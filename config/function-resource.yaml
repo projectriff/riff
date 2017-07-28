@@ -1,0 +1,8 @@
+apiVersion: extensions/v1beta1
+kind: ThirdPartyResource
+metadata:
+  name: function.extensions.sk8s.io
+description: Function
+versions:
+- name: v1
+

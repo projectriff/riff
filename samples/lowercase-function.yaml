@@ -1,0 +1,7 @@
+apiVersion: extensions.sk8s.io/v1
+kind: Function
+metadata:
+  name: lowercase
+spec:
+  lambda: "s->s.toLowerCase()"
+

@@ -1,0 +1,70 @@
+== Prerequisites
+
+1. a running Kubernetes cluster (instructions assume minikube)
+2. kube-proxy running locally:
+
+```
+kubectl proxy
+```
+
+== Create the Function Resource
+
+```
+kubectl create -f config/function-resource.yaml
+```
+
+== Build the Function Controller and Function Runner
+
+```
+./mvnw clean package
+```
+
+== Build and Push the Function Runner Docker Image
+
+```
+cd function-runner
+docker build -t [username]/function-runner .
+docker push [username]/function-runner
+cd ..
+```
+
+== Run the Function Controller
+
+```
+java -jar function-controller/target/function-controller-0.0.1-SNAPSHOT.jar --function.controller.image=[username]/function-runner
+```
+
+== Create a Function
+
+```
+kubectl create -f samples/uppercase-function.yaml
+```
+
+== Determine the Service Port
+
+check for the node port mapped to 8080... (e.g. 3xxxx)
+
+```
+kubectl get svc uppercase
+```
+
+== Invoke the Function
+
+(if it fails, give it a few moments to pull the image and start)
+
+```
+$ curl -H "Content-Type: text/plain" 192.168.99.100:[PORT] -d FooBar
+FOOBAR
+```
+
+== Delete the Function
+
+```
+kubectl delete function uppercase
+```
+
+== Delete the Function Resource
+
+```
+kubectl delete thirdpartyresource function.extensions.sk8s.io
+```
