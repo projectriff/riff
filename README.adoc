@@ -57,14 +57,11 @@ $ curl -H "Content-Type: text/plain" 192.168.99.100:[PORT] -d FooBar
 FOOBAR
 ```
 
-== Delete the Function
+== Cleanup
+
+1: Delete the Function and then its Custom Resource Definition
 
 ```
 kubectl delete function uppercase
-```
-
-== Delete the Function Resource
-
-```
-kubectl delete thirdpartyresource function.extensions.sk8s.io
+kubectl delete crd function.extensions.sk8s.io
 ```
