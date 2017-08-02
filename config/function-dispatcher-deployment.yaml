@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: function-dispatcher
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: function-dispatcher
+      labels:
+        app: function-dispatcher
+    spec:
+      containers:
+      - image: sk8s/function-dispatcher:v0001
+        name: function-dispatcher
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+          value: kafka-0.broker.kafka.svc.cluster.local:9092,kafka-1.broker.kafka.svc.cluster.local:9092,kafka-2.broker.kafka.svc.cluster.local:9092
+        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
+          value: zookeeper.kafka.svc.cluster.local

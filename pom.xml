@@ -7,9 +7,61 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.6.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
+		<spring-cloud.version>Dalston.SR2</spring-cloud.version>
+		<kubernetes-client.version>2.5.9</kubernetes-client.version>
+		<docker-maven.version>0.21.0</docker-maven.version>
+		<docker.base>openjdk:8-alpine</docker.base>
+		<docker.tag>v0001</docker.tag>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-web</artifactId>
+				<version>${spring-boot.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.fabric8</groupId>
+				<artifactId>kubernetes-client</artifactId>
+				<version>${kubernetes-client.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.kafka</groupId>
+				<artifactId>spring-kafka</artifactId>
+				<version>1.1.6.RELEASE</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-test</artifactId>
+				<version>${spring-boot.version}</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<modules>
-		<module>function-controller</module>
-		<module>function-runner</module>
+		<module>sk8s-core</module>
+		<module>topic-controller</module>
+		<module>topic-gateway</module>
+		<module>function-dispatcher</module>
 	</modules>
 
 </project>
