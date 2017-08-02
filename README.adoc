@@ -1,6 +1,6 @@
 == Prerequisites
 
-1. a running Kubernetes cluster (instructions assume minikube)
+1. a running 1.7 Kubernetes cluster (instructions assume minikube for now)
 2. kube-proxy running locally:
 
 ```
@@ -59,7 +59,7 @@ FOOBAR
 
 == Cleanup
 
-1: Delete the Function and then its Custom Resource Definition
+Delete the Function and then its Custom Resource Definition
 
 ```
 kubectl delete function uppercase
