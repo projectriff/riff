@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: topic-gateway
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: topic-gateway
+      labels:
+        app: topic-gateway
+    spec:
+      containers:
+      - image: sk8s/topic-gateway:v0001
+        name: topic-gateway
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: SK8S_TOPIC_GATEWAY_BROKERS
+          value: kafka-0.broker.kafka.svc.cluster.local:9092,kafka-1.broker.kafka.svc.cluster.local:9092,kafka-2.broker.kafka.svc.cluster.local:9092

@@ -8,8 +8,10 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>function-controller</module>
-		<module>function-runner</module>
+		<module>sk8s-core</module>
+		<module>topic-controller</module>
+		<module>topic-gateway</module>
+		<module>function-dispatcher</module>
 	</modules>
 
 </project>

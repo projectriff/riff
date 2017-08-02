@@ -1,37 +1,36 @@
 == Prerequisites
 
 1. a running 1.7 Kubernetes cluster (instructions assume minikube for now)
-2. kube-proxy running locally:
+2. Kafka installed on the cluster using https://github.com/Yolean/kubernetes-kafka
 
-```
-kubectl proxy
-```
-
-== Create the Function Resource
-
-```
-kubectl create -f config/function-resource.yaml
-```
-
-== Build the Function Controller and Function Runner
+== Build
 
 ```
 ./mvnw clean package
 ```
 
-== Build and Push the Function Runner Docker Image
+Create the Docker Images. No need to push if using the Minikube Docker daemon.
 
 ```
-cd function-runner
-docker build -t [username]/function-runner .
-docker push [username]/function-runner
+cd function-dispatcher
+docker build -t sk8s/function-dispatcher:v0001 .
+cd ../topic-controller
+docker build -t sk8s/topic-controller:v0001 .
+cd ../topic-gateway
+docker build -t sk8s/topic-gateway:v0001 .
 cd ..
 ```
 
-== Run the Function Controller
+== Deploy
 
 ```
-java -jar function-controller/target/function-controller-0.0.1-SNAPSHOT.jar --function.controller.image=[username]/function-runner
+kubectl apply -f ./config/
+```
+
+== Create a Topic
+
+```
+kubectl create -f samples/words-topic.yaml
 ```
 
 == Create a Function
@@ -40,28 +39,8 @@ java -jar function-controller/target/function-controller-0.0.1-SNAPSHOT.jar --fu
 kubectl create -f samples/uppercase-function.yaml
 ```
 
-== Determine the Service Port
-
-check for the node port mapped to 8080... (e.g. 3xxxx)
+== Publish a Message to the Topic
 
 ```
-kubectl get svc uppercase
-```
-
-== Invoke the Function
-
-(if it fails, give it a few moments to pull the image and start)
-
-```
-$ curl -H "Content-Type: text/plain" 192.168.99.100:[PORT] -d FooBar
-FOOBAR
-```
-
-== Cleanup
-
-Delete the Function and then its Custom Resource Definition
-
-```
-kubectl delete function uppercase
-kubectl delete crd function.extensions.sk8s.io
+curl -H "Content-Type: text/plain" 192.168.99.100:30111/messages/words -d FooBar
 ```

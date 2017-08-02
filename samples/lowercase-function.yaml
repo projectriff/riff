@@ -3,5 +3,5 @@ kind: Function
 metadata:
   name: lowercase
 spec:
+  topic: words
   lambda: "s->s.toLowerCase()"
-
