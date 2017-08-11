@@ -16,4 +16,4 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: SK8S_TOPIC_GATEWAY_BROKERS
-          value: kafka-0.broker.kafka.svc.cluster.local:9092,kafka-1.broker.kafka.svc.cluster.local:9092,kafka-2.broker.kafka.svc.cluster.local:9092
+          value: kafka:9092
