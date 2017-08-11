@@ -16,6 +16,6 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
-          value: kafka-0.broker.kafka.svc.cluster.local:9092,kafka-1.broker.kafka.svc.cluster.local:9092,kafka-2.broker.kafka.svc.cluster.local:9092
+          value: kafka:9092
         - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
-          value: zookeeper.kafka.svc.cluster.local
+          value: zookeeper:2181
