@@ -1,7 +1,6 @@
 == Prerequisites
 
 1. a running 1.7 Kubernetes cluster (instructions assume minikube for now)
-2. Kafka installed on the cluster using https://github.com/Yolean/kubernetes-kafka
 
 == Build
 
@@ -11,6 +10,12 @@ eval $(minikube docker-env)
 ./mvnw docker:build -pl ./topic-controller
 ./mvnw docker:build -pl ./topic-gateway
 ./mvnw docker:build -pl ./function-dispatcher
+```
+
+== Create Kafka/Zookeeper
+
+```
+kubectl apply -f config/kafka
 ```
 
 == Deploy
@@ -34,7 +39,7 @@ kubectl create -f samples/echo-function.yaml
 == Publish a Message to the Topic
 
 ```
-curl -H "Content-Type: text/plain" 192.168.99.100:30111/messages/words -d hello
+curl -H "Content-Type: text/plain" $(minikube ip):30111/messages/words -d hello
 ```
 
 == Watch Results on Minikube
@@ -42,4 +47,18 @@ curl -H "Content-Type: text/plain" 192.168.99.100:30111/messages/words -d hello
 ```
 minikube ssh
 tail -f /messages/words.log
+```
+
+== Tear it all down
+
+```
+kubectl delete functions/echo
+kubectl delete topics/words
+kubectl delete all -l app=topic-controller
+kubectl delete all -l app=topic-gateway
+kubectl delete all -l app=function-dispatcher
+kubectl delete crd/functions.extensions.sk8s.io
+kubectl delete crd/topics.extensions.sk8s.io
+kubectl delete jobs -l function=echo
+kubectl delete all -l app=kafka
 ```
