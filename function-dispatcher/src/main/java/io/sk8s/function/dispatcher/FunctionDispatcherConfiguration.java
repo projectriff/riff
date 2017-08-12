@@ -22,6 +22,9 @@ import org.springframework.cloud.stream.binder.BinderFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
+
 import io.sk8s.core.function.FunctionResource;
 import io.sk8s.core.function.FunctionResourceEvent;
 import io.sk8s.core.resource.ResourceEvent;
@@ -41,7 +44,12 @@ public class FunctionDispatcherConfiguration {
 	}
 
 	@Bean
-	public FunctionDispatchingHandler functionDispatchingHandler(BinderFactory binderFactory) {
-		return new FunctionDispatchingHandler(binderFactory);
+	public FunctionDispatchingHandler functionDispatchingHandler(KubernetesClient kubernetesClient, BinderFactory binderFactory) {
+		return new FunctionDispatchingHandler(kubernetesClient, binderFactory);
+	}
+
+	@Bean
+	public KubernetesClient kubernetesClient() {
+		return new DefaultKubernetesClient();
 	}
 }

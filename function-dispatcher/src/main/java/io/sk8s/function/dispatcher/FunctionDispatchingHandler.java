@@ -19,16 +19,13 @@ package io.sk8s.function.dispatcher;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeansException;
 import org.springframework.cloud.stream.binder.Binder;
 import org.springframework.cloud.stream.binder.BinderFactory;
 import org.springframework.cloud.stream.binder.Binding;
@@ -37,27 +34,18 @@ import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
 import org.springframework.cloud.stream.binder.HeaderMode;
 import org.springframework.cloud.stream.binder.kafka.properties.KafkaConsumerProperties;
 import org.springframework.cloud.stream.binder.kafka.properties.KafkaProducerProperties;
-import org.springframework.http.ResponseEntity;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 
-import io.fabric8.kubernetes.api.model.ContainerBuilder;
-import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.EnvVarBuilder;
-import io.fabric8.kubernetes.api.model.JobSpecBuilder;
-import io.fabric8.kubernetes.api.model.VolumeBuilder;
-import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.utils.HttpClientUtils;
 
-import io.sk8s.core.function.Env;
 import io.sk8s.core.function.FunctionResource;
 import io.sk8s.core.function.FunctionResourceHandler;
 import io.sk8s.core.handler.HandlerResource;
@@ -72,22 +60,19 @@ import okio.BufferedSource;
 /**
  * @author Mark Fisher
  */
-public class FunctionDispatchingHandler implements FunctionResourceHandler {
+public class FunctionDispatchingHandler implements FunctionResourceHandler, ApplicationContextAware {
 
 	private static Log logger = LogFactory.getLog(FunctionDispatchingHandler.class);
 
-	@Autowired
-	private FunctionDispatcherProperties properties;
+	private final KubernetesClient kubernetesClient;
 
 	private final Map<String, FunctionResource> resources = new HashMap<>();
+
+	private final Map<String, Dispatcher> dispatchers = new HashMap<>();
 
 	private final Map<String, Binding<?>> bindings = new HashMap<>();
 
 	private final Binder<MessageChannel, ExtendedConsumerProperties<KafkaConsumerProperties>, ExtendedProducerProperties<KafkaProducerProperties>> binder;
-
-	private final KubernetesClient kubernetesClient = new DefaultKubernetesClient();
-
-	private final RestTemplate restTemplate = new RestTemplate();
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -105,12 +90,10 @@ public class FunctionDispatchingHandler implements FunctionResourceHandler {
 				logger.error("unknown handler: " + handlerName);
 			}
 			// TODO: extract Dispatcher as a pluggable strategy
-			String dispatcher = handlerResource.getSpec().getDispatcher();
-			if ("JobLauncher".equalsIgnoreCase(dispatcher)) {
-				launchJob(functionResource, handlerResource, payload);
-			}
-			else if ("ServiceInvoker".equalsIgnoreCase(dispatcher)) {
-				invokeService(functionResource, payload);
+			String dispatcherName = handlerResource.getSpec().getDispatcher();
+			Dispatcher dispatcher = this.getDispatcher(dispatcherName);
+			if (dispatcher != null) {
+				dispatcher.dispatch(payload, m.getHeaders(), functionResource, handlerResource);
 			}
 			else {
 				logger.info("unknown dispatcher: " + dispatcher);
@@ -121,26 +104,22 @@ public class FunctionDispatchingHandler implements FunctionResourceHandler {
 		}
 	};
 
-	private List<String> resolvePlaceholders(List<String> original, FunctionResource functionResource) {
-		// TODO: apply to entire resource, for now just args
-		List<String> resolved = new ArrayList<>(original.size());
-		for (int i = 0; i < original.size(); i++) {
-			String s = original.get(i);
-			// TODO: find the name with pattern, for now just "command"
-			if (s.contains("$COMMAND")) {
-				resolved.add(functionResource.getSpec().getParam("command"));
-			}
-			else {
-				resolved.add(s);
-			}
-		}
-		return resolved;
-	}
-
 	@SuppressWarnings("unchecked")
-	public FunctionDispatchingHandler(BinderFactory binderFactory) {
+	public FunctionDispatchingHandler(KubernetesClient kubernetesClient, BinderFactory binderFactory) {
+		this.kubernetesClient = kubernetesClient;
 		this.binder = (Binder<MessageChannel, ExtendedConsumerProperties<KafkaConsumerProperties>, ExtendedProducerProperties<KafkaProducerProperties>>)
 				binderFactory.getBinder("kafka", MessageChannel.class);
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext context) throws BeansException {
+		for (Map.Entry<String, Dispatcher> entry : context.getBeansOfType(Dispatcher.class).entrySet()) {
+			this.dispatchers.put(entry.getKey().toLowerCase(), entry.getValue());
+		}
+	}
+
+	private Dispatcher getDispatcher(String name) {
+		return this.dispatchers.get(name.toLowerCase());
 	}
 
 	@Override
@@ -222,70 +201,5 @@ public class FunctionDispatchingHandler implements FunctionResourceHandler {
 			}
 		}
 		return null;
-	}
-
-	private void invokeService(FunctionResource functionResource, String payload) {
-		// TODO: create the Handler instance by passing params
-		String url = functionResource.getSpec().getParam("url");
-		Assert.hasText(url, "no url provided for function " + functionResource.getMetadata().get("name"));
-		ResponseEntity<?> response = this.restTemplate.postForEntity(url, payload, String.class);
-		System.out.println("response: "+ response);
-	}
-
-	private void launchJob(FunctionResource functionResource, HandlerResource handlerResource, String payload) {
-		String functionName = functionResource.getMetadata().get("name");
-		String s = this.kubernetesClient.extensions().jobs().inNamespace(this.properties.getNamespace()).createNew()
-			.withApiVersion("batch/v1")
-			.withNewMetadata()
-				.withName(functionName + "-" + System.currentTimeMillis())
-			.endMetadata()
-			.withSpec(new JobSpecBuilder()
-				.withNewTemplate()
-					.withNewMetadata()
-						.withLabels(Collections.singletonMap("function", functionName))
-					.endMetadata()
-					.withNewSpec()
-						.withRestartPolicy("OnFailure")
-						.withActiveDeadlineSeconds(10L)
-						.withContainers(new ContainerBuilder()
-							.withName("main")
-							.withImage(handlerResource.getSpec().getImage())
-							.withCommand(handlerResource.getSpec().getCommand())
-							.withArgs(this.resolvePlaceholders(handlerResource.getSpec().getArgs(), functionResource))
-							.withEnv(buildEnvVars(functionResource.getSpec().getEnv(), payload))
-							.withVolumeMounts(new VolumeMountBuilder()
-								.withMountPath("/output")
-								.withName("messages")
-							.build())
-						.build())
-						.withVolumes(new VolumeBuilder()
-							.withName("messages")
-							.withNewHostPath("/messages")
-						.build())
-					.endSpec()
-				.endTemplate()
-			.build())
-			.done().toString();
-		System.out.println("JOB: " + s);
-	}
-
-	private EnvVar[] buildEnvVars(List<Env> envList, String payload) {
-		Map<String, String> map = new HashMap<>();
-		if (envList != null) {
-			for (Env env : envList) {
-				String value = ("payload".equalsIgnoreCase(env.getValueFrom())) ? payload : "";
-				map.put(env.getName(), value);
-			}
-		}
-		map.put("MESSAGE", payload);
-		EnvVar[] vars = new EnvVar[map.size()];
-		int i = 0;
-		for (Map.Entry<String, String> entry : map.entrySet()) {
-			vars[i++] = new EnvVarBuilder()
-					.withName(entry.getKey())
-					.withValue(entry.getValue())
-					.build();
-		}
-		return vars;
 	}
 }
