@@ -24,6 +24,12 @@ kubectl apply -f config/kafka
 kubectl apply -f config/
 ```
 
+== Create a Handler
+
+```
+kubectl create -f samples/shell-handler.yaml
+```
+
 == Create a Topic
 
 ```
@@ -54,11 +60,13 @@ tail -f /messages/words.log
 ```
 kubectl delete functions/echo
 kubectl delete topics/words
+kubectl delete handlers/shell
 kubectl delete all -l app=topic-controller
 kubectl delete all -l app=topic-gateway
 kubectl delete all -l app=function-dispatcher
 kubectl delete crd/functions.extensions.sk8s.io
 kubectl delete crd/topics.extensions.sk8s.io
+kubectl delete crd/handlers.extensions.sk8s.io
 kubectl delete jobs -l function=echo
 kubectl delete all -l app=kafka
 ```

@@ -34,7 +34,9 @@ public class FunctionResource extends Resource<FunctionSpec> {
 
 		private String topic;
 
-		private String command;
+		private String handler;
+
+		private List<Param> params;
 
 		private List<Env> env;
 
@@ -46,15 +48,31 @@ public class FunctionResource extends Resource<FunctionSpec> {
 			this.topic = topic;
 		}
 
-		public String getCommand() {
-			return command;
+		public String getHandler() {
+			return handler;
 		}
 
-		public void setCommand(String command) {
-			this.command = command;
+		public void setHandler(String handler) {
+			this.handler = handler;
 		}
 
-		
+		public String getParam(String name) {
+			for (Param param : params) {
+				if (param.getName().equals(name)) {
+					return param.getValue();
+				}
+			}
+			return "";
+		}
+
+		public List<Param> getParams() {
+			return params;
+		}
+
+		public void setParams(List<Param> params) {
+			this.params = params;
+		}
+
 		public List<Env> getEnv() {
 			return env;
 		}
@@ -65,30 +83,7 @@ public class FunctionResource extends Resource<FunctionSpec> {
 
 		@Override
 		public String toString() {
-			return "Spec [topic=" + topic + ", command=" + command + "]";
-		}
-
-		public class Env {
-
-			private String name;
-
-			private String valueFrom;
-
-			public String getName() {
-				return name;
-			}
-
-			public void setName(String name) {
-				this.name = name;
-			}
-
-			public String getValueFrom() {
-				return valueFrom;
-			}
-
-			public void setValueFrom(String valueFrom) {
-				this.valueFrom = valueFrom;
-			}
+			return "Spec [topic=" + topic + ", handler=" + handler + "]";
 		}
 	}
 }
