@@ -1,6 +1,0 @@
-apiVersion: extensions.sk8s.io/v1
-kind: Topic
-metadata:
-  name: words
-spec:
-  name: words

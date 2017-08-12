@@ -1,0 +1,7 @@
+#!/bin/bash
+
+./mvnw docker:build -pl ./topic-controller
+./mvnw docker:build -pl ./topic-gateway
+./mvnw docker:build -pl ./event-dispatcher
+./mvnw docker:build -pl ./spring-cloud-function-web-handler
+

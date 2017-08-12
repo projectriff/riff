@@ -3,5 +3,8 @@ kind: Function
 metadata:
   name: echo
 spec:
-  topic: words
-  command: "echo $MESSAGE >> /output/words.log"
+  input: greetings
+  handler: shell
+  params:
+  - name: command
+    value: "echo $MESSAGE >> /output/greetings.log"

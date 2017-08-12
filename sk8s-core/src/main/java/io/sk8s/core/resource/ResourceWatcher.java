@@ -28,11 +28,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.utils.HttpClientUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -93,11 +94,12 @@ public class ResourceWatcher<E extends ResourceEvent> implements SmartLifecycle 
 			this.executor.submit(() -> {
 				try {
 					while (this.running.get()) {
+						// TODO: replace this code
+						Response response = null;
 						try {
-							// TODO: replace this code
 							OkHttpClient httpClient = HttpClientUtils.createHttpClient(kubernetesClient.getConfiguration());
 							Request.Builder requestBuilder = new Request.Builder().get().url(this.url);
-							Response response = httpClient.newCall(requestBuilder.build()).execute();
+							response = httpClient.newCall(requestBuilder.build()).execute();
 							BufferedSource source = response.body().source();
 							while (!source.exhausted()) {
 								String line = source.readUtf8LineStrict();
@@ -108,6 +110,7 @@ public class ResourceWatcher<E extends ResourceEvent> implements SmartLifecycle 
 									this.handleEvent(this.objectMapper.readValue(line, this.resourceEventType));
 								}
 								catch (Exception e) {
+									e.printStackTrace();
 									break;
 								}
 							}
@@ -117,6 +120,14 @@ public class ResourceWatcher<E extends ResourceEvent> implements SmartLifecycle 
 						}
 						catch (Exception e) {
 							e.printStackTrace();
+						}
+						finally {
+							try {
+								response.close();
+							}
+							catch (Exception e) {
+								// ignore
+							}
 						}
 					}
 				}
@@ -143,7 +154,7 @@ public class ResourceWatcher<E extends ResourceEvent> implements SmartLifecycle 
 	}
 
 	private void handleEvent(ResourceEvent event) {
-		logger.info("handling ResourceEvent: " + event);
+		//logger.info("handling ResourceEvent: " + event);
 		if ("ADDED".equalsIgnoreCase(event.getType())) {
 			handler.resourceAdded(event.getResource());
 		}

@@ -61,7 +61,8 @@
 		<module>sk8s-core</module>
 		<module>topic-controller</module>
 		<module>topic-gateway</module>
-		<module>function-dispatcher</module>
+		<module>event-dispatcher</module>
+		<module>spring-cloud-function-web-handler</module>
 	</modules>
 
 </project>

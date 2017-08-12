@@ -1,0 +1,11 @@
+apiVersion: extensions.sk8s.io/v1
+kind: Handler
+metadata:
+  name: shell
+spec:
+  dispatcher: JobLauncher
+  image: busybox
+  command: /bin/sh
+  args:
+  - -c
+  - $COMMAND

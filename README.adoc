@@ -7,9 +7,7 @@ a running 1.7 Kubernetes cluster (instructions assume minikube for now)
 ```
 eval $(minikube docker-env)
 ./mvnw clean package
-./mvnw docker:build -pl ./topic-controller
-./mvnw docker:build -pl ./topic-gateway
-./mvnw docker:build -pl ./function-dispatcher
+./dockerize
 ```
 
 == Create Kafka/Zookeeper
@@ -21,13 +19,19 @@ kubectl apply -f config/kafka
 == Deploy
 
 ```
-kubectl apply -f config/
+kubectl apply -f config
+```
+
+== Create a Handler
+
+```
+kubectl create -f samples/shell-handler.yaml
 ```
 
 == Create a Topic
 
 ```
-kubectl create -f samples/words-topic.yaml
+kubectl create -f samples/greetings-topic.yaml
 ```
 
 == Create a Function
@@ -39,26 +43,59 @@ kubectl create -f samples/echo-function.yaml
 == Publish a Message to the Topic
 
 ```
-curl -H "Content-Type: text/plain" $(minikube ip):30111/messages/words -d hello
+./publish greetings hello
 ```
 
 == Watch Results on Minikube
 
 ```
 minikube ssh
-tail -f /messages/words.log
+tail -f /messages/greetings.log
+```
+
+== Add a Spring Cloud Function
+
+=== Build the JAR and Install it to Your Local Maven Repo
+
+```
+cd samples/java/greeter
+./mvnw clean install
+```
+
+=== Copy the JAR to the Volume Mount Location
+
+```
+minikube ssh
+sudo mkdir /functions
+sudo cp /Users/[name]/.m2/repository/io/sk8s/samples/greeter/1.0.0/greeter-1.0.0.jar /functions/
+```
+
+=== Create the Handler
+
+```
+kubectl create -f samples/spring-handler.yaml
+```
+
+=== Create a New Topic
+
+```
+kubectl create -f samples/names-topic.yaml
+```
+
+=== Create the Function
+
+```
+kubectl create -f samples/greeter-function.yaml
+```
+
+=== Publish a Message
+
+```
+./publish names World
 ```
 
 == Tear it all down
 
 ```
-kubectl delete functions/echo
-kubectl delete topics/words
-kubectl delete all -l app=topic-controller
-kubectl delete all -l app=topic-gateway
-kubectl delete all -l app=function-dispatcher
-kubectl delete crd/functions.extensions.sk8s.io
-kubectl delete crd/topics.extensions.sk8s.io
-kubectl delete jobs -l function=echo
-kubectl delete all -l app=kafka
+./teardown
 ```

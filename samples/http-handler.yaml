@@ -1,0 +1,6 @@
+apiVersion: extensions.sk8s.io/v1
+kind: Handler
+metadata:
+  name: http
+spec:
+  dispatcher: ServiceInvoker

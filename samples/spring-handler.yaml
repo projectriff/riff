@@ -1,0 +1,8 @@
+apiVersion: extensions.sk8s.io/v1
+kind: Handler
+metadata:
+  name: spring
+spec:
+  dispatcher: HandlerPool
+  replicas: 3
+  image: sk8s/spring-cloud-function-web-handler:v0001

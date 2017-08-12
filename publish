@@ -1,0 +1,3 @@
+#!/bin/bash
+
+curl -H "Content-Type: text/plain" $(minikube ip):30111/messages/$1 -d "$2"

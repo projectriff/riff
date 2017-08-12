@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: event-dispatcher
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: event-dispatcher
+      labels:
+        app: event-dispatcher
+    spec:
+      containers:
+      - image: sk8s/event-dispatcher:v0001
+        name: event-dispatcher
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+          value: kafka:9092
+        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
+          value: zookeeper:2181
