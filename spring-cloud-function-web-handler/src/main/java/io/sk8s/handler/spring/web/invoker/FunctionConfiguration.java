@@ -29,7 +29,7 @@ import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.function.support.FluxFunction;
-import org.springframework.cloud.function.support.FunctionUtils;
+import org.springframework.cloud.function.support.FunctionFactoryUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
@@ -83,7 +83,7 @@ public class FunctionConfiguration {
 					function = function.andThen(currentFunction);
 				}
 			}
-			return (!FunctionUtils.isFluxFunction(function))
+			return (!FunctionFactoryUtils.isFluxFunction(function))
 					? new FluxFunction<String, String>((Function<String, String>) function)
 					: (Function<Flux<String>, Flux<String>>) function;
 		}
