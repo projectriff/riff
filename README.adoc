@@ -1,6 +1,12 @@
 == Prerequisites
 
-a running 1.7 Kubernetes cluster (instructions assume minikube for now)
+a running 1.7 Kubernetes cluster with at least 4GB of memory
+
+these instructions assume minikube for now, for example:
+
+```
+minikube start --cpus=4 --memory=4096 --disk-size=64g
+```
 
 == Build
 
