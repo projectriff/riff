@@ -1,0 +1,30 @@
+= SK8S Go Playground
+
+Go experiments for https://github.com/markfisher/sk8s
+
+== Building
+These instructions assume you've cloned this repo in `$GOPATH/src/github.com/sk8s`:
+
+[source, bash]
+----
+go install github.com/sk8s/controller/topic
+----
+
+== Running
+To run from your machine targeting a k8s cluster you can manage with `kubectl`:
+[source, bash]
+----
+$GOPATH/bin/topic -kubeconf ~/.kube/config
+----
+
+== Running in Cluster
+To run the topic-controller _inside_ the Kubernetes Cluster
+
+1. Build for Linux and create a Docker image with the executable:
++
+[source, bash]
+----
+./dockerize.sh
+----
+2. The built image uses `sk8s/topic-controller:v0001` as the tag,
+so https://github.com/markfisher/sk8s/blob/master/config/topic-controller-deployment.yaml[topic-controller-deployment.yaml] can be used.
