@@ -18,10 +18,18 @@ package topic // import "github.com/sk8s/core/topic"
 
 import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	apiextv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/rest"
+	"reflect"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"time"
+	"fmt"
 )
 
 const (
@@ -32,7 +40,7 @@ const (
 )
 
 
-
+// Represents the topics.extensions.sk8s.io CRD
 type Topic struct {
 	meta_v1.TypeMeta   `json:",inline"`
 	meta_v1.ObjectMeta `json:"metadata"`
@@ -41,14 +49,17 @@ type Topic struct {
 
 }
 
+// Spec (what the user wants) for a topic
 type TopicSpec struct {
 
 }
 
+// Status (computed) for a topic
 type TopicStatus struct {
 
 }
 
+// Returned in list operations
 type TopicList struct {
 	meta_v1.TypeMeta `json:",inline"`
 	meta_v1.ListMeta `json:"metadata"`
@@ -64,6 +75,57 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&TopicList{},
 	)
 	meta_v1.AddToGroupVersion(scheme, SchemeGroupVersion)
+	return nil
+}
+
+// Create the CRD topic resource, ignore error if it already exists
+func CreateCRD(clientset apiextcs.Interface) error {
+	crd := &apiextv1beta1.CustomResourceDefinition{
+		ObjectMeta: meta_v1.ObjectMeta{Name: FullTopicCRDName},
+		Spec: apiextv1beta1.CustomResourceDefinitionSpec{
+			Group:   TopicGroup,
+			Version: TopicVersion,
+			Scope:   apiextv1beta1.NamespaceScoped,
+			Names:   apiextv1beta1.CustomResourceDefinitionNames{
+				Plural: TopicPlural,
+				Kind:   reflect.TypeOf(Topic{}).Name(),
+			},
+		},
+	}
+
+	_, err := clientset.ApiextensionsV1beta1().CustomResourceDefinitions().Create(crd)
+	if err != nil && apierrors.IsAlreadyExists(err) {
+		return nil
+	}
+	return err
+
+	// wait for CRD being established
+	err = wait.Poll(500*time.Millisecond, 60*time.Second, func() (bool, error) {
+		crd, err = clientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get(FullTopicCRDName, meta_v1.GetOptions{})
+		if err != nil {
+			return false, err
+		}
+		for _, cond := range crd.Status.Conditions {
+			switch cond.Type {
+			case apiextv1beta1.Established:
+				if cond.Status == apiextv1beta1.ConditionTrue {
+					return true, err
+				}
+			case apiextv1beta1.NamesAccepted:
+				if cond.Status == apiextv1beta1.ConditionFalse {
+					fmt.Printf("Name conflict: %v\n", cond.Reason)
+				}
+			}
+		}
+		return false, err
+	})
+	if err != nil {
+		deleteErr := clientset.ApiextensionsV1beta1().CustomResourceDefinitions().Delete(FullTopicCRDName, nil)
+		if deleteErr != nil {
+			return errors.NewAggregate([]error{err, deleteErr})
+		}
+		return err
+	}
 	return nil
 }
 

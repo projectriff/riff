@@ -23,8 +23,7 @@ import (
 	"github.com/sk8s/core/topic"
 
 	"flag"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
@@ -48,6 +47,18 @@ func main() {
 		panic(err.Error())
 	}
 
+	// create clientset and create the topics CRD, if not already there
+	clientset, err := apiextcs.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// note: if the CRD exist our CreateCRD function is set to exit without an error
+	err = topic.CreateCRD(clientset)
+	if err != nil {
+		panic(err)
+	}
+
 	// Create a new clientset which include our CRD schema
 	crdcs, scheme, err := topic.NewClient(config)
 	if err != nil {
@@ -56,31 +67,6 @@ func main() {
 
 	// Create a CRD client interface
 	crdclient := topic.TopicClient(crdcs, scheme, "default")
-
-	// Create a new Example object and write to k8s
-	example := &topic.Topic{
-		ObjectMeta: meta_v1.ObjectMeta{
-			Name:   "example123",
-			Labels: map[string]string{"mylabel": "test"},
-		},
-		Spec: topic.TopicSpec{},
-	}
-
-	result, err := crdclient.Create(example)
-	if err == nil {
-		fmt.Printf("CREATED: %#v\n", result)
-	} else if apierrors.IsAlreadyExists(err) {
-		fmt.Printf("ALREADY EXISTS: %#v\n", result)
-	} else {
-		panic(err)
-	}
-
-	// List all Topic objects
-	items, err := crdclient.List(meta_v1.ListOptions{})
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("List:\n%s\n", items)
 
 	// Example Controller
 	// Watch for changes in Topic objects and fire Add, Delete, Update callbacks
