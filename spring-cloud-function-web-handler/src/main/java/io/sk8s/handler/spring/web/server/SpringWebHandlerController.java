@@ -16,8 +16,9 @@
 
 package io.sk8s.handler.spring.web.server;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,15 +29,13 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.sk8s.handler.spring.web.invoker.FunctionConfiguration;
 
-import reactor.core.publisher.Flux;
-
 /**
+ * @author Eric Bottard
  * @author Mark Fisher
  */
 @RestController
@@ -47,40 +46,72 @@ public class SpringWebHandlerController {
 	@Autowired
 	private ConfigurableApplicationContext context;
 
-	private Function<Flux<String>, Flux<String>> function;
-
-	private final AtomicBoolean initialized = new AtomicBoolean();
-
-	public void setFunction(Function<Flux<String>, Flux<String>> function) {
-		this.function = function;
-	}
+	private volatile Object function;
 
 	@PostMapping("/init")
-	@SuppressWarnings("unchecked")
-	public void init(@RequestBody String uri, @RequestParam String classname) {
-		if (initialized.compareAndSet(false, true)) {
-			logger.info("init called with uri: " + uri);
-			// TODO: use JSON with both uri and classname (eventually dependencies)
+	// TODO: use JSON with both uri and classname (eventually dependencies)
+	public void init(@RequestBody InitPayload init) {
+		if (function == null) {
+			logger.info("init called with uri: " + init.getUri());
 			ConfigurableApplicationContext functionContext = new SpringApplicationBuilder()
 					.sources(FunctionConfiguration.class)
 					.web(false)
 					.parent(this.context)
-					.run("--function.uri=" + uri,
-							"--function.classname=" + classname);
-			this.function = functionContext.getBean("function", Function.class);
+					.run("--function.uri=" + init.getUri(),
+							"--function.className=" + init.getClassName());
+			this.function = functionContext.getBean("function");
 		}
 	}
 
 	@PostMapping("/invoke")
-	public String invoke(@RequestBody String body) {
+	public Object invoke(@RequestBody Object body) {
 		logger.info("invoke called with: " + body);
 		if (this.function == null) {
 			throw new FunctionNotInitializedException();
 		}
-		return this.function.apply(Flux.just(body)).blockFirst();
+		if (function instanceof Supplier) {
+			return ((Supplier) function).get();
+		}
+		else if (function instanceof Function) {
+			return ((Function) function).apply(body);
+		}
+		else if (function instanceof Consumer) {
+			((Consumer) function).accept(body);
+			return null;
+		}
+		else {
+			throw new AssertionError();
+		}
 	}
 
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public static class FunctionNotInitializedException extends RuntimeException {
+	}
+
+	/**
+	 * The payload received to initialize a new function.
+	 *
+	 * @author Eric Bottard
+	 */
+	public static class InitPayload {
+		private String uri;
+
+		private String className;
+
+		public void setUri(String uri) {
+			this.uri = uri;
+		}
+
+		public void setClassName(String className) {
+			this.className = className;
+		}
+
+		public String getUri() {
+			return uri;
+		}
+
+		public String getClassName() {
+			return className;
+		}
 	}
 }
