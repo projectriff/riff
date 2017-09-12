@@ -16,31 +16,35 @@
 
 package io.sk8s.handler.spring.web.invoker;
 
+import javax.validation.constraints.Size;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * @author Mark Fisher
  */
-@ConfigurationProperties(prefix = "function")
+@ConfigurationProperties("function")
 public class FunctionProperties {
 
-	private String uri;
+	@Size(min = 1)
+	private String[] uri = new String[0];
 
-	private String classname;
+	@Size(min = 1)
+	private String[] className = new String[0];
 
-	public String getUri() {
+	public String[] getUri() {
 		return uri;
 	}
 
-	public void setUri(String uri) {
+	public void setUri(String[] uri) {
 		this.uri = uri;
 	}
 
-	public String getClassname() {
-		return classname;
+	public String[] getClassName() {
+		return className;
 	}
 
-	public void setClassname(String classname) {
-		this.classname = classname;
+	public void setClassName(String[] className) {
+		this.className = className;
 	}
 }

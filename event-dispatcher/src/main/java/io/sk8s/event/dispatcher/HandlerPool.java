@@ -331,7 +331,8 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 			Pod handlerPod = this.kubernetesClient.pods().withLabel("handler", handlerName).list().getItems().get(0);
 			handlerPod.getMetadata().setLabels(functionLabels);
 			pod = this.kubernetesClient.pods().createOrReplace(handlerPod);
-			bindOutputChannel(functionName, functionResource.getSpec().getOutput());
+			FunctionResource.FunctionSpec functionSpec = functionResource.getSpec();
+			bindOutputChannel(functionName, functionSpec.getOutput());
 			this.serviceLatches.putIfAbsent(functionName, new CountDownLatch(1));
 			try {
 				this.serviceLatches.get(functionName).await(10, TimeUnit.SECONDS);
@@ -342,11 +343,11 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 				return;
 			}
 			Service service = this.services.get(functionName);
-			String baseUrl = "http://" + service.getSpec().getClusterIP();
-			String url = baseUrl + "/init?classname=" + functionResource.getSpec().getParam("classname");
-			logger.info("POST to /init for function '" + functionName + "' with uri: " + functionResource.getSpec().getParam("uri"));
+			InitPayload initPayload = new InitPayload(functionSpec.getParam("uri"), functionSpec.getParam("classname"));
+			String url = "http://" + service.getSpec().getClusterIP() + "/init";
+			logger.info("POST to /init for function '" + functionName + "' with params: " + initPayload);
 			ResponseEntity<String> initResponse = this.restTemplate.postForEntity(
-					url, functionResource.getSpec().getParam("uri"), String.class); 
+					url, initPayload, String.class);
 			logger.info("Response: " + initResponse);
 		}
 		Service service = this.services.get(functionName);
@@ -373,5 +374,36 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 	private void sendResponse(String functionName, String payload) {
 		this.outputChannels.get(functionName).send(MessageBuilder.withPayload(payload)
 				.setHeader(MessageHeaders.CONTENT_TYPE, "text/plain").build());
+	}
+
+	/**
+	 * The payload that will be POSTed as JSon to the {@literal init} endpoint of the web handler.
+	 *
+	 * @author Eric Bottard
+	 */
+	private static class InitPayload {
+		private final String uri;
+		private final String className;
+
+		private InitPayload(String uri, String className) {
+			this.uri = uri;
+			this.className = className;
+		}
+
+		public String getUri() {
+			return uri;
+		}
+
+		public String getClassName() {
+			return className;
+		}
+
+		@Override
+		public String toString() {
+			return "{" +
+					"uri='" + uri + '\'' +
+					", className='" + className + '\'' +
+					'}';
+		}
 	}
 }
