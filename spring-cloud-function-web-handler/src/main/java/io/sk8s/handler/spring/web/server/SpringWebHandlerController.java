@@ -46,15 +46,15 @@ public class SpringWebHandlerController {
 
 	@PostMapping("/init")
 	// TODO: use JSON with both uri and classname (eventually dependencies)
-	public void init(@RequestParam String uri, @RequestParam String className) {
+	public void init(@RequestBody InitPayload init) {
 		if (function == null) {
-			logger.info("init called with uri: " + uri);
+			logger.info("init called with uri: " + init.getUri());
 			ConfigurableApplicationContext functionContext = new SpringApplicationBuilder()
 					.sources(FunctionConfiguration.class)
 					.web(false)
 					.parent(this.context)
-					.run("--function.uri=" + uri,
-							"--function.className=" + className);
+					.run("--function.uri=" + init.getUri(),
+							"--function.className=" + init.getClassName());
 			this.function = functionContext.getBean("function");
 		}
 	}
@@ -82,5 +82,32 @@ public class SpringWebHandlerController {
 
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public static class FunctionNotInitializedException extends RuntimeException {
+	}
+
+	/**
+	 * The payload received to initialize a new function.
+	 *
+	 * @author Eric Bottard
+	 */
+	public static class InitPayload {
+		private String uri;
+
+		private String className;
+
+		public void setUri(String uri) {
+			this.uri = uri;
+		}
+
+		public void setClassName(String className) {
+			this.className = className;
+		}
+
+		public String getUri() {
+			return uri;
+		}
+
+		public String getClassName() {
+			return className;
+		}
 	}
 }
