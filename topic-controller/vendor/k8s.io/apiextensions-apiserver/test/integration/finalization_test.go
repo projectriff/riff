@@ -69,8 +69,7 @@ func TestFinalization(t *testing.T) {
 	require.NoError(t, err)
 
 	// Removing the finalizers to allow the following delete remove the object.
-	// This step will fail if previous delete wrongly removed the object. The
-	// object will be deleted as part of the finalizer update.
+	// This step will fail if previous delete wrongly removed the object.
 	for {
 		gottenNoxuInstance.SetFinalizers(nil)
 		_, err = noxuResourceClient.Update(gottenNoxuInstance)
@@ -83,6 +82,14 @@ func TestFinalization(t *testing.T) {
 		gottenNoxuInstance, err = noxuResourceClient.Get(name, metav1.GetOptions{})
 		require.NoError(t, err)
 	}
+
+	// Now when finalizer is not there it should be possible to actually remove the object from the server.
+	err = noxuResourceClient.Delete(name, &metav1.DeleteOptions{
+		Preconditions: &metav1.Preconditions{
+			UID: &uid,
+		},
+	})
+	require.NoError(t, err)
 
 	// Check that the object is actually gone.
 	_, err = noxuResourceClient.Get(name, metav1.GetOptions{})
