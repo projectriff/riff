@@ -21,7 +21,9 @@ import (
 	"time"
 
 	"github.com/sk8s/core/topic"
+	"github.com/sk8s/provisioner/kafka"
 
+	"os"
 	"flag"
 	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/rest"
@@ -68,7 +70,8 @@ func main() {
 	// Create a CRD client interface
 	crdclient := topic.TopicClient(crdcs, scheme, "default")
 
-	// Example Controller
+	provisioner := kafka.NewKafkaProvisioner(os.Getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES"))
+
 	// Watch for changes in Topic objects and fire Add, Delete, Update callbacks
 	_, controller := cache.NewInformer(
 		crdclient.NewListWatch(),
@@ -76,13 +79,16 @@ func main() {
 		time.Minute*10,
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
-				fmt.Printf("add: %s \n", obj)
+				t := obj.(*topic.Topic)
+				fmt.Println("Adding topic " + t.Name)
+				err := provisioner.ProvisionProducerDestination(t.Name)
+				if err != nil {
+					panic(err)
+				}
 			},
 			DeleteFunc: func(obj interface{}) {
-				fmt.Printf("delete: %s \n", obj)
 			},
 			UpdateFunc: func(oldObj, newObj interface{}) {
-				fmt.Printf("Update old: %s \n      New: %s\n", oldObj, newObj)
 			},
 		},
 	)

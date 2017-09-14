@@ -152,6 +152,12 @@
   revision = "d0303fe809921458f417bcf828397a65db30a7e4"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/samuel/go-zookeeper"
+  packages = ["zk"]
+  revision = "e6b59f6144beb8570562539c1898a0b1fea34b41"
+
+[[projects]]
   name = "github.com/spf13/pflag"
   packages = ["."]
   revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
@@ -162,6 +168,13 @@
   name = "github.com/ugorji/go"
   packages = ["codec"]
   revision = "8c0409fcbb70099c748d71f714529204975f6c3f"
+
+[[projects]]
+  branch = "topic-management"
+  name = "github.com/wvanbergen/kazoo-go"
+  packages = ["."]
+  revision = "ef4f7dc0b6f69bb0478d216f3491fa2508de2940"
+  source = "https://github.com/ericbottard/kazoo-go.git"
 
 [[projects]]
   branch = "master"
@@ -226,6 +239,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "76a483020cedb3a5e5bfcb6e7a179591bee019ad162147219019d1317643e2e8"
+  inputs-digest = "7cc299fe6b4209c1add8d2ce3714aae6b97df64ddd301b6b21ae3c74c07adbb7"
   solver-name = "gps-cdcl"
   solver-version = 1
