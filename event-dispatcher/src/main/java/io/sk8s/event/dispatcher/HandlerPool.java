@@ -322,6 +322,15 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 	}
 
 	@Override
+	public void destroy(FunctionResource functionResource, HandlerResource handlerResource) {
+		String functionName = functionResource.getMetadata().get("name");
+		Map<String, String> functionLabels = Collections.singletonMap("function", functionName);
+		this.kubernetesClient.services().withLabels(functionLabels).delete() ;
+
+		// TODO: "reference count" handlers?
+	}
+
+	@Override
 	public void dispatch(String payload, Map<String, Object> headers, FunctionResource functionResource, HandlerResource handlerResource) {
 		String functionName = functionResource.getMetadata().get("name");
 		Pod pod = this.functionPods.get(functionName);
