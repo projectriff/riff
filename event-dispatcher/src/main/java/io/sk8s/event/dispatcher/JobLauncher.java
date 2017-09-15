@@ -51,10 +51,6 @@ public class JobLauncher implements Dispatcher {
 	}
 
 	@Override
-	public void init(FunctionResource functionResource, HandlerResource handlerResource) {
-	}
-
-	@Override
 	public void dispatch(String payload, Map<String, Object> headers, FunctionResource functionResource, HandlerResource handlerResource) {
 		String functionName = functionResource.getMetadata().get("name");
 		String job = this.kubernetesClient.extensions().jobs().inNamespace(this.properties.getNamespace()).createNew()

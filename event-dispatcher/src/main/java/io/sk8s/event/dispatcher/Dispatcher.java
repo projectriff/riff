@@ -22,12 +22,43 @@ import io.sk8s.core.function.FunctionResource;
 import io.sk8s.core.handler.HandlerResource;
 
 /**
+ * Strategy interface for deciding how to handle function application using some handler.
+ *
+ * <p>Implementations may decide to spawn a one off container, or maintain a pool, <em>etc.</em></p>
+ *
  * @author Mark Fisher
+ * @author Eric Bottard
  */
 public interface Dispatcher {
 
-	void init(FunctionResource functionResource, HandlerResource handlerResource);
+	/**
+	 * Called when a new function is registered, to let the dispatcher set up infrastructure if needed.
+	 *
+	 * <p>Default implementation does nothing.</p>
+	 *
+	 * @param functionResource the new function
+	 * @param handlerResource the handler used by the function
+	 */
+	default void init(FunctionResource functionResource, HandlerResource handlerResource) {}
 
+	/**
+	 * Called when a function is un-registered, to let the dispatcher tear down infrastructure if needed.
+	 *
+	 * <p>Default implementation does nothing.</p>
+	 *
+	 * @param functionResource the function that is going away
+	 * @param handlerResource the handler used by the function
+	 */
+	default void destroy(FunctionResource functionResource, HandlerResource handlerResource) {}
+
+	/**
+	 * Perform actual invocation of the function.
+	 *
+	 * @param payload the input to the function
+	 * @param headers message headers received as part of invocation request
+	 * @param functionResource the function to apply
+	 * @param handlerResource the handler used by the function
+	 */
 	void dispatch(String payload, Map<String, Object> headers, FunctionResource functionResource, HandlerResource handlerResource);
 
 }

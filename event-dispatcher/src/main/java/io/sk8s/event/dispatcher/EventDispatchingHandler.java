@@ -139,6 +139,18 @@ public class EventDispatchingHandler implements FunctionResourceHandler, Applica
 		logger.info("function added: " + functionName);
 	}
 
+	@Override
+	public void resourceDeleted(FunctionResource functionResource) {
+		String functionName = functionResource.getMetadata().get("name");
+		removeListener(functionResource);
+		String handlerName = functionResource.getSpec().getHandler();
+		HandlerResource handlerResource = this.getHandler(handlerName);
+		Dispatcher dispatcher = this.getDispatcher(handlerResource.getSpec().getDispatcher());
+		dispatcher.destroy(functionResource, handlerResource);
+		this.resources.remove(functionName);
+		logger.info("function deleted: " + functionName);
+	}
+
 	private void addListener(FunctionResource resource) {
 		String topic = resource.getSpec().getInput();
 		final String functionName = resource.getMetadata().get("name");
@@ -153,24 +165,19 @@ public class EventDispatchingHandler implements FunctionResourceHandler, Applica
 		this.bindings.put(functionName, binding);
 	}
 
-	private ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties() {
-		KafkaConsumerProperties kafkaProps = new KafkaConsumerProperties();
-		ExtendedConsumerProperties<KafkaConsumerProperties> extendedProps = new ExtendedConsumerProperties<>(kafkaProps);
-		extendedProps.setHeaderMode(HeaderMode.raw);
-		return extendedProps;
-	}
-
-	@Override
-	public void resourceDeleted(FunctionResource resource) {
-		// TODO: call a cleanup method on the associated dispatcher
-		// e.g. the pool dispatcher should remove the service and pod(s)
+	private void removeListener(FunctionResource resource) {
 		String functionName = resource.getMetadata().get("name");
 		Binding<?> binding = this.bindings.remove(functionName);
 		if (binding != null) {
 			binding.unbind();
 		}
-		this.resources.remove(functionName);
-		logger.info("function deleted: " + functionName);
+	}
+
+	private ExtendedConsumerProperties<KafkaConsumerProperties> consumerProperties() {
+		KafkaConsumerProperties kafkaProps = new KafkaConsumerProperties();
+		ExtendedConsumerProperties<KafkaConsumerProperties> extendedProps = new ExtendedConsumerProperties<>(kafkaProps);
+		extendedProps.setHeaderMode(HeaderMode.raw);
+		return extendedProps;
 	}
 
 	private HandlerResource getHandler(String name) {

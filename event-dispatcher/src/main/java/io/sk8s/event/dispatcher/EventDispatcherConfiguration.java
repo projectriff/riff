@@ -44,9 +44,8 @@ public class EventDispatcherConfiguration {
 	}
 
 	@Bean
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public ResourceWatcher<ResourceEvent<FunctionResource>> watcher(EventDispatchingHandler eventDispatchingHandler) {
-		return new ResourceWatcher(FunctionResourceEvent.class, "functions", eventDispatchingHandler);
+	public ResourceWatcher<FunctionResourceEvent> watcher(EventDispatchingHandler eventDispatchingHandler) {
+		return new ResourceWatcher<>(FunctionResourceEvent.class, "functions", eventDispatchingHandler);
 	}
 
 	@Bean

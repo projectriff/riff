@@ -26,15 +26,14 @@ import io.sk8s.core.function.FunctionResource;
 import io.sk8s.core.handler.HandlerResource;
 
 /**
+ * A Dispatcher implementation that invokes a URL configured as part of the function spec.
+ *
  * @author Mark Fisher
+ * @author Eric Bottard
  */
 public class ServiceInvoker implements Dispatcher {
 
 	private final RestTemplate restTemplate = new RestTemplate();
-
-	@Override
-	public void init(FunctionResource functionResource, HandlerResource handlerResource) {
-	}
 
 	@Override
 	public void dispatch(String payload, Map<String, Object> headers, FunctionResource functionResource, HandlerResource handlerResource) {
