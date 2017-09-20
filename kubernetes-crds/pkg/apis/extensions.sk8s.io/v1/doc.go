@@ -1,0 +1,1 @@
+package v1 // import "github.com/sk8sio/sk8s-types/pkg/apis/extensions.sk8s.io/v1"
