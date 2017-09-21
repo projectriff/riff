@@ -16,6 +16,7 @@
 
 package io.sk8s.topic.controller;
 
+import io.sk8s.core.resource.ResourceEventHandler;
 import io.sk8s.kubernetes.api.model.Topic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,9 +26,6 @@ import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
 import org.springframework.cloud.stream.binder.kafka.properties.KafkaConsumerProperties;
 import org.springframework.cloud.stream.binder.kafka.properties.KafkaProducerProperties;
 import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
-
-import io.sk8s.core.resource.ResourceEventHandler;
-import io.sk8s.core.topic.TopicResource;
 
 /**
  * @author Mark Fisher

@@ -19,6 +19,13 @@ package io.sk8s.topic.controller;
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.kubernetes.client.Watcher;
+import io.sk8s.kubernetes.api.model.Topic;
+import io.sk8s.kubernetes.client.Sk8sClient;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.binder.BinderFactory;
@@ -32,17 +39,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldCallback;
-
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.Watch;
-import io.fabric8.kubernetes.client.Watcher;
-import io.sk8s.core.resource.ResourceEvent;
-import io.sk8s.core.resource.ResourceWatcher;
-import io.sk8s.core.topic.TopicResource;
-import io.sk8s.core.topic.TopicResourceEvent;
-import io.sk8s.kubernetes.api.model.Topic;
-import io.sk8s.kubernetes.client.Sk8sClient;
 
 /**
  * @author Mark Fisher
