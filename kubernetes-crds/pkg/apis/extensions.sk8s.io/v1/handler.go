@@ -31,7 +31,7 @@ type Handler struct {
 // Spec (what the user wants) for a handler
 type HandlerSpec struct {
 	// The dispatcher to use
-	Dispatcher	string `json:"dispatcher"`
+	Dispatcher string `json:"dispatcher"`
 }
 
 // Status (computed) for a handler

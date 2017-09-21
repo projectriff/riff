@@ -10,7 +10,6 @@ type Topic struct {
 	meta_v1.ObjectMeta `json:"metadata"`
 	Spec               TopicSpec   `json:"spec"`
 	Status             TopicStatus `json:"status,omitempty"`
-
 }
 
 // Spec (what the user wants) for a topic
@@ -22,7 +21,6 @@ type TopicSpec struct {
 
 // Status (computed) for a topic
 type TopicStatus struct {
-
 }
 
 // Returned in list operations

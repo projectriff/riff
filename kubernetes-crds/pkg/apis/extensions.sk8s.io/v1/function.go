@@ -26,21 +26,53 @@ type Function struct {
 	meta_v1.ObjectMeta `json:"metadata"`
 	Spec               FunctionSpec   `json:"spec"`
 	Status             FunctionStatus `json:"status,omitempty"`
-
 }
 
 // Spec (what the user wants) for a function
 type FunctionSpec struct {
 
 	// +optional
-	Input *string `json:"input,omitempty"`
+	Input string `json:"input,omitempty"`
 
+	// +optional
+	Ouput string `json:"output,omitempty"`
 
+	// +optional
+	Params []FunctionParam `json:"params,omitempty"`
+
+	HandlerRef HandlerReference `json:"handlerRef"`
+
+	// +optional
+	Env []FunctionEnvVar `json:"env,omitempty"`
+}
+
+type FunctionParam struct {
+	Name string `json:"name"`
+
+	Value string `json:"value"` // TODO could be other than string?
+}
+
+type FunctionEnvVar struct {
+	Name      string `json:"name"`
+	ValueFrom string `json:"valueFrom"`
+}
+
+// An object reference to a Handler
+// sub-set of https://kubernetes.io/docs/api-reference/v1.7/#objectreference-v1-core
+// TODO: Add apiVersion, etc?
+type HandlerReference struct {
+	// Namespace of the referent.
+	// More info: http://kubernetes.io/docs/user-guide/namespaces
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,2,opt,name=namespace"`
+	// Name of the referent.
+	// More info: http://kubernetes.io/docs/user-guide/identifiers#names
+	// +optional
+	Name string `json:"name,omitempty" protobuf:"bytes,3,opt,name=name"`
 }
 
 // Status (computed) for a function
 type FunctionStatus struct {
-
 }
 
 // Returned in list operations
