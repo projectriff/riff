@@ -33,10 +33,16 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldCallback;
 
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.kubernetes.client.Watcher;
 import io.sk8s.core.resource.ResourceEvent;
 import io.sk8s.core.resource.ResourceWatcher;
 import io.sk8s.core.topic.TopicResource;
 import io.sk8s.core.topic.TopicResourceEvent;
+import io.sk8s.kubernetes.api.model.Topic;
+import io.sk8s.kubernetes.client.Sk8sClient;
 
 /**
  * @author Mark Fisher
@@ -46,9 +52,30 @@ import io.sk8s.core.topic.TopicResourceEvent;
 @EnableConfigurationProperties(TopicControllerProperties.class)
 public class TopicControllerConfiguration {
 
-	@Bean
-	public ResourceWatcher<ResourceEvent<TopicResource>> watcher(TopicCreatingHandler topicCreatingHandler) {
-		return new ResourceWatcher(TopicResourceEvent.class, "topics", topicCreatingHandler);
+	@Bean(destroyMethod = "close")
+	public Watch topicWatcher(TopicCreatingHandler topicCreatingHandler) {
+		Sk8sClient sk8sClient = new DefaultKubernetesClient().adapt(Sk8sClient.class);
+		return sk8sClient.topics().watch(new Watcher<Topic>() {
+
+			@Override
+			public void eventReceived(Action action, Topic resource) {
+				switch (action) {
+					case ADDED:
+						topicCreatingHandler.resourceAdded(resource);
+						break;
+					case DELETED:
+						topicCreatingHandler.resourceDeleted(resource);
+						break;
+					default:
+						System.out.format("Unhandled event %s on %s%n", action, resource);
+				}
+			}
+
+			@Override
+			public void onClose(KubernetesClientException cause) {
+
+			}
+		});
 	}
 
 	@Bean

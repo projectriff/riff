@@ -31,6 +31,7 @@ public abstract class Resource<S> {
 
 	private String kind;
 
+	@JsonIgnoreProperties("annotations")
 	private Map<String, String> metadata;
 
 	private S spec;

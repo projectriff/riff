@@ -19,6 +19,7 @@
 		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
 		<spring-cloud.version>Dalston.SR2</spring-cloud.version>
 		<kubernetes-client.version>2.5.9</kubernetes-client.version>
+		<sk8s-kubernetes-client.version>1.0.0.BUILD-SNAPSHOT</sk8s-kubernetes-client.version>
 		<docker-maven.version>0.21.0</docker-maven.version>
 		<docker.base>openjdk:8-alpine</docker.base>
 		<docker.tag>v0001</docker.tag>
@@ -44,6 +45,11 @@
 				<version>${kubernetes-client.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>io.sk8s</groupId>
+				<artifactId>sk8s-kubernetes-client</artifactId>
+				<version>${sk8s-kubernetes-client.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework.kafka</groupId>
 				<artifactId>spring-kafka</artifactId>
 				<version>1.1.6.RELEASE</version>
@@ -63,6 +69,7 @@
 		<module>topic-gateway</module>
 		<module>event-dispatcher</module>
 		<module>spring-cloud-function-web-handler</module>
+		<module>sk8s-kubernetes-client</module>
 	</modules>
 
 </project>

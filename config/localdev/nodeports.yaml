@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  labels:
+    app: kafka
+    component: kafka-broker
+spec:
+  type: NodePort
+  ports:
+  - port: 9092
+    name: kafka-port
+    targetPort: 9092
+    protocol: TCP
+    nodePort: 30092
+  selector:
+    app: kafka
+    component: kafka-broker
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper
+  labels:
+    app: kafka
+    component: zookeeper
+spec:
+  type: NodePort
+  ports:
+  - port: 2181
+    name: zookeeper-port
+    targetPort: 2181
+    protocol: TCP
+    nodePort: 32181
+  selector:
+    app: kafka
+    component: zookeeper
+

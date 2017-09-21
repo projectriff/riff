@@ -16,6 +16,7 @@
 
 package io.sk8s.topic.controller;
 
+import io.sk8s.kubernetes.api.model.Topic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,7 +32,7 @@ import io.sk8s.core.topic.TopicResource;
 /**
  * @author Mark Fisher
  */
-public class TopicCreatingHandler implements ResourceEventHandler<TopicResource> {
+public class TopicCreatingHandler implements ResourceEventHandler<Topic> {
 
 	private static Log logger = LogFactory.getLog(TopicCreatingHandler.class);
 
@@ -42,14 +43,14 @@ public class TopicCreatingHandler implements ResourceEventHandler<TopicResource>
 	}
 
 	@Override
-	public void resourceAdded(TopicResource resource) {
-		String topicName = resource.getMetadata().get("name");
+	public void resourceAdded(Topic resource) {
+		String topicName = resource.getMetadata().getName();
 		logger.info("adding topic: " + topicName);
 		this.createTopic(topicName, 1);
 	}
 
 	@Override
-	public void resourceDeleted(TopicResource resource) {
+	public void resourceDeleted(Topic resource) {
 		logger.info("topic deletion not yet supported");
 	}
 
