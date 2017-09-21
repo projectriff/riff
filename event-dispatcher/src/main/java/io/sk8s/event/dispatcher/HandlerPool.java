@@ -16,6 +16,8 @@
 
 package io.sk8s.event.dispatcher;
 
+import static io.sk8s.kubernetes.api.model.FunctionUtils.param;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,24 +26,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.cloud.stream.binder.Binder;
-import org.springframework.cloud.stream.binder.BinderFactory;
-import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
-import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
-import org.springframework.cloud.stream.binder.HeaderMode;
-import org.springframework.cloud.stream.binder.kafka.properties.KafkaConsumerProperties;
-import org.springframework.cloud.stream.binder.kafka.properties.KafkaProducerProperties;
-import org.springframework.context.SmartLifecycle;
-import org.springframework.http.ResponseEntity;
-import org.springframework.integration.channel.DirectChannel;
-import org.springframework.integration.support.MessageBuilder;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.web.client.RestTemplate;
 
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.Endpoints;
@@ -54,19 +38,44 @@ import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
+import io.sk8s.core.resource.ResourceAddedOrModifiedEvent;
+import io.sk8s.core.resource.ResourceDeletedEvent;
+import io.sk8s.core.resource.ResourceEvent;
+import io.sk8s.kubernetes.api.model.FunctionSpec;
+import io.sk8s.kubernetes.api.model.FunctionUtils;
+import io.sk8s.kubernetes.api.model.Handler;
+import io.sk8s.kubernetes.api.model.XFunction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import io.sk8s.core.function.FunctionResource;
-import io.sk8s.core.handler.HandlerResource;
+import org.springframework.cloud.stream.binder.Binder;
+import org.springframework.cloud.stream.binder.BinderFactory;
+import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
+import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
+import org.springframework.cloud.stream.binder.HeaderMode;
+import org.springframework.cloud.stream.binder.kafka.properties.KafkaConsumerProperties;
+import org.springframework.cloud.stream.binder.kafka.properties.KafkaProducerProperties;
+import org.springframework.context.SmartLifecycle;
+import org.springframework.context.event.EventListener;
+import org.springframework.http.ResponseEntity;
+import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.support.MessageBuilder;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.web.client.RestTemplate;
 
 /**
+ * A {@link Dispatcher} that maintains a pool of {@link Handler handlers} ready for
+ * dispatching function invocation.
+ *
  * @author Mark Fisher
+ * @author Eric Bottard
  */
 public class HandlerPool implements Dispatcher, SmartLifecycle {
 
-	private static Log logger = LogFactory.getLog(HandlerPool.class);
+	private static Logger logger = LoggerFactory.getLogger(HandlerPool.class);
 
 	private final KubernetesClient kubernetesClient;
 
@@ -76,33 +85,24 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 
 	private final AtomicBoolean running = new AtomicBoolean();
 
+	// TODO Use ObjectReference as key
 	private final Map<String, Deployment> handlerDeployments = new HashMap<>();
 
+	// TODO Use ObjectReference as key
 	private final Map<String, Service> services = new HashMap<>();
 
 	private final ConcurrentMap<String, CountDownLatch> serviceLatches = new ConcurrentHashMap<>();
 
-	private final Map<String, Map<String, Pod>> handlerPods = new HashMap<>();
-
+	// TODO Use ObjectReference as key
 	private final Map<String, Pod> functionPods = new HashMap<>();
 
 	private final Map<String, MessageChannel> outputChannels = new HashMap<>();
 
-	private Watch poolWatch;
-
-	private Watch serviceWatch;
-
-	private Watch endpointsWatch;
-
-	private Watch functionWatch;
-
 	@SuppressWarnings("unchecked")
 	public HandlerPool(KubernetesClient kubernetesClient, BinderFactory binderFactory) {
 		this.kubernetesClient = kubernetesClient;
-		this.binder = (Binder<MessageChannel,
-				ExtendedConsumerProperties<KafkaConsumerProperties>,
-				ExtendedProducerProperties<KafkaProducerProperties>>)
-				binderFactory.getBinder("kafka", MessageChannel.class);
+		this.binder = (Binder<MessageChannel, ExtendedConsumerProperties<KafkaConsumerProperties>, ExtendedProducerProperties<KafkaProducerProperties>>) binderFactory
+				.getBinder("kafka", MessageChannel.class);
 	}
 
 	@Override
@@ -120,120 +120,72 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 		return true;
 	}
 
+	@EventListener
+	public void onDeploymentAdded(ResourceAddedOrModifiedEvent<Deployment> event) {
+		if (isRunning()) {
+			String name = event.getResource().getMetadata().getName();
+			handlerDeployments.put(name, event.getResource());
+		}
+	}
+
+	@EventListener
+	public void onDeploymentDeleted(ResourceDeletedEvent<Deployment> event) {
+		if (isRunning()) {
+			String name = event.getResource().getMetadata().getName();
+			handlerDeployments.remove(name);
+		}
+	}
+
+	@EventListener
+	public void onServiceAdded(ResourceAddedOrModifiedEvent<Service> event) {
+		if (isRunning()) {
+			String name = event.getResource().getMetadata().getName();
+			logger.info("SERVICE {}: {}", event.getAction(), name);
+			services.put(name, event.getResource());
+		}
+	}
+
+	@EventListener
+	public void onServiceDeleted(ResourceDeletedEvent<Service> event) {
+		if (isRunning()) {
+			String name = event.getResource().getMetadata().getName();
+			services.remove(name);
+			logger.info("SERVICE {}: {}", event.getAction(), name);
+		}
+	}
+
+	@EventListener(condition = "#event.resource.metadata.labels?.get('function') != null " +
+			"&& !#event.resource.subsets.empty")
+	public void onEndpointAdded(ResourceAddedOrModifiedEvent<Endpoints> event) {
+		if (isRunning()) {
+			String functionName = event.getResource().getMetadata().getLabels().get("function");
+			serviceLatches.putIfAbsent(functionName, new CountDownLatch(1));
+			serviceLatches.get(functionName).countDown();
+		}
+	}
+
+	@EventListener(condition = "#event.resource.metadata.labels?.get('function') != null ")
+	public void onFunctionPodAdded(ResourceAddedOrModifiedEvent<Pod> event) {
+		if (isRunning()) {
+			Pod pod = event.getResource();
+			String functionName = pod.getMetadata().getLabels().get("function");
+			functionPods.put(functionName, pod);
+			logger.info("FUNCTION POD {}: {}", event.getAction(), pod.getMetadata().getName());
+		}
+	}
+
+	@EventListener(condition = "#event.resource.metadata.labels?.get('function') != null ")
+	public void onFunctionPodRemoved(ResourceDeletedEvent<Pod> event) {
+		if (isRunning()) {
+			Pod pod = event.getResource();
+			String functionName = pod.getMetadata().getLabels().get("function");
+			functionPods.remove(functionName);
+		}
+	}
+
 	@Override
 	public void start() {
-		this.poolWatch = kubernetesClient.extensions().deployments().watch(new Watcher<Deployment>() {
-
-			@Override
-			public void eventReceived(Watcher.Action action, Deployment deployment) {
-				String name = deployment.getMetadata().getName();
-				switch (action) {
-				case DELETED:
-					handlerDeployments.remove(name);
-					break;
-				case ADDED:
-				case MODIFIED:
-					handlerDeployments.put(name, deployment);
-				default:
-					break;
-				}
-			}
-
-			@Override
-			public void onClose(KubernetesClientException exception) {
-			}
-		});
-
-		this.serviceWatch = kubernetesClient.services().watch(new Watcher<Service>() {
-
-			@Override
-			public void eventReceived(Action action, Service service) {
-				String name = service.getMetadata().getName();
-				switch (action) {
-				case DELETED:
-					services.remove(service);
-					break;
-				case ADDED:
-				case MODIFIED:
-					logger.info("SERVICE " + action.name() + ": " + service);
-					services.put(name, service);
-				default:
-					break;
-				}				
-			}
-
-			@Override
-			public void onClose(KubernetesClientException cause) {
-			}
-			
-		});
-
-		this.endpointsWatch = kubernetesClient.endpoints().watch(new Watcher<Endpoints>() {
-
-			@Override
-			public void eventReceived(Action action, Endpoints endpoints) {
-				switch (action) {
-				case ADDED:
-				case MODIFIED:
-					String functionName = endpoints.getMetadata().getLabels().get("function");
-					if (functionName != null && endpoints.getSubsets().size() > 0) {
-						logger.info("service ready for " + functionName);
-						serviceLatches.putIfAbsent(functionName, new CountDownLatch(1));
-						serviceLatches.get(functionName).countDown();
-					}
-					break;
-				default:
-					break;
-				}
-			}
-
-			@Override
-			public void onClose(KubernetesClientException cause) {
-			}
-			
-		});
-
-		this.functionWatch = this.kubernetesClient.pods().watch(new Watcher<Pod>() {
-
-			@Override
-			public void eventReceived(Action action, Pod pod) {
-				String handlerName = pod.getMetadata().getLabels().get("handler");
-				String functionName = pod.getMetadata().getLabels().get("function");
-				if (functionName != null) {
-					switch (action) {
-					case DELETED:
-						functionPods.remove(functionName);
-						break;
-					case ADDED:
-					case MODIFIED:
-						functionPods.put(functionName, pod);
-						logger.info("FUNCTION POD " + action + ": " + pod);
-					default:
-						break;
-					}
-				}
-				else if (handlerName != null) {
-					String ip = pod.getStatus().getPodIP();
-					switch (action) {
-					case DELETED:
-						handlerPods.get(handlerName).remove(ip);
-						break;
-					case ADDED:
-					case MODIFIED:
-						if (!handlerPods.containsKey(handlerName)) {
-							handlerPods.put(handlerName, new HashMap<>());
-						}
-						handlerPods.get(handlerName).put(ip, pod);
-					default:
-						break;
-					}
-				}
-			}
-
-			@Override
-			public void onClose(KubernetesClientException exception) {
-			}
-		});
+		this.running.compareAndSet(false, true);
 	}
 
 	@Override
@@ -244,22 +196,14 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 
 	@Override
 	public void stop() {
-		if (this.running.compareAndSet(true, false)) {
-			this.poolWatch.close();
-			this.serviceWatch.close();
-			this.endpointsWatch.close();
-			this.functionWatch.close();
-			this.poolWatch = null;
-			this.serviceWatch = null;
-			this.endpointsWatch = null;
-			this.functionWatch = null;
-		}
+		this.running.compareAndSet(true, false);
 	}
 
 	@Override
-	public void init(FunctionResource functionResource, HandlerResource handlerResource) {
-		String functionName = functionResource.getMetadata().get("name");
+	public void init(XFunction functionResource, Handler handlerResource) {
+		String functionName = functionResource.getMetadata().getName();
 		Map<String, String> functionLabels = Collections.singletonMap("function", functionName);
+		//@formatter:off
 		this.kubernetesClient.services().createNew()
 			.withNewMetadata()
 				.withName(functionName)
@@ -268,83 +212,97 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 			.withNewSpec()
 				.withSelector(functionLabels)
 				.withPorts(new ServicePortBuilder()
-						.withPort(80)
-						.withNewTargetPort(8080)
-					.build())
+					.withPort(80)
+					.withNewTargetPort(8080)
+					.build()
+				)
 			.endSpec()
-		.done();
+			.done();
+		//@formatter:on
 
-		String handlerName = handlerResource.getMetadata().get("name");
-		int poolSize = handlerResource.getSpec().getReplicas();
+		String handlerName = handlerResource.getMetadata().getName();
+		Integer poolSize = handlerResource.getSpec().getReplicas();
+		if (poolSize == null) {
+			poolSize = 1;
+		}
 		if (!this.handlerDeployments.containsKey(handlerName)) {
 			Map<String, String> handlerLabels = Collections.singletonMap("handler", handlerName);
 			Map<String, Quantity> resourceRequests = new HashMap<>();
 			resourceRequests.put("cpu", new Quantity("500m"));
 			resourceRequests.put("memory", new Quantity("512Mi"));
+			//@formatter:off
 			this.kubernetesClient.extensions().deployments().create(new DeploymentBuilder()
-					.withNewMetadata()
-						.withName(handlerName)
-						.withLabels(handlerLabels)
-					.endMetadata()
-					.withNewSpec()
-						.withReplicas(poolSize)
-						.withNewSelector()
-							.withMatchLabels(handlerLabels)
-						.endSelector()
-						.withNewTemplate()
-							.withNewMetadata()
-								.withName(handlerName)
-								.withLabels(handlerLabels)
-							.endMetadata()
-							.withNewSpec()
-								.withContainers(new ContainerBuilder()
-									.withName("main")
-									.withImage(handlerResource.getSpec().getImage())
-									//.withCommand(handlerResource.getSpec().getCommand())
-									//.withArgs(handlerResource.getSpec().getArgs())
-									.withVolumeMounts(new VolumeMountBuilder()
-										.withMountPath("/functions")
-										.withName("functions")
-									.build())
-									.withNewResources()
-										.withRequests(resourceRequests)
-									.endResources()
-								.build())
-								.withVolumes(new VolumeBuilder()
+				.withNewMetadata()
+					.withName(handlerName)
+					.withLabels(handlerLabels)
+				.endMetadata()
+				.withNewSpec()
+					.withReplicas(poolSize)
+					.withNewSelector()
+						.withMatchLabels(handlerLabels)
+					.endSelector()
+					.withNewTemplate()
+						.withNewMetadata()
+							.withName(handlerName)
+							.withLabels(handlerLabels)
+						.endMetadata()
+						.withNewSpec()
+							.withContainers(new ContainerBuilder()
+								.withName("main")
+								.withImage(handlerResource.getSpec().getImage())
+								//.withCommand(handlerResource.getSpec().getCommand())
+								//.withArgs(handlerResource.getSpec().getArgs())
+								.withVolumeMounts(new VolumeMountBuilder()
+									.withMountPath("/functions")
 									.withName("functions")
-									.withNewHostPath("/functions")
-								.build())
-							.endSpec()
-						.endTemplate()
-					.endSpec()
-				.build());
+									.build()
+								)
+								.withNewResources()
+									.withRequests(resourceRequests)
+								.endResources()
+								.build()
+							)
+							.withVolumes(new VolumeBuilder()
+								.withName("functions")
+								.withNewHostPath("/functions")
+								.build()
+							)
+						.endSpec()
+					.endTemplate()
+				.endSpec()
+			.build()
+			);
+			//@formatter:on
 		}
 	}
 
 	@Override
-	public void destroy(FunctionResource functionResource, HandlerResource handlerResource) {
-		String functionName = functionResource.getMetadata().get("name");
+	public void destroy(XFunction functionResource, Handler handlerResource) {
+		String functionName = functionResource.getMetadata().getName();
 		Map<String, String> functionLabels = Collections.singletonMap("function", functionName);
-		this.kubernetesClient.services().withLabels(functionLabels).delete() ;
+		this.kubernetesClient.services().withLabels(functionLabels).delete();
 
 		// TODO: "reference count" handlers?
 	}
 
 	@Override
-	public void dispatch(String payload, Map<String, Object> headers, FunctionResource functionResource, HandlerResource handlerResource) {
-		String functionName = functionResource.getMetadata().get("name");
+	public void dispatch(String payload, Map<String, Object> headers, XFunction functionResource,
+			Handler handlerResource) {
+		String functionName = functionResource.getMetadata().getName();
 		Pod pod = this.functionPods.get(functionName);
 		if (pod == null) {
 			Map<String, String> functionLabels = Collections.singletonMap("function", functionName);
-			String handlerName = handlerResource.getMetadata().get("name");
+			String handlerName = handlerResource.getMetadata().getName();
 			Pod handlerPod = this.kubernetesClient.pods().withLabel("handler", handlerName).list().getItems().get(0);
 			handlerPod.getMetadata().setLabels(functionLabels);
 			pod = this.kubernetesClient.pods().createOrReplace(handlerPod);
-			FunctionResource.FunctionSpec functionSpec = functionResource.getSpec();
+			FunctionSpec functionSpec = functionResource.getSpec();
 			bindOutputChannel(functionName, functionSpec.getOutput());
-			this.serviceLatches.putIfAbsent(functionName, new CountDownLatch(1));
 			try {
+				logger.info("Waiting for service for function {}", functionName);
+				this.serviceLatches.putIfAbsent(functionName, new CountDownLatch(1));
 				this.serviceLatches.get(functionName).await(10, TimeUnit.SECONDS);
+				logger.info("Done waiting for {} service", functionName);
 			}
 			catch (InterruptedException interrupted) {
 				Thread.currentThread().interrupt();
@@ -352,7 +310,7 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 				return;
 			}
 			Service service = this.services.get(functionName);
-			InitPayload initPayload = new InitPayload(functionSpec.getParam("uri"), functionSpec.getParam("classname"));
+			InitPayload initPayload = new InitPayload(param("uri", functionResource), param("classname", functionResource));
 			String url = "http://" + service.getSpec().getClusterIP() + "/init";
 			logger.info("POST to /init for function '" + functionName + "' with params: " + initPayload);
 			ResponseEntity<String> initResponse = this.restTemplate.postForEntity(
@@ -363,7 +321,8 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 		if (service != null) {
 			String baseUrl = "http://" + service.getSpec().getClusterIP();
 			logger.info("POST to " + baseUrl + "/invoke with message: " + payload);
-			ResponseEntity<String> response = this.restTemplate.postForEntity(baseUrl + "/invoke", payload, String.class);
+			ResponseEntity<String> response = this.restTemplate.postForEntity(baseUrl + "/invoke", payload,
+					String.class);
 			logger.info("Response: " + response);
 			sendResponse(functionName, response.getBody());
 		}
@@ -375,7 +334,8 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 	private void bindOutputChannel(String functionName, String topic) {
 		DirectChannel channel = new DirectChannel();
 		this.outputChannels.put(functionName, channel);
-		ExtendedProducerProperties<KafkaProducerProperties> props = new ExtendedProducerProperties<>(new KafkaProducerProperties());
+		ExtendedProducerProperties<KafkaProducerProperties> props = new ExtendedProducerProperties<>(
+				new KafkaProducerProperties());
 		props.setHeaderMode(HeaderMode.raw);
 		this.binder.bindProducer(topic, channel, props);
 	}
@@ -386,12 +346,14 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 	}
 
 	/**
-	 * The payload that will be POSTed as JSon to the {@literal init} endpoint of the web handler.
+	 * The payload that will be POSTed as JSon to the {@literal init} endpoint of the web
+	 * handler.
 	 *
 	 * @author Eric Bottard
 	 */
 	private static class InitPayload {
 		private final String uri;
+
 		private final String className;
 
 		private InitPayload(String uri, String className) {

@@ -14,30 +14,21 @@
  * limitations under the License.
  */
 
-package io.sk8s.core.function;
+package io.sk8s.core.resource;
+
+import io.fabric8.kubernetes.client.Watcher;
 
 /**
- * @author Mark Fisher
+ * Specialization of {@link ResourceEvent} for when a resource is added or modified.
+ * Useful as an event registration type for objects that want to maintain a cache of last known state of such resources
+ * using {@literal Map.put()} or similar.
+ *
+ * @author Eric Bottard
+ * @param <T> the type of resource that is being changed
  */
-public class Env {
+public abstract class ResourceAddedOrModifiedEvent<T> extends ResourceEvent<T> {
 
-	private String name;
-
-	private String valueFrom;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getValueFrom() {
-		return valueFrom;
-	}
-
-	public void setValueFrom(String value) {
-		this.valueFrom = value;
+	ResourceAddedOrModifiedEvent(T resource, Watcher.Action action) {
+		super(resource, action);
 	}
 }

@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package io.sk8s.core.function;
+package io.sk8s.core.resource;
 
-import io.sk8s.core.resource.ResourceEvent;
+import io.fabric8.kubernetes.client.Watcher;
 
 /**
- * @author Mark Fisher
+ * Specialization of {@link ResourceEvent} for when a watch reports an error.
+ * @author Eric Bottard
+ * @param <T> the type of resource that is in error
  */
-public class FunctionResourceEvent extends ResourceEvent<FunctionResource> {
+public class ResourceErrorEvent<T> extends ResourceEvent<T> {
 
+	ResourceErrorEvent(T resource) {
+		super(resource, Watcher.Action.ERROR);
+	}
 }

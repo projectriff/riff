@@ -1,7 +1,0 @@
-apiVersion: extensions.sk8s.io/v1
-kind: Function
-metadata:
-  name: exclaim
-spec:
-  topic: words
-  command: "echo $MESSAGE!!! >> /output/words.log"

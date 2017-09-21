@@ -4,7 +4,8 @@ metadata:
   name: echo
 spec:
   input: greetings
-  handler: shell
+  handlerRef:
+    name: shell
   params:
   - name: command
     value: "echo $MESSAGE >> /output/greetings.log"

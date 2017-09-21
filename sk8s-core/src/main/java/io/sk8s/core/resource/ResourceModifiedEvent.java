@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package io.sk8s.core.topic;
+package io.sk8s.core.resource;
 
-import io.sk8s.core.resource.ResourceEventHandler;
+import io.fabric8.kubernetes.client.Watcher;
 
 /**
- * @author Mark Fisher
+ * Specialization of {@link ResourceEvent} for when a resource is modified.
+ * @author Eric Bottard
+ * @param <T> the type of resource that is being modified
  */
-public interface TopicResourceHandler extends ResourceEventHandler<TopicResource> {
+public class ResourceModifiedEvent<T> extends ResourceAddedOrModifiedEvent<T> {
 
+	ResourceModifiedEvent(T resource) {
+		super(resource, Watcher.Action.MODIFIED);
+	}
 }

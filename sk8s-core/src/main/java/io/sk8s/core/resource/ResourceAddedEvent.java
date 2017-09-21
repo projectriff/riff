@@ -14,30 +14,18 @@
  * limitations under the License.
  */
 
-package io.sk8s.core.function;
+package io.sk8s.core.resource;
+
+import io.fabric8.kubernetes.client.Watcher;
 
 /**
- * @author Mark Fisher
+ * Specialization of {@link ResourceEvent} for when a resource is added.
+ * @author Eric Bottard
+ * @param <T> the type of resource that is being added
  */
-public class Param {
+public class ResourceAddedEvent<T> extends ResourceAddedOrModifiedEvent<T> {
 
-	private String name;
-
-	private String value;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
+	ResourceAddedEvent(T resource) {
+		super(resource, Watcher.Action.ADDED);
 	}
 }

@@ -1,11 +1,27 @@
 == Prerequisites
 
-a running 1.7 Kubernetes cluster with at least 4GB of memory
-
+* a running 1.7 Kubernetes cluster with at least 4GB of memory
 these instructions assume minikube for now, for example:
-
++
 ```
 minikube start --cpus=4 --memory=4096 --disk-size=64g
+```
+
+* A working Go programming environment, with `GOPATH` set (defaults
+to `~/go`)
+
+== Build the kubernetes-model jar Enhanced with Sk8s Types
+```
+cd $GOPATH   #default to ~/go
+git clone https://github.com/ericbottard/kubernetes-model src/github.com/fabric8io/kubernetes-model/
+cd src/github.com/fabric8io/kubernetes-model/
+git checkout sk8s
+make
+cd <back to the clone of this repo>
+```
+== Create Sk8s Custom Resource Definitions
+```
+kubectl apply -f config/types
 ```
 
 == Build
