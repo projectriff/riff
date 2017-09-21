@@ -16,6 +16,8 @@ type Topic struct {
 // Spec (what the user wants) for a topic
 type TopicSpec struct {
 
+	// TODO: add fields here. Java had name (if != from metadata.name?), partitions, exposeRead/exposeWrite
+
 }
 
 // Status (computed) for a topic
