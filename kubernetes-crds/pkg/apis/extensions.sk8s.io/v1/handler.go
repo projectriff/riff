@@ -32,6 +32,22 @@ type Handler struct {
 type HandlerSpec struct {
 	// The dispatcher to use
 	Dispatcher string `json:"dispatcher"`
+
+	// The container image to use
+	Image string `json:"image"`
+
+	// The command used to run the container
+	// +optional
+	Command string `json:"command,omitempty"`
+
+	// The args used to run the container
+	// +optional
+	Args []string `json:"args,omitempty"`
+
+	// The number of replicas to create.
+	// Defaults to 1
+	// +optional
+	Replicas *int32 `json:"replicas,omitempty"`
 }
 
 // Status (computed) for a handler
