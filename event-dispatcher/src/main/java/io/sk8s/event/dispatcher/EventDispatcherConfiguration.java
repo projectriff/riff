@@ -16,19 +16,18 @@
 
 package io.sk8s.event.dispatcher;
 
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.Watch;
+import io.sk8s.core.resource.ResourceEventPublisher;
+import io.sk8s.kubernetes.client.Sk8sClient;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.binder.BinderFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
-
-import io.sk8s.core.function.FunctionResource;
-import io.sk8s.core.function.FunctionResourceEvent;
-import io.sk8s.core.resource.ResourceEvent;
-import io.sk8s.core.resource.ResourceWatcher;
 
 /**
  * @author Mark Fisher
@@ -39,13 +38,13 @@ import io.sk8s.core.resource.ResourceWatcher;
 public class EventDispatcherConfiguration {
 
 	@Bean
-	public EventDispatchingHandler eventDispatchingHandler(KubernetesClient kubernetesClient, BinderFactory binderFactory) {
-		return new EventDispatchingHandler(kubernetesClient, binderFactory);
+	public EventDispatchingHandler eventDispatchingHandler(BinderFactory binderFactory) {
+		return new EventDispatchingHandler(binderFactory);
 	}
 
-	@Bean
-	public ResourceWatcher<FunctionResourceEvent> watcher(EventDispatchingHandler eventDispatchingHandler) {
-		return new ResourceWatcher<>(FunctionResourceEvent.class, "functions", eventDispatchingHandler);
+	@Bean(destroyMethod = "close" /*explicit to make sure this stays as a bean*/)
+	public Watch functionEventPublisher(Sk8sClient client, ApplicationEventPublisher eventPublisher) {
+		return client.functions().watch(new ResourceEventPublisher<>(eventPublisher));
 	}
 
 	@Bean

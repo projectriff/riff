@@ -16,36 +16,33 @@
 
 package io.sk8s.core.resource;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import io.fabric8.kubernetes.client.Watcher;
 
-/**
- * @author Mark Fisher
- */
-public abstract class ResourceEvent<R extends Resource<?>> {
+import org.springframework.core.ResolvableType;
+import org.springframework.core.ResolvableTypeProvider;
 
-	private String type;
+public class WatcherEvent<T> implements ResolvableTypeProvider {
 
-	private R resource;
+	private final T resource;
 
-	public String getType() {
-		return type;
-	}
+	private final Watcher.Action action;
 
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	@JsonProperty("object")
-	public R getResource() {
-		return resource;
-	}
-
-	public void setResource(R resource) {
+	public WatcherEvent(T resource, Watcher.Action action) {
 		this.resource = resource;
+		this.action = action;
 	}
 
 	@Override
-	public String toString() {
-		return this.getClass().getSimpleName() + " [type=" + type + ", resource=" + resource + "]";
+	public ResolvableType getResolvableType() {
+		return ResolvableType.forClassWithGenerics(getClass(),
+				ResolvableType.forInstance(getResource()));
+	}
+
+	public Watcher.Action getAction() {
+		return action;
+	}
+
+	public T getResource() {
+		return resource;
 	}
 }

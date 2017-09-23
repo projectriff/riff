@@ -18,12 +18,12 @@ package io.sk8s.event.dispatcher;
 
 import java.util.Map;
 
+import io.sk8s.kubernetes.api.model.Handler;
+import io.sk8s.kubernetes.api.model.XFunction;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
-
-import io.sk8s.core.function.FunctionResource;
-import io.sk8s.core.handler.HandlerResource;
 
 /**
  * A Dispatcher implementation that invokes a URL configured as part of the function spec.
@@ -36,11 +36,15 @@ public class ServiceInvoker implements Dispatcher {
 	private final RestTemplate restTemplate = new RestTemplate();
 
 	@Override
-	public void dispatch(String payload, Map<String, Object> headers, FunctionResource functionResource, HandlerResource handlerResource) {
+	public void dispatch(String payload, Map<String, Object> headers, XFunction functionResource, Handler handlerResource) {
 		// TODO: create the Handler instance by passing params
-		String url = functionResource.getSpec().getParam("url");
-		Assert.hasText(url, "no url provided for function " + functionResource.getMetadata().get("name"));
+		String url = urlParam(functionResource);
+		Assert.hasText(url, "no url provided for function " + functionResource.getMetadata().getName());
 		ResponseEntity<?> response = this.restTemplate.postForEntity(url, payload, String.class);
 		System.out.println("response: "+ response);
+	}
+
+	private String urlParam(XFunction functionResource) {
+		return functionResource.getSpec().getParams().stream().filter(p -> p.getName().equals("url")).findFirst().get().getValue();
 	}
 }

@@ -14,30 +14,13 @@
  * limitations under the License.
  */
 
-package io.sk8s.core.function;
+package io.sk8s.core.resource;
 
-/**
- * @author Mark Fisher
- */
-public class Env {
+import io.fabric8.kubernetes.client.Watcher;
 
-	private String name;
+public class ResourceDeletedEvent<T> extends WatcherEvent<T> {
 
-	private String valueFrom;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getValueFrom() {
-		return valueFrom;
-	}
-
-	public void setValueFrom(String value) {
-		this.valueFrom = value;
+	public ResourceDeletedEvent(T resource) {
+		super(resource, Watcher.Action.DELETED);
 	}
 }

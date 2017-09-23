@@ -18,11 +18,9 @@ package io.sk8s.event.dispatcher;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.stream.Stream;
 
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
@@ -31,10 +29,11 @@ import io.fabric8.kubernetes.api.model.JobSpecBuilder;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.sk8s.kubernetes.api.model.FunctionEnvVar;
+import io.sk8s.kubernetes.api.model.Handler;
+import io.sk8s.kubernetes.api.model.XFunction;
 
-import io.sk8s.core.function.Env;
-import io.sk8s.core.function.FunctionResource;
-import io.sk8s.core.handler.HandlerResource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Mark Fisher
@@ -51,51 +50,55 @@ public class JobLauncher implements Dispatcher {
 	}
 
 	@Override
-	public void dispatch(String payload, Map<String, Object> headers, FunctionResource functionResource, HandlerResource handlerResource) {
-		String functionName = functionResource.getMetadata().get("name");
+	public void dispatch(String payload, Map<String, Object> headers, XFunction functionResource,
+			Handler handlerResource) {
+		String functionName = functionResource.getMetadata().getName();
 		String job = this.kubernetesClient.extensions().jobs().inNamespace(this.properties.getNamespace()).createNew()
-			.withApiVersion("batch/v1")
-			.withNewMetadata()
+				.withApiVersion("batch/v1")
+				.withNewMetadata()
 				.withName(functionName + "-" + System.currentTimeMillis())
-			.endMetadata()
-			.withSpec(new JobSpecBuilder()
-				.withNewTemplate()
-					.withNewMetadata()
+				.endMetadata()
+				.withSpec(new JobSpecBuilder()
+						.withNewTemplate()
+						.withNewMetadata()
 						.withLabels(Collections.singletonMap("function", functionName))
-					.endMetadata()
-					.withNewSpec()
+						.endMetadata()
+						.withNewSpec()
 						.withRestartPolicy("OnFailure")
 						.withActiveDeadlineSeconds(10L)
+						// TODO why wouldn't our HandlerSpec contain Container(s) object models directly
 						.withContainers(new ContainerBuilder()
-							.withName("main")
-							.withImage(handlerResource.getSpec().getImage())
-							.withCommand(handlerResource.getSpec().getCommand())
-							.withArgs(this.resolvePlaceholders(handlerResource.getSpec().getArgs(), functionResource))
-							.withEnv(buildEnvVars(functionResource.getSpec().getEnv(), payload))
-							.withVolumeMounts(new VolumeMountBuilder()
-								.withMountPath("/output")
-								.withName("messages")
-							.build())
-						.build())
+								.withName("main")
+								.withImage(handlerResource.getSpec().getImage())
+								.withCommand(handlerResource.getSpec().getCommand())
+								.withArgs(
+										this.resolvePlaceholders(handlerResource.getSpec().getArgs(), functionResource))
+								.withEnv(buildEnvVars(functionResource.getSpec().getEnv(), payload))
+								.withVolumeMounts(new VolumeMountBuilder()
+										.withMountPath("/output")
+										.withName("messages")
+										.build())
+								.build())
 						.withVolumes(new VolumeBuilder()
-							.withName("messages")
-							.withNewHostPath("/messages")
+								.withName("messages")
+								.withNewHostPath("/messages")
+								.build())
+						.endSpec()
+						.endTemplate()
 						.build())
-					.endSpec()
-				.endTemplate()
-			.build())
-			.done().toString();
+				.done().toString();
 		System.out.println("JOB: " + job);
 	}
 
-	private List<String> resolvePlaceholders(List<String> original, FunctionResource functionResource) {
+	private List<String> resolvePlaceholders(List<String> original, XFunction functionResource) {
 		// TODO: apply to entire resource, for now just args
 		List<String> resolved = new ArrayList<>(original.size());
 		for (int i = 0; i < original.size(); i++) {
 			String s = original.get(i);
 			// TODO: find the name with pattern, for now just "command"
-			if (s.contains("$COMMAND")) {
-				resolved.add(functionResource.getSpec().getParam("command"));
+			if (s.equals("$COMMAND")) {
+				String command = functionResource.getSpec().getParams().stream().filter(p -> p.getName().equals("command")).findAny().get().getValue();
+				resolved.add(command);
 			}
 			else {
 				resolved.add(s);
@@ -104,23 +107,16 @@ public class JobLauncher implements Dispatcher {
 		return resolved;
 	}
 
-	private EnvVar[] buildEnvVars(List<Env> envList, String payload) {
-		Map<String, String> map = new HashMap<>();
-		if (envList != null) {
-			for (Env env : envList) {
-				String value = ("payload".equalsIgnoreCase(env.getValueFrom())) ? payload : "";
-				map.put(env.getName(), value);
-			}
-		}
-		map.put("MESSAGE", payload);
-		EnvVar[] vars = new EnvVar[map.size()];
-		int i = 0;
-		for (Map.Entry<String, String> entry : map.entrySet()) {
-			vars[i++] = new EnvVarBuilder()
-					.withName(entry.getKey())
-					.withValue(entry.getValue())
-					.build();
-		}
-		return vars;
+	private EnvVar[] buildEnvVars(List<FunctionEnvVar> envList, String payload) {
+		// Put the payload under the "MESSAGE" key and any envvar that had valueFrom() equal "payload"
+		// All other variables are currently set to ""
+		return Stream.concat(
+				Stream.of(new EnvVarBuilder().withName("MESSAGE").withValue(payload).build()),
+				envList.stream()
+						.map(ev -> new EnvVarBuilder()
+								.withName(ev.getName())
+								.withValue("payload".equalsIgnoreCase(ev.getValueFrom()) ? payload : "")
+								.build()))
+				.toArray(EnvVar[]::new);
 	}
 }

@@ -16,7 +16,8 @@
 
 package io.sk8s.topic.controller;
 
-import io.sk8s.core.resource.ResourceEventHandler;
+import io.sk8s.core.resource.ResourceAddedEvent;
+import io.sk8s.core.resource.ResourceDeletedEvent;
 import io.sk8s.kubernetes.api.model.Topic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,11 +27,13 @@ import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
 import org.springframework.cloud.stream.binder.kafka.properties.KafkaConsumerProperties;
 import org.springframework.cloud.stream.binder.kafka.properties.KafkaProducerProperties;
 import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
+import org.springframework.context.event.EventListener;
 
 /**
  * @author Mark Fisher
+ * @author Eric Bottard
  */
-public class TopicCreatingHandler implements ResourceEventHandler<Topic> {
+public class TopicCreatingHandler {
 
 	private static Log logger = LogFactory.getLog(TopicCreatingHandler.class);
 
@@ -40,15 +43,16 @@ public class TopicCreatingHandler implements ResourceEventHandler<Topic> {
 		this.provisioner = provisioner;
 	}
 
-	@Override
-	public void resourceAdded(Topic resource) {
+	@EventListener
+	public void onTopicAdded(ResourceAddedEvent<Topic> event) {
+		Topic resource = event.getResource();
 		String topicName = resource.getMetadata().getName();
 		logger.info("adding topic: " + topicName);
 		this.createTopic(topicName, 1);
 	}
 
-	@Override
-	public void resourceDeleted(Topic resource) {
+	@EventListener
+	public void onTopicDeleted(ResourceDeletedEvent<Topic> event) {
 		logger.info("topic deletion not yet supported");
 	}
 

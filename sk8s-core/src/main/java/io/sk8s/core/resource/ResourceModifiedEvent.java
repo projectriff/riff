@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package io.sk8s.core.function;
+package io.sk8s.core.resource;
 
-import io.sk8s.core.resource.ResourceEvent;
+import io.fabric8.kubernetes.client.Watcher;
 
-/**
- * @author Mark Fisher
- */
-public class FunctionResourceEvent extends ResourceEvent<FunctionResource> {
+public class ResourceModifiedEvent<T> extends WatcherEvent<T> {
 
+	public ResourceModifiedEvent(T resource) {
+		super(resource, Watcher.Action.MODIFIED);
+	}
 }

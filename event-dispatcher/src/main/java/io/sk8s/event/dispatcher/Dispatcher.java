@@ -18,8 +18,8 @@ package io.sk8s.event.dispatcher;
 
 import java.util.Map;
 
-import io.sk8s.core.function.FunctionResource;
-import io.sk8s.core.handler.HandlerResource;
+import io.sk8s.kubernetes.api.model.Handler;
+import io.sk8s.kubernetes.api.model.XFunction;
 
 /**
  * Strategy interface for deciding how to handle function application using some handler.
@@ -39,7 +39,7 @@ public interface Dispatcher {
 	 * @param functionResource the new function
 	 * @param handlerResource the handler used by the function
 	 */
-	default void init(FunctionResource functionResource, HandlerResource handlerResource) {}
+	default void init(XFunction functionResource, Handler handlerResource) {}
 
 	/**
 	 * Called when a function is un-registered, to let the dispatcher tear down infrastructure if needed.
@@ -49,7 +49,7 @@ public interface Dispatcher {
 	 * @param functionResource the function that is going away
 	 * @param handlerResource the handler used by the function
 	 */
-	default void destroy(FunctionResource functionResource, HandlerResource handlerResource) {}
+	default void destroy(XFunction functionResource, Handler handlerResource) {}
 
 	/**
 	 * Perform actual invocation of the function.
@@ -59,6 +59,6 @@ public interface Dispatcher {
 	 * @param functionResource the function to apply
 	 * @param handlerResource the handler used by the function
 	 */
-	void dispatch(String payload, Map<String, Object> headers, FunctionResource functionResource, HandlerResource handlerResource);
+	void dispatch(String payload, Map<String, Object> headers, XFunction functionResource, Handler handlerResource);
 
 }

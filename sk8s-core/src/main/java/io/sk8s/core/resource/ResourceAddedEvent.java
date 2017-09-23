@@ -14,30 +14,13 @@
  * limitations under the License.
  */
 
-package io.sk8s.core.function;
+package io.sk8s.core.resource;
 
-/**
- * @author Mark Fisher
- */
-public class Param {
+import io.fabric8.kubernetes.client.Watcher;
 
-	private String name;
+public class ResourceAddedEvent<T> extends WatcherEvent<T> {
 
-	private String value;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
+	public ResourceAddedEvent(T resource) {
+		super(resource, Watcher.Action.ADDED);
 	}
 }

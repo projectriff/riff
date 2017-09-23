@@ -16,12 +16,11 @@
 
 package io.sk8s.core.resource;
 
-/**
- * @author Mark Fisher
- */
-public interface ResourceEventHandler<R> {
+import io.fabric8.kubernetes.client.Watcher;
 
-	void resourceAdded(R resource);
+public class ResourceErrorEvent<T> extends WatcherEvent<T> {
 
-	void resourceDeleted(R resource);
+	public ResourceErrorEvent(T resource) {
+		super(resource, Watcher.Action.ERROR);
+	}
 }

@@ -17,11 +17,14 @@
 package io.sk8s.event.dispatcher;
 
 import java.io.UnsupportedEncodingException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.sk8s.core.resource.ResourceAddedEvent;
+import io.sk8s.core.resource.ResourceDeletedEvent;
+import io.sk8s.kubernetes.api.model.Handler;
+import io.sk8s.kubernetes.api.model.HandlerReference;
+import io.sk8s.kubernetes.api.model.XFunction;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -36,58 +39,45 @@ import org.springframework.cloud.stream.binder.kafka.properties.KafkaConsumerPro
 import org.springframework.cloud.stream.binder.kafka.properties.KafkaProducerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.event.EventListener;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.util.StringUtils;
-
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.utils.HttpClientUtils;
-
-import io.sk8s.core.function.FunctionResource;
-import io.sk8s.core.function.FunctionResourceHandler;
-import io.sk8s.core.handler.HandlerResource;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okio.BufferedSource;
 
 /**
  * @author Mark Fisher
  */
-public class EventDispatchingHandler implements FunctionResourceHandler, ApplicationContextAware {
+public class EventDispatchingHandler implements ApplicationContextAware {
 
 	private final Log logger = LogFactory.getLog(EventDispatchingHandler.class);
 
-	private final KubernetesClient kubernetesClient;
+	// TODO: Change key to ObjectReference or similar
+	private final Map<String, XFunction> functions = new HashMap<>();
 
-	private final Map<String, FunctionResource> resources = new HashMap<>();
+	private final Map<HandlerReference, Handler> handlers = new HashMap<>();
 
 	private final Map<String, Dispatcher> dispatchers = new HashMap<>();
 
+	// TODO: Change key to ObjectReference or similar
 	private final Map<String, Binding<?>> bindings = new HashMap<>();
 
 	private final Binder<MessageChannel, ExtendedConsumerProperties<KafkaConsumerProperties>, ExtendedProducerProperties<KafkaProducerProperties>> binder;
-
-	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	private final MessageHandler messageHandler = m -> {
 		try {
 			String payload = new String((byte[]) m.getPayload(), "UTF-8");
 			String functionName = m.getHeaders().get("function", String.class);
-			FunctionResource functionResource = this.resources.get(functionName);
+			XFunction functionResource = this.functions.get(functionName);
 			if (functionResource == null) {
 				logger.error("unknown function: " + functionName);
+				return; // TODO is that the best thing to do?
 			}
-			String handlerName = functionResource.getSpec().getHandler();
-			HandlerResource handlerResource = getHandler(handlerName);
+			HandlerReference handlerRef = functionResource.getSpec().getHandlerRef();
+			Handler handlerResource = handlers.get(handlerRef);
 			if (handlerResource == null) {
-				logger.error("unknown handler: " + handlerName);
+				logger.error("unknown handler: " + handlerRef);
 			}
 			String dispatcherName = handlerResource.getSpec().getDispatcher();
 			Dispatcher dispatcher = this.getDispatcher(dispatcherName);
@@ -104,8 +94,7 @@ public class EventDispatchingHandler implements FunctionResourceHandler, Applica
 	};
 
 	@SuppressWarnings("unchecked")
-	public EventDispatchingHandler(KubernetesClient kubernetesClient, BinderFactory binderFactory) {
-		this.kubernetesClient = kubernetesClient;
+	public EventDispatchingHandler(BinderFactory binderFactory) {
 		this.binder = (Binder<MessageChannel,
 				ExtendedConsumerProperties<KafkaConsumerProperties>,
 				ExtendedProducerProperties<KafkaProducerProperties>>)
@@ -123,37 +112,36 @@ public class EventDispatchingHandler implements FunctionResourceHandler, Applica
 		return this.dispatchers.get(name.toLowerCase());
 	}
 
-	@Override
-	public void resourceAdded(FunctionResource functionResource) {
-		String functionName = functionResource.getMetadata().get("name");
-		if (this.resources.containsKey(functionName)) {
-			// TODO: fix the Watcher so we don't get repeated events
-			return;
-		}
-		this.resources.put(functionName, functionResource);
-		String handlerName = functionResource.getSpec().getHandler();
-		HandlerResource handlerResource = this.getHandler(handlerName);
+	@EventListener
+	public void onFunctionRegistered(ResourceAddedEvent<XFunction> event) {
+		XFunction functionResource = event.getResource();
+		String functionName = functionResource.getMetadata().getName();
+		this.functions.put(functionName, functionResource);
+		HandlerReference handlerReference = functionResource.getSpec().getHandlerRef();
+		Handler handlerResource = handlers.get(handlerReference);
 		Dispatcher dispatcher = this.getDispatcher(handlerResource.getSpec().getDispatcher());
 		dispatcher.init(functionResource, handlerResource);
 		addListener(functionResource);
 		logger.info("function added: " + functionName);
+
 	}
 
-	@Override
-	public void resourceDeleted(FunctionResource functionResource) {
-		String functionName = functionResource.getMetadata().get("name");
+	@EventListener
+	public void onFunctionUnregistered(ResourceDeletedEvent<XFunction> event) {
+		XFunction functionResource = event.getResource();
+		String functionName = functionResource.getMetadata().getName();
 		removeListener(functionResource);
-		String handlerName = functionResource.getSpec().getHandler();
-		HandlerResource handlerResource = this.getHandler(handlerName);
+		HandlerReference handlerReference = functionResource.getSpec().getHandlerRef();
+		Handler handlerResource = handlers.get(handlerReference);
 		Dispatcher dispatcher = this.getDispatcher(handlerResource.getSpec().getDispatcher());
 		dispatcher.destroy(functionResource, handlerResource);
-		this.resources.remove(functionName);
+		this.functions.remove(functionName);
 		logger.info("function deleted: " + functionName);
 	}
 
-	private void addListener(FunctionResource resource) {
-		String topic = resource.getSpec().getInput();
-		final String functionName = resource.getMetadata().get("name");
+	private void addListener(XFunction function) {
+		String topic = function.getSpec().getInput();
+		final String functionName = function.getMetadata().getName();
 		DirectChannel channel = new DirectChannel();
 		channel.subscribe(m -> {
 			messageHandler.handleMessage(MessageBuilder.fromMessage(m)
@@ -165,8 +153,8 @@ public class EventDispatchingHandler implements FunctionResourceHandler, Applica
 		this.bindings.put(functionName, binding);
 	}
 
-	private void removeListener(FunctionResource resource) {
-		String functionName = resource.getMetadata().get("name");
+	private void removeListener(XFunction resource) {
+		String functionName = resource.getMetadata().getName();
 		Binding<?> binding = this.bindings.remove(functionName);
 		if (binding != null) {
 			binding.unbind();
@@ -178,46 +166,5 @@ public class EventDispatchingHandler implements FunctionResourceHandler, Applica
 		ExtendedConsumerProperties<KafkaConsumerProperties> extendedProps = new ExtendedConsumerProperties<>(kafkaProps);
 		extendedProps.setHeaderMode(HeaderMode.raw);
 		return extendedProps;
-	}
-
-	private HandlerResource getHandler(String name) {
-		// TODO: use this.handlers (local cache from a watch)
-		OkHttpClient httpClient = HttpClientUtils.createHttpClient(kubernetesClient.getConfiguration());
-		Response response = null;
-		try {
-			// TODO: replace this code
-			URL url = new URL(kubernetesClient.getMasterUrl() + "apis/extensions.sk8s.io/v1/namespaces/default/handlers/" + name);
-			Request.Builder requestBuilder = new Request.Builder().get().url(url);
-			response = httpClient.newCall(requestBuilder.build()).execute();
-			BufferedSource source = response.body().source();
-			while (!source.exhausted()) {
-				String line = source.readUtf8LineStrict();
-				if (!StringUtils.hasText(line)) {
-					break;
-				}
-				try {
-					return this.objectMapper.readValue(line, HandlerResource.class);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-					break;
-				}
-			}
-		}
-		catch (SocketTimeoutException e) {
-			// reconnect
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		finally {
-			try {
-				response.close();
-			}
-			catch (Exception e) {
-				// ignore
-			}
-		}
-		return null;
 	}
 }

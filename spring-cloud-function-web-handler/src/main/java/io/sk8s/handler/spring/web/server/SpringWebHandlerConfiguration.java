@@ -16,13 +16,13 @@
 
 package io.sk8s.handler.spring.web.server;
 
+import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-
-import java.util.Arrays;
 
 /**
  * Configures the server related beans of the application.

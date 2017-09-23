@@ -20,10 +20,8 @@ import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
-import io.fabric8.kubernetes.client.Watcher;
-import io.sk8s.kubernetes.api.model.Topic;
+import io.sk8s.core.resource.ResourceEventPublisher;
 import io.sk8s.kubernetes.client.Sk8sClient;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -34,6 +32,7 @@ import org.springframework.cloud.stream.binder.ExtendedProducerProperties;
 import org.springframework.cloud.stream.binder.kafka.properties.KafkaConsumerProperties;
 import org.springframework.cloud.stream.binder.kafka.properties.KafkaProducerProperties;
 import org.springframework.cloud.stream.provisioning.ProvisioningProvider;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.MessageChannel;
@@ -49,29 +48,9 @@ import org.springframework.util.ReflectionUtils.FieldCallback;
 public class TopicControllerConfiguration {
 
 	@Bean(destroyMethod = "close")
-	public Watch topicWatcher(TopicCreatingHandler topicCreatingHandler) {
+	public Watch topicWatcher(ApplicationEventPublisher eventPublisher) {
 		Sk8sClient sk8sClient = new DefaultKubernetesClient().adapt(Sk8sClient.class);
-		return sk8sClient.topics().watch(new Watcher<Topic>() {
-
-			@Override
-			public void eventReceived(Action action, Topic resource) {
-				switch (action) {
-					case ADDED:
-						topicCreatingHandler.resourceAdded(resource);
-						break;
-					case DELETED:
-						topicCreatingHandler.resourceDeleted(resource);
-						break;
-					default:
-						System.out.format("Unhandled event %s on %s%n", action, resource);
-				}
-			}
-
-			@Override
-			public void onClose(KubernetesClientException cause) {
-
-			}
-		});
+		return sk8sClient.topics().watch(new ResourceEventPublisher<>(eventPublisher));
 	}
 
 	@Bean
