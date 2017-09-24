@@ -5,7 +5,8 @@ metadata:
 spec:
   input: names
   output: greetings
-  handler: spring
+  handlerRef:
+    name: spring
   params:
   - name: uri
     value: file:///functions/greeter-1.0.0.jar

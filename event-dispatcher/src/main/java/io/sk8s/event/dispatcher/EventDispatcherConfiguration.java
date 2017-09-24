@@ -42,9 +42,14 @@ public class EventDispatcherConfiguration {
 		return new EventDispatchingHandler(binderFactory);
 	}
 
-	@Bean(destroyMethod = "close" /*explicit to make sure this stays as a bean*/)
-	public Watch functionEventPublisher(Sk8sClient client, ApplicationEventPublisher eventPublisher) {
-		return client.functions().watch(new ResourceEventPublisher<>(eventPublisher));
+	@Bean
+	public ResourceEventPublisher functionsEventPublisher(Sk8sClient client) {
+		return new ResourceEventPublisher(client.functions());
+	}
+
+	@Bean
+	public ResourceEventPublisher handlersEventPublisher(Sk8sClient client) {
+		return new ResourceEventPublisher(client.handlers());
 	}
 
 	@Bean
@@ -53,15 +58,43 @@ public class EventDispatcherConfiguration {
 	}
 
 	@Bean
+	public Sk8sClient sk8sClient(KubernetesClient kubernetesClient) {
+		return kubernetesClient.adapt(Sk8sClient.class);
+	}
+
+	// Handler Pool
+	@Bean
 	public HandlerPool handlerPool(KubernetesClient kubernetesClient, BinderFactory binderFactory) {
 		return new HandlerPool(kubernetesClient, binderFactory);
 	}
 
 	@Bean
+	public ResourceEventPublisher podsEventPublisher(KubernetesClient client) {
+		return new ResourceEventPublisher(client.pods());
+	}
+
+	@Bean
+	public ResourceEventPublisher servicesEventPublisher(KubernetesClient client) {
+		return new ResourceEventPublisher(client.services());
+	}
+
+	@Bean
+	public ResourceEventPublisher endpointsEventPublisher(KubernetesClient client) {
+		return new ResourceEventPublisher(client.endpoints());
+	}
+
+	@Bean
+	public ResourceEventPublisher deploymentsEventPublisher(KubernetesClient client) {
+		return new ResourceEventPublisher(client.extensions().deployments());
+	}
+
+	// Job Launcher
+	@Bean
 	public JobLauncher jobLauncher(KubernetesClient kubernetesClient) {
 		return new JobLauncher(kubernetesClient);
 	}
 
+	// Service Invoker
 	@Bean
 	public ServiceInvoker serviceInvoker() {
 		return new ServiceInvoker();

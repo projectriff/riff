@@ -24,6 +24,7 @@ import io.sk8s.core.resource.ResourceAddedEvent;
 import io.sk8s.core.resource.ResourceDeletedEvent;
 import io.sk8s.kubernetes.api.model.Handler;
 import io.sk8s.kubernetes.api.model.HandlerReference;
+import io.sk8s.kubernetes.api.model.HandlerReferenceBuilder;
 import io.sk8s.kubernetes.api.model.XFunction;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,7 +75,7 @@ public class EventDispatchingHandler implements ApplicationContextAware {
 				logger.error("unknown function: " + functionName);
 				return; // TODO is that the best thing to do?
 			}
-			HandlerReference handlerRef = functionResource.getSpec().getHandlerRef();
+			HandlerReference handlerRef = handlerForFunction(functionResource);
 			Handler handlerResource = handlers.get(handlerRef);
 			if (handlerResource == null) {
 				logger.error("unknown handler: " + handlerRef);
@@ -112,18 +113,46 @@ public class EventDispatchingHandler implements ApplicationContextAware {
 		return this.dispatchers.get(name.toLowerCase());
 	}
 
+
+	@EventListener
+	public void onHandlerRegistered(ResourceAddedEvent<Handler> event) {
+		HandlerReference reference = new HandlerReferenceBuilder()
+				.withName(event.getResource().getMetadata().getName())
+				.withNamespace(event.getResource().getMetadata().getNamespace())
+				.build();
+		handlers.put(reference, event.getResource());
+	}
+
+	@EventListener
+	public void onHandlerUnregistered(ResourceDeletedEvent<Handler> event) {
+		HandlerReference reference = new HandlerReferenceBuilder()
+				.withName(event.getResource().getMetadata().getName())
+				.withNamespace(event.getResource().getMetadata().getNamespace())
+				.build();
+		handlers.remove(reference);
+	}
+
 	@EventListener
 	public void onFunctionRegistered(ResourceAddedEvent<XFunction> event) {
 		XFunction functionResource = event.getResource();
 		String functionName = functionResource.getMetadata().getName();
 		this.functions.put(functionName, functionResource);
-		HandlerReference handlerReference = functionResource.getSpec().getHandlerRef();
+		HandlerReference handlerReference = handlerForFunction(functionResource);
 		Handler handlerResource = handlers.get(handlerReference);
 		Dispatcher dispatcher = this.getDispatcher(handlerResource.getSpec().getDispatcher());
 		dispatcher.init(functionResource, handlerResource);
 		addListener(functionResource);
 		logger.info("function added: " + functionName);
+	}
 
+	private HandlerReference handlerForFunction(XFunction functionResource) {
+		HandlerReference handlerRef = functionResource.getSpec().getHandlerRef();
+		if (handlerRef.getNamespace() == null) {
+			handlerRef = new HandlerReferenceBuilder(handlerRef)
+					.withNamespace(functionResource.getMetadata().getNamespace())
+					.build();
+		}
+		return handlerRef;
 	}
 
 	@EventListener
@@ -131,7 +160,7 @@ public class EventDispatchingHandler implements ApplicationContextAware {
 		XFunction functionResource = event.getResource();
 		String functionName = functionResource.getMetadata().getName();
 		removeListener(functionResource);
-		HandlerReference handlerReference = functionResource.getSpec().getHandlerRef();
+		HandlerReference handlerReference = handlerForFunction(functionResource);
 		Handler handlerResource = handlers.get(handlerReference);
 		Dispatcher dispatcher = this.getDispatcher(handlerResource.getSpec().getDispatcher());
 		dispatcher.destroy(functionResource, handlerResource);

@@ -18,7 +18,7 @@ package io.sk8s.core.resource;
 
 import io.fabric8.kubernetes.client.Watcher;
 
-public class ResourceAddedEvent<T> extends WatcherEvent<T> {
+public class ResourceAddedEvent<T> extends ResourceEvent<T> {
 
 	public ResourceAddedEvent(T resource) {
 		super(resource, Watcher.Action.ADDED);

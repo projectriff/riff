@@ -18,7 +18,7 @@ package io.sk8s.core.resource;
 
 import io.fabric8.kubernetes.client.Watcher;
 
-public class ResourceDeletedEvent<T> extends WatcherEvent<T> {
+public class ResourceDeletedEvent<T> extends ResourceEvent<T> {
 
 	public ResourceDeletedEvent(T resource) {
 		super(resource, Watcher.Action.DELETED);

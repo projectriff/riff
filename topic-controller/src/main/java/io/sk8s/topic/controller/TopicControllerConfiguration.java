@@ -47,10 +47,8 @@ import org.springframework.util.ReflectionUtils.FieldCallback;
 @EnableConfigurationProperties(TopicControllerProperties.class)
 public class TopicControllerConfiguration {
 
-	@Bean(destroyMethod = "close")
-	public Watch topicWatcher(ApplicationEventPublisher eventPublisher) {
-		Sk8sClient sk8sClient = new DefaultKubernetesClient().adapt(Sk8sClient.class);
-		return sk8sClient.topics().watch(new ResourceEventPublisher<>(eventPublisher));
+	public ResourceEventPublisher topicsEventPublisher(Sk8sClient client) {
+		return new ResourceEventPublisher(client.topics());
 	}
 
 	@Bean

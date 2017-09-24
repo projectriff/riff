@@ -38,7 +38,7 @@ import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
-import io.sk8s.core.resource.WatcherEvent;
+import io.sk8s.core.resource.ResourceEvent;
 import io.sk8s.kubernetes.api.model.FunctionSpec;
 import io.sk8s.kubernetes.api.model.Handler;
 import io.sk8s.kubernetes.api.model.XFunction;
@@ -122,7 +122,7 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 	}
 
 	@EventListener
-	public void onDeploymentEvent(WatcherEvent<Deployment> event) {
+	public void onDeploymentEvent(ResourceEvent<Deployment> event) {
 		if (isRunning()) {
 			String name = event.getResource().getMetadata().getName();
 			switch (event.getAction()) {
@@ -139,7 +139,7 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 	}
 
 	@EventListener
-	public void onServiceEvent(WatcherEvent<Service> event) {
+	public void onServiceEvent(ResourceEvent<Service> event) {
 		if (isRunning()) {
 			String name = event.getResource().getMetadata().getName();
 			switch (event.getAction()) {
@@ -157,20 +157,19 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 	}
 
 	@EventListener
-	public void onEndpointEvent(WatcherEvent<Endpoints> event) {
+	public void onEndpointEvent(ResourceEvent<Endpoints> event) {
 		if (isRunning()) {
-			String name = event.getResource().getMetadata().getName();
 			switch (event.getAction()) {
-			case DELETED:
-				services.remove(name);
-				break;
 			case ADDED:
 			case MODIFIED:
-				String functionName = event.getResource().getMetadata().getLabels().get("function");
-				if (functionName != null && event.getResource().getSubsets().size() > 0) {
-					logger.info("Service ready for {}", functionName);
-					serviceLatches.putIfAbsent(functionName, new CountDownLatch(1));
-					serviceLatches.get(functionName).countDown();
+				Map<String, String> labels = event.getResource().getMetadata().getLabels();
+				if (labels != null) {
+					String functionName = labels.get("function");
+					if (functionName != null && event.getResource().getSubsets().size() > 0) {
+						logger.info("Service ready for {}", functionName);
+						serviceLatches.putIfAbsent(functionName, new CountDownLatch(1));
+						serviceLatches.get(functionName).countDown();
+					}
 				}
 			default:
 				break;
@@ -179,7 +178,7 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 	}
 
 	@EventListener
-	public void onPodEvent(WatcherEvent<Pod> event) {
+	public void onPodEvent(ResourceEvent<Pod> event) {
 		if (isRunning()) {
 			Pod pod = event.getResource();
 			String handlerName = pod.getMetadata().getLabels().get("handler");

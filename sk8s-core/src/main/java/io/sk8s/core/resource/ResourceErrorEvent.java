@@ -18,7 +18,7 @@ package io.sk8s.core.resource;
 
 import io.fabric8.kubernetes.client.Watcher;
 
-public class ResourceErrorEvent<T> extends WatcherEvent<T> {
+public class ResourceErrorEvent<T> extends ResourceEvent<T> {
 
 	public ResourceErrorEvent(T resource) {
 		super(resource, Watcher.Action.ERROR);

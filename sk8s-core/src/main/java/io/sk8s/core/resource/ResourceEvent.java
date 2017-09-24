@@ -21,13 +21,13 @@ import io.fabric8.kubernetes.client.Watcher;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.ResolvableTypeProvider;
 
-public class WatcherEvent<T> implements ResolvableTypeProvider {
+public class ResourceEvent<T> implements ResolvableTypeProvider {
 
 	private final T resource;
 
 	private final Watcher.Action action;
 
-	public WatcherEvent(T resource, Watcher.Action action) {
+	public ResourceEvent(T resource, Watcher.Action action) {
 		this.resource = resource;
 		this.action = action;
 	}

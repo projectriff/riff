@@ -16,26 +16,63 @@
 
 package io.sk8s.core.resource;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.MixedOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
-public class ResourceEventPublisher<T> implements Watcher<T> {
+public class ResourceEventPublisher<T extends HasMetadata, L extends KubernetesResourceList<T>, D, R extends Resource<T, D>> {
 
 	private static final Logger log = LoggerFactory.getLogger(ResourceEventPublisher.class);
 
-	private final ApplicationEventPublisher applicationEventPublisher;
+	@Autowired
+	private ApplicationEventPublisher applicationEventPublisher;
 
-	public ResourceEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-		this.applicationEventPublisher = applicationEventPublisher;
+	private Watch watch;
+
+	private final MixedOperation<T, L, D, R> watchListDeletable;
+
+	public ResourceEventPublisher(MixedOperation<T, L, D, R> watchListDeletable) {
+		this.watchListDeletable = watchListDeletable;
 	}
 
-	@Override
-	public void eventReceived(Action action, T resource) {
-		switch (action) {
+	/**
+	 * Create a Watcher that will get notified on new events on a watchable, after having listed all items of said
+	 * watchable and artificially fired an {@link io.fabric8.kubernetes.client.Watcher.Action#ADDED} event for all of them. This allows listeners to
+	 * catch up with all items that were already there before they registered.
+	 */
+	@EventListener(ContextRefreshedEvent.class)
+	public void lateInit() {
+		ApplicationEventPublishingWatcher<T> publisher = new ApplicationEventPublishingWatcher<>();
+		L list = watchListDeletable.list();
+		String from = list.getMetadata().getResourceVersion();
+		list.getItems().forEach(i -> publisher.eventReceived(Watcher.Action.ADDED, (T)i));
+		watch = watchListDeletable.withResourceVersion(from).watch(publisher);
+	};
+
+	@PreDestroy
+	public void destroy() {
+		watch.close();
+	}
+
+	private class ApplicationEventPublishingWatcher<T> implements Watcher<T> {
+
+		@Override
+		public void eventReceived(Action action, T resource) {
+			switch (action) {
 			case ADDED:
 				applicationEventPublisher.publishEvent(new ResourceAddedEvent<>(resource));
 				break;
@@ -49,11 +86,12 @@ public class ResourceEventPublisher<T> implements Watcher<T> {
 				break;
 			default:
 				log.warn("Unsupported event action {} received for resource {}", action, resource);
+			}
 		}
-	}
 
-	@Override
-	public void onClose(KubernetesClientException cause) {
+		@Override
+		public void onClose(KubernetesClientException cause) {
 
+		}
 	}
 }

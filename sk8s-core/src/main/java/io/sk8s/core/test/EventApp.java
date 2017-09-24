@@ -19,7 +19,7 @@ package io.sk8s.core.test;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
 import io.sk8s.core.resource.ResourceEventPublisher;
-import io.sk8s.core.resource.WatcherEvent;
+import io.sk8s.core.resource.ResourceEvent;
 import io.sk8s.kubernetes.api.model.Topic;
 import io.sk8s.kubernetes.client.Sk8sClient;
 
@@ -43,15 +43,15 @@ public class EventApp {
 	}
 
 	@Bean
-	public Watch toplicPublisher(Sk8sClient client, ApplicationEventPublisher applicationEventPublisher) {
-		return client.topics().watch(new ResourceEventPublisher<>(applicationEventPublisher));
+	public ResourceEventPublisher toplicsEventPublisher(Sk8sClient client) {
+		return new ResourceEventPublisher<>(client.topics());
 	}
 
 	@Component
 	public static class Client {
 
 		@EventListener
-		public void onTopicAdded(WatcherEvent<Topic> event) {
+		public void onTopicAdded(ResourceEvent<Topic> event) {
 			System.out.println("Received " + event);
 		}
 
