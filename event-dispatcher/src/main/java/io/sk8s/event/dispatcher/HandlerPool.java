@@ -149,8 +149,7 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 		}
 	}
 
-	@EventListener(condition = "#event.resource.metadata.labels != null " +
-			"&& #event.resource.metadata.labels['function'] != null " +
+	@EventListener(condition = "#event.resource.metadata.labels?.get('function') != null " +
 			"&& !#event.resource.subsets.empty")
 	public void onEndpointAdded(ResourceAddedOrModifiedEvent<Endpoints> event) {
 		if (isRunning()) {
@@ -161,8 +160,7 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 		}
 	}
 
-	@EventListener(condition = "#event.resource.metadata.labels != null " +
-			"&& #event.resource.metadata.labels['function'] != null")
+	@EventListener(condition = "#event.resource.metadata.labels?.get('function') != null ")
 	public void onFunctionPodAdded(ResourceAddedOrModifiedEvent<Pod> event) {
 		if (isRunning()) {
 			Pod pod = event.getResource();
@@ -172,8 +170,7 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 		}
 	}
 
-	@EventListener(condition = "#event.resource.metadata.labels != null " +
-			"&& #event.resource.metadata.labels['function'] != null")
+	@EventListener(condition = "#event.resource.metadata.labels?.get('function') != null ")
 	public void onFunctionPodRemoved(ResourceDeletedEvent<Pod> event) {
 		if (isRunning()) {
 			Pod pod = event.getResource();
