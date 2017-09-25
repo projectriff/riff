@@ -1,0 +1,48 @@
+# Default values for sk8s.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+eventDispatcher:
+  replicaCount: 1
+  image:
+    repository: sk8s/event-dispatcher
+    tag: v0001
+    pullPolicy: IfNotPresent
+topicController:
+  replicaCount: 1
+  image:
+    repository: sk8s/topic-controller
+    tag: v0001
+    pullPolicy: IfNotPresent
+topicGateway:
+  replicaCount: 1
+  image:
+    repository: sk8s/topic-gateway
+    tag: v0001
+    pullPolicy: IfNotPresent
+  service:
+    name: topic-gateway
+    type: NodePort
+    externalPort: 80
+    internalPort: 8080
+zookeeper:
+  replicaCount: 1
+  image:
+    repository: wurstmeister/zookeeper
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    name: zookeeper
+    type: ClusterIP
+    externalPort: 2181
+    internalPort: 2181
+kafka:
+  replicaCount: 1
+  image:
+    repository: wurstmeister/kafka
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    name: kafka
+    type: ClusterIP
+    externalPort: 9092
+    internalPort: 9092
