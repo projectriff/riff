@@ -18,9 +18,14 @@ package io.sk8s.core.resource;
 
 import io.fabric8.kubernetes.client.Watcher;
 
-public class ResourceAddedEvent<T> extends ResourceEvent<T> {
+/**
+ * Specialization of {@link ResourceEvent} for when a resource is added.
+ * @author Eric Bottard
+ * @param <T> the type of resource that is being added
+ */
+public class ResourceAddedEvent<T> extends ResourceAddedOrModifiedEvent<T> {
 
-	public ResourceAddedEvent(T resource) {
+	ResourceAddedEvent(T resource) {
 		super(resource, Watcher.Action.ADDED);
 	}
 }

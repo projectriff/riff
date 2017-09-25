@@ -19,13 +19,16 @@ package io.sk8s.core.resource;
 import io.fabric8.kubernetes.client.Watcher;
 
 /**
- * Specialization of {@link ResourceEvent} for when a watch reports an error.
+ * Specialization of {@link ResourceEvent} for when a resource is added or modified.
+ * Useful as an event registration type for objects that want to maintain a cache of last known state of such resources
+ * using {@literal Map.put()} or similar.
+ *
  * @author Eric Bottard
- * @param <T> the type of resource that is in error
+ * @param <T> the type of resource that is being changed
  */
-public class ResourceErrorEvent<T> extends ResourceEvent<T> {
+public abstract class ResourceAddedOrModifiedEvent<T> extends ResourceEvent<T> {
 
-	ResourceErrorEvent(T resource) {
-		super(resource, Watcher.Action.ERROR);
+	ResourceAddedOrModifiedEvent(T resource, Watcher.Action action) {
+		super(resource, action);
 	}
 }

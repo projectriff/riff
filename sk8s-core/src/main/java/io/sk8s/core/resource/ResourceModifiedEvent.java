@@ -18,9 +18,14 @@ package io.sk8s.core.resource;
 
 import io.fabric8.kubernetes.client.Watcher;
 
-public class ResourceModifiedEvent<T> extends ResourceEvent<T> {
+/**
+ * Specialization of {@link ResourceEvent} for when a resource is modified.
+ * @author Eric Bottard
+ * @param <T> the type of resource that is being modified
+ */
+public class ResourceModifiedEvent<T> extends ResourceAddedOrModifiedEvent<T> {
 
-	public ResourceModifiedEvent(T resource) {
+	ResourceModifiedEvent(T resource) {
 		super(resource, Watcher.Action.MODIFIED);
 	}
 }

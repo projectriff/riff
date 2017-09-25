@@ -16,18 +16,29 @@
 
 package io.sk8s.core.resource;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.Watcher;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.ResolvableTypeProvider;
+import org.springframework.util.Assert;
 
+/**
+ * Fired by {@link ResourceEventPublisher} when a change happens on a watched resource.
+ * Contains references to the {@link io.fabric8.kubernetes.client.Watcher.Action} and the resource.
+ *
+ * @param <T> the type of resource that is the subject of change.
+ * @author Eric Bottard
+ */
 public class ResourceEvent<T> implements ResolvableTypeProvider {
 
 	private final T resource;
 
 	private final Watcher.Action action;
 
-	public ResourceEvent(T resource, Watcher.Action action) {
+	ResourceEvent(T resource, Watcher.Action action) {
+		Assert.notNull(resource, "Resource cannot be null");
+		Assert.notNull(action, "Action cannot be null");
 		this.resource = resource;
 		this.action = action;
 	}
@@ -44,5 +55,15 @@ public class ResourceEvent<T> implements ResolvableTypeProvider {
 
 	public T getResource() {
 		return resource;
+	}
+
+	@Override
+	public String toString() {
+		if (resource instanceof HasMetadata) {
+			HasMetadata hasMetadata = (HasMetadata) resource;
+			return String.format("%s<%s>(%s)", getClass().getSimpleName(), resource.getClass().getSimpleName(), hasMetadata.getMetadata().getName());
+		} else {
+			return String.format("%s<%s>(%s)", getClass().getSimpleName(), resource.getClass().getSimpleName(), resource);
+		}
 	}
 }

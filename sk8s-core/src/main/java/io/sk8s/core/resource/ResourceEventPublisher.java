@@ -16,7 +16,6 @@
 
 package io.sk8s.core.resource;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -34,11 +33,19 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
+/**
+ * Will publish variations of {@link ResourceEvent} to an {@link ApplicationEventPublisher}
+ * by adapting a {@link Watcher} to the Spring event model.
+ *
+ * <p>After creation, a catchup mechanism will fire {@link io.fabric8.kubernetes.client.Watcher.Action#ADDED}
+ * events for all items that were already there.</p>
+ *
+ * @author Eric Bottard
+ */
 public class ResourceEventPublisher<T extends HasMetadata, L extends KubernetesResourceList<T>, D, R extends Resource<T, D>> {
 
 	private static final Logger log = LoggerFactory.getLogger(ResourceEventPublisher.class);
 
-	@Autowired
 	private ApplicationEventPublisher applicationEventPublisher;
 
 	private Watch watch;
@@ -47,6 +54,11 @@ public class ResourceEventPublisher<T extends HasMetadata, L extends KubernetesR
 
 	public ResourceEventPublisher(MixedOperation<T, L, D, R> watchListDeletable) {
 		this.watchListDeletable = watchListDeletable;
+	}
+
+	@Autowired
+	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
 	/**

@@ -8,6 +8,19 @@ these instructions assume minikube for now, for example:
 minikube start --cpus=4 --memory=4096 --disk-size=64g
 ```
 
+== Build the kubernetes-model jar Enhanced with Sk8s Types
+```
+cd <elsewhere>
+git clone https://github.com/ericbottard/kubernetes-model
+git checkout sk8s
+make
+cd <back to the clone of this repo>
+```
+== Create Sk8s Custom Resource Definitions
+```
+kubectl apply -f config/types
+```
+
 == Build
 
 ```

@@ -38,6 +38,8 @@ import io.fabric8.kubernetes.api.model.extensions.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
+import io.sk8s.core.resource.ResourceAddedOrModifiedEvent;
+import io.sk8s.core.resource.ResourceDeletedEvent;
 import io.sk8s.core.resource.ResourceEvent;
 import io.sk8s.kubernetes.api.model.FunctionSpec;
 import io.sk8s.kubernetes.api.model.Handler;
@@ -62,7 +64,10 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.web.client.RestTemplate;
 
 /**
+ * A {@link Dispatcher} that maintains a pool of {@link Handler handlers} ready for dispatching function invocation.
+ *
  * @author Mark Fisher
+ * @author Eric Bottard
  */
 public class HandlerPool implements Dispatcher, SmartLifecycle {
 
@@ -84,20 +89,10 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 
 	private final ConcurrentMap<String, CountDownLatch> serviceLatches = new ConcurrentHashMap<>();
 
-	private final Map<String, Map<String, Pod>> handlerPods = new HashMap<>();
-
 	// TODO Use ObjectReference as key
 	private final Map<String, Pod> functionPods = new HashMap<>();
 
 	private final Map<String, MessageChannel> outputChannels = new HashMap<>();
-
-	private Watch poolWatch;
-
-	private Watch serviceWatch;
-
-	private Watch endpointsWatch;
-
-	private Watch functionWatch;
 
 	@SuppressWarnings("unchecked")
 	public HandlerPool(KubernetesClient kubernetesClient, BinderFactory binderFactory) {
@@ -122,97 +117,70 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 	}
 
 	@EventListener
-	public void onDeploymentEvent(ResourceEvent<Deployment> event) {
+	public void onDeploymentAdded(ResourceAddedOrModifiedEvent<Deployment> event) {
 		if (isRunning()) {
 			String name = event.getResource().getMetadata().getName();
-			switch (event.getAction()) {
-			case DELETED:
-				handlerDeployments.remove(name);
-				break;
-			case ADDED:
-			case MODIFIED:
 				handlerDeployments.put(name, event.getResource());
-			default:
-				break;
-			}
 		}
 	}
 
 	@EventListener
-	public void onServiceEvent(ResourceEvent<Service> event) {
+	public void onDeploymentDeleted(ResourceDeletedEvent<Deployment> event) {
 		if (isRunning()) {
 			String name = event.getResource().getMetadata().getName();
-			switch (event.getAction()) {
-			case DELETED:
-				services.remove(name);
-				break;
-			case ADDED:
-			case MODIFIED:
-				logger.info("SERVICE {}: {}", event.getAction(), name);
-				services.put(name, event.getResource());
-			default:
-				break;
-			}
+				handlerDeployments.remove(name);
 		}
 	}
 
 	@EventListener
-	public void onEndpointEvent(ResourceEvent<Endpoints> event) {
+	public void onServiceAdded(ResourceAddedOrModifiedEvent<Service> event) {
 		if (isRunning()) {
-			switch (event.getAction()) {
-			case ADDED:
-			case MODIFIED:
-				Map<String, String> labels = event.getResource().getMetadata().getLabels();
-				if (labels != null) {
-					String functionName = labels.get("function");
-					if (functionName != null && event.getResource().getSubsets().size() > 0) {
-						logger.info("Service ready for {}", functionName);
-						serviceLatches.putIfAbsent(functionName, new CountDownLatch(1));
-						serviceLatches.get(functionName).countDown();
-					}
-				}
-			default:
-				break;
-			}
+			String name = event.getResource().getMetadata().getName();
+			logger.info("SERVICE {}: {}", event.getAction(), name);
+			services.put(name, event.getResource());
 		}
 	}
 
 	@EventListener
-	public void onPodEvent(ResourceEvent<Pod> event) {
+	public void onServiceDeleted(ResourceDeletedEvent<Service> event) {
+		if (isRunning()) {
+			String name = event.getResource().getMetadata().getName();
+				services.remove(name);
+		}
+	}
+
+	@EventListener(condition = "#event.resource.metadata.labels != null " +
+			"&& #event.resource.metadata.labels['function'] != null " +
+			"&& !#event.resource.subsets.empty")
+	public void onEndpointAdded(ResourceAddedOrModifiedEvent<Endpoints> event) {
+		if (isRunning()) {
+			String functionName = event.getResource().getMetadata().getLabels().get("function");
+			logger.info("Service ready for {}", functionName);
+			serviceLatches.putIfAbsent(functionName, new CountDownLatch(1));
+			serviceLatches.get(functionName).countDown();
+		}
+	}
+
+	@EventListener(condition = "#event.resource.metadata.labels != null " +
+			"&& #event.resource.metadata.labels['function'] != null")
+	public void onFunctionPodAdded(ResourceAddedOrModifiedEvent<Pod> event) {
 		if (isRunning()) {
 			Pod pod = event.getResource();
-			String handlerName = pod.getMetadata().getLabels().get("handler");
 			String functionName = pod.getMetadata().getLabels().get("function");
-			Watcher.Action action = event.getAction();
-			if (functionName != null) {
-				switch (event.getAction()) {
-					case DELETED:
-						functionPods.remove(functionName);
-						break;
-					case ADDED:
-					case MODIFIED:
-						functionPods.put(functionName, pod);
-						logger.info("FUNCTION POD {}: {}" , action, pod);
-					default:
-						break;
-				}
-			}
-			else if (handlerName != null) {
-				String ip = pod.getStatus().getPodIP();
-				switch (event.getAction()) {
-					case DELETED:
-						handlerPods.get(handlerName).remove(ip);
-						break;
-					case ADDED:
-					case MODIFIED:
-						handlerPods.computeIfAbsent(handlerName, name -> new HashMap<>()).put(ip, pod);
-					default:
-						break;
-				}
-			}
+			functionPods.put(functionName, pod);
+			logger.info("FUNCTION POD {}: {}" , event.getAction(), pod);
 		}
 	}
 
+	@EventListener(condition = "#event.resource.metadata.labels != null " +
+			"&& #event.resource.metadata.labels['function'] != null")
+	public void onFunctionPodRemoved(ResourceDeletedEvent<Pod> event) {
+		if (isRunning()) {
+			Pod pod = event.getResource();
+			String functionName = pod.getMetadata().getLabels().get("function");
+			functionPods.remove(functionName);
+		}
+	}
 
 	@Override
 	public void start() {

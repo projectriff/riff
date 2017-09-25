@@ -18,9 +18,14 @@ package io.sk8s.core.resource;
 
 import io.fabric8.kubernetes.client.Watcher;
 
+/**
+ * Specialization of {@link ResourceEvent} for when a resource is deleted.
+ * @author Eric Bottard
+ * @param <T> the type of resource that is being deleted
+ */
 public class ResourceDeletedEvent<T> extends ResourceEvent<T> {
 
-	public ResourceDeletedEvent(T resource) {
+	ResourceDeletedEvent(T resource) {
 		super(resource, Watcher.Action.DELETED);
 	}
 }
