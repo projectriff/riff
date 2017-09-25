@@ -31,7 +31,7 @@ type Handler struct {
 // Spec (what the user wants) for a handler
 type HandlerSpec struct {
 	// The dispatcher to use
-	Dispatcher string `json:"dispatcher"`
+	Dispatcher string `json:"dispatcher" description:"The Dispatcher strategy to use with this handler (name of a spring bean)"`
 
 	// The container image to use
 	Image string `json:"image"`
