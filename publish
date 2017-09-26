@@ -1,3 +1,4 @@
 #!/bin/bash
 
-curl -H "Content-Type: text/plain" $(minikube ip):30111/messages/$1 -d "$2"
+port=$(kubectl get svc | grep topic-gateway | cut -d ":" -f 2 | cut -d "/" -f 1)
+curl -H "Content-Type: text/plain" $(minikube ip):$port/messages/$1 -d "$2"
