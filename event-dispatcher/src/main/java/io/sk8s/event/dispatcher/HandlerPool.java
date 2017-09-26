@@ -64,7 +64,8 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * A {@link Dispatcher} that maintains a pool of {@link Handler handlers} ready for dispatching function invocation.
+ * A {@link Dispatcher} that maintains a pool of {@link Handler handlers} ready for
+ * dispatching function invocation.
  *
  * @author Mark Fisher
  * @author Eric Bottard
@@ -120,7 +121,7 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 	public void onDeploymentAdded(ResourceAddedOrModifiedEvent<Deployment> event) {
 		if (isRunning()) {
 			String name = event.getResource().getMetadata().getName();
-				handlerDeployments.put(name, event.getResource());
+			handlerDeployments.put(name, event.getResource());
 		}
 	}
 
@@ -128,7 +129,7 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 	public void onDeploymentDeleted(ResourceDeletedEvent<Deployment> event) {
 		if (isRunning()) {
 			String name = event.getResource().getMetadata().getName();
-				handlerDeployments.remove(name);
+			handlerDeployments.remove(name);
 		}
 	}
 
@@ -145,7 +146,7 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 	public void onServiceDeleted(ResourceDeletedEvent<Service> event) {
 		if (isRunning()) {
 			String name = event.getResource().getMetadata().getName();
-				services.remove(name);
+			services.remove(name);
 		}
 	}
 
@@ -166,7 +167,7 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 			Pod pod = event.getResource();
 			String functionName = pod.getMetadata().getLabels().get("function");
 			functionPods.put(functionName, pod);
-			logger.info("FUNCTION POD {}: {}" , event.getAction(), pod.getMetadata().getName());
+			logger.info("FUNCTION POD {}: {}", event.getAction(), pod.getMetadata().getName());
 		}
 	}
 
@@ -199,19 +200,22 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 	public void init(XFunction functionResource, Handler handlerResource) {
 		String functionName = functionResource.getMetadata().getName();
 		Map<String, String> functionLabels = Collections.singletonMap("function", functionName);
+		//@formatter:off
 		this.kubernetesClient.services().createNew()
-				.withNewMetadata()
+			.withNewMetadata()
 				.withName(functionName)
 				.withLabels(functionLabels)
-				.endMetadata()
-				.withNewSpec()
+			.endMetadata()
+			.withNewSpec()
 				.withSelector(functionLabels)
 				.withPorts(new ServicePortBuilder()
-						.withPort(80)
-						.withNewTargetPort(8080)
-						.build())
-				.endSpec()
-				.done();
+					.withPort(80)
+					.withNewTargetPort(8080)
+					.build()
+				)
+			.endSpec()
+			.done();
+		//@formatter:on
 
 		String handlerName = handlerResource.getMetadata().getName();
 		Integer poolSize = handlerResource.getSpec().getReplicas();
@@ -223,43 +227,49 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 			Map<String, Quantity> resourceRequests = new HashMap<>();
 			resourceRequests.put("cpu", new Quantity("500m"));
 			resourceRequests.put("memory", new Quantity("512Mi"));
+			//@formatter:off
 			this.kubernetesClient.extensions().deployments().create(new DeploymentBuilder()
-					.withNewMetadata()
-						.withName(handlerName)
-						.withLabels(handlerLabels)
-					.endMetadata()
-					.withNewSpec()
-						.withReplicas(poolSize)
-						.withNewSelector()
-							.withMatchLabels(handlerLabels)
-						.endSelector()
-						.withNewTemplate()
-							.withNewMetadata()
-								.withName(handlerName)
-								.withLabels(handlerLabels)
-							.endMetadata()
-							.withNewSpec()
-								.withContainers(new ContainerBuilder()
-									.withName("main")
-									.withImage(handlerResource.getSpec().getImage())
-									//.withCommand(handlerResource.getSpec().getCommand())
-									//.withArgs(handlerResource.getSpec().getArgs())
-									.withVolumeMounts(new VolumeMountBuilder()
-										.withMountPath("/functions")
-										.withName("functions")
-									.build())
-									.withNewResources()
-										.withRequests(resourceRequests)
-									.endResources()
-								.build())
-								.withVolumes(new VolumeBuilder()
+				.withNewMetadata()
+					.withName(handlerName)
+					.withLabels(handlerLabels)
+				.endMetadata()
+				.withNewSpec()
+					.withReplicas(poolSize)
+					.withNewSelector()
+						.withMatchLabels(handlerLabels)
+					.endSelector()
+					.withNewTemplate()
+						.withNewMetadata()
+							.withName(handlerName)
+							.withLabels(handlerLabels)
+						.endMetadata()
+						.withNewSpec()
+							.withContainers(new ContainerBuilder()
+								.withName("main")
+								.withImage(handlerResource.getSpec().getImage())
+								//.withCommand(handlerResource.getSpec().getCommand())
+								//.withArgs(handlerResource.getSpec().getArgs())
+								.withVolumeMounts(new VolumeMountBuilder()
+									.withMountPath("/functions")
 									.withName("functions")
-									.withNewHostPath("/functions")
-								.build())
-							.endSpec()
-						.endTemplate()
-					.endSpec()
-					.build());
+									.build()
+								)
+								.withNewResources()
+									.withRequests(resourceRequests)
+								.endResources()
+								.build()
+							)
+							.withVolumes(new VolumeBuilder()
+								.withName("functions")
+								.withNewHostPath("/functions")
+								.build()
+							)
+						.endSpec()
+					.endTemplate()
+				.endSpec()
+			.build()
+			);
+			//@formatter:on
 		}
 	}
 

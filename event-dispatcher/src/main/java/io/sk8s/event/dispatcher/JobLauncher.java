@@ -53,40 +53,47 @@ public class JobLauncher implements Dispatcher {
 	public void dispatch(String payload, Map<String, Object> headers, XFunction functionResource,
 			Handler handlerResource) {
 		String functionName = functionResource.getMetadata().getName();
+		// @formatter:off
 		String job = this.kubernetesClient.extensions().jobs().inNamespace(this.properties.getNamespace()).createNew()
-				.withApiVersion("batch/v1")
-				.withNewMetadata()
+			.withApiVersion("batch/v1")
+			.withNewMetadata()
 				.withName(functionName + "-" + System.currentTimeMillis())
-				.endMetadata()
-				.withSpec(new JobSpecBuilder()
-						.withNewTemplate()
-						.withNewMetadata()
+			.endMetadata()
+			.withSpec(
+				new JobSpecBuilder()
+				.withNewTemplate()
+					.withNewMetadata()
 						.withLabels(Collections.singletonMap("function", functionName))
-						.endMetadata()
-						.withNewSpec()
+					.endMetadata()
+					.withNewSpec()
 						.withRestartPolicy("OnFailure")
 						.withActiveDeadlineSeconds(10L)
 						// TODO why wouldn't our HandlerSpec contain Container(s) object models directly
 						.withContainers(new ContainerBuilder()
-								.withName("main")
-								.withImage(handlerResource.getSpec().getImage())
-								.withCommand(handlerResource.getSpec().getCommand())
-								.withArgs(
-										this.resolvePlaceholders(handlerResource.getSpec().getArgs(), functionResource))
-								.withEnv(buildEnvVars(functionResource.getSpec().getEnv(), payload))
-								.withVolumeMounts(new VolumeMountBuilder()
-										.withMountPath("/output")
-										.withName("messages")
-										.build())
-								.build())
+							.withName("main")
+							.withImage(handlerResource.getSpec().getImage())
+							.withCommand(handlerResource.getSpec().getCommand())
+							.withArgs(this.resolvePlaceholders(handlerResource.getSpec().getArgs(), functionResource))
+							.withEnv(buildEnvVars(functionResource.getSpec().getEnv(), payload))
+							.withVolumeMounts(new VolumeMountBuilder()
+								.withMountPath("/output")
+								.withName("messages")
+								.build()
+							)
+							.build()
+						)
 						.withVolumes(new VolumeBuilder()
 								.withName("messages")
 								.withNewHostPath("/messages")
-								.build())
-						.endSpec()
-						.endTemplate()
-						.build())
-				.done().toString();
+								.build()
+						)
+					.endSpec()
+				.endTemplate()
+				.build()
+			)
+			.done().toString();
+		// @formatter:on
+
 		System.out.println("JOB: " + job);
 	}
 
@@ -97,7 +104,8 @@ public class JobLauncher implements Dispatcher {
 			String s = original.get(i);
 			// TODO: find the name with pattern, for now just "command"
 			if (s.equals("$COMMAND")) {
-				String command = functionResource.getSpec().getParams().stream().filter(p -> p.getName().equals("command")).findAny().get().getValue();
+				String command = functionResource.getSpec().getParams().stream()
+						.filter(p -> p.getName().equals("command")).findAny().get().getValue();
 				resolved.add(command);
 			}
 			else {
@@ -108,7 +116,8 @@ public class JobLauncher implements Dispatcher {
 	}
 
 	private EnvVar[] buildEnvVars(List<FunctionEnvVar> envList, String payload) {
-		// Put the payload under the "MESSAGE" key and any envvar that had valueFrom() equal "payload"
+		// Put the payload under the "MESSAGE" key and any envvar that had valueFrom() equal
+		// "payload"
 		// All other variables are currently set to ""
 		return Stream.concat(
 				Stream.of(new EnvVarBuilder().withName("MESSAGE").withValue(payload).build()),
