@@ -166,7 +166,7 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 			Pod pod = event.getResource();
 			String functionName = pod.getMetadata().getLabels().get("function");
 			functionPods.put(functionName, pod);
-			logger.info("FUNCTION POD {}: {}" , event.getAction(), pod);
+			logger.info("FUNCTION POD {}: {}" , event.getAction(), pod.getMetadata().getName());
 		}
 	}
 
