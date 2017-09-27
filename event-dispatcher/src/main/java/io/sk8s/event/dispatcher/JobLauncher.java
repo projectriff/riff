@@ -30,8 +30,10 @@ import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.sk8s.kubernetes.api.model.FunctionEnvVar;
+import io.sk8s.kubernetes.api.model.FunctionUtils;
 import io.sk8s.kubernetes.api.model.Handler;
 import io.sk8s.kubernetes.api.model.XFunction;
+import kafka.security.auth.All;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -73,8 +75,8 @@ public class JobLauncher implements Dispatcher {
 							.withName("main")
 							.withImage(handlerResource.getSpec().getImage())
 							.withCommand(handlerResource.getSpec().getCommand())
-							.withArgs(this.resolvePlaceholders(handlerResource.getSpec().getArgs(), functionResource))
-							.withEnv(buildEnvVars(functionResource.getSpec().getEnv(), payload))
+							.withArgs(handlerResource.getSpec().getArgs())
+							.withEnv(buildEnvVars(functionResource.getSpec().getEnv(), payload, functionResource))
 							.withVolumeMounts(new VolumeMountBuilder()
 								.withMountPath("/output")
 								.withName("messages")
@@ -97,30 +99,18 @@ public class JobLauncher implements Dispatcher {
 		System.out.println("JOB: " + job);
 	}
 
-	private List<String> resolvePlaceholders(List<String> original, XFunction functionResource) {
-		// TODO: apply to entire resource, for now just args
-		List<String> resolved = new ArrayList<>(original.size());
-		for (int i = 0; i < original.size(); i++) {
-			String s = original.get(i);
-			// TODO: find the name with pattern, for now just "command"
-			if (s.equals("$COMMAND")) {
-				String command = functionResource.getSpec().getParams().stream()
-						.filter(p -> p.getName().equals("command")).findAny().get().getValue();
-				resolved.add(command);
-			}
-			else {
-				resolved.add(s);
-			}
-		}
-		return resolved;
-	}
+	/*
+	 * Put the payload under the "MESSAGE" key and any envvar that had valueFrom() equal
+	 * "payload". Put the function param "command" under the COMMAND key. All other variables
+	 * are currently set to ""
+	 */
+	private EnvVar[] buildEnvVars(List<FunctionEnvVar> envList, String payload, XFunction functionResource) {
 
-	private EnvVar[] buildEnvVars(List<FunctionEnvVar> envList, String payload) {
-		// Put the payload under the "MESSAGE" key and any envvar that had valueFrom() equal
-		// "payload"
-		// All other variables are currently set to ""
 		return Stream.concat(
-				Stream.of(new EnvVarBuilder().withName("MESSAGE").withValue(payload).build()),
+				Stream.of(
+						new EnvVarBuilder().withName("MESSAGE").withValue(payload).build(),
+						new EnvVarBuilder().withName("COMMAND")
+								.withValue(FunctionUtils.param("command", functionResource)).build()),
 				envList.stream()
 						.map(ev -> new EnvVarBuilder()
 								.withName(ev.getName())
