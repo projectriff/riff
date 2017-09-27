@@ -1,4 +1,4 @@
 #!/bin/bash
 
-port=$(kubectl get svc | grep topic-gateway | cut -d ":" -f 2 | cut -d "/" -f 1)
+port=$(kubectl get svc topic-gateway -o jsonpath='{.spec.ports[?(@.name == "http")].nodePort}')
 curl -H "Content-Type: text/plain" $(minikube ip):$port/messages/$1 -d "$2"
