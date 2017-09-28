@@ -1,0 +1,13 @@
+apiVersion: extensions.sk8s.io/v1
+kind: Function
+metadata:
+  name: square
+spec:
+  input: numbers
+  output: greetings
+  handlerRef:
+    name: node
+  params:
+  - name: uri
+    value: /functions/node/hello.js
+

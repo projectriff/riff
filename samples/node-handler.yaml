@@ -1,0 +1,8 @@
+apiVersion: extensions.sk8s.io/v1
+kind: Handler
+metadata:
+  name: node
+spec:
+  dispatcher: HandlerPool
+  replicas: 2
+  image: sk8s/node-function-web-handler:v0001

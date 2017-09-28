@@ -5,3 +5,5 @@
 ./mvnw docker:build -pl ./event-dispatcher
 ./mvnw docker:build -pl ./spring-cloud-function-web-handler
 
+docker build -t sk8s/node-function-web-handler:v0001 node-function-web-handler
+

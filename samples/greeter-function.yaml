@@ -9,7 +9,7 @@ spec:
     name: spring
   params:
   - name: uri
-    value: file:///functions/greeter-1.0.0.jar
+    value: file:///functions/java/greeter/target/greeter-1.0.0.jar
   - name: classname
     value: functions.Greeter
 

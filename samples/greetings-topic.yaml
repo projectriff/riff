@@ -2,5 +2,3 @@ apiVersion: extensions.sk8s.io/v1
 kind: Topic
 metadata:
   name: greetings
-spec:
-  name: greetings

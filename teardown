@@ -9,6 +9,8 @@ kubectl delete all -l app=event-dispatcher
 kubectl delete jobs -l function=echo
 kubectl delete all -l function=greeter
 kubectl delete all -l handler=spring
+kubectl delete all -l function=square
+kubectl delete all -l handler=node
 kubectl delete crd/functions.extensions.sk8s.io
 kubectl delete crd/handlers.extensions.sk8s.io
 kubectl delete crd/topics.extensions.sk8s.io

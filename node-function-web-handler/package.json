@@ -1,0 +1,12 @@
+{
+  "name": "node-function-web-handler",
+  "version": "1.0.0",
+  "author": "Eric Bottard",
+  "license": "Apache-2.0",
+  "description": "Basic node function handler for sk8s",
+  "private": true,
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.15.5"
+  }
+}
