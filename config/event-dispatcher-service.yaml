@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: event-dispatcher
+  labels:
+    app: event-dispatcher
+spec:
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8080
+  selector:
+    app: event-dispatcher

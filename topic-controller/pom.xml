@@ -31,6 +31,10 @@
 			<artifactId>spring-cloud-stream-binder-kafka</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.moelholm</groupId>
+			<artifactId>prometheus-spring-boot-starter</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>io.fabric8</groupId>
 			<artifactId>kubernetes-client</artifactId>
 		</dependency>
