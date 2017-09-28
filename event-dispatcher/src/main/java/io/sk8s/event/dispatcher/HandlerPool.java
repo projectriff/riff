@@ -16,6 +16,8 @@
 
 package io.sk8s.event.dispatcher;
 
+import static io.sk8s.kubernetes.api.model.FunctionUtils.param;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +44,7 @@ import io.sk8s.core.resource.ResourceAddedOrModifiedEvent;
 import io.sk8s.core.resource.ResourceDeletedEvent;
 import io.sk8s.core.resource.ResourceEvent;
 import io.sk8s.kubernetes.api.model.FunctionSpec;
+import io.sk8s.kubernetes.api.model.FunctionUtils;
 import io.sk8s.kubernetes.api.model.Handler;
 import io.sk8s.kubernetes.api.model.XFunction;
 import org.slf4j.Logger;
@@ -147,6 +150,7 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 		if (isRunning()) {
 			String name = event.getResource().getMetadata().getName();
 			services.remove(name);
+			logger.info("SERVICE {}: {}", event.getAction(), name);
 		}
 	}
 
@@ -155,7 +159,6 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 	public void onEndpointAdded(ResourceAddedOrModifiedEvent<Endpoints> event) {
 		if (isRunning()) {
 			String functionName = event.getResource().getMetadata().getLabels().get("function");
-			logger.info("Service ready for {}", functionName);
 			serviceLatches.putIfAbsent(functionName, new CountDownLatch(1));
 			serviceLatches.get(functionName).countDown();
 		}
@@ -296,8 +299,10 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 			FunctionSpec functionSpec = functionResource.getSpec();
 			bindOutputChannel(functionName, functionSpec.getOutput());
 			try {
-				this.serviceLatches.computeIfAbsent(functionName, name -> new CountDownLatch(1))
-						.await(10, TimeUnit.SECONDS);
+				logger.info("Waiting for service for function {}", functionName);
+				this.serviceLatches.putIfAbsent(functionName, new CountDownLatch(1));
+				this.serviceLatches.get(functionName).await(10, TimeUnit.SECONDS);
+				logger.info("Done waiting for {} service", functionName);
 			}
 			catch (InterruptedException interrupted) {
 				Thread.currentThread().interrupt();
@@ -305,7 +310,7 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 				return;
 			}
 			Service service = this.services.get(functionName);
-			InitPayload initPayload = new InitPayload(getParam(functionSpec, "uri"), getParam(functionSpec, "payload"));
+			InitPayload initPayload = new InitPayload(param("uri", functionResource), param("classname", functionResource));
 			String url = "http://" + service.getSpec().getClusterIP() + "/init";
 			logger.info("POST to /init for function '" + functionName + "' with params: " + initPayload);
 			ResponseEntity<String> initResponse = this.restTemplate.postForEntity(
@@ -324,10 +329,6 @@ public class HandlerPool implements Dispatcher, SmartLifecycle {
 		else {
 			logger.info("failed to retrieve service for function: " + functionName);
 		}
-	}
-
-	private String getParam(FunctionSpec functionSpec, String paramName) {
-		return functionSpec.getParams().stream().filter(p -> p.getName().equals(paramName)).findAny().get().getValue();
 	}
 
 	private void bindOutputChannel(String functionName, String topic) {
