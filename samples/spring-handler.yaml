@@ -6,3 +6,20 @@ spec:
   dispatcher: HandlerPool
   replicas: 3
   image: sk8s/spring-cloud-function-web-handler:v0001
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-handler
+  labels:
+    app: spring-handler
+spec:
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8080
+  selector:
+    handler: spring
+
