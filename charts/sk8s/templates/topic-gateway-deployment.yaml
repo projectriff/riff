@@ -1,0 +1,28 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}-topic-gateway
+  labels:
+    app: {{ template "name" . }}
+    component: topic-gateway
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        component: topic-gateway
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-topic-gateway
+          image: "{{ .Values.topicGateway.image.repository }}:{{ .Values.topicGateway.image.tag }}"
+          imagePullPolicy: {{ .Values.topicGateway.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.topicGateway.service.internalPort }}
+          env:
+          - name: SK8S_TOPIC_GATEWAY_BROKERS
+            value: {{ template "fullname" . }}-kafka:9092
