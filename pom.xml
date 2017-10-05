@@ -50,6 +50,11 @@
 				<version>${sk8s-kubernetes-client.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>io.sk8s</groupId>
+				<artifactId>sk8s-test-support</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework.kafka</groupId>
 				<artifactId>spring-kafka</artifactId>
 				<version>1.1.6.RELEASE</version>
@@ -77,6 +82,7 @@
 		<module>event-dispatcher</module>
 		<module>zipkin-server</module>
 		<module>sk8s-kubernetes-client</module>
+		<module>sk8s-test-support</module>
 	</modules>
 
 </project>
