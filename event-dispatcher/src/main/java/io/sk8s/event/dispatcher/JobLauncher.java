@@ -137,6 +137,7 @@ public class JobLauncher {
 		return new EnvVar[] {
 				new EnvVarBuilder().withName("JAVA_TOOL_OPTIONS").withValue("-Xmx512m").build(),
 				new EnvVarBuilder().withName("SPRING_APPLICATION_JSON").withValue(json).build()
+
 		};
 	}
 }
