@@ -72,8 +72,9 @@
 		<module>sk8s-core</module>
 		<module>topic-controller</module>
 		<module>topic-gateway</module>
+		<module>function-sidecar</module>
+		<module>function-invokers</module>
 		<module>event-dispatcher</module>
-		<module>spring-cloud-function-web-handler</module>
 		<module>sk8s-kubernetes-client</module>
 	</modules>
 

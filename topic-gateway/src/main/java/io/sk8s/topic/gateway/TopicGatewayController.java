@@ -16,7 +16,13 @@
 
 package io.sk8s.topic.gateway;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,8 +38,11 @@ public class TopicGatewayController {
 	private MessagePublisher publisher;
 
 	@PostMapping("/messages/{topic}")
-	public String publishMessage(@PathVariable String topic, @RequestBody String message) {
+	public String publishMessage(@PathVariable String topic, @RequestBody String payload) throws UnsupportedEncodingException {
+		Message<byte[]> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8.name()))
+				.setHeader(MessageHeaders.REPLY_CHANNEL, "foo")
+				.build();
 		this.publisher.publishMessage(topic, message);
-		return "message published to topic: " + topic;
+		return "message published to topic: " + topic + "\n";
 	}
 }

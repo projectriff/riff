@@ -3,13 +3,10 @@ kind: Function
 metadata:
   name: greeter
 spec:
+  image: sk8s/java-function-invoker:v0001
+  protocol: http
   input: names
   output: greetings
-  handlerRef:
-    name: spring
-  params:
-  - name: uri
-    value: file:///functions/java/greeter/target/greeter-1.0.0.jar
-  - name: classname
-    value: functions.Greeter
-
+  env:
+  - name: FUNCTION_URI
+    value: file:///resources/java/greeter/target/greeter-1.0.0.jar?functions.Greeter

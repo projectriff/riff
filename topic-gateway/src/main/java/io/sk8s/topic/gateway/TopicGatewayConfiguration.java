@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -41,17 +41,17 @@ public class TopicGatewayConfiguration {
 	private TopicGatewayProperties properties;
 
 	@Bean
-	public MessagePublisher publisher(KafkaTemplate<String, String> kafkaTemplate) {
+	public MessagePublisher publisher(KafkaTemplate<String, byte[]> kafkaTemplate) {
 		return new MessagePublisher(kafkaTemplate);
 	}
 
 	@Bean
-	public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
+	public KafkaTemplate<String, byte[]> kafkaTemplate(ProducerFactory<String, byte[]> producerFactory) {
 		return new KafkaTemplate<>(producerFactory);
 	}
 
 	@Bean
-	public ProducerFactory<String, String> producerFactory() {
+	public ProducerFactory<String, byte[]> producerFactory() {
 		return new DefaultKafkaProducerFactory<>(producerProps());
 	}
 
@@ -62,8 +62,8 @@ public class TopicGatewayConfiguration {
 	    props.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
 	    props.put(ProducerConfig.LINGER_MS_CONFIG, 1);
 	    props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
-	    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-	    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+	    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
+	    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
 	    return props;
 	}
 }

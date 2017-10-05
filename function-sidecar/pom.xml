@@ -3,11 +3,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>topic-gateway</artifactId>
+	<artifactId>function-sidecar</artifactId>
 	<packaging>jar</packaging>
 
-	<name>topic-gateway</name>
-	<description>Topic Gateway</description>
+	<name>function-sidecar</name>
+	<description>Function Sidecar</description>
 
 	<parent>
 		<groupId>io.sk8s</groupId>
@@ -23,16 +23,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-stream</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.sk8s</groupId>
-			<artifactId>sk8s-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka</artifactId>
+			<artifactId>spring-cloud-stream-binder-kafka</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.moelholm</groupId>
