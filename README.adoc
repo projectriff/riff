@@ -15,7 +15,7 @@ to `~/go`)
 cd $GOPATH   #default to ~/go
 git clone https://github.com/ericbottard/kubernetes-model src/github.com/fabric8io/kubernetes-model/
 cd src/github.com/fabric8io/kubernetes-model/
-git checkout sk8s
+git checkout sk8s-sidecar
 make
 cd <back to the clone of this repo>
 ```
@@ -44,12 +44,6 @@ kubectl apply -f config/kafka
 kubectl apply -f config
 ```
 
-== Create a Handler
-
-```
-kubectl create -f samples/shell-handler.yaml
-```
-
 == Create a Topic
 
 ```
@@ -68,11 +62,11 @@ kubectl create -f samples/echo-function.yaml
 ./publish greetings hello
 ```
 
-== Watch Results on Minikube
+== Watch Echo Function Sidecar Log
 
 ```
 # In another terminal
-minikube ssh -- tail -f /messages/greetings.log
+kubectl logs -f [echo-pod-name] -c sidecar
 ```
 
 == Add a Spring Cloud Function
@@ -87,14 +81,8 @@ minikube ssh -- tail -f /messages/greetings.log
 
 ```
 # In yet another terminal
-minikube mount samples:/functions
+minikube mount samples:/resources
 # Leave this running, use another terminal from now on
-```
-
-=== Create the Handler
-
-```
-kubectl create -f samples/spring-handler.yaml
 ```
 
 === Create a New Topic

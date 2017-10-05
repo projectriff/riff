@@ -16,20 +16,30 @@
 
 package io.sk8s.topic.gateway;
 
+import org.springframework.cloud.stream.binder.EmbeddedHeaderUtils;
+import org.springframework.cloud.stream.binder.MessageValues;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 
 /**
  * @author Mark Fisher
  */
 public class MessagePublisher {
 
-	private final KafkaTemplate<String, String> kafkaTemplate;
+	private final KafkaTemplate<String, byte[]> kafkaTemplate;
 
-	public MessagePublisher(KafkaTemplate<String, String> kafkaTemplate) {
+	public MessagePublisher(KafkaTemplate<String, byte[]> kafkaTemplate) {
 		this.kafkaTemplate = kafkaTemplate;
 	}
 
-	public void publishMessage(String topic, String message) {
-		this.kafkaTemplate.send(topic, message);
+	public void publishMessage(String topic, Message message) {
+		try {
+			byte[] bytes = EmbeddedHeaderUtils.embedHeaders(new MessageValues(message), MessageHeaders.REPLY_CHANNEL);
+			this.kafkaTemplate.send(topic, bytes);
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
