@@ -55,6 +55,11 @@
 				<version>0.0.1-SNAPSHOT</version>
 			</dependency>
 			<dependency>
+				<groupId>io.sk8s</groupId>
+				<artifactId>sk8s-test-support</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework.kafka</groupId>
 				<artifactId>spring-kafka</artifactId>
 				<version>1.1.6.RELEASE</version>
@@ -70,6 +75,7 @@
 				<version>${spring-boot.version}</version>
 				<scope>test</scope>
 			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
@@ -77,6 +83,7 @@
 		<module>sk8s-core</module>
 		<module>topic-controller</module>
 		<module>topic-gateway</module>
+		<module>function-proto</module>
 		<module>function-sidecar</module>
 		<module>function-invokers</module>
 		<module>event-dispatcher</module>
