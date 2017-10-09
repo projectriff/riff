@@ -15,7 +15,7 @@ to `~/go`)
 cd $GOPATH   #default to ~/go
 git clone https://github.com/ericbottard/kubernetes-model src/github.com/fabric8io/kubernetes-model/
 cd src/github.com/fabric8io/kubernetes-model/
-git checkout sk8s
+git checkout sk8s-sidecar
 make
 cd <back to the clone of this repo>
 ```
