@@ -25,12 +25,9 @@ import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.internal.KubernetesDeserializer;
-import io.sk8s.kubernetes.api.model.DoneableHandler;
 import io.sk8s.kubernetes.api.model.DoneableTopic;
 import io.sk8s.kubernetes.api.model.DoneableXFunction;
 import io.sk8s.kubernetes.api.model.FunctionList;
-import io.sk8s.kubernetes.api.model.Handler;
-import io.sk8s.kubernetes.api.model.HandlerList;
 import io.sk8s.kubernetes.api.model.Topic;
 import io.sk8s.kubernetes.api.model.TopicList;
 import io.sk8s.kubernetes.api.model.XFunction;
@@ -49,7 +46,6 @@ public class DefaultSk8sClient extends BaseClient implements Sk8sClient {
 			Map<String, Class<?>> map = (Map<String, Class<?>>) mapField.get(null);
 
 			map.put("Topic", Topic.class);
-			map.put("Handler", Handler.class);
 			map.put("Function", XFunction.class);
 		}
 		catch (NoSuchFieldException | IllegalAccessException e) {
@@ -64,11 +60,6 @@ public class DefaultSk8sClient extends BaseClient implements Sk8sClient {
 	@Override
 	public MixedOperation<Topic, TopicList, DoneableTopic, Resource<Topic, DoneableTopic>> topics() {
 		return new TopicOperationsImpl(httpClient, getConfiguration(), getNamespace());
-	}
-
-	@Override
-	public MixedOperation<Handler, HandlerList, DoneableHandler, Resource<Handler, DoneableHandler>> handlers() {
-		return new HandlerOperationsImpl(httpClient, getConfiguration(), getNamespace());
 	}
 
 	@Override

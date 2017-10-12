@@ -20,12 +20,9 @@ package io.sk8s.kubernetes.client;
 import io.fabric8.kubernetes.client.Client;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import io.sk8s.kubernetes.api.model.DoneableHandler;
 import io.sk8s.kubernetes.api.model.DoneableTopic;
 import io.sk8s.kubernetes.api.model.DoneableXFunction;
 import io.sk8s.kubernetes.api.model.FunctionList;
-import io.sk8s.kubernetes.api.model.Handler;
-import io.sk8s.kubernetes.api.model.HandlerList;
 import io.sk8s.kubernetes.api.model.Topic;
 import io.sk8s.kubernetes.api.model.TopicList;
 import io.sk8s.kubernetes.api.model.XFunction;
@@ -35,7 +32,5 @@ public interface Sk8sClient extends Client {
 	MixedOperation<Topic, TopicList, DoneableTopic, Resource<Topic, DoneableTopic>> topics();
 
 	MixedOperation<XFunction, FunctionList, DoneableXFunction, Resource<XFunction, DoneableXFunction>> functions();
-
-	MixedOperation<Handler, HandlerList, DoneableHandler, Resource<Handler, DoneableHandler>> handlers();
 
 }

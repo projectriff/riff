@@ -89,7 +89,7 @@ You need:
 * A Java 8 environment.
 
 * A working Go environment, with a clone of Eric Bottard's customized fabric8io/kubernetes-model.
-
++
 ----
 cd $(go env GOPATH)   #defaults to ~/go
 git clone https://github.com/ericbottard/kubernetes-model src/github.com/fabric8io/kubernetes-model/
@@ -126,8 +126,7 @@ eval $(minikube docker-env)
 Build components and create Docker images:
 
 ----
-./mvnw clean package
-./dockerize
+./mvnw clean package && ./dockerize
 ----
 
 ==== Deploy Kafka/Zookeeper

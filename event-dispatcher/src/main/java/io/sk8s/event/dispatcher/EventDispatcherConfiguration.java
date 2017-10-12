@@ -16,16 +16,15 @@
 
 package io.sk8s.event.dispatcher;
 
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.sk8s.core.resource.ResourceEventPublisher;
+import io.sk8s.kubernetes.client.Sk8sClient;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
-
-import io.sk8s.core.resource.ResourceEventPublisher;
-import io.sk8s.kubernetes.client.Sk8sClient;
 
 /**
  * @author Mark Fisher
@@ -36,13 +35,23 @@ import io.sk8s.kubernetes.client.Sk8sClient;
 public class EventDispatcherConfiguration {
 
 	@Bean
-	public EventDispatchingHandler eventDispatchingHandler(KubernetesClient kubernetesClient) {
-		return new EventDispatchingHandler(kubernetesClient);
+	public EventDispatchingHandler eventDispatchingHandler() {
+		return new EventDispatchingHandler();
 	}
 
 	@Bean
 	public ResourceEventPublisher functionsEventPublisher(Sk8sClient client) {
 		return new ResourceEventPublisher(client.functions());
+	}
+
+	@Bean
+	public ResourceEventPublisher deploymentEventPublisher(KubernetesClient client) {
+		return new ResourceEventPublisher(client.extensions().deployments());
+	}
+
+	@Bean
+	public ResourceEventPublisher topicEventPublisher(Sk8sClient client) {
+		return new ResourceEventPublisher(client.topics());
 	}
 
 	@Bean
@@ -56,7 +65,7 @@ public class EventDispatcherConfiguration {
 	}
 
 	@Bean
-	public JobLauncher jobLauncher(KubernetesClient kubernetesClient) {
-		return new JobLauncher(kubernetesClient);
+	public FunctionDeployer functionDeployer(KubernetesClient kubernetesClient) {
+		return new FunctionDeployer(kubernetesClient);
 	}
 }

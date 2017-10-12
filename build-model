@@ -3,6 +3,7 @@ set -e -v
 
 # regenerate the fabric8 java API including k8s custom resources
 pushd $(go env GOPATH)/src/github.com/fabric8io/kubernetes-model/
-git checkout sk8s
+git fetch origin
+git checkout origin/sk8s
 make
 popd

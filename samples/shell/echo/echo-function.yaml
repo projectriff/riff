@@ -1,10 +1,4 @@
 apiVersion: extensions.sk8s.io/v1
-kind: Topic
-metadata:
-  name: greetings
----
-
-apiVersion: extensions.sk8s.io/v1
 kind: Function
 metadata:
   name: echo

@@ -23,11 +23,8 @@ import java.util.TreeMap;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.base.HasMetadataOperation;
-import io.sk8s.kubernetes.api.model.DoneableHandler;
 import io.sk8s.kubernetes.api.model.DoneableXFunction;
 import io.sk8s.kubernetes.api.model.FunctionList;
-import io.sk8s.kubernetes.api.model.Handler;
-import io.sk8s.kubernetes.api.model.HandlerList;
 import io.sk8s.kubernetes.api.model.XFunction;
 import okhttp3.OkHttpClient;
 
