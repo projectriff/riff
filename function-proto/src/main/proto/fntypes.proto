@@ -26,7 +26,7 @@ message Request {
 }
 
 /*
- * TODO: Reply can be Empty for sink behavior. Maybe move this can be a separate RPC.
+ * TODO: Reply can be Empty for sink behavior. Maybe we should create a separate RPC for sink.
  * For now the Dispatcher can check the return type and decide to output the Reply.
  */
 message Reply {

@@ -54,16 +54,20 @@ public class GrpcProfileTests {
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-
 		server = new FunctionServer(InProcessServerBuilder.forName(serverName).directExecutor());
 		server.start();
 		inProcessChannel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			// Use stderr here since the logger may has been reset by its JVM shutdown hook.
+			System.err.println("*** shutting down gRPC server since JVM is shutting down");
+			server.stop();
+			System.err.println("*** server shut down");
+		}));
 	}
 
 	@AfterClass
 	public static void tearDown() throws Exception {
 		inProcessChannel.shutdownNow();
-		server.stop();
 	}
 
 	@Autowired
@@ -109,16 +113,6 @@ public class GrpcProfileTests {
 		 */
 		public void start() throws IOException {
 			server.start();
-
-			Runtime.getRuntime().addShutdownHook(new Thread() {
-				@Override
-				public void run() {
-					// Use stderr here since the logger may has been reset by its JVM shutdown hook.
-					System.err.println("*** shutting down gRPC server since JVM is shutting down");
-					FunctionServer.this.stop();
-					System.err.println("*** server shut down");
-				}
-			});
 		}
 
 		/**

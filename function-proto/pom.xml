@@ -32,8 +32,8 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<protobuf.version>3.3.0</protobuf.version>
-		<grpc.version>1.4.0</grpc.version>
+		<protobuf.version>3.4.0</protobuf.version>
+		<grpc.version>1.7.0</grpc.version>
 		<protobuf.plugin.version>0.5.0</protobuf.plugin.version>
 		<os.plugin.version>1.4.1.Final</os.plugin.version>
 	</properties>
@@ -69,9 +69,9 @@
 				<artifactId>protobuf-maven-plugin</artifactId>
 				<version>${protobuf.plugin.version}</version>
 				<configuration>
-					<protocArtifact>com.google.protobuf:protoc:3.3.0:exe:${os.detected.classifier}</protocArtifact>
+					<protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
 					<pluginId>grpc-java</pluginId>
-					<pluginArtifact>io.grpc:protoc-gen-grpc-java:1.4.0:exe:${os.detected.classifier}</pluginArtifact>
+					<pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
 				</configuration>
 				<executions>
 					<execution>

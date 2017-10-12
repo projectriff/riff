@@ -59,7 +59,7 @@ public class DispatcherConfiguration {
 	@EnableConfigurationProperties(GrpcProperties.class)
 	static class GrpcDispatcherConfig {
 
-		@Configuration
+		@Profile("grpc")
 		@ConditionalOnProperty(value = "grpc.stub", havingValue = "blocking", matchIfMissing = true)
 		static class BlockingStubConfiguration {
 			@Bean
@@ -73,7 +73,7 @@ public class DispatcherConfiguration {
 			}
 		}
 
-		@Configuration
+		@Profile("grpc")
 		@ConditionalOnProperty(value = "grpc.stub", havingValue = "async")
 		static class AsyncStubConfiguration {
 			@Bean
