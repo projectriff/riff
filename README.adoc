@@ -11,7 +11,7 @@ eval $(minikube docker-env)
 
 * A working Go environment, with `GOPATH` set (defaults
 to `~/go`) and a clone of ericbottard's customized fabric8io/kubernetes-model.
-
++
 ```
 cd $GOPATH   #default to ~/go
 git clone https://github.com/ericbottard/kubernetes-model src/github.com/fabric8io/kubernetes-model/
