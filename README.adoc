@@ -69,9 +69,10 @@ kubectl create -f samples/echo-function.yaml
 
 == Watch Echo Function Sidecar Log
 
+In another terminal
 ```
-# In another terminal
-kubectl logs -f [echo-pod-name] -c sidecar
+#kubectl logs -f -c sidecar [echo-pod-name]
+kubectl logs -f -c sidecar $(kubectl get pod -l function=echo -o jsonpath='{.items[0].metadata.name}')
 ```
 
 == Add a Spring Cloud Function
@@ -112,12 +113,6 @@ kubectl create -f samples/greeter-function.yaml
 
 === Have the Samples Folder Mounted on the Minikube VM
 (see above if you haven't done this yet)
-
-=== Create the Handler
-
-```
-kubectl create -f samples/node-handler.yaml
-```
 
 === Create a New Topic
 

@@ -17,6 +17,7 @@
 
 	<modules>
 		<module>java-function-invoker</module>
+		<module>node-function-invoker</module>
   </modules>
 
 </project>
