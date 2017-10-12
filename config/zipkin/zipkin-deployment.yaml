@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: zipkin
+  labels:
+    app: zipkin
+    component: zipkin
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: zipkin
+        component: zipkin
+    spec:
+      containers:
+      - name: zipkin
+        image: sk8s/zipkin-server:v0001
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9411
+        env:
+        - name: DEBUG
+          value: 'true'
+        - name: SERVER_PORT
+          value: '9411'
+        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+          value: kafka:9092
+        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
+          value: zookeeper:2181
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
