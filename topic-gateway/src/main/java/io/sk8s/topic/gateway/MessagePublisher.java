@@ -16,30 +16,35 @@
 
 package io.sk8s.topic.gateway;
 
-import org.springframework.cloud.stream.binder.EmbeddedHeaderUtils;
-import org.springframework.cloud.stream.binder.MessageValues;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.integration.router.AbstractMappingMessageRouter;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
 
 /**
  * @author Mark Fisher
+ * @author Thomas Risberg
  */
+@EnableBinding
 public class MessagePublisher {
 
-	private final KafkaTemplate<String, byte[]> kafkaTemplate;
+	private final Log logger = LogFactory.getLog(MessagePublisher.class);
 
-	public MessagePublisher(KafkaTemplate<String, byte[]> kafkaTemplate) {
-		this.kafkaTemplate = kafkaTemplate;
+	private AbstractMappingMessageRouter router;
+
+	private MessageTraceHandler traceHandler;
+
+	public MessagePublisher(AbstractMappingMessageRouter router, MessageTraceHandler traceHandler) {
+		this.router = router;
+		this.traceHandler = traceHandler;
 	}
 
 	public void publishMessage(String topic, Message message) {
-		try {
-			byte[] bytes = EmbeddedHeaderUtils.embedHeaders(new MessageValues(message), MessageHeaders.REPLY_CHANNEL);
-			this.kafkaTemplate.send(topic, bytes);
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		Message<?> tracedMessage = traceHandler.traceBeforeSend(message, topic);
+		router.handleMessage(tracedMessage);
+		traceHandler.traceAfterSend(tracedMessage);
+		logger.info("Published message payload: " + message + " to " + topic + " channel");
 	}
 }
