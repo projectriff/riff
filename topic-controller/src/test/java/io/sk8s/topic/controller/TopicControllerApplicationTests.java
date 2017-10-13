@@ -16,6 +16,8 @@
 
 package io.sk8s.topic.controller;
 
+import io.sk8s.test.Sk8sTypesAvailableRule;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -28,7 +30,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class TopicControllerApplicationTests {
-
+	@ClassRule
+	public static Sk8sTypesAvailableRule sk8sTypesAvailableRule = new Sk8sTypesAvailableRule();
 	@Test
 	public void contextLoads() {
 	}
