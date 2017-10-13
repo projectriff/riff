@@ -4,8 +4,7 @@ metadata:
   name: echo
 spec:
   input: greetings
-  handlerRef:
-    name: shell
-  params:
-  - name: command
-    value: "echo $MESSAGE >> /output/greetings.log"
+  protocol: stdio
+  image: busybox
+  command: ["/bin/sh", "-c"]
+  args: ['while read X; do echo "received: $X"; done</pipes/input >/pipes/output']

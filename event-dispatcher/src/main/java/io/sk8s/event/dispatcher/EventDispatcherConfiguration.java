@@ -16,18 +16,16 @@
 
 package io.sk8s.event.dispatcher;
 
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.Watch;
-import io.sk8s.core.resource.ResourceEventPublisher;
-import io.sk8s.kubernetes.client.Sk8sClient;
-
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.binder.BinderFactory;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
+
+import io.sk8s.core.resource.ResourceEventPublisher;
+import io.sk8s.kubernetes.client.Sk8sClient;
 
 /**
  * @author Mark Fisher
@@ -38,18 +36,13 @@ import org.springframework.context.annotation.Configuration;
 public class EventDispatcherConfiguration {
 
 	@Bean
-	public EventDispatchingHandler eventDispatchingHandler(BinderFactory binderFactory) {
-		return new EventDispatchingHandler(binderFactory);
+	public EventDispatchingHandler eventDispatchingHandler() {
+		return new EventDispatchingHandler();
 	}
 
 	@Bean
 	public ResourceEventPublisher functionsEventPublisher(Sk8sClient client) {
 		return new ResourceEventPublisher(client.functions());
-	}
-
-	@Bean
-	public ResourceEventPublisher handlersEventPublisher(Sk8sClient client) {
-		return new ResourceEventPublisher(client.handlers());
 	}
 
 	@Bean
@@ -62,41 +55,8 @@ public class EventDispatcherConfiguration {
 		return kubernetesClient.adapt(Sk8sClient.class);
 	}
 
-	// Handler Pool
-	@Bean
-	public HandlerPool handlerPool(KubernetesClient kubernetesClient, BinderFactory binderFactory) {
-		return new HandlerPool(kubernetesClient, binderFactory);
-	}
-
-	@Bean
-	public ResourceEventPublisher podsEventPublisher(KubernetesClient client) {
-		return new ResourceEventPublisher(client.pods());
-	}
-
-	@Bean
-	public ResourceEventPublisher servicesEventPublisher(KubernetesClient client) {
-		return new ResourceEventPublisher(client.services());
-	}
-
-	@Bean
-	public ResourceEventPublisher endpointsEventPublisher(KubernetesClient client) {
-		return new ResourceEventPublisher(client.endpoints());
-	}
-
-	@Bean
-	public ResourceEventPublisher deploymentsEventPublisher(KubernetesClient client) {
-		return new ResourceEventPublisher(client.extensions().deployments());
-	}
-
-	// Job Launcher
 	@Bean
 	public JobLauncher jobLauncher(KubernetesClient kubernetesClient) {
 		return new JobLauncher(kubernetesClient);
-	}
-
-	// Service Invoker
-	@Bean
-	public ServiceInvoker serviceInvoker() {
-		return new ServiceInvoker();
 	}
 }

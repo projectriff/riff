@@ -1,0 +1,12 @@
+apiVersion: extensions.sk8s.io/v1
+kind: Function
+metadata:
+  name: wc
+spec:
+  image: sk8s/shell-function-invoker:latest
+  protocol: stdio
+  input: names
+  output: greetings
+  env:
+  - name: FUNCTION_URI
+    value: /resources/script/wordcount.sh
