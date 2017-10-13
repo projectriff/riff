@@ -20,6 +20,8 @@ spec:
         ports:
         - containerPort: 9411
         env:
+        - name: JAVA_TOOL_OPTIONS
+          value: '-Xmx512m'
         - name: DEBUG
           value: 'true'
         - name: SERVER_PORT
