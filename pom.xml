@@ -72,6 +72,7 @@
 		<module>sk8s-core</module>
 		<module>topic-controller</module>
 		<module>topic-gateway</module>
+		<module>function-proto</module>
 		<module>function-sidecar</module>
 		<module>function-invokers</module>
 		<module>event-dispatcher</module>

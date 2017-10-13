@@ -1,0 +1,13 @@
+#!/bin/bash
+
+cd "$(dirname "$0")"
+if [ -e proto ]; then
+  rm proto/*
+else
+  mkdir proto
+fi
+
+cp ../../function-proto/src/main/proto/*.proto proto
+
+docker build --rm -f py/Dockerfile . -t sk8s/grpc-py
+

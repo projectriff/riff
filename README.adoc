@@ -69,6 +69,32 @@ kubectl create -f samples/echo-function.yaml
 kubectl logs -f [echo-pod-name] -c sidecar
 ```
 
+== Run the gRPC Sample
+
+=== Build the gRPC sample image
+```
+samples/grpc/dockerize
+```
+
+=== Create a Function
+
+```
+kubectl create -f samples/grpc-function.yaml
+```
+
+=== Publish a Message to the Topic
+
+```
+./publish greetings hello
+```
+
+== Watch Echo Function Sidecar Log
+
+```
+# In another terminal
+kubectl logs -f [grpc-pod-name] -c sidecar
+```
+
 == Add a Spring Cloud Function
 
 === Build the JAR
