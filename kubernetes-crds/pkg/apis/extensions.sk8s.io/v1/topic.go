@@ -17,6 +17,8 @@ type TopicSpec struct {
 
 	// TODO: add fields here. Java had name (if != from metadata.name?), partitions, exposeRead/exposeWrite
 
+	// +optional
+	Partitions *int32 `json:"partitions,omitempty"`
 }
 
 // Status (computed) for a topic
