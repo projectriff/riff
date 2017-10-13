@@ -39,8 +39,8 @@
 			<artifactId>sk8s-kubernetes-client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
+			<groupId>io.sk8s</groupId>
+			<artifactId>sk8s-test-support</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
