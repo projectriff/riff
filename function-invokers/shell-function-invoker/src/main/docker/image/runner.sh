@@ -2,6 +2,12 @@
 
 set -e
 
-source $FUNCTION_URI
+while [ ! -e /pipes/input ]
+do
+	echo "Waiting for input pipe to appear"
+	sleep 1
+done
 
-while read X; do echo $(userfunction "$X"); done </pipes/input >/pipes/output
+while read X; do
+	source "$FUNCTION_URI" "$X";
+done </pipes/input >/pipes/output
