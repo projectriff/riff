@@ -4,4 +4,5 @@
 ./mvnw docker:build -pl ./topic-gateway
 ./mvnw docker:build -pl ./event-dispatcher
 ./mvnw docker:build -pl ./function-sidecar
+./mvnw docker:build -pl ./zipkin-server
 ./mvnw docker:build -pl ./function-invokers/java-function-invoker

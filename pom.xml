@@ -75,6 +75,7 @@
 		<module>function-sidecar</module>
 		<module>function-invokers</module>
 		<module>event-dispatcher</module>
+		<module>zipkin-server</module>
 		<module>sk8s-kubernetes-client</module>
 	</modules>
 

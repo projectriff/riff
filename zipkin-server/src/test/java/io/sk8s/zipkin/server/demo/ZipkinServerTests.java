@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package io.sk8s.topic.gateway;
+package io.sk8s.zipkin.server.demo;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
- * @author Mark Fisher
  * @author Thomas Risberg
  */
 // Need a JUnit Kafka Rule to avoid failing when Kafka not available
 //@RunWith(SpringRunner.class)
 //@SpringBootTest
-public class TopicGatewayApplicationTests {
+public class ZipkinServerTests {
 
 	@Test
 	public void contextLoads() {

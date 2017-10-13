@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package io.sk8s.topic.gateway;
+package io.sk8s.zipkin.server.demo;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.sleuth.zipkin.stream.EnableZipkinStreamServer;
 
-/**
- * @author Mark Fisher
- */
-@ConfigurationProperties(prefix = "sk8s.topic.gateway")
-public class TopicGatewayProperties {
+@SpringBootApplication
+@EnableZipkinStreamServer
+public class ZipkinServer {
 
-	private String brokers;
-
-	public String getBrokers() {
-		return brokers;
-	}
-
-	public void setBrokers(String brokers) {
-		this.brokers = brokers;
+	public static void main(String[] args) {
+		SpringApplication.run(ZipkinServer.class, args);
 	}
 }
