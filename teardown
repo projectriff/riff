@@ -15,3 +15,5 @@ kubectl delete crd/functions.extensions.sk8s.io
 kubectl delete crd/handlers.extensions.sk8s.io
 kubectl delete crd/topics.extensions.sk8s.io
 kubectl delete all -l app=kafka
+kubectl delete all -l app=metrics
+kubectl delete cm -l app=metrics
