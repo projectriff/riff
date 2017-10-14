@@ -40,6 +40,7 @@ public class TopicGatewayController {
 	@PostMapping("/messages/{topic}")
 	public String publishMessage(@PathVariable String topic, @RequestBody String payload) throws UnsupportedEncodingException {
 		Message<byte[]> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8.name()))
+				.setHeader("topic", topic)
 				.setHeader(MessageHeaders.REPLY_CHANNEL, "foo")
 				.build();
 		this.publisher.publishMessage(topic, message);
