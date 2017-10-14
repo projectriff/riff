@@ -16,54 +16,36 @@
 
 package io.sk8s.topic.gateway;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.ByteArraySerializer;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.sleuth.Tracer;
+import org.springframework.cloud.sleuth.instrument.messaging.MessagingSpanTextMapInjector;
+import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.integration.router.AbstractMappingMessageRouter;
+import org.springframework.integration.router.HeaderValueRouter;
 
 /**
  * @author Mark Fisher
+ * @author Thomas Risberg
  */
 @Configuration
-@EnableConfigurationProperties(TopicGatewayProperties.class)
 public class TopicGatewayConfiguration {
 
-	@Autowired
-	private TopicGatewayProperties properties;
-
 	@Bean
-	public MessagePublisher publisher(KafkaTemplate<String, byte[]> kafkaTemplate) {
-		return new MessagePublisher(kafkaTemplate);
+	public MessageTraceHandler messageTraceHandler(Tracer tracer, MessagingSpanTextMapInjector injector) {
+		return new MessageTraceHandler(tracer, injector);
 	}
 
 	@Bean
-	public KafkaTemplate<String, byte[]> kafkaTemplate(ProducerFactory<String, byte[]> producerFactory) {
-		return new KafkaTemplate<>(producerFactory);
+	public MessagePublisher publisher(AbstractMappingMessageRouter mappingMessageRouter, MessageTraceHandler messageTraceHandler) {
+		return new MessagePublisher(mappingMessageRouter, messageTraceHandler);
 	}
 
 	@Bean
-	public ProducerFactory<String, byte[]> producerFactory() {
-		return new DefaultKafkaProducerFactory<>(producerProps());
-	}
-
-	private Map<String, Object> producerProps() {
-	    Map<String, Object> props = new HashMap<>();
-	    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.properties.getBrokers());
-	    props.put(ProducerConfig.RETRIES_CONFIG, 0);
-	    props.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
-	    props.put(ProducerConfig.LINGER_MS_CONFIG, 1);
-	    props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
-	    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
-	    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
-	    return props;
+	public AbstractMappingMessageRouter mappingMessageRouter(BinderAwareChannelResolver channelResolver) {
+		AbstractMappingMessageRouter router = new HeaderValueRouter("topic");
+		router.setResolutionRequired(true);
+		router.setChannelResolver(channelResolver);
+		return router;
 	}
 }
