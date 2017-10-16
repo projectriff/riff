@@ -56,7 +56,7 @@
 			</dependency>
 			<dependency>
 				<groupId>io.sk8s</groupId>
-				<artifactId>sk8s-test-support</artifactId>
+				<artifactId>function-proto</artifactId>
 				<version>0.0.1-SNAPSHOT</version>
 			</dependency>
 			<dependency>
