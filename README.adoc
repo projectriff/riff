@@ -75,9 +75,9 @@ In another terminal
 kubectl logs -f -c sidecar $(kubectl get pod -l function=echo -o jsonpath='{.items[0].metadata.name}')
 ```
 
-== Add a Spring Cloud Function
+== Create sample functions with language support
 
-=== Build the JAR
+=== Build the Java function JAR
 
 ```
 ./mvnw clean package -f samples/java/greeter/pom.xml
@@ -90,6 +90,8 @@ docker build -t sk8s/sample-functions samples
 kubectl apply -f samples/sample-functions-deployment.yaml
 kubectl apply -f samples/sample-functions-svc.yaml
 ```
+
+== Run a Spring Cloud Function
 
 === Create a New Topic
 
@@ -109,7 +111,7 @@ kubectl create -f samples/greeter-function.yaml
 ./publish names World
 ```
 
-== Add a Node Function
+== Run a Node Function
 
 NOTE: We already built and published all sample functions above
 
