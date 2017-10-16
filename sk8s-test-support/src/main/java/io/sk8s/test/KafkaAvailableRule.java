@@ -22,6 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author David Turanski
  **/
 public class KafkaAvailableRule extends KubernetesAvailableRule {
+	private final static String KAFKA_LABEL = "app=kafka";
+
 	public KafkaAvailableRule() {
 		super("K8S KAFKA");
 	}
@@ -29,9 +31,8 @@ public class KafkaAvailableRule extends KubernetesAvailableRule {
 	@Override
 	protected void obtainResource() throws Exception {
 		try {
-			String label = "app=kafka";
-			boolean serviceAvailable = !this.client.services().withLabel("app=kafka").list().getItems().isEmpty();
-			boolean podsAvailable = !this.client.pods().withLabel("app=kafka").list().getItems().isEmpty();
+			boolean serviceAvailable = !this.client.services().withLabel(KAFKA_LABEL).list().getItems().isEmpty();
+			boolean podsAvailable = !this.client.pods().withLabel(KAFKA_LABEL).list().getItems().isEmpty();
 
 			assertThat(serviceAvailable && podsAvailable).isTrue();
 		}
