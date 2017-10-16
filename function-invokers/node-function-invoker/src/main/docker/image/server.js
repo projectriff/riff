@@ -7,11 +7,16 @@ const app = express();
 
 app.use('/', bodyParser.text());
 
-// Download function
-var wget = require('node-wget');
-wget(process.env.FUNCTION_URI);
-var i = process.env.FUNCTION_URI.lastIndexOf("/");
-var fnFileName = process.env.FUNCTION_URI.substr(i);
+if (process.env.FUNCTION_URI.startsWith("http")) {
+    // Download function
+    var wget = require('node-wget');
+    wget(process.env.FUNCTION_URI);
+    var i = process.env.FUNCTION_URI.lastIndexOf("/");
+}
+else {
+    // Assume a resolvable file path
+    var fnFileName = process.env.FUNCTION_URI;
+}
 
 app.post('/', function (req, res) {
     var fn = require(fnFileName);
