@@ -83,12 +83,12 @@ kubectl logs -f -c sidecar $(kubectl get pod -l function=echo -o jsonpath='{.ite
 ./mvnw clean package -f samples/java/greeter/pom.xml
 ```
 
-=== Mount the Samples Folder into the Minikube VM
+=== Build and deploy sample functions http server
 
 ```
-# In yet another terminal
-minikube mount samples:/resources
-# Leave this running, use another terminal from now on
+docker build -t sk8s/sample-functions samples
+kubectl apply -f samples/sample-functions-deployment.yaml
+kubectl apply -f samples/sample-functions-svc.yaml
 ```
 
 === Create a New Topic
@@ -111,8 +111,7 @@ kubectl create -f samples/greeter-function.yaml
 
 == Add a Node Function
 
-=== Have the Samples Folder Mounted on the Minikube VM
-(see above if you haven't done this yet)
+NOTE: We already built and published all sample functions above
 
 === Create a New Topic
 

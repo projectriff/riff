@@ -9,4 +9,4 @@ spec:
   output: greetings
   env:
   - name: FUNCTION_URI
-    value: /resources/script/wordcount.sh
+    value: http://sample-functions/script/wordcount.sh

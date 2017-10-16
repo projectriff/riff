@@ -9,4 +9,4 @@ spec:
   output: greetings
   env:
   - name: FUNCTION_URI
-    value: /resources/node/square.js
+    value: http://sample-functions/node/square.js

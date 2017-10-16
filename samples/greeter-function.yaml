@@ -9,4 +9,4 @@ spec:
   output: greetings
   env:
   - name: FUNCTION_URI
-    value: file:///resources/java/greeter/target/greeter-1.0.0.jar?functions.Greeter
+    value: http://sample-functions/java/greeter-1.0.0.jar?functions.Greeter
