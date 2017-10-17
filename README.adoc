@@ -74,6 +74,33 @@ In another terminal
 #kubectl logs -f -c sidecar [echo-pod-name]
 kubectl logs -f -c sidecar $(kubectl get pod -l function=echo -o jsonpath='{.items[0].metadata.name}')
 ```
+== Add a gRPC Function
+
+=== Build the image
+
+```
+samples/grpc/dockerize
+```
+
+=== Create a Topic (if necessary)
+
+```
+kubectl create -f samples/greetings-topic.yaml
+```
+
+=== Create the Function
+
+```
+kubectl create -f samples/grpc-function
+```
+
+== Watch gRPC Function Sidecar Log
+
+In another terminal
+```
+#kubectl logs -f -c sidecar [grpc-pod-name]
+kubectl logs -f -c sidecar $(kubectl get pod -l function=grpc -o jsonpath='{.items[0].metadata.name}')
+
 
 == Add a Spring Cloud Function
 

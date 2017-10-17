@@ -17,8 +17,12 @@
 package io.sk8s.event.dispatcher;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 
@@ -42,6 +46,8 @@ import io.sk8s.kubernetes.api.model.XFunction;
 public class JobLauncher {
 
 	private final KubernetesClient kubernetesClient;
+
+	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Autowired
 	private EventDispatcherProperties properties;
@@ -127,13 +133,25 @@ public class JobLauncher {
 	}
 
 	private EnvVar[] buildSidecarEnvVars(XFunction function) {
-		String json = "{\"spring.cloud.stream.bindings.input.destination\":\"" + function.getSpec().getInput() + "\","
-				+ "\"spring.cloud.stream.bindings.output.destination\":\"" + function.getSpec().getOutput() + "\","
-				+ "\"spring.cloud.stream.kafka.binder.brokers\":\"kafka:9092\","
-				+ "\"spring.cloud.stream.kafka.binder.zkNodes\":\"zookeeper:2181\","
-				+ "\"server.port\":\"7433\","
-				+ "\"spring.profiles.active\":\"" + function.getSpec().getProtocol() + "\","
-				+ "\"spring.application.name\":\"sidecar-" + function.getSpec().getInput() + "\"}";
+		Map<String, String> springApplicationConfig = new HashMap<>();
+
+		springApplicationConfig.put("spring.cloud.stream.bindings.input.destination", function.getSpec().getInput());
+		springApplicationConfig.put("spring.cloud.stream.bindings.input.group", function.getMetadata().getName());
+		springApplicationConfig.put("spring.cloud.stream.bindings.output.destination", function.getSpec().getOutput());
+		springApplicationConfig.put("spring.cloud.stream.kafka.binder.brokers", "kafka:9092");
+		springApplicationConfig.put("spring.cloud.stream.kafka.binder.zkNodes", "zookeeper:2181");
+		springApplicationConfig.put("spring.application.name","sidecar-" + function.getSpec().getInput());
+		springApplicationConfig.put("server.port", "7433");
+		springApplicationConfig.put("spring.profiles.active",  function.getSpec().getProtocol());
+
+		String json;
+		try {
+			json = objectMapper.writeValueAsString(springApplicationConfig);
+		}
+		catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+		
 		return new EnvVar[] {
 				new EnvVarBuilder().withName("JAVA_TOOL_OPTIONS").withValue("-Xmx512m").build(),
 				new EnvVarBuilder().withName("SPRING_APPLICATION_JSON").withValue(json).build()

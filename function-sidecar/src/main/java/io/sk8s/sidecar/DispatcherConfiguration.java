@@ -16,12 +16,23 @@
 
 package io.sk8s.sidecar;
 
+import io.grpc.Channel;
+import io.grpc.ManagedChannelBuilder;
+import io.sk8s.sidecar.grpc.function.StringFunctionGrpc;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author Mark Fisher
+ * @author David Turanski
  */
 @Configuration
 public class DispatcherConfiguration {
@@ -41,6 +52,54 @@ public class DispatcherConfiguration {
 		@Bean
 		public StdioDispatcher dispatcher() {
 			return new StdioDispatcher();
+		}
+	}
+
+	@Profile("grpc")
+	@EnableConfigurationProperties(GrpcProperties.class)
+	static class GrpcDispatcherConfig {
+
+		@Profile("grpc")
+		@ConditionalOnProperty(value = "grpc.stub", havingValue = "blocking", matchIfMissing = true)
+		static class BlockingStubConfiguration {
+			@Bean
+			public StringFunctionGrpc.StringFunctionBlockingStub functionStub(Channel grpcChannel) {
+				return StringFunctionGrpc.newBlockingStub(grpcChannel);
+			}
+
+			@Bean
+			public Dispatcher dispatcher(StringFunctionGrpc.StringFunctionBlockingStub stub) {
+				return new GrpcBlockingDispatcher(stub);
+			}
+		}
+
+		@Profile("grpc")
+		@ConditionalOnProperty(value = "grpc.stub", havingValue = "async")
+		static class AsyncStubConfiguration {
+			@Bean
+			public StringFunctionGrpc.StringFunctionStub functionStub(Channel grpcChannel) {
+				return StringFunctionGrpc.newStub(grpcChannel);
+			}
+
+			@Bean
+			public Dispatcher dispatcher(StringFunctionGrpc.StringFunctionStub stub) {
+				return new GrpcAsyncDispatcher(stub);
+			}
+		}
+
+		@Bean
+		@ConditionalOnMissingBean(Channel.class)
+		public Channel grpcChannel(GrpcProperties properties) {
+			ManagedChannelBuilder<?> managedChannelBuilder = ManagedChannelBuilder
+				.forAddress("localhost", properties.getPort()).usePlaintext(properties.isPlainText()).directExecutor();
+			if (properties.getIdleTimeout() > 0) {
+				managedChannelBuilder = managedChannelBuilder
+					.idleTimeout(properties.getIdleTimeout(), TimeUnit.SECONDS);
+			}
+			if (properties.getMaxMessageSize() > 0) {
+				managedChannelBuilder = managedChannelBuilder.maxInboundMessageSize(properties.getMaxMessageSize());
+			}
+			return managedChannelBuilder.build();
 		}
 	}
 }
