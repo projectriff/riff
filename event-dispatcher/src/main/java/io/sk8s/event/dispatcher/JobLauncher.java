@@ -133,7 +133,7 @@ public class JobLauncher {
 				+ "\"spring.cloud.stream.kafka.binder.zkNodes\":\"zookeeper:2181\","
 				+ "\"server.port\":\"7433\","
 				+ "\"spring.profiles.active\":\"" + function.getSpec().getProtocol() + "\","
-				+ "\"spring.application.name\":\"sidecar-" + function.getSpec().getInput() + "\"}";
+				+ "\"spring.application.name\":\"sidecar-" + function.getMetadata().getName() + "\"}";
 		return new EnvVar[] {
 				new EnvVarBuilder().withName("JAVA_TOOL_OPTIONS").withValue("-Xmx512m").build(),
 				new EnvVarBuilder().withName("SPRING_APPLICATION_JSON").withValue(json).build()
