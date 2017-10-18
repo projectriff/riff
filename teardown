@@ -3,14 +3,14 @@
 kubectl delete functions --all
 kubectl delete topics --all
 
-kubectl delete all -l app=topic-controller
-kubectl delete all -l app=topic-gateway
-kubectl delete all -l app=event-dispatcher
-
 kubectl delete all -l function=echo
 kubectl delete all -l function=greeter
 kubectl delete all -l function=square
 kubectl delete all -l function=grpc
+
+kubectl delete all -l app=topic-controller
+kubectl delete all -l app=topic-gateway
+kubectl delete all -l app=event-dispatcher
 
 kubectl delete crd/functions.extensions.sk8s.io
 kubectl delete crd/topics.extensions.sk8s.io
@@ -19,3 +19,6 @@ kubectl delete all -l app=kafka
 kubectl delete all -l app=zipkin
 kubectl delete all -l app=metrics
 kubectl delete cm -l app=metrics
+
+docker rmi --force sk8s/greeter:v0001
+docker rmi --force sk8s/square:v0001

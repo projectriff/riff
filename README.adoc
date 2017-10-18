@@ -110,12 +110,10 @@ kubectl logs -f -c sidecar $(kubectl get pod -l function=grpc -o jsonpath='{.ite
 ./mvnw clean package -f samples/java/greeter/pom.xml
 ```
 
-=== Mount the Samples Folder into the Minikube VM
+=== Build the Docker container for the function code
 
 ```
-# In yet another terminal
-minikube mount samples:/resources
-# Leave this running, use another terminal from now on
+./faas create -f greeter -v v0001 -p samples/java/
 ```
 
 === Create a New Topic
@@ -138,8 +136,11 @@ kubectl create -f samples/greeter-function.yaml
 
 == Add a Node Function
 
-=== Have the Samples Folder Mounted on the Minikube VM
-(see above if you haven't done this yet)
+=== Build the Docker container for the function code
+
+```
+./faas create -f square -v v0001 -p samples/node/
+```
 
 === Create a New Topic
 

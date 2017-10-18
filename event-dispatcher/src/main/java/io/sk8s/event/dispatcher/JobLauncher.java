@@ -76,10 +76,6 @@ public class JobLauncher {
 						.withVolumes(new VolumeBuilder()
 								.withName("pipes")
 								.withEmptyDir(new EmptyDirVolumeSourceBuilder().build())
-								.build(),
-							new VolumeBuilder()
-								.withName("resources")
-								.withNewHostPath("/resources")
 								.build()
 						)
 					.endSpec()
@@ -127,8 +123,7 @@ public class JobLauncher {
 
 	private VolumeMount[] buildSharedVolumeMounts() {
 		return new VolumeMount[] {
-				new VolumeMountBuilder().withMountPath("/pipes").withName("pipes").build(),
-				new VolumeMountBuilder().withMountPath("/resources").withName("resources").build()
+				new VolumeMountBuilder().withMountPath("/pipes").withName("pipes").build()
 		};
 	}
 
