@@ -1,0 +1,80 @@
+#!/bin/bash
+
+function print_usage() {
+cat <<EOF
+
+USAGE: faas create -f <function> -p <path> -v <version>
+  This command will build the function based on the code available in the path directory
+
+Flags:
+
+[*] -f  | --function - the name of the function
+    -p  | --path - the path to the function code (defaults to current directory)
+    -v  | --version - the version of the function created (defaults to v0001)
+
+[*] = Required arguments
+
+EOF
+}
+
+function create() {
+  echo "Creating $FUNCTION $FNPATH $VERSION"
+  docker build -t "sk8s/${FUNCTION}:${VERSION}" $FNPATH
+}
+
+# ======================================= FUNCTIONS END =======================================
+
+if [[ $1 == "--help" || $1 == "-h" ]] ; then
+    print_usage
+    exit 0
+fi
+
+if [[ $# == 0 ]]; then
+  print_usage
+  exit 0
+fi
+
+COMMAND="$1"
+shift
+
+while [[ $# > 0 ]]
+do
+key="$1"
+case ${key} in
+ -f|--function)
+ FUNCTION="$2"
+ shift
+ ;;
+ -p|--path)
+ FNPATH="$2"
+ shift
+ ;;
+ -v|--version)
+ VERSION="$2"
+ shift
+ ;;
+ --help)
+ print_usage
+ exit 0
+ ;;
+ *)
+ echo ""
+ echo "ERROR: Invalid option: [$1]"
+ print_usage
+ exit 1
+ ;;
+esac
+shift
+done
+
+# ======================================= DEFAULTS ============================================
+FNPATH="${FNPATH:-.}"
+VERSION="${VERSION:-v0001}"
+# ======================================= DEFAULTS END ========================================
+if [[ "${COMMAND}" == "create" ]]; then
+  create
+else
+  echo "$COMMAND is an invalid command"
+  exit 1;
+fi
+
