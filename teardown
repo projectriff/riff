@@ -12,6 +12,10 @@ kubectl delete all -l app=topic-controller
 kubectl delete all -l app=topic-gateway
 kubectl delete all -l app=event-dispatcher
 
+kubectl delete all -l app=topic-controller
+kubectl delete all -l app=topic-gateway
+kubectl delete all -l app=event-dispatcher
+
 kubectl delete crd/functions.extensions.sk8s.io
 kubectl delete crd/topics.extensions.sk8s.io
 
