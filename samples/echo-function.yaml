@@ -3,8 +3,9 @@ kind: Function
 metadata:
   name: echo
 spec:
-  input: greetings
+  image: sk8s/shell-function-invoker:latest
   protocol: stdio
-  image: busybox
-  command: ["/bin/sh", "-c"]
-  args: ['while read X; do echo "received: $X"; done</pipes/input >/pipes/output']
+  input: greetings
+  env:
+  - name: FUNCTION_URI
+    value: /resources/script/echo.sh

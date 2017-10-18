@@ -6,3 +6,5 @@
 ./mvnw docker:build -pl ./function-sidecar
 ./mvnw docker:build -pl ./zipkin-server
 ./mvnw docker:build -pl ./function-invokers/java-function-invoker
+./mvnw docker:build -pl ./function-invokers/node-function-invoker
+./mvnw docker:build -pl ./function-invokers/shell-function-invoker
