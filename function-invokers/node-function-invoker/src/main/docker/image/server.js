@@ -7,9 +7,19 @@ const app = express();
 
 app.use('/', bodyParser.text());
 
-var fn = require(process.env.FUNCTION_URI);
+if (process.env.FUNCTION_URI.startsWith("http")) {
+    // Download function
+    var wget = require('node-wget');
+    wget(process.env.FUNCTION_URI);
+    var i = process.env.FUNCTION_URI.lastIndexOf("/");
+}
+else {
+    // Assume a resolvable file path
+    var fnFileName = process.env.FUNCTION_URI;
+}
 
 app.post('/', function (req, res) {
+    var fn = require(fnFileName);
     var resultx = fn(req.body);
     console.log("Result " + resultx);
     res.type("text/plain");

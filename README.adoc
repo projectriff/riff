@@ -102,21 +102,23 @@ In another terminal
 kubectl logs -f -c sidecar $(kubectl get pod -l function=grpc -o jsonpath='{.items[0].metadata.name}')
 
 
-== Add a Spring Cloud Function
+== Create sample functions with language support
 
-=== Build the JAR
+=== Build the Java function JAR
 
 ```
 ./mvnw clean package -f samples/java/greeter/pom.xml
 ```
 
-=== Mount the Samples Folder into the Minikube VM
+=== Build and deploy sample functions http server
 
 ```
-# In yet another terminal
-minikube mount samples:/resources
-# Leave this running, use another terminal from now on
+docker build -t sk8s/sample-functions samples
+kubectl apply -f samples/sample-functions-deployment.yaml
+kubectl apply -f samples/sample-functions-svc.yaml
 ```
+
+== Run a Spring Cloud Function
 
 === Create a New Topic
 
@@ -136,10 +138,9 @@ kubectl create -f samples/greeter-function.yaml
 ./publish names World
 ```
 
-== Add a Node Function
+== Run a Node Function
 
-=== Have the Samples Folder Mounted on the Minikube VM
-(see above if you haven't done this yet)
+NOTE: We already built and published all sample functions above
 
 === Create a New Topic
 

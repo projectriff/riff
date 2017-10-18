@@ -2,6 +2,7 @@
 
 kubectl delete functions --all
 kubectl delete topics --all
+kubectl delete all -l app=sample-functions
 
 kubectl delete all -l app=topic-controller
 kubectl delete all -l app=topic-gateway
