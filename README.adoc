@@ -159,6 +159,33 @@ kubectl create -f samples/square-function.yaml
 ./publish numbers 2
 ```
 
+
+== Add a Python Function
+
+=== Have the Samples Folder Mounted on the Minikube VM
+(see above if you haven't done this yet)
+
+=== Create a New Topic
+
+```
+kubectl create -f samples/tweets.yaml
+```
+
+=== Create the Function
+
+```
+kubectl create -f samples/sentiments.yaml
+```
+
+=== Publish a Message
+
+The function performs sentiment analysis on tweets. It accepts JSON and looks only at the `text` field. The input
+is in the form of an array (sorry about the escaped quotes).
+
+```
+./publish tweets "[{\"text\":\"happy happy happy\"},{\"text\":\"sad sad sad\"}]"
+```
+
 == Tear it all down
 
 ```
