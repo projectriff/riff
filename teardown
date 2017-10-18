@@ -7,6 +7,8 @@ kubectl delete all -l function=echo
 kubectl delete all -l function=greeter
 kubectl delete all -l function=square
 kubectl delete all -l function=grpc
+kubectl delete all -l function=sentiments
+
 
 kubectl delete all -l app=topic-controller
 kubectl delete all -l app=topic-gateway
