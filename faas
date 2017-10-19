@@ -3,23 +3,32 @@
 function print_usage() {
 cat <<EOF
 
-USAGE: faas create -f <function> -p <path> -v <version>
-  This command will build the function based on the code available in the path directory
+USAGE: 
 
-Flags:
+faas build -n <name> -v <version> -f <path>
+  This command will build the function based on the code available in the path directory, using the name 
+  specified for the image that is built
 
-[*] -f  | --function - the name of the function
-    -p  | --path - the path to the function code (defaults to current directory)
-    -v  | --version - the version of the function created (defaults to v0001)
+faas create -f <path>
+  This command will create the resource[s] based on the resource definition[s] that the path points to
 
-[*] = Required arguments
+Options:
+
+  -n  | --name - the name of the function (defaults to nake of current directory)
+  -v  | --version - the version of the function (defaults to v0001)
+  -f  | --filename - filename, directory, or URL for the code or resource (defaults to current directory)
 
 EOF
 }
 
-function create() {
-  echo "Creating $FUNCTION $FNPATH $VERSION"
+function build() {
+  echo "Building $FUNCTION $FNPATH $VERSION"
   docker build -t "sk8s/${FUNCTION}:${VERSION}" $FNPATH
+}
+
+function create() {
+  echo "Creating $FNPATH resource[s]"
+  kubectl create -f $FNPATH
 }
 
 # ======================================= FUNCTIONS END =======================================
@@ -41,11 +50,11 @@ while [[ $# > 0 ]]
 do
 key="$1"
 case ${key} in
- -f|--function)
+ -n|--name)
  FUNCTION="$2"
  shift
  ;;
- -p|--path)
+ -f|--filename)
  FNPATH="$2"
  shift
  ;;
@@ -68,10 +77,13 @@ shift
 done
 
 # ======================================= DEFAULTS ============================================
+FUNCTION="${FUNCTION:-${PWD##*/}}"
 FNPATH="${FNPATH:-.}"
 VERSION="${VERSION:-v0001}"
 # ======================================= DEFAULTS END ========================================
-if [[ "${COMMAND}" == "create" ]]; then
+if [[ "${COMMAND}" == "build" ]]; then
+  build
+elif [[ "${COMMAND}" == "create" ]]; then
   create
 else
   echo "$COMMAND is an invalid command"
