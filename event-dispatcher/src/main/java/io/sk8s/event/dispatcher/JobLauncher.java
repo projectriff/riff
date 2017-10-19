@@ -32,6 +32,8 @@ import io.fabric8.kubernetes.api.model.EmptyDirVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.JobSpecBuilder;
+import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.PodSpecBuilder;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
@@ -66,20 +68,12 @@ public class JobLauncher {
 			.endMetadata()
 			.withSpec(
 				new JobSpecBuilder()
-				.withNewTemplate()
-					.withNewMetadata()
-						.withLabels(Collections.singletonMap("function", functionName))
-					.endMetadata()
-					.withNewSpec()
-						.withRestartPolicy("OnFailure")
-						.withContainers(buildMainContainer(functionResource), buildSidecarContainer(functionResource))
-						.withVolumes(new VolumeBuilder()
-								.withName("pipes")
-								.withEmptyDir(new EmptyDirVolumeSourceBuilder().build())
-								.build()
-						)
-					.endSpec()
-				.endTemplate()
+					.withNewTemplate()
+						.withNewMetadata()
+							.withLabels(Collections.singletonMap("function", functionName))
+						.endMetadata()
+						.withSpec(buildPodSpec(functionResource))
+					.endTemplate()
 				.build()
 			)
 			.done().toString();
@@ -87,11 +81,26 @@ public class JobLauncher {
 		System.out.println("JOB: " + job);
 	}
 
+	private PodSpec buildPodSpec(XFunction function) {
+		PodSpecBuilder builder = new PodSpecBuilder()
+				.withRestartPolicy("OnFailure")
+				.withContainers(buildMainContainer(function), buildSidecarContainer(function));
+		if ("stdio".equals(function.getSpec().getProtocol())) {
+			builder.withVolumes(new VolumeBuilder()
+					.withName("pipes")
+					.withEmptyDir(new EmptyDirVolumeSourceBuilder().build())
+					.build());
+		}
+		return builder.build();
+	}
+
 	private Container buildMainContainer(XFunction function) {
 		ContainerBuilder builder = new ContainerBuilder().withName("main")
 				.withImage(function.getSpec().getImage())
-				.withImagePullPolicy("IfNotPresent")
-				.withVolumeMounts(buildSharedVolumeMounts());
+				.withImagePullPolicy("IfNotPresent");
+		if ("stdio".equals(function.getSpec().getProtocol())) {
+			builder.withVolumeMounts(buildNamedPipesMount());
+		}
 		List<String> command = function.getSpec().getCommand();
 		if (!ObjectUtils.isEmpty(command)) {
 			builder.addAllToCommand(command);
@@ -113,18 +122,18 @@ public class JobLauncher {
 	}
 
 	private Container buildSidecarContainer(XFunction function) {
-		return new ContainerBuilder().withName("sidecar")
+		ContainerBuilder builder = new ContainerBuilder().withName("sidecar")
 				.withImage("sk8s/function-sidecar:v0001")
 				.withImagePullPolicy("IfNotPresent")
-				.withEnv(buildSidecarEnvVars(function))
-				.withVolumeMounts(buildSharedVolumeMounts())
-				.build();
+				.withEnv(buildSidecarEnvVars(function));
+		if ("stdio".equals(function.getSpec().getProtocol())) {
+			builder.withVolumeMounts(buildNamedPipesMount());
+		}
+		return builder.build();
 	}
 
-	private VolumeMount[] buildSharedVolumeMounts() {
-		return new VolumeMount[] {
-				new VolumeMountBuilder().withMountPath("/pipes").withName("pipes").build()
-		};
+	private VolumeMount buildNamedPipesMount() {
+		return new VolumeMountBuilder().withMountPath("/pipes").withName("pipes").build();
 	}
 
 	private EnvVar[] buildSidecarEnvVars(XFunction function) {
