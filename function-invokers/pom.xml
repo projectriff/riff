@@ -18,9 +18,8 @@
 	<modules>
 		<module>java-function-invoker</module>
 		<module>node-function-invoker</module>
-		<module>shell-function-invoker</module>
 		<module>python2-function-invoker</module>
-
-  </modules>
+		<module>shell-function-invoker</module>
+	</modules>
 
 </project>

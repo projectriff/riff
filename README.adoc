@@ -163,19 +163,23 @@ kubectl create -f samples/square-function.yaml
 
 == Add a Python Function
 
-=== Have the Samples Folder Mounted on the Minikube VM
-(see above if you haven't done this yet)
-
-=== Create a New Topic
+=== Build the Docker container for the function code
 
 ```
-kubectl create -f samples/tweets.yaml
+./faas create -f sentiments -v v0001 -p samples/python/
+```
+
+=== Create New Topics
+
+```
+kubectl create -f samples/tweets-topic.yaml
+kubectl create -f samples/sentiments-topic.yaml
 ```
 
 === Create the Function
 
 ```
-kubectl create -f samples/sentiments.yaml
+kubectl create -f samples/sentiments-function.yaml
 ```
 
 === Publish a Message

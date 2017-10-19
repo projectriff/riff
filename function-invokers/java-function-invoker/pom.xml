@@ -76,31 +76,40 @@
 				<groupId>io.fabric8</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
 				<version>${docker-maven.version}</version>
-				<configuration>
-					<images>
-						<image>
-							<name>sk8s/${project.artifactId}</name>
-							<build>
-								<from>${docker.base}</from>
-								<tags>
-									<tag>latest</tag>
-									<tag>${project.version}</tag>
-									<tag>${docker.tag}</tag>
-								</tags>
-								<entryPoint>
-									<exec>
-										<arg>java</arg>
-										<arg>-jar</arg>
-										<arg>/maven/${project.build.finalName}.jar</arg>
-									</exec>
-								</entryPoint>
-								<assembly>
-									<descriptor>assembly.xml</descriptor>
-								</assembly>
-							</build>
-						</image>
-					</images>
-				</configuration>
+				<executions>
+					<execution>
+						<id>dockerize</id>
+						<phase>package</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+						<configuration>
+							<images>
+								<image>
+									<name>sk8s/${project.artifactId}</name>
+									<build>
+										<from>${docker.base}</from>
+										<tags>
+											<tag>latest</tag>
+											<tag>${project.version}</tag>
+											<tag>${docker.tag}</tag>
+										</tags>
+										<entryPoint>
+											<exec>
+												<arg>java</arg>
+												<arg>-jar</arg>
+												<arg>/maven/${project.build.finalName}.jar</arg>
+											</exec>
+										</entryPoint>
+										<assembly>
+											<descriptor>assembly.xml</descriptor>
+										</assembly>
+									</build>
+								</image>
+							</images>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

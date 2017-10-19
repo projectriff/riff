@@ -3,10 +3,10 @@ kind: Function
 metadata:
   name: sentiments
 spec:
-  image: sk8s/python2-function-invoker:latest
+  image: sk8s/sentiments:v0001
   protocol: stdio
   input: tweets
   output: sentiments
   env:
   - name: FUNCTION_URI
-    value: file:///resources/python/sentiment_service.py?handler=sentiment_service.process
+    value: file:///functions/python/sentiment_service.py?handler=sentiment_service.process
