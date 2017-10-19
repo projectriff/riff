@@ -1,0 +1,12 @@
+= Samples
+
+* Java
+  - https://github.com/markfisher/sk8s/tree/master/samples/java/greeter[greeter]
+* Node
+  - https://github.com/markfisher/sk8s/tree/master/samples/node/square[square]
+* Python
+  - https://github.com/markfisher/sk8s/tree/master/samples/python/sentiments[sentiments]
+  - https://github.com/markfisher/sk8s/tree/master/samples/python/uppercase[uppercase]
+* Shell
+  - https://github.com/markfisher/sk8s/tree/master/samples/shell/echo[echo]
+  - https://github.com/markfisher/sk8s/tree/master/samples/shell/wordcount[wordcount]

@@ -1,0 +1,34 @@
+= uppercase
+
+[horizontal]
+*Language*:: Python
+*Function*:: https://github.com/markfisher/sk8s/blob/master/samples/python/uppercase/py/func.py[func.py]
+*Protocol*:: gRPC
+*Input*:: greetings
+
+=== Build the image
+
+(from this sample's directory)
+```
+./dockerize
+```
+
+=== Create the Function and Topic(s)
+
+```
+./faas apply -f samples/python/uppercase
+```
+
+=== Tail the Sidecar Log
+
+In another terminal
+
+```
+./faas logs -n uppercase -t
+```
+
+=== Publish a Message to the Input Topic
+
+```
+./publish greetings hello
+```

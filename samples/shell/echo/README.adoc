@@ -1,0 +1,32 @@
+= echo
+
+[horizontal]
+*Language*:: Shell
+*Function*:: https://github.com/markfisher/sk8s/blob/master/samples/shell/echo/echo.sh[echo.sh]
+*Protocol*:: stdio
+*Input*:: greetings
+
+=== Build the Docker container for the function code
+
+```
+./faas build -n echo -v v0001 -f samples/shell/echo
+```
+
+=== Create the Function and Topic(s)
+
+```
+./faas apply -f samples/shell/echo
+```
+
+=== Tail the Sidecar Log
+
+In another terminal
+```
+./faas logs -n echo -t
+```
+
+=== Publish a Message to the Input Topic
+
+```
+./publish greetings hello
+```

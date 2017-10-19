@@ -1,0 +1,34 @@
+= square
+
+[horizontal]
+*Language*:: JavaScript
+*Function*:: https://github.com/markfisher/sk8s/blob/master/samples/node/square/square.js[square.js]
+*Protocol*:: HTTP
+*Input*:: numbers
+*Output*:: greetings
+
+=== Build the Docker container for the function code
+
+```
+./faas build -n square -v v0001 -f samples/node/square
+```
+
+=== Create the Function and Topic(s)
+
+```
+./faas apply -f samples/node/square
+```
+
+=== Tail the Sidecar Log
+
+In another terminal
+
+```
+./faas logs -n square -t
+```
+
+=== Publish a Message
+
+```
+./publish numbers 2
+```

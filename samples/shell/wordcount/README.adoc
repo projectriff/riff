@@ -1,0 +1,33 @@
+= wordcount
+
+[horizontal]
+*Language*:: Shell
+*Function*:: https://github.com/markfisher/sk8s/blob/master/samples/shell/wordcount/wordcount.sh[wordcount.sh]
+*Protocol*:: stdio
+*Input*:: names
+*Output*:: greetings
+
+=== Build the Docker container for the function code
+
+```
+./faas build -n wordcount -v v0001 -f samples/shell/wordcount
+```
+
+=== Create the Function and Topic(s)
+
+```
+./faas apply -f samples/shell/wordcount
+```
+
+=== Tail the Sidecar Log
+
+In another terminal
+```
+./faas logs -n wordcount -t
+```
+
+=== Publish a Message to the Input Topic
+
+```
+./publish names hello
+```

@@ -1,0 +1,40 @@
+= greeter
+
+[horizontal]
+*Language*:: Java
+*Function*:: https://github.com/markfisher/sk8s/blob/master/samples/java/greeter/src/main/java/functions/Greeter.java[Greeter.java]
+*Protocol*:: HTTP
+*Input*:: names
+*Output*:: greetings
+
+=== Build the JAR
+
+```
+./mvnw clean package -f samples/java/greeter/pom.xml
+```
+
+=== Build the Docker container for the function code
+
+```
+./faas build -n greeter -v v0001 -f samples/java/greeter
+```
+
+=== Create the Function and Topic(s)
+
+```
+./faas apply -f samples/java/greeter
+```
+
+=== Tail the Sidecar Log
+
+In another terminal
+
+```
+./faas logs -n greeter -t
+```
+
+=== Publish a Message
+
+```
+./publish names World
+```

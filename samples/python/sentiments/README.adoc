@@ -1,0 +1,37 @@
+= sentiments
+
+[horizontal]
+*Language*:: Python
+*Function*:: https://github.com/markfisher/sk8s/blob/master/samples/python/sentiments/sentiment_service.py[sentiment_service.py]
+*Protocol*:: stdio
+*Input*:: tweets
+*Output*:: sentiments
+
+=== Build the Docker container for the function code
+
+```
+./faas build -n sentiments -v v0001 -f samples/python/sentiments
+```
+
+=== Create the Function and Topic(s)
+
+```
+./faas apply -f samples/python/sentiments
+```
+
+=== Tail the Sidecar Log
+
+In another terminal
+
+```
+./faas logs -n sentiments -t
+```
+
+=== Publish a Message
+
+The function performs sentiment analysis on tweets. It accepts JSON and looks only at the `text` field. The input
+is in the form of an array (sorry about the escaped quotes).
+
+```
+./publish tweets "[{\"text\":\"happy happy happy\"},{\"text\":\"sad sad sad\"}]"
+```
