@@ -3,7 +3,7 @@
 * A running 1.7 Kubernetes cluster with at least 4GB of memory
 these instructions assume minikube for now. Point your docker environment
 to the docker running in minikube.
-+
+
 ```
 minikube start --cpus=4 --memory=4096 --disk-size=64g
 eval $(minikube docker-env)
@@ -52,8 +52,9 @@ kubectl apply -f config
 == Create a Topic
 
 ```
-./faas create -f samples/greetings-topic.yaml
+./faas apply -f samples/greetings-topic.yaml
 ```
+
 === Build the Docker container for the function code
 
 ```
@@ -76,9 +77,9 @@ kubectl apply -f config
 
 In another terminal
 ```
-#kubectl logs -f -c sidecar [echo-pod-name]
-kubectl logs -f -c sidecar $(kubectl get pod -l function=echo -o jsonpath='{.items[0].metadata.name}')
+./faas logs -n echo -c sidecar -t
 ```
+
 == Add a gRPC Function
 
 === Build the image
@@ -90,7 +91,7 @@ samples/grpc/dockerize
 === Create a Topic (if necessary)
 
 ```
-./faas create -f samples/greetings-topic.yaml
+./faas apply -f samples/greetings-topic.yaml
 ```
 
 === Create the Function
@@ -104,8 +105,7 @@ samples/grpc/dockerize
 In another terminal
 
 ```
-#kubectl logs -f -c sidecar [grpc-pod-name]
-kubectl logs -f -c sidecar $(kubectl get pod -l function=grpc -o jsonpath='{.items[0].metadata.name}')
+./faas logs -n grpc -c sidecar -t
 ```
 
 == Add a Spring Cloud Function
@@ -125,7 +125,7 @@ kubectl logs -f -c sidecar $(kubectl get pod -l function=grpc -o jsonpath='{.ite
 === Create a New Topic
 
 ```
-./faas create -f samples/names-topic.yaml
+./faas apply -f samples/names-topic.yaml
 ```
 
 === Create the Function
@@ -151,7 +151,7 @@ kubectl logs -f -c sidecar $(kubectl get pod -l function=grpc -o jsonpath='{.ite
 === Create a New Topic
 
 ```
-./faas create -f samples/numbers-topic.yaml
+./faas apply -f samples/numbers-topic.yaml
 ```
 
 === Create the Function
@@ -177,14 +177,14 @@ kubectl logs -f -c sidecar $(kubectl get pod -l function=grpc -o jsonpath='{.ite
 === Create New Topics
 
 ```
-kubectl create -f samples/tweets-topic.yaml
-kubectl create -f samples/sentiments-topic.yaml
+./faas apply -f samples/tweets-topic.yaml
+./faas apply -f samples/sentiments-topic.yaml
 ```
 
 === Create the Function
 
 ```
-kubectl create -f samples/sentiments-function.yaml
+./faas create -f samples/sentiments-function.yaml
 ```
 
 === Publish a Message
