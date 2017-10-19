@@ -3,7 +3,7 @@ kind: Function
 metadata:
   name: echo
 spec:
-  image: sk8s/scripts:v0001
+  image: sk8s/echo:v0001
   protocol: stdio
   input: greetings
   env:
