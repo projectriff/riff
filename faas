@@ -3,23 +3,105 @@
 function print_usage() {
 cat <<EOF
 
-USAGE: faas create -f <function> -p <path> -v <version>
-  This command will build the function based on the code available in the path directory
+faas is a tool for building and creating functions
 
-Flags:
+Commands:
+  build        Build a function container
+  create       Create function resource definitions
+  apply        Apply function resource definitions
+  delete       Delete function resource definitions
 
-[*] -f  | --function - the name of the function
-    -p  | --path - the path to the function code (defaults to current directory)
-    -v  | --version - the version of the function created (defaults to v0001)
-
-[*] = Required arguments
+  Use "faas <command> --help" for more information about a given command.
 
 EOF
 }
 
-function create() {
-  echo "Creating $FUNCTION $FNPATH $VERSION"
+function print_build_usage() {
+cat <<EOF
+
+Build the function based on the code available in the path directory, using the name 
+  and version specified for the image that is built.
+  
+Usage: 
+
+  faas build -n <name> -v <version> -f <path>
+
+Options:
+
+  -n, --name: the name of the function (defaults to the name of the current directory)
+  -v, --version: the version of the function (defaults to v0001)
+  -f, --filename: filename, directory, or URL for the code or resource (defaults to the current directory)
+
+EOF
+}
+
+function print_create_usage() {
+cat <<EOF
+
+Create the resource[s] based on the resource definition[s] that the path points to.
+
+Usage: 
+
+  faas create -f <path>
+
+Options:
+
+  -f, --filename: filename, directory, or URL for the resource definition[s] (defaults to the current directory)
+
+EOF
+}
+
+function print_apply_usage() {
+cat <<EOF
+
+Apply the resource definition[s] that the path points to. A resource will be created if
+  it doesn't exist yet.
+
+Usage: 
+
+  faas apply -f <path>
+
+Options:
+
+  -f, --filename: filename, directory, or URL for the resource definition[s] (defaults to the current directory)
+
+EOF
+}
+
+function print_delete_usage() {
+cat <<EOF
+
+Delete the resource definition[s] that the path points to.
+
+Usage: 
+
+  faas delete -f <path>
+
+Options:
+
+  -f, --filename: filename, directory, or URL for the resource definition[s] (defaults to the current directory)
+
+EOF
+}
+
+function build() {
+  echo "Building $FUNCTION $FNPATH $VERSION"
   docker build -t "sk8s/${FUNCTION}:${VERSION}" $FNPATH
+}
+
+function create() {
+  echo "Creating $FNPATH resource[s]"
+  kubectl create -f $FNPATH
+}
+
+function apply() {
+  echo "Applying $FNPATH resource[s]"
+  kubectl apply -f $FNPATH
+}
+
+function delete() {
+  echo "Deleting $FNPATH resource[s]"
+  kubectl delete -f $FNPATH
 }
 
 # ======================================= FUNCTIONS END =======================================
@@ -37,15 +119,31 @@ fi
 COMMAND="$1"
 shift
 
+if [[ $1 == "--help" || $1 == "-h" ]] ; then
+    if [[ "${COMMAND}" == "build" ]]; then
+      print_build_usage
+      exit 0
+    elif [[ "${COMMAND}" == "create" ]]; then
+      print_create_usage
+      exit 0
+    elif [[ "${COMMAND}" == "apply" ]]; then
+      print_apply_usage
+      exit 0
+    elif [[ "${COMMAND}" == "delete" ]]; then
+      print_delete_usage
+      exit 0
+    fi    
+fi
+
 while [[ $# > 0 ]]
 do
 key="$1"
 case ${key} in
- -f|--function)
+ -n|--name)
  FUNCTION="$2"
  shift
  ;;
- -p|--path)
+ -f|--filename)
  FNPATH="$2"
  shift
  ;;
@@ -68,11 +166,18 @@ shift
 done
 
 # ======================================= DEFAULTS ============================================
+FUNCTION="${FUNCTION:-${PWD##*/}}"
 FNPATH="${FNPATH:-.}"
 VERSION="${VERSION:-v0001}"
 # ======================================= DEFAULTS END ========================================
-if [[ "${COMMAND}" == "create" ]]; then
+if [[ "${COMMAND}" == "build" ]]; then
+  build
+elif [[ "${COMMAND}" == "create" ]]; then
   create
+elif [[ "${COMMAND}" == "apply" ]]; then
+  apply
+elif [[ "${COMMAND}" == "delete" ]]; then
+  delete
 else
   echo "$COMMAND is an invalid command"
   exit 1;
