@@ -57,7 +57,7 @@ kubectl apply -f config
 === Build the Docker container for the function code
 
 ```
-./faas create -f echo -v v0001 -p samples/script/
+./faas build -n echo -v v0001 -f samples/script/
 ```
 
 == Create a Function
@@ -166,13 +166,12 @@ kubectl logs -f -c sidecar $(kubectl get pod -l function=grpc -o jsonpath='{.ite
 ./publish numbers 2
 ```
 
-
 == Add a Python Function
 
 === Build the Docker container for the function code
 
 ```
-./faas create -f sentiments -v v0001 -p samples/python/
+./faas build -n sentiments -v v0001 -f samples/python/
 ```
 
 === Create New Topics
