@@ -1,0 +1,24 @@
+apiVersion: extensions.sk8s.io/v1
+kind: Topic
+metadata:
+  name: tweets
+---
+
+apiVersion: extensions.sk8s.io/v1
+kind: Topic
+metadata:
+  name: sentiments
+---
+
+apiVersion: extensions.sk8s.io/v1
+kind: Function
+metadata:
+  name: sentiments
+spec:
+  image: sk8s/sentiments:v0001
+  protocol: stdio
+  input: tweets
+  output: sentiments
+  env:
+  - name: FUNCTION_URI
+    value: file:///functions/function.py?handler=function.process

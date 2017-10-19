@@ -1,4 +1,16 @@
 apiVersion: extensions.sk8s.io/v1
+kind: Topic
+metadata:
+  name: names
+---
+
+apiVersion: extensions.sk8s.io/v1
+kind: Topic
+metadata:
+  name: greetings
+---
+
+apiVersion: extensions.sk8s.io/v1
 kind: Function
 metadata:
   name: wordcount
@@ -7,6 +19,3 @@ spec:
   protocol: stdio
   input: names
   output: greetings
-  env:
-  - name: FUNCTION_URI
-    value: /functions/script/wordcount.sh

@@ -1,0 +1,24 @@
+apiVersion: extensions.sk8s.io/v1
+kind: Topic
+metadata:
+  name: names
+---
+
+apiVersion: extensions.sk8s.io/v1
+kind: Topic
+metadata:
+  name: greetings
+---
+
+apiVersion: extensions.sk8s.io/v1
+kind: Function
+metadata:
+  name: greeter
+spec:
+  image: sk8s/greeter:v0001
+  protocol: http
+  input: names
+  output: greetings
+  env:
+  - name: FUNCTION_URI
+    value: file:///functions/function.jar?functions.Greeter

@@ -18,13 +18,13 @@ git clone https://github.com/ericbottard/kubernetes-model src/github.com/fabric8
 
 * A clone of this repo.
 
-== Build the kubernetes-model jar Enhanced with Sk8s Types
+== Build the kubernetes-model jar Enhanced with Custom Types
 
 ```
 ./build-model
 ```
 
-== Create Sk8s Custom Resource Definitions
+== Create Function and Topic Custom Resource Definitions
 ```
 kubectl apply -f config/types
 ```
@@ -49,63 +49,59 @@ kubectl apply -f config/kafka
 kubectl apply -f config
 ```
 
-== Create a Topic
-
-```
-./faas apply -f samples/greetings-topic.yaml
-```
+== Create a Shell Function
 
 === Build the Docker container for the function code
 
 ```
-./faas build -n echo -v v0001 -f samples/script/
+./faas build -n echo -v v0001 -f samples/shell/echo
 ```
 
-== Create a Function
+=== Create the Function and Topic(s)
 
 ```
-./faas create -f samples/echo-function.yaml
+./faas apply -f samples/shell/echo
 ```
 
-== Publish a Message to the Topic
+=== Tail the Sidecar Log
+
+In another terminal
+```
+./faas logs -n echo -t
+```
+
+=== Publish a Message to the Input Topic
 
 ```
 ./publish greetings hello
 ```
 
-== Watch Echo Function Sidecar Log
-
-In another terminal
-```
-./faas logs -n echo -c sidecar -t
-```
-
-== Add a gRPC Function
+== Add a Python gRPC Function
 
 === Build the image
 
 ```
-samples/grpc/dockerize
+samples/python/uppercase/dockerize
 ```
 
-=== Create a Topic (if necessary)
+=== Create the Function and Topic(s)
 
 ```
-./faas apply -f samples/greetings-topic.yaml
+./faas apply -f samples/python/uppercase
 ```
 
-=== Create the Function
-
-```
-./faas create -f samples/grpc-function.yaml
-```
-
-== Watch gRPC Function Sidecar Log
+=== Tail the Sidecar Log
 
 In another terminal
 
 ```
-./faas logs -n grpc -c sidecar -t
+./faas logs -n uppercase -t
+```
+
+=== Publish a Message to the Input Topic
+
+```
+./publish greetings hello
 ```
 
 == Add a Spring Cloud Function
@@ -119,19 +115,21 @@ In another terminal
 === Build the Docker container for the function code
 
 ```
-./faas build -n greeter -v v0001 -f samples/java/
+./faas build -n greeter -v v0001 -f samples/java/greeter
 ```
 
-=== Create a New Topic
+=== Create the Function and Topic(s)
 
 ```
-./faas apply -f samples/names-topic.yaml
+./faas apply -f samples/java/greeter
 ```
 
-=== Create the Function
+=== Tail the Sidecar Log
+
+In another terminal
 
 ```
-./faas create -f samples/greeter-function.yaml
+./faas logs -n greeter -t
 ```
 
 === Publish a Message
@@ -145,19 +143,21 @@ In another terminal
 === Build the Docker container for the function code
 
 ```
-./faas build -n square -v v0001 -f samples/node/
+./faas build -n square -v v0001 -f samples/node/square
 ```
 
-=== Create a New Topic
+=== Create the Function and Topic(s)
 
 ```
-./faas apply -f samples/numbers-topic.yaml
+./faas apply -f samples/node/square
 ```
 
-=== Create the Function
+=== Tail the Sidecar Log
+
+In another terminal
 
 ```
-./faas create -f samples/square-function.yaml
+./faas logs -n square -t
 ```
 
 === Publish a Message
@@ -171,20 +171,21 @@ In another terminal
 === Build the Docker container for the function code
 
 ```
-./faas build -n sentiments -v v0001 -f samples/python/
+./faas build -n sentiments -v v0001 -f samples/python/sentiments
 ```
 
-=== Create New Topics
+=== Create the Function and Topic(s)
 
 ```
-./faas apply -f samples/tweets-topic.yaml
-./faas apply -f samples/sentiments-topic.yaml
+./faas apply -f samples/python/sentiments
 ```
 
-=== Create the Function
+=== Tail the Sidecar Log
+
+In another terminal
 
 ```
-./faas create -f samples/sentiments-function.yaml
+./faas logs -n sentiments -t
 ```
 
 === Publish a Message
