@@ -3,10 +3,10 @@ kind: Function
 metadata:
   name: wc
 spec:
-  image: sk8s/shell-function-invoker:latest
+  image: sk8s/scripts:v0001
   protocol: stdio
   input: names
   output: greetings
   env:
   - name: FUNCTION_URI
-    value: /resources/script/wordcount.sh
+    value: /functions/script/wordcount.sh

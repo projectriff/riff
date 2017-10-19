@@ -54,6 +54,11 @@ kubectl apply -f config
 ```
 kubectl create -f samples/greetings-topic.yaml
 ```
+=== Build the Docker container for the function code
+
+```
+./faas create -f scripts -v v0001 -p samples/script/
+```
 
 == Create a Function
 
