@@ -1,10 +1,11 @@
 #!/bin/bash
 
-./mvnw docker:build -pl ./topic-controller
-./mvnw docker:build -pl ./topic-gateway
-./mvnw docker:build -pl ./event-dispatcher
-./mvnw docker:build -pl ./function-sidecar
-./mvnw docker:build -pl ./zipkin-server
-./mvnw docker:build -pl ./function-invokers/java-function-invoker
-./mvnw docker:build -pl ./function-invokers/node-function-invoker
-./mvnw docker:build -pl ./function-invokers/shell-function-invoker
+./mvnw docker:build -pl \
+topic-controller,\
+topic-gateway,\
+event-dispatcher,\
+function-sidecar,\
+zipkin-server,\
+function-invokers/java-function-invoker,\
+function-invokers/node-function-invoker,\
+function-invokers/shell-function-invoker
