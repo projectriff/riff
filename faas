@@ -10,6 +10,8 @@ Commands:
   create       Create function resource definitions
   apply        Apply function resource definitions
   delete       Delete function resource definitions
+  list         List current function resources
+  logs         Show logs for a function resource
 
   Use "faas <command> --help" for more information about a given command.
 
@@ -84,6 +86,36 @@ Options:
 EOF
 }
 
+function print_list_usage() {
+cat <<EOF
+
+List the current function resources.
+
+Usage: 
+
+  faas list
+
+EOF
+}
+
+function print_logs_usage() {
+cat <<EOF
+
+Display the logs for a running function.
+  
+Usage: 
+
+  faas logs -n <name> [-c <container>] [-t]
+
+Options:
+
+  -n, --name: the name of the function (defaults to the name of the current directory)
+  -c, --container: the name of the container, usually sidecar or main (defaults to sidecar)
+  -t, --tail: tail the logs
+
+EOF
+}
+
 function build() {
   echo "Building $FUNCTION $FNPATH $VERSION"
   docker build -t "sk8s/${FUNCTION}:${VERSION}" $FNPATH
@@ -104,6 +136,16 @@ function delete() {
   kubectl delete -f $FNPATH
 }
 
+function list() {
+  echo "Listing function resource[s]"
+  kubectl get functions
+}
+
+function logs() {
+  echo "Displaying logs for container ${CONTAINER} of function ${FUNCTION}"
+  kubectl logs ${TAIL} -c ${CONTAINER} $(kubectl get pod -l function=${FUNCTION} -o jsonpath='{.items[0].metadata.name}')
+}
+
 # ======================================= FUNCTIONS END =======================================
 
 if [[ $1 == "--help" || $1 == "-h" ]] ; then
@@ -120,47 +162,60 @@ COMMAND="$1"
 shift
 
 if [[ $1 == "--help" || $1 == "-h" ]] ; then
-    if [[ "${COMMAND}" == "build" ]]; then
-      print_build_usage
-      exit 0
-    elif [[ "${COMMAND}" == "create" ]]; then
-      print_create_usage
-      exit 0
-    elif [[ "${COMMAND}" == "apply" ]]; then
-      print_apply_usage
-      exit 0
-    elif [[ "${COMMAND}" == "delete" ]]; then
-      print_delete_usage
-      exit 0
-    fi    
+  if [[ "${COMMAND}" == "build" ]]; then
+    print_build_usage
+    exit 0
+  elif [[ "${COMMAND}" == "create" ]]; then
+    print_create_usage
+    exit 0
+  elif [[ "${COMMAND}" == "apply" ]]; then
+    print_apply_usage
+    exit 0
+  elif [[ "${COMMAND}" == "delete" ]]; then
+    print_delete_usage
+    exit 0
+  elif [[ "${COMMAND}" == "list" ]]; then
+    print_list_usage
+    exit 0
+  elif [[ "${COMMAND}" == "logs" ]]; then
+    print_logs_usage
+    exit 0
+  fi    
 fi
 
 while [[ $# > 0 ]]
 do
 key="$1"
 case ${key} in
- -n|--name)
- FUNCTION="$2"
- shift
- ;;
- -f|--filename)
- FNPATH="$2"
- shift
- ;;
- -v|--version)
- VERSION="$2"
- shift
- ;;
- --help)
- print_usage
- exit 0
- ;;
- *)
- echo ""
- echo "ERROR: Invalid option: [$1]"
- print_usage
- exit 1
- ;;
+  -n|--name)
+  FUNCTION="$2"
+  shift
+  ;;
+  -f|--filename)
+  FNPATH="$2"
+  shift
+  ;;
+  -v|--version)
+  VERSION="$2"
+  shift
+  ;;
+  -c|--container)
+  CONTAINER="$2"
+  shift
+  ;;
+  -t|--tail)
+  TAIL="-f"
+  ;;
+  --help)
+  print_usage
+  exit 0
+  ;;
+  *)
+  echo ""
+  echo "ERROR: Invalid option: [$1]"
+  print_usage
+  exit 1
+  ;;
 esac
 shift
 done
@@ -169,6 +224,7 @@ done
 FUNCTION="${FUNCTION:-${PWD##*/}}"
 FNPATH="${FNPATH:-.}"
 VERSION="${VERSION:-v0001}"
+CONTAINER="${CONTAINER:-sidecar}"
 # ======================================= DEFAULTS END ========================================
 if [[ "${COMMAND}" == "build" ]]; then
   build
@@ -178,8 +234,11 @@ elif [[ "${COMMAND}" == "apply" ]]; then
   apply
 elif [[ "${COMMAND}" == "delete" ]]; then
   delete
+elif [[ "${COMMAND}" == "list" ]]; then
+  list
+elif [[ "${COMMAND}" == "logs" ]]; then
+  logs
 else
   echo "$COMMAND is an invalid command"
   exit 1;
 fi
-
