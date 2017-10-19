@@ -52,7 +52,7 @@ kubectl apply -f config
 == Create a Topic
 
 ```
-kubectl create -f samples/greetings-topic.yaml
+./faas create -f samples/greetings-topic.yaml
 ```
 === Build the Docker container for the function code
 
@@ -63,7 +63,7 @@ kubectl create -f samples/greetings-topic.yaml
 == Create a Function
 
 ```
-kubectl create -f samples/echo-function.yaml
+./faas create -f samples/echo-function.yaml
 ```
 
 == Publish a Message to the Topic
@@ -90,22 +90,23 @@ samples/grpc/dockerize
 === Create a Topic (if necessary)
 
 ```
-kubectl create -f samples/greetings-topic.yaml
+./faas create -f samples/greetings-topic.yaml
 ```
 
 === Create the Function
 
 ```
-kubectl create -f samples/grpc-function
+./faas create -f samples/grpc-function.yaml
 ```
 
 == Watch gRPC Function Sidecar Log
 
 In another terminal
+
 ```
 #kubectl logs -f -c sidecar [grpc-pod-name]
 kubectl logs -f -c sidecar $(kubectl get pod -l function=grpc -o jsonpath='{.items[0].metadata.name}')
-
+```
 
 == Add a Spring Cloud Function
 
@@ -118,19 +119,19 @@ kubectl logs -f -c sidecar $(kubectl get pod -l function=grpc -o jsonpath='{.ite
 === Build the Docker container for the function code
 
 ```
-./faas create -f greeter -v v0001 -p samples/java/
+./faas build -n greeter -v v0001 -f samples/java/
 ```
 
 === Create a New Topic
 
 ```
-kubectl create -f samples/names-topic.yaml
+./faas create -f samples/names-topic.yaml
 ```
 
 === Create the Function
 
 ```
-kubectl create -f samples/greeter-function.yaml
+./faas create -f samples/greeter-function.yaml
 ```
 
 === Publish a Message
@@ -144,19 +145,19 @@ kubectl create -f samples/greeter-function.yaml
 === Build the Docker container for the function code
 
 ```
-./faas create -f square -v v0001 -p samples/node/
+./faas build -n square -v v0001 -f samples/node/
 ```
 
 === Create a New Topic
 
 ```
-kubectl create -f samples/numbers-topic.yaml
+./faas create -f samples/numbers-topic.yaml
 ```
 
 === Create the Function
 
 ```
-kubectl create -f samples/square-function.yaml
+./faas create -f samples/square-function.yaml
 ```
 
 === Publish a Message
