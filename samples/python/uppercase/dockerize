@@ -9,4 +9,4 @@ fi
 
 cp ../../../function-proto/src/main/proto/*.proto proto
 
-docker build --rm -f py/Dockerfile . -t sk8s/grpc-py
+docker build . --rm -t sk8s/grpc-py
