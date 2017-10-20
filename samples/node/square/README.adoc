@@ -32,3 +32,9 @@ In another terminal
 ```
 ./publish numbers 2
 ```
+
+=== Delete the function
+
+```
+./faas delete -n square
+```

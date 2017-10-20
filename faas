@@ -73,15 +73,15 @@ EOF
 function print_delete_usage() {
 cat <<EOF
 
-Delete the resource definition[s] that the path points to.
+Delete the resource definition[s] for the function specified.
 
 Usage: 
 
-  faas delete -f <path>
+  faas delete -n <name>
 
 Options:
 
-  -f, --filename: filename, directory, or URL for the resource definition[s] (defaults to the current directory)
+  -n, --name: the name of the function (defaults to the name of the current directory)
 
 EOF
 }
@@ -132,12 +132,13 @@ function apply() {
 }
 
 function delete() {
-  echo "Deleting $FNPATH resource[s]"
-  kubectl delete -f $FNPATH
+  echo "Deleting $FUNCTION resource[s]"
+  kubectl delete function $FUNCTION
+  kubectl delete jobs -l function=$FUNCTION
 }
 
 function list() {
-  echo "Listing function resource[s]"
+  echo "Listing function resources"
   kubectl get functions
 }
 
