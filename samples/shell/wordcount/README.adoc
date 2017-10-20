@@ -31,3 +31,9 @@ In another terminal
 ```
 ./publish names hello
 ```
+
+=== Delete the function
+
+```
+./faas delete -n wordcount
+```

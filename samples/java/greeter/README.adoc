@@ -38,3 +38,9 @@ In another terminal
 ```
 ./publish names World
 ```
+
+=== Delete the function
+
+```
+./faas delete -n greeter
+```

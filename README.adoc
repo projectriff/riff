@@ -49,7 +49,7 @@ kubectl apply -f config/kafka
 kubectl apply -f config
 ```
 
-== Try Some https://github.com/markfisher/sk8s/tree/master/samples[Samples]
+== Try Some link:samples/README.adoc[Samples]
 
 == Tear it all down
 

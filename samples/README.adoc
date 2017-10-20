@@ -1,12 +1,12 @@
 = Samples
 
 * Java
-  - https://github.com/markfisher/sk8s/tree/master/samples/java/greeter[greeter]
+  - link:java/greeter/README.adoc[greeter]
 * Node
-  - https://github.com/markfisher/sk8s/tree/master/samples/node/square[square]
+  - link:node/square/README.adoc[square]
 * Python
-  - https://github.com/markfisher/sk8s/tree/master/samples/python/sentiments[sentiments]
-  - https://github.com/markfisher/sk8s/tree/master/samples/python/uppercase[uppercase]
+  - link:python/sentiments/README.adoc[sentiments]
+  - link:python/uppercase/README.adoc[uppercase]
 * Shell
-  - https://github.com/markfisher/sk8s/tree/master/samples/shell/echo[echo]
-  - https://github.com/markfisher/sk8s/tree/master/samples/shell/wordcount[wordcount]
+  - link:shell/echo/README.adoc[echo]
+  - link:shell/wordcount/README.adoc[wordcount]
