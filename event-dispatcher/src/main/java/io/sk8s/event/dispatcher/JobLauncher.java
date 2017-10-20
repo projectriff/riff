@@ -65,6 +65,13 @@ public class JobLauncher {
 			.withApiVersion("batch/v1")
 			.withNewMetadata()
 				.withName(functionName + "-" + System.currentTimeMillis())
+				.addNewOwnerReference()
+					.withApiVersion(functionResource.getApiVersion())
+					.withKind(functionResource.getKind())
+					.withName(functionName)
+					.withUid(functionResource.getMetadata().getUid())
+					.withController(true)
+				.endOwnerReference()
 			.endMetadata()
 			.withSpec(
 				new JobSpecBuilder()

@@ -25,6 +25,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 
+import io.fabric8.kubernetes.client.KubernetesClient;
+
 import io.sk8s.core.resource.ResourceAddedEvent;
 import io.sk8s.core.resource.ResourceDeletedEvent;
 import io.sk8s.kubernetes.api.model.XFunction;
@@ -42,6 +44,12 @@ public class EventDispatchingHandler {
 	@Autowired // TODO: merge in here?
 	private JobLauncher launcher;
 
+	private final KubernetesClient kubernetesClient;
+
+	public EventDispatchingHandler(KubernetesClient kubernetesClient) {
+		this.kubernetesClient = kubernetesClient;
+	}
+
 	@EventListener
 	public void onFunctionRegistered(ResourceAddedEvent<XFunction> event) {
 		XFunction functionResource = event.getResource();
@@ -55,7 +63,7 @@ public class EventDispatchingHandler {
 	public void onFunctionUnregistered(ResourceDeletedEvent<XFunction> event) {
 		XFunction functionResource = event.getResource();
 		String functionName = functionResource.getMetadata().getName();
-		// TODO: delete any Job(s)
+		this.kubernetesClient.extensions().jobs().withLabel("function", functionName).delete();
 		this.functions.remove(functionName);
 		logger.info("function deleted: " + functionName);
 	}

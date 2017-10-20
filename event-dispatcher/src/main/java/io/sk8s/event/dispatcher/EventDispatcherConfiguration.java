@@ -36,8 +36,8 @@ import io.sk8s.kubernetes.client.Sk8sClient;
 public class EventDispatcherConfiguration {
 
 	@Bean
-	public EventDispatchingHandler eventDispatchingHandler() {
-		return new EventDispatchingHandler();
+	public EventDispatchingHandler eventDispatchingHandler(KubernetesClient kubernetesClient) {
+		return new EventDispatchingHandler(kubernetesClient);
 	}
 
 	@Bean
