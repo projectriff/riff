@@ -21,6 +21,3 @@ kubectl delete all -l app=kafka
 kubectl delete all -l app=zipkin
 kubectl delete all -l app=metrics
 kubectl delete cm -l app=metrics
-
-docker rmi --force sk8s/greeter:v0001
-docker rmi --force sk8s/square:v0001
