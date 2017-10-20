@@ -22,6 +22,8 @@ spec:
           image: "{{ .Values.topicController.image.repository }}:{{ .Values.topicController.image.tag }}"
           imagePullPolicy: {{ .Values.topicController.image.pullPolicy }}
           env:
+          - name: JAVA_TOOL_OPTIONS
+            value: '-Xmx512m'
           - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
             value: {{ template "fullname" . }}-kafka:9092
           - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
