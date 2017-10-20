@@ -149,8 +149,10 @@ public class JobLauncher {
 		springApplicationConfig.put("spring.cloud.stream.bindings.input.destination", function.getSpec().getInput());
 		springApplicationConfig.put("spring.cloud.stream.bindings.input.group", function.getMetadata().getName());
 		springApplicationConfig.put("spring.cloud.stream.bindings.output.destination", function.getSpec().getOutput());
-		springApplicationConfig.put("spring.cloud.stream.kafka.binder.brokers", "kafka:9092");
-		springApplicationConfig.put("spring.cloud.stream.kafka.binder.zkNodes", "zookeeper:2181");
+		springApplicationConfig.put("spring.cloud.stream.kafka.binder.brokers",
+				System.getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS"));
+		springApplicationConfig.put("spring.cloud.stream.kafka.binder.zkNodes",
+				System.getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES"));
 		springApplicationConfig.put("spring.application.name","sidecar-" + function.getMetadata().getName());
 		springApplicationConfig.put("server.port", "7433");
 		springApplicationConfig.put("spring.profiles.active",  function.getSpec().getProtocol());
