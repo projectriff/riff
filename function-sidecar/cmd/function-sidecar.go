@@ -47,17 +47,20 @@ func main() {
 
 	brokers := []string{saj["spring.cloud.stream.kafka.binder.brokers"].(string)}
 	input := saj["spring.cloud.stream.bindings.input.destination"].(string)
-	output := saj["spring.cloud.stream.bindings.output.destination"].(string)
+	output := saj["spring.cloud.stream.bindings.output.destination"]
 	group := saj["spring.cloud.stream.bindings.input.group"].(string)
 	protocol := saj["spring.profiles.active"].(string)
 
 	dispatcher := createDispatcher(protocol)
 
-	producer, err := sarama.NewAsyncProducer(brokers, nil)
-	if err != nil {
-		panic(err)
+	var producer sarama.AsyncProducer
+	if output != nil {
+		producer, err = sarama.NewAsyncProducer(brokers, nil)
+		if err != nil {
+			panic(err)
+		}
+		defer producer.Close()
 	}
-	defer producer.Close()
 
 	consumer, err := cluster.NewConsumer(brokers, group, []string{input}, consumerConfig)
 	if err != nil {
@@ -89,15 +92,17 @@ func main() {
 					log.Printf("Error dispatching message: %v", err)
 					break
 				}
-				messageOut := message.Message{Payload: []byte(dispatched.(string)), Headers: messageIn.Headers}
-				bytesOut, err := message.EncodeMessage(messageOut)
-				fmt.Fprintf(os.Stdout, ">>> %s\n", messageOut)
-				if err != nil {
-					log.Printf("Error encoding message: %v", err)
-					break
+				if output != nil {
+					messageOut := message.Message{Payload: []byte(dispatched.(string)), Headers: messageIn.Headers}
+					bytesOut, err := message.EncodeMessage(messageOut)
+					fmt.Fprintf(os.Stdout, ">>> %s\n", messageOut)
+					if err != nil {
+						log.Printf("Error encoding message: %v", err)
+						break
+					}
+					outMessage := &sarama.ProducerMessage{Topic: output.(string), Value: sarama.ByteEncoder(bytesOut)}
+					producer.Input() <- outMessage
 				}
-				outMessage := &sarama.ProducerMessage{Topic: output, Value: sarama.ByteEncoder(bytesOut)}
-				producer.Input() <- outMessage
 				consumer.MarkOffset(msg, "") // mark message as processed
 			}
 		case <-signals:
