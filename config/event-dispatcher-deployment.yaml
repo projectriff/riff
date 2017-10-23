@@ -11,7 +11,7 @@ spec:
         app: event-dispatcher
     spec:
       containers:
-      - image: sk8s/event-dispatcher:v0001
+      - image: sk8s/event-dispatcher:0.0.1-SNAPSHOT
         name: event-dispatcher
         imagePullPolicy: IfNotPresent
         env:

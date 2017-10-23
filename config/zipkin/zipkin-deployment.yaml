@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: zipkin
-        image: sk8s/zipkin-server:v0001
+        image: sk8s/zipkin-server:0.0.1-SNAPSHOT
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9411

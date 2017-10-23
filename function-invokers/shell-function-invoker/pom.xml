@@ -16,28 +16,21 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>io.fabric8</groupId>
-				<artifactId>docker-maven-plugin</artifactId>
-				<version>${docker-maven.version}</version>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<version>${dockerfile-maven.version}</version>
 				<executions>
 					<execution>
-						<id>dockerize</id>
-						<phase>package</phase>
+						<id>default</id>
 						<goals>
 							<goal>build</goal>
 						</goals>
-						<configuration>
-							<images>
-								<image>
-									<name>sk8s/${project.artifactId}</name>
-									<build>
-										<dockerFile>Dockerfile</dockerFile>
-									</build>
-								</image>
-							</images>
-						</configuration>
 					</execution>
 				</executions>
+				<configuration>
+					<repository>sk8s/${project.artifactId}</repository>
+					<tag>${project.version}</tag>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

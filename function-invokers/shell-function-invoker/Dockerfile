@@ -1,5 +1,5 @@
 FROM alpine
-COPY image/ .
+COPY src/main/shell/ .
 RUN chmod u+x runner.sh
 CMD ./runner.sh
 

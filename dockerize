@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./mvnw docker:build -pl \
+./mvnw dockerfile:build -pl \
 topic-controller,\
 topic-gateway,\
 event-dispatcher,\

@@ -11,7 +11,7 @@ spec:
         app: topic-controller
     spec:
       containers:
-      - image: sk8s/topic-controller:v0001
+      - image: sk8s/topic-controller:0.0.1-SNAPSHOT
         name: topic-controller
         imagePullPolicy: IfNotPresent
         env:

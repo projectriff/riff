@@ -45,33 +45,15 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>io.fabric8</groupId>
-				<artifactId>docker-maven-plugin</artifactId>
-				<version>${docker-maven.version}</version>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<version>${dockerfile-maven.version}</version>
 				<configuration>
-					<images>
-						<image>
-							<name>sk8s/${project.artifactId}</name>
-							<build>
-								<from>${docker.base}</from>
-								<tags>
-									<tag>latest</tag>
-									<tag>${project.version}</tag>
-									<tag>${docker.tag}</tag>
-								</tags>
-								<entryPoint>
-									<exec>
-										<arg>java</arg>
-										<arg>-jar</arg>
-										<arg>/maven/${project.build.finalName}.jar</arg>
-									</exec>
-								</entryPoint>
-								<assembly>
-									<descriptor>assembly.xml</descriptor>
-								</assembly>
-							</build>
-						</image>
-					</images>
+					<repository>sk8s/${project.artifactId}</repository>
+					<tag>${project.version}</tag>
+					<buildArgs>
+						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+					</buildArgs>
 				</configuration>
 			</plugin>
 		</plugins>
