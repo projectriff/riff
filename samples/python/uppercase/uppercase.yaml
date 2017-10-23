@@ -12,7 +12,6 @@ spec:
   image: sk8s/grpc-py:latest
   protocol: grpc
   input: greetings
-  output: devnull
   env:
   - name: GRPC_PORT
     value: 10382

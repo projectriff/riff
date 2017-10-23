@@ -91,6 +91,7 @@ public class EventDispatchingHandler {
 		XFunction functionResource = event.getResource();
 		String functionName = functionResource.getMetadata().getName();
 		this.functions.remove(functionName);
+		deployer.undeploy(functionResource);
 
 		this.kafkaConsumerMonitor.stopTracking(functionName, functionResource.getSpec().getInput());
 

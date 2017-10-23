@@ -57,6 +57,9 @@ public class FunctionDeployer {
 		this.kubernetesClient = kubernetesClient;
 	}
 
+	/**
+	 * Requests that the given function be deployed with N replicas.
+	 */
 	public void deploy(XFunction functionResource, int replicas) {
 		String functionName = functionResource.getMetadata().getName();
 		System.out.printf("Setting %d replicas for %s%n", replicas, functionName);
@@ -89,9 +92,19 @@ public class FunctionDeployer {
 		// @formatter:on
 	}
 
+	/**
+	 * Returns the system to a clean slate regarding the deployment of the given function.
+	 */
+	public void undeploy(XFunction function) {
+		String functionName = function.getMetadata().getName();
+		this.kubernetesClient.extensions().deployments()
+				.inNamespace(function.getMetadata().getNamespace())
+				.withName(functionName)
+				.delete();
+	}
+
 	private PodSpec buildPodSpec(XFunction function) {
 		PodSpecBuilder builder = new PodSpecBuilder()
-				.withRestartPolicy("Always")
 				.withContainers(buildMainContainer(function), buildSidecarContainer(function));
 		if ("stdio".equals(function.getSpec().getProtocol())) {
 			builder.withVolumes(new VolumeBuilder()

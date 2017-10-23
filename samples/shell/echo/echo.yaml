@@ -12,7 +12,6 @@ spec:
   image: sk8s/echo:v0001
   protocol: stdio
   input: greetings
-  output: devnull
   env:
   - name: FUNCTION_URI
     value: /resources/script/echo.sh
