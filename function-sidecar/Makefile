@@ -28,4 +28,4 @@ fetch-grpc:
 	     -P $(GRPC_DIR)/function
 
 dockerize:
-	docker build . -t sk8s/function-sidecar:v0001	  
+	docker build . -t sk8s/function-sidecar:0.0.1-SNAPSHOT
