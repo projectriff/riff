@@ -10,7 +10,7 @@
 === Build the Docker container for the function code
 
 ```
-./faas build -n wordcount -v v0001 -f samples/shell/wordcount
+./faas build -n wordcount -v latest -f samples/shell/wordcount
 ```
 
 === Create the Function and Topic(s)

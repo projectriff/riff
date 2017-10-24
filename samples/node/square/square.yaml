@@ -15,7 +15,7 @@ kind: Function
 metadata:
   name: square
 spec:
-  image: sk8s/square:v0001
+  image: sk8s/square:latest
   protocol: http
   input: numbers
   output: greetings

@@ -15,7 +15,7 @@ kind: Function
 metadata:
   name: greeter
 spec:
-  image: sk8s/greeter:v0001
+  image: sk8s/greeter:latest
   protocol: http
   input: names
   output: greetings

@@ -15,7 +15,7 @@ kind: Function
 metadata:
   name: wordcount
 spec:
-  image: sk8s/wordcount:v0001
+  image: sk8s/wordcount:latest
   protocol: stdio
   input: names
   output: greetings
