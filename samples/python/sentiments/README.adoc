@@ -10,7 +10,7 @@
 === Build the Docker container for the function code
 
 ```
-./faas build -n sentiments -v v0001 -f samples/python/sentiments
+./faas build -n sentiments -v latest -f samples/python/sentiments
 ```
 
 === Create the Function and Topic(s)

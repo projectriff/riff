@@ -16,7 +16,7 @@
 === Build the Docker container for the function code
 
 ```
-./faas build -n greeter -v v0001 -f samples/java/greeter
+./faas build -n greeter -v latest -f samples/java/greeter
 ```
 
 === Create the Function and Topic(s)

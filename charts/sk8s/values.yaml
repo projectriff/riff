@@ -28,7 +28,7 @@ zipkin:
   replicaCount: 1
   image:
     repository: sk8s/zipkin-server
-    tag: v0001
+    tag: latest
     pullPolicy: IfNotPresent
   service:
     name: zipkin

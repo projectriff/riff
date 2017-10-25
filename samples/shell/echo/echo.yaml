@@ -9,6 +9,6 @@ kind: Function
 metadata:
   name: echo
 spec:
-  image: sk8s/echo:v0001
+  image: sk8s/echo:latest
   protocol: stdio
   input: greetings
