@@ -1,3 +1,4 @@
+{{- if .Values.create.faas -}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -28,3 +29,4 @@ spec:
             value: {{ template "fullname" . }}-kafka:9092
           - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
             value: {{ template "fullname" . }}-zookeeper:2181
+{{- end -}}

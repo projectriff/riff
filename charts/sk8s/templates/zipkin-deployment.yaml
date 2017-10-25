@@ -1,3 +1,4 @@
+{{- if .Values.create.faas -}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -39,3 +40,4 @@ spec:
               fieldRef:
                 apiVersion: v1
                 fieldPath: metadata.namespace
+{{- end -}}
