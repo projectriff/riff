@@ -1,6 +1,9 @@
 # Default values for sk8s.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+create:
+  crd: true
+  faas: true
 eventDispatcher:
   replicaCount: 1
   image:
