@@ -16,4 +16,13 @@ else
   # looks like local
   port=$(kubectl get svc topic-gateway -o jsonpath='{.spec.ports[?(@.name == "http")].nodePort}')
 fi
-curl -H "Content-Type: text/plain" $(minikube ip):$port/messages/$1 -d "$2"
+
+count=${3:-1}
+pause=${4:-0}
+address=$(minikube ip)
+
+for ((i=1; i<=$count; i++)); do
+	curl -H "Content-Type: text/plain" http://$address:$port/messages/$1 -d "$2"
+	sleep $pause
+done
+

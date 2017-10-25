@@ -17,6 +17,7 @@
 package io.sk8s.topic.controller;
 
 import io.sk8s.core.resource.ResourceAddedEvent;
+import io.sk8s.core.resource.ResourceAddedOrModifiedEvent;
 import io.sk8s.core.resource.ResourceDeletedEvent;
 import io.sk8s.kubernetes.api.model.Topic;
 import io.sk8s.kubernetes.api.model.TopicSpec;
@@ -45,7 +46,7 @@ public class TopicCreatingHandler {
 	}
 
 	@EventListener
-	public void onTopicAdded(ResourceAddedEvent<Topic> event) {
+	public void onTopicAdded(ResourceAddedOrModifiedEvent<Topic> event) {
 		Topic resource = event.getResource();
 		String topicName = resource.getMetadata().getName();
 		TopicSpec spec = resource.getSpec();

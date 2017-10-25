@@ -20,6 +20,7 @@ import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
@@ -36,6 +37,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.springframework.util.StopWatch;
 
 /**
  * Tracks current and end offset (and hence lag) for a set of topic/consumerGroup pairs.
@@ -101,18 +104,22 @@ public class KafkaConsumerMonitor implements Closeable {
 		return tracked.stream()
 				.collect(Collectors.toMap(
 						Function.identity(),
-						tg -> logEndOffsetTrackingConsumer.partitionsFor(tg.topic).stream()
-								.map(pi -> new TopicPartition(tg.topic, pi.partition()))
-								.map(
-										tp -> {
-											OffsetAndMetadata committed = consumersByGroup.get(tg.group).committed(tp);
-											if (committed == null) {
-												committed = new OffsetAndMetadata(0L);
-											}
-											return new Offsets(tp.partition(), logEndOffsetTrackingConsumer.position(tp),
-													committed.offset());
-										})
-								.collect(Collectors.toList())));
+						tg -> {
+							List<PartitionInfo> partitionInfos = logEndOffsetTrackingConsumer.partitionsFor(tg.topic);
+							return partitionInfos.stream()
+									.map(pi -> new TopicPartition(tg.topic, pi.partition()))
+									.map(
+											tp -> {
+												OffsetAndMetadata committed = consumersByGroup.get(tg.group).committed(tp);
+												if (committed == null) {
+													committed = new OffsetAndMetadata(0L);
+												}
+												long position = logEndOffsetTrackingConsumer.position(tp);
+												return new Offsets(tp.partition(), position,
+														committed.offset());
+											})
+									.collect(Collectors.toList());
+						}));
 	}
 
 	static class TopicGroup {

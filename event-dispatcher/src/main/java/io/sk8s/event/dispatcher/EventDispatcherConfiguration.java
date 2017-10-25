@@ -42,6 +42,16 @@ public class EventDispatcherConfiguration {
 		return new ResourceEventPublisher(client.functions());
 	}
 
+@Bean
+	public ResourceEventPublisher deploymentEventPublisher(KubernetesClient client) {
+		return new ResourceEventPublisher(client.extensions().deployments());
+	}
+
+@Bean
+	public ResourceEventPublisher topicEventPublisher(Sk8sClient client) {
+		return new ResourceEventPublisher(client.topics());
+	}
+
 	@Bean
 	public KubernetesClient kubernetesClient() {
 		return new DefaultKubernetesClient();

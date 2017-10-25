@@ -16,40 +16,50 @@
 
 package io.sk8s.event.dispatcher;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import io.fabric8.kubernetes.api.model.extensions.Deployment;
 import io.sk8s.core.resource.ResourceAddedOrModifiedEvent;
 import io.sk8s.core.resource.ResourceDeletedEvent;
+import io.sk8s.kubernetes.api.model.Topic;
+import io.sk8s.kubernetes.api.model.TopicSpec;
 import io.sk8s.kubernetes.api.model.XFunction;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
- * Listens for function registration/un-registration and periodically scales deployment of function
- * pods based on the evaluation of a SpEL expression.
+ * Listens for function registration/un-registration and periodically scales deployment of
+ * function pods based on the evaluation of a SpEL expression.
  *
  * @author Eric Bottard
  * @author Mark Fisher
  */
 public class EventDispatchingHandler {
 
+	public static final int DOWN_EDGE_LINGER_PERIOD = 10_000;
+
 	private final Log logger = LogFactory.getLog(EventDispatchingHandler.class);
 
 	// TODO: Change key to ObjectReference or similar
-	private final Map<String, XFunction> functions = new HashMap<>();
+	private final Map<String, XFunction> functions = new ConcurrentHashMap<>();
+
+	// TODO: Change key to ObjectReference or similar
+	private final Map<String, Topic> topics = new ConcurrentHashMap<>();
+
+	private final Map<String, CountDownLatch> topicsReady = new ConcurrentHashMap<>();
+
+	private final Map<String, Integer> actualNbReplicas = new ConcurrentHashMap<>();
+
+	private final Map<String, Long> edgeInfos = new ConcurrentHashMap<>();
 
 	@Autowired
 	private FunctionDeployer deployer;
@@ -58,13 +68,10 @@ public class EventDispatchingHandler {
 
 	private final Thread scalingThread = new Thread(new ScalingMonitor());
 
-	private final Object mutex = new Object();
-
 	private volatile boolean running = false;
 
-	private final KafkaConsumerMonitor kafkaConsumerMonitor = new KafkaConsumerMonitor(System.getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS"));
-
-	private final SpelExpressionParser spelExpressionParser = new SpelExpressionParser();
+	private final KafkaConsumerMonitor kafkaConsumerMonitor = new KafkaConsumerMonitor(
+			System.getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS"));
 
 	@EventListener
 	public void onFunctionRegistered(ResourceAddedOrModifiedEvent<XFunction> event) {
@@ -78,49 +85,94 @@ public class EventDispatchingHandler {
 			running = true;
 			scalingThread.start();
 		}
-		synchronized (mutex) {
-			this.mutex.notify();
+		synchronized (this) {
+			this.notify();
 		}
 
 		logger.info("function added: " + functionName);
 	}
-
 
 	@EventListener
 	public void onFunctionUnregistered(ResourceDeletedEvent<XFunction> event) {
 		XFunction functionResource = event.getResource();
 		String functionName = functionResource.getMetadata().getName();
 		this.functions.remove(functionName);
+		this.actualNbReplicas.remove(functionName);
+
 		deployer.undeploy(functionResource);
 
 		this.kafkaConsumerMonitor.stopTracking(functionName, functionResource.getSpec().getInput());
 
 		updateWakeUpInterval();
-		synchronized (mutex) {
-			this.mutex.notify();
+		synchronized (this) {
+			this.notify();
 		}
 
 		logger.info("function deleted: " + functionName);
 	}
 
+	@EventListener
+	public void onTopicRegistered(ResourceAddedOrModifiedEvent<Topic> event) {
+		Topic topic = event.getResource();
+		String name = topic.getMetadata().getName();
+		topics.put(name, topic);
+		topicsReady.computeIfAbsent(name, i -> new CountDownLatch(1)).countDown();
+	}
+
+	@EventListener
+	public void onTopicUnregistered(ResourceDeletedEvent<Topic> event) {
+		Topic topic = event.getResource();
+		String name = topic.getMetadata().getName();
+		topics.remove(name);
+		topicsReady.remove(name);
+	}
+
+	@EventListener
+	public void onDeploymentRegistered(ResourceAddedOrModifiedEvent<Deployment> event) {
+		Deployment deployment = event.getResource();
+		String functionName = deployment.getMetadata().getName();
+		actualNbReplicas.put(functionName, deployment.getSpec().getReplicas());
+	}
+
+	@EventListener
+	public void onDeploymentUnregistered(ResourceDeletedEvent<Deployment> event) {
+		Deployment deployment = event.getResource();
+		String functionName = deployment.getMetadata().getName();
+		actualNbReplicas.remove(functionName);
+	}
+
 	@PreDestroy
-	public void tearDown() {
+	public synchronized void tearDown() {
 		running = false;
-		synchronized (mutex) {
-			mutex.notify();
-		}
+		this.notify();
 		kafkaConsumerMonitor.close();
 	}
 
 	/**
-	 * Updates the wake up interval of the scaling thread to be the minimal desired value of all
-	 * functions, or zero (sleep forever) if there is no function.
+	 * Updates the wake up interval of the scaling thread to be the minimal desired value of
+	 * all functions, or zero (sleep forever) if there is no function.
 	 */
 	private void updateWakeUpInterval() {
 		this.scalingFrequencyMs = this.functions.values().stream()
-				.mapToInt(f -> f.getSpec().getScalingStrategy() == null ? 1_000
+				.mapToInt(f -> f.getSpec().getScalingStrategy() == null ? 100
 						: f.getSpec().getScalingStrategy().getMaxUpdatePeriodMilliSeconds())
 				.min().orElse(0);
+	}
+
+	private static class ScaleRequestInfo {
+		/* The time when we decided to last scale down. */
+		private long timestamp;
+
+		private int replicas;
+
+		ScaleRequestInfo(int replicas) {
+			update(replicas);
+		}
+
+		public void update(int replicas) {
+			this.replicas = replicas;
+			this.timestamp = System.currentTimeMillis();
+		}
 	}
 
 	private class ScalingMonitor implements Runnable {
@@ -129,30 +181,42 @@ public class EventDispatchingHandler {
 		public void run() {
 			while (running) {
 
-				Map<KafkaConsumerMonitor.TopicGroup, List<KafkaConsumerMonitor.Offsets>> offsets = kafkaConsumerMonitor.compute();
+				Map<KafkaConsumerMonitor.TopicGroup, List<KafkaConsumerMonitor.Offsets>> offsets = kafkaConsumerMonitor
+						.compute();
 				logOffsets(offsets);
 				Map<String, Long> lags = offsets.entrySet().stream()
 						.collect(Collectors.toMap(
-							e -> e.getKey().group,
-							e -> e.getValue().stream()
-									.mapToLong(KafkaConsumerMonitor.Offsets::getLag)
-									.max().getAsLong()
-						));
-				functions.values().parallelStream().forEach(
+								e -> e.getKey().group,
+								e -> e.getValue().stream()
+										.mapToLong(KafkaConsumerMonitor.Offsets::getLag)
+										.max().getAsLong()));
+				functions.values().stream().forEach(
 						f -> {
-							String expression = f.getSpec().getScalingStrategy() != null ? f.getSpec().getScalingStrategy().getReplicasExpression() : "1";
-							Expression spel = spelExpressionParser.parseExpression(expression);
-							EvaluationContext context = new StandardEvaluationContext();
-							context.setVariable("lag", lags.get(f.getMetadata().getName()));
-							int replicas = spel.getValue(context, Integer.class);
-							// TODO no more replicas than topic.partitions
-							deployer.deploy(f, replicas);
-						}
-				);
-				
-				synchronized (mutex) {
+							int desired = computeDesiredNbReplicas(lags, f);
+							String name = f.getMetadata().getName();
+							Integer currentDesired = actualNbReplicas.computeIfAbsent(name, k -> desired);
+							System.out.println("Want " + desired + " for " + name);
+							if (desired < currentDesired) {
+								if (edgeInfos.computeIfAbsent(name, n -> System.currentTimeMillis()) < System.currentTimeMillis() - DOWN_EDGE_LINGER_PERIOD) {
+									deployer.deploy(f, desired);
+									actualNbReplicas.put(name, desired);
+									edgeInfos.remove(name);
+								} else {
+									System.out.printf("Waiting another %dms before scaling down to %d for %s%n", DOWN_EDGE_LINGER_PERIOD -(System.currentTimeMillis() - edgeInfos.get(name)), desired, name);
+								}
+							}
+							else if (desired > currentDesired) {
+								deployer.deploy(f, desired);
+								actualNbReplicas.put(name, desired);
+								edgeInfos.remove(name);
+							} else {
+								edgeInfos.remove(name);
+							}
+						});
+
+				synchronized (EventDispatchingHandler.this) {
 					try {
-						mutex.wait(scalingFrequencyMs);
+						EventDispatchingHandler.this.wait(scalingFrequencyMs);
 					}
 					catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
@@ -161,13 +225,72 @@ public class EventDispatchingHandler {
 			}
 		}
 
+		/**
+		 * Compute the desired nb of replicas for a function. Each function defines 4 values:<ul>
+		 *     <li>minReplicas (>= 0, default 0)</li>
+		 *     <li>maxReplicas (minReplicas <= maxReplicas <= nbPartitions, default nbPartitions)</li>
+		 *     <li>l, the amount of lag required to trigger the first pod to appear, default 1</li>
+		 *     <li>L, the amount of lag required to trigger all (maxReplicas) pods to appear. Default 10.</li>
+		 * </ul>
+		 * This method linearly interpolates based on witnessed lag and clamps the result between min/maxReplicas.
+		 */
+		private int computeDesiredNbReplicas(Map<String, Long> lags, XFunction f) {
+			String fnName = f.getMetadata().getName();
+			long lag = lags.get(fnName);
+
+			// TODO: those 3 numbers part of Function spec
+			int lagForMax = 10;
+			int lagForOne = 1;
+			int min = 0;
+
+			String input = f.getSpec().getInput();
+			double max = nbPartitions(input);
+			double slope = (max - 1) / (lagForMax - lagForOne);
+			int computedReplicas;
+			if (slope > 0d) {
+				// max>1
+				computedReplicas = (int) (1 + (lag - lagForOne) * slope);
+			}
+			else {
+				computedReplicas = lag >= lagForOne ? 1 : 0;
+			}
+			return clamp(computedReplicas, min, (int) max);
+		}
+
+		private int nbPartitions(String input) {
+			waitForTopicEntry(input);
+			TopicSpec spec = topics.get(input).getSpec();
+			if (spec == null || spec.getPartitions() == null) {
+				return 1;
+			}
+			else {
+				return spec.getPartitions();
+			}
+		}
+
+		private void waitForTopicEntry(String input) {
+			try {
+				topicsReady.computeIfAbsent(input, i -> new CountDownLatch(1)).await();
+			}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+		}
+
 		private void logOffsets(Map<KafkaConsumerMonitor.TopicGroup, List<KafkaConsumerMonitor.Offsets>> offsets) {
-			for (Map.Entry<KafkaConsumerMonitor.TopicGroup, List<KafkaConsumerMonitor.Offsets>> entry : offsets.entrySet()) {
+			for (Map.Entry<KafkaConsumerMonitor.TopicGroup, List<KafkaConsumerMonitor.Offsets>> entry : offsets
+					.entrySet()) {
 				System.out.println(entry.getKey());
 				for (KafkaConsumerMonitor.Offsets values : entry.getValue()) {
 					System.out.println("\t" + values + " Lag=" + values.getLag());
 				}
 			}
 		}
+	}
+
+	private static int clamp(int value, int min, int max) {
+		value = Math.min(value, max);
+		value = Math.max(value, min);
+		return value;
 	}
 }

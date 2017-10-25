@@ -2,6 +2,8 @@ apiVersion: extensions.sk8s.io/v1
 kind: Topic
 metadata:
   name: greetings
+spec:
+  partitions: 10
 ---
 
 apiVersion: extensions.sk8s.io/v1
@@ -16,5 +18,4 @@ spec:
   - name: FUNCTION_URI
     value: /resources/script/echo.sh
   scalingStrategy:
-    maxUpdatePeriodMilliSeconds: 5000
-    replicasExpression: "#lag"
+    maxUpdatePeriodMilliSeconds: 100
