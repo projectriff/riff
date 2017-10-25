@@ -22,6 +22,20 @@ spec:
         - name: {{ .Chart.Name }}-topic-gateway
           image: "{{ .Values.topicGateway.image.repository }}:{{ .Values.topicGateway.image.tag }}"
           imagePullPolicy: {{ .Values.topicGateway.image.pullPolicy }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.topicGateway.service.internalPort }}
+            initialDelaySeconds: 90
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.topicGateway.service.internalPort }}
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 5
           ports:
             - containerPort: {{ .Values.topicGateway.service.internalPort }}
           env:

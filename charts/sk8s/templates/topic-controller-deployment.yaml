@@ -22,6 +22,22 @@ spec:
         - name: {{ .Chart.Name }}-topic-controller
           image: "{{ .Values.topicController.image.repository }}:{{ .Values.topicController.image.tag }}"
           imagePullPolicy: {{ .Values.topicController.image.pullPolicy }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 5
+          ports:
+            - containerPort: 8080
           env:
           - name: JAVA_TOOL_OPTIONS
             value: '-Xmx512m'
