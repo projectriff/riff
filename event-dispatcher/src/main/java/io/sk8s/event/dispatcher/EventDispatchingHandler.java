@@ -144,31 +144,8 @@ public class EventDispatchingHandler {
 		kafkaConsumerMonitor.close();
 	}
 
-	/**
-	 * Updates the wake up interval of the scaling thread to be the minimal desired value of
-	 * all functions, or zero (sleep forever) if there is no function.
-	 */
 	private void updateWakeUpInterval() {
-		this.scalingFrequencyMs = this.functions.values().stream()
-				.mapToInt(f -> f.getSpec().getScalingStrategy() == null ? 100
-						: f.getSpec().getScalingStrategy().getMaxUpdatePeriodMilliSeconds())
-				.min().orElse(0);
-	}
-
-	private static class ScaleRequestInfo {
-		/* The time when we decided to last scale down. */
-		private long timestamp;
-
-		private int replicas;
-
-		ScaleRequestInfo(int replicas) {
-			update(replicas);
-		}
-
-		public void update(int replicas) {
-			this.replicas = replicas;
-			this.timestamp = System.currentTimeMillis();
-		}
+		this.scalingFrequencyMs = this.functions.isEmpty() ? 0 : 100;
 	}
 
 	private class ScalingMonitor implements Runnable {
@@ -244,21 +221,21 @@ public class EventDispatchingHandler {
 			String fnName = f.getMetadata().getName();
 			long lag = lags.get(fnName);
 
-			// TODO: those 3 numbers part of Function spec
-			int lagForMax = 10;
-			int lagForOne = 1;
+			// TODO: those 3 numbers part of Function spec?
+			int bigL = 10;
+			int littleL = 1;
 			int min = 0;
 
 			String input = f.getSpec().getInput();
 			double max = nbPartitions(input);
-			double slope = (max - 1) / (lagForMax - lagForOne);
+			double slope = (max - 1) / (bigL - littleL);
 			int computedReplicas;
 			if (slope > 0d) {
 				// max>1
-				computedReplicas = (int) (1 + (lag - lagForOne) * slope);
+				computedReplicas = (int) (1 + (lag - littleL) * slope);
 			}
 			else {
-				computedReplicas = lag >= lagForOne ? 1 : 0;
+				computedReplicas = lag >= littleL ? 1 : 0;
 			}
 			return clamp(computedReplicas, min, (int) max);
 		}
