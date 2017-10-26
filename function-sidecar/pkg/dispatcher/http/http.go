@@ -31,12 +31,12 @@ type httpDispatcher struct {
 func (httpDispatcher) Dispatch(in interface{}) (interface{}, error) {
 	slice := ([]byte)(in.(string))
 	resp, err := http.Post("http://localhost:8080", "text/plain", bytes.NewReader(slice))
-	defer resp.Body.Close()
 
 	if err != nil {
 		log.Printf("Error invoking http://localhost:8080: %v", err)
 		return nil, err
 	}
+	defer resp.Body.Close()
 	out, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Error reading response", err)
