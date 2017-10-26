@@ -32,7 +32,7 @@ topicGateway:
     pullPolicy: IfNotPresent
   service:
     name: topic-gateway
-    type: NodePort
+    type: LoadBalancer
     externalPort: 80
     internalPort: 8080
 grafana:
@@ -43,7 +43,7 @@ grafana:
     pullPolicy: IfNotPresent
   service:
     name: prometheus
-    type: NodePort
+    type: LoadBalancer
     externalPort: 3000
     internalPort: 3000
 prometheus:
@@ -54,7 +54,7 @@ prometheus:
     pullPolicy: IfNotPresent
   service:
     name: prometheus
-    type: NodePort
+    type: LoadBalancer
     externalPort: 9090
     internalPort: 9090
 zipkin:
@@ -65,7 +65,7 @@ zipkin:
     pullPolicy: IfNotPresent
   service:
     name: zipkin
-    type: NodePort
+    type: LoadBalancer
     externalPort: 9411
     internalPort: 9411
 zookeeper:
