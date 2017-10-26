@@ -16,23 +16,16 @@ Copyright 2017 the original author or authors.
 '''
 __author__ = 'David Turanski'
 
-import sys
-import os
-import zipfile
 import importlib
 import ntpath
+import os
 import os.path
-import signal
+import sys
 import traceback
-from urlparse import urlparse
+import zipfile
 from shutil import copyfile
-from os import listdir
-from os.path import isfile
+from urlparse import urlparse
 
-# def signal_term_handler(signal, frame):
-#     sys.exit(0)
-#
-# signal.signal(signal.SIGINT, signal_term_handler)
 
 def run_function(func):
     while True:
