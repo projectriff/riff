@@ -17,5 +17,3 @@ spec:
   env:
   - name: FUNCTION_URI
     value: /resources/script/echo.sh
-  scalingStrategy:
-    maxUpdatePeriodMilliSeconds: 100
