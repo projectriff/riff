@@ -180,9 +180,10 @@ Once the app opens click on "Add data source" and enter the following:
 ----
 Name:   sk8s
 Type:   Prometheus
-Url:    http://demo-sk8s-prometheus:9090    [this must match the service name 
-                                             based on the name given to the release 
-                                             which was `demo` in our case]
+Url:    http://demo-sk8s-prometheus:9090    [for Helm install this must match the service 
+                                             name based on the name given to the release 
+                                             which was "demo" in our case. For a manual 
+                                             install use http://prometheus:9090]
 Access: proxy
 ----
 
