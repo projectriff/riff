@@ -64,7 +64,7 @@
 				<artifactId>dockerfile-maven-plugin</artifactId>
 				<version>${dockerfile-maven.version}</version>
 				<configuration>
-					<repository>${docker.org}/${docker.image.prefix}${project.artifactId}</repository>
+					<repository>${docker.org}/${project.artifactId}</repository>
 					<tag>${project.version}</tag>
 					<buildArgs>
 						<JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
