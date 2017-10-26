@@ -130,7 +130,7 @@ public class JobLauncher {
 
 	private Container buildSidecarContainer(XFunction function) {
 		ContainerBuilder builder = new ContainerBuilder().withName("sidecar")
-				.withImage("sk8s/function-sidecar:0.0.1-SNAPSHOT")
+				.withImage(properties.getSidecarImageName())
 				.withImagePullPolicy("IfNotPresent")
 				.withEnv(buildSidecarEnvVars(function));
 		if ("stdio".equals(function.getSpec().getProtocol())) {
