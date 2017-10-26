@@ -50,21 +50,11 @@ type FunctionSpec struct {
 	// +optional
 	Env []FunctionEnvVar `json:"env,omitempty"`
 
-	// +optional
-	ScalingStrategy *ScalingStrategy `json:"scalingStrategy,omitempty"`
 }
 
 type FunctionEnvVar struct {
 	Name      string `json:"name"`
 	Value     string `json:"value"`
-}
-
-type ScalingStrategy struct {
-
-	// +optional
-	MaxUpdatePeriodMilliSeconds *int32 `json:"maxUpdatePeriodMilliSeconds,omitempty"`
-
-	ReplicasExpression string `json:"replicasExpression"`
 }
 
 // Status (computed) for a function
