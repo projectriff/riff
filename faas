@@ -134,6 +134,7 @@ function apply() {
 function delete() {
   echo "Deleting $FUNCTION resource[s]"
   kubectl delete function $FUNCTION
+  kubectl delete all -l function=$FUNCTION
 }
 
 function list() {
