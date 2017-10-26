@@ -25,7 +25,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class EventDispatcherProperties {
 
 	private String namespace = "default";
-	private String sidecarImageName = "sk8s/function-sidecar";
+	private String sidecarImageName = "sk8s/function-sidecar:v0.0.1-SNAPSHOT";
 
 	public String getNamespace() {
 		return namespace;
