@@ -21,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,7 +40,6 @@ public class TopicGatewayController {
 	public String publishMessage(@PathVariable String topic, @RequestBody String payload) throws UnsupportedEncodingException {
 		Message<byte[]> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8.name()))
 				.setHeader("topic", topic)
-				.setHeader(MessageHeaders.REPLY_CHANNEL, "foo")
 				.build();
 		this.publisher.publishMessage(topic, message);
 		return "message published to topic: " + topic + "\n";
