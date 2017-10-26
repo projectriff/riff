@@ -4,34 +4,64 @@
 create:
   crd: true
   faas: true
+enable:
+  metricsDashboard: false
+  tracingDashboard: false
 eventDispatcher:
   replicaCount: 1
   image:
     repository: sk8s/event-dispatcher
-    tag: v0002
+    tag: 0.0.1-SNAPSHOT
     pullPolicy: IfNotPresent
+  service:
+    name: event-dispatcher
+    type: ClusterIP
+    externalPort: 80
+    internalPort: 8080
 topicController:
   replicaCount: 1
   image:
     repository: sk8s/topic-controller
-    tag: v0002
+    tag: 0.0.1-SNAPSHOT
     pullPolicy: IfNotPresent
 topicGateway:
   replicaCount: 1
   image:
     repository: sk8s/topic-gateway
-    tag: v0002
+    tag: 0.0.1-SNAPSHOT
     pullPolicy: IfNotPresent
   service:
     name: topic-gateway
     type: NodePort
     externalPort: 80
     internalPort: 8080
+grafana:
+  replicaCount: 1
+  image:
+    repository: grafana/grafana
+    tag: 4.4.1
+    pullPolicy: IfNotPresent
+  service:
+    name: prometheus
+    type: NodePort
+    externalPort: 3000
+    internalPort: 3000
+prometheus:
+  replicaCount: 1
+  image:
+    repository: prom/prometheus
+    tag: v1.7.1
+    pullPolicy: IfNotPresent
+  service:
+    name: prometheus
+    type: NodePort
+    externalPort: 9090
+    internalPort: 9090
 zipkin:
   replicaCount: 1
   image:
     repository: sk8s/zipkin-server
-    tag: v0001
+    tag: 0.0.1-SNAPSHOT
     pullPolicy: IfNotPresent
   service:
     name: zipkin
@@ -42,7 +72,7 @@ zookeeper:
   replicaCount: 1
   image:
     repository: wurstmeister/zookeeper
-    tag: latest
+    tag: 3.4.6
     pullPolicy: IfNotPresent
   service:
     name: zookeeper
@@ -53,7 +83,7 @@ kafka:
   replicaCount: 1
   image:
     repository: wurstmeister/kafka
-    tag: latest
+    tag: 0.11.0.1
     pullPolicy: IfNotPresent
   service:
     name: kafka

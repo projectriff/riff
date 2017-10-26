@@ -1,25 +1,25 @@
 {{- if .Values.create.faas -}}
-{{- if .Values.enable.tracingDashboard -}}
+{{- if .Values.enable.metricsDashboard -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "fullname" . }}-zipkin
+  name: {{ template "fullname" . }}-prometheus
   labels:
     app: {{ template "name" . }}
-    component: zipkin
+    component: prometheus
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.zipkin.service.type }}
+  type: {{ .Values.prometheus.service.type }}
   ports:
-    - port: {{ .Values.zipkin.service.externalPort }}
-      targetPort: {{ .Values.zipkin.service.internalPort }}
+    - port: {{ .Values.prometheus.service.externalPort }}
+      targetPort: {{ .Values.prometheus.service.internalPort }}
       protocol: TCP
-      name: {{ .Values.zipkin.service.name }}
+      name: {{ .Values.prometheus.service.name }}
   selector:
     app: {{ template "name" . }}
-    component: zipkin
+    component: prometheus
     release: {{ .Release.Name }}
 {{- end -}}
 {{- end -}}

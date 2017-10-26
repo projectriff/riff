@@ -1,25 +1,23 @@
 {{- if .Values.create.faas -}}
-{{- if .Values.enable.tracingDashboard -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "fullname" . }}-zipkin
+  name: {{ template "fullname" . }}-event-dispatcher
   labels:
     app: {{ template "name" . }}
-    component: zipkin
+    component: event-dispatcher
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.zipkin.service.type }}
+  type: {{ .Values.eventDispatcher.service.type }}
   ports:
-    - port: {{ .Values.zipkin.service.externalPort }}
-      targetPort: {{ .Values.zipkin.service.internalPort }}
+    - port: {{ .Values.eventDispatcher.service.externalPort }}
+      targetPort: {{ .Values.eventDispatcher.service.internalPort }}
       protocol: TCP
-      name: {{ .Values.zipkin.service.name }}
+      name: {{ .Values.eventDispatcher.service.name }}
   selector:
     app: {{ template "name" . }}
-    component: zipkin
+    component: event-dispatcher
     release: {{ .Release.Name }}
-{{- end -}}
 {{- end -}}

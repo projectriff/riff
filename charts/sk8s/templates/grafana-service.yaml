@@ -1,25 +1,25 @@
 {{- if .Values.create.faas -}}
-{{- if .Values.enable.tracingDashboard -}}
+{{- if .Values.enable.metricsDashboard -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "fullname" . }}-zipkin
+  name: {{ template "fullname" . }}-grafana
   labels:
     app: {{ template "name" . }}
-    component: zipkin
+    component: grafana
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.zipkin.service.type }}
+  type: {{ .Values.grafana.service.type }}
   ports:
-    - port: {{ .Values.zipkin.service.externalPort }}
-      targetPort: {{ .Values.zipkin.service.internalPort }}
+    - port: {{ .Values.grafana.service.externalPort }}
+      targetPort: {{ .Values.grafana.service.internalPort }}
       protocol: TCP
-      name: {{ .Values.zipkin.service.name }}
+      name: {{ .Values.grafana.service.name }}
   selector:
     app: {{ template "name" . }}
-    component: zipkin
+    component: grafana
     release: {{ .Release.Name }}
 {{- end -}}
 {{- end -}}
