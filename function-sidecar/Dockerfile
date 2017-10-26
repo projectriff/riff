@@ -1,6 +1,5 @@
-FROM golang:1.8
+FROM scratch
 
-WORKDIR /go/src/github.com/sk8sio/function-sidecar
-COPY . .
-RUN go build cmd/function-sidecar.go
-ENTRYPOINT ["./function-sidecar"]
+ADD function-sidecar /
+
+CMD ["/function-sidecar"]

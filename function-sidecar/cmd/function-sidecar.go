@@ -102,6 +102,8 @@ func main() {
 					}
 					outMessage := &sarama.ProducerMessage{Topic: output.(string), Value: sarama.ByteEncoder(bytesOut)}
 					producer.Input() <- outMessage
+				} else {
+					fmt.Fprintf(os.Stdout, "=== Not sending function return value as function did not provide an output channel. Raw result = %s\n", dispatched)
 				}
 				consumer.MarkOffset(msg, "") // mark message as processed
 			}

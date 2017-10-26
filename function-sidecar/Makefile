@@ -28,4 +28,8 @@ fetch-grpc:
 	     -P $(GRPC_DIR)/function
 
 dockerize:
+	# This builds the executable from Go sources on *your* machine, targeting Linux OS
+	# and linking everything statically, to minimize Docker image size
+	# See e.g. https://blog.codeship.com/building-minimal-docker-containers-for-go-applications/ for details
+	CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o $(OUTPUT) cmd/function-sidecar.go
 	docker build . -t sk8s/function-sidecar:0.0.1-SNAPSHOT

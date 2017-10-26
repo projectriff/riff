@@ -24,6 +24,7 @@ import (
 	"github.com/sk8sio/function-sidecar/pkg/dispatcher"
 	"log"
 	"golang.org/x/net/context"
+	"time"
 )
 
 var _ = function.NewStringFunctionClient(nil)
@@ -43,7 +44,8 @@ func (this grpcDispatcher) Dispatch(in interface{}) (interface{}, error) {
 }
 
 func NewGrpcDispatcher() dispatcher.Dispatcher {
-	conn, err := grpc.Dial("localhost:10382", grpc.WithInsecure())
+	context, _ := context.WithTimeout(context.Background(), 60 * time.Second)
+	conn, err := grpc.DialContext(context, "localhost:10382", grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}

@@ -33,9 +33,9 @@ func (httpDispatcher) Dispatch(in interface{}) (interface{}, error) {
 	slice := ([]byte)(in.(string))
 
 	client := http.Client{
-		Timeout: time.Duration(10 * time.Second),
+		Timeout: time.Duration(60 * time.Second),
 	}
-	resp, err := client.Post("http://localhost:8080", "text/plain", bytes.NewReader(slice))
+	resp, err := client.Post("http://[::1]:8080", "text/plain", bytes.NewReader(slice))
 
 	if err != nil {
 		log.Printf("Error invoking http://localhost:8080: %v", err)
