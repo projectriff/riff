@@ -7,6 +7,6 @@ Go implementation of https://github.com/markfisher/sk8s/tree/master/function-sid
 cd $GOPATH
 git clone https://github.com/ericbottard/sk8s-function-sidecar src/github.com/sk8sio/function-sidecar
 cd src/github.com/sk8sio/function-sidecar
-docker build . -t sk8s/function-sidecar:v0001
+make dockerize
 ```
 
