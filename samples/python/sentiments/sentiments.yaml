@@ -19,6 +19,4 @@ spec:
   protocol: stdio
   input: tweets
   output: sentiments
-  env:
-  - name: FUNCTION_URI
-    value: file:///functions/function.py?handler=function.process
+
