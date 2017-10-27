@@ -1,0 +1,8 @@
+apiVersion: extensions.sk8s.io/v1
+kind: Function
+metadata:
+  name: echo
+spec:
+  image: sk8s/echo:v0001
+  protocol: stdio
+  input: greetings

@@ -30,8 +30,8 @@ import io.sk8s.core.resource.ResourceDeletedEvent;
 import io.sk8s.kubernetes.api.model.Topic;
 import io.sk8s.kubernetes.api.model.TopicSpec;
 import io.sk8s.kubernetes.api.model.XFunction;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -45,26 +45,28 @@ import org.springframework.context.event.EventListener;
  */
 public class EventDispatchingHandler {
 
-	public static final int DOWN_EDGE_LINGER_PERIOD = 10_000;
+	private static final int DOWN_EDGE_LINGER_PERIOD = 10_000;
 
-	private final Log logger = LogFactory.getLog(EventDispatchingHandler.class);
+	private final Logger logger = LoggerFactory.getLogger(EventDispatchingHandler.class);
 
-	// TODO: Change key to ObjectReference or similar
+	// TODO: Change key to ObjectReference or similar for all these maps
+	// Key is function name
 	private final Map<String, XFunction> functions = new ConcurrentHashMap<>();
 
-	// TODO: Change key to ObjectReference or similar
 	private final Map<String, Topic> topics = new ConcurrentHashMap<>();
 
 	private final Map<String, CountDownLatch> topicsReady = new ConcurrentHashMap<>();
 
-	private final Map<String, Integer> actualNbReplicas = new ConcurrentHashMap<>();
+	/** Keeps track of what the deployments ask. */
+	private final Map<String, Integer> actualReplicaCount = new ConcurrentHashMap<>();
 
+	/** Keeps track of the last time this decided to scale down (but not yet effective). */
 	private final Map<String, Long> edgeInfos = new ConcurrentHashMap<>();
 
 	@Autowired
 	private FunctionDeployer deployer;
 
-	private volatile long scalingFrequencyMs = 0L; // Wait forever
+	private volatile long scalingIntervalMs = 0L; // Wait forever
 
 	private final Thread scalingThread = new Thread(new ScalingMonitor());
 
@@ -95,7 +97,7 @@ public class EventDispatchingHandler {
 		XFunction functionResource = event.getResource();
 		String functionName = functionResource.getMetadata().getName();
 		this.functions.remove(functionName);
-		this.actualNbReplicas.remove(functionName);
+		this.actualReplicaCount.remove(functionName);
 
 		deployer.undeploy(functionResource);
 
@@ -127,14 +129,14 @@ public class EventDispatchingHandler {
 	public void onDeploymentRegistered(ResourceAddedOrModifiedEvent<Deployment> event) {
 		Deployment deployment = event.getResource();
 		String functionName = deployment.getMetadata().getName();
-		actualNbReplicas.put(functionName, deployment.getSpec().getReplicas());
+		actualReplicaCount.put(functionName, deployment.getSpec().getReplicas());
 	}
 
 	@EventListener
 	public void onDeploymentUnregistered(ResourceDeletedEvent<Deployment> event) {
 		Deployment deployment = event.getResource();
 		String functionName = deployment.getMetadata().getName();
-		actualNbReplicas.remove(functionName);
+		actualReplicaCount.remove(functionName);
 	}
 
 	@PreDestroy
@@ -145,7 +147,7 @@ public class EventDispatchingHandler {
 	}
 
 	private void updateWakeUpInterval() {
-		this.scalingFrequencyMs = this.functions.isEmpty() ? 0 : 100;
+		this.scalingIntervalMs = this.functions.isEmpty() ? 0 : 100;
 	}
 
 	private class ScalingMonitor implements Runnable {
@@ -166,20 +168,20 @@ public class EventDispatchingHandler {
 											.max().getAsLong()));
 					functions.values().stream().forEach(
 							f -> {
-								int desired = computeDesiredNbReplicas(lags, f);
+								int desired = computeDesiredReplicaCount(lags, f);
 								String name = f.getMetadata().getName();
-								Integer currentDesired = actualNbReplicas.computeIfAbsent(name, k -> desired);
-								System.out.println("Want " + desired + " for " + name);
+								Integer currentDesired = actualReplicaCount.computeIfAbsent(name, k -> 0);
+								logger.debug("Want {} for {} (Deployement currently set to {})", desired, name, currentDesired);
 								if (desired < currentDesired) {
 									if (edgeInfos.computeIfAbsent(name,
 											n -> System.currentTimeMillis()) < System.currentTimeMillis()
 													- DOWN_EDGE_LINGER_PERIOD) {
 										deployer.deploy(f, desired);
-										actualNbReplicas.put(name, desired);
+										actualReplicaCount.put(name, desired);
 										edgeInfos.remove(name);
 									}
 									else {
-										System.out.printf("Waiting another %dms before scaling down to %d for %s%n",
+										logger.trace("Waiting another {}ms before scaling down to {} for {}",
 												DOWN_EDGE_LINGER_PERIOD
 														- (System.currentTimeMillis() - edgeInfos.get(name)),
 												desired, name);
@@ -187,7 +189,7 @@ public class EventDispatchingHandler {
 								}
 								else if (desired > currentDesired) {
 									deployer.deploy(f, desired);
-									actualNbReplicas.put(name, desired);
+									actualReplicaCount.put(name, desired);
 									edgeInfos.remove(name);
 								}
 								else {
@@ -196,7 +198,7 @@ public class EventDispatchingHandler {
 							});
 
 					try {
-						EventDispatchingHandler.this.wait(scalingFrequencyMs);
+						EventDispatchingHandler.this.wait(scalingIntervalMs);
 					}
 					catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
@@ -206,42 +208,42 @@ public class EventDispatchingHandler {
 		}
 
 		/**
-		 * Compute the desired nb of replicas for a function. Each function defines 4 values:
+		 * Compute the desired nb of replicas for a function. This function leverages these 4 values (currently non configurable):
 		 * <ul>
 		 * <li>minReplicas (>= 0, default 0)</li>
 		 * <li>maxReplicas (minReplicas <= maxReplicas <= nbPartitions, default nbPartitions)</li>
-		 * <li>l, the amount of lag required to trigger the first pod to appear, default 1</li>
-		 * <li>L, the amount of lag required to trigger all (maxReplicas) pods to appear. Default
+		 * <li>lagRequiredForOne, the amount of lag required to trigger the first pod to appear, default 1</li>
+		 * <li>lagRequiredForMax, the amount of lag required to trigger all (maxReplicas) pods to appear. Default
 		 * 10.</li>
 		 * </ul>
 		 * This method linearly interpolates based on witnessed lag and clamps the result between
 		 * min/maxReplicas.
 		 */
-		private int computeDesiredNbReplicas(Map<String, Long> lags, XFunction f) {
+		private int computeDesiredReplicaCount(Map<String, Long> lags, XFunction f) {
 			String fnName = f.getMetadata().getName();
 			long lag = lags.get(fnName);
-
-			// TODO: those 3 numbers part of Function spec?
-			int bigL = 10;
-			int littleL = 1;
-			int min = 0;
-
 			String input = f.getSpec().getInput();
-			double max = nbPartitions(input);
-			double slope = (max - 1) / (bigL - littleL);
+
+			// TODO: those 4 numbers part of Function spec?
+			int lagRequiredForMax = 10;
+			int lagRequiredForOne = 1;
+			int minReplicas = 0;
+			int maxReplicas = nbPartitions(input);
+
+			double slope = ((double) maxReplicas - 1) / (lagRequiredForMax - lagRequiredForOne);
 			int computedReplicas;
 			if (slope > 0d) {
 				// max>1
-				computedReplicas = (int) (1 + (lag - littleL) * slope);
+				computedReplicas = (int) (1 + (lag - lagRequiredForOne) * slope);
 			}
 			else {
-				computedReplicas = lag >= littleL ? 1 : 0;
+				computedReplicas = lag >= lagRequiredForOne ? 1 : 0;
 			}
-			return clamp(computedReplicas, min, (int) max);
+			return clamp(computedReplicas, minReplicas, maxReplicas);
 		}
 
 		private int nbPartitions(String input) {
-			waitForTopicEntry(input);
+			waitForTopic(input);
 			TopicSpec spec = topics.get(input).getSpec();
 			if (spec == null || spec.getPartitions() == null) {
 				return 1;
@@ -251,7 +253,7 @@ public class EventDispatchingHandler {
 			}
 		}
 
-		private void waitForTopicEntry(String input) {
+		private void waitForTopic(String input) {
 			try {
 				topicsReady.computeIfAbsent(input, i -> new CountDownLatch(1)).await();
 			}
@@ -263,9 +265,9 @@ public class EventDispatchingHandler {
 		private void logOffsets(Map<KafkaConsumerMonitor.TopicGroup, List<KafkaConsumerMonitor.Offsets>> offsets) {
 			for (Map.Entry<KafkaConsumerMonitor.TopicGroup, List<KafkaConsumerMonitor.Offsets>> entry : offsets
 					.entrySet()) {
-				System.out.println(entry.getKey());
+				logger.debug(entry.getKey().toString());
 				for (KafkaConsumerMonitor.Offsets values : entry.getValue()) {
-					System.out.println("\t" + values + " Lag=" + values.getLag());
+					logger.debug("\t" + values + " Lag=" + values.getLag());
 				}
 			}
 		}

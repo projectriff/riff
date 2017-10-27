@@ -51,7 +51,7 @@ public class KafkaConsumerMonitor implements Closeable {
 
 	private final Map<String, Consumer<?, ?>> consumersByGroup = new HashMap<>();
 
-	private final String monitoringConsumerGroupID = "monitoring_consumer_" + UUID.randomUUID().toString();
+	private final String monitoringConsumerGroupID = "monitor_" + UUID.randomUUID().toString();
 
 	private volatile Consumer<?,?> logEndOffsetTrackingConsumer;
 
