@@ -21,6 +21,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.sk8s.core.resource.ResourceEventPublisher;
 import io.sk8s.kubernetes.client.Sk8sClient;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableBinding
+@EnableConfigurationProperties(EventDispatcherProperties.class)
 public class EventDispatcherConfiguration {
 
 	@Bean

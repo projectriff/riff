@@ -39,6 +39,7 @@ import io.sk8s.kubernetes.api.model.XFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -56,6 +57,9 @@ public class FunctionDeployer {
 	private final KubernetesClient kubernetesClient;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
+
+	@Autowired
+	private EventDispatcherProperties properties;
 
 	public FunctionDeployer(KubernetesClient kubernetesClient) {
 		this.kubernetesClient = kubernetesClient;
