@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>io.sk8s</groupId>
 		<artifactId>sk8s-parent</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>${sk8s.version}</version>
 		<relativePath/>
 	</parent>
 
