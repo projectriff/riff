@@ -36,6 +36,8 @@ import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.sk8s.kubernetes.api.model.FunctionEnvVar;
 import io.sk8s.kubernetes.api.model.XFunction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.util.ObjectUtils;
 
@@ -48,6 +50,8 @@ import org.springframework.util.ObjectUtils;
  * @author Mark Fisher
  */
 public class FunctionDeployer {
+
+	private final static Logger logger = LoggerFactory.getLogger(FunctionDeployer.class);
 
 	private final KubernetesClient kubernetesClient;
 
@@ -62,7 +66,7 @@ public class FunctionDeployer {
 	 */
 	public void deploy(XFunction functionResource, int replicas) {
 		String functionName = functionResource.getMetadata().getName();
-		System.out.printf("Setting %d replicas for %s%n", replicas, functionName);
+		logger.debug("Setting {} replicas for {}", replicas, functionName);
 		// @formatter:off
 		this.kubernetesClient.extensions().deployments()
 				.inNamespace(functionResource.getMetadata().getNamespace())

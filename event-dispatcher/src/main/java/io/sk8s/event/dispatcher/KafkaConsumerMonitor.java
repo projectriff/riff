@@ -25,7 +25,6 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.io.Closeable;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,8 +36,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.springframework.util.StopWatch;
 
 /**
  * Tracks current and end offset (and hence lag) for a set of topic/consumerGroup pairs.
@@ -55,9 +52,7 @@ public class KafkaConsumerMonitor implements Closeable {
 
 	private volatile Consumer<?,?> logEndOffsetTrackingConsumer;
 
-	private final Set<TopicGroup> tracked = new HashSet<>();
-
-	private final static Collection<TopicPartition> FOR_ALL_PARTITIONS = Collections.emptyList();
+	private final Set<Subscription> tracked = new HashSet<>();
 
 	public KafkaConsumerMonitor(String host) {
 		this.host = host;
@@ -65,8 +60,8 @@ public class KafkaConsumerMonitor implements Closeable {
 
 	@Override
 	public synchronized void close() {
-		for (TopicGroup topicGroup : tracked) {
-			stopTracking(topicGroup.group, topicGroup.topic);
+		for (Subscription subscription : tracked) {
+			stopTracking(subscription.group, subscription.topic);
 		}
 		if (logEndOffsetTrackingConsumer != null) {
 			logEndOffsetTrackingConsumer.close();
@@ -78,12 +73,12 @@ public class KafkaConsumerMonitor implements Closeable {
 			logEndOffsetTrackingConsumer = createNewConsumer(monitoringConsumerGroupID);
 		}
 		consumersByGroup.computeIfAbsent(group, k -> createNewConsumer(group));
-		tracked.add(new TopicGroup(topic, group));
+		tracked.add(new Subscription(topic, group));
 		reassignPartitions();
 	}
 
 	public synchronized void stopTracking(String group, String topic) {
-		tracked.remove(new TopicGroup(topic, group));
+		tracked.remove(new Subscription(topic, group));
 		if (tracked.stream().noneMatch(tg -> tg.group.equals(group))) {
 			consumersByGroup.remove(group).close();
 		}
@@ -98,8 +93,8 @@ public class KafkaConsumerMonitor implements Closeable {
 						).collect(Collectors.toSet()));
 	}
 
-	public Map<TopicGroup, List<Offsets>> compute() {
-		logEndOffsetTrackingConsumer.seekToEnd(FOR_ALL_PARTITIONS);
+	public Map<Subscription, List<Offsets>> compute() {
+		logEndOffsetTrackingConsumer.seekToEnd(Collections.emptySet()); // Means "all currently assigned"
 
 		return tracked.stream()
 				.collect(Collectors.toMap(
@@ -122,12 +117,12 @@ public class KafkaConsumerMonitor implements Closeable {
 						}));
 	}
 
-	static class TopicGroup {
+	static class Subscription {
 		final String topic;
 	
 		final String group;
 
-		TopicGroup(String topic, String group) {
+		Subscription(String topic, String group) {
 			this.topic = topic;
 			this.group = group;
 		}
@@ -136,7 +131,7 @@ public class KafkaConsumerMonitor implements Closeable {
 		public boolean equals(Object o) {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
-			TopicGroup that = (TopicGroup) o;
+			Subscription that = (Subscription) o;
 			return Objects.equals(topic, that.topic) &&
 					Objects.equals(group, that.group);
 		}
@@ -148,7 +143,7 @@ public class KafkaConsumerMonitor implements Closeable {
 
 		@Override
 		public String toString() {
-			return "TopicGroup{" +
+			return "Subscription{" +
 					"topic='" + topic + '\'' +
 					", group='" + group + '\'' +
 					'}';

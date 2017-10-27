@@ -66,7 +66,7 @@ public class EventDispatchingHandler {
 	@Autowired
 	private FunctionDeployer deployer;
 
-	private volatile long scalingIntervalMs = 0L; // Wait forever
+	private volatile long scalingMonitorIntervalMs = 0L; // Wait forever
 
 	private final Thread scalingThread = new Thread(new ScalingMonitor());
 
@@ -82,7 +82,7 @@ public class EventDispatchingHandler {
 		this.functions.put(functionName, functionResource);
 		this.kafkaConsumerMonitor.beginTracking(functionName, functionResource.getSpec().getInput());
 
-		updateWakeUpInterval();
+		updateMonitorInterval();
 		if (!running) {
 			running = true;
 			scalingThread.start();
@@ -103,7 +103,7 @@ public class EventDispatchingHandler {
 
 		this.kafkaConsumerMonitor.stopTracking(functionName, functionResource.getSpec().getInput());
 
-		updateWakeUpInterval();
+		updateMonitorInterval();
 		this.notify();
 
 		logger.info("function deleted: " + functionName);
@@ -146,8 +146,8 @@ public class EventDispatchingHandler {
 		kafkaConsumerMonitor.close();
 	}
 
-	private void updateWakeUpInterval() {
-		this.scalingIntervalMs = this.functions.isEmpty() ? 0 : 100;
+	private void updateMonitorInterval() {
+		this.scalingMonitorIntervalMs = this.functions.isEmpty() ? 0 : 100;
 	}
 
 	private class ScalingMonitor implements Runnable {
@@ -157,7 +157,7 @@ public class EventDispatchingHandler {
 			while (running) {
 				synchronized (EventDispatchingHandler.this) {
 
-					Map<KafkaConsumerMonitor.TopicGroup, List<KafkaConsumerMonitor.Offsets>> offsets = kafkaConsumerMonitor
+					Map<KafkaConsumerMonitor.Subscription, List<KafkaConsumerMonitor.Offsets>> offsets = kafkaConsumerMonitor
 							.compute();
 					logOffsets(offsets);
 					Map<String, Long> lags = offsets.entrySet().stream()
@@ -171,7 +171,7 @@ public class EventDispatchingHandler {
 								int desired = computeDesiredReplicaCount(lags, f);
 								String name = f.getMetadata().getName();
 								Integer currentDesired = actualReplicaCount.computeIfAbsent(name, k -> 0);
-								logger.debug("Want {} for {} (Deployement currently set to {})", desired, name, currentDesired);
+								logger.debug("Want {} for {} (Deployment currently set to {})", desired, name, currentDesired);
 								if (desired < currentDesired) {
 									if (edgeInfos.computeIfAbsent(name,
 											n -> System.currentTimeMillis()) < System.currentTimeMillis()
@@ -198,7 +198,7 @@ public class EventDispatchingHandler {
 							});
 
 					try {
-						EventDispatchingHandler.this.wait(scalingIntervalMs);
+						EventDispatchingHandler.this.wait(scalingMonitorIntervalMs);
 					}
 					catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
@@ -262,8 +262,8 @@ public class EventDispatchingHandler {
 			}
 		}
 
-		private void logOffsets(Map<KafkaConsumerMonitor.TopicGroup, List<KafkaConsumerMonitor.Offsets>> offsets) {
-			for (Map.Entry<KafkaConsumerMonitor.TopicGroup, List<KafkaConsumerMonitor.Offsets>> entry : offsets
+		private void logOffsets(Map<KafkaConsumerMonitor.Subscription, List<KafkaConsumerMonitor.Offsets>> offsets) {
+			for (Map.Entry<KafkaConsumerMonitor.Subscription, List<KafkaConsumerMonitor.Offsets>> entry : offsets
 					.entrySet()) {
 				logger.debug(entry.getKey().toString());
 				for (KafkaConsumerMonitor.Offsets values : entry.getValue()) {
