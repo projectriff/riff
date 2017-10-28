@@ -1,5 +1,4 @@
-FROM continuumio/anaconda:5.0.0
-ADD src/main/python/* /
-RUN mkdir -p /resources
-CMD ["/bin/bash","-c", "/runner.sh"]
+FROM python:2.7.11-slim
+COPY src/main/python/* /
+ENTRYPOINT ["/bin/bash", "-c", "./runner.sh"]
 

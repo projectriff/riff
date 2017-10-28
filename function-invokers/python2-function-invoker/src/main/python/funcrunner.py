@@ -16,17 +16,16 @@ Copyright 2017 the original author or authors.
 '''
 __author__ = 'David Turanski'
 
-import sys
-import os
-import zipfile
 import importlib
 import ntpath
+import os
 import os.path
+import sys
 import traceback
-from urlparse import urlparse
+import zipfile
 from shutil import copyfile
-from os import listdir
-from os.path import isfile
+from urlparse import urlparse
+
 
 def run_function(func):
     while True:
@@ -35,8 +34,8 @@ def run_function(func):
             func(data)
         except KeyboardInterrupt:
             exit(0)
-        except:
-            traceback.print_exc(file=sys.stderr)
+        except Exception:
+            traceback.print_exc(file=sys.stdout)
 
 
 def install_function():
@@ -55,11 +54,9 @@ def install_function():
                 zip_ref.extractall('.')
                 zip_ref.close()
                 sys.stderr.write("Files extracted\n")
-            elif (extension == '.py'):
-                copyfile(url.path, ('./%s' % ntpath.basename(url.path)))
-
-            for f in listdir('.'):
-                sys.stderr.write("%s\n" % f)
+            elif extension == '.py':
+                if not os.path.isfile(url.path):
+                    copyfile(url.path, ('./%s' % ntpath.basename(url.path)))
 
         else:
             sys.stderr.write("scheme %s is not supported\n" % url.scheme)
@@ -69,7 +66,14 @@ def install_function():
         if len(url.query) <= indx or url.query[0:indx] != 'handler=':
             sys.stderr.write("FUNCTION_URI missing handler\n")
             exit(1)
-        mod_name, func_name = url.query[indx:].rsplit('.', 1)
+
+        handler = url.query[indx:]
+        if extension == '.py' and '.' not in handler:
+            func_name = handler
+            mod_name = ntpath.basename(filename)
+        else:
+            mod_name, func_name = handler.rsplit('.', 1)
+
         mod = importlib.import_module(mod_name)
         return getattr(mod, func_name)
 
