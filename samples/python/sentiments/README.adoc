@@ -19,14 +19,6 @@
 ./faas apply -f samples/python/sentiments
 ```
 
-=== Tail the Sidecar Log
-
-In another terminal
-
-```
-./faas logs -n sentiments -t
-```
-
 === Publish a Message
 
 The function performs sentiment analysis on tweets. It accepts JSON and looks only at the `text` field. The input
@@ -34,6 +26,12 @@ is in the form of an array (sorry about the escaped quotes).
 
 ```
 ./publish tweets "[{\"text\":\"happy happy happy\"},{\"text\":\"sad sad sad\"}]"
+```
+
+=== Tail the Sidecar Log
+
+```
+./faas logs -n sentiments -t
 ```
 
 === Delete the function

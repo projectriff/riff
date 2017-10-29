@@ -19,18 +19,16 @@
 ./faas apply -f samples/node/square
 ```
 
-=== Tail the Sidecar Log
-
-In another terminal
-
-```
-./faas logs -n square -t
-```
-
 === Publish a Message
 
 ```
 ./publish numbers 2
+```
+
+=== Tail the Sidecar Log
+
+```
+./faas logs -n square -t
 ```
 
 === Delete the function

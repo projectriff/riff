@@ -25,18 +25,16 @@
 ./faas apply -f samples/java/greeter
 ```
 
-=== Tail the Sidecar Log
-
-In another terminal
-
-```
-./faas logs -n greeter -t
-```
-
 === Publish a Message
 
 ```
 ./publish names World
+```
+
+=== Tail the Sidecar Log
+
+```
+./faas logs -n greeter -t
 ```
 
 === Delete the function

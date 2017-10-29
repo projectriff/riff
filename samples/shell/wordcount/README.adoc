@@ -19,17 +19,16 @@
 ./faas apply -f samples/shell/wordcount
 ```
 
-=== Tail the Sidecar Log
-
-In another terminal
-```
-./faas logs -n wordcount -t
-```
-
 === Publish a Message to the Input Topic
 
 ```
 ./publish names hello
+```
+
+=== Tail the Sidecar Log
+
+```
+./faas logs -n wordcount -t
 ```
 
 === Delete the function

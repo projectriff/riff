@@ -18,17 +18,16 @@
 ./faas apply -f samples/shell/echo
 ```
 
-=== Tail the Sidecar Log
-
-In another terminal
-```
-./faas logs -n echo -t
-```
-
 === Publish a Message to the Input Topic
 
 ```
 ./publish greetings hello
+```
+
+=== Tail the Sidecar Log
+
+```
+./faas logs -n echo -t
 ```
 
 === Delete the function

@@ -19,18 +19,16 @@
 ./faas apply -f samples/python/uppercase
 ```
 
-=== Tail the Sidecar Log
-
-In another terminal
-
-```
-./faas logs -n uppercase -t
-```
-
 === Publish a Message to the Input Topic
 
 ```
 ./publish greetings hello
+```
+
+=== Tail the Sidecar Log
+
+```
+./faas logs -n uppercase -t
 ```
 
 === Delete the function
