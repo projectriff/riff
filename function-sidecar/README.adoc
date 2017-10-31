@@ -10,3 +10,8 @@ cd src/github.com/sk8sio/function-sidecar
 make dockerize
 ```
 
+== Tests (including integration with Kafka)
+Assuming kafka is running locally on port 9092,
+```
+KAFKA_BROKER=localhost:9092 make clean test
+```

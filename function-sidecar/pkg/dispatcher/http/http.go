@@ -26,7 +26,6 @@ import (
 )
 
 type httpDispatcher struct {
-	Foo string
 }
 
 func (httpDispatcher) Dispatch(in interface{}) (interface{}, error) {
@@ -52,5 +51,5 @@ func (httpDispatcher) Dispatch(in interface{}) (interface{}, error) {
 }
 
 func NewHttpDispatcher() dispatcher.Dispatcher {
-	return httpDispatcher{""}
+	return httpDispatcher{}
 }

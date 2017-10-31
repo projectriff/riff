@@ -2,6 +2,9 @@
 OUTPUT = function-sidecar
 GRPC_DIR = pkg/dispatcher/grpc
 
+test: build
+	go test -v ./...
+
 build: $(OUTPUT)
 
 $(OUTPUT): vendor
@@ -11,7 +14,7 @@ vendor: Gopkg.toml
 	dep ensure
 
 clean:
-	rm $(OUTPUT)
+	rm -f $(OUTPUT)
 
 grpc: $(GRPC_DIR)/fntypes/fntypes.pb.go $(GRPC_DIR)/function/function.pb.go
 
