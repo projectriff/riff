@@ -1,4 +1,8 @@
-= Samples
+= Sk8s: a FaaS for Kubernetes - Samples
+
+To Sk8s FaaS link:../README.adoc[README]
+
+== Samples
 
 * Java
   - link:java/greeter/README.adoc[greeter]

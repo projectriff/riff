@@ -1,0 +1,33 @@
+= Sk8s: a FaaS for Kubernetes - Monitoring
+
+To Sk8s FaaS link:README.adoc[README] link:Getting-Started.adoc[Getting Started]
+
+== [[dashboards]]Using the Metrics and Tracing Dashboards
+
+=== Metrics with Grafana
+
+To create the Sk8s Grafana Metrics Dashboard run the following from a terminal with the Sk8s Git repo as the current directory:
+
+----
+./sk8s-grafana-dashboard
+----
+
+To access the Grafana Dashboard run the following from a terminal:
+
+----
+minikube service $(kubectl get svc -l component=grafana -o jsonpath='{.items[0].metadata.name}')
+----
+
+Once the app opens click on the "Home:" link on the top left hand side and select the `sk8s` dashboard.
+
+=== Tracing with Zipkin
+
+To access the Zipkin dashboard run the following from a terminal:
+
+----
+minikube service $(kubectl get svc -l component=zipkin -o jsonpath='{.items[0].metadata.name}')
+----
+
+When the dashboard opens, click on the `Find a trace` link on the top bar. Then select a component from the top-left drop down menu and click the `Find Traces` button. 
+
+
