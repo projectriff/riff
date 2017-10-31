@@ -39,6 +39,8 @@ spec:
           ports:
             - containerPort: {{ .Values.topicGateway.service.internalPort }}
           env:
+          - name: SERVER_PORT
+            value: '{{ .Values.topicGateway.service.internalPort }}'
           - name: JAVA_TOOL_OPTIONS
             value: '-Xmx512m'
           - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS

@@ -25,20 +25,22 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: 8080
+              port: {{ .Values.eventDispatcher.service.internalPort }}
             initialDelaySeconds: 90
             periodSeconds: 15
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /health
-              port: 8080
+              port: {{ .Values.eventDispatcher.service.internalPort }}
             initialDelaySeconds: 60
             periodSeconds: 15
             timeoutSeconds: 5
           ports:
-            - containerPort: 8080
+            - containerPort: {{ .Values.eventDispatcher.service.internalPort }}
           env:
+          - name: SERVER_PORT
+            value: '{{ .Values.eventDispatcher.service.internalPort }}'
           - name: JAVA_TOOL_OPTIONS
             value: '-Xmx512m'
           - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
