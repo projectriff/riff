@@ -1,0 +1,83 @@
+= Sk8s: a FaaS for Kubernetes - Getting Started
+
+To Sk8s FaaS link:README.adoc[README]
+
+== Installation
+
+=== [[helm]]Helm install of Sk8s FaaS
+
+Sk8s offers a Helm Chart for deploying the FaaS and its required services to a Kubernetes Cluster.
+The following instructions cover how to initialize Helm and install Sk8s FaaS on the Minikube cluster.
+
+==== Prerequisites
+
+* A running 1.7 Kubernetes cluster with at least 4GB of memory. These instructions assume minikube for now.
+
+----
+minikube start --cpus=4 --memory=4096 --disk-size=64g
+----
+
+==== Install Helm
+
+Helm is comprised of 2 components: one is the client (Helm) the other is the server component (Tiller). The Helm client is run on your local machine and can be installed using the instructions found here: https://github.com/kubernetes/helm/blob/master/README.md#install
+
+Once you have Helm client installed you can install the server component using:
+
+----
+helm init
+----
+
+NOTE: To verify that the Tiller pod has started execute the following command: `kubectl get pod --namespace kube-system` and you should see the `tiller` pod running.
+
+==== Add the Sk8s repository to your Helm environment
+
+Run the following commands to add the `sk8s-incubator` repository:
+
+----
+helm repo add sk8s-incubator http://sk8s-incubator.cfapps.io
+helm repo update
+----
+
+==== Install Sk8s FaaS helm chart
+
+Install the Sk8s Helm chart using the following command:
+
+----
+helm install --name demo sk8s-incubator/sk8s
+----
+
+You should see a number of resources get created in your Minikube. You can see them all using:
+
+----
+kubectl get all,jobs,functions,topics
+----
+
+==== Clone the repo
+
+To work with the demos and Metrics Dashboard you need a clone of the Sk8s repo:
+
+----
+git clone https://github.com/markfisher/sk8s.git
+----
+
+==== Enable Metrics and Tracing Dashboards
+
+You can enable each dashboard by setting flags for the Helm release. For the Metrics Dashboard use
+`--set enable.metricsDashboard=true` and for the Tracing Dashboard use `--set enable.metricsDashboard=true`.
+
+These flags can be set when installing the chart or you can apply them during an upgrade operation.
+Here is an example of upgrading the release and enabling the Metrics Dashboard:
+
+----
+helm upgrade demo sk8s-incubator/sk8s --set enable.metricsDashboard=true
+----
+
+See how to use the link:Monitoring.adoc#dashboards[dashboards] and run some link:samples/README.adoc[samples].
+
+==== To tear it all down
+
+----
+helm delete demo --purge
+----
+
+
