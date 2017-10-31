@@ -14,6 +14,20 @@ spec:
       - image: sk8s/event-dispatcher:0.0.1-SNAPSHOT
         name: event-dispatcher
         imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 90
+          periodSeconds: 15
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 5
         env:
         - name: JAVA_TOOL_OPTIONS
           value: '-Xmx512m'
