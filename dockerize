@@ -5,7 +5,6 @@ topic-controller,\
 topic-gateway,\
 event-dispatcher,\
 function-sidecar,\
-zipkin-server,\
 function-invokers/java-function-invoker,\
 function-invokers/node-function-invoker,\
 function-invokers/python2-function-invoker,\

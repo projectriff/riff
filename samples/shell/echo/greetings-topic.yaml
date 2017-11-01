@@ -3,4 +3,4 @@ kind: Topic
 metadata:
   name: greetings
 spec:
-  partitions: 10
+  partitions: 3 

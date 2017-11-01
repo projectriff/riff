@@ -38,13 +38,13 @@
 			<artifactId>spring-cloud-sleuth-stream</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>io.sk8s</groupId>
 			<artifactId>sk8s-core</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.moelholm</groupId>
-			<artifactId>prometheus-spring-boot-starter</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.sk8s</groupId>

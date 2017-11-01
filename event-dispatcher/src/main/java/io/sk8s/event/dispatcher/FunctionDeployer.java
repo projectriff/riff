@@ -174,7 +174,7 @@ public class FunctionDeployer {
 		config.put("spring.application.name", "sidecar-" + function.getSpec().getInput());
 
 		config.put("spring.cloud.stream.kafka.binder.brokers", System.getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS"));
-		config.put("spring.cloud.stream.kafka.binder.zkNodes", System.getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES"));
+		config.put("spring.cloud.stream.kafka.binder.zkNodes", System.getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_ZKNODES"));
 		config.put("server.port", "-1");
 
 		String json;
