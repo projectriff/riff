@@ -17,14 +17,14 @@ spec:
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
-            path: /health
+            path: /application/status
             port: 8080
           initialDelaySeconds: 60
           periodSeconds: 15
           timeoutSeconds: 5
         readinessProbe:
           httpGet:
-            path: /health
+            path: /application/status
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 10
@@ -34,5 +34,5 @@ spec:
           value: '-Xmx512m'
         - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
           value: kafka:9092
-        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
+        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZKNODES
           value: zookeeper:2181

@@ -5,12 +5,6 @@ metadata:
 ---
 
 apiVersion: extensions.sk8s.io/v1
-kind: Topic
-metadata:
-  name: greetings
----
-
-apiVersion: extensions.sk8s.io/v1
 kind: Function
 metadata:
   name: square
@@ -18,4 +12,3 @@ spec:
   image: sk8s/square:v0001
   protocol: http
   input: numbers
-  output: greetings
