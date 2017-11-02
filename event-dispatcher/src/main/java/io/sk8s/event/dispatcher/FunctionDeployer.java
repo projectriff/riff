@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Makes sure a certain function is running on Kubernetes.
@@ -166,9 +167,13 @@ public class FunctionDeployer {
 	}
 
 	private EnvVar[] buildSidecarEnvVars(XFunction function) {
+		String outputDestination = function.getSpec().getOutput();
+		if (!StringUtils.hasText(outputDestination)) {
+			outputDestination = "replies";
+		}
 		Map<String, Object> config = new LinkedHashMap<>();
 		config.put("spring.cloud.stream.bindings.input.destination", function.getSpec().getInput());
-		config.put("spring.cloud.stream.bindings.output.destination", function.getSpec().getOutput());
+		config.put("spring.cloud.stream.bindings.output.destination", outputDestination);
 		config.put("spring.cloud.stream.bindings.input.group", function.getMetadata().getName());
 		config.put("spring.profiles.active", function.getSpec().getProtocol());
 		config.put("spring.application.name", "sidecar-" + function.getSpec().getInput());

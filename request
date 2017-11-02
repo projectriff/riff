@@ -1,0 +1,14 @@
+#!/bin/bash
+
+svc=$(kubectl get svc -l component=topic-gateway -o jsonpath='{.items}')
+if [[ $svc == "[]" ]] ; then
+  echo "Unable to locate the topic-gateway"
+  exit 1
+else
+  port=$(kubectl get svc -l component=topic-gateway -o jsonpath='{.items[0].spec.ports[?(@.name == "http")].nodePort}')
+fi
+
+address=$(minikube ip)
+
+curl -H "Content-Type: text/plain" http://$address:$port/requests/$1 -d "$2"
+echo ""
