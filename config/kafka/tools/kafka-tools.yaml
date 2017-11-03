@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: kafka
+    component: kafka-tools
+  name: kafka-tools
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kafka
+        component: kafka-tools
+    spec:
+      containers:
+      - name: kafka-tools
+        image: wurstmeister/kafka:0.11.0.1
+        command: ["sleep", "infinity"]
