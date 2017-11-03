@@ -26,15 +26,15 @@ spec:
             httpGet:
               path: /health
               port: {{ .Values.eventDispatcher.service.internalPort }}
-            initialDelaySeconds: 90
+            initialDelaySeconds: 60
             periodSeconds: 15
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /health
               port: {{ .Values.eventDispatcher.service.internalPort }}
-            initialDelaySeconds: 60
-            periodSeconds: 15
+            initialDelaySeconds: 30
+            periodSeconds: 10
             timeoutSeconds: 5
           ports:
             - containerPort: {{ .Values.eventDispatcher.service.internalPort }}
