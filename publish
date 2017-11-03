@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# look for a local deploy
 svc=$(kubectl get svc -l component=topic-gateway -o jsonpath='{.items}')
 if [[ $svc == "[]" ]] ; then
   echo "Unable to locate the topic-gateway"
