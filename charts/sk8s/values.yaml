@@ -14,7 +14,7 @@ eventDispatcher:
     tag: 0.0.1-SNAPSHOT
     pullPolicy: IfNotPresent
   service:
-    name: event-dispatcher
+    name: http
     type: ClusterIP
     externalPort: 80
     internalPort: 8080
@@ -31,7 +31,7 @@ topicGateway:
     tag: 0.0.1-SNAPSHOT
     pullPolicy: IfNotPresent
   service:
-    name: topic-gateway
+    name: http
     type: LoadBalancer
     externalPort: 80
     internalPort: 8080
@@ -42,7 +42,7 @@ grafana:
     tag: 4.4.1
     pullPolicy: IfNotPresent
   service:
-    name: prometheus
+    name: graphana
     type: LoadBalancer
     externalPort: 3000
     internalPort: 3000

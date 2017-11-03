@@ -8,7 +8,8 @@ spec:
     metadata:
       name: event-dispatcher
       labels:
-        app: event-dispatcher
+        app: sk8s
+        component: event-dispatcher
     spec:
       containers:
       - image: sk8s/event-dispatcher:0.0.1-SNAPSHOT

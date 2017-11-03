@@ -3,11 +3,12 @@ kind: Service
 metadata:
   name: topic-controller
   labels:
-    app: topic-controller
+    app: sk8s
+    component: topic-controller
 spec:
   ports:
   - port: 80
     name: http
     targetPort: 8080
   selector:
-    app: topic-controller
+    component: topic-controller

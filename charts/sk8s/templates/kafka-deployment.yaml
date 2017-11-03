@@ -15,7 +15,7 @@ spec:
     metadata:
       labels:
         app: {{ template "name" . }}
-        component: kafka
+        component: kafka-broker
         release: {{ .Release.Name }}
     spec:
       containers:

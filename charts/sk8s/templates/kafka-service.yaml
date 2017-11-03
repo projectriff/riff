@@ -17,6 +17,6 @@ spec:
       name: {{ .Values.kafka.service.name }}
   selector:
     app: {{ template "name" . }}
-    component: kafka
+    component: kafka-broker
     release: {{ .Release.Name }}
 {{- end -}}

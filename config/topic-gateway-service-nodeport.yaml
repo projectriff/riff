@@ -3,7 +3,8 @@ kind: Service
 metadata:
   name: topic-gateway
   labels:
-    app: topic-gateway
+    app: sk8s
+    component: topic-gateway
 spec:
   type: NodePort
   ports:
@@ -14,4 +15,4 @@ spec:
     name: https
     targetPort: 8443
   selector:
-    app: topic-gateway
+    component: topic-gateway
