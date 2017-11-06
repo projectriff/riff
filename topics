@@ -44,7 +44,8 @@ EOF
 
 function list() {
   echo "Listing all Topics"
-  kubectl exec $POD -- /opt/kafka/bin/kafka-topics.sh --list --zookeeper zookeeper:2181
+  zk=$(kubectl get service -l component=zookeeper -o jsonpath='{.items[0].metadata.name}')
+  kubectl exec $POD -- /opt/kafka/bin/kafka-topics.sh --list --zookeeper $zk:2181
 }
 
 function tail() {
