@@ -96,7 +96,7 @@ func TestIntegrationWithKafka(t *testing.T) {
 		if ok {
 			reply := string(msg.Value[2:])
 			if reply != expectedReply {
-				t.Fatal(fmt.Errorf("Received reply [%s] does not match expected expected [%s]", reply, expectedReply))
+				t.Fatal(fmt.Errorf("Received reply [%s] does not match expected reply [%s]", reply, expectedReply))
 			}
 		}
 	case <-time.After(time.Second * 100):
