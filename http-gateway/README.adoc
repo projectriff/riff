@@ -4,9 +4,9 @@ Go implementation of https://github.com/markfisher/sk8s/tree/master/topic-gatewa
 
 == Building
 ```
-cd $GOPATH
+cd $(go env GOPATH)
 git clone https://github.com/ericbottard/sk8s-http-gateway src/github.com/sk8sio/http-gateway
 cd src/github.com/sk8sio/http-gateway
-docker build -t sk8s/topic-gateway:v0001
+make dockerize
 ```
 

@@ -26,9 +26,10 @@ import (
 	"os"
 	"os/signal"
 	"time"
+	"github.com/sk8sio/http-gateway/pkg/message"
 )
 
-func myHandler(producer sarama.AsyncProducer) http.HandlerFunc {
+func messageHandler(producer sarama.AsyncProducer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		topic := r.URL.Path[len("/messages/"):]
 		b, err := ioutil.ReadAll(r.Body)
@@ -36,18 +37,34 @@ func myHandler(producer sarama.AsyncProducer) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		message := &sarama.ProducerMessage{Topic: topic, Value: sarama.ByteEncoder(b)}
+		scsMessage := message.Message{Payload: b, Headers: nil}
+
+		bytesOut, err := message.EncodeMessage(scsMessage)
+		if err != nil {
+			log.Printf("Error encoding message: %v", err)
+			return
+		}
+		kafkaMsg := &sarama.ProducerMessage{Topic: topic, Value: sarama.ByteEncoder(bytesOut)}
+
 		select {
-			case producer.Input() <- message:
-				log.Printf("Sent %v bytes to topic '%v'", len(b), topic)
+			case producer.Input() <- kafkaMsg:
+				w.Write([]byte("message published to topic: " + topic + "\n"))
 		}
 	}
 }
 
+func healthHandler() func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"status":"UP"}`))
+	}
+}
+
+
 func startHttpServer(producer sarama.AsyncProducer) *http.Server {
 	srv := &http.Server{Addr: ":8080"}
 
-	http.HandleFunc("/messages/", myHandler(producer))
+	http.HandleFunc("/messages/", messageHandler(producer))
+	http.HandleFunc("/health", healthHandler())
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
@@ -64,7 +81,7 @@ func main() {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt)
 
-	producer, err := sarama.NewAsyncProducer([]string{os.Getenv("SK8S_TOPIC_GATEWAY_BROKERS")}, nil)
+	producer, err := sarama.NewAsyncProducer([]string{os.Getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS")}, nil)
 	if err != nil {
 		panic(err)
 	}

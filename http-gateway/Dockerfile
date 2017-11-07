@@ -1,6 +1,5 @@
-FROM golang:1.8
+FROM scratch
 
-WORKDIR /go/src/github.com/sk8sio/http-gateway
-COPY . .
-RUN go build cmd/http-gateway.go
-ENTRYPOINT ["./http-gateway"]
+ADD http-gateway /
+
+CMD ["/http-gateway"]
