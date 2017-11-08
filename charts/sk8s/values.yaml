@@ -13,6 +13,9 @@ eventDispatcher:
     repository: sk8s/event-dispatcher
     tag: 0.0.1-SNAPSHOT
     pullPolicy: IfNotPresent
+  sidecarImage:
+    repository: sk8s/function-sidecar
+    name: 0.0.1-SNAPSHOT
   service:
     name: http
     type: ClusterIP

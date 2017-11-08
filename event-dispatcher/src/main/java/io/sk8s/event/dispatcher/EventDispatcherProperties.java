@@ -24,7 +24,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "sk8s.event.dispatcher")
 public class EventDispatcherProperties {
 
-	private String sidecarImageName = "sk8s/function-sidecar:0.0.1-SNAPSHOT";
+	private String sidecarImageName;
 
 	public String getSidecarImageName() {
 		return sidecarImageName;
