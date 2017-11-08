@@ -43,7 +43,7 @@ func main() {
 	}
 
 	consumerConfig := makeConsumerConfig()
-	consumerConfig.Consumer.Offsets.Initial = sarama.OffsetNewest
+	consumerConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
 
 	brokers := []string{saj["spring.cloud.stream.kafka.binder.brokers"].(string)}
 	input := saj["spring.cloud.stream.bindings.input.destination"].(string)

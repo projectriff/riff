@@ -58,9 +58,6 @@ func TestIntegrationWithKafka(t *testing.T) {
 	startErr := cmd.Start()
 	defer cmd.Process.Kill()
 
-	// Allow the sidecar to start. Will need to revisit
-	time.Sleep(5 * time.Second)
-
 	if startErr != nil {
 		t.Fatal(startErr)
 	}
