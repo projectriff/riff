@@ -72,8 +72,12 @@ func main() {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt)
 
-	//go consumeErrors(consumer)
-	//go consumeNotifications(consumer)
+	if consumerConfig.Consumer.Return.Errors {
+		go consumeErrors(consumer)
+	}
+	if consumerConfig.Group.Return.Notifications {
+		go consumeNotifications(consumer)
+	}
 
 	// consume messages, watch signals
 	for {
@@ -138,7 +142,7 @@ func consumeErrors(consumer *cluster.Consumer) {
 
 func makeConsumerConfig() *cluster.Config {
 	consumerConfig := cluster.NewConfig()
-	//consumerConfig.Consumer.Return.Errors = true
-	//consumerConfig.Group.Return.Notifications = true
+	consumerConfig.Consumer.Return.Errors = true
+	consumerConfig.Group.Return.Notifications = true
 	return consumerConfig
 }
