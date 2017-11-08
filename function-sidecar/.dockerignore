@@ -1,9 +1,2 @@
-.gitignore
-.git
-Gopkg.lock
-Gopkg.toml
-LICENSE
-README.adoc
-Dockerfile
-.idea
-Makefile
+*
+!function-sidecar
