@@ -1,20 +1,33 @@
 .PHONY: build clean fetch-grpc grpc dockerize
 OUTPUT = function-sidecar
-GRPC_DIR = pkg/dispatcher/grpc
+OUTPUT_LINUX = function-sidecar-linux
 
-test: build
-	go test -v ./...
+GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
+
+GRPC_DIR = pkg/dispatcher/grpc
 
 build: $(OUTPUT)
 
-$(OUTPUT): vendor
+build-for-docker: $(OUTPUT_LINUX)
+
+$(OUTPUT): $(GO_SOURCES) vendor
 	go build cmd/function-sidecar.go
+
+$(OUTPUT_LINUX): $(GO_SOURCES) vendor
+	# This builds the executable from Go sources on *your* machine, targeting Linux OS
+	# and linking everything statically, to minimize Docker image size
+	# See e.g. https://blog.codeship.com/building-minimal-docker-containers-for-go-applications/ for details
+	CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o $(OUTPUT_LINUX) cmd/function-sidecar.go
 
 vendor: Gopkg.toml
 	dep ensure
 
 clean:
 	rm -f $(OUTPUT)
+	rm -f $(OUTPUT_LINUX)
+
+test: build
+	go test -v ./...
 
 grpc: $(GRPC_DIR)/fntypes/fntypes.pb.go $(GRPC_DIR)/function/function.pb.go
 
@@ -30,9 +43,5 @@ fetch-grpc:
 	wget https://raw.githubusercontent.com/markfisher/sk8s/master/function-proto/src/main/proto/function.proto \
 	     -P $(GRPC_DIR)/function
 
-dockerize:
-	# This builds the executable from Go sources on *your* machine, targeting Linux OS
-	# and linking everything statically, to minimize Docker image size
-	# See e.g. https://blog.codeship.com/building-minimal-docker-containers-for-go-applications/ for details
-	CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o $(OUTPUT) cmd/function-sidecar.go
+dockerize: build-for-docker
 	docker build . -t sk8s/function-sidecar:0.0.1-SNAPSHOT

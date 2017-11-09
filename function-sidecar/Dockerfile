@@ -1,5 +1,5 @@
 FROM scratch
 
-ADD function-sidecar /
+ADD function-sidecar-linux /
 
 CMD ["/function-sidecar"]
