@@ -1,5 +1,5 @@
 FROM scratch
 
-ADD http-gateway /
+ADD http-gateway-linux /http-gateway
 
 CMD ["/http-gateway"]
