@@ -54,7 +54,7 @@ public class TopicGatewayController {
 	@Autowired
 	private MessagePublisher publisher;
 
-	private final Map<String, MonoProcessor<String>> replies = new WeakHashMap<>();
+	private final Map<String, MonoProcessor<Object>> replies = new WeakHashMap<>();
 
 	@PostMapping("/messages/{topic}")
 	public String publishMessage(@PathVariable String topic, @RequestBody String payload,
@@ -68,7 +68,7 @@ public class TopicGatewayController {
 	}
 
 	@PostMapping("/requests/{topic}")
-	public Mono<String> publishRequest(@PathVariable String topic, @RequestBody String payload,
+	public Mono<Object> publishRequest(@PathVariable String topic, @RequestBody String payload,
 			@RequestHeader("Content-Type") String contentType) throws UnsupportedEncodingException {
 		String correlationId = UUID.randomUUID().toString();
 		Message<byte[]> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8.name()))
@@ -76,24 +76,23 @@ public class TopicGatewayController {
 				.setHeader(MessageHeaders.CONTENT_TYPE, contentType)
 				.setHeader("correlationId", correlationId)
 				.build();
-		MonoProcessor<String> reply = MonoProcessor.create();
+		MonoProcessor<Object> reply = MonoProcessor.create();
 		this.replies.put(correlationId, reply);
 		this.publisher.publishMessage(topic, message);
-		this.logger.debug("message published to '%s' with correlationId: %s", topic, correlationId);
+		this.logger.debug("Message published to '{}' with correlationId: {}", topic, correlationId);
 		return reply;
 	}
 
 	@StreamListener(Sink.INPUT)
-	// TODO: switch to byte[] payload and handle conversion from String
-	public void handleReply(Message<String> reply) {
+	public void handleReply(Message<Object> reply) {
 		String correlationId = reply.getHeaders().get("correlationId", String.class);
 		if (StringUtils.hasText(correlationId)) {
-			MonoProcessor<String> replyHolder = this.replies.get(correlationId);
+			MonoProcessor<Object> replyHolder = this.replies.remove(correlationId);
 			if (replyHolder != null) {
 				replyHolder.onNext(reply.getPayload());
 			}
 			else {
-				logger.debug("received reply for timed out request: " + reply);
+				logger.debug("Received reply for timed out request: " + reply);
 			}
 		}
 	}
