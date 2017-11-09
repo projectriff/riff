@@ -10,7 +10,7 @@
 		<groupId>io.sk8s</groupId>
 		<artifactId>sk8s-parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath />
+		<relativePath>../..</relativePath>
 	</parent>
 
 	<properties>
@@ -20,18 +20,13 @@
 		<spring-cloud.version>Dalston.SR2</spring-cloud.version>
 		<spring-cloud-function.version>1.0.0.BUILD-SNAPSHOT</spring-cloud-function.version>
 		<spring-cloud-deployer.version>1.2.0.RELEASE</spring-cloud-deployer.version>
+		<reactor.version>3.0.7.RELEASE</reactor.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
-			<groupId>io.projectreactor</groupId>
-			<artifactId>reactor-core</artifactId>
-			<version>3.0.7.RELEASE</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-function-web</artifactId>
-			<version>${spring-cloud-function.version}</version>
+			<artifactId>spring-cloud-function-context</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -60,6 +55,13 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
 				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-function-dependencies</artifactId>
+				<version>${spring-cloud-function.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
