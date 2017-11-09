@@ -89,27 +89,11 @@ public class TopicGatewayController {
 		if (StringUtils.hasText(correlationId)) {
 			MonoProcessor<Object> replyHolder = this.replies.remove(correlationId);
 			if (replyHolder != null) {
-				replyHolder.onNext(new Person((String)reply.getPayload()));
+				replyHolder.onNext(reply.getPayload());
 			}
 			else {
 				logger.debug("Received reply for timed out request: " + reply);
 			}
-		}
-	}
-
-	public static class Person {
-		private String name;
-
-		public Person(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
 		}
 	}
 }
