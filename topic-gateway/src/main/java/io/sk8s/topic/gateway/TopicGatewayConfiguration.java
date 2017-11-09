@@ -18,6 +18,7 @@ package io.sk8s.topic.gateway;
 
 import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.cloud.sleuth.instrument.messaging.MessagingSpanTextMapInjector;
+import org.springframework.cloud.stream.binder.BinderFactory;
 import org.springframework.cloud.stream.binding.BinderAwareChannelResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,10 +43,10 @@ public class TopicGatewayConfiguration {
 	}
 
 	@Bean
-	public AbstractMappingMessageRouter mappingMessageRouter(BinderAwareChannelResolver channelResolver) {
+	public AbstractMappingMessageRouter mappingMessageRouter(BinderFactory binderFactory, BinderAwareChannelResolver channelResolver) {
 		AbstractMappingMessageRouter router = new HeaderValueRouter("topic");
 		router.setResolutionRequired(true);
-		router.setChannelResolver(channelResolver);
+		router.setChannelResolver(new HeaderEmbeddingBinderAwareChannelResolver(binderFactory, channelResolver));
 		return router;
 	}
 }

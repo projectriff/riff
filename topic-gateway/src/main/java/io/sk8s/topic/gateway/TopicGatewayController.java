@@ -36,6 +36,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import reactor.core.publisher.Mono;
@@ -56,21 +57,23 @@ public class TopicGatewayController {
 	private final Map<String, MonoProcessor<String>> replies = new WeakHashMap<>();
 
 	@PostMapping("/messages/{topic}")
-	public String publishMessage(@PathVariable String topic, @RequestBody String payload) throws UnsupportedEncodingException {
+	public String publishMessage(@PathVariable String topic, @RequestBody String payload,
+			@RequestHeader("Content-Type") String contentType) throws UnsupportedEncodingException {
 		Message<byte[]> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8.name()))
 				.setHeader("topic", topic)
-				.setHeader(MessageHeaders.CONTENT_TYPE, "application/octet-stream")
+				.setHeader(MessageHeaders.CONTENT_TYPE, contentType)
 				.build();
 		this.publisher.publishMessage(topic, message);
 		return "message published to topic: " + topic + "\n";
 	}
 
 	@PostMapping("/requests/{topic}")
-	public Mono<String> publishRequest(@PathVariable String topic, @RequestBody String payload) throws UnsupportedEncodingException {
+	public Mono<String> publishRequest(@PathVariable String topic, @RequestBody String payload,
+			@RequestHeader("Content-Type") String contentType) throws UnsupportedEncodingException {
 		String correlationId = UUID.randomUUID().toString();
 		Message<byte[]> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8.name()))
 				.setHeader("topic", topic)
-				.setHeader(MessageHeaders.CONTENT_TYPE, "application/octet-stream")
+				.setHeader(MessageHeaders.CONTENT_TYPE, contentType)
 				.setHeader("correlationId", correlationId)
 				.build();
 		MonoProcessor<String> reply = MonoProcessor.create();
@@ -81,20 +84,16 @@ public class TopicGatewayController {
 	}
 
 	@StreamListener(Sink.INPUT)
-	public void handleReply(Message<byte[]> reply) {
+	// TODO: switch to byte[] payload and handle conversion from String
+	public void handleReply(Message<String> reply) {
 		String correlationId = reply.getHeaders().get("correlationId", String.class);
 		if (StringUtils.hasText(correlationId)) {
-			try {
-				MonoProcessor<String> replyHolder = this.replies.get(correlationId);
-				if (replyHolder != null) {
-					replyHolder.onNext(new String(reply.getPayload(), StandardCharsets.UTF_8.name()));
-				}
-				else {
-					logger.debug("received reply for timed out request: " + reply);
-				}
+			MonoProcessor<String> replyHolder = this.replies.get(correlationId);
+			if (replyHolder != null) {
+				replyHolder.onNext(reply.getPayload());
 			}
-			catch (UnsupportedEncodingException e) {
-				// ignore
+			else {
+				logger.debug("received reply for timed out request: " + reply);
 			}
 		}
 	}
