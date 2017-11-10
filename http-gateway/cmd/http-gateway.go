@@ -65,6 +65,7 @@ func startHttpServer(producer sarama.AsyncProducer) *http.Server {
 
 	http.HandleFunc("/messages/", messageHandler(producer))
 	http.HandleFunc("/health", healthHandler())
+	http.HandleFunc("/application/status", healthHandler())
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
