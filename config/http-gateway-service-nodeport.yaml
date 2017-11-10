@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: topic-gateway
+  name: http-gateway
   labels:
     app: sk8s
-    component: topic-gateway
+    component: http-gateway
 spec:
   type: NodePort
   ports:
@@ -15,4 +15,4 @@ spec:
     name: https
     targetPort: 8443
   selector:
-    component: topic-gateway
+    component: http-gateway

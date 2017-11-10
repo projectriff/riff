@@ -1,38 +1,30 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: topic-gateway
+  name: http-gateway
 spec:
   replicas: 1
   template:
     metadata:
-      name: topic-gateway
+      name: http-gateway
       labels:
         app: sk8s
-        component: topic-gateway
+        component: http-gateway
     spec:
       containers:
-      - image: sk8s/topic-gateway:0.0.1-SNAPSHOT
-        name: topic-gateway
+      - image: sk8s/http-gateway:0.0.1-SNAPSHOT
+        name: http-gateway
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
             path: /application/status
             port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 15
-          timeoutSeconds: 5
+          periodSeconds: 5
         readinessProbe:
           httpGet:
             path: /application/status
             port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
+          periodSeconds: 5
         env:
-        - name: JAVA_TOOL_OPTIONS
-          value: '-Xmx512m'
         - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
           value: kafka:9092
-        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZKNODES
-          value: zookeeper:2181
