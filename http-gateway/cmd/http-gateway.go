@@ -20,15 +20,19 @@ import (
 	"context"
 	"fmt"
 	"gopkg.in/Shopify/sarama.v1"
+	"github.com/bsm/sarama-cluster"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+	"github.com/satori/go.uuid"
 	"github.com/sk8sio/http-gateway/pkg/message"
 )
 
+// Function messageHandler creates an http handler that posts the http body as a message to Kafka, replying
+// immediately with a successful http response
 func messageHandler(producer sarama.AsyncProducer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		topic := r.URL.Path[len("/messages/"):]
@@ -47,8 +51,46 @@ func messageHandler(producer sarama.AsyncProducer) http.HandlerFunc {
 		kafkaMsg := &sarama.ProducerMessage{Topic: topic, Value: sarama.ByteEncoder(bytesOut)}
 
 		select {
-			case producer.Input() <- kafkaMsg:
-				w.Write([]byte("message published to topic: " + topic + "\n"))
+		case producer.Input() <- kafkaMsg:
+			w.Write([]byte("message published to topic: " + topic + "\n"))
+		}
+	}
+}
+
+// Function replyHandler creates an http handler that posts the http body as a message to Kafka, then waits
+// for a message on a go channel it creates for a reply (this is expected to be set by the main thread) and sends
+// that as an http response.
+func replyHandler(producer sarama.AsyncProducer, replies map[string]chan message.Message) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		topic := r.URL.Path[len("/requests/"):]
+		b, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		correlationId := uuid.NewV4().String()
+		replyChan := make(chan message.Message)
+		replies[correlationId] = replyChan
+		scsMessage := message.Message{Payload: b, Headers: map[string]interface{}{"correlationId": correlationId}}
+
+		bytesOut, err := message.EncodeMessage(scsMessage)
+		if err != nil {
+			log.Printf("Error encoding message: %v", err)
+			return
+		}
+		kafkaMsg := &sarama.ProducerMessage{Topic: topic, Value: sarama.ByteEncoder(bytesOut)}
+
+		select {
+		case producer.Input() <- kafkaMsg:
+			select {
+			case reply := <-replyChan:
+				delete(replies, correlationId)
+				p := reply.Payload
+				w.Write(p.([]byte)) // TODO equivalent of Spring's HttpMessageConverter handling
+			case <- time.After(time.Second * 60):
+				delete(replies, correlationId)
+				w.WriteHeader(404)
+			}
 		}
 	}
 }
@@ -59,12 +101,11 @@ func healthHandler() func(http.ResponseWriter, *http.Request) {
 	}
 }
 
-
-func startHttpServer(producer sarama.AsyncProducer) *http.Server {
+func startHttpServer(producer sarama.AsyncProducer, replies map[string]chan message.Message) *http.Server {
 	srv := &http.Server{Addr: ":8080"}
 
 	http.HandleFunc("/messages/", messageHandler(producer))
-	http.HandleFunc("/health", healthHandler())
+	http.HandleFunc("/requests/", replyHandler(producer, replies))
 	http.HandleFunc("/application/status", healthHandler())
 
 	go func() {
@@ -82,7 +123,11 @@ func main() {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt)
 
-	producer, err := sarama.NewAsyncProducer([]string{os.Getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS")}, nil)
+	// Key is correlationId, value is channel used to pass message received from main Kafka consumer loop
+	replies := make(map[string]chan message.Message)
+
+	brokers := []string{os.Getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS")}
+	producer, err := sarama.NewAsyncProducer(brokers, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -92,8 +137,22 @@ func main() {
 		}
 	}()
 
-	srv := startHttpServer(producer)
+	consumerConfig := makeConsumerConfig()
+	consumer, err := cluster.NewConsumer(brokers, "gateway", []string{"replies"}, consumerConfig)
+	if err != nil {
+		panic(err)
+	}
+	defer consumer.Close()
+	if consumerConfig.Consumer.Return.Errors {
+		go consumeErrors(consumer)
+	}
+	if consumerConfig.Group.Return.Notifications {
+		go consumeNotifications(consumer)
+	}
 
+
+
+	srv := startHttpServer(producer, replies)
 
 MainLoop:
 	for {
@@ -106,8 +165,46 @@ MainLoop:
 				panic(err) // failure/timeout shutting down the server gracefully
 			}
 			break MainLoop
+		case msg, ok := <-consumer.Messages():
+			if ok {
+				fmt.Printf("Got a reply %v\n", msg)
+				messageWithHeaders, err := message.ExtractMessage(msg.Value)
+				if err != nil {
+					log.Println("Failed to extract message ", err)
+					break
+				}
+				correlationId := messageWithHeaders.Headers["correlationId"].(string)
+				c := replies[correlationId]
+				if c != nil {
+					fmt.Printf("Sending %v\n", messageWithHeaders)
+					c <- messageWithHeaders
+					consumer.MarkOffset(msg, "") // mark message as processed
+				} else {
+					log.Printf("Did not find communication channel for correlationId %v. Timed out?", correlationId)
+					consumer.MarkOffset(msg, "") // mark message as processed
+				}
+			}
+
 		case err := <-producer.Errors():
 			log.Println("Failed to produce kafka message ", err)
 		}
+	}
+}
+
+func makeConsumerConfig() *cluster.Config {
+	consumerConfig := cluster.NewConfig()
+	consumerConfig.Consumer.Return.Errors = true
+	consumerConfig.Group.Return.Notifications = true
+	return consumerConfig
+}
+
+func consumeNotifications(consumer *cluster.Consumer) {
+	for ntf := range consumer.Notifications() {
+		log.Printf("Rebalanced: %+v\n", ntf)
+	}
+}
+func consumeErrors(consumer *cluster.Consumer) {
+	for err := range consumer.Errors() {
+		log.Printf("Error: %s\n", err.Error())
 	}
 }

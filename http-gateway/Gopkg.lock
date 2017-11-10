@@ -2,6 +2,17 @@
 
 
 [[projects]]
+  name = "github.com/Shopify/sarama"
+  packages = ["."]
+  revision = "c7650177c9f7b51aa9410e270adcbc2b16c16b9e"
+
+[[projects]]
+  name = "github.com/bsm/sarama-cluster"
+  packages = ["."]
+  revision = "80bf98f4ce392286976f7705155aa13763bcfd8a"
+  version = "v2.1.9"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -24,6 +35,12 @@
   packages = ["."]
   revision = "ded5959c0d4e360646dc9e9908cff48666781367"
   version = "v1.0.2"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/golang/protobuf"
+  packages = ["proto","protoc-gen-go/descriptor","ptypes","ptypes/any","ptypes/duration","ptypes/empty","ptypes/timestamp"]
+  revision = "1643683e1b54a9e88ad26d98f81400c8c9d9f4f9"
 
 [[projects]]
   branch = "master"
@@ -50,6 +67,36 @@
   revision = "1f30fe9094a513ce4c700b9a54458bbb0c96996c"
 
 [[projects]]
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "879c5887cd475cd7864858769793b2ceb0d44feb"
+  version = "v1.1.0"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = ["context","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace"]
+  revision = "a337091b0525af65de94df2eb7e98bd9962dcbe2"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/text"
+  packages = ["collate","collate/build","internal/colltab","internal/gen","internal/tag","internal/triegen","internal/ucd","language","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable"]
+  revision = "88f656faf3f37f690df1a32515b479415e1a6769"
+
+[[projects]]
+  branch = "master"
+  name = "google.golang.org/genproto"
+  packages = ["googleapis/api/annotations","googleapis/bigtable/admin/cluster/v1","googleapis/longrunning","googleapis/rpc/status"]
+  revision = "11c7f9e547da6db876260ce49ea7536985904c9b"
+
+[[projects]]
+  name = "google.golang.org/grpc"
+  packages = [".","balancer","codes","connectivity","credentials","grpclb/grpc_lb_v1/messages","grpclog","internal","keepalive","metadata","naming","peer","resolver","stats","status","tap","transport"]
+  revision = "5ffe3083946d5603a0578721101dc8165b1d5b5f"
+  version = "v1.7.2"
+
+[[projects]]
   name = "gopkg.in/Shopify/sarama.v1"
   packages = ["."]
   revision = "bbdbe644099b7fdc8327d5cc69c030945188b2e9"
@@ -58,6 +105,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7ad4426cdf259b395bcc8672e6a835fcc72ab065089dd730a2cd806514b2b9c5"
+  inputs-digest = "db324fed63a4a7f0fb50f7b8f58110c640230afcef2e3284cf29bea5340cbb15"
   solver-name = "gps-cdcl"
   solver-version = 1
