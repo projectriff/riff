@@ -167,7 +167,6 @@ MainLoop:
 			break MainLoop
 		case msg, ok := <-consumer.Messages():
 			if ok {
-				fmt.Printf("Got a reply %v\n", msg)
 				messageWithHeaders, err := message.ExtractMessage(msg.Value)
 				if err != nil {
 					log.Println("Failed to extract message ", err)
