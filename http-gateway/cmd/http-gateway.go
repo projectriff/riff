@@ -172,15 +172,17 @@ MainLoop:
 					log.Println("Failed to extract message ", err)
 					break
 				}
-				correlationId := messageWithHeaders.Headers["correlationId"].(string)
-				c := replies[correlationId]
-				if c != nil {
-					fmt.Printf("Sending %v\n", messageWithHeaders)
-					c <- messageWithHeaders
-					consumer.MarkOffset(msg, "") // mark message as processed
-				} else {
-					log.Printf("Did not find communication channel for correlationId %v. Timed out?", correlationId)
-					consumer.MarkOffset(msg, "") // mark message as processed
+				correlationId, ok := messageWithHeaders.Headers["correlationId"].(string)
+				if ok {
+					c := replies[correlationId]
+					if c != nil {
+						fmt.Printf("Sending %v\n", messageWithHeaders)
+						c <- messageWithHeaders
+						consumer.MarkOffset(msg, "") // mark message as processed
+					} else {
+						log.Printf("Did not find communication channel for correlationId %v. Timed out?", correlationId)
+						consumer.MarkOffset(msg, "") // mark message as processed
+					}
 				}
 			}
 
