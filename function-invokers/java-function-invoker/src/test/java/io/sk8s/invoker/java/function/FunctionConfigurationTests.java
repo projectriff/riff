@@ -43,6 +43,22 @@ public abstract class FunctionConfigurationTests {
 
 	@TestPropertySource(properties = { "function.jarLocation=file:target/test-classes",
 			"function.className=" +
+					"io.sk8s.invoker.java.function.FunctionConfigurationTests.Doubler"
+	})
+	public static class SingleFunctionTests extends FunctionConfigurationTests {
+	
+		@Autowired
+		@Qualifier("function")
+		private Function<Integer, Integer> function;
+	
+		@Test
+		public void testDouble() {
+			assertThat(function.apply(2), is(4));
+		}
+	}
+	
+	@TestPropertySource(properties = { "function.jarLocation=file:target/test-classes",
+			"function.className=" +
 					"io.sk8s.invoker.java.function.FunctionConfigurationTests.NumberEmitter," +
 					"io.sk8s.invoker.java.function.FunctionConfigurationTests.Frenchizer"
 	})
