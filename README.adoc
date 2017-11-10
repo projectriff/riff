@@ -67,7 +67,9 @@ eval $(minikube docker-env)
 Build components and create Docker images:
 
 ----
-./mvnw clean package && ./dockerize
+./mvnw clean install
+./mvnw clean install -f topic-gateway/
+./dockerize
 ----
 
 ==== Deploy Kafka/Zookeeper
