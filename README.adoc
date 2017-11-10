@@ -20,13 +20,14 @@ minikube start --cpus=4 --memory=4096 --disk-size=64g
 
 * A Java 8 environment.
 
-* A working Go environment, with a clone of Eric Bottard's customized fabric8io/kubernetes-model
-and the Function Sidecar repository.
+* A working Go environment, with clones of the customized fabric8io/kubernetes-model,
+the function-sidecar repository, and the http-gateway repository.
 +
 ----
 cd $(go env GOPATH)   #defaults to ~/go
 git clone https://github.com/ericbottard/kubernetes-model src/github.com/fabric8io/kubernetes-model/
 git clone https://github.com/ericbottard/function-sidecar src/github.com/sk8sio/function-sidecar/
+git clone https://github.com/ericbottard/sk8s-http-gateway src/github.com/sk8sio/http-gateway/
 ----
 
 * A clone of this repo.
@@ -41,11 +42,12 @@ git clone https://github.com/markfisher/sk8s.git
 ./build-model
 ----
 
-==== Build the Function Sidecar
+==== Build the Function Sidecar and HTTP Gateway
 
 ----
 eval $(minikube docker-env)
 ./build-function-sidecar
+./build-http-gateway
 ----
 
 ==== Setup the Kubernetes environment

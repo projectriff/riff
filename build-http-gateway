@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e -v
+
+pushd $(go env GOPATH)/src/github.com/sk8sio/http-gateway/
+git fetch origin
+make clean dockerize
+popd
