@@ -21,16 +21,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * @author Mark Fisher
  */
-@ConfigurationProperties(prefix = "sk8s.event.dispatcher")
-public class EventDispatcherProperties {
+@ConfigurationProperties(prefix = "sk8s.function.controller.sidecar")
+public class SidecarProperties {
 
-	private String sidecarImageName = "sk8s/function-sidecar:0.0.1-SNAPSHOT";
+	private String tag = "0.0.1-SNAPSHOT";
 
-	public String getSidecarImageName() {
-		return sidecarImageName;
+	public String getTag() {
+		return tag;
 	}
 
-	public void setSidecarImageName(String sidecarImageName) {
-		this.sidecarImageName = sidecarImageName;
+	public void setTag(String tag) {
+		this.tag = tag;
 	}
 }

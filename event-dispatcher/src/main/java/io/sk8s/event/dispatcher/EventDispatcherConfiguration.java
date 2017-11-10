@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableBinding
-@EnableConfigurationProperties(EventDispatcherProperties.class)
+@EnableConfigurationProperties(SidecarProperties.class)
 public class EventDispatcherConfiguration {
 
 	@Bean

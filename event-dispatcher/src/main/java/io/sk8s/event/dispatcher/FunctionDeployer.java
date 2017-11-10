@@ -21,8 +21,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.EmptyDirVolumeSourceBuilder;
@@ -34,14 +39,12 @@ import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
+
 import io.sk8s.kubernetes.api.model.FunctionEnvVar;
 import io.sk8s.kubernetes.api.model.XFunction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Makes sure a certain function is running on Kubernetes.
@@ -53,6 +56,8 @@ import org.springframework.util.StringUtils;
  */
 public class FunctionDeployer {
 
+	private final static String SIDECAR_IMAGE = "sk8s/function-sidecar";
+
 	private final static Logger logger = LoggerFactory.getLogger(FunctionDeployer.class);
 
 	private final KubernetesClient kubernetesClient;
@@ -60,7 +65,7 @@ public class FunctionDeployer {
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Autowired
-	private EventDispatcherProperties properties;
+	private SidecarProperties sidecarProperties;
 
 	public FunctionDeployer(KubernetesClient kubernetesClient) {
 		this.kubernetesClient = kubernetesClient;
@@ -153,7 +158,7 @@ public class FunctionDeployer {
 
 	private Container buildSidecarContainer(XFunction function) {
 		ContainerBuilder builder = new ContainerBuilder().withName("sidecar")
-				.withImage(properties.getSidecarImageName())
+				.withImage(SIDECAR_IMAGE + ":" + sidecarProperties.getTag())
 				.withImagePullPolicy("IfNotPresent")
 				.withEnv(buildSidecarEnvVars(function));
 		if ("stdio".equals(function.getSpec().getProtocol())) {
