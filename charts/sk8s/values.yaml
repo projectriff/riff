@@ -24,17 +24,16 @@ topicController:
     repository: sk8s/topic-controller
     tag: 0.0.1-SNAPSHOT
     pullPolicy: IfNotPresent
-topicGateway:
+httpGateway:
   replicaCount: 1
   image:
-    repository: sk8s/topic-gateway
+    repository: sk8s/http-gateway
     tag: 0.0.1-SNAPSHOT
     pullPolicy: IfNotPresent
   service:
     name: http
     type: LoadBalancer
     externalPort: 80
-    internalPort: 8080
 grafana:
   replicaCount: 1
   image:
