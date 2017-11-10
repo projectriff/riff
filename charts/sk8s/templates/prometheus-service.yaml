@@ -11,12 +11,12 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.prometheus.service.type }}
+  type: LoadBalancer
   ports:
     - port: {{ .Values.prometheus.service.externalPort }}
-      targetPort: {{ .Values.prometheus.service.internalPort }}
+      targetPort: 9090
       protocol: TCP
-      name: {{ .Values.prometheus.service.name }}
+      name: prometheus
   selector:
     app: {{ template "name" . }}
     component: prometheus

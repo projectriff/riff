@@ -11,12 +11,12 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.grafana.service.type }}
+  type: LoadBalancer
   ports:
     - port: {{ .Values.grafana.service.externalPort }}
-      targetPort: {{ .Values.grafana.service.internalPort }}
+      targetPort: 3000
       protocol: TCP
-      name: {{ .Values.grafana.service.name }}
+      name: grafana
   selector:
     app: {{ template "name" . }}
     component: grafana

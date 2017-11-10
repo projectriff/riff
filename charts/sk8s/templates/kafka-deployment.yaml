@@ -20,10 +20,10 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}-kafka
-          image: "{{ .Values.kafka.image.repository }}:{{ .Values.kafka.image.tag }}"
-          imagePullPolicy: {{ .Values.kafka.image.pullPolicy }}
+          image: "wurstmeister/kafka:0.11.0.1"
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: {{ .Values.kafka.service.internalPort }}
+            - containerPort: 9092
           env:
             - name: KAFKA_PORT
               value: "9092"

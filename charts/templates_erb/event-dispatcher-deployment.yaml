@@ -2,10 +2,10 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-topic-controller
+  name: {{ template "fullname" . }}-event-dispatcher
   labels:
     app: {{ template "name" . }}
-    component: topic-controller
+    component: event-dispatcher
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -15,13 +15,13 @@ spec:
     metadata:
       labels:
         app: {{ template "name" . }}
-        component: topic-controller
+        component: event-dispatcher
         release: {{ .Release.Name }}
     spec:
       containers:
-        - name: {{ .Chart.Name }}-topic-controller
-          image: "{{ .Values.topicController.image.repository }}:{{ .Values.topicController.image.tag }}"
-          imagePullPolicy: {{ .Values.topicController.image.pullPolicy }}
+        - name: {{ .Chart.Name }}-event-dispatcher
+          image: "sk8s/event-dispatcher:<%= ENV.fetch('SK8S_IMAGE_TAG') %>"
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               path: /health
@@ -39,10 +39,14 @@ spec:
           ports:
             - containerPort: 8080
           env:
+          - name: SERVER_PORT
+            value: '8080'
           - name: JAVA_TOOL_OPTIONS
             value: '-Xmx512m'
           - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
             value: {{ template "fullname" . }}-kafka:9092
           - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
             value: {{ template "fullname" . }}-zookeeper:2181
+          - name: SK8S_FUNCTION_CONTROLLER_SIDECAR_TAG
+            value: <%= ENV.fetch('SIDECAR_IMAGE_TAG') %>
 {{- end -}}

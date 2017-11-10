@@ -20,8 +20,8 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}-http-gateway
-          image: "{{ .Values.httpGateway.image.repository }}:{{ .Values.httpGateway.image.tag }}"
-          imagePullPolicy: {{ .Values.httpGateway.image.pullPolicy }}
+          image: "sk8s/http-gateway:<%= ENV.fetch('HTTP_GATEWAY_IMAGE_TAG') %>"
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               path: /application/status

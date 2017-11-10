@@ -10,12 +10,12 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.httpGateway.service.type }}
+  type: LoadBalancer
   ports:
     - port: {{ .Values.httpGateway.service.externalPort }}
       targetPort: 8080
       protocol: TCP
-      name: {{ .Values.httpGateway.service.name }}
+      name: http
   selector:
     app: {{ template "name" . }}
     component: http-gateway

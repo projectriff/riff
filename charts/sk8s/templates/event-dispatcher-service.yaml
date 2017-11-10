@@ -10,12 +10,12 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.eventDispatcher.service.type }}
+  type: ClusterIP
   ports:
-    - port: {{ .Values.eventDispatcher.service.externalPort }}
-      targetPort: {{ .Values.eventDispatcher.service.internalPort }}
+    - port: 80
+      targetPort: 8080
       protocol: TCP
-      name: {{ .Values.eventDispatcher.service.name }}
+      name: http
   selector:
     app: {{ template "name" . }}
     component: event-dispatcher

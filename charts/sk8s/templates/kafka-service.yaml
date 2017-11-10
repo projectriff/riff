@@ -9,12 +9,12 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.kafka.service.type }}
+  type: ClusterIP
   ports:
-    - port: {{ .Values.kafka.service.externalPort }}
-      targetPort: {{ .Values.kafka.service.internalPort }}
+    - port: 9092
+      targetPort: 9092
       protocol: TCP
-      name: {{ .Values.kafka.service.name }}
+      name: kafka
   selector:
     app: {{ template "name" . }}
     component: kafka-broker

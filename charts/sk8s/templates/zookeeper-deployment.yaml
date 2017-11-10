@@ -20,10 +20,10 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}-zookeeper
-          image: "{{ .Values.zookeeper.image.repository }}:{{ .Values.zookeeper.image.tag }}"
-          imagePullPolicy: {{ .Values.zookeeper.image.pullPolicy }}
+          image: "wurstmeister/zookeeper:3.4.6"
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: {{ .Values.zookeeper.service.internalPort }}
+            - containerPort: 2181
           env:
           - name: ZOOKEEPER_ID
             value: "1"
