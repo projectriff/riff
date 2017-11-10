@@ -20,11 +20,13 @@ minikube start --cpus=4 --memory=4096 --disk-size=64g
 
 * A Java 8 environment.
 
-* A working Go environment, with a clone of Eric Bottard's customized fabric8io/kubernetes-model.
+* A working Go environment, with a clone of Eric Bottard's customized fabric8io/kubernetes-model
+and the Function Sidecar repository.
 +
 ----
 cd $(go env GOPATH)   #defaults to ~/go
 git clone https://github.com/ericbottard/kubernetes-model src/github.com/fabric8io/kubernetes-model/
+git clone https://github.com/ericbottard/function-sidecar src/github.com/sk8sio/function-sidecar/
 ----
 
 * A clone of this repo.
@@ -37,6 +39,13 @@ git clone https://github.com/markfisher/sk8s.git
 
 ----
 ./build-model
+----
+
+==== Build the Function Sidecar
+
+----
+eval $(minikube docker-env)
+./build-function-sidecar
 ----
 
 ==== Setup the Kubernetes environment
@@ -95,5 +104,3 @@ See how to use the link:Monitoring.adoc#dashboards[dashboards].
 == [[samples]]Try Some Samples
 
 With the Sk8s FaaS running try some of the link:samples/README.adoc[samples].
-
-
