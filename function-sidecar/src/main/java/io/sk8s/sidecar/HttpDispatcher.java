@@ -16,19 +16,37 @@
 
 package io.sk8s.sidecar;
 
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
+
+import javax.annotation.PostConstruct;
 
 /**
  * @author Mark Fisher
  */
 public class HttpDispatcher implements Dispatcher {
 
-	private static final String INVOKER_URL = "http://localhost:8080/";
+    private static final String INVOKER_URL = "http://localhost:8080/";
 
-	private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final RetryTemplate retryTemplate = new RetryTemplate();
+    private final ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+    private final SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
 
-	@Override
-	public String dispatch(String input) {
-		return this.restTemplate.postForObject(INVOKER_URL, input, String.class);
-	}
+    @Override
+    public String dispatch(String input) {
+        return this.retryTemplate.execute(retryContext -> restTemplate.postForObject(INVOKER_URL, input, String.class));
+    }
+
+    @PostConstruct
+    public void initIt() {
+        this.backOffPolicy.setInitialInterval(1);
+        this.backOffPolicy.setMaxInterval(5);
+        this.retryPolicy.setMaxAttempts(3);
+        this.retryTemplate.setBackOffPolicy(backOffPolicy);
+        this.retryTemplate.setRetryPolicy(retryPolicy);
+    }
+
 }

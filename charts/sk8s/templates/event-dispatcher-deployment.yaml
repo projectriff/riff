@@ -47,4 +47,6 @@ spec:
             value: {{ template "fullname" . }}-kafka:9092
           - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
             value: {{ template "fullname" . }}-zookeeper:2181
+          - name: SK8S_EVENT_DISPATCHER_SIDECARIMAGENAME
+            value: "{{ .Values.eventDispatcher.sidecarImage.repository }}:{{ .Values.eventDispatcher.sidecarImage.tag }}"
 {{- end -}}
