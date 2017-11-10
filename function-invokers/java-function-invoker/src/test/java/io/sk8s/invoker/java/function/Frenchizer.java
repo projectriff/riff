@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-package io.sk8s.invoker.java.server;
+package io.sk8s.invoker.java.function;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
+import java.util.function.Function;
 
-/**
- * @author Eric Bottard
- * @author Mark Fisher
- * @author Dave Syer
- */
-@Controller
-public class JavaFunctionInvokerController {
+public class Frenchizer implements Function<Integer, String> {
 
-	@Autowired
-	private FunctionProperties functions;
-
-	@PostMapping("/")
-	public String invoke() {
-		return "forward:/" + functions.getFunctionName();
+	@Override
+	public String apply(Integer integer) {
+		switch (integer) {
+		case 1:
+			return "un";
+		case 2:
+			return "deux";
+		case 3:
+			return "trois";
+		case 4:
+			return "quatre";
+		default:
+			throw new RuntimeException();
+		}
 	}
-
 }

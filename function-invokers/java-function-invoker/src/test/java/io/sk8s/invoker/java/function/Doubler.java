@@ -16,35 +16,11 @@
 
 package io.sk8s.invoker.java.function;
 
-import javax.validation.constraints.Size;
+import java.util.function.Function;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-/**
- * @author Mark Fisher
- */
-@ConfigurationProperties("function")
-public class FunctionProperties {
-
-	@Size(min = 1)
-	private String[] jarLocation = new String[0];
-
-	@Size(min = 1)
-	private String[] className = new String[0];
-
-	public String[] getJarLocation() {
-		return jarLocation;
-	}
-
-	public void setJarLocation(String[] jarLocation) {
-		this.jarLocation = jarLocation;
-	}
-
-	public String[] getClassName() {
-		return className;
-	}
-
-	public void setClassName(String[] className) {
-		this.className = className;
+public class Doubler implements Function<Integer, Integer> {
+	@Override
+	public Integer apply(Integer integer) {
+		return 2 * integer;
 	}
 }

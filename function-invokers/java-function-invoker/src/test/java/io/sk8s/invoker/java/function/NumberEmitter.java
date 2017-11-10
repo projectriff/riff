@@ -14,26 +14,13 @@
  * limitations under the License.
  */
 
-package io.sk8s.invoker.java.server;
+package io.sk8s.invoker.java.function;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
+import java.util.function.Supplier;
 
-/**
- * @author Eric Bottard
- * @author Mark Fisher
- * @author Dave Syer
- */
-@Controller
-public class JavaFunctionInvokerController {
-
-	@Autowired
-	private FunctionProperties functions;
-
-	@PostMapping("/")
-	public String invoke() {
-		return "forward:/" + functions.getFunctionName();
+public class NumberEmitter implements Supplier<Integer> {
+	@Override
+	public Integer get() {
+		return 1;
 	}
-
 }

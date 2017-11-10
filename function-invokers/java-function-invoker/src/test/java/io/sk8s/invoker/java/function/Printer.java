@@ -14,26 +14,14 @@
  * limitations under the License.
  */
 
-package io.sk8s.invoker.java.server;
+package io.sk8s.invoker.java.function;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
+import java.util.function.Consumer;
 
-/**
- * @author Eric Bottard
- * @author Mark Fisher
- * @author Dave Syer
- */
-@Controller
-public class JavaFunctionInvokerController {
+public class Printer implements Consumer<Object> {
 
-	@Autowired
-	private FunctionProperties functions;
-
-	@PostMapping("/")
-	public String invoke() {
-		return "forward:/" + functions.getFunctionName();
+	@Override
+	public void accept(Object o) {
+		System.err.println("Seen " + o);
 	}
-
 }

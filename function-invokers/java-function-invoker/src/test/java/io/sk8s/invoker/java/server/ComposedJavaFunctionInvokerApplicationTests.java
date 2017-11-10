@@ -22,7 +22,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -41,8 +40,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = "function.uri=file:target/test-classes"
-		+ "?io.sk8s.invoker.java.function.Doubler")
-public class JavaFunctionInvokerApplicationTests {
+		+ "?io.sk8s.invoker.java.function.Doubler,io.sk8s.invoker.java.function.Frenchizer")
+public class ComposedJavaFunctionInvokerApplicationTests {
 
 	@Autowired
 	private TestRestTemplate rest;
@@ -50,9 +49,9 @@ public class JavaFunctionInvokerApplicationTests {
 	@Test
 	public void contextLoads() throws Exception {
 		ResponseEntity<String> result = rest.exchange(RequestEntity.post(new URI("/"))
-				.contentType(MediaType.TEXT_PLAIN).body("5"), String.class);
+				.contentType(MediaType.TEXT_PLAIN).body("2"), String.class);
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(result.getBody()).isEqualTo("10");
+		assertThat(result.getBody()).isEqualTo("quatre");
 	}
 
 }
