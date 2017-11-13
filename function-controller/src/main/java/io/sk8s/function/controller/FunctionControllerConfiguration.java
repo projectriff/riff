@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.sk8s.event.dispatcher;
+package io.sk8s.function.controller;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -32,15 +32,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableBinding
 @EnableConfigurationProperties(SidecarProperties.class)
-public class EventDispatcherConfiguration {
+public class FunctionControllerConfiguration {
 
 	@Bean
-	public EventDispatchingHandler eventDispatchingHandler() {
-		return new EventDispatchingHandler();
+	public FunctionMonitor functionMonitor() {
+		return new FunctionMonitor();
 	}
 
 	@Bean
-	public ResourceEventPublisher functionsEventPublisher(Sk8sClient client) {
+	public ResourceEventPublisher functionEventPublisher(Sk8sClient client) {
 		return new ResourceEventPublisher(client.functions());
 	}
 

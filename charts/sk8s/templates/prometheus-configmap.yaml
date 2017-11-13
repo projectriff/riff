@@ -20,7 +20,7 @@ data:
       scrape_interval: 5s
       # metrics_path defaults to '/metrics'
       # scheme defaults to 'http'.
-      static_configs: 
+      static_configs:
       - targets: ['localhost:9090']
     - job_name: 'sk8s'
       # Override the global default and scrape targets from this job every 5 seconds.
@@ -29,6 +29,6 @@ data:
       # scheme defaults to 'http'.
       metrics_path: '/prometheus'
       static_configs:
-      - targets: ['{{ template "fullname" . }}-topic-gateway:{{ .Values.topicGateway.service.externalPort }}','{{ template "fullname" . }}-event-dispatcher:{{ .Values.eventDispatcher.service.externalPort }}']
+      - targets: ['{{ template "fullname" . }}-topic-gateway:{{ .Values.topicGateway.service.externalPort }}','{{ template "fullname" . }}-function-controller:{{ .Values.functionController.service.externalPort }}']
 {{- end -}}
 {{- end -}}

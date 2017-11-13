@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.sk8s.event.dispatcher;
+package io.sk8s.function.controller;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  *
  * @author Eric Bottard
  */
-public class KafkaConsumerMonitor implements Closeable {
+public class LagTracker implements Closeable {
 
 	private final String host;
 
@@ -54,7 +54,7 @@ public class KafkaConsumerMonitor implements Closeable {
 
 	private final Set<Subscription> tracked = new HashSet<>();
 
-	public KafkaConsumerMonitor(String host) {
+	public LagTracker(String host) {
 		this.host = host;
 	}
 

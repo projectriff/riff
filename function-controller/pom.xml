@@ -3,11 +3,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>event-dispatcher</artifactId>
+	<artifactId>function-controller</artifactId>
 	<packaging>jar</packaging>
 
-	<name>event-dispatcher</name>
-	<description>Event Dispatcher</description>
+	<name>function-controller</name>
+	<description>Function Controller</description>
 
 	<parent>
 		<groupId>io.sk8s</groupId>

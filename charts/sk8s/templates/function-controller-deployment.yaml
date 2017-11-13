@@ -2,10 +2,10 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-event-dispatcher
+  name: {{ template "fullname" . }}-function-controller
   labels:
     app: {{ template "name" . }}
-    component: event-dispatcher
+    component: function-controller
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -15,32 +15,32 @@ spec:
     metadata:
       labels:
         app: {{ template "name" . }}
-        component: event-dispatcher
+        component: function-controller
         release: {{ .Release.Name }}
     spec:
       containers:
-        - name: {{ .Chart.Name }}-event-dispatcher
-          image: "{{ .Values.eventDispatcher.image.repository }}:{{ .Values.eventDispatcher.image.tag }}"
-          imagePullPolicy: {{ .Values.eventDispatcher.image.pullPolicy }}
+        - name: {{ .Chart.Name }}-function-controller
+          image: "{{ .Values.functionController.image.repository }}:{{ .Values.functionController.image.tag }}"
+          imagePullPolicy: {{ .Values.functionController.image.pullPolicy }}
           livenessProbe:
             httpGet:
               path: /health
-              port: {{ .Values.eventDispatcher.service.internalPort }}
+              port: {{ .Values.functionController.service.internalPort }}
             initialDelaySeconds: 60
             periodSeconds: 15
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /health
-              port: {{ .Values.eventDispatcher.service.internalPort }}
+              port: {{ .Values.functionController.service.internalPort }}
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
           ports:
-            - containerPort: {{ .Values.eventDispatcher.service.internalPort }}
+            - containerPort: {{ .Values.functionController.service.internalPort }}
           env:
           - name: SERVER_PORT
-            value: '{{ .Values.eventDispatcher.service.internalPort }}'
+            value: '{{ .Values.functionController.service.internalPort }}'
           - name: JAVA_TOOL_OPTIONS
             value: '-Xmx512m'
           - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS

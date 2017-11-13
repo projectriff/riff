@@ -74,7 +74,6 @@
 				<version>${spring-boot.version}</version>
 				<scope>test</scope>
 			</dependency>
-
 		</dependencies>
 	</dependencyManagement>
 
@@ -83,7 +82,7 @@
 		<module>topic-controller</module>
 		<module>function-proto</module>
 		<module>function-invokers</module>
-		<module>event-dispatcher</module>
+		<module>function-controller</module>
 		<module>zipkin-server</module>
 		<module>sk8s-kubernetes-client</module>
 		<module>sk8s-test-support</module>

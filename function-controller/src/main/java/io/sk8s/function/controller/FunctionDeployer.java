@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.sk8s.event.dispatcher;
+package io.sk8s.function.controller;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
