@@ -21,10 +21,10 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}-grafana
-          image: "{{ .Values.grafana.image.repository }}:{{ .Values.grafana.image.tag }}"
-          imagePullPolicy: {{ .Values.grafana.image.pullPolicy }}
+          image: "grafana/grafana:4.4.1"
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: {{ .Values.grafana.service.internalPort }}
+            - containerPort: 3000
           env:
           - name: GRAFANA_PORT
             value: "3000"

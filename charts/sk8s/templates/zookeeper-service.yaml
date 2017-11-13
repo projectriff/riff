@@ -10,12 +10,12 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.zookeeper.service.type }}
+  type: ClusterIP
   ports:
-    - port: {{ .Values.zookeeper.service.externalPort }}
-      targetPort: {{ .Values.zookeeper.service.internalPort }}
+    - port: 2181
+      targetPort: 2181
       protocol: TCP
-      name: {{ .Values.zookeeper.service.name }}
+      name: zookeeper
   selector:
     app: {{ template "name" . }}
     component: zookeeper

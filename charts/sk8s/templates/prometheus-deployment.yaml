@@ -21,10 +21,10 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}-prometheus
-          image: "{{ .Values.prometheus.image.repository }}:{{ .Values.prometheus.image.tag }}"
-          imagePullPolicy: {{ .Values.prometheus.image.pullPolicy }}
+          image: "prom/prometheus:v1.7.1"
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: {{ .Values.prometheus.service.internalPort }}
+            - containerPort: 9090
           args:
             - '-storage.local.retention=6h'
             - '-storage.local.memory-chunks=500000'
