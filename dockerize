@@ -8,3 +8,5 @@ function-invokers/java-function-invoker,\
 function-invokers/node-function-invoker,\
 function-invokers/python2-function-invoker,\
 function-invokers/shell-function-invoker
+
+./mvnw dockerfile:build -f topic-gateway
