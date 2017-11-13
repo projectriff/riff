@@ -4,6 +4,13 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	TopicPlural      string = "topics"
+	TopicGroup       string = "extensions.sk8s.io"
+	TopicVersion     string = "v1"
+	FullTopicCRDName    string = TopicPlural + "." + TopicGroup
+)
+
 // Represents the topics.extensions.sk8s.io CRD
 type Topic struct {
 	meta_v1.TypeMeta   `json:",inline"`
