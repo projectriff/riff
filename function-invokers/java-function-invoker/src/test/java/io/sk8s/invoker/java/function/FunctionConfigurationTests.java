@@ -32,6 +32,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.cloud.function.context.InMemoryFunctionCatalog;
 import org.springframework.cloud.function.core.FunctionCatalog;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -42,6 +43,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { FunctionConfiguration.class, FunctionProperties.class,
 		InMemoryFunctionCatalog.class })
+@DirtiesContext
 public abstract class FunctionConfigurationTests {
 
 	@TestPropertySource(properties = {
