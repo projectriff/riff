@@ -18,7 +18,7 @@ package io.sk8s.invoker.java.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * @author Eric Bottard
@@ -31,8 +31,8 @@ public class JavaFunctionInvokerController {
 	@Autowired
 	private FunctionProperties functions;
 
-	@PostMapping("/")
-	public Object invoke() {
+	@RequestMapping("/")
+	public String invoke() {
 		return "forward:/" + functions.getFunctionName();
 	}
 
