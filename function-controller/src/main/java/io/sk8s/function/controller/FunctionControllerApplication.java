@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.sk8s.event.dispatcher;
+package io.sk8s.function.controller;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,9 +23,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Mark Fisher
  */
 @SpringBootApplication
-public class EventDispatcherApplication {
+public class FunctionControllerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(EventDispatcherApplication.class, args);
+		SpringApplication.run(FunctionControllerApplication.class, args);
 	}
 }

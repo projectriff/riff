@@ -10,7 +10,7 @@ enable:
 eventDispatcher:
   replicaCount: 1
   image:
-    repository: sk8s/event-dispatcher
+    repository: sk8s/function-controller
     tag: 0.0.1-SNAPSHOT
     pullPolicy: IfNotPresent
   service:

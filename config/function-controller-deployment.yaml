@@ -1,19 +1,19 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: event-dispatcher
+  name: function-controller
 spec:
   replicas: 1
   template:
     metadata:
-      name: event-dispatcher
+      name: function-controller
       labels:
         app: sk8s
-        component: event-dispatcher
+        component: function-controller
     spec:
       containers:
-      - image: sk8s/event-dispatcher:0.0.1-SNAPSHOT
-        name: event-dispatcher
+      - image: sk8s/function-controller:0.0.1-SNAPSHOT
+        name: function-controller
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
