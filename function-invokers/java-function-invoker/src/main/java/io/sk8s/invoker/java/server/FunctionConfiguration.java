@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -72,6 +73,8 @@ public class FunctionConfiguration {
 	@Autowired
 	private ConfigurableApplicationContext context;
 
+	private URLClassLoader functionClassLoader;
+
 	@Bean
 	@ConfigurationProperties("maven")
 	public MavenProperties mavenProperties() {
@@ -93,8 +96,6 @@ public class FunctionConfiguration {
 	 * etc. The instances are created in an isolated class loader, so the jar they are
 	 * packed in has to define all the dependencies (except core JDK).
 	 * 
-	 * TODO: Add reactor and maybe Message (not spring-messaging) to class loader in a way
-	 * that they can be shared with the main application context.
 	 */
 	@PostConstruct
 	public void init() {
@@ -111,6 +112,18 @@ public class FunctionConfiguration {
 		}
 	}
 
+	@PreDestroy
+	public void close() {
+		if (this.functionClassLoader != null) {
+			try {
+				this.functionClassLoader.close();
+			}
+			catch (IOException e) {
+				throw new IllegalStateException("Cannot close function class loader", e);
+			}
+		}
+	}
+
 	private Function<String, URL> toResourceURL(DelegatingResourceLoader resourceLoader) {
 		return l -> {
 			try {
@@ -124,16 +137,15 @@ public class FunctionConfiguration {
 
 	private class BeanCreator {
 
-		private URLClassLoader cl;
 		private AtomicInteger counter = new AtomicInteger(0);
 
 		public BeanCreator(URL[] urls) {
-			this.cl = new URLClassLoader(urls, /* explicit null parent */null);
+			functionClassLoader = new URLClassLoader(urls, getClass().getClassLoader().getParent());
 		}
 
 		public Object create(String type) {
 			return context.getAutowireCapableBeanFactory()
-					.createBean(ClassUtils.resolveClassName(type, cl));
+					.createBean(ClassUtils.resolveClassName(type, functionClassLoader));
 		}
 
 		public void register(Object bean) {

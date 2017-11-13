@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -41,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = "function.uri=file:target/test-classes"
 		+ "?io.sk8s.invoker.java.function.Doubler,io.sk8s.invoker.java.function.Frenchizer")
+@DirtiesContext
 public class ComposedJavaFunctionInvokerApplicationTests {
 
 	@Autowired
