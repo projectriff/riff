@@ -26,23 +26,22 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
+import org.springframework.cloud.function.context.FunctionRegistration;
+import org.springframework.cloud.function.context.FunctionRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -58,7 +57,17 @@ import org.springframework.util.ClassUtils;
  * @author Dave Syer
  */
 @Configuration
+@EnableConfigurationProperties
 public class FunctionConfiguration {
+
+	@Autowired
+	private FunctionRegistry registry;
+
+	@Autowired
+	private FunctionProperties properties;
+
+	@Autowired
+	private DelegatingResourceLoader delegatingResourceLoader;
 
 	@Bean
 	@ConfigurationProperties("maven")
@@ -84,59 +93,37 @@ public class FunctionConfiguration {
 	 * TODO: Add reactor and maybe Message (not spring-messaging) to class loader in a way
 	 * that they can be shared with the main application context.
 	 */
-	@Component
-	@Order(0)
-	protected static class ContextFunctionPostProcessor
-			implements BeanDefinitionRegistryPostProcessor {
+	@PostConstruct
+	public void init() {
+		URL[] urls = Arrays.stream(properties.getJarLocation())
+				.map(toResourceURL(delegatingResourceLoader)).toArray(URL[]::new);
 
-		private Function<String, URL> toResourceURL(
-				DelegatingResourceLoader resourceLoader) {
-			return l -> {
-				try {
-					return resourceLoader.getResource(l).getFile().toURI().toURL();
-				}
-				catch (IOException e) {
-					throw new UncheckedIOException(e);
-				}
-			};
+		try {
+			URLClassLoader cl = new URLClassLoader(urls,
+					/* explicit null parent */null);
+			AtomicInteger counter = new AtomicInteger(0);
+			Arrays.stream(properties.getClassName())
+					.map(name -> (Object) BeanUtils
+							.instantiateClass(ClassUtils.resolveClassName(name, cl)))
+					.sequential()
+					.forEach(bean -> registry
+							.register(new FunctionRegistration<Object>(bean)
+									.names("function" + counter.getAndIncrement())));
 		}
+		catch (Exception e) {
+			throw new IllegalStateException("Cannot create functions", e);
+		}
+	}
 
-		@Override
-		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
-				throws BeansException {
-			// In the BFPP so these things are available but not @Autowirable
-			Environment environment = beanFactory.getBean("environment",
-					Environment.class);
-			FunctionProperties properties = beanFactory.getBean(FunctionProperties.class);
-			// Spring Boot hasn't done the binding yet, but we're only interested in one
-			// property. TODO: relaxed binding
-			properties.setUri(environment.getProperty("function.uri"));
-			properties.init();
-			DelegatingResourceLoader delegatingResourceLoader = beanFactory
-					.getBean(DelegatingResourceLoader.class);
-
-			URL[] urls = Arrays.stream(properties.getJarLocation())
-					.map(toResourceURL(delegatingResourceLoader)).toArray(URL[]::new);
-
+	private Function<String, URL> toResourceURL(DelegatingResourceLoader resourceLoader) {
+		return l -> {
 			try {
-				URLClassLoader cl = new URLClassLoader(urls,
-						/* explicit null parent */null);
-				AtomicInteger counter = new AtomicInteger(0);
-				Arrays.stream(properties.getClassName())
-						.map(name -> (Object) BeanUtils
-								.instantiateClass(ClassUtils.resolveClassName(name, cl)))
-						.sequential().forEach(bean -> beanFactory.registerSingleton(
-								"function" + counter.getAndIncrement(), bean));
+				return resourceLoader.getResource(l).getFile().toURI().toURL();
 			}
-			catch (Exception e) {
-				throw new IllegalStateException("Cannot create functions", e);
+			catch (IOException e) {
+				throw new UncheckedIOException(e);
 			}
-		}
-
-		@Override
-		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
-				throws BeansException {
-		}
+		};
 	}
 
 }

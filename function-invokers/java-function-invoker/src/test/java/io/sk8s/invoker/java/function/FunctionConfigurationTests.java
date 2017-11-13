@@ -28,9 +28,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.rule.OutputCapture;
+import org.springframework.cloud.function.context.InMemoryFunctionCatalog;
+import org.springframework.cloud.function.core.FunctionCatalog;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -39,54 +40,83 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { FunctionConfiguration.class, FunctionProperties.class })
+@SpringBootTest(classes = { FunctionConfiguration.class, FunctionProperties.class,
+		InMemoryFunctionCatalog.class })
 public abstract class FunctionConfigurationTests {
 
-	@TestPropertySource(properties = { "function.uri=file:target/test-classes?io.sk8s.invoker.java.function.Doubler"
-	})
+	@TestPropertySource(properties = {
+			"function.uri=file:target/test-classes?io.sk8s.invoker.java.function.Doubler" })
 	public static class SingleFunctionTests extends FunctionConfigurationTests {
-	
+
 		@Autowired
-		@Qualifier("function0")
-		private Function<Integer, Integer> function;
-	
+		private FunctionCatalog catalog;
+
 		@Test
 		public void testDouble() {
+			Function<Integer, Integer> function = catalog.lookupFunction("function0");
 			assertThat(function.apply(2), is(4));
 		}
 	}
-	
-	@TestPropertySource(properties = { "function.uri=file:target/test-classes?" +
-					"io.sk8s.invoker.java.function.NumberEmitter"
-	})
-	public static class SingleSupplierTests extends FunctionConfigurationTests {
+
+	@TestPropertySource(properties = { "function.uri=file:target/test-classes?"
+			+ "io.sk8s.invoker.java.function.NumberEmitter,"
+			+ "io.sk8s.invoker.java.function.Frenchizer" })
+	public static class SupplierCompositionTests extends FunctionConfigurationTests {
 
 		@Autowired
-		@Qualifier("function0")
-		private Supplier<Integer> function;
+		private FunctionCatalog catalog;
 
 		@Test
-		public void testComposition() {
+		public void testSupplier() {
+			Supplier<Integer> function = catalog.lookupSupplier("function0");
 			assertThat(function.get(), is(1));
+		}
+
+		@Test
+		public void testFunction() {
+			Function<Integer, String> function = catalog.lookupFunction("function1");
+			assertThat(function.apply(1), is("un"));
+		}
+
+	}
+
+	@TestPropertySource(properties = { "function.uri=file:target/test-classes?"
+			+ "io.sk8s.invoker.java.function.Doubler,"
+			+ "io.sk8s.invoker.java.function.Frenchizer" })
+	public static class FunctionCompositionTests extends FunctionConfigurationTests {
+
+		@Autowired
+		private FunctionCatalog catalog;
+
+		@Test
+		public void testFunction() {
+			Function<Integer, Integer> function = catalog.lookupFunction("function0");
+			assertThat(function.apply(2), is(4));
+		}
+
+		@Test
+		public void testThen() {
+			Function<Integer, String> function = catalog.lookupFunction("function1");
+			assertThat(function.apply(4), is("quatre"));
 		}
 	}
 
-	@TestPropertySource(properties = { "function.uri=file:target/test-classes?" +
-					"io.sk8s.invoker.java.function.Printer"
-	})
-	public static class SingleConsumerTests extends FunctionConfigurationTests {
+	@TestPropertySource(properties = { "function.uri=file:target/test-classes?"
+			+ "io.sk8s.invoker.java.function.Frenchizer,"
+			+ "io.sk8s.invoker.java.function.Printer" })
+	public static class ConsumerCompositionTests extends FunctionConfigurationTests {
 
 		@Rule
 		public OutputCapture capture = new OutputCapture();
 
 		@Autowired
-		@Qualifier("function0")
-		private Consumer<Object> function;
+		private FunctionCatalog catalog;
 
 		@Test
-		public void testComposition() {
-			function.accept("deux");
-			capture.expect(containsString("Seen deux"));
+		public void testConsumer() {
+			Consumer<String> function = catalog.lookupConsumer("function1");
+			function.accept("2");
+			capture.expect(containsString("Seen 2"));
 		}
 	}
 
