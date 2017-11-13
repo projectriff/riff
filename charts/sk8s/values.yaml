@@ -7,7 +7,7 @@ create:
 enable:
   metricsDashboard: false
   tracingDashboard: false
-eventDispatcher:
+functionController:
   replicaCount: 1
   image:
     repository: sk8s/function-controller
