@@ -84,6 +84,10 @@ public class ContextRunner {
 		this.runThread = null;
 	}
 
+	public ConfigurableApplicationContext getContext() {
+		return this.context;
+	}
+
 	private void resetUrlHandler() {
 		// Tomcat always tries to set this, even if it was already set
 		Field field = ReflectionUtils.findField(URL.class, "factory");

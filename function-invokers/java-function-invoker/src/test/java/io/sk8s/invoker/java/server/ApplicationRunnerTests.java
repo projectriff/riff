@@ -13,31 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.sk8s.invoker.java.function;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+package io.sk8s.invoker.java.server;
+
+import io.sk8s.invoker.java.function.Doubler;
+import io.sk8s.invoker.java.function.FunctionApp;
+
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Dave Syer
  *
  */
-@SpringBootApplication
-public class FunctionApp {
-	
-	@Bean
-	public Doubler myDoubler() {
-		return new Doubler();
-	}
+public class ApplicationRunnerTests {
 
-	@Bean
-	public Frenchizer myFrenchizer() {
-		return new Frenchizer();
-	}
-
-	public static void main(String[] args) throws Exception {
-		SpringApplication.run(FunctionApp.class, args);
+	@Test
+	public void startEvaluateAndStop() {
+		ApplicationRunner runner = new ApplicationRunner(getClass().getClassLoader(), FunctionApp.class.getName());
+		runner.run("--spring.main.webEnvironment=false");
+		assertThat(runner.containsBean(Doubler.class.getName())).isTrue();
+		assertThat(runner.getBean(Doubler.class.getName())).isNotNull();
+		runner.close();
 	}
 
 }

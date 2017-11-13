@@ -19,6 +19,7 @@ package io.sk8s.invoker.java.server;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.PreDestroy;
 
@@ -26,6 +27,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.support.LiveBeansView;
+import org.springframework.expression.Expression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -59,8 +63,10 @@ public class ApplicationRunner {
 			ClassUtils.overrideThreadContextClassLoader(this.classLoader);
 			Class<?> cls = this.classLoader.loadClass(ContextRunner.class.getName());
 			this.app = cls.newInstance();
-			runContext(this.source, Collections.singletonMap(
-					LiveBeansView.MBEAN_DOMAIN_PROPERTY_NAME, "function-invoker"), args);
+			runContext(this.source,
+					Collections.singletonMap(LiveBeansView.MBEAN_DOMAIN_PROPERTY_NAME,
+							"function-invoker-" + UUID.randomUUID()),
+					args);
 		}
 		catch (Exception e) {
 			logger.error("Cannot deploy", e);
@@ -72,6 +78,57 @@ public class ApplicationRunner {
 		if (e != null) {
 			throw e;
 		}
+	}
+
+	public Object getBean(String name) {
+		if (this.app != null) {
+			if (containsBeanByName(name)) {
+				return getBeanByName(name);
+			}
+			return getBeanByType(name);
+		}
+		return null;
+	}
+
+	private boolean containsBeanByName(String name) {
+		Expression parsed = new SpelExpressionParser()
+				.parseExpression("containsBean(\"" + name + "\")");
+		Method method = ReflectionUtils.findMethod(this.app.getClass(), "getContext");
+		return (Boolean) parsed.getValue(new StandardEvaluationContext(
+				ReflectionUtils.invokeMethod(method, this.app)));
+	}
+
+	private Object getBeanByName(String name) {
+		Expression parsed = new SpelExpressionParser()
+				.parseExpression("getBean(\"" + name + "\")");
+		Method method = ReflectionUtils.findMethod(this.app.getClass(), "getContext");
+		return parsed.getValue(new StandardEvaluationContext(
+				ReflectionUtils.invokeMethod(method, this.app)));
+	}
+
+	private Object getBeanByType(String name) {
+		Expression parsed = new SpelExpressionParser()
+				.parseExpression("getBean(T(" + name + "))");
+		Method method = ReflectionUtils.findMethod(this.app.getClass(), "getContext");
+		return parsed.getValue(new StandardEvaluationContext(
+				ReflectionUtils.invokeMethod(method, this.app)));
+	}
+
+	public boolean containsBean(String name) {
+		if (this.app != null) {
+			if (containsBeanByName(name)) {
+				return true;
+			}
+			Expression parsed = new SpelExpressionParser()
+					.parseExpression("getBeansOfType(T(" + name + "))");
+			Method method = ReflectionUtils.findMethod(this.app.getClass(), "getContext");
+			@SuppressWarnings("unchecked")
+			Map<String, Object> beans = (Map<String, Object>) parsed
+					.getValue(new StandardEvaluationContext(
+							ReflectionUtils.invokeMethod(method, this.app)));
+			return !beans.isEmpty();
+		}
+		return false;
 	}
 
 	@PreDestroy

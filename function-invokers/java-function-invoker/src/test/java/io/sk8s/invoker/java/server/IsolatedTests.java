@@ -81,6 +81,8 @@ public class IsolatedTests {
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		// Check single valued response in s-c-f
 		assertThat(result.getBody()).isEqualTo("[10]");
+		assertThat(runner.containsBean("io.sk8s.invoker.java.function.FluxDoubler"))
+				.isFalse();
 	}
 
 	@Test
@@ -98,8 +100,37 @@ public class IsolatedTests {
 
 	@Test
 	public void appClassPath() throws Exception {
+		runner.run("--server.port=" + port, "--function.uri=app:classpath?"
+				+ "handler=io.sk8s.invoker.java.function.SpringDoubler");
+		ResponseEntity<String> result = rest
+				.exchange(
+						RequestEntity.post(new URI("http://localhost:" + port + "/"))
+								.contentType(MediaType.TEXT_PLAIN).body("5"),
+						String.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("10");
+	}
+
+	@Test
+	public void mainClassBeanName() throws Exception {
 		runner.run("--server.port=" + port,
-				"--function.uri=app:classpath?handler=io.sk8s.invoker.java.function.SpringDoubler");
+				"--function.uri=app:classpath?" + "handler=myDoubler&"
+						+ "main=io.sk8s.invoker.java.function.FunctionApp");
+		ResponseEntity<String> result = rest
+				.exchange(
+						RequestEntity.post(new URI("http://localhost:" + port + "/"))
+								.contentType(MediaType.TEXT_PLAIN).body("5"),
+						String.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("10");
+	}
+
+	@Test
+	public void mainClassBeanType() throws Exception {
+		runner.run("--server.port=" + port,
+				"--function.uri=app:classpath?"
+						+ "handler=io.sk8s.invoker.java.function.Doubler&"
+						+ "main=io.sk8s.invoker.java.function.FunctionApp");
 		ResponseEntity<String> result = rest
 				.exchange(
 						RequestEntity.post(new URI("http://localhost:" + port + "/"))

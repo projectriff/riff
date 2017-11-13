@@ -39,7 +39,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class FunctionProperties {
 
-	private static Pattern uriPattern = Pattern.compile("(.+)\\?.*handler=(.+)&?(.*)");
+	private static Pattern uriPattern = Pattern.compile("(.+)\\?.*handler=([^&]+)&?(.*)");
 
 	private static Log logger = LogFactory.getLog(FunctionProperties.class);
 
@@ -49,6 +49,8 @@ public class FunctionProperties {
 	private String[] className;
 
 	private String functionName;
+
+	private String mainClassName;
 
 	public String getUri() {
 		return uri;
@@ -72,10 +74,14 @@ public class FunctionProperties {
 			logger.info("initializing with uri: " + uri);
 			Matcher m = uriPattern.matcher(uri);
 			Assert.isTrue(m.matches(),
-				"expected format: [jarLocation]?handler=[className]");
+				"expected format: <jarLocation>?handler=<className>[&main=<className>]");
 
 			String jarLocation = m.group(1);
 			String className = m.group(2);
+			String rest = m.group(3);
+			if (rest!=null && rest.startsWith("main=")) {
+				this.mainClassName = rest.substring("main=".length());
+			}
 
 			this.jarLocation = StringUtils.commaDelimitedListToStringArray(jarLocation);
 			this.className = StringUtils.commaDelimitedListToStringArray(className);
@@ -89,5 +95,9 @@ public class FunctionProperties {
 
 	public String getFunctionName() {
 		return this.functionName;
+	}
+
+	public String getMainClassName() {
+		return this.mainClassName;
 	}
 }
