@@ -74,9 +74,11 @@ public class FunctionProperties {
 			this.jarLocation = StringUtils.commaDelimitedListToStringArray(jarLocation);
 			this.className = StringUtils.commaDelimitedListToStringArray(className);
 		}
-		this.functionName = StringUtils
-				.arrayToCommaDelimitedString(IntStream.range(0, this.className.length)
-						.sequential().mapToObj(i -> "function" + i).toArray());
+		if (this.className != null) {
+			this.functionName = StringUtils
+					.arrayToCommaDelimitedString(IntStream.range(0, this.className.length)
+							.sequential().mapToObj(i -> "function" + i).toArray());
+		}
 	}
 
 	public String getFunctionName() {
