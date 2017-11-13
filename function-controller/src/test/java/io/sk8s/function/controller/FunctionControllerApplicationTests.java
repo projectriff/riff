@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-package io.sk8s.event.dispatcher;
+package io.sk8s.function.controller;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import io.sk8s.test.Sk8sTypesAvailableRule;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * @author Mark Fisher
  */
-@ConfigurationProperties(prefix = "sk8s.function.controller.sidecar")
-public class SidecarProperties {
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class FunctionControllerApplicationTests {
 
-	private String tag = "0.0.1-SNAPSHOT";
+	@ClassRule
+	public static Sk8sTypesAvailableRule sk8sTypesAvailableRule = new Sk8sTypesAvailableRule();
 
-	public String getTag() {
-		return tag;
+	@Test
+	public void contextLoads() {
 	}
 
-	public void setTag(String tag) {
-		this.tag = tag;
-	}
 }

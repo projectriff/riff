@@ -2,7 +2,7 @@
 
 ./mvnw dockerfile:build -pl \
 topic-controller,\
-event-dispatcher,\
+function-controller,\
 zipkin-server,\
 function-invokers/java-function-invoker,\
 function-invokers/node-function-invoker,\
