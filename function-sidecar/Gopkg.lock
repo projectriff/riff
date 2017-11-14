@@ -38,6 +38,12 @@
   version = "v1.0.2"
 
 [[projects]]
+  name = "github.com/giantswarm/retry-go"
+  packages = ["."]
+  revision = "867bc2467430df5c49fb33e54d648f5fc0e73bf1"
+  version = "0.5.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/golang/protobuf"
   packages = ["proto","ptypes","ptypes/any","ptypes/duration","ptypes/empty","ptypes/timestamp"]
@@ -48,6 +54,12 @@
   name = "github.com/golang/snappy"
   packages = ["."]
   revision = "553a641470496b2327abcac10b36396bd98e45c9"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/juju/errgo"
+  packages = ["."]
+  revision = "08cceb5d0b5331634b9826762a8fd53b29b86ad8"
 
 [[projects]]
   name = "github.com/pierrec/lz4"
@@ -100,6 +112,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d89a4b3e6398fa30a64e40c20a5317539bcdff83a063facb1888d8b3c8217485"
+  inputs-digest = "2305cd807e59a0254b3b206a198ed3b35f11062d832556b0d2b4c9085f009bd4"
   solver-name = "gps-cdcl"
   solver-version = 1

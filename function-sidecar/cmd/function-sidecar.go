@@ -51,6 +51,8 @@ func main() {
 	group := saj["spring.cloud.stream.bindings.input.group"].(string)
 	protocol := saj["spring.profiles.active"].(string)
 
+	fmt.Printf("Sidecar for function '%v' (%v->%v) using %v dispatcher starting\n", group, input, output, protocol)
+
 	dispatcher := createDispatcher(protocol)
 
 	var producer sarama.AsyncProducer

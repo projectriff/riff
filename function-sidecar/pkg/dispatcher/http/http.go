@@ -23,7 +23,15 @@ import (
 	"io/ioutil"
 	"log"
 	"time"
+	"net"
+	retry "github.com/giantswarm/retry-go"
+
+
 )
+
+const UseTimeout = 10000000 // "Infinite" number of retries to override default and use the Timeout approach instead
+const ConnectionAttemptTimeout = 1 * time.Minute
+const ConnectionAttemptInterval = 100 * time.Millisecond
 
 type httpDispatcher struct {
 }
@@ -51,5 +59,18 @@ func (httpDispatcher) Dispatch(in interface{}) (interface{}, error) {
 }
 
 func NewHttpDispatcher() dispatcher.Dispatcher {
+	attemptDial := func() error {
+		log.Println("Waiting for function to accept connection on localhost:8080")
+		_, err := net.Dial("tcp", "localhost:8080")
+		return err
+	}
+
+	err := retry.Do(attemptDial,
+		retry.Timeout(ConnectionAttemptTimeout),
+		retry.Sleep(ConnectionAttemptInterval),
+		retry.MaxTries(UseTimeout))
+	if err != nil {
+		panic(err)
+	}
 	return httpDispatcher{}
 }
