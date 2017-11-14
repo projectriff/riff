@@ -17,7 +17,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/sk8sio/sk8s-types/pkg/apis/extensions.sk8s.io/v1"
@@ -30,6 +29,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
+	"log"
 )
 
 // return rest config, if path not specified assume in cluster config
@@ -81,8 +81,9 @@ func main() {
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				t := obj.(*v1.Topic)
-				fmt.Println("Adding topic " + t.Name)
-				err := provisioner.ProvisionProducerDestination(t.Name)
+				log.Printf("Adding topic %v with %v partitions", t.Name, *t.Spec.Partitions)
+				t = applyDefaults(t)
+				err := provisioner.ProvisionProducerDestination(t.Name, int(*t.Spec.Partitions))
 				if err != nil {
 					panic(err)
 				}
@@ -99,4 +100,12 @@ func main() {
 
 	// Wait forever
 	select {}
+}
+
+func applyDefaults(topic *v1.Topic) *v1.Topic {
+	if topic.Spec.Partitions == nil {
+		defaultPartitions := int32(1)
+		topic.Spec.Partitions = &defaultPartitions
+	}
+	return topic
 }

@@ -18,6 +18,7 @@ package kafka
 
 import (
 	kazoo "github.com/wvanbergen/kazoo-go"
+	"log"
 )
 
 type KafkaProvisioner struct {
@@ -34,7 +35,11 @@ func NewKafkaProvisioner(connectionString string) *KafkaProvisioner {
 	return &kp
 }
 
-func (kp *KafkaProvisioner) ProvisionProducerDestination(name string) error {
-	err := kp.kz.CreateTopic(name, 1, 1, nil)
+func (kp *KafkaProvisioner) ProvisionProducerDestination(name string, partitions int) error {
+	err := kp.kz.CreateTopic(name, partitions, 1, nil)
+	if err == kazoo.ErrTopicExists {
+		log.Printf("Topic %v already exists. Doing nothing", name)
+		return nil
+	}
 	return err
 }
