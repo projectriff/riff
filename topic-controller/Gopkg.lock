@@ -16,8 +16,8 @@
 [[projects]]
   name = "github.com/asaskevich/govalidator"
   packages = ["."]
-  revision = "73945b6115bfbbcc57d89b7316e28109364124e1"
-  version = "v7"
+  revision = "521b25f4b05fd26bec69d9dedeb8f9c9a83939a8"
+  version = "v8"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -34,8 +34,8 @@
 [[projects]]
   name = "github.com/emicklei/go-restful"
   packages = [".","log"]
-  revision = "68c9750c36bb8cb433f1b88c807b4b30df4acc40"
-  version = "v2.2.1"
+  revision = "5741799b275a3c4a5a9623a993576d7545cf7b5c"
+  version = "v2.4.0"
 
 [[projects]]
   name = "github.com/emicklei/go-restful-swagger12"
@@ -77,13 +77,13 @@
   branch = "master"
   name = "github.com/go-openapi/loads"
   packages = ["."]
-  revision = "a80dea3052f00e5f032e860dd7355cd0cc67e24d"
+  revision = "c3e1ca4c0b6160cac10aeef7e8b425cc95b9c820"
 
 [[projects]]
   branch = "master"
   name = "github.com/go-openapi/spec"
   packages = ["."]
-  revision = "3faa0055dbbf2110abc1f3b4e3adbb22721e96e7"
+  revision = "a4fa9574c7aa73b2fc54e251eb9524d0482bb592"
 
 [[projects]]
   branch = "master"
@@ -95,13 +95,13 @@
   branch = "master"
   name = "github.com/go-openapi/swag"
   packages = ["."]
-  revision = "f3f9494671f93fcff853e3c6e9e948b3eb71e590"
+  revision = "cf0bdb963811675a4d7e74901cefc7411a1df939"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
   packages = ["proto","sortkeys"]
-  revision = "100ba4e885062801d56799d78530b73b178a78f3"
-  version = "v0.4"
+  revision = "342cbe0a04158f6dcb03ca0079991a51a4248c02"
+  version = "v0.5"
 
 [[projects]]
   branch = "master"
@@ -130,32 +130,39 @@
 [[projects]]
   name = "github.com/imdario/mergo"
   packages = ["."]
-  revision = "3e95a51e0639b4cf372f2ccf74c86749d747fbdc"
-  version = "0.2.2"
+  revision = "7fe0c75c13abdee74b09fcacef5ea1c6bba6a874"
+  version = "0.2.4"
 
 [[projects]]
   branch = "master"
   name = "github.com/juju/ratelimit"
   packages = ["."]
-  revision = "5b9ff866471762aa2ab2dced63c9fb6f53921342"
+  revision = "59fac5042749a5afb9af70e813da1dd5474f0167"
 
 [[projects]]
   branch = "master"
   name = "github.com/mailru/easyjson"
   packages = ["buffer","jlexer","jwriter"]
-  revision = "2a92e673c9a6302dd05c3a691ae1f24aef46457d"
+  revision = "5f62e4f3afa2f576dc86531b7df4d966b19ef8f8"
 
 [[projects]]
   branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
-  revision = "d0303fe809921458f417bcf828397a65db30a7e4"
+  revision = "06020f85339e21b2478f756a78e295255ffa4d6a"
 
 [[projects]]
   branch = "master"
   name = "github.com/samuel/go-zookeeper"
   packages = ["zk"]
-  revision = "e6b59f6144beb8570562539c1898a0b1fea34b41"
+  revision = "9a96098268ef555eb1f04d8b1ee813d0a87e5089"
+
+[[projects]]
+  branch = "add-client"
+  name = "github.com/sk8sio/sk8s-types"
+  packages = ["pkg/apis/extensions.sk8s.io/v1","pkg/client/topic"]
+  revision = "cae020b826f44e0561d25c21b1031b6e9d694111"
+  source = "github.com/ericbottard/sk8s-types"
 
 [[projects]]
   name = "github.com/spf13/pflag"
@@ -164,7 +171,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/ugorji/go"
   packages = ["codec"]
   revision = "8c0409fcbb70099c748d71f714529204975f6c3f"
@@ -180,25 +186,25 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "faadfbdc035307d901e69eea569f5dda451a3ee3"
+  revision = "6a293f2d4b14b8e6d3f0539e383f6d0d30fce3fd"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = ["http2","http2/hpack","idna","lex/httplex"]
-  revision = "b129b8e0fbeb39c8358e51a07ab6c50ad415e72e"
+  revision = "a337091b0525af65de94df2eb7e98bd9962dcbe2"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix","windows"]
-  revision = "062cd7e4e68206d8bab9b18396626e855c992658"
+  revision = "1e2299c37cc91a509f1b12369872d27be0ce98a6"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/text"
-  packages = ["internal/gen","internal/triegen","internal/ucd","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable","width"]
-  revision = "acd49d43e9b95df46670431bf5c7ae59586daad8"
+  packages = ["collate","collate/build","internal/colltab","internal/gen","internal/tag","internal/triegen","internal/ucd","language","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable","width"]
+  revision = "88f656faf3f37f690df1a32515b479415e1a6769"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -239,6 +245,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7cc299fe6b4209c1add8d2ce3714aae6b97df64ddd301b6b21ae3c74c07adbb7"
+  inputs-digest = "fc1de6cd50c399e5b3c9ed3d0407bac9cf4a0b8dfa1418d2bbc3b33d18202a2f"
   solver-name = "gps-cdcl"
   solver-version = 1

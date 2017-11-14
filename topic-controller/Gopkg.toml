@@ -22,22 +22,15 @@
 
 
 [[constraint]]
-  branch = "release-1.7"
-  name = "k8s.io/apiextensions-apiserver"
-
-[[constraint]]
-  branch = "release-1.7"
-  name = "k8s.io/apimachinery"
-
-[[constraint]]
-  name = "k8s.io/client-go"
-  version = "4.0.0"
-
-#[[constraint]]
-#  name = "github.com/Shopify/sarama"
-#  version = "1.12.0"
+  name = "github.com/sk8sio/sk8s-types"
+  branch = "add-client"
+  source = "github.com/ericbottard/sk8s-types"
 
 [[constraint]]
   name = "github.com/wvanbergen/kazoo-go"
   branch = "topic-management"
   source = "https://github.com/ericbottard/kazoo-go.git"
+
+[[override]]
+  name = "github.com/ugorji/go"
+  revision = "8c0409fcbb70099c748d71f714529204975f6c3f"

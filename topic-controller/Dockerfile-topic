@@ -1,5 +1,0 @@
-FROM scratch
-
-ADD bin/topic /bin/
-
-CMD ["bin/topic"]
