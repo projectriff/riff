@@ -118,8 +118,9 @@ public class FunctionConfiguration {
 			URL[] urls = Arrays.stream(properties.getJarLocation())
 					.map(toResourceURL(delegatingResourceLoader)).toArray(URL[]::new);
 
-			try (URLClassLoader cl = new URLClassLoader(urls,
-					/* explicit null parent */null)) {
+			try {
+				URLClassLoader cl = new URLClassLoader(urls,
+						/* explicit null parent */null);
 				AtomicInteger counter = new AtomicInteger(0);
 				Arrays.stream(properties.getClassName())
 						.map(name -> (Object) BeanUtils
@@ -127,8 +128,8 @@ public class FunctionConfiguration {
 						.sequential().forEach(bean -> beanFactory.registerSingleton(
 								"function" + counter.getAndIncrement(), bean));
 			}
-			catch (IOException e) {
-
+			catch (Exception e) {
+				throw new IllegalStateException("Cannot create functions", e);
 			}
 		}
 
