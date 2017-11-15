@@ -109,7 +109,14 @@ public class LagTracker implements Closeable {
 												if (committed == null) {
 													committed = new OffsetAndMetadata(0L);
 												}
-												long position = logEndOffsetTrackingConsumer.position(tp);
+												long position = 0;
+												try {
+													position = logEndOffsetTrackingConsumer.position(tp);
+												}
+												catch (IllegalArgumentException e) {
+													reassignPartitions();
+													position = logEndOffsetTrackingConsumer.position(tp);
+												}
 												return new Offsets(tp.partition(), position,
 														committed.offset());
 											})
