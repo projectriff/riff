@@ -21,10 +21,20 @@ minikube start --cpus=4 --memory=4096 --disk-size=64g
 
 Helm is comprised of 2 components: one is the client (Helm) the other is the server component (Tiller). The Helm client is run on your local machine and can be installed using the instructions found here: https://github.com/kubernetes/helm/blob/master/README.md#install
 
-Once you have Helm client installed you can install the server component using:
+Once you have Helm client installed you can install the server component.
+
+For a cluster that does not have RBAC enabled use:
 
 ----
 helm init
+----
+
+For a cluster that has RBAC enabled use:
+
+----
+kubectl -n kube-system create serviceaccount tiller
+kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+helm init --service-account=tiller
 ----
 
 NOTE: To verify that the Tiller pod has started execute the following command: `kubectl get pod --namespace kube-system` and you should see the `tiller` pod running.
@@ -40,16 +50,24 @@ helm repo update
 
 ==== Install Sk8s FaaS helm chart
 
-Install the Sk8s Helm chart using the following command:
+Install the Sk8s Helm chart using one of the following commands.
+
+For a cluster that does not have RBAC enabled use:
 
 ----
 helm install --name demo sk8s-incubator/sk8s
 ----
 
+For a cluster that does have RBAC enabled use:
+
+----
+helm install --name demo sk8s-incubator/sk8s --set create.rbac=true
+----
+
 You should see a number of resources get created in your Minikube. You can see them all using:
 
 ----
-kubectl get all,jobs,functions,topics
+kubectl get svc,deployments,pods,jobs,functions,topics
 ----
 
 ==== Clone the repo

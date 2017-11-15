@@ -84,6 +84,12 @@ kubectl apply -f config/kafka
 kubectl apply -f config
 ----
 
+If your cluster has RBAC enabled, then you also need to create a Role and a RoleBinding:
+
+----
+kubectl apply -f config/rbac
+----
+
 ==== Deploy Metrics (Grafana/Prometheus) and Tracing (Zipkin) Dashboards
 
 ----
