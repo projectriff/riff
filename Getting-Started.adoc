@@ -1,6 +1,6 @@
 = Sk8s: a FaaS for Kubernetes - Getting Started
 
-To Sk8s FaaS link:README.adoc[README]
+IMPORTANT: We don't have a curated and published release yet, so please use the manual build process documented in the link:README.adoc[README] for the time beeing.
 
 == Installation
 
