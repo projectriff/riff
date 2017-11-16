@@ -22,12 +22,9 @@
 
 
 [[constraint]]
-  branch = "release-1.7"
-  name = "k8s.io/apiextensions-apiserver"
-
-[[constraint]]
-  branch = "release-1.7"
-  name = "k8s.io/apimachinery"
+  name = "k8s.io/kubernetes"
+  revision = "930b5c4b2db777e7ece981d84e9430808feceb4c"
+  source = "github.com/openshift/kubernetes"
 
 [[constraint]]
   name = "k8s.io/client-go"
