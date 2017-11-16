@@ -15,9 +15,9 @@ kubectl create ns sk8s
 helm init --tiller-namespace sk8s && sleep 10
 helm repo update
 helm --tiller-namespace sk8s install sk8srepo/sk8s --namespace sk8s -n sk8s
-docker build -t sk8s/slack_command:test slack-command
-docker push sk8s/slack_command:test
-kubectl -n sk8s apply -f slack-command/slack_command.yaml
+docker build -t sk8s/slack-command:test slack-command
+docker push sk8s/slack-command:test
+kubectl -n sk8s apply -f slack-command/slack-command.yaml
 while [ -z "$gw_ip" ]; do
   sleep 10
   gw_ip=$(kubectl -n sk8s get svc -l component=http-gateway -o jsonpath='{.items[0].status.loadBalancer.ingress[].ip}')

@@ -2,35 +2,16 @@
 
 [horizontal]
 *Language*:: JavaScript
-*Function*:: https://github.com/markfisher/sk8s/blob/master/samples/gke/slack-command/slack_command.js[slack_command.js]
+*Function*:: https://github.com/markfisher/sk8s/blob/master/samples/slack/slack-command/slack_command.js[slack_command.js]
 *Protocol*:: HTTP
 *Input*:: slack
 *Output*:: none (replies, implicitly)
 
-=== TL;DR
-
-If you have push access to the `sk8s` org on dockerhub, you can probably run the `test.sh` script in this
-directory and watch the whole process work. It's a bit noisy and the output may be difficult to interpret,
-however. Therefore the behaviour will be described in detail in this document.
-
 === Deploy the FaaS
 
-Assuming a clean GKE environment,
-```
-kubectl create ns <your-namespace>
-helm repo add sk8srepo https://sk8s_charts.storage.googleapis.com
-helm repo update
-helm init --tiller-namespace <your-namespace>
-... wait for tiller pod to come up, should only be a few seconds ...
-helm --tiller-namespace <your-namespace> install sk8srepo/sk8s --namespace <your-namespace> -n sk8s
-```
-
-where `<your-namespace>` is any non-default namespace of your choosing that does not already exist at the
-time of running the above example; strictly speaking all deploys can be done in the default namespace, but
-it can be risky when it comes time to clean your deploy.
-
-Note: at present, the above helm command installs the latest version of the `sk8s` chart. This is
-because we have yet to create a stable release. When that happens, somebody should update this documentation.
+Deploy your FaaS, either manually (https://github.com/markfisher/sk8s#manual) or with helm
+(https://github.com/markfisher/sk8s/blob/master/Getting-Started.adoc#helm). For this example to work, your Kubernetes cluster
+must allow for the creation of a LoadBalancer with a public facing IP address.
 
 === Build the Docker container for the function code
 
@@ -73,6 +54,8 @@ spec:
 EOF)
 ```
 
+where `<your-namespace>` is the Kubernetes namespace in which you would like your function deployed.
+
 === Set up your integration on Slack
 
 When creating your slack slash command (https://api.slack.com/slash-commands), consider the below command
@@ -88,9 +71,8 @@ We can see from the `EXTERNAL-IP` and `PORT(S)` columns that our gateway should 
 in this case. Since the topic we configured in the previous step was called `slack`, then we should configure our
 slash command to send `POST` requests to `http://104.154.118.171:80/requests/slack`.
 
-=== Tear down the FaaS
+=== Delete your function
 
 ```
-helm --tiller-namespace <your-namespace> del --purge sk8s
-kubectl delete ns <your-namespace> cascade=true
+kubectl -n <your-namespace> delete function slack-command
 ```
