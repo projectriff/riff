@@ -1,0 +1,96 @@
+= GKE
+
+[horizontal]
+*Language*:: JavaScript
+*Function*:: https://github.com/markfisher/sk8s/blob/master/samples/gke/slack-command/slack_command.js[slack_command.js]
+*Protocol*:: HTTP
+*Input*:: slack
+*Output*:: none (replies, implicitly)
+
+=== TL;DR
+
+If you have push access to the `sk8s` org on dockerhub, you can probably run the `test.sh` script in this
+directory and watch the whole process work. It's a bit noisy and the output may be difficult to interpret,
+however. Therefore the behaviour will be described in detail in this document.
+
+=== Deploy the FaaS
+
+Assuming a clean GKE environment,
+```
+kubectl create ns <your-namespace>
+helm repo add sk8srepo https://sk8s_charts.storage.googleapis.com
+helm repo update
+helm init --tiller-namespace <your-namespace>
+... wait for tiller pod to come up, should only be a few seconds ...
+helm --tiller-namespace <your-namespace> install sk8srepo/sk8s --namespace <your-namespace> -n sk8s
+```
+
+where `<your-namespace>` is any non-default namespace of your choosing that does not already exist at the
+time of running the above example; strictly speaking all deploys can be done in the default namespace, but
+it can be risky when it comes time to clean your deploy.
+
+Note: at present, the above helm command installs the latest version of the `sk8s` chart. This is
+because we have yet to create a stable release. When that happens, somebody should update this documentation.
+
+=== Build the Docker container for the function code
+
+```
+docker build -t <your-dockerhub-repo>:<your-tag> slack-command
+```
+
+Where `<your-dockerhub-repo>` is a repository on dockerhub for which you have push permissions, and `<your-tag>`
+is anything other than `latest` (not strictly necessary, but probably a best practice).
+
+=== Publish the resulting image
+
+This step is of special concern when deploying to GKE, as minikube is capable of having both the docker daemon
+(which builds the images) and the registry (which kubernetes pulls from) on your local machine. In the GKE case,
+we will generally assume you are able to publish your images to dockerhub.
+
+```
+docker push <your-dockerhub-repo>:<your-tag>
+```
+
+=== Create the Function and Topic(s)
+
+Assuming your kube config is pointed at GKE,
+
+```
+kubectl -n <your-namespace> apply -f <(cat <<EOF
+apiVersion: extensions.sk8s.io/v1
+kind: Topic
+metadata:
+  name: slack
+---
+apiVersion: extensions.sk8s.io/v1
+kind: Function
+metadata:
+  name: slack-command
+spec:
+  image: <your-dockerhub-repo>:<your-tag>
+  protocol: http
+  input: slack
+EOF)
+```
+
+=== Set up your integration on Slack
+
+When creating your slack slash command (https://api.slack.com/slash-commands), consider the below command
+with output.
+
+```
+$ kubectl -n <your-namespace> get svc -l component=http-gateway
+NAME                     TYPE           CLUSTER-IP      EXTERNAL-IP       PORT(S)        AGE
+sk8s-sk8s-http-gateway   LoadBalancer   10.51.247.194   104.154.118.171   80:30725/TCP   22m
+```
+
+We can see from the `EXTERNAL-IP` and `PORT(S)` columns that our gateway should be reachable at `http://104.154.118.171:80`
+in this case. Since the topic we configured in the previous step was called `slack`, then we should configure our
+slash command to send `POST` requests to `http://104.154.118.171:80/requests/slack`.
+
+=== Tear down the FaaS
+
+```
+helm --tiller-namespace <your-namespace> del --purge sk8s
+kubectl delete ns <your-namespace> cascade=true
+```
