@@ -1,2 +1,4 @@
 FROM sk8s/shell-function-invoker:0.0.1-SNAPSHOT
-ADD wordcount.sh /functions/script.sh
+ARG FUNCTION_URI="/wordcount.sh"
+ADD wordcount.sh /
+ENV FUNCTION_URI $FUNCTION_URI

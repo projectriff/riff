@@ -1,3 +1,4 @@
 FROM sk8s/shell-function-invoker:0.0.1-SNAPSHOT
-ADD echo.sh /functions/script.sh
-ENV FUNCTION_URI /functions/script.sh
+ARG FUNCTION_URI="/echo.sh"
+ADD echo.sh /
+ENV FUNCTION_URI $FUNCTION_URI

@@ -8,8 +8,11 @@ do
 	sleep 1
 done
 
-# todo: only use this as a default if no env var set
-FUNCTION_URI=/functions/script.sh
+
+if [ -z $FUNCTION_URI ]; then
+	echo "Required variable FUNCTION_URI is not defined"
+	exit 1
+fi
 
 while read X; do
 	source "$FUNCTION_URI" "$X";
