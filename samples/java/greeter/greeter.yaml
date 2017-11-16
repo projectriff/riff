@@ -20,6 +20,3 @@ spec:
   output: greetings
   container:
     image: sk8s/greeter:v0001
-    env:
-    - name: FUNCTION_URI
-      value: file:///functions/function.jar?functions.Greeter

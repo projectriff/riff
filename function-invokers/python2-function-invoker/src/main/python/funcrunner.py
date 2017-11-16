@@ -78,7 +78,7 @@ def install_function():
         return getattr(mod, func_name)
 
     except KeyError:
-        sys.stderr.write("required environment variable FUNCTION_URI is missing\n")
+        sys.stderr.write("required environment variable FUNCTION_URI is not defined\n")
         exit(1)
 
 

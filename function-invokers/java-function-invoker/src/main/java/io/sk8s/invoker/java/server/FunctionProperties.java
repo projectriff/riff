@@ -16,6 +16,8 @@
 
 package io.sk8s.invoker.java.server;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 import javax.annotation.PostConstruct;
@@ -36,6 +38,8 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("function")
 @Validated
 public class FunctionProperties {
+
+	private static Pattern uriPattern = Pattern.compile("(.+)\\?.*handler=(.+)&?(.*)");
 
 	private static Log logger = LogFactory.getLog(FunctionProperties.class);
 
@@ -66,11 +70,13 @@ public class FunctionProperties {
 	public void init() {
 		if (uri != null) {
 			logger.info("initializing with uri: " + uri);
-			String[] tokens = uri.split("\\?");
-			Assert.isTrue(tokens.length == 2,
-					"expected format: [jarLocation]?[className]");
-			String jarLocation = tokens[0];
-			String className = tokens[1];
+			Matcher m = uriPattern.matcher(uri);
+			Assert.isTrue(m.matches(),
+				"expected format: [jarLocation]?handler=[className]");
+
+			String jarLocation = m.group(1);
+			String className = m.group(2);
+
 			this.jarLocation = StringUtils.commaDelimitedListToStringArray(jarLocation);
 			this.className = StringUtils.commaDelimitedListToStringArray(className);
 		}

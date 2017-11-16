@@ -66,13 +66,13 @@ public class IsolatedTests {
 		expected.expect(BeanCreationException.class);
 		SpringApplication.run(JavaFunctionInvokerApplication.class,
 				"--server.port=" + port, "--function.uri=file:target/test-classes"
-						+ "?io.sk8s.invoker.java.function.FluxDoubler");
+						+ "?handler=io.sk8s.invoker.java.function.FluxDoubler");
 	}
 
 	@Test
 	public void fluxFunction() throws Exception {
 		runner.run("--server.port=" + port, "--function.uri=file:target/test-classes"
-				+ "?io.sk8s.invoker.java.function.FluxDoubler");
+				+ "?handler=io.sk8s.invoker.java.function.FluxDoubler");
 		ResponseEntity<String> result = rest
 				.exchange(
 						RequestEntity.post(new URI("http://localhost:" + port + "/"))
@@ -86,7 +86,7 @@ public class IsolatedTests {
 	@Test
 	public void simpleFunction() throws Exception {
 		runner.run("--server.port=" + port, "--function.uri=file:target/test-classes"
-				+ "?io.sk8s.invoker.java.function.Doubler");
+				+ "?handler=io.sk8s.invoker.java.function.Doubler");
 		ResponseEntity<String> result = rest
 				.exchange(
 						RequestEntity.post(new URI("http://localhost:" + port + "/"))
