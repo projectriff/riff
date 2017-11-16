@@ -8,7 +8,7 @@ To Sk8s FaaS link:../README.adoc[README]
   - link:java/greeter/README.adoc[greeter]
 * Node
   - link:node/square/README.adoc[square]
-  - link:gke/README.adoc[Slack command on GKE]
+  - link:slack/README.adoc[slack-command]
 * Python
   - link:python/sentiments/README.adoc[sentiments]
   - link:python/uppercase/README.adoc[uppercase]
