@@ -1,0 +1,13 @@
+apiVersion: extensions.sk8s.io/v1
+kind: Topic
+metadata:
+  name: slack
+---
+apiVersion: extensions.sk8s.io/v1
+kind: Function
+metadata:
+  name: slack-command
+spec:
+  image: sk8s/slack-command:test
+  protocol: http
+  input: slack
