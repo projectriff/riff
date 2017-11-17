@@ -16,6 +16,11 @@ functionController:
     repository: sk8s/function-controller
     tag: 0.0.1-SNAPSHOT
     pullPolicy: IfNotPresent
+  sidecar:
+    image:
+      repository: sk8s/function-sidecar
+      tag: 0.0.1-SNAPSHOT
+      pullPolicy: IfNotPresent
   service:
     name: http
     type: ClusterIP
