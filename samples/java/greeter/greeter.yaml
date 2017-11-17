@@ -15,10 +15,11 @@ kind: Function
 metadata:
   name: greeter
 spec:
-  image: sk8s/greeter:v0001
   protocol: http
   input: names
   output: greetings
-  env:
-  - name: FUNCTION_URI
-    value: file:///functions/function.jar?functions.Greeter
+  container:
+    image: sk8s/greeter:v0001
+    env:
+    - name: FUNCTION_URI
+      value: file:///functions/function.jar?functions.Greeter

@@ -15,8 +15,10 @@ kind: Function
 metadata:
   name: sentiments
 spec:
-  image: sk8s/sentiments:v0001
   protocol: stdio
   input: tweets
   output: sentiments
+  container:
+    image: sk8s/sentiments:v0001
+
 

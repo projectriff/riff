@@ -8,6 +8,7 @@ kind: Function
 metadata:
   name: slack-command
 spec:
-  image: sk8s/slack-command:test
   protocol: http
   input: slack
+  container:
+    image: sk8s/slack-command:test
