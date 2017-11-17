@@ -48,9 +48,10 @@ kind: Function
 metadata:
   name: slack-command
 spec:
-  image: <your-dockerhub-repo>:<your-tag>
   protocol: http
   input: slack
+  container:
+    image: <your-dockerhub-repo>:<your-tag>
 EOF)
 ```
 

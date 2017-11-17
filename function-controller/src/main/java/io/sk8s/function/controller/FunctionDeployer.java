@@ -18,16 +18,10 @@ package io.sk8s.function.controller;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.EmptyDirVolumeSourceBuilder;
@@ -39,12 +33,12 @@ import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
-
-import io.sk8s.kubernetes.api.model.FunctionEnvVar;
 import io.sk8s.kubernetes.api.model.XFunction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 
 /**
  * Makes sure a certain function is running on Kubernetes.
@@ -123,28 +117,10 @@ public class FunctionDeployer {
 	}
 
 	private Container buildMainContainer(XFunction function) {
-		ContainerBuilder builder = new ContainerBuilder().withName("main")
-				.withImage(function.getSpec().getImage())
-				.withImagePullPolicy("IfNotPresent");
+		ContainerBuilder builder = new ContainerBuilder(function.getSpec().getContainer())
+				.withName("main");
 		if ("stdio".equals(function.getSpec().getProtocol())) {
 			builder.withVolumeMounts(buildNamedPipesMount());
-		}
-		List<String> command = function.getSpec().getCommand();
-		if (!ObjectUtils.isEmpty(command)) {
-			builder.addAllToCommand(command);
-		}
-		List<String> args = function.getSpec().getArgs();
-		if (!ObjectUtils.isEmpty(args)) {
-			builder.addAllToArgs(args);
-		}
-		List<FunctionEnvVar> envVars = function.getSpec().getEnv();
-		if (!ObjectUtils.isEmpty(envVars)) {
-			for (FunctionEnvVar envVar : envVars) {
-				builder.addToEnv(new EnvVarBuilder()
-						.withName(envVar.getName())
-						.withValue(envVar.getValue())
-						.build());
-			}
 		}
 		return builder.build();
 	}

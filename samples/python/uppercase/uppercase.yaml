@@ -9,9 +9,10 @@ kind: Function
 metadata:
   name: uppercase
 spec:
-  image: sk8s/grpc-py:latest
   protocol: grpc
   input: greetings
-  env:
-  - name: GRPC_PORT
-    value: 10382
+  container:
+    image: sk8s/grpc-py:v0001
+    env:
+    - name: GRPC_PORT
+      value: 10382
