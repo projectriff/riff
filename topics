@@ -128,7 +128,7 @@ shift
 done
 
 # ======================================= DEFAULTS ============================================
-TOPIC="${TOPIC:-replies}"
+TOPIC="${TOPIC:-function-replicas}"
 
 # ======================================= DEFAULTS END ========================================
 if [[ "${COMMAND}" == "describe" ]]; then

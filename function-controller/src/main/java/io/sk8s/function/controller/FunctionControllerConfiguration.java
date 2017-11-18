@@ -16,15 +16,25 @@
 
 package io.sk8s.function.controller;
 
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.sk8s.core.resource.ResourceEventPublisher;
-import io.sk8s.kubernetes.client.Sk8sClient;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
+
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
+
+import io.sk8s.core.resource.ResourceEventPublisher;
+import io.sk8s.kubernetes.client.Sk8sClient;
 
 /**
  * @author Mark Fisher
@@ -67,5 +77,33 @@ public class FunctionControllerConfiguration {
 	@Bean
 	public FunctionDeployer functionDeployer(KubernetesClient kubernetesClient) {
 		return new FunctionDeployer(kubernetesClient);
+	}
+
+	@Bean
+	public EventPublisher eventPublisher(KafkaTemplate<String, byte[]> kafkaTemplate) {
+		return new EventPublisher(kafkaTemplate);
+	}
+
+	@Bean
+	public KafkaTemplate<String, byte[]> kafkaTemplate(ProducerFactory<String, byte[]> producerFactory) {
+		return new KafkaTemplate<>(producerFactory);
+	}
+
+	@Bean
+	public ProducerFactory<String, byte[]> producerFactory() {
+		return new DefaultKafkaProducerFactory<>(producerProps());
+	}
+
+	@Bean
+	public Map<String, Object> producerProps() {
+	    Map<String, Object> props = new HashMap<>();
+	    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, System.getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS"));
+	    props.put(ProducerConfig.RETRIES_CONFIG, 0);
+	    props.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
+	    props.put(ProducerConfig.LINGER_MS_CONFIG, 1);
+	    props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
+	    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
+	    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class);
+	    return props;
 	}
 }

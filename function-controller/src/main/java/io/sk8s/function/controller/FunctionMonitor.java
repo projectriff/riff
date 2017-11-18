@@ -16,6 +16,7 @@
 
 package io.sk8s.function.controller;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,6 +51,8 @@ public class FunctionMonitor {
 
 	private static final int SCALE_DOWN_LINGER_PERIOD = 10_000;
 
+	private static final String FUNCTION_REPLICA_TOPIC = "function-replicas";
+
 	private final Logger logger = LoggerFactory.getLogger(FunctionMonitor.class);
 
 	// TODO: Change key to ObjectReference or similar for all these maps
@@ -63,11 +66,16 @@ public class FunctionMonitor {
 	/** Keeps track of what the deployments ask. */
 	private final Map<String, Integer> actualReplicaCount = new ConcurrentHashMap<>();
 
+	private final Map<String, Integer> availableReplicaCount = new ConcurrentHashMap<>();
+
 	/** Keeps track of the last time this decided to scale down (but not yet effective). */
 	private final Map<String, Long> scaleDownStartTimes = new ConcurrentHashMap<>();
 
 	@Autowired
 	private FunctionDeployer deployer;
+
+	@Autowired
+	private EventPublisher publisher;
 
 	private volatile long scalerIntervalMs = 0L; // Wait forever
 
@@ -83,6 +91,7 @@ public class FunctionMonitor {
 		XFunction functionResource = event.getResource();
 		String functionName = functionResource.getMetadata().getName();
 		this.functions.put(functionName, functionResource);
+		this.deployer.deploy(functionResource, 0);
 		this.lagTracker.beginTracking(functionName, functionResource.getSpec().getInput());
 		this.updateScalerInterval();
 		if (this.running.compareAndSet(false, true)) {
@@ -124,15 +133,31 @@ public class FunctionMonitor {
 	@EventListener
 	public void onDeploymentRegistered(ResourceAddedOrModifiedEvent<Deployment> event) {
 		Deployment deployment = event.getResource();
-		String functionName = deployment.getMetadata().getName();
-		this.actualReplicaCount.put(functionName, deployment.getSpec().getReplicas());
+		if (deployment.getMetadata().getLabels().containsKey("function")) {
+			String functionName = deployment.getMetadata().getName();
+			Integer replicas = deployment.getStatus().getReplicas();
+			replicas = (replicas != null) ? replicas : 0;
+			Integer availableReplicas = deployment.getStatus().getAvailableReplicas();
+			availableReplicas = (availableReplicas != null) ? availableReplicas : 0;
+			this.actualReplicaCount.put(functionName, replicas);
+			Integer previous = this.availableReplicaCount.put(functionName, availableReplicas);
+			if (previous != availableReplicas) {
+				XFunction functionResource = this.functions.get(functionName);
+				if (functionResource != null && !FUNCTION_REPLICA_TOPIC.equals(functionResource.getSpec().getInput())) {
+					this.publisher.publish(FUNCTION_REPLICA_TOPIC,
+							Collections.singletonMap(functionName, availableReplicas));
+				}
+			}
+		}
 	}
 
 	@EventListener
 	public void onDeploymentUnregistered(ResourceDeletedEvent<Deployment> event) {
 		Deployment deployment = event.getResource();
-		String functionName = deployment.getMetadata().getName();
-		this.actualReplicaCount.remove(functionName);
+		if (deployment.getMetadata().getLabels().containsKey("function")) {
+			String functionName = deployment.getMetadata().getName();
+			this.actualReplicaCount.remove(functionName);
+		}
 	}
 
 	@PreDestroy
