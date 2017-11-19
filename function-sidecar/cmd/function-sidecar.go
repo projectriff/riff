@@ -17,14 +17,14 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/bsm/sarama-cluster"
-	"encoding/json"
-
 	"gopkg.in/Shopify/sarama.v1"
 
 	"github.com/sk8sio/function-sidecar/pkg/dispatcher/http"
@@ -35,7 +35,6 @@ import (
 )
 
 func main() {
-
 	var saj map[string]interface{}
 	err := json.Unmarshal([]byte(os.Getenv("SPRING_APPLICATION_JSON")), &saj)
 	if err != nil {
@@ -70,9 +69,9 @@ func main() {
 	}
 	defer consumer.Close()
 
-	// trap SIGINT to trigger a shutdown.
+	// trap SIGINT, SIGTERM, and SIGKILL to trigger a shutdown.
 	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, os.Kill)
 
 	if consumerConfig.Consumer.Return.Errors {
 		go consumeErrors(consumer)
@@ -118,6 +117,7 @@ func main() {
 		}
 	}
 }
+
 func createDispatcher(protocol string) dispatcher.Dispatcher {
 	switch protocol {
 	case "http":
@@ -136,6 +136,7 @@ func consumeNotifications(consumer *cluster.Consumer) {
 		log.Printf("Rebalanced: %+v\n", ntf)
 	}
 }
+
 func consumeErrors(consumer *cluster.Consumer) {
 	for err := range consumer.Errors() {
 		log.Printf("Error: %s\n", err.Error())
