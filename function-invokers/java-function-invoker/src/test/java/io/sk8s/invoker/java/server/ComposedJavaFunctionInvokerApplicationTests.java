@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = "function.uri=file:target/test-classes"
-		+ "?io.sk8s.invoker.java.function.Doubler,io.sk8s.invoker.java.function.Frenchizer")
+		+ "?handler=io.sk8s.invoker.java.function.Doubler,io.sk8s.invoker.java.function.Frenchizer")
 public class ComposedJavaFunctionInvokerApplicationTests {
 
 	@Autowired

@@ -45,7 +45,7 @@ import static org.junit.Assert.assertThat;
 public abstract class FunctionConfigurationTests {
 
 	@TestPropertySource(properties = {
-			"function.uri=file:target/test-classes?io.sk8s.invoker.java.function.Doubler" })
+			"function.uri=file:target/test-classes?handler=io.sk8s.invoker.java.function.Doubler" })
 	public static class SingleFunctionTests extends FunctionConfigurationTests {
 
 		@Autowired
@@ -58,7 +58,7 @@ public abstract class FunctionConfigurationTests {
 		}
 	}
 
-	@TestPropertySource(properties = { "function.uri=file:target/test-classes?"
+	@TestPropertySource(properties = { "function.uri=file:target/test-classes?handler="
 			+ "io.sk8s.invoker.java.function.NumberEmitter,"
 			+ "io.sk8s.invoker.java.function.Frenchizer" })
 	public static class SupplierCompositionTests extends FunctionConfigurationTests {
@@ -80,7 +80,7 @@ public abstract class FunctionConfigurationTests {
 
 	}
 
-	@TestPropertySource(properties = { "function.uri=file:target/test-classes?"
+	@TestPropertySource(properties = { "function.uri=file:target/test-classes?handler="
 			+ "io.sk8s.invoker.java.function.Doubler,"
 			+ "io.sk8s.invoker.java.function.Frenchizer" })
 	public static class FunctionCompositionTests extends FunctionConfigurationTests {
@@ -101,7 +101,7 @@ public abstract class FunctionConfigurationTests {
 		}
 	}
 
-	@TestPropertySource(properties = { "function.uri=file:target/test-classes?"
+	@TestPropertySource(properties = { "function.uri=file:target/test-classes?handler="
 			+ "io.sk8s.invoker.java.function.Frenchizer,"
 			+ "io.sk8s.invoker.java.function.Printer" })
 	public static class ConsumerCompositionTests extends FunctionConfigurationTests {

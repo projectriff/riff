@@ -62,7 +62,12 @@ def install_function():
             sys.stderr.write("scheme %s is not supported\n" % url.scheme)
             exit(1)
 
-        handler = url.query
+        indx = len('handler=')
+        if len(url.query) <= indx or url.query[0:indx] != 'handler=':
+            sys.stderr.write("FUNCTION_URI missing handler\n")
+            exit(1)
+
+        handler = url.query[indx:]
         if extension == '.py' and '.' not in handler:
             func_name = handler
             mod_name = ntpath.basename(filename)
