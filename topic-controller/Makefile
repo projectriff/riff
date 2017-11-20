@@ -18,7 +18,7 @@ $(OUTPUT_LINUX): $(GO_SOURCES) vendor
 	# This builds the executable from Go sources on *your* machine, targeting Linux OS
 	# and linking everything statically, to minimize Docker image size
 	# See e.g. https://blog.codeship.com/building-minimal-docker-containers-for-go-applications/ for details
-	CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o $(OUTPUT_LINUX) cmd/topic-controller.go
+	CGO_ENABLED=0 GOOS=linux go build -ldflags "-linkmode external -extldflags -static" -v -a -installsuffix cgo -o $(OUTPUT_LINUX) cmd/topic-controller.go
 
 vendor: Gopkg.toml
 	dep ensure
