@@ -49,7 +49,7 @@ import io.sk8s.kubernetes.api.model.XFunction;
  */
 public class FunctionMonitor {
 
-	private static final int SCALE_DOWN_LINGER_PERIOD = 10_000;
+	private static final int DEFAULT_IDLE_TIMEOUT = 10_000;
 
 	private static final String FUNCTION_REPLICA_TOPIC = "function-replicas";
 
@@ -191,19 +191,21 @@ public class FunctionMonitor {
 								String name = f.getMetadata().getName();
 								Integer current = actualReplicaCount.computeIfAbsent(name, k -> 0);
 								logger.debug("Want {} for {} (Deployment currently set to {})", desired, name, current);
+								Integer idleTimeout = f.getSpec().getIdleTimeout();
+								if (idleTimeout == null) {
+									idleTimeout = DEFAULT_IDLE_TIMEOUT;
+								}
+								long now = System.currentTimeMillis();
 								boolean resetScaleDownStartTime = true;
 								if (desired < current) {
-									if (scaleDownStartTimes.computeIfAbsent(name,
-											n -> System.currentTimeMillis()) < System.currentTimeMillis()
-													- SCALE_DOWN_LINGER_PERIOD) {
+									if (scaleDownStartTimes.computeIfAbsent(name, n -> now) < now - idleTimeout) {
 										deployer.deploy(f, desired);
 										actualReplicaCount.put(name, desired);
 									}
 									else {
 										resetScaleDownStartTime = false;
 										logger.trace("Waiting another {}ms before scaling down to {} for {}",
-												SCALE_DOWN_LINGER_PERIOD
-														- (System.currentTimeMillis() - scaleDownStartTimes.get(name)),
+												idleTimeout - (now - scaleDownStartTimes.get(name)),
 												desired, name);
 									}
 								}
