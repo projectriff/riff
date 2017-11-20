@@ -1,6 +1,18 @@
 .PHONY: build clean fetch-grpc grpc dockerize
 OUTPUT = function-sidecar
 OUTPUT_LINUX = function-sidecar-linux
+BUILD_FLAGS =
+
+ifeq ($(OS),Windows_NT)
+    detected_OS := Windows
+else
+    detected_OS := $(shell sh -c 'uname -s 2>/dev/null || echo not')
+endif
+
+ifeq ($(detected_OS),Linux)
+        BUILD_FLAGS += -ldflags "-linkmode external -extldflags -static"
+endif
+
 
 GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
 
@@ -17,7 +29,7 @@ $(OUTPUT_LINUX): $(GO_SOURCES) vendor
 	# This builds the executable from Go sources on *your* machine, targeting Linux OS
 	# and linking everything statically, to minimize Docker image size
 	# See e.g. https://blog.codeship.com/building-minimal-docker-containers-for-go-applications/ for details
-	CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o $(OUTPUT_LINUX) cmd/function-sidecar.go
+	CGO_ENABLED=0 GOOS=linux go build $(BUILD_FLAGS) -v -a -installsuffix cgo -o $(OUTPUT_LINUX) cmd/function-sidecar.go
 
 vendor: Gopkg.toml
 	dep ensure
