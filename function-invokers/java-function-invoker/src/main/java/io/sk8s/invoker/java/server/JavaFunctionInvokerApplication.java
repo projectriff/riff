@@ -56,11 +56,11 @@ public class JavaFunctionInvokerApplication {
 
 	private boolean isolated(String[] args) {
 		for (String arg : args) {
-			if (arg.equals("--function.runner.isolated=true")) {
-				return true;
+			if (arg.equals("--function.runner.isolated=false")) {
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	private URLClassLoader createClassLoader() {
