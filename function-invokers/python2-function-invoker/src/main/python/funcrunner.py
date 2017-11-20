@@ -62,12 +62,7 @@ def install_function():
             sys.stderr.write("scheme %s is not supported\n" % url.scheme)
             exit(1)
 
-        indx = len('handler=')
-        if len(url.query) <= indx or url.query[0:indx] != 'handler=':
-            sys.stderr.write("FUNCTION_URI missing handler\n")
-            exit(1)
-
-        handler = url.query[indx:]
+        handler = url.query
         if extension == '.py' and '.' not in handler:
             func_name = handler
             mod_name = ntpath.basename(filename)
@@ -78,7 +73,7 @@ def install_function():
         return getattr(mod, func_name)
 
     except KeyError:
-        sys.stderr.write("required environment variable FUNCTION_URI is missing\n")
+        sys.stderr.write("required environment variable FUNCTION_URI is not defined\n")
         exit(1)
 
 

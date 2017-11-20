@@ -3,7 +3,7 @@ sys.path.insert(0, os.path.abspath('.'))
 
 import grpc
 import time
-import function_pb2 as function
+import function_pb2_grpc as function
 import fntypes_pb2 as types
 from concurrent import futures
 
