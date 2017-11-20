@@ -28,7 +28,6 @@ import java.util.function.Function;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -39,6 +38,7 @@ import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.function.context.FunctionRegistration;
 import org.springframework.cloud.function.context.FunctionRegistry;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
@@ -68,6 +68,9 @@ public class FunctionConfiguration {
 
 	@Autowired
 	private DelegatingResourceLoader delegatingResourceLoader;
+
+	@Autowired
+	private ConfigurableApplicationContext context;
 
 	@Bean
 	@ConfigurationProperties("maven")
@@ -99,16 +102,9 @@ public class FunctionConfiguration {
 				.map(toResourceURL(delegatingResourceLoader)).toArray(URL[]::new);
 
 		try {
-			URLClassLoader cl = new URLClassLoader(urls,
-					/* explicit null parent */null);
-			AtomicInteger counter = new AtomicInteger(0);
-			Arrays.stream(properties.getClassName())
-					.map(name -> (Object) BeanUtils
-							.instantiateClass(ClassUtils.resolveClassName(name, cl)))
-					.sequential()
-					.forEach(bean -> registry
-							.register(new FunctionRegistration<Object>(bean)
-									.names("function" + counter.getAndIncrement())));
+			BeanCreator creator = new BeanCreator(urls);
+			Arrays.stream(properties.getClassName()).map(creator::create).sequential()
+					.forEach(creator::register);
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Cannot create functions", e);
@@ -124,6 +120,27 @@ public class FunctionConfiguration {
 				throw new UncheckedIOException(e);
 			}
 		};
+	}
+
+	private class BeanCreator {
+
+		private URLClassLoader cl;
+		private AtomicInteger counter = new AtomicInteger(0);
+
+		public BeanCreator(URL[] urls) {
+			this.cl = new URLClassLoader(urls, /* explicit null parent */null);
+		}
+
+		public Object create(String type) {
+			return context.getAutowireCapableBeanFactory()
+					.createBean(ClassUtils.resolveClassName(type, cl));
+		}
+
+		public void register(Object bean) {
+			registry.register(new FunctionRegistration<Object>(bean)
+					.names("function" + counter.getAndIncrement()));
+		}
+
 	}
 
 }

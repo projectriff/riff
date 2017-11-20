@@ -18,21 +18,26 @@ package io.sk8s.invoker.java.function;
 
 import java.util.function.Function;
 
+import javax.annotation.PostConstruct;
+
 public class Frenchizer implements Function<Integer, String> {
+
+	private String[] numbers;
+
+	@PostConstruct
+	public void init() {
+		this.numbers = new String[4];
+		numbers[0] = "un";
+		numbers[1] = "deux";
+		numbers[2] = "trois";
+		numbers[3] = "quatre";
+	}
 
 	@Override
 	public String apply(Integer integer) {
-		switch (integer) {
-		case 1:
-			return "un";
-		case 2:
-			return "deux";
-		case 3:
-			return "trois";
-		case 4:
-			return "quatre";
-		default:
-			throw new RuntimeException();
+		if (integer < this.numbers.length + 1) {
+			return this.numbers[integer - 1];
 		}
+		throw new RuntimeException();
 	}
 }
