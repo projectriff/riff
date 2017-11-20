@@ -29,6 +29,7 @@ import (
 	"time"
 	"github.com/satori/go.uuid"
 	"github.com/sk8sio/http-gateway/pkg/message"
+	"syscall"
 )
 
 // Function messageHandler creates an http handler that posts the http body as a message to Kafka, replying
@@ -119,9 +120,9 @@ func startHttpServer(producer sarama.AsyncProducer, replies map[string]chan mess
 }
 
 func main() {
-	// Trap SIGINT to trigger a shutdown.
+	// Trap signals to trigger a proper shutdown.
 	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, os.Kill)
 
 	// Key is correlationId, value is channel used to pass message received from main Kafka consumer loop
 	replies := make(map[string]chan message.Message)
