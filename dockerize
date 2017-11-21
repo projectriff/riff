@@ -1,7 +1,6 @@
 #!/bin/bash
 
 ./mvnw dockerfile:build -pl \
-topic-controller,\
 function-controller,\
 zipkin-server,\
 function-invokers/java-function-invoker,\
