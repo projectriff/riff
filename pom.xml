@@ -78,13 +78,8 @@
 	</dependencyManagement>
 
 	<modules>
-		<module>sk8s-core</module>
 		<module>function-proto</module>
-		<module>function-invokers</module>
-		<module>function-controller</module>
 		<module>zipkin-server</module>
-		<module>sk8s-kubernetes-client</module>
-		<module>sk8s-test-support</module>
 	</modules>
 
 </project>
