@@ -1,12 +1,9 @@
-= SK8S Topic Controller
-
-Go implementation of https://github.com/markfisher/sk8s/tree/master/topic-crontroller
+= Topic Controller
 
 == Building
 ```
 cd $(go env GOPATH)
-git clone https://github.com/ericbottard/sk8s-topic-controller src/github.com/sk8sio/topic-controller
-cd src/github.com/sk8sio/http-controller
+git clone https://github.com/projectriff/topic-controller src/github.com/projectriff/topic-controller
+cd src/github.com/projectriff/topic-controller
 make dockerize
 ```
-
