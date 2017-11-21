@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e -v
+
+pushd $PWD/../function-controller/
+git fetch origin
+git checkout origin/master
+./mvnw clean package
+./mvnw dockerfile:build -pl function-controller
+popd

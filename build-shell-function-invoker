@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e -v
+
+pushd $PWD/../shell-function-invoker/
+git fetch origin
+git checkout origin/master
+./build.sh
+popd

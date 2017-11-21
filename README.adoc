@@ -31,10 +31,17 @@ git clone https://github.com/projectriff/topic-controller src/github.com/project
 git clone https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway/
 ----
 
-* A clone of this repo.
-
+* A clone of the riff,function-controller, java-function-invoker, node-function-invoker, shell-function-invoker and python2-function-invoker repos.
++
+NOTE: These repos should be cloned under the same directory since we will be using relative paths during the build.
++
 ----
 git clone https://github.com/projectriff/riff.git
+git clone https://github.com/projectriff/function-controller.git
+git clone https://github.com/projectriff/java-function-invoker.git
+git clone https://github.com/projectriff/node-function-invoker.git
+git clone https://github.com/projectriff/shell-function-invoker.git
+git clone https://github.com/projectriff/python2-function-invoker.git
 ----
 
 ==== Build the kubernetes-model jar Enhanced with the Types for the CustomResources
@@ -66,12 +73,17 @@ Point your Docker environment to the Docker environment running in minikube:
 eval $(minikube docker-env)
 ----
 
-==== Build RIFF
-
-Build components and create Docker images:
+==== Build the Function Controller
 
 ----
-./mvnw clean package && ./dockerize
+./build-function-controller
+----
+
+
+==== Build the java-function-invoker, node-function-invoker, shell-function-invoker and python2-function-invoker
+
+----
+./build-function-invokers
 ----
 
 ==== Deploy Kafka/Zookeeper

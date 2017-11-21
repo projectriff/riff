@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e -v
+
+./build-java-function-invoker
+./build-node-function-invoker
+./build-shell-function-invoker
+./build-python2-function-invoker
+
