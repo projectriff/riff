@@ -50,10 +50,15 @@ git clone https://github.com/projectriff/python2-function-invoker.git
 ./build-model
 ----
 
-==== Build the Function Sidecar, HTTP Gateway and Topic Controller
+==== Point your Docker environment to the Docker environment running in minikube:
 
 ----
 eval $(minikube docker-env)
+----
+
+==== Build the Function Sidecar, HTTP Gateway and Topic Controller
+
+----
 ./build-function-sidecar
 ./build-http-gateway
 ./build-topic-controller
@@ -65,12 +70,6 @@ Create Function and Topic Custom Resource Definitions:
 
 ----
 kubectl apply -f config/types
-----
-
-Point your Docker environment to the Docker environment running in minikube:
-
-----
-eval $(minikube docker-env)
 ----
 
 ==== Build the Function Controller
