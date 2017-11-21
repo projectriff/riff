@@ -27,7 +27,7 @@ the function-sidecar repository, the topic-controller repository and the http-ga
 cd $(go env GOPATH)   #defaults to ~/go
 git clone https://github.com/projectriff/kubernetes-model src/github.com/fabric8io/kubernetes-model/
 git clone https://github.com/projectriff/function-sidecar src/github.com/projectriff/function-sidecar/
-git clone https://github.com/projectriff/function-sidecar src/github.com/projectriff/function-sidecar/
+git clone https://github.com/projectriff/topic-controller src/github.com/projectriff/topic-controller/
 git clone https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway/
 ----
 
