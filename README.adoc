@@ -31,7 +31,7 @@ git clone https://github.com/projectriff/topic-controller src/github.com/project
 git clone https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway/
 ----
 
-* A clone of the riff,function-controller, java-function-invoker, node-function-invoker, shell-function-invoker and python2-function-invoker repos.
+* A clone of the riff, function-controller, java-function-invoker, node-function-invoker, shell-function-invoker and python2-function-invoker repos.
 +
 NOTE: These repos should be cloned under the same directory since we will be using relative paths during the build.
 +
@@ -50,7 +50,7 @@ git clone https://github.com/projectriff/python2-function-invoker.git
 ./build-model
 ----
 
-==== Point your Docker environment to the Docker environment running in minikube:
+==== Point your local Docker environment to the Docker environment running in minikube:
 
 ----
 eval $(minikube docker-env)
