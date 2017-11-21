@@ -17,7 +17,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -27,35 +26,61 @@ import (
 	"github.com/bsm/sarama-cluster"
 	"gopkg.in/Shopify/sarama.v1"
 
+	"flag"
+	dispatch "github.com/projectriff/function-sidecar/pkg/dispatcher"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher/http"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher/stdio"
-	"github.com/projectriff/function-sidecar/pkg/dispatcher"
 	"github.com/projectriff/function-sidecar/pkg/message"
-	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc"
+	"strings"
 )
 
+type stringSlice []string
+
+func (sl *stringSlice) String() string {
+	return fmt.Sprint(*sl)
+}
+
+func (sl *stringSlice) Set(value string) error {
+	*sl = stringSlice(strings.Split(value, ","))
+	return nil
+}
+
+var brokers stringSlice = []string{"localhost:9092"}
+var inputs, outputs stringSlice
+var group, protocol string
+
+func init() {
+	flag.Var(&brokers, "brokers", "location of the Kafka server(s) to connect to")
+	flag.Var(&inputs, "inputs", "kafka topic(s) to listen to, as input for the function")
+	flag.Var(&outputs, "outputs", "kafka topic(s) to write to with results from the function")
+	flag.StringVar(&group, "group", "", "kafka consumer group to act as")
+	flag.StringVar(&protocol, "protocol", "", "dispatcher protocol to use. One of [http, grpc, stdio]")
+}
+
 func main() {
-	var saj map[string]interface{}
-	err := json.Unmarshal([]byte(os.Getenv("SPRING_APPLICATION_JSON")), &saj)
-	if err != nil {
-		panic(err)
+
+	flag.Parse()
+
+	if len(inputs) > 1 {
+		log.Fatalf("Only 1 input supported for now. See https://github.com/projectriff/riff/issues/184. Provided %v\n", inputs)
+	} else if len(outputs) > 1 {
+		log.Fatalf("Only 1 output supported for now. See https://github.com/projectriff/riff/issues/184. Provided %v\n", outputs)
 	}
 
-	consumerConfig := makeConsumerConfig()
-	consumerConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
-
-	brokers := []string{saj["spring.cloud.stream.kafka.binder.brokers"].(string)}
-	input := saj["spring.cloud.stream.bindings.input.destination"].(string)
-	output := saj["spring.cloud.stream.bindings.output.destination"]
-	group := saj["spring.cloud.stream.bindings.input.group"].(string)
-	protocol := saj["spring.profiles.active"].(string)
+	input := inputs[0]
+	var output string
+	if len(outputs) > 0 {
+		output = outputs[0]
+	} else {
+		output = ""
+	}
 
 	fmt.Printf("Sidecar for function '%v' (%v->%v) using %v dispatcher starting\n", group, input, output, protocol)
 
-	dispatcher := createDispatcher(protocol)
-
 	var producer sarama.AsyncProducer
-	if output != nil {
+	var err error
+	if output != "" {
 		producer, err = sarama.NewAsyncProducer(brokers, nil)
 		if err != nil {
 			panic(err)
@@ -63,22 +88,26 @@ func main() {
 		defer producer.Close()
 	}
 
+	consumerConfig := makeConsumerConfig()
+	consumerConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
+
 	consumer, err := cluster.NewConsumer(brokers, group, []string{input}, consumerConfig)
 	if err != nil {
 		panic(err)
 	}
 	defer consumer.Close()
-
-	// trap SIGINT, SIGTERM, and SIGKILL to trigger a shutdown.
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, os.Kill)
-
 	if consumerConfig.Consumer.Return.Errors {
 		go consumeErrors(consumer)
 	}
 	if consumerConfig.Group.Return.Notifications {
 		go consumeNotifications(consumer)
 	}
+
+	dispatcher := createDispatcher(protocol)
+
+	// trap SIGINT, SIGTERM, and SIGKILL to trigger a shutdown.
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, os.Kill)
 
 	// consume messages, watch signals
 	for {
@@ -97,7 +126,7 @@ func main() {
 					log.Printf("Error dispatching message: %v", err)
 					break
 				}
-				if output != nil {
+				if output != "" {
 					messageOut := message.Message{Payload: []byte(dispatched.(string)), Headers: messageIn.Headers}
 					bytesOut, err := message.EncodeMessage(messageOut)
 					fmt.Fprintf(os.Stdout, ">>> %s\n", messageOut)
@@ -105,7 +134,7 @@ func main() {
 						log.Printf("Error encoding message: %v", err)
 						break
 					}
-					outMessage := &sarama.ProducerMessage{Topic: output.(string), Value: sarama.ByteEncoder(bytesOut)}
+					outMessage := &sarama.ProducerMessage{Topic: output, Value: sarama.ByteEncoder(bytesOut)}
 					producer.Input() <- outMessage
 				} else {
 					fmt.Fprintf(os.Stdout, "=== Not sending function return value as function did not provide an output channel. Raw result = %s\n", dispatched)
@@ -118,7 +147,7 @@ func main() {
 	}
 }
 
-func createDispatcher(protocol string) dispatcher.Dispatcher {
+func createDispatcher(protocol string) dispatch.Dispatcher {
 	switch protocol {
 	case "http":
 		return http.NewHttpDispatcher()
