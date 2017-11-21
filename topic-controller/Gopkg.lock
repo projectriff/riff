@@ -158,10 +158,10 @@
   revision = "9a96098268ef555eb1f04d8b1ee813d0a87e5089"
 
 [[projects]]
-  branch = "add-client"
+  branch = "add-container"
   name = "github.com/sk8sio/sk8s-types"
   packages = ["pkg/apis/extensions.sk8s.io/v1","pkg/client/topic"]
-  revision = "cae020b826f44e0561d25c21b1031b6e9d694111"
+  revision = "4ced9df4d327e266926a85bbdb356d812d0581ba"
   source = "github.com/ericbottard/sk8s-types"
 
 [[projects]]
@@ -242,9 +242,15 @@
   revision = "d92e8497f71b7b4e0494e5bd204b48d34bd6f254"
   version = "v4.0.0"
 
+[[projects]]
+  name = "k8s.io/kubernetes"
+  packages = ["pkg/api","pkg/api/v1","pkg/apis/extensions","pkg/util","pkg/util/parsers"]
+  revision = "930b5c4b2db777e7ece981d84e9430808feceb4c"
+  source = "github.com/openshift/kubernetes"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fc1de6cd50c399e5b3c9ed3d0407bac9cf4a0b8dfa1418d2bbc3b33d18202a2f"
+  inputs-digest = "4194bb95629cd4f76388043c25666512fb8dd94043a4b8d9eb175fc0d566eb0e"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -18,6 +18,7 @@ package v1
 
 import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kapi "k8s.io/kubernetes/pkg/api/v1"
 )
 
 // Represents the functions.extensions.sk8s.io CRD
@@ -31,14 +32,6 @@ type Function struct {
 // Spec (what the user wants) for a function
 type FunctionSpec struct {
 
-	Image string `json:"image"`
-
-	// +optional
-	Command []string `json:"command,omitempty"`
-
-	// +optional
-	Args []string `json:"args,omitempty"`
-
 	Protocol string `json:"protocol"`
 
 	// +optional
@@ -47,14 +40,8 @@ type FunctionSpec struct {
 	// +optional
 	Output string `json:"output,omitempty"`
 
-	// +optional
-	Env []FunctionEnvVar `json:"env,omitempty"`
+	Container kapi.Container `json:"container"`
 
-}
-
-type FunctionEnvVar struct {
-	Name      string `json:"name"`
-	Value     string `json:"value"`
 }
 
 // Status (computed) for a function

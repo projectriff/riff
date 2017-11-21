@@ -23,7 +23,6 @@
 
 [[constraint]]
   name = "github.com/sk8sio/sk8s-types"
-  branch = "add-client"
   source = "github.com/ericbottard/sk8s-types"
 
 [[constraint]]
