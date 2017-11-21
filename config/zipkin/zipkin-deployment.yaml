@@ -15,21 +15,13 @@ spec:
     spec:
       containers:
       - name: zipkin
-        image: sk8s/zipkin-server:0.0.1-SNAPSHOT
+        image: openzipkin/zipkin:2.2
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9411
         env:
         - name: JAVA_TOOL_OPTIONS
           value: '-Xmx512m'
-        - name: DEBUG
-          value: 'true'
-        - name: SERVER_PORT
-          value: '9411'
-        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
-          value: kafka:9092
-        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
-          value: zookeeper:2181
         - name: POD_NAMESPACE
           valueFrom:
             fieldRef:

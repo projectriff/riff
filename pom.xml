@@ -79,7 +79,6 @@
 
 	<modules>
 		<module>function-proto</module>
-		<module>zipkin-server</module>
 	</modules>
 
 </project>
