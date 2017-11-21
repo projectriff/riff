@@ -1,12 +1,9 @@
-= SK8S HTTP Gateway
-
-Go implementation of https://github.com/markfisher/sk8s/tree/master/topic-gateway
+= HTTP Gateway
 
 == Building
 ```
 cd $(go env GOPATH)
-git clone https://github.com/ericbottard/sk8s-http-gateway src/github.com/sk8sio/http-gateway
-cd src/github.com/sk8sio/http-gateway
+git clone https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway
+cd src/github.com/projectriff/http-gateway
 make dockerize
 ```
-
