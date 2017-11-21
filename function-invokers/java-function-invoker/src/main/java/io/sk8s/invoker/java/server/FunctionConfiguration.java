@@ -25,11 +25,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -100,7 +102,7 @@ public class FunctionConfiguration {
 	@PostConstruct
 	public void init() {
 		URL[] urls = Arrays.stream(properties.getJarLocation())
-				.map(toResourceURL(delegatingResourceLoader)).toArray(URL[]::new);
+				.flatMap(toResourceURL(delegatingResourceLoader)).toArray(URL[]::new);
 
 		try {
 			BeanCreator creator = new BeanCreator(urls);
@@ -124,10 +126,15 @@ public class FunctionConfiguration {
 		}
 	}
 
-	private Function<String, URL> toResourceURL(DelegatingResourceLoader resourceLoader) {
+	private Function<String, Stream<URL>> toResourceURL(
+			DelegatingResourceLoader resourceLoader) {
 		return l -> {
+			if (l.equals("app:classpath")) {
+				return Stream
+						.of(((URLClassLoader) getClass().getClassLoader()).getURLs());
+			}
 			try {
-				return resourceLoader.getResource(l).getFile().toURI().toURL();
+				return Stream.of(resourceLoader.getResource(l).getFile().toURI().toURL());
 			}
 			catch (IOException e) {
 				throw new UncheckedIOException(e);
@@ -140,12 +147,23 @@ public class FunctionConfiguration {
 		private AtomicInteger counter = new AtomicInteger(0);
 
 		public BeanCreator(URL[] urls) {
-			functionClassLoader = new URLClassLoader(urls, getClass().getClassLoader().getParent());
+			functionClassLoader = new URLClassLoader(urls,
+					getClass().getClassLoader().getParent());
 		}
 
 		public Object create(String type) {
-			return context.getAutowireCapableBeanFactory()
-					.createBean(ClassUtils.resolveClassName(type, functionClassLoader));
+			AutowireCapableBeanFactory factory = context.getAutowireCapableBeanFactory();
+			ClassLoader contextClassLoader = ClassUtils
+					.overrideThreadContextClassLoader(functionClassLoader);
+			try {
+				return factory.createBean(
+						ClassUtils.resolveClassName(type, functionClassLoader));
+			}
+			finally {
+				if (contextClassLoader != null) {
+					ClassUtils.overrideThreadContextClassLoader(contextClassLoader);
+				}
+			}
 		}
 
 		public void register(Object bean) {
