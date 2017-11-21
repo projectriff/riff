@@ -38,12 +38,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/golang/protobuf"
-  packages = ["proto","protoc-gen-go/descriptor","ptypes","ptypes/any","ptypes/duration","ptypes/empty","ptypes/timestamp"]
-  revision = "1643683e1b54a9e88ad26d98f81400c8c9d9f4f9"
-
-[[projects]]
-  branch = "master"
   name = "github.com/golang/snappy"
   packages = ["."]
   revision = "553a641470496b2327abcac10b36396bd98e45c9"
@@ -73,30 +67,6 @@
   version = "v1.1.0"
 
 [[projects]]
-  branch = "master"
-  name = "golang.org/x/net"
-  packages = ["context","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace"]
-  revision = "a337091b0525af65de94df2eb7e98bd9962dcbe2"
-
-[[projects]]
-  branch = "master"
-  name = "golang.org/x/text"
-  packages = ["collate","collate/build","internal/colltab","internal/gen","internal/tag","internal/triegen","internal/ucd","language","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable"]
-  revision = "88f656faf3f37f690df1a32515b479415e1a6769"
-
-[[projects]]
-  branch = "master"
-  name = "google.golang.org/genproto"
-  packages = ["googleapis/api/annotations","googleapis/bigtable/admin/cluster/v1","googleapis/longrunning","googleapis/rpc/status"]
-  revision = "11c7f9e547da6db876260ce49ea7536985904c9b"
-
-[[projects]]
-  name = "google.golang.org/grpc"
-  packages = [".","balancer","codes","connectivity","credentials","grpclb/grpc_lb_v1/messages","grpclog","internal","keepalive","metadata","naming","peer","resolver","stats","status","tap","transport"]
-  revision = "5ffe3083946d5603a0578721101dc8165b1d5b5f"
-  version = "v1.7.2"
-
-[[projects]]
   name = "gopkg.in/Shopify/sarama.v1"
   packages = ["."]
   revision = "bbdbe644099b7fdc8327d5cc69c030945188b2e9"
@@ -105,6 +75,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "db324fed63a4a7f0fb50f7b8f58110c640230afcef2e3284cf29bea5340cbb15"
+  inputs-digest = "f59764a367d29efa4bd5e69042499e0284557e300e24e2f739606cdf124443bc"
   solver-name = "gps-cdcl"
   solver-version = 1
