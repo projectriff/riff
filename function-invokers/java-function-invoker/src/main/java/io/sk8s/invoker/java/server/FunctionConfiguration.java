@@ -30,8 +30,12 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -46,6 +50,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StreamUtils;
 
 /**
  * Sets up infrastructure capable of instantiating a "functional" bean (whether Supplier,
@@ -62,6 +67,8 @@ import org.springframework.util.ClassUtils;
 @Configuration
 @EnableConfigurationProperties
 public class FunctionConfiguration {
+
+	private static Log logger = LogFactory.getLog(FunctionConfiguration.class);
 
 	@Autowired
 	private FunctionRegistry registry;
@@ -93,7 +100,7 @@ public class FunctionConfiguration {
 	}
 
 	/**
-	 * Registers a singleton bean for each of the function classes passed into the
+	 * Registers a function for each of the function classes passed into the
 	 * {@link FunctionProperties}. They are named sequentially "function0", "function1",
 	 * etc. The instances are created in an isolated class loader, so the jar they are
 	 * packed in has to define all the dependencies (except core JDK).
@@ -106,6 +113,7 @@ public class FunctionConfiguration {
 
 		try {
 			BeanCreator creator = new BeanCreator(urls);
+			creator.run(properties.getMainClassName());
 			Arrays.stream(properties.getClassName()).map(creator::create).sequential()
 					.forEach(creator::register);
 		}
@@ -142,20 +150,63 @@ public class FunctionConfiguration {
 		};
 	}
 
+	/**
+	 * Encapsulates the bean and spring application context creation concerns for
+	 * functions. Creates a single application context if <code>run()</code> is called
+	 * with a non-null main class, and then uses it to lookup functions (by name and then
+	 * by type).
+	 *
+	 */
 	private class BeanCreator {
 
 		private AtomicInteger counter = new AtomicInteger(0);
+		private ApplicationRunner runner;
 
 		public BeanCreator(URL[] urls) {
-			functionClassLoader = new URLClassLoader(urls,
+			functionClassLoader = new BeanCreatorClassLoader(urls,
 					getClass().getClassLoader().getParent());
 		}
 
+		public void run(String main) {
+			if (main == null) {
+				return;
+			}
+			if (ClassUtils.isPresent(SpringApplication.class.getName(),
+					functionClassLoader)) {
+				logger.info("SpringApplication available. Bootstrapping: " + main);
+				ClassLoader contextClassLoader = ClassUtils
+						.overrideThreadContextClassLoader(functionClassLoader);
+				try {
+					ApplicationRunner runner = new ApplicationRunner(functionClassLoader,
+							main);
+					// TODO: make the runtime properties configurable
+					runner.run("--spring.main.webEnvironment=false",
+							"--spring.main.bannerMode=OFF",
+							"--spring.main.webApplicationType=none");
+					this.runner = runner;
+				}
+				finally {
+					if (contextClassLoader != null) {
+						ClassUtils.overrideThreadContextClassLoader(contextClassLoader);
+					}
+				}
+			}
+			else {
+				throw new IllegalStateException(
+						"SpringApplication not available and main class requested: "
+								+ main);
+			}
+		}
+
 		public Object create(String type) {
-			AutowireCapableBeanFactory factory = context.getAutowireCapableBeanFactory();
 			ClassLoader contextClassLoader = ClassUtils
 					.overrideThreadContextClassLoader(functionClassLoader);
+			AutowireCapableBeanFactory factory = context.getAutowireCapableBeanFactory();
 			try {
+				if (this.runner != null) {
+					return this.runner.getBean(type);
+				}
+				logger.info("No main class provided. Instantiating: " + type);
 				return factory.createBean(
 						ClassUtils.resolveClassName(type, functionClassLoader));
 			}
@@ -173,4 +224,37 @@ public class FunctionConfiguration {
 
 	}
 
+	private static final class BeanCreatorClassLoader extends URLClassLoader {
+		private BeanCreatorClassLoader(URL[] urls, ClassLoader parent) {
+			super(urls, parent);
+		}
+
+		@Override
+		protected Class<?> loadClass(String name, boolean resolve)
+				throws ClassNotFoundException {
+			try {
+				return super.loadClass(name, resolve);
+			}
+			catch (ClassNotFoundException e) {
+				if (name.contains(ContextRunner.class.getName())) {
+					// Special case for the ContextRunner. We can re-use the bytes for it,
+					// and the function jar doesn't have to include them since it is only
+					// used here.
+					byte[] bytes;
+					try {
+						bytes = StreamUtils.copyToByteArray(
+								getClass().getClassLoader().getResourceAsStream(
+										ClassUtils.convertClassNameToResourcePath(name)
+												+ ".class"));
+						return defineClass(name, bytes, 0, bytes.length);
+					}
+					catch (IOException ex) {
+						throw new ClassNotFoundException(
+								"Cannot find runner class: " + name, ex);
+					}
+				}
+				throw e;
+			}
+		}
+	}
 }

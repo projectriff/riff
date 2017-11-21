@@ -16,7 +16,9 @@
 
 package io.sk8s.invoker.java;
 
+import io.sk8s.invoker.java.server.ApplicationRunnerTests;
 import io.sk8s.invoker.java.server.ComposedJavaFunctionInvokerApplicationTests;
+import io.sk8s.invoker.java.server.ContextRunnerTests;
 import io.sk8s.invoker.java.server.IsolatedTests;
 
 import org.junit.Ignore;
@@ -31,7 +33,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ ComposedJavaFunctionInvokerApplicationTests.class,
-		IsolatedTests.class })
+		IsolatedTests.class, ContextRunnerTests.class, ApplicationRunnerTests.class })
 @Ignore
 public class AdhocTestSuite {
 

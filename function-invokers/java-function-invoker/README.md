@@ -11,4 +11,3 @@ Then
 $ curl -v localhost:8080 -H "Content-Type: text/plain" -d 5
 10
 ```
-

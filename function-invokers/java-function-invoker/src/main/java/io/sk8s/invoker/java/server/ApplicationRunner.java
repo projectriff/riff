@@ -16,9 +16,9 @@
 
 package io.sk8s.invoker.java.server;
 
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.PreDestroy;
 
@@ -26,8 +26,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.support.LiveBeansView;
+import org.springframework.expression.Expression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Driver class for running a Spring Boot application via an isolated classpath.
@@ -46,7 +48,7 @@ public class ApplicationRunner {
 
 	private final String source;
 
-	private Object app;
+	private StandardEvaluationContext app;
 
 	public ApplicationRunner(ClassLoader classLoader, String source) {
 		this.classLoader = classLoader;
@@ -58,9 +60,11 @@ public class ApplicationRunner {
 		try {
 			ClassUtils.overrideThreadContextClassLoader(this.classLoader);
 			Class<?> cls = this.classLoader.loadClass(ContextRunner.class.getName());
-			this.app = cls.newInstance();
-			runContext(this.source, Collections.singletonMap(
-					LiveBeansView.MBEAN_DOMAIN_PROPERTY_NAME, "function-invoker"), args);
+			this.app = new StandardEvaluationContext(cls.newInstance());
+			runContext(this.source,
+					Collections.singletonMap(LiveBeansView.MBEAN_DOMAIN_PROPERTY_NAME,
+							"function-invoker-" + UUID.randomUUID()),
+					args);
 		}
 		catch (Exception e) {
 			logger.error("Cannot deploy", e);
@@ -74,6 +78,48 @@ public class ApplicationRunner {
 		}
 	}
 
+	public Object getBean(String name) {
+		if (this.app != null) {
+			if (containsBeanByName(name)) {
+				return getBeanByName(name);
+			}
+			return getBeanByType(name);
+		}
+		return null;
+	}
+
+	private boolean containsBeanByName(String name) {
+		Expression parsed = new SpelExpressionParser()
+				.parseExpression("context.containsBean(\"" + name + "\")");
+		return parsed.getValue(this.app, Boolean.class);
+	}
+
+	private Object getBeanByName(String name) {
+		Expression parsed = new SpelExpressionParser()
+				.parseExpression("context.getBean(\"" + name + "\")");
+		return parsed.getValue(this.app);
+	}
+
+	private Object getBeanByType(String name) {
+		Expression parsed = new SpelExpressionParser()
+				.parseExpression("context.getBean(T(" + name + "))");
+		return parsed.getValue(this.app);
+	}
+
+	public boolean containsBean(String name) {
+		if (this.app != null) {
+			if (containsBeanByName(name)) {
+				return true;
+			}
+			Expression parsed = new SpelExpressionParser()
+					.parseExpression("context.getBeansOfType(T(" + name + "))");
+			@SuppressWarnings("unchecked")
+			Map<String, Object> beans = (Map<String, Object>) parsed.getValue(this.app);
+			return !beans.isEmpty();
+		}
+		return false;
+	}
+
 	@PreDestroy
 	public void close() {
 		closeContext();
@@ -83,9 +129,8 @@ public class ApplicationRunner {
 		if (this.app == null) {
 			return null;
 		}
-		Method method = ReflectionUtils.findMethod(this.app.getClass(), "getError");
-		Throwable e;
-		e = (Throwable) ReflectionUtils.invokeMethod(method, this.app);
+		Expression parsed = new SpelExpressionParser().parseExpression("error");
+		Throwable e = parsed.getValue(this.app, Throwable.class);
 		if (e == null) {
 			return null;
 		}
@@ -97,15 +142,20 @@ public class ApplicationRunner {
 
 	private void runContext(String mainClass, Map<String, String> properties,
 			String... args) {
-		Method method = ReflectionUtils.findMethod(this.app.getClass(), "run",
-				String.class, Map.class, String[].class);
-		ReflectionUtils.invokeMethod(method, this.app, mainClass, properties, args);
+		Expression parsed = new SpelExpressionParser()
+				.parseExpression("run(#main,#properties,#args)");
+		StandardEvaluationContext context = this.app;
+		context.setVariable("main", mainClass);
+		context.setVariable("properties", properties);
+		context.setVariable("args", args);
+		parsed.getValue(context);
 	}
 
 	private void closeContext() {
 		if (this.app != null) {
-			Method method = ReflectionUtils.findMethod(this.app.getClass(), "close");
-			ReflectionUtils.invokeMethod(method, this.app);
+			Expression parsed = new SpelExpressionParser().parseExpression("close()");
+			parsed.getValue(this.app);
+			this.app = null;
 		}
 	}
 
