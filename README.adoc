@@ -10,7 +10,7 @@ You can install the system using link:Getting-Started.adoc#helm[a Helm chart] or
 
 You need:
 
-* A running 1.7 Kubernetes cluster with at least 4GB of memory. These instructions assume minikube for now.
+* A running 1.7+ Kubernetes cluster with at least 4GB of memory. These instructions assume minikube for now.
 +
 ----
 minikube start --cpus=4 --memory=4096 --disk-size=64g
@@ -21,11 +21,12 @@ minikube start --cpus=4 --memory=4096 --disk-size=64g
 * A Java 8 environment.
 
 * A working Go environment, with clones of the customized fabric8io/kubernetes-model,
-the function-sidecar repository, and the http-gateway repository.
+the function-sidecar repository, the topic-controller repository and the http-gateway repository.
 +
 ----
 cd $(go env GOPATH)   #defaults to ~/go
 git clone https://github.com/projectriff/kubernetes-model src/github.com/fabric8io/kubernetes-model/
+git clone https://github.com/projectriff/function-sidecar src/github.com/projectriff/function-sidecar/
 git clone https://github.com/projectriff/function-sidecar src/github.com/projectriff/function-sidecar/
 git clone https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway/
 ----
@@ -42,12 +43,13 @@ git clone https://github.com/projectriff/riff.git
 ./build-model
 ----
 
-==== Build the Function Sidecar and HTTP Gateway
+==== Build the Function Sidecar, HTTP Gateway and Topic Controller
 
 ----
 eval $(minikube docker-env)
 ./build-function-sidecar
 ./build-http-gateway
+./build-topic-controller
 ----
 
 ==== Setup the Kubernetes environment

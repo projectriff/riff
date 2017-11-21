@@ -3,5 +3,6 @@ set -e -v
 
 pushd $(go env GOPATH)/src/github.com/sk8sio/function-sidecar/
 git fetch origin
+git checkout origin/master
 make clean dockerize
 popd
