@@ -95,4 +95,17 @@ public class IsolatedTests {
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(result.getBody()).isEqualTo("10");
 	}
+
+	@Test
+	public void appClassPath() throws Exception {
+		runner.run("--server.port=" + port,
+				"--function.uri=app:classpath?handler=io.sk8s.invoker.java.function.SpringDoubler");
+		ResponseEntity<String> result = rest
+				.exchange(
+						RequestEntity.post(new URI("http://localhost:" + port + "/"))
+								.contentType(MediaType.TEXT_PLAIN).body("5"),
+						String.class);
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("10");
+	}
 }
