@@ -1,10 +1,10 @@
-= Sk8s: a FaaS for Kubernetes
+= RIFF: a FaaS for Kubernetes
 
 == Installation
 
 You can install the system using link:Getting-Started.adoc#helm[a Helm chart] or by link:#manual[manually building and deploying] the components.
 
-=== [[manual]]Manual install of Sk8s FaaS
+=== [[manual]]Manual install of RIFF
 
 ==== Prerequisites
 
@@ -25,15 +25,15 @@ the function-sidecar repository, and the http-gateway repository.
 +
 ----
 cd $(go env GOPATH)   #defaults to ~/go
-git clone https://github.com/ericbottard/kubernetes-model src/github.com/fabric8io/kubernetes-model/
-git clone https://github.com/ericbottard/function-sidecar src/github.com/sk8sio/function-sidecar/
-git clone https://github.com/ericbottard/sk8s-http-gateway src/github.com/sk8sio/http-gateway/
+git clone https://github.com/projectriff/kubernetes-model src/github.com/fabric8io/kubernetes-model/
+git clone https://github.com/projectriff/function-sidecar src/github.com/projectriff/function-sidecar/
+git clone https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway/
 ----
 
 * A clone of this repo.
 
 ----
-git clone https://github.com/markfisher/sk8s.git
+git clone https://github.com/projectriff/riff.git
 ----
 
 ==== Build the kubernetes-model jar Enhanced with the Types for the CustomResources
@@ -64,7 +64,7 @@ Point your Docker environment to the Docker environment running in minikube:
 eval $(minikube docker-env)
 ----
 
-==== Build Sk8s FaaS
+==== Build RIFF
 
 Build components and create Docker images:
 
@@ -78,7 +78,7 @@ Build components and create Docker images:
 kubectl apply -f config/kafka
 ----
 
-==== Deploy Sk8s FaaS
+==== Deploy RIFF
 
 ----
 kubectl apply -f config
@@ -111,4 +111,4 @@ See how to use the link:Monitoring.adoc#dashboards[dashboards].
 
 == [[samples]]Try Some Samples
 
-With the Sk8s FaaS running try some of the link:samples/README.adoc[samples].
+With RIFF running try some of the link:samples/README.adoc[samples].
