@@ -1,0 +1,53 @@
+{{- if .Values.create.faas -}}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}-function-controller
+  labels:
+    app: {{ template "name" . }}
+    component: function-controller
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        component: function-controller
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-function-controller
+          image: "{{ .Values.functionController.image.repository }}:{{ .Values.functionController.image.tag }}"
+          imagePullPolicy: {{ .Values.functionController.image.pullPolicy }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.functionController.service.internalPort }}
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.functionController.service.internalPort }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          ports:
+            - containerPort: {{ .Values.functionController.service.internalPort }}
+          env:
+          - name: SERVER_PORT
+            value: '{{ .Values.functionController.service.internalPort }}'
+          - name: JAVA_TOOL_OPTIONS
+            value: '-Xmx512m'
+          - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+            value: {{ template "fullname" . }}-kafka:9092
+          - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
+            value: {{ template "fullname" . }}-zookeeper:2181
+          - name: RIFF_FUNCTION_CONTROLLER_SIDECAR_TAG
+            value: {{ .Values.functionController.sidecar.image.tag }}
+      serviceAccountName: {{ template "fullname" . }}-sa
+{{- end -}}

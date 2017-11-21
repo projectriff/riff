@@ -1,0 +1,25 @@
+{{- if .Values.create.faas -}}
+{{- if .Values.enable.metricsDashboard -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}-prometheus
+  labels:
+    app: {{ template "name" . }}
+    component: prometheus
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.prometheus.service.type }}
+  ports:
+    - port: {{ .Values.prometheus.service.externalPort }}
+      targetPort: {{ .Values.prometheus.service.internalPort }}
+      protocol: TCP
+      name: {{ .Values.prometheus.service.name }}
+  selector:
+    app: {{ template "name" . }}
+    component: prometheus
+    release: {{ .Release.Name }}
+{{- end -}}
+{{- end -}}

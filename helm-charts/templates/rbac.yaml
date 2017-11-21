@@ -1,0 +1,30 @@
+{{- if .Values.create.faas -}}
+{{ if .Values.create.rbac }}
+kind: Role
+apiVersion: rbac.authorization.k8s.io/{{ required "A valid .Values.rbac.apiVersion entry required!" .Values.rbac.apiVersion }}
+metadata:
+  name: {{ template "fullname" . }}-role
+rules:
+  - apiGroups: [""]
+    resources: ["services", "pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["extensions"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch", "create", "delete", "update", "patch"]
+  - apiGroups: ["projectriff.io"]
+    resources: ["functions", "topics"]
+    verbs: ["get", "list", "watch"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/{{ required "A valid .Values.rbac.apiVersion entry required!" .Values.rbac.apiVersion }}
+metadata:
+  name: {{ template "fullname" . }}-rb
+subjects:
+- kind: ServiceAccount
+  name: {{ template "fullname" . }}-sa
+roleRef:
+  kind: Role
+  name: {{ template "fullname" . }}-role
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
+{{- end -}}

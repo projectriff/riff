@@ -1,0 +1,97 @@
+# Default values for riff.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+create:
+  crd: true
+  faas: true
+  rbac: false
+enable:
+  metricsDashboard: false
+  tracingDashboard: false
+rbac:
+  apiVersion: v1beta1
+functionController:
+  replicaCount: 1
+  image:
+    repository: projectriff/function-controller
+    tag: 0.0.1-SNAPSHOT
+    pullPolicy: IfNotPresent
+  sidecar:
+    image:
+      tag: 0.0.1-SNAPSHOT
+  service:
+    name: http
+    type: ClusterIP
+    externalPort: 80
+    internalPort: 8080
+topicController:
+  replicaCount: 1
+  image:
+    repository: projectriff/topic-controller
+    tag: 0.0.1-SNAPSHOT
+    pullPolicy: IfNotPresent
+httpGateway:
+  replicaCount: 1
+  image:
+    repository: projectriff/http-gateway
+    tag: 0.0.1-SNAPSHOT
+    pullPolicy: IfNotPresent
+  service:
+    name: http
+    type: LoadBalancer
+    externalPort: 80
+grafana:
+  replicaCount: 1
+  image:
+    repository: grafana/grafana
+    tag: 4.4.1
+    pullPolicy: IfNotPresent
+  service:
+    name: graphana
+    type: LoadBalancer
+    externalPort: 3000
+    internalPort: 3000
+prometheus:
+  replicaCount: 1
+  image:
+    repository: prom/prometheus
+    tag: v1.7.1
+    pullPolicy: IfNotPresent
+  service:
+    name: prometheus
+    type: LoadBalancer
+    externalPort: 9090
+    internalPort: 9090
+zipkin:
+  replicaCount: 1
+  image:
+    repository: projectriff/zipkin-server
+    tag: 0.0.1-SNAPSHOT
+    pullPolicy: IfNotPresent
+  service:
+    name: zipkin
+    type: LoadBalancer
+    externalPort: 9411
+    internalPort: 9411
+zookeeper:
+  replicaCount: 1
+  image:
+    repository: wurstmeister/zookeeper
+    tag: 3.4.6
+    pullPolicy: IfNotPresent
+  service:
+    name: zookeeper
+    type: ClusterIP
+    externalPort: 2181
+    internalPort: 2181
+kafka:
+  replicaCount: 1
+  image:
+    repository: wurstmeister/kafka
+    tag: 0.11.0.1
+    pullPolicy: IfNotPresent
+  service:
+    name: kafka
+    type: ClusterIP
+    externalPort: 9092
+    internalPort: 9092

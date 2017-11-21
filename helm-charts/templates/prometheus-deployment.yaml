@@ -1,0 +1,40 @@
+{{- if .Values.create.faas -}}
+{{- if .Values.enable.metricsDashboard -}}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}-prometheus
+  labels:
+    app: {{ template "name" . }}
+    component: prometheus
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.prometheus.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        component: prometheus
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-prometheus
+          image: "{{ .Values.prometheus.image.repository }}:{{ .Values.prometheus.image.tag }}"
+          imagePullPolicy: {{ .Values.prometheus.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.prometheus.service.internalPort }}
+          args:
+            - '-storage.local.retention=6h'
+            - '-storage.local.memory-chunks=500000'
+            - '-config.file=/etc/prometheus/prometheus.yml'
+          volumeMounts:
+          - name: config-volume
+            mountPath: /etc/prometheus
+      volumes:
+      - name: config-volume
+        configMap:
+          name: {{ template "fullname" . }}-prometheus
+{{- end -}}
+{{- end -}}

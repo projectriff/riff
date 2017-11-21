@@ -1,0 +1,22 @@
+{{- if .Values.create.faas -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}-kafka
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.kafka.service.type }}
+  ports:
+    - port: {{ .Values.kafka.service.externalPort }}
+      targetPort: {{ .Values.kafka.service.internalPort }}
+      protocol: TCP
+      name: {{ .Values.kafka.service.name }}
+  selector:
+    app: {{ template "name" . }}
+    component: kafka-broker
+    release: {{ .Release.Name }}
+{{- end -}}

@@ -1,0 +1,25 @@
+{{- if .Values.create.faas -}}
+{{- if .Values.enable.tracingDashboard -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}-zipkin
+  labels:
+    app: {{ template "name" . }}
+    component: zipkin
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.zipkin.service.type }}
+  ports:
+    - port: {{ .Values.zipkin.service.externalPort }}
+      targetPort: {{ .Values.zipkin.service.internalPort }}
+      protocol: TCP
+      name: {{ .Values.zipkin.service.name }}
+  selector:
+    app: {{ template "name" . }}
+    component: zipkin
+    release: {{ .Release.Name }}
+{{- end -}}
+{{- end -}}

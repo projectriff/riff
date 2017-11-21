@@ -1,0 +1,23 @@
+{{- if .Values.create.faas -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}-zookeeper
+  labels:
+    app: {{ template "name" . }}
+    component: zookeeper
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.zookeeper.service.type }}
+  ports:
+    - port: {{ .Values.zookeeper.service.externalPort }}
+      targetPort: {{ .Values.zookeeper.service.internalPort }}
+      protocol: TCP
+      name: {{ .Values.zookeeper.service.name }}
+  selector:
+    app: {{ template "name" . }}
+    component: zookeeper
+    release: {{ .Release.Name }}
+{{- end -}}

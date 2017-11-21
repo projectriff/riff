@@ -1,0 +1,41 @@
+{{- if .Values.create.faas -}}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}-http-gateway
+  labels:
+    app: {{ template "name" . }}
+    component: http-gateway
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        component: http-gateway
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-http-gateway
+          image: "{{ .Values.httpGateway.image.repository }}:{{ .Values.httpGateway.image.tag }}"
+          imagePullPolicy: {{ .Values.httpGateway.image.pullPolicy }}
+          livenessProbe:
+            httpGet:
+              path: /application/status
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /application/status
+              port: 8080
+            periodSeconds: 5
+          ports:
+            - containerPort: 8080
+          env:
+          - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+            value: {{ template "fullname" . }}-kafka:9092
+{{- end -}}

@@ -1,0 +1,45 @@
+{{- if .Values.create.faas -}}
+{{- if .Values.enable.tracingDashboard -}}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}-zipkin
+  labels:
+    app: {{ template "name" . }}
+    component: zipkin
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.zipkin.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        component: zipkin
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-zipkin
+          image: "{{ .Values.zipkin.image.repository }}:{{ .Values.zipkin.image.tag }}"
+          imagePullPolicy: {{ .Values.zipkin.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.zipkin.service.internalPort }}
+          env:
+          - name: JAVA_TOOL_OPTIONS
+            value: '-Xmx512m'
+          - name: DEBUG
+            value: 'true'
+          - name: SERVER_PORT
+            value: '9411'
+          - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+            value: {{ template "fullname" . }}-kafka:9092
+          - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
+            value: {{ template "fullname" . }}-zookeeper:2181
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+{{- end -}}
+{{- end -}}
