@@ -38,12 +38,12 @@ Assuming your kube config is pointed at GKE,
 
 ```
 kubectl -n <your-namespace> apply -f <(cat <<EOF
-apiVersion: extensions.sk8s.io/v1
+apiVersion: projectriff.io/v1
 kind: Topic
 metadata:
   name: slack
 ---
-apiVersion: extensions.sk8s.io/v1
+apiVersion: projectriff.io/v1
 kind: Function
 metadata:
   name: slack-command
