@@ -1,16 +1,16 @@
-apiVersion: extensions.sk8s.io/v1
+apiVersion: projectriff.io/v1
 kind: Topic
 metadata:
   name: tweets
 ---
 
-apiVersion: extensions.sk8s.io/v1
+apiVersion: projectriff.io/v1
 kind: Topic
 metadata:
   name: sentiments
 ---
 
-apiVersion: extensions.sk8s.io/v1
+apiVersion: projectriff.io/v1
 kind: Function
 metadata:
   name: sentiments

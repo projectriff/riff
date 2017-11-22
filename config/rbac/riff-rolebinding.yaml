@@ -1,11 +1,11 @@
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: sk8s-rb
+  name: riff-rb
 subjects:
 - kind: ServiceAccount
-  name: sk8s-sa
+  name: riff-sa
 roleRef:
   kind: Role
-  name: sk8s-role
+  name: riff-role
   apiGroup: rbac.authorization.k8s.io

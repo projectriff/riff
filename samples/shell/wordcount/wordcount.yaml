@@ -1,16 +1,19 @@
-apiVersion: extensions.sk8s.io/v1
+apiVersion: projectriff.io/v1
 kind: Topic
 metadata:
   name: names
 ---
 
-apiVersion: extensions.sk8s.io/v1
+apiVersion: projectriff.io/v1
 kind: Topic
 metadata:
   name: greetings
+spec:
+  partitions: 3
+
 ---
 
-apiVersion: extensions.sk8s.io/v1
+apiVersion: projectriff.io/v1
 kind: Function
 metadata:
   name: wordcount
