@@ -16,7 +16,7 @@
 syntax = "proto3";
 import "fntypes.proto";
 option java_multiple_files = false;
-option java_package = "io.sk8s.sidecar.grpc.function";
+option java_package = "io.projectriff.sidecar.grpc.function";
 option java_outer_classname = "FunctionProtos";
 
 package function;
@@ -24,5 +24,3 @@ package function;
 service StringFunction {
   rpc Call(fntypes.Request) returns (fntypes.Reply) {}
 }
-
-
