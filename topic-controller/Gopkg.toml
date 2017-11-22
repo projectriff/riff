@@ -22,10 +22,6 @@
 
 
 [[constraint]]
-  name = "github.com/sk8sio/sk8s-types"
-  source = "github.com/ericbottard/sk8s-types"
-
-[[constraint]]
   name = "github.com/wvanbergen/kazoo-go"
   branch = "topic-management"
   source = "https://github.com/ericbottard/kazoo-go.git"

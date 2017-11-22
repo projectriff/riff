@@ -153,16 +153,15 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/projectriff/kubernetes-crds"
+  packages = ["pkg/apis/projectriff.io/v1","pkg/client/topic"]
+  revision = "016c0076807d3040f8417e23a8b81f7d8af21ff6"
+
+[[projects]]
+  branch = "master"
   name = "github.com/samuel/go-zookeeper"
   packages = ["zk"]
   revision = "9a96098268ef555eb1f04d8b1ee813d0a87e5089"
-
-[[projects]]
-  branch = "add-container"
-  name = "github.com/sk8sio/sk8s-types"
-  packages = ["pkg/apis/extensions.sk8s.io/v1","pkg/client/topic"]
-  revision = "4ced9df4d327e266926a85bbdb356d812d0581ba"
-  source = "github.com/ericbottard/sk8s-types"
 
 [[projects]]
   name = "github.com/spf13/pflag"
@@ -251,6 +250,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4194bb95629cd4f76388043c25666512fb8dd94043a4b8d9eb175fc0d566eb0e"
+  inputs-digest = "d4bd4cff17e0d90d0c11cc640778004c830394455c26adbede9f33fb978daecc"
   solver-name = "gps-cdcl"
   solver-version = 1

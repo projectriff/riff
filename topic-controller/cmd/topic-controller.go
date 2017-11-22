@@ -20,8 +20,8 @@ import (
 	"time"
 
 	"github.com/projectriff/topic-controller/pkg/topic/provisioner/kafka"
-	"github.com/sk8sio/sk8s-types/pkg/apis/extensions.sk8s.io/v1"
-	"github.com/sk8sio/sk8s-types/pkg/client/topic"
+	"github.com/projectriff/kubernetes-crds/pkg/client/topic"
+	"github.com/projectriff/kubernetes-crds/pkg/apis/projectriff.io/v1"
 
 	"context"
 	"flag"

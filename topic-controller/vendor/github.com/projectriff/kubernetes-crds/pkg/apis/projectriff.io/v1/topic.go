@@ -6,12 +6,12 @@ import (
 
 const (
 	TopicPlural      string = "topics"
-	TopicGroup       string = "extensions.sk8s.io"
+	TopicGroup       string = "projectriff.io"
 	TopicVersion     string = "v1"
 	FullTopicCRDName    string = TopicPlural + "." + TopicGroup
 )
 
-// Represents the topics.extensions.sk8s.io CRD
+// Represents the topics.projectriff.io CRD
 type Topic struct {
 	meta_v1.TypeMeta   `json:",inline"`
 	meta_v1.ObjectMeta `json:"metadata"`

@@ -21,7 +21,7 @@ import (
 	kapi "k8s.io/kubernetes/pkg/api/v1"
 )
 
-// Represents the functions.extensions.sk8s.io CRD
+// Represents the functions.projectriff.io CRD
 type Function struct {
 	meta_v1.TypeMeta   `json:",inline"`
 	meta_v1.ObjectMeta `json:"metadata"`
@@ -39,6 +39,9 @@ type FunctionSpec struct {
 
 	// +optional
 	Output string `json:"output,omitempty"`
+
+	// +optional
+	IdleTimeoutMs *int32 `json:"idleTimeoutMs,omitempty"`
 
 	Container kapi.Container `json:"container"`
 
