@@ -1,10 +1,10 @@
-= RIFF: a FaaS for Kubernetes
+= riff is for functions
 
 == Installation
 
 You can install the system using link:Getting-Started.adoc#helm[a Helm chart] or by link:#manual[manually building and deploying] the components.
 
-=== [[manual]]Manual install of RIFF
+=== [[manual]]Manual install of riff
 
 ==== Prerequisites
 
@@ -124,4 +124,4 @@ See how to use the link:Monitoring.adoc#dashboards[dashboards].
 
 == [[samples]]Try Some Samples
 
-With RIFF running try some of the link:samples/README.adoc[samples].
+With riff running try some of the link:samples/README.adoc[samples].
