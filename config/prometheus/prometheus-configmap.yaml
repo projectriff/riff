@@ -24,4 +24,4 @@ data:
       # scheme defaults to 'http'.
       metrics_path: '/prometheus'
       static_configs:
-      - targets: ['topic-gateway:80','topic-controller:80','function-controller:80','spring-handler:80','greeter:80']
+      - targets: ['http-gateway:80','topic-controller:80','function-controller:80','spring-handler:80','greeter:80']
