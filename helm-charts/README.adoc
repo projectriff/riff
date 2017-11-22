@@ -1,0 +1,9 @@
+= riff is for functions
+
+== Local Installation on Minikube
+
+from the root of this project:
+
+```
+helm install -n demo --set httpGateway.service.type=NodePort .
+```
