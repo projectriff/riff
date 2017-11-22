@@ -19,7 +19,7 @@ package stdio
 import (
 	"bufio"
 	"fmt"
-	"github.com/sk8sio/function-sidecar/pkg/dispatcher"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher"
 	"log"
 	"os"
 	"syscall"

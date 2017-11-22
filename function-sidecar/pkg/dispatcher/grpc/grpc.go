@@ -19,9 +19,9 @@ package grpc
 import (
 	"google.golang.org/grpc"
 
-	function "github.com/sk8sio/function-sidecar/pkg/dispatcher/grpc/function"
-	fntypes "github.com/sk8sio/function-sidecar/pkg/dispatcher/grpc/fntypes"
-	"github.com/sk8sio/function-sidecar/pkg/dispatcher"
+	function "github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/function"
+	fntypes "github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/fntypes"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher"
 	"log"
 	"golang.org/x/net/context"
 	"time"

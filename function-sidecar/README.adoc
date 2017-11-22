@@ -1,12 +1,10 @@
-= SK8S Function Sidecar
-
-Go implementation of https://github.com/markfisher/sk8s/tree/master/function-sidecar
+= Function Sidecar
 
 == Building
 ```
 cd $GOPATH
-git clone https://github.com/ericbottard/sk8s-function-sidecar src/github.com/sk8sio/function-sidecar
-cd src/github.com/sk8sio/function-sidecar
+git clone https://github.com/projectriff/function-sidecar src/github.com/projectriff/function-sidecar
+cd src/github.com/projectriff/function-sidecar
 make dockerize
 ```
 

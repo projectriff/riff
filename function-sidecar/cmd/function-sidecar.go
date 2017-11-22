@@ -27,11 +27,11 @@ import (
 	"github.com/bsm/sarama-cluster"
 	"gopkg.in/Shopify/sarama.v1"
 
-	"github.com/sk8sio/function-sidecar/pkg/dispatcher/http"
-	"github.com/sk8sio/function-sidecar/pkg/dispatcher/stdio"
-	"github.com/sk8sio/function-sidecar/pkg/dispatcher"
-	"github.com/sk8sio/function-sidecar/pkg/message"
-	"github.com/sk8sio/function-sidecar/pkg/dispatcher/grpc"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher/http"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher/stdio"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher"
+	"github.com/projectriff/function-sidecar/pkg/message"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc"
 )
 
 func main() {

@@ -16,7 +16,7 @@
 syntax = "proto3";
 import "google/protobuf/empty.proto";
 option java_multiple_files = false;
-option java_package = "io.sk8s.sidecar.grpc.fntypes";
+option java_package = "io.projectriff.sidecar.grpc.fntypes";
 option java_outer_classname = "FunctionTypeProtos";
 
 package fntypes;
@@ -35,5 +35,3 @@ message Reply {
 	    google.protobuf.Empty void = 2;
 	}
 }
-
-

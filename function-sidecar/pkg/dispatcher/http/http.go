@@ -17,7 +17,7 @@
 package http
 
 import (
-	dispatcher "github.com/sk8sio/function-sidecar/pkg/dispatcher"
+	dispatcher "github.com/projectriff/function-sidecar/pkg/dispatcher"
 	"net/http"
 	"bytes"
 	"io/ioutil"
