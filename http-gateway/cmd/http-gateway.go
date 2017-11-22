@@ -28,7 +28,7 @@ import (
 	"os/signal"
 	"time"
 	"github.com/satori/go.uuid"
-	"github.com/sk8sio/http-gateway/pkg/message"
+	"github.com/projectriff/http-gateway/pkg/message"
 	"syscall"
 )
 

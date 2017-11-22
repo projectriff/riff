@@ -41,4 +41,4 @@ clean:
 	rm -f $(OUTPUT_LINUX)
 
 dockerize: build-for-docker
-	docker build . -t sk8s/http-gateway:0.0.1-SNAPSHOT -t sk8s/topic-gateway:0.0.1-SNAPSHOT
+	docker build . -t projectriff/http-gateway:0.0.1-SNAPSHOT
