@@ -1,4 +1,4 @@
 apiVersion: v1
-description: A Helm chart for Riff
+description: a helm chart for riff
 name: riff
 version: 0.0.1

@@ -47,7 +47,7 @@ spec:
             value: {{ template "fullname" . }}-kafka:9092
           - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
             value: {{ template "fullname" . }}-zookeeper:2181
-          - name: RIFF_FUNCTION_CONTROLLER_SIDECAR_TAG
+          - name: RIFF_FUNCTION_SIDECAR_TAG
             value: {{ .Values.functionController.sidecar.image.tag }}
       serviceAccountName: {{ template "fullname" . }}-sa
 {{- end -}}
