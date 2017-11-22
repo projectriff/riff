@@ -1,7 +1,7 @@
 .PHONY: build build-for-docker clean dockerize
 OUTPUT = topic-controller
 OUTPUT_LINUX = $(OUTPUT)-linux
-BUILD_FLAGS = 
+BUILD_FLAGS =
 
 ifeq ($(OS),Windows_NT)
     detected_OS := Windows
@@ -40,4 +40,4 @@ clean:
 	rm -f $(OUTPUT_LINUX)
 
 dockerize: build-for-docker
-	docker build . -t sk8s/topic-controller:0.0.1-SNAPSHOT
+	docker build . -t projectriff/topic-controller:0.0.1-SNAPSHOT

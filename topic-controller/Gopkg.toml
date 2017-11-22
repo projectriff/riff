@@ -22,8 +22,8 @@
 
 
 [[constraint]]
-  name = "github.com/sk8sio/sk8s-types"
-  source = "github.com/ericbottard/sk8s-types"
+  name = "github.com/projectriff/kubernetes-crds"
+  source = "github.com/projectriff/kubernetes-crds"
 
 [[constraint]]
   name = "github.com/wvanbergen/kazoo-go"
