@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: function-controller
   labels:
-    app: sk8s
+    app: riff
     component: function-controller
 spec:
   ports:

@@ -19,4 +19,4 @@ spec:
   input: names
   output: greetings
   container:
-    image: sk8s/wordcount:v0001
+    image: projectriff/wordcount:v0001

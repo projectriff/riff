@@ -19,6 +19,4 @@ spec:
   input: tweets
   output: sentiments
   container:
-    image: sk8s/sentiments:v0001
-
-
+    image: projectriff/sentiments:v0001

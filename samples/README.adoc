@@ -1,6 +1,6 @@
-= Sk8s: a FaaS for Kubernetes - Samples
+= riff: a FaaS for Kubernetes - Samples
 
-To Sk8s FaaS link:../README.adoc[README]
+To riff link:../README.adoc[README]
 
 == Samples
 

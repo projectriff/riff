@@ -6,4 +6,4 @@ spec:
   protocol: stdio
   input: greetings
   container:
-    image: sk8s/echo:v0001
+    image: projectriff/echo:v0001

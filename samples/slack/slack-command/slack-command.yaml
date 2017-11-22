@@ -11,4 +11,4 @@ spec:
   protocol: http
   input: slack
   container:
-    image: sk8s/slack-command:test
+    image: projectriff/slack-command:test

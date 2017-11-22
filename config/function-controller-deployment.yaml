@@ -8,11 +8,11 @@ spec:
     metadata:
       name: function-controller
       labels:
-        app: sk8s
+        app: riff
         component: function-controller
     spec:
       containers:
-      - image: sk8s/function-controller:0.0.1-SNAPSHOT
+      - image: projectriff/function-controller:0.0.1-SNAPSHOT
         name: function-controller
         imagePullPolicy: IfNotPresent
         livenessProbe:
@@ -38,4 +38,4 @@ spec:
           value: zookeeper:2181
         - name: SK8S_FUNCTION_CONTROLLER_SIDECAR_TAG
           value: 0.0.1-SNAPSHOT
-      serviceAccountName: sk8s-sa
+      serviceAccountName: riff-sa

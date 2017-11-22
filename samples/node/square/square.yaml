@@ -12,4 +12,4 @@ spec:
   protocol: http
   input: numbers
   container:
-    image: sk8s/square:v0001
+    image: projectriff/square:v0001

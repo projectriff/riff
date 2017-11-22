@@ -8,11 +8,11 @@ spec:
     metadata:
       name: topic-controller
       labels:
-        app: sk8s
+        app: riff
         component: topic-controller
     spec:
       containers:
-      - image: sk8s/topic-controller:0.0.1-SNAPSHOT
+      - image: projectriff/topic-controller:0.0.1-SNAPSHOT
         name: topic-controller
         imagePullPolicy: IfNotPresent
         livenessProbe:
@@ -36,4 +36,4 @@ spec:
           value: kafka:9092
         - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
           value: zookeeper:2181
-      serviceAccountName: sk8s-sa
+      serviceAccountName: riff-sa

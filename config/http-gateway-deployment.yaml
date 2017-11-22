@@ -8,11 +8,11 @@ spec:
     metadata:
       name: http-gateway
       labels:
-        app: sk8s
+        app: riff
         component: http-gateway
     spec:
       containers:
-      - image: sk8s/http-gateway:0.0.1-SNAPSHOT
+      - image: projectriff/http-gateway:0.0.1-SNAPSHOT
         name: http-gateway
         imagePullPolicy: IfNotPresent
         livenessProbe:

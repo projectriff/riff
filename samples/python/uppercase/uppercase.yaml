@@ -12,7 +12,7 @@ spec:
   protocol: grpc
   input: greetings
   container:
-    image: sk8s/grpc-py:v0001
+    image: projectriff/grpc-py:v0001
     env:
     - name: GRPC_PORT
       value: 10382

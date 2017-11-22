@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: topic-controller
   labels:
-    app: sk8s
+    app: riff
     component: topic-controller
 spec:
   ports:

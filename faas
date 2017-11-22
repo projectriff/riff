@@ -21,10 +21,10 @@ EOF
 function print_build_usage() {
 cat <<EOF
 
-Build the function based on the code available in the path directory, using the name 
+Build the function based on the code available in the path directory, using the name
   and version specified for the image that is built.
-  
-Usage: 
+
+Usage:
 
   faas build -n <name> -v <version> -f <path>
 
@@ -42,7 +42,7 @@ cat <<EOF
 
 Create the resource[s] based on the resource definition[s] that the path points to.
 
-Usage: 
+Usage:
 
   faas create -f <path>
 
@@ -59,7 +59,7 @@ cat <<EOF
 Apply the resource definition[s] that the path points to. A resource will be created if
   it doesn't exist yet.
 
-Usage: 
+Usage:
 
   faas apply -f <path>
 
@@ -75,7 +75,7 @@ cat <<EOF
 
 Delete the resource definition[s] for the function specified.
 
-Usage: 
+Usage:
 
   faas delete -n <name>
 
@@ -91,7 +91,7 @@ cat <<EOF
 
 List the current function resources.
 
-Usage: 
+Usage:
 
   faas list
 
@@ -102,8 +102,8 @@ function print_logs_usage() {
 cat <<EOF
 
 Display the logs for a running function.
-  
-Usage: 
+
+Usage:
 
   faas logs -n <name> [-c <container>] [-t]
 
@@ -118,7 +118,7 @@ EOF
 
 function build() {
   echo "Building $FUNCTION $FNPATH $VERSION"
-  docker build -t "sk8s/${FUNCTION}:${VERSION}" $FNPATH
+  docker build -t "projectriff/${FUNCTION}:${VERSION}" $FNPATH
 }
 
 function create() {
@@ -180,7 +180,7 @@ if [[ $1 == "--help" || $1 == "-h" ]] ; then
   elif [[ "${COMMAND}" == "logs" ]]; then
     print_logs_usage
     exit 0
-  fi    
+  fi
 fi
 
 while [[ $# > 0 ]]
