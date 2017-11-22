@@ -1,3 +1,0 @@
-#!/bin/bash
-
-./mvnw dockerfile:build -pl zipkin-server
