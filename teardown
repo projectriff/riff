@@ -7,8 +7,8 @@ kubectl delete topics --all
 
 kubectl delete all,svc -l app=riff
 
-kubectl delete crd/functions.extensions.sk8s.io
-kubectl delete crd/topics.extensions.sk8s.io
+kubectl delete crd/functions.projectriff.io
+kubectl delete crd/topics.projectriff.io
 
 kubectl delete all,svc -l app=kafka
 kubectl delete all,svc -l app=zipkin
