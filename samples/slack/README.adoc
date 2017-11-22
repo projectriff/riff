@@ -2,16 +2,17 @@
 
 [horizontal]
 *Language*:: JavaScript
-*Function*:: https://github.com/markfisher/sk8s/blob/master/samples/slack/slack-command/slack_command.js[slack_command.js]
+*Function*:: https://github.com/projectriff/riff/blob/master/samples/slack/slack-command/slack_command.js[slack_command.js]
 *Protocol*:: HTTP
 *Input*:: slack
 *Output*:: none (replies, implicitly)
 
 === Deploy the FaaS
 
-Deploy your FaaS, either manually (https://github.com/markfisher/sk8s#manual) or with helm
-(https://github.com/markfisher/sk8s/blob/master/Getting-Started.adoc#helm). For this example to work, your Kubernetes cluster
-must allow for the creation of a LoadBalancer with a public facing IP address.
+Deploy riff, either manually (https://github.com/projectriff/riff#manual) or with helm
+(https://github.com/projectriff/riff/blob/master/Getting-Started.adoc#helm).
+For this example to work, your Kubernetes cluster must allow for the creation of
+a LoadBalancer with a public facing IP address.
 
 === Build the Docker container for the function code
 
@@ -65,7 +66,7 @@ with output.
 ```
 $ kubectl -n <your-namespace> get svc -l component=http-gateway
 NAME                     TYPE           CLUSTER-IP      EXTERNAL-IP       PORT(S)        AGE
-sk8s-sk8s-http-gateway   LoadBalancer   10.51.247.194   104.154.118.171   80:30725/TCP   22m
+riff-http-gateway        LoadBalancer   10.51.247.194   104.154.118.171   80:30725/TCP   22m
 ```
 
 We can see from the `EXTERNAL-IP` and `PORT(S)` columns that our gateway should be reachable at `http://104.154.118.171:80`

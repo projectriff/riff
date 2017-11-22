@@ -2,7 +2,7 @@
 
 [horizontal]
 *Language*:: Shell
-*Function*:: https://github.com/markfisher/sk8s/blob/master/samples/shell/echo/echo.sh[echo.sh]
+*Function*:: https://github.com/projectriff/riff/blob/master/samples/shell/echo/echo.sh[echo.sh]
 *Protocol*:: stdio
 *Input*:: greetings
 

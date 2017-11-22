@@ -2,7 +2,7 @@
 
 [horizontal]
 *Language*:: Python
-*Function*:: https://github.com/markfisher/sk8s/blob/master/samples/python/sentiments/sentiment_service.py[sentiment_service.py]
+*Function*:: https://github.com/projectriff/riff/blob/master/samples/python/sentiments/sentiment_service.py[sentiment_service.py]
 *Protocol*:: stdio
 *Input*:: tweets
 *Output*:: sentiments

@@ -2,7 +2,7 @@
 
 [horizontal]
 *Language*:: Python
-*Function*:: https://github.com/markfisher/sk8s/blob/master/samples/python/uppercase/py/func.py[func.py]
+*Function*:: https://github.com/projectriff/riff/blob/master/samples/python/uppercase/py/func.py[func.py]
 *Protocol*:: gRPC
 *Input*:: greetings
 
