@@ -7,3 +7,9 @@ from the root of this project:
 ```
 helm install -n demo --set httpGateway.service.type=NodePort .
 ```
+
+to uninstall:
+
+```
+helm delete --purge demo
+```
