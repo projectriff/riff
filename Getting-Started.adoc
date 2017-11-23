@@ -1,27 +1,27 @@
-= Sk8s: a FaaS for Kubernetes - Getting Started
-
-IMPORTANT: We don't have a curated and published release yet, so please use the manual build process documented in the link:README.adoc[README] for the time being.
+= Getting Started with riff
 
 == Installation
 
-=== [[helm]]Helm install of Sk8s FaaS
+=== [[helm]]Helm install of riff
 
-Sk8s offers a Helm Chart for deploying the FaaS and its required services to a Kubernetes Cluster.
-The following instructions cover how to initialize Helm and install Sk8s FaaS on the Minikube cluster.
+Riff offers a helm chart for deploying the FaaS and its required services to a Kubernetes Cluster.
+The following instructions cover how to initialize helm and install riff.
 
 ==== Prerequisites
 
-* A running 1.7 Kubernetes cluster with at least 4GB of memory. These instructions assume minikube for now.
+* A running 1.7+ Kubernetes cluster
+
+If using Minikube, we recommend at least 4GB of memory:
 
 ----
-minikube start --cpus=4 --memory=4096 --disk-size=64g
+minikube start --memory=4096
 ----
 
 ==== Install Helm
 
-Helm is comprised of 2 components: one is the client (Helm) the other is the server component (Tiller). The Helm client is run on your local machine and can be installed using the instructions found here: https://github.com/kubernetes/helm/blob/master/README.md#install
+Helm is comprised of 2 components: one is the client (helm) the other is the server component (tiller). The helm client runs on your local machine and can be installed using the instructions found here: https://github.com/kubernetes/helm/blob/master/README.md#install
 
-Once you have Helm client installed you can install the server component.
+Once you have the helm client installed you can install the server component.
 
 For a cluster that does not have RBAC enabled use:
 
@@ -37,57 +37,68 @@ kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceac
 helm init --service-account=tiller
 ----
 
-NOTE: To verify that the Tiller pod has started execute the following command: `kubectl get pod --namespace kube-system` and you should see the `tiller` pod running.
+NOTE: To verify that the tiller pod has started execute the following command: `kubectl get pod --namespace kube-system` and you should see the `tiller` pod running.
 
-==== Add the Sk8s repository to your Helm environment
+==== Add the riff repository to your helm environment
 
-Run the following commands to add the `sk8s-incubator` repository:
-
-----
-helm repo add sk8s-incubator http://sk8s-incubator.cfapps.io
-helm repo update
-----
-
-==== Install Sk8s FaaS helm chart
-
-Install the Sk8s Helm chart using one of the following commands.
-
-For a cluster that does not have RBAC enabled use:
+Run the following commands to add the repository:
 
 ----
-helm install --name demo sk8s-incubator/sk8s
+helm repo add riffrepo https://riff_charts.storage.googleapis.com
+helm repo update riffrepo
 ----
 
-For a cluster that does have RBAC enabled use:
+==== Install the riff helm chart
+
+Install the riff helm chart as follows:
+
+- `helm search riffrepo/riff` and identify the version you're looking to install (use the latest one if unsure)
+
+For an install with default configuration and no RBAC enabled use:
 
 ----
-helm install --name demo sk8s-incubator/sk8s --set create.rbac=true
+helm install riffrepo/riff --name demo --version <version>
 ----
 
-You should see a number of resources get created in your Minikube. You can see them all using:
+For a cluster that has RBAC enabled add `--set create.rbac=true`:
 
 ----
-kubectl get svc,deployments,pods,jobs,functions,topics
+helm install riffrepo/riff --name demo --version <version> --set create.rbac=true
 ----
 
-==== Clone the repo
-
-To work with the demos and Metrics Dashboard you need a clone of the Sk8s repo:
+You should see a number of resources get created in your cluster. You can see them all using:
 
 ----
-git clone https://github.com/markfisher/sk8s.git
+kubectl get svc,deployments,pods,functions,topics
+----
+
+==== Customizing the Configuration
+
+Clone the https://github.com/projectriff/riff[riff] repository.
+The `helm install` commands in this section assume you are in the root directory of that project.
+
+For `NodePort` service types (e.g. running on Minikube) add `--values helm/values-nodeport.yaml`:
+
+----
+helm install riffrepo/riff --name demo --version <version> --values helm/values-nodeport.yaml
+----
+
+To install locally built Docker images, use the `values-snapshot.yaml` file, which overrides image tags with snapshot versions:
+
+----
+helm install riffrepo/riff --name demo --values helm/values-snapshot.yaml
 ----
 
 ==== Enable Metrics and Tracing Dashboards
 
-You can enable each dashboard by setting flags for the Helm release. For the Metrics Dashboard use
-`--set enable.metricsDashboard=true` and for the Tracing Dashboard use `--set enable.tracingDashboard=true`.
+You can enable each dashboard by setting flags for the helm release.
+For the Metrics Dashboard use `--set enable.metricsDashboard=true` and for the Tracing Dashboard use `--set enable.tracingDashboard=true`.
 
 These flags can be set when installing the chart or you can apply them during an upgrade operation.
 Here is an example of upgrading the release and enabling the Metrics Dashboard:
 
 ----
-helm upgrade demo sk8s-incubator/sk8s --set enable.metricsDashboard=true
+helm upgrade demo riffrepo/riff --set enable.metricsDashboard=true
 ----
 
 See how to use the link:Monitoring.adoc#dashboards[dashboards] and run some link:samples/README.adoc[samples].
@@ -97,5 +108,3 @@ See how to use the link:Monitoring.adoc#dashboards[dashboards] and run some link
 ----
 helm delete demo --purge
 ----
-
-
