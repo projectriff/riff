@@ -1,8 +1,2 @@
 #!/bin/bash
-set -e -v
-
-pushd $PWD/../java-function-invoker/
-git fetch origin
-git checkout origin/master
-./mvnw clean package dockerfile:build
-popd
+./build-helper "$PWD/../java-function-invoker/" ${1:-''} ${2:-''} './mvnw clean package dockerfile:build'

@@ -1,9 +1,2 @@
 #!/bin/bash
-set -e -v
-
-pushd $PWD/../function-controller/
-git fetch origin
-git checkout origin/master
-./mvnw clean package
-./mvnw dockerfile:build -pl function-controller
-popd
+./build-helper "$PWD/../function-controller/" ${1:-''} ${2:-''} './mvnw clean package && ./mvnw dockerfile:build -pl function-controller'

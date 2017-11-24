@@ -1,8 +1,2 @@
 #!/bin/bash
-set -e -v
-
-pushd $(go env GOPATH)/src/github.com/projectriff/http-gateway/
-git fetch origin
-git checkout origin/master
-make clean dockerize
-popd
+./build-helper "$(go env GOPATH)/src/github.com/projectriff/http-gateway/" ${1:-''} ${2:-''} 'make clean dockerize'

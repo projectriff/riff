@@ -1,8 +1,2 @@
 #!/bin/bash
-set -e -v
-
-pushd $PWD/../python2-function-invoker/
-git fetch origin
-git checkout origin/master
-./build.sh
-popd
+./build-helper "$PWD/../python-function-invoker/" ${1:-''} ${2:-''} './build.sh'

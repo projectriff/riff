@@ -4,7 +4,7 @@
 
 You can install the system using link:Getting-Started.adoc#helm[a Helm chart] or by link:#manual[manually building and deploying] the components.
 
-=== [[manual]]Manual install of riff
+=== [[manual]] Manual install of riff
 
 ==== Prerequisites
 
@@ -12,6 +12,7 @@ You need:
 
 * A running 1.7+ Kubernetes cluster with at least 4GB of memory. These instructions assume minikube for now.
 +
+[source,bash]
 ----
 minikube start --cpus=4 --memory=4096 --disk-size=64g
 ----
@@ -23,93 +24,114 @@ minikube start --cpus=4 --memory=4096 --disk-size=64g
 * A working Go environment, with clones of the customized fabric8io/kubernetes-model,
 the function-sidecar repository, the topic-controller repository and the http-gateway repository.
 +
+[source, bash]
 ----
 cd $(go env GOPATH)   #defaults to ~/go
-git clone https://github.com/projectriff/kubernetes-model src/github.com/fabric8io/kubernetes-model/
-git clone https://github.com/projectriff/function-sidecar src/github.com/projectriff/function-sidecar/
-git clone https://github.com/projectriff/topic-controller src/github.com/projectriff/topic-controller/
-git clone https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway/
+git clone -o upstream https://github.com/projectriff/kubernetes-model src/github.com/fabric8io/kubernetes-model/
+git clone -o upstream https://github.com/projectriff/function-sidecar src/github.com/projectriff/function-sidecar/
+git clone -o upstream https://github.com/projectriff/topic-controller src/github.com/projectriff/topic-controller/
+git clone -o upstream https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway/
 ----
 
 * A clone of the riff, function-controller, java-function-invoker, node-function-invoker, shell-function-invoker and python2-function-invoker repos.
 +
-NOTE: These repos should be cloned under the same directory since we will be using relative paths during the build.
+NOTE: These repos should be cloned under a unique root directory since we will be using relative paths during the build.
 +
+[source, bash]
 ----
-git clone https://github.com/projectriff/riff.git
-git clone https://github.com/projectriff/function-controller.git
-git clone https://github.com/projectriff/java-function-invoker.git
-git clone https://github.com/projectriff/node-function-invoker.git
-git clone https://github.com/projectriff/shell-function-invoker.git
-git clone https://github.com/projectriff/python2-function-invoker.git
+#cd <some_root_dir>
+git clone -o upstream https://github.com/projectriff/riff.git
+git clone -o upstream https://github.com/projectriff/function-controller.git
+git clone -o upstream https://github.com/projectriff/java-function-invoker.git
+git clone -o upstream https://github.com/projectriff/node-function-invoker.git
+git clone -o upstream https://github.com/projectriff/shell-function-invoker.git
+git clone -o upstream https://github.com/projectriff/python2-function-invoker.git
+----
+
+From now on, this README assumes you're running commands from the `riff` repository clone:
+
+[source, bash]
+----
+cd riff
 ----
 
 ==== Build the kubernetes-model jar Enhanced with the Types for the CustomResources
 
+[source, bash]
 ----
-./build-model
+./build-model upstream riff
 ----
 
 ==== Point your local Docker environment to the Docker environment running in minikube:
 
+[source, bash]
 ----
 eval $(minikube docker-env)
 ----
 
 ==== Build the Function Sidecar, HTTP Gateway and Topic Controller
 
+[source, bash]
 ----
-./build-function-sidecar
-./build-http-gateway
-./build-topic-controller
+./build-function-sidecar upstream master
+./build-http-gateway upstream master
+./build-topic-controller upstream master
 ----
 
 ==== Setup the Kubernetes environment
 
 Create Function and Topic Custom Resource Definitions:
 
+[source, bash]
 ----
 kubectl apply -f config/types
 ----
 
 ==== Build the Function Controller
 
+[source, bash]
 ----
-./build-function-controller
+./build-function-controller upstream master
 ----
 
 
 ==== Build the java-function-invoker, node-function-invoker, shell-function-invoker and python2-function-invoker
 
+[source, bash]
 ----
-./build-function-invokers
+./build-function-invokers upstream master
 ----
 
 ==== Deploy Kafka/Zookeeper
 
+[source, bash]
 ----
 kubectl apply -f config/kafka
 ----
 
 ==== Deploy RIFF
 
+[source, bash]
 ----
 kubectl apply -f config
 ----
 
 If your cluster has RBAC enabled, then you also need to create a Role and a RoleBinding:
 
+[source, bash]
 ----
 kubectl apply -f config/rbac
 ----
 
 ==== Deploy Metrics (Grafana/Prometheus) and Tracing (Zipkin) Dashboards
 
+[source, bash]
 ----
 kubectl apply -f config/prometheus
 kubectl apply -f config/grafana
 ----
 
+[source, bash]
 ----
 kubectl apply -f config/zipkin
 ----
@@ -118,6 +140,9 @@ See how to use the link:Monitoring.adoc#dashboards[dashboards].
 
 ==== To tear it all down
 
+Once you're done playing with riff (see samples below), you can destroy everything created above by running
+
+[source, bash]
 ----
 ./teardown
 ----
@@ -125,3 +150,5 @@ See how to use the link:Monitoring.adoc#dashboards[dashboards].
 == [[samples]]Try Some Samples
 
 With riff running try some of the link:samples/README.adoc[samples].
+
+

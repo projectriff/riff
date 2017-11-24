@@ -1,9 +1,2 @@
 #!/bin/bash
-set -e -v
-
-# regenerate the fabric8 java API including k8s custom resources
-pushd $(go env GOPATH)/src/github.com/fabric8io/kubernetes-model/
-git fetch origin
-git checkout origin/riff
-make
-popd
+./build-helper "$(go env GOPATH)/src/github.com/fabric8io/kubernetes-model/" ${1:-''} ${2:-''} 'make'
