@@ -58,6 +58,10 @@ func init() {
 	flag.StringVar(&protocol, "protocol", "", "dispatcher protocol to use. One of [http, grpc, stdio]")
 }
 
+// PropagatedHeaders is the set of header names that will be copied from the incoming message
+// to the outgoing message
+var PropagatedHeaders = []string{"correlationId"}
+
 func main() {
 
 	flag.Parse()
@@ -121,13 +125,14 @@ func main() {
 					break
 				}
 				strPayload := string(messageIn.Payload.([]byte))
-				dispatched, err := dispatcher.Dispatch(strPayload)
+				dispatched, resultHeaders, err := dispatcher.Dispatch(strPayload, messageIn.Headers)
 				if err != nil {
 					log.Printf("Error dispatching message: %v", err)
 					break
 				}
 				if output != "" {
-					messageOut := message.Message{Payload: []byte(dispatched.(string)), Headers: messageIn.Headers}
+					outHeaders := propagateHeaders(messageIn.Headers, resultHeaders)
+					messageOut := message.Message{Payload: []byte(dispatched.(string)), Headers: outHeaders}
 					bytesOut, err := message.EncodeMessage(messageOut)
 					fmt.Fprintf(os.Stdout, ">>> %s\n", messageOut)
 					if err != nil {
@@ -145,6 +150,22 @@ func main() {
 			return
 		}
 	}
+}
+
+// copy headers from incomingHeaders that need to be propagated into resultHeaders
+func propagateHeaders(incomingHeaders dispatch.Headers, resultHeaders dispatch.Headers) dispatch.Headers {
+	result := make(dispatch.Headers)
+	if resultHeaders != nil {
+		for k, v := range resultHeaders {
+			result[k] = v
+		}
+	}
+	for _, h := range PropagatedHeaders {
+		if value, ok := incomingHeaders[h]; ok {
+			result[h] = value
+		}
+	}
+	return result
 }
 
 func createDispatcher(protocol string) dispatch.Dispatcher {

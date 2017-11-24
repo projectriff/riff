@@ -17,5 +17,15 @@
 package dispatcher
 
 type Dispatcher interface {
-	Dispatch(in interface{}) (interface{}, error)
+	Dispatch(in interface{}, headers Headers) (interface{}, Headers, error)
+}
+
+type Headers map[string]interface{}
+
+func (h Headers) GetOrDefault(key string, value interface{}) interface{} {
+	if v, ok := h[key] ; ok {
+		return v
+	} else {
+		return value
+	}
 }

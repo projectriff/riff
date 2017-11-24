@@ -35,25 +35,25 @@ type stdioDispatcher struct {
 	writer *bufio.Writer
 }
 
-func (this stdioDispatcher) Dispatch(in interface{}) (interface{}, error) {
+func (this stdioDispatcher) Dispatch(in interface{}, headers dispatcher.Headers) (interface{}, dispatcher.Headers, error) {
 	_, err := this.writer.WriteString(in.(string) + "\n")
 	if err != nil {
 		log.Printf("Error writing to %v: %v", OUTPUT_PIPE, err)
-		return nil, err
+		return nil, nil, err
 	}
 	err = this.writer.Flush()
 	//fmt.Println("Wrote " + in.(string))
 	if err != nil {
 		log.Printf("Error flushing %v", err)
-		return nil, err
+		return nil, nil, err
 	}
 	line, err := this.reader.ReadString('\n')
 	if err != nil {
 		log.Printf("Error reading from %v: %v", INPUT_PIPE, err)
-		return nil, err
+		return nil, nil, err
 	}
 	//fmt.Println("Read " + line)
-	return line[0 : len(line)-1], nil
+	return line[0 : len(line)-1], nil, nil
 }
 
 func NewStdioDispatcher() dispatcher.Dispatcher {

@@ -33,14 +33,14 @@ type grpcDispatcher struct {
 	client function.StringFunctionClient
 }
 
-func (this grpcDispatcher) Dispatch(in interface{}) (interface{}, error) {
+func (this grpcDispatcher) Dispatch(in interface{}, headers dispatcher.Headers) (interface{}, dispatcher.Headers, error) {
 	request := fntypes.Request{Body: in.(string)}
 	reply, err := this.client.Call(context.Background(), &request)
 	if err != nil {
 		log.Printf("Error calling gRPC server: %v", err)
-		return nil, err
+		return nil, nil, err
 	}
-	return reply.GetBody(), nil
+	return reply.GetBody(), nil, nil
 }
 
 func NewGrpcDispatcher() dispatcher.Dispatcher {

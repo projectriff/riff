@@ -17,16 +17,14 @@
 package http
 
 import (
-	dispatcher "github.com/projectriff/function-sidecar/pkg/dispatcher"
-	"net/http"
 	"bytes"
+	retry "github.com/giantswarm/retry-go"
+	dispatcher "github.com/projectriff/function-sidecar/pkg/dispatcher"
 	"io/ioutil"
 	"log"
-	"time"
 	"net"
-	retry "github.com/giantswarm/retry-go"
-
-
+	"net/http"
+	"time"
 )
 
 const UseTimeout = 10000000 // "Infinite" number of retries to override default and use the Timeout approach instead
@@ -36,26 +34,50 @@ const ConnectionAttemptInterval = 100 * time.Millisecond
 type httpDispatcher struct {
 }
 
-func (httpDispatcher) Dispatch(in interface{}) (interface{}, error) {
+func (httpDispatcher) Dispatch(in interface{}, headers dispatcher.Headers) (interface{}, dispatcher.Headers, error) {
 	slice := ([]byte)(in.(string))
 
 	client := http.Client{
 		Timeout: time.Duration(60 * time.Second),
 	}
-	resp, err := client.Post("http://localhost:8080", "text/plain", bytes.NewReader(slice))
+	contentType := headers.GetOrDefault("Content-Type", "application/octet-stream").(string)
+	req, err := http.NewRequest("POST", "http://localhost:8080", bytes.NewReader(slice))
+	if err != nil {
+		return nil, nil, err
+	}
+	req.Header.Add("Content-Type", contentType)
+	if accept, ok := headers["Accept"]; ok {
+		req.Header.Add("Accept", accept.(string))
+	}
+
+	resp, err := client.Do(req)
 
 	if err != nil {
 		log.Printf("Error invoking http://localhost:8080: %v", err)
-		return nil, err
+		return nil, nil, err
 	}
 	defer resp.Body.Close()
 	out, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("Error reading response", err)
-		return nil, err
+		log.Printf("Error reading response %v\n", err)
+		return nil, nil, err
 	}
 
-	return string(out), nil
+	return string(out), flatten(resp.Header), nil
+}
+
+// http headers are a multi value map, dispatcher.Headers is single values (but with interface{} value)
+// this function flattens headers which are mono-valued
+func flatten(httpHeaders http.Header) dispatcher.Headers {
+	result := make(map[string]interface{}, len(httpHeaders))
+	for k, v := range httpHeaders {
+		if len(v) == 1 {
+			result[k] = v[0]
+		} else if len(v) > 1 {
+			result[k] = v
+		}
+	}
+	return result
 }
 
 func NewHttpDispatcher() dispatcher.Dispatcher {
