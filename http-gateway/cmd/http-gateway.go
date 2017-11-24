@@ -42,7 +42,7 @@ func messageHandler(producer sarama.AsyncProducer) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		scsMessage := message.Message{Payload: b, Headers: nil}
+		scsMessage := message.Message{Payload: b, Headers: headersToPropagate(r)}
 
 		bytesOut, err := message.EncodeMessage(scsMessage)
 		if err != nil {
@@ -72,7 +72,9 @@ func replyHandler(producer sarama.AsyncProducer, replies map[string]chan message
 		correlationId := uuid.NewV4().String()
 		replyChan := make(chan message.Message)
 		replies[correlationId] = replyChan
-		scsMessage := message.Message{Payload: b, Headers: map[string]interface{}{"correlationId": correlationId}}
+		headers := headersToPropagate(r)
+		headers["correlationId"] = correlationId
+		scsMessage := message.Message{Payload: b, Headers: headers}
 
 		bytesOut, err := message.EncodeMessage(scsMessage)
 		if err != nil {
@@ -117,6 +119,17 @@ func startHttpServer(producer sarama.AsyncProducer, replies map[string]chan mess
 
 	log.Printf("Listening on %v", srv.Addr)
 	return srv
+}
+
+func headersToPropagate(r *http.Request) map[string]interface{} {
+	result := make(map[string]interface{})
+	if ct, ok := r.Header["Content-Type"]; ok {
+		result["Content-Type"] = ct[0]
+	}
+	if ct, ok := r.Header["Accept"]; ok {
+		result["Accept"] = ct[0]
+	}
+	return result
 }
 
 func main() {
