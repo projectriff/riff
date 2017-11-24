@@ -1,2 +1,2 @@
 #!/bin/bash
-./build-helper "$PWD/../python-function-invoker/" ${1:-''} ${2:-''} './build.sh'
+./build-helper "$PWD/../python2-function-invoker/" ${1:-''} ${2:-''} './build.sh'
