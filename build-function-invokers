@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e -v
 
-./build-java-function-invoker ${1:-''} ${2:-''}
-./build-node-function-invoker ${1:-''} ${2:-''}
-./build-shell-function-invoker ${1:-''} ${2:-''}
-./build-python2-function-invoker ${1:-''} ${2:-''}
+./build-java-function-invoker "$@"
+./build-node-function-invoker "$@"
+./build-shell-function-invoker "$@"
+./build-python2-function-invoker "$@"
 
