@@ -14,11 +14,11 @@ functionController:
   replicaCount: 1
   image:
     repository: projectriff/function-controller
-    tag: 0.0.1-SNAPSHOT
+    tag: 0.0.1
     pullPolicy: IfNotPresent
   sidecar:
     image:
-      tag: 0.0.1-SNAPSHOT
+      tag: 0.0.1
   service:
     name: http
     type: ClusterIP
@@ -28,13 +28,13 @@ topicController:
   replicaCount: 1
   image:
     repository: projectriff/topic-controller
-    tag: 0.0.1-SNAPSHOT
+    tag: 0.0.1
     pullPolicy: IfNotPresent
 httpGateway:
   replicaCount: 1
   image:
     repository: projectriff/http-gateway
-    tag: 0.0.1-SNAPSHOT
+    tag: 0.0.1
     pullPolicy: IfNotPresent
   service:
     name: http
@@ -65,8 +65,8 @@ prometheus:
 zipkin:
   replicaCount: 1
   image:
-    repository: projectriff/zipkin-server
-    tag: 0.0.1-SNAPSHOT
+    repository: openzipkin/zipkin
+    tag: 2.2
     pullPolicy: IfNotPresent
   service:
     name: zipkin
