@@ -1,0 +1,12 @@
+functionController:
+  image:
+    tag: 0.0.1-SNAPSHOT
+  sidecar:
+    image:
+      tag: 0.0.1-SNAPSHOT
+topicController:
+  image:
+    tag: 0.0.1-SNAPSHOT
+httpGateway:
+  image:
+    tag: 0.0.1-SNAPSHOT
