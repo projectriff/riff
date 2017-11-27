@@ -22,7 +22,7 @@
 === Publish a Message
 
 ```
-./publish numbers 2
+./request numbers 2
 ```
 
 === Tail the Sidecar Log
