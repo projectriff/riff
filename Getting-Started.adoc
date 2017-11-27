@@ -44,7 +44,7 @@ NOTE: To verify that the tiller pod has started execute the following command: `
 Run the following commands to add the repository:
 
 ----
-helm repo add riffrepo https://riff_charts.storage.googleapis.com
+helm repo add riffrepo https://riff-charts.storage.googleapis.com
 helm repo update riffrepo
 ----
 
@@ -52,18 +52,16 @@ helm repo update riffrepo
 
 Install the riff helm chart as follows:
 
-- `helm search riffrepo/riff` and identify the version you're looking to install (use the latest one if unsure)
-
 For an install with default configuration and no RBAC enabled use:
 
 ----
-helm install riffrepo/riff --name demo --version <version>
+helm install riffrepo/riff --name demo
 ----
 
 For a cluster that has RBAC enabled add `--set create.rbac=true`:
 
 ----
-helm install riffrepo/riff --name demo --version <version> --set create.rbac=true
+helm install riffrepo/riff --name demo --set create.rbac=true
 ----
 
 You should see a number of resources get created in your cluster. You can see them all using:
@@ -80,7 +78,7 @@ The `helm install` commands in this section assume you are in the root directory
 For `NodePort` service types (e.g. running on Minikube) add `--values helm/values-nodeport.yaml`:
 
 ----
-helm install riffrepo/riff --name demo --version <version> --values helm/values-nodeport.yaml
+helm install riffrepo/riff --name demo --values helm/values-nodeport.yaml
 ----
 
 To install locally built Docker images, use the `values-snapshot.yaml` file, which overrides image tags with snapshot versions:
