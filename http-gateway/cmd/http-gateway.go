@@ -89,6 +89,14 @@ func replyHandler(producer sarama.AsyncProducer, replies map[string]chan message
 			case reply := <-replyChan:
 				delete(replies, correlationId)
 				p := reply.Payload
+				for k, v := range reply.Headers {
+					switch value := v.(type) {
+					case string:
+						w.Header()[k] = []string{value}
+					case []string:
+						w.Header()[k] = value
+					}
+				}
 				w.Write(p.([]byte)) // TODO equivalent of Spring's HttpMessageConverter handling
 			case <- time.After(time.Second * 60):
 				delete(replies, correlationId)
