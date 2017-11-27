@@ -1,12 +1,13 @@
 #!/bin/bash
 
+set -ex 
+
 cd "$(dirname "$0")"
 if [ -e proto ]; then
-  rm proto/*
-else
-  mkdir proto
+  rm -fr proto/
 fi
+mkdir proto
 
-cp ../../../function-proto/src/main/proto/*.proto proto
+cp ../../../../function-proto/src/main/proto/*.proto proto
 
 docker build . --rm -t projectriff/grpc-py:v0001
