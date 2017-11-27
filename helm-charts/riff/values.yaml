@@ -40,28 +40,6 @@ httpGateway:
     name: http
     type: LoadBalancer
     externalPort: 80
-grafana:
-  replicaCount: 1
-  image:
-    repository: grafana/grafana
-    tag: 4.4.1
-    pullPolicy: IfNotPresent
-  service:
-    name: graphana
-    type: LoadBalancer
-    externalPort: 3000
-    internalPort: 3000
-prometheus:
-  replicaCount: 1
-  image:
-    repository: prom/prometheus
-    tag: v1.7.1
-    pullPolicy: IfNotPresent
-  service:
-    name: prometheus
-    type: LoadBalancer
-    externalPort: 9090
-    internalPort: 9090
 zipkin:
   replicaCount: 1
   image:
