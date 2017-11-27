@@ -123,13 +123,7 @@ If your cluster has RBAC enabled, then you also need to create a Role and a Role
 kubectl apply -f config/rbac
 ----
 
-==== Deploy Metrics (Grafana/Prometheus) and Tracing (Zipkin) Dashboards
-
-[source, bash]
-----
-kubectl apply -f config/prometheus
-kubectl apply -f config/grafana
-----
+==== Deploy Tracing (Zipkin) Dashboard
 
 [source, bash]
 ----
@@ -150,5 +144,4 @@ Once you're done playing with riff (see samples below), you can destroy everythi
 == [[samples]]Try Some Samples
 
 With riff running try some of the link:samples/README.adoc[samples].
-
 

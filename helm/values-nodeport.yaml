@@ -1,9 +1,6 @@
 httpGateway:
   service:
     type: NodePort
-grafana:
-  service:
-    type: NodePort
 zipkin:
   service:
     type: NodePort
