@@ -10,13 +10,13 @@
 === Build the Docker container for the function code
 
 ```
-./faas build -n square -v v0001 -f samples/node/square
+./riff build -n square -v v0001 -f samples/node/square
 ```
 
 === Create the Function and Topic(s)
 
 ```
-./faas apply -f samples/node/square
+./riff apply -f samples/node/square
 ```
 
 === Publish a Message
@@ -28,11 +28,11 @@
 === Tail the Sidecar Log
 
 ```
-./faas logs -n square -t
+./riff logs -n square -t
 ```
 
 === Delete the function
 
 ```
-./faas delete -n square
+./riff delete -n square
 ```

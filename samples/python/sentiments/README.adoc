@@ -10,13 +10,13 @@
 === Build the Docker container for the function code
 
 ```
-./faas build -n sentiments -v v0001 -f samples/python/sentiments
+./riff build -n sentiments -v v0001 -f samples/python/sentiments
 ```
 
 === Create the Function and Topic(s)
 
 ```
-./faas apply -f samples/python/sentiments
+./riff apply -f samples/python/sentiments
 ```
 
 === Publish a Message
@@ -31,11 +31,11 @@ is in the form of an array (sorry about the escaped quotes).
 === Tail the Sidecar Log
 
 ```
-./faas logs -n sentiments -t
+./riff logs -n sentiments -t
 ```
 
 === Delete the function
 
 ```
-./faas delete -n sentiments
+./riff delete -n sentiments
 ```

@@ -10,13 +10,13 @@
 === Build the Docker container for the function code
 
 ```
-./faas build -n wordcount -v v0001 -f samples/shell/wordcount
+./riff build -n wordcount -v v0001 -f samples/shell/wordcount
 ```
 
 === Create the Function and Topic(s)
 
 ```
-./faas apply -f samples/shell/wordcount
+./riff apply -f samples/shell/wordcount
 ```
 
 === Publish a Message to the Input Topic
@@ -28,11 +28,11 @@
 === Tail the Sidecar Log
 
 ```
-./faas logs -n wordcount -t
+./riff logs -n wordcount -t
 ```
 
 === Delete the function
 
 ```
-./faas delete -n wordcount
+./riff delete -n wordcount
 ```

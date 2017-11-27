@@ -16,7 +16,7 @@
 === Create the Function and Topic(s)
 
 ```
-./faas apply -f samples/python/uppercase
+./riff apply -f samples/python/uppercase
 ```
 
 === Publish a Message to the Input Topic
@@ -28,11 +28,11 @@
 === Tail the Sidecar Log
 
 ```
-./faas logs -n uppercase -t
+./riff logs -n uppercase -t
 ```
 
 === Delete the function
 
 ```
-./faas delete -n uppercase
+./riff delete -n uppercase
 ```

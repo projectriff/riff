@@ -16,13 +16,13 @@
 === Build the Docker container for the function code
 
 ```
-./faas build -n greeter -v v0001 -f samples/java/greeter
+./riff build -n greeter -v v0001 -f samples/java/greeter
 ```
 
 === Create the Function and Topic(s)
 
 ```
-./faas apply -f samples/java/greeter
+./riff apply -f samples/java/greeter
 ```
 
 === Publish a Message
@@ -34,11 +34,11 @@
 === Tail the Sidecar Log
 
 ```
-./faas logs -n greeter -t
+./riff logs -n greeter -t
 ```
 
 === Delete the function
 
 ```
-./faas delete -n greeter
+./riff delete -n greeter
 ```
