@@ -6,7 +6,6 @@ create:
   faas: true
   rbac: false
 enable:
-  metricsDashboard: false
   tracingDashboard: false
 rbac:
   apiVersion: v1beta1
