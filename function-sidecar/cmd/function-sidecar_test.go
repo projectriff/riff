@@ -6,12 +6,14 @@ import (
 	"os/exec"
 	"os"
 	"fmt"
-	"gopkg.in/Shopify/sarama.v1"
 	"bufio"
 	"errors"
 	"github.com/bsm/sarama-cluster"
 	"math/rand"
 	"time"
+	"github.com/projectriff/function-sidecar/pkg/wireformat"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher"
+	"github.com/Shopify/sarama"
 )
 
 const sourceMsg = `World`
@@ -38,20 +40,11 @@ func TestIntegrationWithKafka(t *testing.T) {
 		t.Fatal("Required environment variable KAFKA_BROKER was not provided")
 	}
 
-	cmd := exec.Command("../function-sidecar")
 	input := randString(10)
 	output := randString(10)
 	group := randString(10)
+	cmd := exec.Command("../function-sidecar", "--inputs", input, "--outputs", output, "--brokers", broker, "--group", group, "--protocol", "http")
 
-	configJson := fmt.Sprintf(`{
-		"spring.cloud.stream.kafka.binder.brokers":"%s",
-		"spring.cloud.stream.bindings.input.destination": "%s",
-		"spring.cloud.stream.bindings.output.destination": "%s",
-		"spring.cloud.stream.bindings.input.group": "%s",
-		"spring.profiles.active": "http"
-	}`, broker, input, output, group)
-
-	cmd.Env = []string{"SPRING_APPLICATION_JSON=" + configJson}
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -79,7 +72,11 @@ func TestIntegrationWithKafka(t *testing.T) {
 		t.Fatal(kafkaProducerErr)
 	}
 
-	testMessage := &sarama.ProducerMessage{Topic: input, Value: sarama.StringEncoder(string([]byte{0xff, 0x00}) + sourceMsg)}
+	testMessage, err := wireformat.ToKafka(dispatcher.Message{Payload: []byte(sourceMsg)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	testMessage.Topic = input
 	kafkaProducer.Input() <- testMessage
 	producerCloseErr := kafkaProducer.Close()
 	if producerCloseErr != nil {
@@ -96,9 +93,13 @@ func TestIntegrationWithKafka(t *testing.T) {
 	defer consumer.Close()
 
 	select {
-	case msg, ok := <-consumer.Messages():
+	case consumerMessage, ok := <-consumer.Messages():
 		if ok {
-			reply := string(msg.Value[2:])
+			msg, err := wireformat.FromKafka(consumerMessage)
+			if err != nil {
+				t.Fatal(err)
+			}
+			reply := string(msg.Payload.([]byte))
 			if reply != expectedReply {
 				t.Fatal(fmt.Errorf("Received reply [%s] does not match expected reply [%s]", reply, expectedReply))
 			}

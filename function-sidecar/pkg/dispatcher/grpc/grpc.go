@@ -34,16 +34,16 @@ type grpcDispatcher struct {
 }
 
 func (this grpcDispatcher) Dispatch(in interface{}, headers dispatcher.Headers) (interface{}, dispatcher.Headers, error) {
-	request := fntypes.Request{Body: in.(string)}
+	request := fntypes.Request{Body: string(in.([]byte))}
 	reply, err := this.client.Call(context.Background(), &request)
 	if err != nil {
 		log.Printf("Error calling gRPC server: %v", err)
 		return nil, nil, err
 	}
-	return reply.GetBody(), nil, nil
+	return []byte(reply.GetBody()), nil, nil
 }
 
-func NewGrpcDispatcher() dispatcher.Dispatcher {
+func NewGrpcDispatcher() dispatcher.SynchDispatcher {
 	context, _ := context.WithTimeout(context.Background(), 60 * time.Second)
 	conn, err := grpc.DialContext(context, "localhost:10382", grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {

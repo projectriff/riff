@@ -14,34 +14,35 @@
  * limitations under the License.
  */
 
-package message
+package wireformat
 
 import (
 	"testing"
 	"reflect"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher"
 )
 
 func TestEmptyMessage(t *testing.T) {
-	msg := Message{}
+	msg := dispatcher.Message{}
 	encodeThenDecode(msg, t)
 }
 
 func TestMessageWithOnlyPayload(t *testing.T) {
-	msg := Message{Payload: []byte("Hello")}
+	msg := dispatcher.Message{Payload: []byte("Hello")}
 	encodeThenDecode(msg, t)
 }
 
 func TestMessageWithOnlyHeaders(t *testing.T) {
-	msg := Message{Headers: map[string]interface{}{"key1":"value1", "k2":18.0}}
+	msg := dispatcher.Message{Headers: map[string]interface{}{"key1":"value1", "k2":18.0}}
 	encodeThenDecode(msg, t)
 }
 
-func encodeThenDecode(msg Message, t *testing.T) {
-	bytes, err := EncodeMessage(msg)
+func encodeThenDecode(msg dispatcher.Message, t *testing.T) {
+	bytes, err := encodeMessage(msg)
 	if err != nil {
 		t.Fatal(err)
 	}
-	msg2, err := ExtractMessage(bytes)
+	msg2, err := extractMessage(bytes)
 	if err != nil {
 		t.Fatal(err)
 	}

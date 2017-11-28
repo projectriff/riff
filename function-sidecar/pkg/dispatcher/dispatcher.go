@@ -16,11 +16,34 @@
 
 package dispatcher
 
-type Dispatcher interface {
+import "fmt"
+
+type SynchDispatcher interface {
 	Dispatch(in interface{}, headers Headers) (interface{}, Headers, error)
 }
 
+type Dispatcher interface {
+
+	Input() chan<- Message
+
+	Output() <-chan Message
+}
+
 type Headers map[string]interface{}
+
+type Message struct {
+	Payload interface{}
+	Headers Headers
+}
+
+func (msg Message) String() string {
+	switch msg.Payload.(type) {
+	case []byte:
+		return fmt.Sprintf("Message{%v, %v}", string(msg.Payload.([]byte)), msg.Headers)
+	default:
+		return fmt.Sprintf("Message{%v, %v}", msg.Payload, msg.Headers)
+	}
+}
 
 func (h Headers) GetOrDefault(key string, value interface{}) interface{} {
 	if v, ok := h[key] ; ok {

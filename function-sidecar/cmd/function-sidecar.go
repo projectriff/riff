@@ -23,15 +23,17 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/Shopify/sarama"
 	"github.com/bsm/sarama-cluster"
-	"gopkg.in/Shopify/sarama.v1"
 
 	"flag"
 	dispatch "github.com/projectriff/function-sidecar/pkg/dispatcher"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher/http"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher/pipes"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher/stdio"
-	"github.com/projectriff/function-sidecar/pkg/message"
+	"github.com/projectriff/function-sidecar/pkg/wireformat"
+	"io"
 	"strings"
 )
 
@@ -58,9 +60,11 @@ func init() {
 	flag.StringVar(&protocol, "protocol", "", "dispatcher protocol to use. One of [http, grpc, stdio]")
 }
 
+const CorrelationId = "correlationId"
+
 // PropagatedHeaders is the set of header names that will be copied from the incoming message
 // to the outgoing message
-var PropagatedHeaders = []string{"correlationId"}
+var PropagatedHeaders = []string{CorrelationId}
 
 func main() {
 
@@ -107,46 +111,77 @@ func main() {
 		go consumeNotifications(consumer)
 	}
 
-	dispatcher := createDispatcher(protocol)
+	dispatcher, err := createDispatcher(protocol)
+	if err != nil {
+		panic(err)
+	}
+	switch d := dispatcher.(type) {
+	case io.Closer:
+		fmt.Print("Requesting close()")
+		defer d.Close()
+	}
 
 	// trap SIGINT, SIGTERM, and SIGKILL to trigger a shutdown.
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, os.Kill)
 
+	go func() {
+		for {
+			select {
+			// Incoming message
+			case msg, open := <-consumer.Messages():
+				if open {
+					messageIn, err := wireformat.FromKafka(msg)
+					fmt.Fprintf(os.Stdout, ">>> %s\n", messageIn)
+					if err != nil {
+						log.Printf("Error receiving message from Kafka: %v", err)
+						break
+					}
+					dispatcher.Input() <- messageIn
+					consumer.MarkOffset(msg, "") // mark message as processed
+				} else {
+					// Kafka closed
+					log.Print("Exiting Kafka Consumer loop")
+					return
+				}
+			}
+		}
+	}()
+
+	go func() {
+		for {
+			select {
+			// Result message
+			case resultMsg, open := <-dispatcher.Output(): // Make sure to drain channel even if output==""
+				if open {
+					if output != "" {
+						fmt.Fprintf(os.Stdout, "<<< %s\n", resultMsg)
+						producerMessage, err := wireformat.ToKafka(resultMsg)
+						if err != nil {
+							log.Printf("Error encoding message: %v", err)
+							break
+						}
+						producerMessage.Topic = output
+						select {
+						case producer.Input() <- producerMessage:
+						}
+					} else {
+						fmt.Fprintf(os.Stdout, "=== Not sending function return value as function did not provide an output channel. Raw result = %s\n", resultMsg)
+					}
+				} else {
+					log.Print("Exiting Kafka Producer loop")
+					return
+				}
+			}
+		}
+	}()
+
 	// consume messages, watch signals
 	for {
 		select {
-		case msg, ok := <-consumer.Messages():
-			if ok {
-				messageIn, err := message.ExtractMessage(msg.Value)
-				fmt.Fprintf(os.Stdout, "<<< %s\n", messageIn)
-				if err != nil {
-					log.Printf("Error receiving message from Kafka: %v", err)
-					break
-				}
-				strPayload := string(messageIn.Payload.([]byte))
-				dispatched, resultHeaders, err := dispatcher.Dispatch(strPayload, messageIn.Headers)
-				if err != nil {
-					log.Printf("Error dispatching message: %v", err)
-					break
-				}
-				if output != "" {
-					outHeaders := propagateHeaders(messageIn.Headers, resultHeaders)
-					messageOut := message.Message{Payload: []byte(dispatched.(string)), Headers: outHeaders}
-					bytesOut, err := message.EncodeMessage(messageOut)
-					fmt.Fprintf(os.Stdout, ">>> %s\n", messageOut)
-					if err != nil {
-						log.Printf("Error encoding message: %v", err)
-						break
-					}
-					outMessage := &sarama.ProducerMessage{Topic: output, Value: sarama.ByteEncoder(bytesOut)}
-					producer.Input() <- outMessage
-				} else {
-					fmt.Fprintf(os.Stdout, "=== Not sending function return value as function did not provide an output channel. Raw result = %s\n", dispatched)
-				}
-				consumer.MarkOffset(msg, "") // mark message as processed
-			}
+		// Request for shutdown
 		case <-signals:
+			close(dispatcher.Input())
 			return
 		}
 	}
@@ -168,14 +203,20 @@ func propagateHeaders(incomingHeaders dispatch.Headers, resultHeaders dispatch.H
 	return result
 }
 
-func createDispatcher(protocol string) dispatch.Dispatcher {
+func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
 	switch protocol {
 	case "http":
-		return http.NewHttpDispatcher()
+		return dispatch.NewWrapper(http.NewHttpDispatcher())
+	case "pipes":
+		return pipes.NewPipesDispatcher()
 	case "stdio":
-		return stdio.NewStdioDispatcher()
+		d, err := stdio.NewStdioDispatcher()
+		if err != nil {
+			return nil, err
+		}
+		return dispatch.NewWrapper(d)
 	case "grpc":
-		return grpc.NewGrpcDispatcher()
+		return dispatch.NewWrapper(grpc.NewGrpcDispatcher())
 	default:
 		panic("Unsupported Dispatcher " + protocol)
 	}
