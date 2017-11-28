@@ -5,7 +5,6 @@
 *Function*:: https://github.com/projectriff/riff/blob/master/samples/node/square/square.js[square.js]
 *Protocol*:: HTTP
 *Input*:: numbers
-*Output*:: greetings
 
 === Build the Docker container for the function code
 
