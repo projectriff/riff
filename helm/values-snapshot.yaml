@@ -1,12 +1,12 @@
 functionController:
   image:
-    tag: 0.0.1-SNAPSHOT
+    tag: 0.0.2-snapshot
   sidecar:
     image:
-      tag: 0.0.1-SNAPSHOT
+      tag: 0.0.2-snapshot
 topicController:
   image:
-    tag: 0.0.1-SNAPSHOT
+    tag: 0.0.2-snapshot
 httpGateway:
   image:
-    tag: 0.0.1-SNAPSHOT
+    tag: 0.0.2-snapshot
