@@ -39,7 +39,7 @@ helm init --service-account=tiller
 
 NOTE: To verify that the tiller pod has started execute the following command: `kubectl get pod --namespace kube-system` and you should see the `tiller` pod running.
 
-==== Add the riff repository to your helm environment
+===== Add the riff repository to your helm environment
 
 Run the following commands to add the repository:
 
@@ -48,7 +48,9 @@ helm repo add riffrepo https://riff-charts.storage.googleapis.com
 helm repo update riffrepo
 ----
 
-==== Install the riff helm chart
+==== Install Riff
+
+===== Using a non-local Kubernetes cluster
 
 Install the riff helm chart as follows:
 
@@ -64,13 +66,7 @@ For a cluster that has RBAC enabled add `--set create.rbac=true`:
 helm install riffrepo/riff --name demo --set create.rbac=true
 ----
 
-You should see a number of resources get created in your cluster. You can see them all using:
-
-----
-kubectl get svc,deployments,pods,functions,topics
-----
-
-==== Customizing the Configuration
+===== Using a local Kubernetes cluster
 
 Clone the https://github.com/projectriff/riff[riff] repository.
 The `helm install` commands in this section assume you are in the root directory of that project.
@@ -85,6 +81,13 @@ To install locally built Docker images, use the `values-snapshot.yaml` file, whi
 
 ----
 helm install riffrepo/riff --name demo --values helm/values-snapshot.yaml
+----
+
+===== Verify the installation
+You should see a number of resources get created in your cluster. You can see them all using:
+
+----
+kubectl get svc,deployments,pods,functions,topics
 ----
 
 ==== Enable Tracing Dashboard
