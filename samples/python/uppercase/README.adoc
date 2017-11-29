@@ -10,7 +10,7 @@
 
 (from this sample's directory)
 ```
-./dockerize
+pushd samples/python/uppercase/ ; ./dockerize ; popd
 ```
 
 === Create the Function and Topic(s)
