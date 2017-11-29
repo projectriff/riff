@@ -1,4 +1,4 @@
 apiVersion: v1
-description: riff is for functions - a FaaS built for Kubernetes
+description: riff is for functions - a FaaS for Kubernetes
 name: riff
 version: 0.0.1
