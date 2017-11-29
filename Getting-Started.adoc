@@ -19,7 +19,7 @@ minikube start --memory=4096
 
 ==== Install Helm
 
-Helm is comprised of 2 components: one is the client (helm) the other is the server component (tiller). The helm client runs on your local machine and can be installed using the instructions found here: https://github.com/kubernetes/helm/blob/master/README.md#install
+Helm is comprised of 2 components: one is the client (helm) the other is the server component (tiller). The helm client runs on your local machine and can be installed using the instructions found https://github.com/kubernetes/helm/blob/master/README.md#install[here]
 
 Once you have the helm client installed you can install the server component.
 
