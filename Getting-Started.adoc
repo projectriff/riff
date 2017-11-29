@@ -13,24 +13,27 @@ The following instructions cover how to initialize helm and install riff.
 
 If using Minikube, we recommend at least 4GB of memory:
 
+[source, bash]
 ----
 minikube start --memory=4096
 ----
 
 ==== Install Helm
 
-Helm is comprised of 2 components: one is the client (helm) the other is the server component (tiller). The helm client runs on your local machine and can be installed using the instructions found here: https://github.com/kubernetes/helm/blob/master/README.md#install
+Helm is comprised of 2 components: one is the client (helm) the other is the server component (tiller). The helm client runs on your local machine and can be installed using the instructions found https://github.com/kubernetes/helm/blob/master/README.md#install[here]
 
 Once you have the helm client installed you can install the server component.
 
 For a cluster that does not have RBAC enabled use:
 
+[source, bash]
 ----
 helm init
 ----
 
 For a cluster that has RBAC enabled use:
 
+[source, bash]
 ----
 kubectl -n kube-system create serviceaccount tiller
 kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
@@ -39,33 +42,50 @@ helm init --service-account=tiller
 
 NOTE: To verify that the tiller pod has started execute the following command: `kubectl get pod --namespace kube-system` and you should see the `tiller` pod running.
 
-==== Add the riff repository to your helm environment
+===== Add the riff repository to your helm environment
 
 Run the following commands to add the repository:
 
+[source, bash]
 ----
 helm repo add riffrepo https://riff-charts.storage.googleapis.com
 helm repo update riffrepo
 ----
 
-==== Install the riff helm chart
+==== Install riff
+
+===== Using a Kubernetes cluster supporting LoadBalancer
 
 Install the riff helm chart as follows:
 
 For an install with default configuration and no RBAC enabled use:
 
+[source, bash]
 ----
 helm install riffrepo/riff --name demo
 ----
 
+===== Using a Kubernetes cluster not supporting LoadBalancer (e.g. minikube)
+
+For `NodePort` service types (e.g. running on Minikube) configure the httpGateway to use `NodePort`:
+
+[source, bash]
+----
+helm install riffrepo/riff --name demo --set httpGateway.service.type=NodePort:
+----
+
+[NOTE]
 For a cluster that has RBAC enabled add `--set create.rbac=true`:
 
+[source, bash]
 ----
 helm install riffrepo/riff --name demo --set create.rbac=true
 ----
 
+===== Verify the installation
 You should see a number of resources get created in your cluster. You can see them all using:
 
+[source, bash]
 ----
 kubectl get svc,deployments,pods,functions,topics
 ----
@@ -75,14 +95,9 @@ kubectl get svc,deployments,pods,functions,topics
 Clone the https://github.com/projectriff/riff[riff] repository.
 The `helm install` commands in this section assume you are in the root directory of that project.
 
-For `NodePort` service types (e.g. running on Minikube) add `--values helm/values-nodeport.yaml`:
-
-----
-helm install riffrepo/riff --name demo --values helm/values-nodeport.yaml
-----
-
 To install locally built Docker images, use the `values-snapshot.yaml` file, which overrides image tags with snapshot versions:
 
+[source, bash]
 ----
 helm install riffrepo/riff --name demo --values helm/values-snapshot.yaml
 ----
@@ -95,6 +110,7 @@ To enable the Tracing Dashboard use `--set enable.tracingDashboard=true`.
 This flag can be set when installing the chart or you can apply it during an upgrade operation.
 Here is an example of upgrading the release and enabling the Tracing Dashboard:
 
+[source, bash]
 ----
 helm upgrade demo riffrepo/riff --set enable.tracingDashboard=true
 ----
@@ -103,6 +119,7 @@ See how to use the link:Monitoring.adoc#dashboards[dashboards] and run some link
 
 ==== To tear it all down
 
+[source, bash]
 ----
 helm delete demo --purge
 ----
