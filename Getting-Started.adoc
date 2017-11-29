@@ -13,6 +13,7 @@ The following instructions cover how to initialize helm and install riff.
 
 If using Minikube, we recommend at least 4GB of memory:
 
+[source, bash]
 ----
 minikube start --memory=4096
 ----
@@ -25,12 +26,14 @@ Once you have the helm client installed you can install the server component.
 
 For a cluster that does not have RBAC enabled use:
 
+[source, bash]
 ----
 helm init
 ----
 
 For a cluster that has RBAC enabled use:
 
+[source, bash]
 ----
 kubectl -n kube-system create serviceaccount tiller
 kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
@@ -43,6 +46,7 @@ NOTE: To verify that the tiller pod has started execute the following command: `
 
 Run the following commands to add the repository:
 
+[source, bash]
 ----
 helm repo add riffrepo https://riff-charts.storage.googleapis.com
 helm repo update riffrepo
@@ -56,6 +60,7 @@ Install the riff helm chart as follows:
 
 For an install with default configuration and no RBAC enabled use:
 
+[source, bash]
 ----
 helm install riffrepo/riff --name demo
 ----
@@ -67,12 +72,14 @@ The `helm install` commands in this section assume you are in the root directory
 
 For `NodePort` service types (e.g. running on Minikube) add `--values helm/values-nodeport.yaml`:
 
+[source, bash]
 ----
 helm install riffrepo/riff --name demo --values helm/values-nodeport.yaml
 ----
 
 To install locally built Docker images, use the `values-snapshot.yaml` file, which overrides image tags with snapshot versions:
 
+[source, bash]
 ----
 helm install riffrepo/riff --name demo --values helm/values-snapshot.yaml
 ----
@@ -80,6 +87,7 @@ helm install riffrepo/riff --name demo --values helm/values-snapshot.yaml
 [NOTE]
 For a cluster that has RBAC enabled add `--set create.rbac=true`:
 
+[source, bash]
 ----
 helm install riffrepo/riff --name demo --set create.rbac=true
 ----
@@ -87,6 +95,7 @@ helm install riffrepo/riff --name demo --set create.rbac=true
 ===== Verify the installation
 You should see a number of resources get created in your cluster. You can see them all using:
 
+[source, bash]
 ----
 kubectl get svc,deployments,pods,functions,topics
 ----
@@ -99,6 +108,7 @@ To enable the Tracing Dashboard use `--set enable.tracingDashboard=true`.
 This flag can be set when installing the chart or you can apply it during an upgrade operation.
 Here is an example of upgrading the release and enabling the Tracing Dashboard:
 
+[source, bash]
 ----
 helm upgrade demo riffrepo/riff --set enable.tracingDashboard=true
 ----
@@ -107,6 +117,7 @@ See how to use the link:Monitoring.adoc#dashboards[dashboards] and run some link
 
 ==== To tear it all down
 
+[source, bash]
 ----
 helm delete demo --purge
 ----

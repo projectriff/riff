@@ -1,4 +1,4 @@
-= riff: a FaaS for Kubernetes - Samples
+= riff: Samples
 
 To riff link:../README.adoc[README]
 

@@ -1,5 +1,7 @@
 = riff is for functions
 
+A FaaS for Kubernetes
+
 == Installation
 
 You can install the system using link:Getting-Started.adoc#helm[a Helm chart] or by link:#manual[manually building and deploying] the components.
