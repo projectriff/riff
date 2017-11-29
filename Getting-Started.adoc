@@ -60,12 +60,6 @@ For an install with default configuration and no RBAC enabled use:
 helm install riffrepo/riff --name demo
 ----
 
-For a cluster that has RBAC enabled add `--set create.rbac=true`:
-
-----
-helm install riffrepo/riff --name demo --set create.rbac=true
-----
-
 ===== Using a local Kubernetes cluster
 
 Clone the https://github.com/projectriff/riff[riff] repository.
@@ -81,6 +75,13 @@ To install locally built Docker images, use the `values-snapshot.yaml` file, whi
 
 ----
 helm install riffrepo/riff --name demo --values helm/values-snapshot.yaml
+----
+
+[NOTE]
+For a cluster that has RBAC enabled add `--set create.rbac=true`:
+
+----
+helm install riffrepo/riff --name demo --set create.rbac=true
 ----
 
 ===== Verify the installation
