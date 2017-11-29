@@ -14,7 +14,7 @@ You need:
 +
 [source,bash]
 ----
-minikube start --cpus=4 --memory=4096
+minikube start --memory=4096
 ----
 
 * Git installed.
