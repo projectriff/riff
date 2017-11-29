@@ -34,19 +34,19 @@ const ConnectionAttemptInterval = 100 * time.Millisecond
 type httpDispatcher struct {
 }
 
-func (httpDispatcher) Dispatch(in interface{}, headers dispatcher.Headers) (interface{}, dispatcher.Headers, error) {
-	slice := in.([]byte)
+func (httpDispatcher) Dispatch(in *dispatcher.Message) (*dispatcher.Message, error) {
+	slice := in.Payload.([]byte)
 
 	client := http.Client{
 		Timeout: time.Duration(60 * time.Second),
 	}
-	contentType := headers.GetOrDefault("Content-Type", "application/octet-stream").(string)
+	contentType := in.Headers.GetOrDefault("Content-Type", "application/octet-stream").(string)
 	req, err := http.NewRequest("POST", "http://localhost:8080", bytes.NewReader(slice))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	req.Header.Add("Content-Type", contentType)
-	if accept, ok := headers["Accept"]; ok {
+	if accept, ok := in.Headers["Accept"]; ok {
 		req.Header.Add("Accept", accept.(string))
 	}
 
@@ -54,16 +54,16 @@ func (httpDispatcher) Dispatch(in interface{}, headers dispatcher.Headers) (inte
 
 	if err != nil {
 		log.Printf("Error invoking http://localhost:8080: %v", err)
-		return nil, nil, err
+		return nil, err
 	}
 	defer resp.Body.Close()
 	out, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Error reading response %v\n", err)
-		return nil, nil, err
+		return nil, err
 	}
 
-	return out, flatten(resp.Header), nil
+	return &dispatcher.Message{Payload: out, Headers: flatten(resp.Header)}, nil
 }
 
 // http headers are a multi value map, dispatcher.Headers is single values (but with interface{} value)

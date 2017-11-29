@@ -18,7 +18,6 @@ package stdio
 
 import (
 	"bufio"
-	"fmt"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher"
 	"log"
 	"os"
@@ -35,25 +34,23 @@ type stdioDispatcher struct {
 	writer *bufio.Writer
 }
 
-func (this stdioDispatcher) Dispatch(in interface{}, headers dispatcher.Headers) (interface{}, dispatcher.Headers, error) {
-	_, err := this.writer.WriteString(string(in.([]byte)) + "\n")
+func (this stdioDispatcher) Dispatch(in *dispatcher.Message) (*dispatcher.Message, error) {
+	_, err := this.writer.WriteString(string(in.Payload.([]byte)) + "\n")
 	if err != nil {
 		log.Printf("Error writing to %v: %v", OUTPUT_PIPE, err)
-		return nil, nil, err
+		return nil, err
 	}
 	err = this.writer.Flush()
-	//fmt.Println("Wrote " + in.(string))
 	if err != nil {
 		log.Printf("Error flushing %v", err)
-		return nil, nil, err
+		return nil, err
 	}
 	line, err := this.reader.ReadString('\n')
 	if err != nil {
 		log.Printf("Error reading from %v: %v", INPUT_PIPE, err)
-		return nil, nil, err
+		return nil, err
 	}
-	//fmt.Println("Read " + line)
-	return []byte(line[0 : len(line)-1]), nil, nil
+	return &dispatcher.Message{Payload: []byte(line[0 : len(line)-1])}, nil
 }
 
 func (this stdioDispatcher) Close() error {
@@ -69,7 +66,7 @@ func (this stdioDispatcher) Close() error {
 }
 
 func NewStdioDispatcher() (dispatcher.SynchDispatcher, error) {
-	fmt.Println("Creating new stdio Dispatcher")
+	log.Println("Creating new stdio Dispatcher")
 	err := syscall.Mkfifo(INPUT_PIPE, 0666)
 	if err != nil {
 		log.Printf("error creating input pipe: %v", err)
@@ -83,7 +80,7 @@ func NewStdioDispatcher() (dispatcher.SynchDispatcher, error) {
 			return nil, err
 		}
 	} else {
-		fmt.Printf("Created %v\n", INPUT_PIPE)
+		log.Printf("Created %v\n", INPUT_PIPE)
 	}
 	err = syscall.Mkfifo(OUTPUT_PIPE, 0666)
 	if err != nil {
@@ -96,7 +93,7 @@ func NewStdioDispatcher() (dispatcher.SynchDispatcher, error) {
 			return nil, err
 		}
 	} else {
-		fmt.Printf("Created %v\n", OUTPUT_PIPE)
+		log.Printf("Created %v\n", OUTPUT_PIPE)
 	}
 
 	result := stdioDispatcher{}

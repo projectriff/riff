@@ -84,7 +84,7 @@ func main() {
 		output = ""
 	}
 
-	fmt.Printf("Sidecar for function '%v' (%v->%v) using %v dispatcher starting\n", group, input, output, protocol)
+	log.Printf("Sidecar for function '%v' (%v->%v) using %v dispatcher starting\n", group, input, output, protocol)
 
 	var producer sarama.AsyncProducer
 	var err error
@@ -117,7 +117,7 @@ func main() {
 	}
 	switch d := dispatcher.(type) {
 	case io.Closer:
-		fmt.Print("Requesting close()")
+		log.Print("Requesting close()")
 		defer d.Close()
 	}
 
@@ -132,7 +132,7 @@ func main() {
 			case msg, open := <-consumer.Messages():
 				if open {
 					messageIn, err := wireformat.FromKafka(msg)
-					fmt.Fprintf(os.Stdout, ">>> %s\n", messageIn)
+					log.Printf(">>> %s\n", messageIn)
 					if err != nil {
 						log.Printf("Error receiving message from Kafka: %v", err)
 						break
@@ -155,7 +155,7 @@ func main() {
 			case resultMsg, open := <-dispatcher.Output(): // Make sure to drain channel even if output==""
 				if open {
 					if output != "" {
-						fmt.Fprintf(os.Stdout, "<<< %s\n", resultMsg)
+						log.Printf("<<< %s\n", resultMsg)
 						producerMessage, err := wireformat.ToKafka(resultMsg)
 						if err != nil {
 							log.Printf("Error encoding message: %v", err)
@@ -166,7 +166,7 @@ func main() {
 						case producer.Input() <- producerMessage:
 						}
 					} else {
-						fmt.Fprintf(os.Stdout, "=== Not sending function return value as function did not provide an output channel. Raw result = %s\n", resultMsg)
+						log.Printf("=== Not sending function return value as function did not provide an output channel. Raw result = %s\n", resultMsg)
 					}
 				} else {
 					log.Print("Exiting Kafka Producer loop")

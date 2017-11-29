@@ -59,14 +59,13 @@ func NewWrapper(synch SynchDispatcher) (wrapper, error) {
 			case in, open := <-i:
 				if open {
 					log.Printf("Wrapper received %v\n", in)
-					payload, headers, err := synch.Dispatch(in.Payload, in.Headers)
+					message, err := synch.Dispatch(&in)
 					if err != nil {
 						log.Printf("Error calling synch dispatcher %v\n", err)
 					}
-					message := Message{Payload: payload, Headers: headers}
-					propagateHeaders(&in, &message)
+					propagateHeaders(&in, message)
 					log.Printf("Wrapper about to forward %v\n", message)
-					o <- message
+					o <- *message
 				} else {
 					close(o)
 					log.Print("Shutting down wrapper")

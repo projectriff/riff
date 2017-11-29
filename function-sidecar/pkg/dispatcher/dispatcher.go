@@ -19,7 +19,7 @@ package dispatcher
 import "fmt"
 
 type SynchDispatcher interface {
-	Dispatch(in interface{}, headers Headers) (interface{}, Headers, error)
+	Dispatch(in *Message) (*Message, error)
 }
 
 type Dispatcher interface {

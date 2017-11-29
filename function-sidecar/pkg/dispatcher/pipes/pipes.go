@@ -19,7 +19,6 @@ package pipes
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher"
 	"log"
 	"os"
@@ -46,7 +45,7 @@ func (this pipesDispatcher) Output() <-chan dispatcher.Message {
 }
 
 func NewPipesDispatcher() (dispatcher.Dispatcher, error) {
-	fmt.Println("Creating new pipes Dispatcher")
+	log.Println("Creating new pipes Dispatcher")
 	err := syscall.Mkfifo(INPUT_PIPE, 0666)
 	if err != nil {
 		log.Printf("error creating input pipe: %v", err)
@@ -60,7 +59,7 @@ func NewPipesDispatcher() (dispatcher.Dispatcher, error) {
 			return nil, err
 		}
 	} else {
-		fmt.Printf("Created %v\n", INPUT_PIPE)
+		log.Printf("Created %v\n", INPUT_PIPE)
 	}
 	err = syscall.Mkfifo(OUTPUT_PIPE, 0666)
 	if err != nil {
@@ -73,7 +72,7 @@ func NewPipesDispatcher() (dispatcher.Dispatcher, error) {
 			return nil, err
 		}
 	} else {
-		fmt.Printf("Created %v\n", OUTPUT_PIPE)
+		log.Printf("Created %v\n", OUTPUT_PIPE)
 	}
 
 	outfile, err := os.OpenFile(INPUT_PIPE, os.O_RDWR, os.ModeNamedPipe)
@@ -94,7 +93,6 @@ func NewPipesDispatcher() (dispatcher.Dispatcher, error) {
 		for {
 			select {
 			case in, open := <-i:
-				fmt.Printf("Got a msg %v", in)
 				if open {
 					err := writeMessage(writer, in)
 					if err != nil {
