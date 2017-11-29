@@ -14,7 +14,7 @@ You need:
 +
 [source,bash]
 ----
-minikube start --cpus=4 --memory=4096 --disk-size=64g
+minikube start --cpus=4 --memory=4096
 ----
 
 * Git installed.
@@ -144,4 +144,3 @@ Once you're done playing with riff (see samples below), you can destroy everythi
 == [[samples]]Try Some Samples
 
 With riff running try some of the link:samples/README.adoc[samples].
-
