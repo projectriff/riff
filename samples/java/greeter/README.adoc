@@ -10,7 +10,7 @@
 === Build the JAR
 
 ```
-./mvnw clean package -f samples/java/greeter/pom.xml
+pushd samples/java/greeter/ ; ./mvnw clean package ; popd
 ```
 
 === Build the Docker container for the function code
