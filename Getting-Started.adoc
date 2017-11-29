@@ -52,7 +52,7 @@ helm repo add riffrepo https://riff-charts.storage.googleapis.com
 helm repo update riffrepo
 ----
 
-==== Install Riff
+==== Install riff
 
 ===== Using a non-local Kubernetes cluster
 
