@@ -2,7 +2,7 @@
 
 [horizontal]
 *Language*:: JavaScript
-*Function*:: https://github.com/projectriff/riff/blob/master/samples/node/square/square.js[square.js]
+*Function*:: link:square.js[square.js]
 *Protocol*:: HTTP
 *Input*:: numbers
 
