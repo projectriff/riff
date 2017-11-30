@@ -9,15 +9,18 @@
 
 === Deploy the FaaS
 
-Deploy riff, either manually (https://github.com/projectriff/riff#manual) or with helm
-(https://github.com/projectriff/riff/blob/master/Getting-Started.adoc#helm).
-For this example to work, your Kubernetes cluster must allow for the creation of
-a LoadBalancer with a public facing IP address.
+[NOTE]
+This example requires a Kubernetes cluster with LoadBalancer support and a public facing IP address. The following
+instructions assume you will be running on https://cloud.google.com/kubernetes-engine/[GKE].
+
+Deploy riff with link:../../../Getting-Started.adoc[helm].
+
 
 === Build the Docker container for the function code
 
 ```
-docker build -t <your-dockerhub-repo>:<your-tag> slack-command
+
+docker build -t <your-dockerhub-repo>/riff-slack-command samples/node/slack/slack-command
 ```
 
 Where `<your-dockerhub-repo>` is a repository on dockerhub for which you have push permissions, and `<your-tag>`
@@ -25,12 +28,10 @@ is anything other than `latest` (not strictly necessary, but probably a best pra
 
 === Publish the resulting image
 
-This step is of special concern when deploying to GKE, as minikube is capable of having both the docker daemon
-(which builds the images) and the registry (which kubernetes pulls from) on your local machine. In the GKE case,
-we will generally assume you are able to publish your images to dockerhub.
+We will generally assume you are able to publish your images to https://hub.docker.com/[dockerhub].
 
 ```
-docker push <your-dockerhub-repo>:<your-tag>
+docker push <your-dockerhub-repo>/riff-slack-command
 ```
 
 === Create the Function and Topic(s)
@@ -52,7 +53,7 @@ spec:
   protocol: http
   input: slack
   container:
-    image: <your-dockerhub-repo>:<your-tag>
+    image: <your-dockerhub-repo>/riff-slack-command:latest
 EOF)
 ```
 
@@ -60,18 +61,18 @@ where `<your-namespace>` is the Kubernetes namespace in which you would like you
 
 === Set up your integration on Slack
 
-When creating your slack slash command (https://api.slack.com/slash-commands), consider the below command
-with output.
+To create your slack slash command (https://api.slack.com/slash-commands), you will need the external IP address
+of the riff http gateway.
 
 ```
-$ kubectl -n <your-namespace> get svc -l component=http-gateway
+$ kubectl -n get svc -l component=http-gateway
 NAME                     TYPE           CLUSTER-IP      EXTERNAL-IP       PORT(S)        AGE
 riff-http-gateway        LoadBalancer   10.51.247.194   104.154.118.171   80:30725/TCP   22m
 ```
 
-We can see from the `EXTERNAL-IP` and `PORT(S)` columns that our gateway should be reachable at `http://104.154.118.171:80`
-in this case. Since the topic we configured in the previous step was called `slack`, then we should configure our
-slash command to send `POST` requests to `http://104.154.118.171:80/requests/slack`.
+You can see from the `EXTERNAL-IP` and `PORT(S)` columns that the external gateway address `http://104.154.118.171:80`
+in this case. Since the input topic we configured for the function is named `slack`, configure the
+slash command to `POST` to `http://104.154.118.171:80/requests/slack`.
 
 === Delete your function
 
