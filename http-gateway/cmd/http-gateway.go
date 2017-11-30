@@ -30,6 +30,7 @@ import (
 	"github.com/satori/go.uuid"
 	"github.com/projectriff/http-gateway/pkg/message"
 	"syscall"
+	"sync"
 )
 
 // Function messageHandler creates an http handler that posts the http body as a message to Kafka, replying
@@ -61,7 +62,7 @@ func messageHandler(producer sarama.AsyncProducer) http.HandlerFunc {
 // Function replyHandler creates an http handler that posts the http body as a message to Kafka, then waits
 // for a message on a go channel it creates for a reply (this is expected to be set by the main thread) and sends
 // that as an http response.
-func replyHandler(producer sarama.AsyncProducer, replies map[string]chan message.Message) http.HandlerFunc {
+func replyHandler(producer sarama.AsyncProducer, replies repliesMap) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		topic := r.URL.Path[len("/requests/"):]
 		b, err := ioutil.ReadAll(r.Body)
@@ -71,7 +72,7 @@ func replyHandler(producer sarama.AsyncProducer, replies map[string]chan message
 		}
 		correlationId := uuid.NewV4().String()
 		replyChan := make(chan message.Message)
-		replies[correlationId] = replyChan
+		replies.put(correlationId, replyChan)
 		headers := headersToPropagate(r)
 		headers["correlationId"] = correlationId
 		scsMessage := message.Message{Payload: b, Headers: headers}
@@ -87,7 +88,7 @@ func replyHandler(producer sarama.AsyncProducer, replies map[string]chan message
 		case producer.Input() <- kafkaMsg:
 			select {
 			case reply := <-replyChan:
-				delete(replies, correlationId)
+				replies.delete(correlationId)
 				p := reply.Payload
 				for k, v := range reply.Headers {
 					switch value := v.(type) {
@@ -99,7 +100,7 @@ func replyHandler(producer sarama.AsyncProducer, replies map[string]chan message
 				}
 				w.Write(p.([]byte)) // TODO equivalent of Spring's HttpMessageConverter handling
 			case <- time.After(time.Second * 60):
-				delete(replies, correlationId)
+				replies.delete(correlationId)
 				w.WriteHeader(404)
 			}
 		}
@@ -112,7 +113,7 @@ func healthHandler() func(http.ResponseWriter, *http.Request) {
 	}
 }
 
-func startHttpServer(producer sarama.AsyncProducer, replies map[string]chan message.Message) *http.Server {
+func startHttpServer(producer sarama.AsyncProducer, replies repliesMap) *http.Server {
 	srv := &http.Server{Addr: ":8080"}
 
 	http.HandleFunc("/messages/", messageHandler(producer))
@@ -146,7 +147,7 @@ func main() {
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, os.Kill)
 
 	// Key is correlationId, value is channel used to pass message received from main Kafka consumer loop
-	replies := make(map[string]chan message.Message)
+	replies := newRepliesMap()
 
 	brokers := []string{os.Getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS")}
 	producer, err := sarama.NewAsyncProducer(brokers, nil)
@@ -196,7 +197,7 @@ MainLoop:
 				}
 				correlationId, ok := messageWithHeaders.Headers["correlationId"].(string)
 				if ok {
-					c := replies[correlationId]
+					c := replies.get(correlationId)
 					if c != nil {
 						fmt.Printf("Sending %v\n", messageWithHeaders)
 						c <- messageWithHeaders
@@ -230,4 +231,32 @@ func consumeErrors(consumer *cluster.Consumer) {
 	for err := range consumer.Errors() {
 		log.Printf("Error: %s\n", err.Error())
 	}
+}
+
+// Type repliesMap implements a concurrent safe map of channels to send replies to, keyed by message correlationIds
+type repliesMap struct {
+	m map[string] chan<- message.Message
+	lock sync.RWMutex
+}
+
+func (replies *repliesMap) delete(key string) {
+	replies.lock.Lock()
+	defer replies.lock.Unlock()
+	delete(replies.m, key)
+}
+
+func (replies *repliesMap) get(key string) chan<- message.Message {
+	replies.lock.RLock()
+	defer replies.lock.RUnlock()
+	return replies.m[key]
+}
+
+func (replies *repliesMap) put(key string, value chan<- message.Message) {
+	replies.lock.Lock()
+	defer replies.lock.Unlock()
+	replies.m[key] = value
+}
+
+func newRepliesMap() repliesMap {
+	return repliesMap{make(map[string]chan<- message.Message), sync.RWMutex{}}
 }
