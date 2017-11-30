@@ -40,7 +40,7 @@ kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceac
 helm init --service-account=tiller
 ----
 
-NOTE: To verify that the tiller pod has started execute the following command: `kubectl get pod --namespace kube-system` and you should see the `tiller` pod running.
+NOTE: To verify that the tiller pod has started execute the following command: `kubectl get pod --namespace kube-system -l app=helm` and you should see the `tiller` pod running.
 
 ===== Add the riff repository to your helm environment
 
@@ -49,7 +49,14 @@ Run the following commands to add the repository:
 [source, bash]
 ----
 helm repo add riffrepo https://riff-charts.storage.googleapis.com
-helm repo update riffrepo
+helm repo update
+----
+
+Run the following command to see that the `riff` chart is available:
+
+[source, bash]
+----
+helm search riff
 ----
 
 ==== Install riff
