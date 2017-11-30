@@ -65,22 +65,34 @@ For an install with default configuration and no RBAC enabled use:
 helm install riffrepo/riff --name demo
 ----
 
-===== Using a Kubernetes cluster not supporting LoadBalancer (e.g. minikube)
-
-For `NodePort` service types (e.g. running on Minikube) configure the httpGateway to use `NodePort`:
-
-[source, bash]
-----
-helm install riffrepo/riff --name demo --set httpGateway.service.type=NodePort:
-----
-
 [NOTE]
+====
 For a cluster that has RBAC enabled add `--set create.rbac=true`:
 
 [source, bash]
 ----
 helm install riffrepo/riff --name demo --set create.rbac=true
 ----
+====
+
+===== Using a Kubernetes cluster not supporting LoadBalancer (e.g. minikube)
+
+For `NodePort` service types (e.g. running on Minikube) configure the httpGateway to use `NodePort`:
+
+[source, bash]
+----
+helm install riffrepo/riff --name demo --set httpGateway.service.type=NodePort
+----
+
+[NOTE]
+====
+For a cluster that has RBAC enabled add `--set create.rbac=true`:
+
+[source, bash]
+----
+helm install riffrepo/riff --name demo --set create.rbac=true --set httpGateway.service.type=NodePort
+----
+====
 
 ===== Verify the installation
 You should see a number of resources get created in your cluster. You can see them all using:
@@ -95,11 +107,13 @@ kubectl get svc,deployments,pods,functions,topics
 Clone the https://github.com/projectriff/riff[riff] repository.
 The `helm install` commands in this section assume you are in the root directory of that project.
 
-To install locally built Docker images, use the `values-snapshot.yaml` file, which overrides image tags with snapshot versions:
+Build the riff components following the link:README.adoc#manual[manual build and deploy] instructions.
+
+To install locally built Docker images with Helm on minikube, use the `values-snapshot.yaml` file, which overrides image tags with snapshot versions:
 
 [source, bash]
 ----
-helm install riffrepo/riff --name demo --values helm/values-snapshot.yaml
+helm install riffrepo/riff --name demo --values helm/values-snapshot.yaml --set httpGateway.service.type=NodePort
 ----
 
 ==== Enable Tracing Dashboard
@@ -112,7 +126,7 @@ Here is an example of upgrading the release and enabling the Tracing Dashboard:
 
 [source, bash]
 ----
-helm upgrade demo riffrepo/riff --set enable.tracingDashboard=true
+helm upgrade demo riffrepo/riff --set enable.tracingDashboard=true --reuse-values
 ----
 
 See how to use the link:Monitoring.adoc#dashboards[dashboards] and run some link:samples/README.adoc[samples].
