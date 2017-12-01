@@ -2,7 +2,7 @@
 
 [horizontal]
 *Language*:: Shell
-*Function*:: https://github.com/projectriff/riff/blob/master/samples/shell/wordcount/wordcount.sh[wordcount.sh]
+*Function*:: link:wordcount.sh[wordcount.sh]
 *Protocol*:: stdio
 *Input*:: names
 *Output*:: greetings

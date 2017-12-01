@@ -2,7 +2,7 @@
 
 [horizontal]
 *Language*:: Java
-*Function*:: https://github.com/projectriff/riff/blob/master/samples/java/greeter/src/main/java/functions/Greeter.java[Greeter.java]
+*Function*:: link:src/main/java/functions/Greeter.java[Greeter.java]
 *Protocol*:: HTTP
 *Input*:: names
 *Output*:: greetings
