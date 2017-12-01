@@ -80,7 +80,7 @@ Execute your slash command in Slack. You should see the response message echo th
 [NOTE]
 Running this sample on a cloud platform like GKE will require you to build and publish the image to a docker repository available to the platform.
 In GKE you can use the https://cloud.google.com/container-registry/[GCP Container Registry] if it is enabled. Here we will assume
- dockerhub(https://hub.docker.com/). You will need to tag the image you build accordingly.
+ https://hub.docker.com/[dockerhub]. You will need to tag the image you build accordingly.
  In these instructions, we refer to the tag as `<your-docker-tag>`. For dockerhub, this is typically something like `<docker-user>/slack-command:test`
 
 === Build the Docker container for the function code
