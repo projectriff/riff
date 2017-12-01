@@ -143,7 +143,8 @@ received:riff is for functions
 [slack-lb]
 === Set up your Slack integration
 
-Use the public Gateway IP URL To create your slack https://api.slack.com/slash-commands[slash command].
+Use the public Gateway IP URL To create your slack https://api.slack.com/slash-commands[slash command]. To POST to the `slack` topic,
+configure the slack command to use `http://$GATEWAY_IP:$GATEWAY_PORT/requests/slack`.
 
 
 == Delete your function
