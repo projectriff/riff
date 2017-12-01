@@ -2,12 +2,12 @@
 
 [horizontal]
 *Language*:: JavaScript
-*Function*:: https://github.com/projectriff/riff/blob/master/samples/node/slack/slack-command/slack_command.js[slack_command.js]
+*Function*:: link::slack_command.js[slack_command.js]
 *Protocol*:: HTTP
 *Input*:: slack
 *Output*:: none (replies, implicitly)
 
-== Deploy the FaaS
+== Deploy the Faa
 
 [NOTE]
 This example requires a Kubernetes cluster with LoadBalancer support and a public facing IP address such as https://cloud.google.com/kubernetes-engine/[GKE].
@@ -44,12 +44,12 @@ Forwarding                    http://a61d8bb0.ngrok.io -> 192.168.99.100:32595
 
 ```
 eval $(minikube docker-env)
-docker build -t projectriff/slack-command:test samples/node/slack/slack-command
+docker build -t projectriff/slack-command:test samples/node/slack
 ```
 === Create the Function and Topic(s)
 
 ```
-./riff apply -f samples/node/slack/slack-command
+./riff apply -f samples/node/slack
 ```
 
 === Test the function locally
@@ -86,7 +86,7 @@ In GKE you can use the https://cloud.google.com/container-registry/[GCP Containe
 === Build the Docker container for the function code
 
 ```
-docker build -t <your-docker-tag> samples/node/slack/slack-command
+docker build -t <your-docker-tag> samples/node/slack
 ```
 
 === Publish the image
@@ -96,10 +96,10 @@ docker push <your-docker-tag>
 
 === Create the Function and Topic(s)
 
-Edit the link:slack-command/slack-command.yaml[local specification] to replace the function container image with `<your-docker-tag>` and then
+Edit the link:slack-command.yaml[local specification] to replace the function container image with `<your-docker-tag>` and then
 
 ```
-./riff apply -f samples/node/slack/slack-command
+./riff apply -f samples/node/slack
 ```
 
 === Test the Function
