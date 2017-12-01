@@ -2,7 +2,7 @@
 
 [horizontal]
 *Language*:: JavaScript
-*Function*:: https://github.com/projectriff/riff/blob/master/samples/slack/slack-command/slack_command.js[slack_command.js]
+*Function*:: https://github.com/projectriff/riff/blob/master/samples/node/slack/slack-command/slack_command.js[slack_command.js]
 *Protocol*:: HTTP
 *Input*:: slack
 *Output*:: none (replies, implicitly)
