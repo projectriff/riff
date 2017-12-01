@@ -18,7 +18,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"gopkg.in/Shopify/sarama.v1"
 	"github.com/bsm/sarama-cluster"
 	"io/ioutil"
@@ -33,6 +32,13 @@ import (
 	"sync"
 )
 
+const ContentType = "Content-Type"
+const Accept = "Accept"
+const CorrelationId = "correlationId"
+
+var incomingHeadersToPropagate = [...]string{ContentType, Accept}
+var outgoingHeadersToPropagate = [...]string{ContentType}
+
 // Function messageHandler creates an http handler that posts the http body as a message to Kafka, replying
 // immediately with a successful http response
 func messageHandler(producer sarama.AsyncProducer) http.HandlerFunc {
@@ -43,9 +49,10 @@ func messageHandler(producer sarama.AsyncProducer) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		scsMessage := message.Message{Payload: b, Headers: headersToPropagate(r)}
+		msg := message.Message{Payload: b, Headers: make(map[string]interface{})}
+		propagateIncomingHeaders(r, &msg)
 
-		bytesOut, err := message.EncodeMessage(scsMessage)
+		bytesOut, err := message.EncodeMessage(msg)
 		if err != nil {
 			log.Printf("Error encoding message: %v", err)
 			return
@@ -62,7 +69,7 @@ func messageHandler(producer sarama.AsyncProducer) http.HandlerFunc {
 // Function replyHandler creates an http handler that posts the http body as a message to Kafka, then waits
 // for a message on a go channel it creates for a reply (this is expected to be set by the main thread) and sends
 // that as an http response.
-func replyHandler(producer sarama.AsyncProducer, replies repliesMap) http.HandlerFunc {
+func replyHandler(producer sarama.AsyncProducer, replies *repliesMap) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		topic := r.URL.Path[len("/requests/"):]
 		b, err := ioutil.ReadAll(r.Body)
@@ -73,11 +80,12 @@ func replyHandler(producer sarama.AsyncProducer, replies repliesMap) http.Handle
 		correlationId := uuid.NewV4().String()
 		replyChan := make(chan message.Message)
 		replies.put(correlationId, replyChan)
-		headers := headersToPropagate(r)
-		headers["correlationId"] = correlationId
-		scsMessage := message.Message{Payload: b, Headers: headers}
 
-		bytesOut, err := message.EncodeMessage(scsMessage)
+		msg := message.Message{Payload: b, Headers: make(map[string]interface{})}
+		propagateIncomingHeaders(r, &msg)
+		msg.Headers[CorrelationId] = correlationId
+
+		bytesOut, err := message.EncodeMessage(msg)
 		if err != nil {
 			log.Printf("Error encoding message: %v", err)
 			return
@@ -90,30 +98,22 @@ func replyHandler(producer sarama.AsyncProducer, replies repliesMap) http.Handle
 			case reply := <-replyChan:
 				replies.delete(correlationId)
 				p := reply.Payload
-				for k, v := range reply.Headers {
-					switch value := v.(type) {
-					case string:
-						w.Header()[k] = []string{value}
-					case []string:
-						w.Header()[k] = value
-					}
-				}
+				propagateOutgoingHeaders(&reply, w)
 				w.Write(p.([]byte)) // TODO equivalent of Spring's HttpMessageConverter handling
-			case <- time.After(time.Second * 60):
+			case <-time.After(time.Second * 60):
 				replies.delete(correlationId)
 				w.WriteHeader(404)
 			}
 		}
 	}
 }
-
 func healthHandler() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"status":"UP"}`))
 	}
 }
 
-func startHttpServer(producer sarama.AsyncProducer, replies repliesMap) *http.Server {
+func startHttpServer(producer sarama.AsyncProducer, replies *repliesMap) *http.Server {
 	srv := &http.Server{Addr: ":8080"}
 
 	http.HandleFunc("/messages/", messageHandler(producer))
@@ -130,15 +130,25 @@ func startHttpServer(producer sarama.AsyncProducer, replies repliesMap) *http.Se
 	return srv
 }
 
-func headersToPropagate(r *http.Request) map[string]interface{} {
-	result := make(map[string]interface{})
-	if ct, ok := r.Header["Content-Type"]; ok {
-		result["Content-Type"] = ct[0]
+func propagateIncomingHeaders(request *http.Request, message *message.Message) {
+	for _, h := range incomingHeadersToPropagate {
+		if v, ok := request.Header[h]; ok {
+			message.Headers[h] = v[0]
+		}
 	}
-	if ct, ok := r.Header["Accept"]; ok {
-		result["Accept"] = ct[0]
+}
+
+func propagateOutgoingHeaders(message *message.Message, response http.ResponseWriter) {
+	for _, h := range outgoingHeadersToPropagate {
+		if v, ok := message.Headers[h]; ok {
+			switch value := v.(type) {
+			case string:
+				response.Header()[h] = []string{value}
+			case []string:
+				response.Header()[h] = value
+			}
+		}
 	}
-	return result
 }
 
 func main() {
@@ -173,15 +183,13 @@ func main() {
 		go consumeNotifications(consumer)
 	}
 
-
-
 	srv := startHttpServer(producer, replies)
 
 MainLoop:
 	for {
 		select {
 		case <-signals:
-			fmt.Println("Shutting Down...")
+			log.Println("Shutting Down...")
 			timeout, c := context.WithTimeout(context.Background(), 1*time.Second)
 			defer c()
 			if err := srv.Shutdown(timeout); err != nil {
@@ -199,7 +207,7 @@ MainLoop:
 				if ok {
 					c := replies.get(correlationId)
 					if c != nil {
-						fmt.Printf("Sending %v\n", messageWithHeaders)
+						log.Printf("Sending %v\n", messageWithHeaders)
 						c <- messageWithHeaders
 						consumer.MarkOffset(msg, "") // mark message as processed
 					} else {
@@ -235,7 +243,7 @@ func consumeErrors(consumer *cluster.Consumer) {
 
 // Type repliesMap implements a concurrent safe map of channels to send replies to, keyed by message correlationIds
 type repliesMap struct {
-	m map[string] chan<- message.Message
+	m    map[string]chan<- message.Message
 	lock sync.RWMutex
 }
 
@@ -257,6 +265,6 @@ func (replies *repliesMap) put(key string, value chan<- message.Message) {
 	replies.m[key] = value
 }
 
-func newRepliesMap() repliesMap {
-	return repliesMap{make(map[string]chan<- message.Message), sync.RWMutex{}}
+func newRepliesMap() *repliesMap {
+	return &repliesMap{make(map[string]chan<- message.Message), sync.RWMutex{}}
 }
