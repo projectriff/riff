@@ -2,7 +2,7 @@
 
 [horizontal]
 *Language*:: JavaScript
-*Function*:: link::slack_command.js[slack_command.js]
+*Function*:: link:slack_command.js[slack_command.js]
 *Protocol*:: HTTP
 *Input*:: slack
 *Output*:: none (replies, implicitly)
