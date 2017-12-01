@@ -29,20 +29,29 @@ type Function struct {
 	Status             FunctionStatus `json:"status,omitempty"`
 }
 
-// Spec (what the user wants) for a function
+// Spec (what the user wants) for a function.
 type FunctionSpec struct {
 
+	// Protocol used to communicate between the sidecar and the invoker (eg http, grpc, pipes).
 	Protocol string `json:"protocol"`
 
+	// The name of the topic the function is monitoring for input messages.
 	// +optional
 	Input string `json:"input,omitempty"`
 
+	// The name of the topic the function is writing its results to.
 	// +optional
 	Output string `json:"output,omitempty"`
 
+	// The maximum number of replicas to use. Defaults to the number of partitions of the input topic.
+	// +optional
+	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
+
+	// How long to wait (in milliseconds) before scaling the function down from 1 to 0 replicas.
 	// +optional
 	IdleTimeoutMs *int32 `json:"idleTimeoutMs,omitempty"`
 
+	// Container definition to use for the function.
 	Container kapi.Container `json:"container"`
 
 }
