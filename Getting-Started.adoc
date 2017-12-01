@@ -11,7 +11,7 @@ The following instructions cover how to initialize helm and install riff.
 
 * A running 1.7+ Kubernetes cluster
 
-CAUTION: There have been some DNS issues reported for Minikube v0.24, we suggest using v0.23 until this has been resolved
+TIP: We recommend using Minikube v0.23.0 or v0.24.1 and avoiding v0.24.0 due to some DNS issues
 
 If using Minikube, we recommend at least 4GB of memory:
 

@@ -14,7 +14,7 @@ You need:
 
 * A running 1.7+ Kubernetes cluster with at least 4GB of memory. These instructions assume minikube for now.
 +
-CAUTION: There have been some DNS issues reported for Minikube v0.24, we suggest using v0.23 until this has been resolved
+TIP: We recommend using Minikube v0.23.0 or v0.24.1 and avoiding v0.24.0 due to some DNS issues
 +
 [source,bash]
 ----
