@@ -8,7 +8,7 @@
 *Output*:: none (replies, implicitly)
 
 A Slack https://api.slack.com/slash-commands[slash command] is a custom integration enabling you to POST data to an external server by configuring a command that can
-be executed by prefixing the command name with the`/` character . This sample will demonstrate how to trigger a function from a Slack client.
+be executed by prefixing the command name with the `/` character . This sample will demonstrate how to trigger a function from a Slack client.
 For example, if you configure a slash command named `riff` to launch this sample function,
 you can use a Slack client to post `/riff riff is for functions` to any channel in your Slack domain . If the command is successful, you will receive the expected
 response ``"received:riff is for functions"`. To do this you need a Slack account.
