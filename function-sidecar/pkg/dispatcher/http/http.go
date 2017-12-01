@@ -18,8 +18,8 @@ package http
 
 import (
 	"bytes"
-	retry "github.com/giantswarm/retry-go"
-	dispatcher "github.com/projectriff/function-sidecar/pkg/dispatcher"
+	"github.com/giantswarm/retry-go"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher"
 	"io/ioutil"
 	"log"
 	"net"
@@ -40,44 +40,53 @@ func (httpDispatcher) Dispatch(in *dispatcher.Message) (*dispatcher.Message, err
 	client := http.Client{
 		Timeout: time.Duration(60 * time.Second),
 	}
-	contentType := in.Headers.GetOrDefault("Content-Type", "application/octet-stream").(string)
 	req, err := http.NewRequest("POST", "http://localhost:8080", bytes.NewReader(slice))
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Content-Type", contentType)
-	if accept, ok := in.Headers["Accept"]; ok {
-		req.Header.Add("Accept", accept.(string))
-	}
+	propagateIncomingHeaders(in, req)
 
 	resp, err := client.Do(req)
-
 	if err != nil {
 		log.Printf("Error invoking http://localhost:8080: %v", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
+
 	out, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Error reading response %v\n", err)
 		return nil, err
 	}
 
-	return &dispatcher.Message{Payload: out, Headers: flatten(resp.Header)}, nil
+	result := dispatcher.Message{Payload: out, Headers: make(map[string]interface{})}
+	propagateOutgoingHeaders(resp, &result)
+	return &result, nil
 }
 
-// http headers are a multi value map, dispatcher.Headers is single values (but with interface{} value)
-// this function flattens headers which are mono-valued
-func flatten(httpHeaders http.Header) dispatcher.Headers {
-	result := make(map[string]interface{}, len(httpHeaders))
-	for k, v := range httpHeaders {
-		if len(v) == 1 {
-			result[k] = v[0]
-		} else if len(v) > 1 {
-			result[k] = v
+func propagateIncomingHeaders(message *dispatcher.Message, request *http.Request) {
+	for h, v := range message.Headers {
+		switch value := v.(type) {
+		case string:
+			request.Header.Add(h, value)
+		case []string:
+			for _, s := range value {
+				request.Header.Add(h, s)
+			}
 		}
 	}
-	return result
+}
+
+func propagateOutgoingHeaders(resp *http.Response, message *dispatcher.Message) {
+	for h, v := range resp.Header {
+		// http headers are a multi value map, dispatcher.Headers is single values (but with interface{} value)
+		// this function flattens headers which are mono-valued
+		if len(v) == 1 {
+			message.Headers[h] = v[0]
+		} else if len(v) > 1 {
+			message.Headers[h] = v
+		}
+	}
 }
 
 func NewHttpDispatcher() dispatcher.SynchDispatcher {

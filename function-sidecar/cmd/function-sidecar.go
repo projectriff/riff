@@ -60,12 +60,6 @@ func init() {
 	flag.StringVar(&protocol, "protocol", "", "dispatcher protocol to use. One of [http, grpc, stdio]")
 }
 
-const CorrelationId = "correlationId"
-
-// PropagatedHeaders is the set of header names that will be copied from the incoming message
-// to the outgoing message
-var PropagatedHeaders = []string{CorrelationId}
-
 func main() {
 
 	flag.Parse()
@@ -121,10 +115,6 @@ func main() {
 		defer d.Close()
 	}
 
-	// trap SIGINT, SIGTERM, and SIGKILL to trigger a shutdown.
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, os.Kill)
-
 	go func() {
 		for {
 			select {
@@ -176,6 +166,9 @@ func main() {
 		}
 	}()
 
+	// trap SIGINT, SIGTERM, and SIGKILL to trigger a shutdown.
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, os.Kill)
 	// consume messages, watch signals
 	for {
 		select {
@@ -185,22 +178,6 @@ func main() {
 			return
 		}
 	}
-}
-
-// copy headers from incomingHeaders that need to be propagated into resultHeaders
-func propagateHeaders(incomingHeaders dispatch.Headers, resultHeaders dispatch.Headers) dispatch.Headers {
-	result := make(dispatch.Headers)
-	if resultHeaders != nil {
-		for k, v := range resultHeaders {
-			result[k] = v
-		}
-	}
-	for _, h := range PropagatedHeaders {
-		if value, ok := incomingHeaders[h]; ok {
-			result[h] = value
-		}
-	}
-	return result
 }
 
 func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
