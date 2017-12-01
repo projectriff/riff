@@ -7,75 +7,142 @@
 *Input*:: slack
 *Output*:: none (replies, implicitly)
 
-=== Deploy the FaaS
+== Deploy the FaaS
 
 [NOTE]
-This example requires a Kubernetes cluster with LoadBalancer support and a public facing IP address. The following
-instructions assume you will be running on https://cloud.google.com/kubernetes-engine/[GKE].
+This example requires a Kubernetes cluster with LoadBalancer support and a public facing IP address such as https://cloud.google.com/kubernetes-engine/[GKE].
+Alternately, you can use an http tunnel such as https://ngrok.com/[ngrok].
 
 Deploy riff with link:../../../Getting-Started.adoc[helm].
 
+== Running on minikube with ngrok
+
+Once riff is running and ngrok is installed, get the URL of the http-gateway:
+
+```
+export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services demo-riff-http-gateway)
+export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
+echo http://$NODE_IP:$NODE_PORT
+```
+You should see something like:
+```
+http://192.168.99.100:32595
+```
+
+In a separate terminal, start ngrok (substituting your actual URL):
+```
+ngrok http 192.168.99.100:32595
+```
+
+You should see some output including something like:
+
+```
+Forwarding                    http://a61d8bb0.ngrok.io -> 192.168.99.100:32595
+```
 
 === Build the Docker container for the function code
 
 ```
-
-docker build -t <your-dockerhub-repo>/riff-slack-command samples/node/slack/slack-command
+eval $(minikube docker-env)
+docker build -t projectriff/slack-command:test samples/node/slack/slack-command
 ```
-
-Where `<your-dockerhub-repo>` is a repository on dockerhub for which you have push permissions, and `<your-tag>`
-is anything other than `latest` (not strictly necessary, but probably a best practice).
-
-=== Publish the resulting image
-
-We will generally assume you are able to publish your images to https://hub.docker.com/[dockerhub].
+=== Create the Function and Topic(s)
 
 ```
-docker push <your-dockerhub-repo>/riff-slack-command
+./riff apply -f samples/node/slack/slack-command
+```
+
+=== Test the function locally
+
+Since the input topic configured for the function is named `slack`, configure the slash command to `POST` to `http://<ngrokid>.ngrok.io/requests/slack`.
+
+Slack slash commands POST `x-www-form-urlencoded` content with the posted content contained in `text`. To emulate this you can use curl (substituting your actual URL):
+
+```
+curl -H"Content-Type:application/x-www-form-urlencoded" http://<ngrokid>.ngrok.io/requests/slack -d text='riff is for functions'
+received:riff is for functions
+```
+[TIP]
+You can use the local URL `http://$NODE_IP:$NODE_PORT` here, but a publicly accessible URL is required for Slack integration.
+
+
+[slack-local]
+=== Set up your Slack integration
+Use the `ngrok.io` URL To create your slack https://api.slack.com/slash-commands[slash command].
+
+[TIP]
+There is a nice tutorial https://tutorials.botsfloor.com/creating-a-slack-command-bot-from-scratch-with-node-js-distribute-it-25cf81f51040[here].
+
+Execute your slash command in Slack. You should see the response message echo the input.
+
+== Running on a Kubernetes cluster with LoadBalancer support (GKE)
+
+[NOTE]
+Running this sample on a cloud platform like GKE will require you to build and publish the image to a docker repository available to the platform.
+In GKE you can use the https://cloud.google.com/container-registry/[GCP Container Registry] if it is enabled. Here we will assume
+ dockerhub(https://hub.docker.com/). You will need to tag the image you build accordingly.
+ In these instructions, we refer to the tag as `<your-docker-tag>`. For dockerhub, this is typically something like `<docker-user>/slack-command:test`
+
+=== Build the Docker container for the function code
+
+```
+docker build -t <your-docker-tag> samples/node/slack/slack-command
+```
+
+=== Publish the image
+```
+docker push <your-docker-tag>
 ```
 
 === Create the Function and Topic(s)
 
-Assuming your kube config is pointed at GKE,
+Edit the link:slack-command/slack-command.yaml[local specification] to replace the function container image with `<your-docker-tag>` and then
 
 ```
-kubectl -n <your-namespace> apply -f <(cat <<EOF
-apiVersion: projectriff.io/v1
-kind: Topic
-metadata:
-  name: slack
----
-apiVersion: projectriff.io/v1
-kind: Function
-metadata:
-  name: slack-command
-spec:
-  protocol: http
-  input: slack
-  container:
-    image: <your-dockerhub-repo>/riff-slack-command:latest
-EOF)
+./riff apply -f samples/node/slack/slack-command
 ```
 
-where `<your-namespace>` is the Kubernetes namespace in which you would like your function deployed.
+=== Test the Function
 
-=== Set up your integration on Slack
-
-To create your slack slash command (https://api.slack.com/slash-commands), you will need the external IP address
-of the riff http gateway.
+==== Get the Gateway IP address and Port:
 
 ```
-$ kubectl -n get svc -l component=http-gateway
+$ kubectl get svc -l component=http-gateway
 NAME                     TYPE           CLUSTER-IP      EXTERNAL-IP       PORT(S)        AGE
 riff-http-gateway        LoadBalancer   10.51.247.194   104.154.118.171   80:30725/TCP   22m
 ```
 
-You can see from the `EXTERNAL-IP` and `PORT(S)` columns that the external gateway address `http://104.154.118.171:80`
-in this case. Since the input topic we configured for the function is named `slack`, configure the
+We can see from the `EXTERNAL-IP` and `PORT(S)` columns that our gateway is on `http://104.154.118.171:80`
+in this case. Since the topic we configured for the function is named `slack`, in this case, we would configure the
 slash command to `POST` to `http://104.154.118.171:80/requests/slack`.
 
-=== Delete your function
+
+Another convenient way to get the URL is:
+```
+export GATEWAY_IP=$(kubectl get svc demo-riff-http-gateway -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+export GATEWAY_PORT=$(kubectl get svc demo-riff-http-gateway -o jsonpath="{.spec.ports[0].port}")
+echo http://$GATEWAY_IP:$GATEWAY_PORT
+```
+
+
+==== Invoke the function via curl
+```
+curl -H"Content-Type:application/x-www-form-urlencoded" http://$GATEWAY_IP:$GATEWAY_PORT/requests/slack -d text='riff is for functions'
+received:riff is for functions
+```
+
+
+[slack-lb]
+=== Set up your Slack integration
+
+Use the public Gateway IP URL To create your slack https://api.slack.com/slash-commands[slash command].
+
+[TIP]
+There is a nice tutorial https://tutorials.botsfloor.com/creating-a-slack-command-bot-from-scratch-with-node-js-distribute-it-25cf81f51040[here].
+
+
+== Delete your function
 
 ```
-kubectl -n <your-namespace> delete function slack-command
+./riff delete -n slack-command
 ```
