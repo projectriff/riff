@@ -7,7 +7,16 @@
 *Input*:: slack
 *Output*:: none (replies, implicitly)
 
-== Deploy the Faa
+A Slack https://api.slack.com/slash-commands[slash command] is a custom integration enabling you to POST data to an external server by configuring a command that can
+be executed by prefixing the command name with the`/` character . This sample will demonstrate how to trigger a function from a Slack client.
+For example, if you configure a slash command named `riff` to launch this sample function,
+you can use a Slack client to post `/riff riff is for functions` to any channel in your Slack domain . If the command is successful, you will receive the expected
+response ``"received:riff is for functions"`. To do this you need a Slack account.
+
+[TIP]
+There is a nice tutorial https://tutorials.botsfloor.com/creating-a-slack-command-bot-from-scratch-with-node-js-distribute-it-25cf81f51040[here].
+
+== Deploy the FaaS
 
 [NOTE]
 This example requires a Kubernetes cluster with LoadBalancer support and a public facing IP address such as https://cloud.google.com/kubernetes-engine/[GKE].
@@ -44,7 +53,7 @@ Forwarding                    http://a61d8bb0.ngrok.io -> 192.168.99.100:32595
 
 ```
 eval $(minikube docker-env)
-docker build -t projectriff/slack-command:test samples/node/slack
+./riff build -n slack-command -v test -f samples/node/slack
 ```
 === Create the Function and Topic(s)
 
@@ -54,26 +63,24 @@ docker build -t projectriff/slack-command:test samples/node/slack
 
 === Test the function locally
 
-Since the input topic configured for the function is named `slack`, configure the slash command to `POST` to `http://<ngrokid>.ngrok.io/requests/slack`.
 
-Slack slash commands POST `x-www-form-urlencoded` content with the posted content contained in `text`. To emulate this you can use curl (substituting your actual URL):
+Slack slash commands POST `x-www-form-urlencoded` content with the posted content contained in `text`. To emulate this you can use curl (substituting your actual URL) to
+post some data to the `slack` topic:
 
 ```
-curl -H"Content-Type:application/x-www-form-urlencoded" http://<ngrokid>.ngrok.io/requests/slack -d text='riff is for functions'
+curl -H "Content-Type:application/x-www-form-urlencoded" http://<ngrokid>.ngrok.io/requests/slack -d text='riff is for functions'
 received:riff is for functions
 ```
 [TIP]
-You can use the local URL `http://$NODE_IP:$NODE_PORT` here, but a publicly accessible URL is required for Slack integration.
+You can use the local URL `http://$NODE_IP:$NODE_PORT` here, but a publicly accessible URL will be required for Slack integration.
 
 
 [slack-local]
 === Set up your Slack integration
-Use the `ngrok.io` URL To create your slack https://api.slack.com/slash-commands[slash command].
 
-[TIP]
-There is a nice tutorial https://tutorials.botsfloor.com/creating-a-slack-command-bot-from-scratch-with-node-js-distribute-it-25cf81f51040[here].
 
-Execute your slash command in Slack. You should see the response message echo the input.
+Since the input topic configured for the function is named `slack`, configure the https://api.slack.com/slash-commands[slash command] to `POST` to `http://<ngrokid>.ngrok.io/requests/slack`.
+
 
 == Running on a Kubernetes cluster with LoadBalancer support (GKE)
 
@@ -113,9 +120,7 @@ riff-http-gateway        LoadBalancer   10.51.247.194   104.154.118.171   80:307
 ```
 
 We can see from the `EXTERNAL-IP` and `PORT(S)` columns that our gateway is on `http://104.154.118.171:80`
-in this case. Since the topic we configured for the function is named `slack`, in this case, we would configure the
-slash command to `POST` to `http://104.154.118.171:80/requests/slack`.
-
+in this case.
 
 Another convenient way to get the URL is:
 ```
@@ -126,8 +131,11 @@ echo http://$GATEWAY_IP:$GATEWAY_PORT
 
 
 ==== Invoke the function via curl
+Slack slash commands POST `x-www-form-urlencoded` content with the posted content contained in `text`. To emulate this you can use curl (substituting your actual URL) to
+post some data to the `slack` topic:
+
 ```
-curl -H"Content-Type:application/x-www-form-urlencoded" http://$GATEWAY_IP:$GATEWAY_PORT/requests/slack -d text='riff is for functions'
+curl -H "Content-Type:application/x-www-form-urlencoded" http://$GATEWAY_IP:$GATEWAY_PORT/requests/slack -d text='riff is for functions'
 received:riff is for functions
 ```
 
@@ -136,9 +144,6 @@ received:riff is for functions
 === Set up your Slack integration
 
 Use the public Gateway IP URL To create your slack https://api.slack.com/slash-commands[slash command].
-
-[TIP]
-There is a nice tutorial https://tutorials.botsfloor.com/creating-a-slack-command-bot-from-scratch-with-node-js-distribute-it-25cf81f51040[here].
 
 
 == Delete your function
