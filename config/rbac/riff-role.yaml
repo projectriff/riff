@@ -2,7 +2,6 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: riff-role
-  namespace: default
 rules:
   - apiGroups: [""]
     resources: ["services", "pods"]

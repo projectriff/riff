@@ -1,0 +1,12 @@
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: riff-cluster-rb
+subjects:
+- kind: ServiceAccount
+  name: riff-sa
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: riff-cluster-role
+  apiGroup: rbac.authorization.k8s.io
