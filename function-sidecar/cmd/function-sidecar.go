@@ -193,7 +193,7 @@ func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
 		}
 		return dispatch.NewWrapper(d)
 	case "grpc":
-		return dispatch.NewWrapper(grpc.NewGrpcDispatcher())
+		return grpc.NewGrpcDispatcher(10382)
 	default:
 		panic("Unsupported Dispatcher " + protocol)
 	}

@@ -24,11 +24,11 @@ type wrapper struct {
 	output <-chan Message
 }
 
-func (w wrapper) Input() chan<- Message {
+func (w *wrapper) Input() chan<- Message {
 	return w.input
 }
 
-func (w wrapper) Output() <-chan Message {
+func (w *wrapper) Output() <-chan Message {
 	return w.output
 }
 
@@ -49,7 +49,7 @@ func propagateHeaders(incomingMessage *Message, resultMessage *Message) {
 }
 
 // NewWrapper wraps a SynchDispatcher to conform to the channel based Dispatcher interface
-func NewWrapper(synch SynchDispatcher) (wrapper, error) {
+func NewWrapper(synch SynchDispatcher) (*wrapper, error) {
 	i := make(chan Message)
 	o := make(chan Message)
 
@@ -75,5 +75,5 @@ func NewWrapper(synch SynchDispatcher) (wrapper, error) {
 		}
 	}()
 
-	return wrapper{old: synch, input: i, output: o}, nil
+	return &wrapper{old: synch, input: i, output: o}, nil
 }

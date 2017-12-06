@@ -19,37 +19,76 @@ package grpc
 import (
 	"google.golang.org/grpc"
 
-	function "github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/function"
-	fntypes "github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/fntypes"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/function"
+	_ "github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/fntypes"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher"
 	"log"
 	"golang.org/x/net/context"
 	"time"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/fntypes"
+	"fmt"
 )
 
-var _ = function.NewStringFunctionClient(nil)
-
 type grpcDispatcher struct {
-	client function.StringFunctionClient
+	stream function.StringFunction_CallClient
+	input  chan dispatcher.Message
+	output chan dispatcher.Message
 }
 
-func (this grpcDispatcher) Dispatch(in *dispatcher.Message) (*dispatcher.Message, error) {
-	request := fntypes.Request{Body: string(in.Payload.([]byte))}
-	reply, err := this.client.Call(context.Background(), &request)
+func (this *grpcDispatcher) Input() chan<- dispatcher.Message {
+	return this.input
+}
+
+func (this *grpcDispatcher) Output() <-chan dispatcher.Message {
+	return this.output
+}
+
+func (this *grpcDispatcher) handleIncoming() {
+	for {
+		select {
+		case in, open := <-this.input:
+			if (open) {
+				req := &fntypes.Request{Body: string(in.Payload.([]byte))}
+				err := this.stream.Send(req)
+				if err != nil {
+					log.Printf("Error sending message to function: %v", err)
+				}
+			} else {
+				close(this.output)
+				log.Print("Shutting down gRPC dispatcher")
+				return
+			}
+		}
+	}
+}
+
+func (this *grpcDispatcher) handleOutgoing() {
+	for {
+		reply, err := this.stream.Recv()
+		if err != nil {
+			log.Printf("Error receiving message from function: %v", err)
+			continue
+		}
+		message := dispatcher.Message{Payload: []byte(reply.GetBody())}
+		this.output <- message
+	}
+}
+
+func NewGrpcDispatcher(port int) (dispatcher.Dispatcher, error) {
+	ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
+	conn, err := grpc.DialContext(ctx, fmt.Sprintf("localhost:%v", port), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Printf("Error calling gRPC server: %v", err)
 		return nil, err
 	}
-	return &dispatcher.Message{Payload:[]byte(reply.GetBody()), Headers:nil}, nil
-}
 
-func NewGrpcDispatcher() dispatcher.SynchDispatcher {
-	context, _ := context.WithTimeout(context.Background(), 60 * time.Second)
-	conn, err := grpc.DialContext(context, "localhost:10382", grpc.WithInsecure(), grpc.WithBlock())
+	fnStream, err := function.NewStringFunctionClient(conn).Call(context.Background())
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		return nil, err
 	}
 
-	result := grpcDispatcher{function.NewStringFunctionClient(conn)}
-	return result;
+	result := &grpcDispatcher{fnStream, make(chan dispatcher.Message, 100), make(chan dispatcher.Message, 100)}
+	go result.handleIncoming()
+	go result.handleOutgoing()
+
+	return result, nil;
 }
