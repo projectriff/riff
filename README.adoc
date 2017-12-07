@@ -1,5 +1,7 @@
 = riff is for functions
 
+image::logo/logo.jpg[riff logo]
+
 A FaaS for Kubernetes
 
 == Installation
