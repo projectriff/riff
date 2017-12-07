@@ -19,14 +19,14 @@ package grpc
 import (
 	"google.golang.org/grpc"
 
-	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/function"
-	_ "github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/fntypes"
-	"github.com/projectriff/function-sidecar/pkg/dispatcher"
-	"log"
-	"golang.org/x/net/context"
-	"time"
-	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/fntypes"
 	"fmt"
+	"log"
+	"time"
+
+	"github.com/projectriff/function-sidecar/pkg/dispatcher"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/fntypes"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/function"
+	"golang.org/x/net/context"
 )
 
 type grpcDispatcher struct {
@@ -47,7 +47,7 @@ func (this *grpcDispatcher) handleIncoming() {
 	for {
 		select {
 		case in, open := <-this.input:
-			if (open) {
+			if open {
 				req := &fntypes.Request{Body: string(in.Payload.([]byte))}
 				err := this.stream.Send(req)
 				if err != nil {
@@ -90,5 +90,5 @@ func NewGrpcDispatcher(port int) (dispatcher.Dispatcher, error) {
 	go result.handleIncoming()
 	go result.handleOutgoing()
 
-	return result, nil;
+	return result, nil
 }
