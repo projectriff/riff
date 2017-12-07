@@ -18,8 +18,12 @@ package v1
 
 import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kapi "k8s.io/kubernetes/pkg/api/v1"
+	kapi "k8s.io/api/core/v1"
 )
+
+// +genclient
+// +genclient:noStatus
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // Represents the functions.projectriff.io CRD
 type Function struct {
@@ -59,6 +63,8 @@ type FunctionSpec struct {
 // Status (computed) for a function
 type FunctionStatus struct {
 }
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // Returned in list operations
 type FunctionList struct {
