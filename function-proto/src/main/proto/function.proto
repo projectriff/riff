@@ -22,5 +22,5 @@ option java_outer_classname = "FunctionProtos";
 package function;
 
 service StringFunction {
-  rpc Call(fntypes.Request) returns (fntypes.Reply) {}
+  rpc Call(stream fntypes.Request) returns (stream fntypes.Reply) {}
 }
