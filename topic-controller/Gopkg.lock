@@ -156,7 +156,6 @@
   name = "github.com/projectriff/kubernetes-crds"
   packages = ["pkg/apis/projectriff.io","pkg/apis/projectriff.io/v1","pkg/client/clientset/versioned","pkg/client/clientset/versioned/scheme","pkg/client/clientset/versioned/typed/projectriff/v1","pkg/client/informers/externalversions","pkg/client/informers/externalversions/internalinterfaces","pkg/client/informers/externalversions/projectriff","pkg/client/informers/externalversions/projectriff/v1","pkg/client/listers/projectriff/v1"]
   revision = "ad31519821e8a1743c1014642fc3c699fef70726"
-  source = "https://github.com/ericbottard/kubernetes-crds"
 
 [[projects]]
   branch = "master"
@@ -240,6 +239,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "657af6622bb3a151d8427c4ce34e2a1e2363c67710efffbba677135484f3063d"
+  inputs-digest = "3208ebf47976592a4604daec893840f753958097bc8ac218475fbdefa67282e6"
   solver-name = "gps-cdcl"
   solver-version = 1

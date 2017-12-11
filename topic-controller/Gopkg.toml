@@ -23,14 +23,9 @@
 
 [[constraint]]
   name = "github.com/projectriff/kubernetes-crds"
-  branch = "issue_5"
-  source = "https://github.com/ericbottard/kubernetes-crds"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/wvanbergen/kazoo-go"
   branch = "topic-management"
   source = "https://github.com/ericbottard/kazoo-go.git"
-
-#[[override]]
-#  name = "github.com/ugorji/go"
-#  revision = "8c0409fcbb70099c748d71f714529204975f6c3f"
