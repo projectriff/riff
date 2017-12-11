@@ -11,6 +11,10 @@ const (
 	FullTopicCRDName    string = TopicPlural + "." + TopicGroup
 )
 
+// +genclient
+// +genclient:noStatus
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
 // Represents the topics.projectriff.io CRD
 type Topic struct {
 	meta_v1.TypeMeta   `json:",inline"`
@@ -31,6 +35,8 @@ type TopicSpec struct {
 // Status (computed) for a topic
 type TopicStatus struct {
 }
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // Returned in list operations
 type TopicList struct {

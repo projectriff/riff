@@ -19,22 +19,24 @@ package main
 import (
 	"time"
 
-	"github.com/projectriff/topic-controller/pkg/topic/provisioner/kafka"
-	"github.com/projectriff/kubernetes-crds/pkg/client/topic"
 	"github.com/projectriff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	riffcs "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned"
+	informers "github.com/projectriff/kubernetes-crds/pkg/client/informers/externalversions"
+	"github.com/projectriff/topic-controller/pkg/topic/provisioner/kafka"
 
 	"context"
 	"flag"
 	"fmt"
-	apiextcs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/clientcmd"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/golang/glog"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 // return rest config, if path not specified assume in cluster config
@@ -76,53 +78,31 @@ func main() {
 		panic(err.Error())
 	}
 
-	// create clientset and create the topics CRD, if not already there
-	clientset, err := apiextcs.NewForConfig(config)
+	riffClient, err := riffcs.NewForConfig(config)
 	if err != nil {
-		panic(err.Error())
+		glog.Fatalf("Error building riff clientset: %s", err.Error())
 	}
 
-	// note: if the CRD exist our CreateCRD function is set to exit without an error
-	err = topic.CreateCRD(clientset)
-	if err != nil {
-		panic(err)
-	}
-
-	// Create a new clientset which include our CRD schema
-	crdcs, scheme, err := topic.NewClient(config)
-	if err != nil {
-		panic(err)
-	}
-
-	// Create a CRD client interface
-	crdclient := topic.TopicClient(crdcs, scheme, "default")
+	riffInformerFactory := informers.NewSharedInformerFactory(riffClient, time.Second*30)
+	topicsInformer := riffInformerFactory.Projectriff().V1().Topics()
 
 	provisioner := kafka.NewKafkaProvisioner(os.Getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES"))
 
-	// Watch for changes in Topic objects and fire Add, Delete, Update callbacks
-	_, controller := cache.NewInformer(
-		crdclient.NewListWatch(),
-		&v1.Topic{},
-		time.Minute*10,
-		cache.ResourceEventHandlerFuncs{
-			AddFunc: func(obj interface{}) {
-				t := obj.(*v1.Topic)
-				t = applyDefaults(t)
-				log.Printf("Adding topic %v with %v partitions", t.Name, *t.Spec.Partitions)
-				err := provisioner.ProvisionProducerDestination(t.Name, int(*t.Spec.Partitions))
-				if err != nil {
-					panic(err)
-				}
-			},
-			DeleteFunc: func(obj interface{}) {
-			},
-			UpdateFunc: func(oldObj, newObj interface{}) {
-			},
+	// Set up an event handler for when Foo resources change
+	topicsInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			t := obj.(*v1.Topic)
+			t = applyDefaults(t)
+			log.Printf("Adding topic %v with %v partitions", t.Name, *t.Spec.Partitions)
+			err := provisioner.ProvisionProducerDestination(t.Name, int(*t.Spec.Partitions))
+			if err != nil {
+				panic(err)
+			}
 		},
-	)
+	})
 
 	stop := make(chan struct{})
-	go controller.Run(stop)
+	go topicsInformer.Informer().Run(stop)
 
 	srv := startHttpServer()
 
@@ -135,6 +115,7 @@ func main() {
 
 	case <-signals:
 		fmt.Println("Shutting Down...")
+		close(stop)
 		timeout, c := context.WithTimeout(context.Background(), 1*time.Second)
 		defer c()
 		if err := srv.Shutdown(timeout); err != nil {
