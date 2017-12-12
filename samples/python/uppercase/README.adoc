@@ -8,9 +8,6 @@
 
 === Build the image
 
-Clone the https://github.com/projectriff/function-proto[function-proto] git repository. This sample assumes `function-proto`
-is in a sibling directory to `riff`.
-
 ```
 pushd samples/python/uppercase; ./dockerize ; popd
 ```
