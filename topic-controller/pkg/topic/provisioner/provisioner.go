@@ -18,5 +18,5 @@ package provisioner
 
 // Type Provisioner allows creation of messaging destinations in a messaging middleware
 type Provisioner interface {
-	ProvisionProducerDestination(name string, partitions int)
+	ProvisionProducerDestination(name string, partitions int) error
 }

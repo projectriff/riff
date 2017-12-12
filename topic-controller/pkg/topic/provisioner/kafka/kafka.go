@@ -19,20 +19,19 @@ package kafka
 import (
 	kazoo "github.com/wvanbergen/kazoo-go"
 	"log"
+	"github.com/projectriff/topic-controller/pkg/topic/provisioner"
 )
 
 type KafkaProvisioner struct {
 	kz *kazoo.Kazoo
 }
 
-func NewKafkaProvisioner(connectionString string) *KafkaProvisioner {
-	kp := KafkaProvisioner{}
+func NewKafkaProvisioner(connectionString string) provisioner.Provisioner {
 	kz, err := kazoo.NewKazooFromConnectionString(connectionString, nil)
 	if err != nil {
 		panic(err)
 	}
-	kp.kz = kz
-	return &kp
+	return &KafkaProvisioner{kz: kz}
 }
 
 func (kp *KafkaProvisioner) ProvisionProducerDestination(name string, partitions int) error {
