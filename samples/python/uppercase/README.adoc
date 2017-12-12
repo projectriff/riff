@@ -8,9 +8,8 @@
 
 === Build the image
 
-(from this sample's directory)
 ```
-pushd samples/python/uppercase/ ; ./dockerize ; popd
+pushd samples/python/uppercase; ./dockerize ; popd
 ```
 
 === Create the Function and Topic(s)
