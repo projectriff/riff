@@ -50,9 +50,9 @@ $(GRPC_DIR)/function/function.pb.go: $(GRPC_DIR)/function/function.proto $(GRPC_
 
 fetch-grpc:
 	rm -f $(GRPC_DIR)/fntypes/*.proto $(GRPC_DIR)/function/*.proto
-	wget https://raw.githubusercontent.com/projectriff/function-proto/master/src/main/proto/fntypes.proto \
+	wget https://raw.githubusercontent.com/projectriff/function-proto/master/fntypes.proto \
 		-P $(GRPC_DIR)/fntypes
-	wget https://raw.githubusercontent.com/projectriff/function-proto/master/src/main/proto/function.proto \
+	wget https://raw.githubusercontent.com/projectriff/function-proto/master/function.proto \
 	     -P $(GRPC_DIR)/function
 
 dockerize: build-for-docker
