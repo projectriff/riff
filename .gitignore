@@ -25,3 +25,4 @@ nbdist/
 .DS_Store
 
 /node-function-web-handler/node_modules/
+samples/python/uppercase/proto
