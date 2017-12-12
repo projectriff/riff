@@ -1,0 +1,10 @@
+= gRPC Java
+
+See the official https://grpc.io/docs/quickstart/java.html[gRPC for Java] reference guide.
+
+The `java` directory in this repo contains a Maven pom to generate Java code from the `.proto` files, compile the source, and
+ package it in a jar file `function-proto-<version>.jar` that can be used to implement a Java function as a gRPC server.
+
+ ```
+ ./mvnw clean package
+ ```

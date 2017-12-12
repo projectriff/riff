@@ -14,24 +14,10 @@
  * limitations under the License.
  */
 syntax = "proto3";
-import "google/protobuf/empty.proto";
-option java_multiple_files = false;
-option java_package = "io.projectriff.sidecar.grpc.fntypes";
-option java_outer_classname = "FunctionTypeProtos";
+import "fntypes.proto";
 
-package fntypes;
+package function;
 
-message Request {
-    string body = 1;
-}
-
-/*
- * TODO: Reply can be Empty for sink behavior. Maybe we should create a separate RPC for sink.
- * For now the Dispatcher can check the return type and decide to output the Reply.
- */
-message Reply {
-    oneof type {
-	    string body = 1;
-	    google.protobuf.Empty void = 2;
-	}
+service StringFunction {
+  rpc Call(stream fntypes.Request) returns (stream fntypes.Reply) {}
 }

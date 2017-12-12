@@ -1,0 +1,13 @@
+== Function Proto
+
+This repository contains https://grpc.io/docs/guides/[gRPC] service definitions used by the riff https://github.com/projectriff/function-sidecar[function-sidecar] to support gRPC streaming between the sidecar and the function.
+
+To enable gRPC streaming, specify the `grpc` protocol in your function yaml. Additionally, your function must implement a gRPC server, using language specific service implementations generated from the interface defined in the `.proto` files provided in this repository.
+
+riff currently supports only https://grpc.io/docs/guides/concepts.html[gRPC bidirectional streaming]. Language specific instructions for implementing a gRPC server are provided in the links below.
+
+link:java/README.adoc[Java]
+
+link:python/README.adoc[Python]
+
+link:node/README.adoc[Node]
