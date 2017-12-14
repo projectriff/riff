@@ -69,7 +69,7 @@ func extractMessage(bytes []byte) (dispatcher.Message, error) {
 		headers[name] = value
 		offset += len
 	}
-	var payload interface{}
+	var payload []byte
 	if len(bytes[offset:]) == 0 {
 		payload = nil
 	} else {
@@ -96,9 +96,7 @@ func encodeMessage(message dispatcher.Message) ([]byte, error) {
 		length += len(headerValues[k])
 	}
 
-	if message.Payload != nil {
-		length += len(message.Payload.([]byte))
-	}
+	length += len(message.Payload)
 
 	result := make([]byte, length)
 	offset := 0
@@ -122,8 +120,6 @@ func encodeMessage(message dispatcher.Message) ([]byte, error) {
 		copy(result[offset:], headerValues[k])
 		offset += len(headerValues[k])
 	}
-	if message.Payload != nil {
-		copy(result[offset:], message.Payload.([]byte))
-	}
+	copy(result[offset:], message.Payload)
 	return result, nil
 }

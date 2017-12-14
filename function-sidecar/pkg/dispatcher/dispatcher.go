@@ -32,17 +32,12 @@ type Dispatcher interface {
 type Headers map[string]interface{}
 
 type Message struct {
-	Payload interface{}
+	Payload []byte
 	Headers Headers
 }
 
 func (msg Message) String() string {
-	switch msg.Payload.(type) {
-	case []byte:
-		return fmt.Sprintf("Message{%v, %v}", string(msg.Payload.([]byte)), msg.Headers)
-	default:
-		return fmt.Sprintf("Message{%v, %v}", msg.Payload, msg.Headers)
-	}
+	return fmt.Sprintf("Message{%v, %v}", string(msg.Payload), msg.Headers)
 }
 
 func (h Headers) GetOrDefault(key string, value interface{}) interface{} {

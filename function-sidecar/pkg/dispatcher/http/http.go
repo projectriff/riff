@@ -35,12 +35,10 @@ type httpDispatcher struct {
 }
 
 func (httpDispatcher) Dispatch(in *dispatcher.Message) (*dispatcher.Message, error) {
-	slice := in.Payload.([]byte)
-
 	client := http.Client{
 		Timeout: time.Duration(60 * time.Second),
 	}
-	req, err := http.NewRequest("POST", "http://localhost:8080", bytes.NewReader(slice))
+	req, err := http.NewRequest("POST", "http://localhost:8080", bytes.NewReader(in.Payload))
 	if err != nil {
 		return nil, err
 	}

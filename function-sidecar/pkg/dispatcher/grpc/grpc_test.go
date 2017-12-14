@@ -88,7 +88,7 @@ func Test(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		select {
 		case ret := <-d.Output():
-			if string(ret.Payload.([]byte)) != "Hello world" {
+			if string(ret.Payload) != "Hello world" {
 				t.Fatalf("Got %v", ret)
 			}
 		case <-time.After(time.Second * 5):
@@ -101,7 +101,7 @@ func Test(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		select {
 		case ret := <-d.Output():
-			if string(ret.Payload.([]byte)) != "Hello gRPC" {
+			if string(ret.Payload) != "Hello gRPC" {
 				t.Fatalf("Got %v", ret)
 			}
 		case <-time.After(time.Second * 5):

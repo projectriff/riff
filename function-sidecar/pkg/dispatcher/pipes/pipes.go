@@ -179,7 +179,7 @@ func writeMessage(writer *bufio.Writer, in dispatcher.Message) error {
 	if err != nil {
 		return err
 	}
-	_, err = writer.WriteString(string(in.Payload.([]byte)) + "\n")
+	_, err = writer.WriteString(string(in.Payload) + "\n")
 	if err != nil {
 		return err
 	}

@@ -48,7 +48,7 @@ func (this *grpcDispatcher) handleIncoming() {
 		select {
 		case in, open := <-this.input:
 			if open {
-				req := &fntypes.Request{Body: string(in.Payload.([]byte))}
+				req := &fntypes.Request{Body: string(in.Payload)}
 				err := this.stream.Send(req)
 				if err != nil {
 					log.Printf("Error sending message to function: %v", err)

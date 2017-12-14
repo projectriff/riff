@@ -35,7 +35,7 @@ type stdioDispatcher struct {
 }
 
 func (this stdioDispatcher) Dispatch(in *dispatcher.Message) (*dispatcher.Message, error) {
-	_, err := this.writer.WriteString(string(in.Payload.([]byte)) + "\n")
+	_, err := this.writer.WriteString(string(in.Payload) + "\n")
 	if err != nil {
 		log.Printf("Error writing to %v: %v", OUTPUT_PIPE, err)
 		return nil, err
