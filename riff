@@ -1,9 +1,13 @@
 #!/bin/bash
 
+RIFF_VERSION=0.0.1
+
 function print_usage() {
 cat <<EOF
 
 riff is for functions
+
+version $RIFF_VERSION
 
 Commands:
   build        Build a function container
@@ -12,6 +16,7 @@ Commands:
   delete       Delete function resource definitions
   list         List current function resources
   logs         Show logs for a function resource
+  version      Display the riff version
 
   Use "riff <command> --help" for more information about a given command.
 
@@ -31,7 +36,7 @@ Usage:
 Options:
 
   -n, --name: the name of the function (defaults to the name of the current directory)
-  -v, --version: the version of the function (defaults to v0001)
+  -v, --version: the version of the function (defaults to 0.0.1)
   -f, --filename: filename, directory, or URL for the code or resource (defaults to the current directory)
 
 EOF
@@ -116,6 +121,18 @@ Options:
 EOF
 }
 
+function print_version_usage() {
+cat <<EOF
+
+Display the riff version.
+
+Usage:
+
+  riff version
+
+EOF
+}
+
 function build() {
   echo "Building $FUNCTION $FNPATH $VERSION"
   docker build -t "projectriff/${FUNCTION}:${VERSION}" $FNPATH
@@ -144,6 +161,10 @@ function list() {
 function logs() {
   echo "Displaying logs for container ${CONTAINER} of function ${FUNCTION}"
   kubectl logs ${TAIL} -c ${CONTAINER} $(kubectl get pod -l function=${FUNCTION} -o jsonpath='{.items[0].metadata.name}')
+}
+
+function version() {
+  echo "riff version $RIFF_VERSION"
 }
 
 # ======================================= FUNCTIONS END =======================================
@@ -179,6 +200,9 @@ if [[ $1 == "--help" || $1 == "-h" ]] ; then
     exit 0
   elif [[ "${COMMAND}" == "logs" ]]; then
     print_logs_usage
+    exit 0
+  elif [[ "${COMMAND}" == "version" ]]; then
+    print_version_usage
     exit 0
   fi
 fi
@@ -223,7 +247,7 @@ done
 # ======================================= DEFAULTS ============================================
 FUNCTION="${FUNCTION:-${PWD##*/}}"
 FNPATH="${FNPATH:-.}"
-VERSION="${VERSION:-v0001}"
+VERSION="${VERSION:-0.0.1}"
 CONTAINER="${CONTAINER:-sidecar}"
 # ======================================= DEFAULTS END ========================================
 if [[ "${COMMAND}" == "build" ]]; then
@@ -238,6 +262,8 @@ elif [[ "${COMMAND}" == "list" ]]; then
   list
 elif [[ "${COMMAND}" == "logs" ]]; then
   logs
+elif [[ "${COMMAND}" == "version" ]]; then
+  version
 else
   echo "$COMMAND is an invalid command"
   exit 1;
