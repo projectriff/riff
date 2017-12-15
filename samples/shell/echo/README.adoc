@@ -9,7 +9,7 @@
 === Build the Docker container for the function code
 
 ```
-./riff build -n echo -v v0001 -f samples/shell/echo
+./riff build -n echo -v 0.0.2 -f samples/shell/echo
 ```
 
 === Create the Function and Topic(s)

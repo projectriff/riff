@@ -19,4 +19,4 @@ spec:
   input: names
   output: greetings
   container:
-    image: projectriff/greeter:v0001
+    image: projectriff/greeter:0.0.2

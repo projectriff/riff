@@ -16,7 +16,7 @@ pushd samples/java/greeter/ ; ./mvnw clean package ; popd
 === Build the Docker container for the function code
 
 ```
-./riff build -n greeter -v v0001 -f samples/java/greeter
+./riff build -n greeter -v 0.0.2 -f samples/java/greeter
 ```
 
 === Create the Function and Topic(s)

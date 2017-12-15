@@ -9,7 +9,7 @@
 === Build the Docker container for the function code
 
 ```
-./riff build -n square -v v0001 -f samples/node/square
+./riff build -n square -v 0.0.2 -f samples/node/square
 ```
 
 === Create the Function and Topic(s)

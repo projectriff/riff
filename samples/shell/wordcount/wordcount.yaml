@@ -22,4 +22,4 @@ spec:
   input: names
   output: greetings
   container:
-    image: projectriff/wordcount:v0001
+    image: projectriff/wordcount:0.0.2

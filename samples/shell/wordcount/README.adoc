@@ -10,7 +10,7 @@
 === Build the Docker container for the function code
 
 ```
-./riff build -n wordcount -v v0001 -f samples/shell/wordcount
+./riff build -n wordcount -v 0.0.2 -f samples/shell/wordcount
 ```
 
 === Create the Function and Topic(s)
