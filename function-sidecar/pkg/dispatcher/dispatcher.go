@@ -19,7 +19,7 @@ package dispatcher
 import "fmt"
 
 type SynchDispatcher interface {
-	Dispatch(in *Message) (*Message, error)
+	Dispatch(in Message) (Message, error)
 }
 
 type Dispatcher interface {
@@ -29,21 +29,52 @@ type Dispatcher interface {
 	Output() <-chan Message
 }
 
-type Headers map[string]interface{}
-
-type Message struct {
-	Payload []byte
-	Headers Headers
+type Message interface {
+	Payload() []byte
+	Headers() Headers
 }
 
-func (msg Message) String() string {
-	return fmt.Sprintf("Message{%v, %v}", string(msg.Payload), msg.Headers)
+type message struct {
+	payload []byte
+	headers Headers
 }
 
-func (h Headers) GetOrDefault(key string, value interface{}) interface{} {
+type Headers map[string][]string
+
+func (msg *message) String() string {
+	return fmt.Sprintf("Message{%v, %v}", string(msg.payload), msg.headers)
+}
+
+func (msg *message) Payload() []byte {
+	return (*msg).payload
+}
+
+func (msg *message) Headers() Headers {
+	return (*msg).headers
+}
+
+func (h Headers) GetOrDefault(key string, value string) string {
 	if v, ok := h[key] ; ok {
-		return v
+		if len(v) == 0 {
+			return value
+		} else {
+			return v[0]
+		}
 	} else {
 		return value
 	}
+}
+
+func NewEmptyMessage() Message {
+	return NewMessage([]byte{}, map[string][]string{})
+}
+
+func NewMessage(payload []byte, headers Headers) Message {
+	if payload == nil {
+		payload = make([]byte, 0)
+	}
+	if headers == nil {
+		headers = make(map[string][]string, 0)
+	}
+	return &message{payload:payload, headers:headers}
 }

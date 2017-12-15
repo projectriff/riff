@@ -72,7 +72,7 @@ func TestIntegrationWithKafka(t *testing.T) {
 		t.Fatal(kafkaProducerErr)
 	}
 
-	testMessage, err := wireformat.ToKafka(dispatcher.Message{Payload: []byte(sourceMsg)})
+	testMessage, err := wireformat.ToKafka(dispatcher.NewMessage([]byte(sourceMsg), nil))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +99,7 @@ func TestIntegrationWithKafka(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			reply := string(msg.Payload)
+			reply := string(msg.Payload())
 			if reply != expectedReply {
 				t.Fatal(fmt.Errorf("Received reply [%s] does not match expected reply [%s]", reply, expectedReply))
 			}

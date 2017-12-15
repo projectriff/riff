@@ -34,11 +34,11 @@ const ConnectionAttemptInterval = 100 * time.Millisecond
 type httpDispatcher struct {
 }
 
-func (httpDispatcher) Dispatch(in *dispatcher.Message) (*dispatcher.Message, error) {
+func (httpDispatcher) Dispatch(in dispatcher.Message) (dispatcher.Message, error) {
 	client := http.Client{
 		Timeout: time.Duration(60 * time.Second),
 	}
-	req, err := http.NewRequest("POST", "http://localhost:8080", bytes.NewReader(in.Payload))
+	req, err := http.NewRequest("POST", "http://localhost:8080", bytes.NewReader(in.Payload()))
 	if err != nil {
 		return nil, err
 	}
@@ -57,33 +57,22 @@ func (httpDispatcher) Dispatch(in *dispatcher.Message) (*dispatcher.Message, err
 		return nil, err
 	}
 
-	result := dispatcher.Message{Payload: out, Headers: make(map[string]interface{})}
-	propagateOutgoingHeaders(resp, &result)
-	return &result, nil
+	result := dispatcher.NewMessage(out, make(map[string][]string))
+	propagateOutgoingHeaders(resp, result)
+	return result, nil
 }
 
-func propagateIncomingHeaders(message *dispatcher.Message, request *http.Request) {
-	for h, v := range message.Headers {
-		switch value := v.(type) {
-		case string:
-			request.Header.Add(h, value)
-		case []string:
-			for _, s := range value {
-				request.Header.Add(h, s)
-			}
+func propagateIncomingHeaders(message dispatcher.Message, request *http.Request) {
+	for h, ss := range message.Headers() {
+		for _, s := range ss {
+			request.Header.Add(h, s)
 		}
 	}
 }
 
-func propagateOutgoingHeaders(resp *http.Response, message *dispatcher.Message) {
+func propagateOutgoingHeaders(resp *http.Response, message dispatcher.Message) {
 	for h, v := range resp.Header {
-		// http headers are a multi value map, dispatcher.Headers is single values (but with interface{} value)
-		// this function flattens headers which are mono-valued
-		if len(v) == 1 {
-			message.Headers[h] = v[0]
-		} else if len(v) > 1 {
-			message.Headers[h] = v
-		}
+		message.Headers()[h] = v
 	}
 }
 

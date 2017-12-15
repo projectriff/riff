@@ -18,6 +18,6 @@ import "fntypes.proto";
 
 package function;
 
-service StringFunction {
-  rpc Call(stream fntypes.Request) returns (stream fntypes.Reply) {}
+service MessageFunction {
+  rpc Call(stream fntypes.Message) returns (stream fntypes.Message) {}
 }

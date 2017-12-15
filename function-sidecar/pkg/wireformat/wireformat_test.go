@@ -23,17 +23,17 @@ import (
 )
 
 func TestEmptyMessage(t *testing.T) {
-	msg := dispatcher.Message{}
+	msg := dispatcher.NewEmptyMessage()
 	encodeThenDecode(msg, t)
 }
 
 func TestMessageWithOnlyPayload(t *testing.T) {
-	msg := dispatcher.Message{Payload: []byte("Hello")}
+	msg := dispatcher.NewMessage([]byte("Hello"), nil)
 	encodeThenDecode(msg, t)
 }
 
 func TestMessageWithOnlyHeaders(t *testing.T) {
-	msg := dispatcher.Message{Headers: map[string]interface{}{"key1":"value1", "k2":18.0}}
+	msg := dispatcher.NewMessage(nil, map[string][]string{"key1":{"value1"}, "k2":{"18.0", "other"}})
 	encodeThenDecode(msg, t)
 }
 

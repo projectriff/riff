@@ -22,6 +22,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
+
 	"github.com/Shopify/sarama"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher"
 )
@@ -41,17 +42,14 @@ func ToKafka(message dispatcher.Message) (*sarama.ProducerMessage, error) {
 func extractMessage(bytes []byte) (dispatcher.Message, error) {
 	offset := uint32(0)
 	if bytes[offset] != 0xff {
-		return dispatcher.Message{}, errors.New("expected 0xff as the leading byte")
+		return nil, errors.New("expected 0xff as the leading byte")
 	}
 	offset++
 
 	headerCount := bytes[offset]
 	offset++
 
-	headers := make(map[string]interface{}, headerCount)
-	if headerCount == 0 {
-		headers = nil
-	}
+	headers := make(map[string][]string, headerCount)
 	for i := byte(0); i < headerCount; i = i + 1 {
 		len := uint32(bytes[offset])
 		offset++
@@ -61,21 +59,15 @@ func extractMessage(bytes []byte) (dispatcher.Message, error) {
 
 		len = binary.BigEndian.Uint32(bytes[offset : offset+4])
 		offset += 4
-		var value interface{}
+		var value []string
 		err := json.Unmarshal(bytes[offset:offset+len], &value)
 		if err != nil {
-			return dispatcher.Message{}, err
+			return nil, err
 		}
 		headers[name] = value
 		offset += len
 	}
-	var payload []byte
-	if len(bytes[offset:]) == 0 {
-		payload = nil
-	} else {
-		payload = bytes[offset:]
-	}
-	return dispatcher.Message{payload, headers}, nil
+	return dispatcher.NewMessage(bytes[offset:], headers), nil
 }
 
 func encodeMessage(message dispatcher.Message) ([]byte, error) {
@@ -83,12 +75,12 @@ func encodeMessage(message dispatcher.Message) ([]byte, error) {
 	length++ // initial 0xff
 	length++ // no of headers
 
-	headerValues := make(map[string][]byte, len(message.Headers))
-	for k, v := range message.Headers {
+	headerValues := make(map[string][]byte, len(message.Headers()))
+	for k, v := range message.Headers() {
 		length += 1 // 1 byte to encode len(k)
 		length += len(k)
 		var err error
-		headerValues[k], err = json.Marshal(v)
+		headerValues[k], err = json.Marshal(v) // will marshal as json array
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +88,7 @@ func encodeMessage(message dispatcher.Message) ([]byte, error) {
 		length += len(headerValues[k])
 	}
 
-	length += len(message.Payload)
+	length += len(message.Payload())
 
 	result := make([]byte, length)
 	offset := 0
@@ -104,10 +96,10 @@ func encodeMessage(message dispatcher.Message) ([]byte, error) {
 	result[offset] = 0xff
 	offset++
 
-	result[offset] = byte(len(message.Headers))
+	result[offset] = byte(len(message.Headers()))
 	offset++
 
-	for k, _ := range message.Headers {
+	for k, _ := range message.Headers() {
 		l := len(k)
 		result[offset] = byte(l)
 		offset++
@@ -120,6 +112,6 @@ func encodeMessage(message dispatcher.Message) ([]byte, error) {
 		copy(result[offset:], headerValues[k])
 		offset += len(headerValues[k])
 	}
-	copy(result[offset:], message.Payload)
+	copy(result[offset:], message.Payload())
 	return result, nil
 }

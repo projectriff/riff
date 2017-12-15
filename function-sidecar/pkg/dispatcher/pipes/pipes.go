@@ -116,7 +116,7 @@ func NewPipesDispatcher() (dispatcher.Dispatcher, error) {
 				continue
 			}
 			if msg != nil {
-				o <- *msg
+				o <- msg
 			}
 		}
 	}()
@@ -124,7 +124,7 @@ func NewPipesDispatcher() (dispatcher.Dispatcher, error) {
 	return pipesDispatcher{input: i, output: o}, nil
 }
 
-func readMessage(reader *bufio.Reader) (*dispatcher.Message, error) {
+func readMessage(reader *bufio.Reader) (dispatcher.Message, error) {
 	line, err := reader.ReadString('\n')
 	if err != nil {
 		return nil, err
@@ -132,7 +132,7 @@ func readMessage(reader *bufio.Reader) (*dispatcher.Message, error) {
 		return nil, errors.New("Unexpected first line of message: " + line)
 	}
 
-	message := dispatcher.Message{}
+	headers := make(map[string][]string)
 	for line, err = reader.ReadString('\n'); line != "#payload\n"; line, err = reader.ReadString('\n') {
 		if err != nil {
 			return nil, err
@@ -142,10 +142,7 @@ func readMessage(reader *bufio.Reader) (*dispatcher.Message, error) {
 		if len(kv) != 2 {
 			return nil, errors.New("Malformed header line: " + line)
 		}
-		if message.Headers == nil {
-			message.Headers = make(map[string]interface{})
-		}
-		message.Headers[kv[0]] = kv[1]
+		headers[kv[0]] = append(headers[kv[0]], kv[1])
 	}
 
 	payload := make([]byte, 0, 256)
@@ -158,8 +155,7 @@ func readMessage(reader *bufio.Reader) (*dispatcher.Message, error) {
 	// Strip last CR
 	payload = payload[0: len(payload)-1]
 
-	message.Payload = payload
-	return &message, nil
+	return dispatcher.NewMessage(payload, headers), nil
 }
 
 func writeMessage(writer *bufio.Writer, in dispatcher.Message) error {
@@ -167,9 +163,9 @@ func writeMessage(writer *bufio.Writer, in dispatcher.Message) error {
 	if err != nil {
 		return err
 	}
-	if in.Headers != nil {
-		for k, v := range in.Headers {
-			_, err = writer.WriteString(k + "=" + v.(string) + "\n")
+	for k, vv := range in.Headers() {
+		for _, v := range vv {
+			_, err = writer.WriteString(k + "=" + v + "\n")
 			if err != nil {
 				return err
 			}
@@ -179,7 +175,7 @@ func writeMessage(writer *bufio.Writer, in dispatcher.Message) error {
 	if err != nil {
 		return err
 	}
-	_, err = writer.WriteString(string(in.Payload) + "\n")
+	_, err = writer.WriteString(string(in.Payload()) + "\n")
 	if err != nil {
 		return err
 	}

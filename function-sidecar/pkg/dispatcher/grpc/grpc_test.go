@@ -41,7 +41,7 @@ type myserver struct {
 }
 
 // Example handler that expects input in the form <N>:<word> and emits "Hello <word>" N times
-func (*myserver) Call(stream function.StringFunction_CallServer) error {
+func (*myserver) Call(stream function.MessageFunction_CallServer) error {
 	for {
 		in, err := stream.Recv()
 		if err == io.EOF {
@@ -50,13 +50,13 @@ func (*myserver) Call(stream function.StringFunction_CallServer) error {
 		if err != nil {
 			return err
 		}
-		parts := strings.SplitN(in.Body, ":", 2)
+		parts := strings.SplitN(string(in.Payload), ":", 2)
 		count, err := strconv.Atoi(parts[0])
 		if err != nil {
 			return err
 		}
 		for i := 0; i < count; i++ {
-			stream.Send(&fntypes.Reply{Type: &fntypes.Reply_Body{Body: "Hello " + parts[1]}})
+			stream.Send(&fntypes.Message{Payload: []byte("Hello " + parts[1])})
 		}
 	}
 }
@@ -66,7 +66,7 @@ func Test(t *testing.T) {
 	port := 1024 + rand.Intn(10000)
 
 	server := grpc.NewServer()
-	function.RegisterStringFunctionServer(server, &myserver{})
+	function.RegisterMessageFunctionServer(server, &myserver{})
 
 	l, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
 	if err != nil {
@@ -83,25 +83,25 @@ func Test(t *testing.T) {
 		close(d.Input())
 	}()
 
-	d.Input() <- dispatcher.Message{Payload: []byte("3:world")}
+	d.Input() <- dispatcher.NewMessage([]byte("3:world"), nil)
 
 	for i := 0; i < 3; i++ {
 		select {
 		case ret := <-d.Output():
-			if string(ret.Payload) != "Hello world" {
+			if string(ret.Payload()) != "Hello world" {
 				t.Fatalf("Got %v", ret)
 			}
 		case <-time.After(time.Second * 5):
 			t.Fatal("Timed out waiting for reply")
 		}
 		if i == 1 { // Send another input in the middle of processing first reply
-			d.Input() <- dispatcher.Message{Payload: []byte("2:gRPC")}
+			d.Input() <- dispatcher.NewMessage([]byte("2:gRPC"), nil)
 		}
 	}
 	for i := 0; i < 2; i++ {
 		select {
 		case ret := <-d.Output():
-			if string(ret.Payload) != "Hello gRPC" {
+			if string(ret.Payload()) != "Hello gRPC" {
 				t.Fatalf("Got %v", ret)
 			}
 		case <-time.After(time.Second * 5):

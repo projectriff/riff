@@ -30,7 +30,7 @@ import (
 )
 
 type grpcDispatcher struct {
-	stream function.StringFunction_CallClient
+	stream function.MessageFunction_CallClient
 	input  chan dispatcher.Message
 	output chan dispatcher.Message
 }
@@ -48,8 +48,8 @@ func (this *grpcDispatcher) handleIncoming() {
 		select {
 		case in, open := <-this.input:
 			if open {
-				req := &fntypes.Request{Body: string(in.Payload)}
-				err := this.stream.Send(req)
+				grpcMessage := toGRPC(in)
+				err := this.stream.Send(grpcMessage)
 				if err != nil {
 					log.Printf("Error sending message to function: %v", err)
 				}
@@ -69,7 +69,7 @@ func (this *grpcDispatcher) handleOutgoing() {
 			log.Printf("Error receiving message from function: %v", err)
 			continue
 		}
-		message := dispatcher.Message{Payload: []byte(reply.GetBody())}
+		message := toDispatcher(reply)
 		this.output <- message
 	}
 }
@@ -81,7 +81,7 @@ func NewGrpcDispatcher(port int) (dispatcher.Dispatcher, error) {
 		return nil, err
 	}
 
-	fnStream, err := function.NewStringFunctionClient(conn).Call(context.Background())
+	fnStream, err := function.NewMessageFunctionClient(conn).Call(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -91,4 +91,26 @@ func NewGrpcDispatcher(port int) (dispatcher.Dispatcher, error) {
 	go result.handleOutgoing()
 
 	return result, nil
+}
+
+func toGRPC(message dispatcher.Message) *fntypes.Message {
+	grpcHeaders := make(map[string]*fntypes.Message_HeaderValue, len(message.Headers()))
+	for k, vv := range message.Headers() {
+		values := fntypes.Message_HeaderValue{}
+		grpcHeaders[k] = &values
+		for _, v := range vv {
+			values.Values = append(values.Values, v)
+		}
+	}
+	result := fntypes.Message{Payload:message.Payload(), Headers:grpcHeaders}
+
+	return &result
+}
+
+func toDispatcher(grpc *fntypes.Message) dispatcher.Message {
+	dHeaders := make(map[string][]string, len(grpc.Headers))
+	for k, pv := range grpc.Headers {
+		dHeaders[k] = pv.Values
+	}
+	return dispatcher.NewMessage(grpc.Payload, dHeaders)
 }

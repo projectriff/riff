@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,13 +37,10 @@ func (w *wrapper) Output() <-chan Message {
 var PropagatedHeaders = []string{"correlationId"}
 
 // copy headers from incomingMessage that need to be propagated into resultMessage.Headers
-func propagateHeaders(incomingMessage *Message, resultMessage *Message) {
+func propagateHeaders(incomingMessage Message, resultMessage Message) {
 	for _, h := range PropagatedHeaders {
-		if value, ok := incomingMessage.Headers[h]; ok {
-			if resultMessage.Headers == nil {
-				resultMessage.Headers = make(map[string]interface{})
-			}
-			resultMessage.Headers[h] = value
+		if value, ok := incomingMessage.Headers()[h]; ok {
+			resultMessage.Headers()[h] = value
 		}
 	}
 }
@@ -60,13 +57,13 @@ func NewWrapper(synch SynchDispatcher) (*wrapper, error) {
 				if open {
 					go func() {
 						log.Printf("Wrapper received %v\n", in)
-						message, err := synch.Dispatch(&in)
+						message, err := synch.Dispatch(in)
 						if err != nil {
 							log.Printf("Error calling synch dispatcher %v\n", err)
 						}
-						propagateHeaders(&in, message)
+						propagateHeaders(in, message)
 						log.Printf("Wrapper about to forward %v\n", message)
-						o <- *message
+						o <- message
 					}()
 				} else {
 					close(o)

@@ -34,8 +34,8 @@ type stdioDispatcher struct {
 	writer *bufio.Writer
 }
 
-func (this stdioDispatcher) Dispatch(in *dispatcher.Message) (*dispatcher.Message, error) {
-	_, err := this.writer.WriteString(string(in.Payload) + "\n")
+func (this stdioDispatcher) Dispatch(in dispatcher.Message) (dispatcher.Message, error) {
+	_, err := this.writer.WriteString(string(in.Payload()) + "\n")
 	if err != nil {
 		log.Printf("Error writing to %v: %v", OUTPUT_PIPE, err)
 		return nil, err
@@ -50,7 +50,7 @@ func (this stdioDispatcher) Dispatch(in *dispatcher.Message) (*dispatcher.Messag
 		log.Printf("Error reading from %v: %v", INPUT_PIPE, err)
 		return nil, err
 	}
-	return &dispatcher.Message{Payload: []byte(line[0 : len(line)-1])}, nil
+	return dispatcher.NewMessage([]byte(line[0 : len(line)-1]), nil), nil
 }
 
 func (this stdioDispatcher) Close() error {
