@@ -56,4 +56,4 @@ fetch-grpc:
 	     -P $(GRPC_DIR)/function
 
 dockerize: build-for-docker
-	docker build . -t projectriff/function-sidecar:0.0.2
+	docker build . -t projectriff/function-sidecar:0.0.3-snapshot
