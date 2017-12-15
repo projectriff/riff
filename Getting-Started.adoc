@@ -13,12 +13,19 @@ The following instructions cover how to initialize helm and install riff.
 
 TIP: We recommend using Minikube v0.23.0 or v0.24.1 and avoiding v0.24.0 due to some DNS issues
 
+[NOTE]
+====
 If using Minikube, we recommend at least 4GB of memory:
 
 [source, bash]
 ----
 minikube start --memory=4096
 ----
+====
+
+* Kubernetes CLI `kubectl` installed and on the local system PATH. We recommend using the same version or later as the Kubernetes cluster you are using.
+
+* Docker, if you plan on building samples or your own functions then you will need Docker installed. We have used Docker version 17.x.
 
 ==== Install Helm
 
@@ -104,6 +111,7 @@ helm install riffrepo/riff --name demo --set create.rbac=true --set httpGateway.
 ====
 
 ===== Verify the installation
+
 You should see a number of resources get created in your cluster. You can see them all using:
 
 [source, bash]
@@ -111,7 +119,58 @@ You should see a number of resources get created in your cluster. You can see th
 kubectl get svc,deployments,pods,functions,topics
 ----
 
-==== Customizing the Configuration
+==== Components installed by the chart
+
+The provided Helm chart installs the following components:
+
+* Kafka and Zookeeper - the message broker used by the riff components
+
+* Topic Controller - the controller that watches the Topic resources and creates new topics in Kafka
+
+* Function Controller - the controller that watches the Function resources and deploys function images together with the sidecar image
+
+* HTTP Gateway - the external facing gateway that listens for data posted to the various topics and forwards the data as a message for the corresponding Kafka topic
+
+* Zipkin (optional) - the dashboard used for distributed tracing
+
+==== Customizing the Installation
+
+The Helm chart contains a https://github.com/projectriff/helm-charts/blob/master/riff/values.yaml[values.yaml] file that specifies the default values used when installing the chart. They can all be overridden by using the flag `--set` as described in the documentation for https://docs.helm.sh/helm/#helm-install[Helm Install].
+
+Some values that you might want to override are listed in the https://github.com/projectriff/helm-charts/blob/master/riff/README.md#configuration[Configuration section of the README].
+
+The following are some scenarios for customizing your installation:
+
+NOTE: The same commands work for all of the riff components: `functionController`, `topicController`, and `httpGateway`
+
+* Overriding the version of a riff component:
++
+To set the version tag for the `functionController` to `0.0.2-build.1` use the following:
++
+[source, bash]
+----
+helm install riffrepo/riff --name demo --set functionController.image.tag=0.0.2-build.1
+----
+
+* Overriding the image repository and version tag of a riff component with a custom built component image:
++
+To set the image repository to `mycustom/function-controller` and the version tag to `0.0.2-test.1` for the `functionController`, use the following:
++
+[source, bash]
+----
+helm install riffrepo/riff --name demo --set functionController.image.repository=mycustom/function-controller --set functionController.image.tag=0.0.2-test.1
+----
+
+* Overriding the version of the `sidecar` component:
++
+The `sidecar` component is only used by the `functionController`, so to set the version for the `sidecar` to `0.0.2-build.1` use the following:
++
+[source, bash]
+----
+helm install riffrepo/riff --name demo --set functionController.sidecar.image.tag=0.0.2-build.1
+----
+
+==== Installing locally built snapshot components with Minikube
 
 Clone the https://github.com/projectriff/riff[riff] repository.
 The `helm install` commands in this section assume you are in the root directory of that project.
