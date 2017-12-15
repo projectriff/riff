@@ -25,13 +25,13 @@ The following lists the configurable parameters and their default values.
 
 | Parameter               | Description                            | Default                   |
 | ----------------------- | -------------------------------------- | ------------------------- |
-| `functionController.image.tag`|The image tag for the function-controller|0.0.1|
+| `functionController.image.tag`|The image tag for the function-controller|0.0.2|
 | `functionController.image.pullPolicy`|The imagePullPolicy for the function-controller|IfNotPresent|
-| `functionController.sidecar.image.tag`|The image tag for the sidecar used|0.0.1|
+| `functionController.sidecar.image.tag`|The image tag for the sidecar used|0.0.2|
 | `functionController.service.type`|The service type used for the function-controller|ClusterIP|
-| `topicController.image.tag`|The image tag for the topic-controller|0.0.1|
+| `topicController.image.tag`|The image tag for the topic-controller|0.0.2|
 | `topicController.image.pullPolicy`|The imagePullPolicy for the topic-controller|IfNotPresent|
-| `httpGateway.image.tag`|The image tag for the http-gateway|0.0.1|
+| `httpGateway.image.tag`|The image tag for the http-gateway|0.0.2|
 | `httpGateway.image.pullPolicy`|The imagePullPolicy for the http-gateway|IfNotPresent|
 | `httpGateway.service.type`|The service type used for the http-gateway|LoadBalancer|
 

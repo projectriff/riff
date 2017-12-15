@@ -13,11 +13,11 @@ functionController:
   replicaCount: 1
   image:
     repository: projectriff/function-controller
-    tag: 0.0.1
+    tag: 0.0.2
     pullPolicy: IfNotPresent
   sidecar:
     image:
-      tag: 0.0.1
+      tag: 0.0.2
   service:
     name: http
     type: ClusterIP
@@ -27,13 +27,13 @@ topicController:
   replicaCount: 1
   image:
     repository: projectriff/topic-controller
-    tag: 0.0.1
+    tag: 0.0.2
     pullPolicy: IfNotPresent
 httpGateway:
   replicaCount: 1
   image:
     repository: projectriff/http-gateway
-    tag: 0.0.1
+    tag: 0.0.2
     pullPolicy: IfNotPresent
   service:
     name: http
