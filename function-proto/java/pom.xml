@@ -22,7 +22,7 @@
 
 	<groupId>io.projectriff</groupId>
 	<artifactId>function-proto</artifactId>
-	<version>0.0.2-snapshot</version>
+	<version>0.0.2</version>
 
 	<properties>
 		<java.version>1.8</java.version>
