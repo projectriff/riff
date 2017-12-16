@@ -55,6 +55,13 @@
   version = "v0.1.1"
 
 [[projects]]
+  branch = "issue_33"
+  name = "github.com/projectriff/function-sidecar"
+  packages = ["pkg/dispatcher","pkg/wireformat"]
+  revision = "c263618f41bd55ca4ff0f95bf30c07cf723f4217"
+  source = "github.com/ericbottard/function-sidecar"
+
+[[projects]]
   branch = "master"
   name = "github.com/rcrowley/go-metrics"
   packages = ["."]
@@ -66,15 +73,9 @@
   revision = "879c5887cd475cd7864858769793b2ceb0d44feb"
   version = "v1.1.0"
 
-[[projects]]
-  name = "gopkg.in/Shopify/sarama.v1"
-  packages = ["."]
-  revision = "bbdbe644099b7fdc8327d5cc69c030945188b2e9"
-  version = "v1.13.0"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f59764a367d29efa4bd5e69042499e0284557e300e24e2f739606cdf124443bc"
+  inputs-digest = "690fddf8bc7628d40258ca1750a493b83a9d9736831ae3c586d9a3f09195f3e7"
   solver-name = "gps-cdcl"
   solver-version = 1

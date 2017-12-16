@@ -18,18 +18,20 @@ package main
 
 import (
 	"context"
-	"gopkg.in/Shopify/sarama.v1"
-	"github.com/bsm/sarama-cluster"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"time"
-	"github.com/satori/go.uuid"
-	"github.com/projectriff/http-gateway/pkg/message"
-	"syscall"
 	"sync"
+	"syscall"
+	"time"
+
+	"github.com/Shopify/sarama"
+	"github.com/bsm/sarama-cluster"
+	"github.com/projectriff/function-sidecar/pkg/dispatcher"
+	"github.com/projectriff/function-sidecar/pkg/wireformat"
+	"github.com/satori/go.uuid"
 )
 
 const ContentType = "Content-Type"
@@ -49,15 +51,15 @@ func messageHandler(producer sarama.AsyncProducer) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		msg := message.Message{Payload: b, Headers: make(map[string]interface{})}
-		propagateIncomingHeaders(r, &msg)
+		msg := dispatcher.NewMessage(b, make(map[string][]string))
+		propagateIncomingHeaders(r, msg)
 
-		bytesOut, err := message.EncodeMessage(msg)
+		kafkaMsg, err := wireformat.ToKafka(msg)
+		kafkaMsg.Topic = topic
 		if err != nil {
-			log.Printf("Error encoding message: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		kafkaMsg := &sarama.ProducerMessage{Topic: topic, Value: sarama.ByteEncoder(bytesOut)}
 
 		select {
 		case producer.Input() <- kafkaMsg:
@@ -78,28 +80,35 @@ func replyHandler(producer sarama.AsyncProducer, replies *repliesMap) http.Handl
 			return
 		}
 		correlationId := uuid.NewV4().String()
-		replyChan := make(chan message.Message)
+		replyChan := make(chan dispatcher.Message)
 		replies.put(correlationId, replyChan)
 
-		msg := message.Message{Payload: b, Headers: make(map[string]interface{})}
-		propagateIncomingHeaders(r, &msg)
-		msg.Headers[CorrelationId] = correlationId
+		msg := dispatcher.NewMessage(b, make(map[string][]string))
+		propagateIncomingHeaders(r, msg)
+		log.Printf("Before %v", msg)
+		msg.Headers()[CorrelationId] = []string{correlationId}
+		log.Printf("After %v", msg)
 
-		bytesOut, err := message.EncodeMessage(msg)
+		kafkaMsg, err := wireformat.ToKafka(msg)
 		if err != nil {
-			log.Printf("Error encoding message: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		kafkaMsg := &sarama.ProducerMessage{Topic: topic, Value: sarama.ByteEncoder(bytesOut)}
+		kafkaMsg.Topic = topic
+
+		encoded, _ := kafkaMsg.Value.Encode()
+		log.Printf("Kafka: %v", string(encoded))
+		decoded, _ := wireformat.FromKafka(&sarama.ConsumerMessage{Value:encoded})
+		log.Printf("KafkaD: %v", decoded)
 
 		select {
 		case producer.Input() <- kafkaMsg:
 			select {
 			case reply := <-replyChan:
 				replies.delete(correlationId)
-				p := reply.Payload
-				propagateOutgoingHeaders(&reply, w)
-				w.Write(p.([]byte)) // TODO equivalent of Spring's HttpMessageConverter handling
+				//log.Printf("Got a reply: %v", reply)
+				propagateOutgoingHeaders(reply, w)
+				w.Write(reply.Payload())
 			case <-time.After(time.Second * 60):
 				replies.delete(correlationId)
 				w.WriteHeader(404)
@@ -122,7 +131,7 @@ func startHttpServer(producer sarama.AsyncProducer, replies *repliesMap) *http.S
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
-			log.Printf("Httpserver: ListenAndServe() error: %s", err)
+			panic(err)
 		}
 	}()
 
@@ -130,23 +139,18 @@ func startHttpServer(producer sarama.AsyncProducer, replies *repliesMap) *http.S
 	return srv
 }
 
-func propagateIncomingHeaders(request *http.Request, message *message.Message) {
+func propagateIncomingHeaders(request *http.Request, message dispatcher.Message) {
 	for _, h := range incomingHeadersToPropagate {
-		if v, ok := request.Header[h]; ok {
-			message.Headers[h] = v[0]
+		if vs, ok := request.Header[h]; ok {
+			(message.Headers())[h] = vs
 		}
 	}
 }
 
-func propagateOutgoingHeaders(message *message.Message, response http.ResponseWriter) {
+func propagateOutgoingHeaders(message dispatcher.Message, response http.ResponseWriter) {
 	for _, h := range outgoingHeadersToPropagate {
-		if v, ok := message.Headers[h]; ok {
-			switch value := v.(type) {
-			case string:
-				response.Header()[h] = []string{value}
-			case []string:
-				response.Header()[h] = value
-			}
+		if vs, ok := message.Headers()[h]; ok {
+			response.Header()[h] = vs
 		}
 	}
 }
@@ -198,14 +202,14 @@ MainLoop:
 			break MainLoop
 		case msg, ok := <-consumer.Messages():
 			if ok {
-				messageWithHeaders, err := message.ExtractMessage(msg.Value)
+				messageWithHeaders, err := wireformat.FromKafka(msg)
 				if err != nil {
 					log.Println("Failed to extract message ", err)
 					break
 				}
-				correlationId, ok := messageWithHeaders.Headers["correlationId"].(string)
+				correlationId, ok := messageWithHeaders.Headers()[CorrelationId]
 				if ok {
-					c := replies.get(correlationId)
+					c := replies.get(correlationId[0])
 					if c != nil {
 						log.Printf("Sending %v\n", messageWithHeaders)
 						c <- messageWithHeaders
@@ -243,7 +247,7 @@ func consumeErrors(consumer *cluster.Consumer) {
 
 // Type repliesMap implements a concurrent safe map of channels to send replies to, keyed by message correlationIds
 type repliesMap struct {
-	m    map[string]chan<- message.Message
+	m    map[string]chan<- dispatcher.Message
 	lock sync.RWMutex
 }
 
@@ -253,18 +257,18 @@ func (replies *repliesMap) delete(key string) {
 	delete(replies.m, key)
 }
 
-func (replies *repliesMap) get(key string) chan<- message.Message {
+func (replies *repliesMap) get(key string) chan<- dispatcher.Message {
 	replies.lock.RLock()
 	defer replies.lock.RUnlock()
 	return replies.m[key]
 }
 
-func (replies *repliesMap) put(key string, value chan<- message.Message) {
+func (replies *repliesMap) put(key string, value chan<- dispatcher.Message) {
 	replies.lock.Lock()
 	defer replies.lock.Unlock()
 	replies.m[key] = value
 }
 
 func newRepliesMap() *repliesMap {
-	return &repliesMap{make(map[string]chan<- message.Message), sync.RWMutex{}}
+	return &repliesMap{make(map[string]chan<- dispatcher.Message), sync.RWMutex{}}
 }
