@@ -152,10 +152,10 @@
   version = "v2.0.1"
 
 [[projects]]
-  branch = "issue_5"
+  branch = "master"
   name = "github.com/projectriff/kubernetes-crds"
   packages = ["pkg/apis/projectriff.io","pkg/apis/projectriff.io/v1","pkg/client/clientset/versioned","pkg/client/clientset/versioned/scheme","pkg/client/clientset/versioned/typed/projectriff/v1","pkg/client/informers/externalversions","pkg/client/informers/externalversions/internalinterfaces","pkg/client/informers/externalversions/projectriff","pkg/client/informers/externalversions/projectriff/v1","pkg/client/listers/projectriff/v1"]
-  revision = "ad31519821e8a1743c1014642fc3c699fef70726"
+  revision = "3dfb7a33f5eee7c4a67547bcfa8557a3993d08d8"
 
 [[projects]]
   branch = "master"
