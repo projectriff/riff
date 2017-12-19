@@ -11,16 +11,17 @@ from concurrent import futures
 This method’s semantics are a combination of those of the request-streaming method and the response-streaming method. 
 It is passed an iterator of request values and is itself an iterator of response values.
 '''
-class StringFunctionServicer(function.StringFunctionServicer):
+class MessageFunctionServicer(function.MessageFunctionServicer):
 
     def Call(self, request_iterator, context):
         for request in request_iterator:
-            reply = types.Reply()
-            reply.body = request.body.upper()
+            reply = types.Message()
+            reply.payload = request.payload.upper()
+            reply.headers['correlationId'].values[:] = request.headers['correlationId'].values[:]
             yield reply
 
 server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
-function.add_StringFunctionServicer_to_server(StringFunctionServicer(), server)
+function.add_MessageFunctionServicer_to_server(MessageFunctionServicer(), server)
 server.add_insecure_port('%s:%s' % ('[::]', os.environ.get("GRPC_PORT","10382")))
 
 server.start()
