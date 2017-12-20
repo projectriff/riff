@@ -247,7 +247,7 @@ done
 # ======================================= DEFAULTS ============================================
 FUNCTION="${FUNCTION:-${PWD##*/}}"
 FNPATH="${FNPATH:-.}"
-VERSION="${VERSION:-0.0.1}"
+VERSION="${VERSION:-0.0.2}"
 CONTAINER="${CONTAINER:-sidecar}"
 # ======================================= DEFAULTS END ========================================
 if [[ "${COMMAND}" == "build" ]]; then
