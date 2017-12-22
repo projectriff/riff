@@ -118,13 +118,20 @@ func Packages(context *generator.Context, arguments *args.GeneratorArgs) generat
 
 `)...)
 
+	if err := context.AddDir(arguments.OutputPackagePath); err != nil {
+		glog.Fatalf("Failed to load output package: %v", err)
+	}
+	pkg := context.Universe[arguments.OutputPackagePath]
+	if pkg == nil {
+		glog.Fatalf("Got nil output package: %v", err)
+	}
 	return generator.Packages{
 		&generator.DefaultPackage{
-			PackageName: filepath.Base(arguments.OutputPackagePath),
-			PackagePath: arguments.OutputPackagePath,
+			PackageName: strings.Split(filepath.Base(pkg.Path), ".")[0],
+			PackagePath: pkg.Path,
 			HeaderText:  header,
 			GeneratorFunc: func(c *generator.Context) (generators []generator.Generator) {
-				return []generator.Generator{NewOpenAPIGen(arguments.OutputFileBaseName, arguments.OutputPackagePath, context)}
+				return []generator.Generator{NewOpenAPIGen(arguments.OutputFileBaseName, pkg, context)}
 			},
 			FilterFunc: func(c *generator.Context, t *types.Type) bool {
 				// There is a conflict between this codegen and codecgen, we should avoid types generated for codecgen
@@ -153,12 +160,12 @@ const (
 type openAPIGen struct {
 	generator.DefaultGen
 	// TargetPackage is the package that will get GetOpenAPIDefinitions function returns all open API definitions.
-	targetPackage string
+	targetPackage *types.Package
 	imports       namer.ImportTracker
 	context       *generator.Context
 }
 
-func NewOpenAPIGen(sanitizedName string, targetPackage string, context *generator.Context) generator.Generator {
+func NewOpenAPIGen(sanitizedName string, targetPackage *types.Package, context *generator.Context) generator.Generator {
 	return &openAPIGen{
 		DefaultGen: generator.DefaultGen{
 			OptionalName: sanitizedName,
@@ -172,7 +179,7 @@ func NewOpenAPIGen(sanitizedName string, targetPackage string, context *generato
 func (g *openAPIGen) Namers(c *generator.Context) namer.NameSystems {
 	// Have the raw namer for this file track what it imports.
 	return namer.NameSystems{
-		"raw": namer.NewRawNamer(g.targetPackage, g.imports),
+		"raw": namer.NewRawNamer(g.targetPackage.Path, g.imports),
 	}
 }
 
@@ -185,10 +192,10 @@ func (g *openAPIGen) Filter(c *generator.Context, t *types.Type) bool {
 }
 
 func (g *openAPIGen) isOtherPackage(pkg string) bool {
-	if pkg == g.targetPackage {
+	if pkg == g.targetPackage.Path {
 		return false
 	}
-	if strings.HasSuffix(pkg, "\""+g.targetPackage+"\"") {
+	if strings.HasSuffix(pkg, "\""+g.targetPackage.Path+"\"") {
 		return false
 	}
 	return true

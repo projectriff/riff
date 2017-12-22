@@ -21,6 +21,7 @@ package v1beta1
 import (
 	v1beta1 "k8s.io/api/authorization/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
 )
@@ -54,7 +55,8 @@ func (s *selfSubjectRulesReviewLister) List(selector labels.Selector) (ret []*v1
 
 // Get retrieves the SelfSubjectRulesReview from the index for a given name.
 func (s *selfSubjectRulesReviewLister) Get(name string) (*v1beta1.SelfSubjectRulesReview, error) {
-	obj, exists, err := s.indexer.GetByKey(name)
+	key := &v1beta1.SelfSubjectRulesReview{ObjectMeta: v1.ObjectMeta{Name: name}}
+	obj, exists, err := s.indexer.Get(key)
 	if err != nil {
 		return nil, err
 	}
