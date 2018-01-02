@@ -94,9 +94,6 @@ func replyHandler(producer sarama.AsyncProducer, replies *repliesMap) http.Handl
 		}
 		kafkaMsg.Topic = topic
 
-		encoded, _ := kafkaMsg.Value.Encode()
-		decoded, _ := wireformat.FromKafka(&sarama.ConsumerMessage{Value:encoded})
-
 		select {
 		case producer.Input() <- kafkaMsg:
 			select {
