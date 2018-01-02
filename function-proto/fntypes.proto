@@ -22,6 +22,6 @@ message Message {
 		repeated string values = 1;
 	}
 
-    bytes payload = 1;
+	bytes payload = 1;
 	map<string, HeaderValue> headers = 2;
 }
