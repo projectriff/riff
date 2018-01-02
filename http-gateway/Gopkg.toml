@@ -25,7 +25,3 @@
   name = "github.com/satori/go.uuid"
   version = "v1.1.0"
 
-[[constraint]]
-  name = "github.com/projectriff/function-sidecar"
-  branch = "issue_33"
-  source = "github.com/ericbottard/function-sidecar"

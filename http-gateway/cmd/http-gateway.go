@@ -85,9 +85,7 @@ func replyHandler(producer sarama.AsyncProducer, replies *repliesMap) http.Handl
 
 		msg := dispatcher.NewMessage(b, make(map[string][]string))
 		propagateIncomingHeaders(r, msg)
-		log.Printf("Before %v", msg)
 		msg.Headers()[CorrelationId] = []string{correlationId}
-		log.Printf("After %v", msg)
 
 		kafkaMsg, err := wireformat.ToKafka(msg)
 		if err != nil {
@@ -97,16 +95,13 @@ func replyHandler(producer sarama.AsyncProducer, replies *repliesMap) http.Handl
 		kafkaMsg.Topic = topic
 
 		encoded, _ := kafkaMsg.Value.Encode()
-		log.Printf("Kafka: %v", string(encoded))
 		decoded, _ := wireformat.FromKafka(&sarama.ConsumerMessage{Value:encoded})
-		log.Printf("KafkaD: %v", decoded)
 
 		select {
 		case producer.Input() <- kafkaMsg:
 			select {
 			case reply := <-replyChan:
 				replies.delete(correlationId)
-				//log.Printf("Got a reply: %v", reply)
 				propagateOutgoingHeaders(reply, w)
 				w.Write(reply.Payload())
 			case <-time.After(time.Second * 60):
