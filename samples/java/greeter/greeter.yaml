@@ -15,7 +15,7 @@ kind: Function
 metadata:
   name: greeter
 spec:
-  protocol: http
+  protocol: pipes
   input: names
   output: greetings
   container:
