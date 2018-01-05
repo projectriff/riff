@@ -16,15 +16,17 @@ call :capture_jsonpath svc_type "http-gateway" "{.items[0].spec.type}"
 if [%svc_type%]==[NodePort] (
   call :capture_cmd address "minikube ip"
   call :capture_jsonpath port "http-gateway" "{.items[0].spec.ports[?(@.name == 'http')].nodePort}"
-) else (
-  call :capture_jsonpath address "http-gateway" "{.items[0].status.loadBalancer.ingress[0].ip}"
-  if [%address%]==[] (
-    echo External IP is not yet available, try in a few ...
-    exit /B 1
-  )
-  call :capture_kubectl_jsonpath_cmd port "http-gateway" "{.items[0].spec.ports[?(@.name == 'http')].port}"
+  goto do_curl
 )
 
+call :capture_jsonpath address "http-gateway" "{.items[0].status.loadBalancer.ingress[0].ip}"
+if [%address%]==[] (
+  echo External IP is not yet available, try in a few ...
+  exit /B 1
+)
+call :capture_jsonpath port "http-gateway" "{.items[0].spec.ports[?(@.name == 'http')].port}"
+
+:do_curl
 curl -H "Content-Type: text/plain" -X POST http://%address%:%port%/requests/%~1 -d "%~2"
 echo.
 

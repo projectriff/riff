@@ -16,15 +16,17 @@ call :capture_jsonpath svc_type "http-gateway" "{.items[0].spec.type}"
 if [%svc_type%]==[NodePort] (
   call :capture_cmd address "minikube ip"
   call :capture_jsonpath port "http-gateway" "{.items[0].spec.ports[?(@.name == 'http')].nodePort}"
-) else (
-  call :capture_jsonpath address "http-gateway" "{.items[0].status.loadBalancer.ingress[0].ip}"
-  if [%address%]==[] (
-    echo External IP is not yet available, try in a few ...
-    exit /B 1
-  )
-  call :capture_kubectl_jsonpath_cmd port "http-gateway" "{.items[0].spec.ports[?(@.name == 'http')].port}"
+  goto do_curl
 )
 
+call :capture_jsonpath address "http-gateway" "{.items[0].status.loadBalancer.ingress[0].ip}"
+if [%address%]==[] (
+  echo External IP is not yet available, try in a few ...
+  exit /B 1
+)
+call :capture_jsonpath port "http-gateway" "{.items[0].spec.ports[?(@.name == 'http')].port}"
+
+:do_curl
 if [%3]==[] (
     set count=1
 ) else (
@@ -35,8 +37,7 @@ if [%4]==[] (
 ) else (
     set pause=%4
 )
-
-for /L %%i IN (1,1,%count%) do call :do_post_content %~1 %~2 %%i
+for /L %%i in (1,1,%count%) do call :do_post_content %~1 %~2 %%i
 echo.
 
 exit /B %ERRORLEVEL%
