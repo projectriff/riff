@@ -1,0 +1,3 @@
+option java_multiple_files = false;
+option java_package = "io.projectriff.grpc.fntypes";
+option java_outer_classname = "FnTypesProtos";
