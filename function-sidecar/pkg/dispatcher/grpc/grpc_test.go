@@ -28,7 +28,6 @@ import (
 
 	"github.com/projectriff/function-sidecar/pkg/dispatcher"
 	gdispatcher "github.com/projectriff/function-sidecar/pkg/dispatcher/grpc"
-	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/fntypes"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/function"
 	"google.golang.org/grpc"
 )
@@ -56,7 +55,7 @@ func (*myserver) Call(stream function.MessageFunction_CallServer) error {
 			return err
 		}
 		for i := 0; i < count; i++ {
-			stream.Send(&fntypes.Message{Payload: []byte("Hello " + parts[1])})
+			stream.Send(&function.Message{Payload: []byte("Hello " + parts[1])})
 		}
 	}
 }

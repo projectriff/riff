@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/projectriff/function-sidecar/pkg/dispatcher"
-	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/fntypes"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/function"
 	"golang.org/x/net/context"
 )
@@ -93,21 +92,21 @@ func NewGrpcDispatcher(port int) (dispatcher.Dispatcher, error) {
 	return result, nil
 }
 
-func toGRPC(message dispatcher.Message) *fntypes.Message {
-	grpcHeaders := make(map[string]*fntypes.Message_HeaderValue, len(message.Headers()))
+func toGRPC(message dispatcher.Message) *function.Message {
+	grpcHeaders := make(map[string]*function.Message_HeaderValue, len(message.Headers()))
 	for k, vv := range message.Headers() {
-		values := fntypes.Message_HeaderValue{}
+		values := function.Message_HeaderValue{}
 		grpcHeaders[k] = &values
 		for _, v := range vv {
 			values.Values = append(values.Values, v)
 		}
 	}
-	result := fntypes.Message{Payload:message.Payload(), Headers:grpcHeaders}
+	result := function.Message{Payload:message.Payload(), Headers:grpcHeaders}
 
 	return &result
 }
 
-func toDispatcher(grpc *fntypes.Message) dispatcher.Message {
+func toDispatcher(grpc *function.Message) dispatcher.Message {
 	dHeaders := make(map[string][]string, len(grpc.Headers))
 	for k, pv := range grpc.Headers {
 		dHeaders[k] = pv.Values
