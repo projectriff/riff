@@ -4,18 +4,18 @@ sys.path.insert(0, os.path.abspath('.'))
 import grpc
 import time
 import function_pb2_grpc as function
-import fntypes_pb2 as types
+import function_pb2 as message
 from concurrent import futures
 
 '''
-This method’s semantics are a combination of those of the request-streaming method and the response-streaming method. 
+This method’s semantics are a combination of those of the request-streaming method and the response-streaming method.
 It is passed an iterator of request values and is itself an iterator of response values.
 '''
 class MessageFunctionServicer(function.MessageFunctionServicer):
 
     def Call(self, request_iterator, context):
         for request in request_iterator:
-            reply = types.Message()
+            reply = message.Message()
             reply.payload = request.payload.upper()
             reply.headers['correlationId'].values[:] = request.headers['correlationId'].values[:]
             yield reply
