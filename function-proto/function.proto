@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 syntax = "proto3";
-import "fntypes.proto";
 
 package function;
 
+message Message {
+	message HeaderValue {
+		repeated string values = 1;
+	}
+
+	bytes payload = 1;
+	map<string, HeaderValue> headers = 2;
+}
+
 service MessageFunction {
-  rpc Call(stream fntypes.Message) returns (stream fntypes.Message) {}
+  rpc Call(stream Message) returns (stream Message) {}
 }
