@@ -379,6 +379,8 @@ apiVersion: projectriff.io/v1
 kind: Topic
 metadata:
   name: $TOPIC_IN
+spec:
+  partitions: 1
 EOF
   if [[ -n "$TOPIC_OUT" ]] ; then
     cat >> $FNTOPICS <<EOF
@@ -387,6 +389,8 @@ apiVersion: projectriff.io/v1
 kind: Topic
 metadata:
   name: $TOPIC_OUT
+spec:
+  partitions: 1
 EOF
   fi
 }
