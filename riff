@@ -10,15 +10,50 @@ riff is for functions
 version $RIFF_VERSION
 
 Commands:
+  init         Initialize a function
   build        Build a function container
-  create       Create function resource definitions
   apply        Apply function resource definitions
+  create       Create function resources, build container and apply the function resources
   delete       Delete function resource definitions
   list         List current function resources
   logs         Show logs for a function resource
   version      Display the riff version
 
   Use "riff <command> --help" for more information about a given command.
+
+EOF
+}
+
+function print_init_usage() {
+cat <<EOF
+
+Initialize the function based on the function source code specified as the filename, using the name
+  and version specified for the function image repository and tag.
+
+Usage:
+
+  riff init -u <useraccount> -n <name> -v <version> -f <source> -l <language> -p <protocol> -i <input-topic> -o <output-topic> [-a <artifact>] [--classname <class-name>] [--push]
+
+Options:
+
+  -u, --useraccount: the Docker user account to be used for the image repository (defaults to current OS username)
+  -n, --name: the name of the function (defaults to the name of the current directory)
+  -v, --version: the version of the function (defaults to 0.0.1)
+  -f, --filename: filename or directory to be used for the function resources, 
+                  if a file is specified then the file's directory will be used 
+                  (defaults to the current directory)
+  -f, --filename: filename, directory, or URL for the resource definition[s] (defaults to the current directory)
+  -l, --language: the language used for the functiuon source
+                  (defaults to filename extension language type or 'shell' if directory specified)
+  -p, --protocol: the protocol to use for function invocations
+                  (defaults to 'stdio' for shell and python, to 'http' for java and node)
+  -i, --input: the name of the input topic (defaults to function name)
+  -o, --output: the name of the output topic (no default, only created if specified)
+  -a, --artifact: path to the function artifact, source code or jar file
+                  (defaults to function name with extension appended based on language: 
+                      '.sh' for shell, '.jar' for java, 'js' for node and '.py' for python)
+  --classname: the fully qualified class name of the Java function class (required for Java functions)
+  --push: push the image to Docker registry
 
 EOF
 }
@@ -31,13 +66,14 @@ Build the function based on the code available in the path directory, using the 
 
 Usage:
 
-  riff build -n <name> -v <version> -f <path>
+  riff build -n <name> -v <version> -f <path> [--push]
 
 Options:
 
   -n, --name: the name of the function (defaults to the name of the current directory)
   -v, --version: the version of the function (defaults to 0.0.1)
   -f, --filename: filename, directory, or URL for the code or resource (defaults to the current directory)
+  --push: push the image to Docker registry
 
 EOF
 }
@@ -45,15 +81,33 @@ EOF
 function print_create_usage() {
 cat <<EOF
 
-Create the resource[s] based on the resource definition[s] that the path points to.
+Create the resource[s] for the function based on the function source code specified as the filename, using the name
+  and version specified for the function image repository and tag. Build the function and deploy it.
 
 Usage:
 
-  riff create -f <path>
+  riff create -u <useraccount> -n <name> -v <version> -f <source> -l <language> -p <protocol> -i <input-topic> -o <output-topic> [-a <artifact>] [--classname <class-name>] [--push]
 
 Options:
 
+  -u, --useraccount: the Docker user account to be used for the image repository (defaults to current OS username)
+  -n, --name: the name of the function (defaults to the name of the current directory)
+  -v, --version: the version of the function (defaults to 0.0.1)
+  -f, --filename: filename or directory to be used for the function resources, 
+                  if a file is specified then the file's directory will be used 
+                  (defaults to the current directory)
   -f, --filename: filename, directory, or URL for the resource definition[s] (defaults to the current directory)
+  -l, --language: the language used for the functiuon source
+                  (defaults to filename extension language type or 'shell' if directory specified)
+  -p, --protocol: the protocol to use for function invocations
+                  (defaults to 'stdio' for shell and python, to 'http' for java and node)
+  -i, --input: the name of the input topic (defaults to function name)
+  -o, --output: the name of the output topic (no default, only created if specified)
+  -a, --artifact: path to the function artifact, source code or jar file
+                  (defaults to function name with extension appended based on language: 
+                      '.sh' for shell, '.jar' for java, 'js' for node and '.py' for python)
+  --classname: the fully qualified class name of the Java function class (required for Java functions)
+  --push: push the image to Docker registry
 
 EOF
 }
@@ -133,19 +187,235 @@ Usage:
 EOF
 }
 
-function build() {
-  echo "Building $FUNCTION $FNPATH $VERSION"
-  docker build -t "projectriff/${FUNCTION}:${VERSION}" $FNPATH
+function init() {
+  # assume the file extension based on languag - might be overridden as necessary later
+  if [[ $FNLANG == "" || $FNLANG == "shell" ]] ; then
+    FNEXT="sh"
+  elif [[ $FNLANG == "java" ]] ; then
+    FNEXT="jar"
+  elif [[ $FNLANG == "node" ]] ; then
+    FNEXT="js"
+  elif [[ $FNLANG == "python" ]] ; then
+    FNEXT="py"
+  fi
+  # check --file argument
+  if [ -f "${FNPATH}" ] ; then
+    FNFILE=$(basename "$FNPATH")
+    FNEXT="${FNFILE##*.}"
+    FNDIR=$(cd "$(dirname "$FNPATH")" && pwd)
+  elif [ -d "${FNPATH}" ] ; then
+    if [[ $FNPATH == "." ]] ; then
+      FNDIR=$(cd "$(dirname "$FNPATH")" && pwd)
+    else
+      FNDIR=$(cd "$(dirname "$FNPATH")" && pwd)/$(basename "$FNPATH")
+    fi
+    # look for function file
+    if [ -f "${FNPATH}/${FUNCTION}.sh" ] ; then
+      FNEXT="sh"
+    elif [ -f "${FNPATH}/${FUNCTION}.jar" ] ; then
+      FNEXT="jar"
+    elif [ -f "${FNPATH}/${FUNCTION}.js" ] ; then
+      FNEXT="js"
+    elif [ -f "${FNPATH}/${FUNCTION}.py" ] ; then
+      FNEXT="py"
+    fi
+    FNFILE="$FUNCTION.$FNEXT"
+  else
+    echo "$FNPATH: No such file or directory"
+    exit 1
+  fi
+  # override file path and extension if --artifact provided
+  if [ -z $FNARTIFACT ] ; then
+    ARTRELPATH=$FNFILE
+    ARTRELDIR="."
+  else
+    if [ -f "${FNARTIFACT}" ] ; then
+      ARTDIR=$(dirname "$FNARTIFACT")
+      if [[ $ARTDIR == /* ]] ; then
+        ARTRELDIR=$(make_path_relative $ARTDIR $FNDIR)
+      else
+        ARTRELDIR=$ARTDIR
+      fi
+      if [[ $ARTRELDIR == "" ]] ; then
+        ARTRELPATH="$(basename $FNARTIFACT)"
+      else
+        ARTRELPATH=$ARTRELDIR/$(basename $FNARTIFACT)
+      fi
+      FNFILE=$(basename "$FNARTIFACT")
+      FNEXT="${FNFILE##*.}"
+    else
+      echo "Artifact $FNARTIFACT: No such file"
+      exit 1
+    fi
+  fi
+  # figure out language if not provided in --language arg
+  if [[ $FNLANG == "" ]] ; then
+    if [[ $FNEXT == "sh" ]] ; then
+      FNLANG="shell"
+    elif [[ $FNEXT == "jar" ]] ; then
+      FNLANG="java"
+    elif [[ $FNEXT == "js" ]] ; then
+      FNLANG="node"
+    elif [[ $FNEXT == "py" ]] ; then
+      FNLANG="python"
+    fi
+  fi
+  # figure out protocol if not provided in --protocol arg
+  if [[ $FNPROT == "" ]] ; then
+    if [[ $FNEXT == "sh" ]] ; then
+      FNPROT="stdio"
+    elif [[ $FNEXT == "jar" ]] ; then
+      FNPROT="http"
+    elif [[ $FNEXT == "js" ]] ; then
+      FNPROT="http"
+    elif [[ $FNEXT == "py" ]] ; then
+      FNPROT="stdio"
+    fi
+  fi
+  # default the topic to function name
+  if [[ $TOPIC_IN == "" ]] ; then
+    TOPIC_IN=$FUNCTION
+  fi
+  # ready to initialize
+  echo "Initializing $FNLANG function $FUNCTION"
+  FNDOCKER="$FNDIR/Dockerfile"
+  if [ -f $FNDOCKER ] ; then
+    echo "Docker file already exists in $FNDIR"
+  else
+    write_dockerfile
+  fi
+  FNDEF="$FNDIR/$FUNCTION-function.yaml"
+  if [ -f $FNDEF ] ; then
+    echo "Function definition file already exists in $FNDIR"
+  else
+    write_function_yaml
+  fi
+  FNTOPICS="$FNDIR/$FUNCTION-topics.yaml"
+  if [ -f $FNTOPICS ] ; then
+    echo "Topics definition file already exists in $FNDIR"
+  else
+    write_topics_yaml
+  fi
 }
 
-function create() {
-  echo "Creating $FNPATH resource[s]"
-  kubectl create -f $FNPATH
+function make_path_relative() {
+  source=$1
+  target=$2
+  common=$source
+  result=
+  while [ "${target#"$common"}" = "$target" ]; do
+      if [ -z "$result" ] ; then
+          result=$(basename "$common")
+      else
+          result=$(basename "$common")/$result
+      fi
+      common=$(dirname "$common")
+  done
+  if [[ "$common" == "/" ]] ; then
+    result="/"$result
+  fi
+  echo $result
+}
+
+function write_dockerfile() {
+  if [[ $FNLANG == "shell" ]] ; then
+    cat >> $FNDOCKER <<EOF
+FROM projectriff/${FNLANG}-function-invoker:${RIFF_VERSION}
+ARG FUNCTION_URI="/${FNFILE}"
+ENV FUNCTION_URI \${FUNCTION_URI}
+ADD ${ARTRELPATH} /
+EOF
+  elif [[ $FNLANG == "java" ]] ; then
+    cat >> $FNDOCKER <<EOF
+FROM projectriff/${FNLANG}-function-invoker:${RIFF_VERSION}
+ARG FUNCTION_JAR=/functions/${FNFILE}
+ARG FUNCTION_CLASS=${FNCLASS}
+ENV FUNCTION_URI file://\${FUNCTION_JAR}?handler=\${FUNCTION_CLASS}
+ADD ${ARTRELPATH} \${FUNCTION_JAR}
+EOF
+  elif [[ $FNLANG == "node" ]] ; then
+    cat >> $FNDOCKER <<EOF
+FROM projectriff/${FNLANG}-function-invoker:${RIFF_VERSION}
+ENV FUNCTION_URI /functions/${FNFILE}
+ADD ${ARTRELPATH} \${FUNCTION_URI}
+EOF
+  elif [[ $FNLANG == "python" ]] ; then
+    cat >> $FNDOCKER <<EOF
+FROM projectriff/python2-function-invoker:${RIFF_VERSION}
+ARG FUNCTION_MODULE=${FNFILE}
+ARG FUNCTION_HANDLER=process
+ENV FUNCTION_URI file:///\${FUNCTION_MODULE}?handler=\${FUNCTION_HANDLER}
+ADD ${ARTRELPATH} /
+ADD ${ARTRELDIR}/requirements.txt /
+RUN pip install --upgrade pip && pip install -r /requirements.txt
+EOF
+  fi
+}
+
+function write_function_yaml() {
+  cat >> $FNDEF <<EOF
+apiVersion: projectriff.io/v1
+kind: Function
+metadata:
+  name: ${FUNCTION}
+spec:
+  protocol: ${FNPROT}
+  input: ${TOPIC_IN}
+EOF
+  if [[ -n "$TOPIC_OUT" ]] ; then
+    cat >> $FNDEF <<EOF
+  output: ${TOPIC_OUT}
+EOF
+  fi
+  cat >> $FNDEF <<EOF
+  container:
+    image: ${USERACCT}/${FUNCTION}:${VERSION}
+EOF
+}
+
+function write_topics_yaml() {
+  cat >> $FNTOPICS <<EOF
+apiVersion: projectriff.io/v1
+kind: Topic
+metadata:
+  name: $TOPIC_IN
+EOF
+  if [[ -n "$TOPIC_OUT" ]] ; then
+    cat >> $FNTOPICS <<EOF
+---
+apiVersion: projectriff.io/v1
+kind: Topic
+metadata:
+  name: $TOPIC_OUT
+EOF
+  fi
+}
+
+function build() {
+  echo "Building $FUNCTION $FNPATH $VERSION"
+  docker build -t "${USERACCT}/${FUNCTION}:${VERSION}" $FNPATH
+  if [[ $DOCKERPUSH == "true" ]] ; then
+      docker push "${USERACCT}/${FUNCTION}:${VERSION}"
+  fi
 }
 
 function apply() {
   echo "Applying $FNPATH resource[s]"
   kubectl apply -f $FNPATH
+}
+
+function create() {
+  echo "Creating function $FUNCTION version $VERSION"
+  init
+  if [ -f "${FNPATH}" ] ; then
+    FNPATH=$(dirname "$FNPATH")
+  fi
+  if [ -f "${ARTRELPATH}" ] ; then
+    build
+    apply
+  else
+    echo "File ${FNFILE} not found, not able to build"
+  fi
 }
 
 function delete() {
@@ -183,7 +453,10 @@ COMMAND="$1"
 shift
 
 if [[ $1 == "--help" || $1 == "-h" ]] ; then
-  if [[ "${COMMAND}" == "build" ]]; then
+  if [[ "${COMMAND}" == "init" ]]; then
+    print_init_usage
+    exit 0
+  elif [[ "${COMMAND}" == "build" ]]; then
     print_build_usage
     exit 0
   elif [[ "${COMMAND}" == "create" ]]; then
@@ -211,12 +484,35 @@ while [[ $# > 0 ]]
 do
 key="$1"
 case ${key} in
+  -u|--useraccount)
+  USERACCT="$2"
+  shift
+  ;;
   -n|--name)
   FUNCTION="$2"
   shift
   ;;
   -f|--filename)
   FNPATH="$2"
+  shift
+  ;;
+  -a|--artifact)
+  FNARTIFACT="$2"
+  shift
+  ;;
+  --classname)
+  FNCLASS="$2"
+  shift
+  ;;
+  -l|--language)
+  FNLANG="$2"
+  if [[ $FNLANG == "js" ]] ; then
+    FNLANG="node"
+  fi
+  shift
+  ;;
+  -p|--protocol)
+  FNPROT="$2"
   shift
   ;;
   -v|--version)
@@ -227,8 +523,19 @@ case ${key} in
   CONTAINER="$2"
   shift
   ;;
+  -i|--input)
+  TOPIC_IN="$2"
+  shift
+  ;;
+  -o|--output)
+  TOPIC_OUT="$2"
+  shift
+  ;;
   -t|--tail)
   TAIL="-f"
+  ;;
+  --push)
+  DOCKERPUSH="true"
   ;;
   --help)
   print_usage
@@ -247,10 +554,15 @@ done
 # ======================================= DEFAULTS ============================================
 FUNCTION="${FUNCTION:-${PWD##*/}}"
 FNPATH="${FNPATH:-.}"
+FNLANG="${FNLANG:-}"
+FNPROT="${FNPROT:-}"
+USERACCT="${USERACCT:-${USER}}"
 VERSION="${VERSION:-0.0.1}"
 CONTAINER="${CONTAINER:-sidecar}"
 # ======================================= DEFAULTS END ========================================
-if [[ "${COMMAND}" == "build" ]]; then
+if [[ "${COMMAND}" == "init" ]]; then
+  init
+elif [[ "${COMMAND}" == "build" ]]; then
   build
 elif [[ "${COMMAND}" == "create" ]]; then
   create
