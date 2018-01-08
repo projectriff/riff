@@ -43,8 +43,7 @@ Options:
   -f, --filename: filename or directory to be used for the function resources, 
                   if a file is specified then the file's directory will be used 
                   (defaults to the current directory)
-  -f, --filename: filename, directory, or URL for the resource definition[s] (defaults to the current directory)
-  -l, --language: the language used for the functiuon source
+  -l, --language: the language used for the function source
                   (defaults to filename extension language type or 'shell' if directory specified)
   -p, --protocol: the protocol to use for function invocations
                   (defaults to 'stdio' for shell and python, to 'http' for java and node)
@@ -52,8 +51,9 @@ Options:
   -o, --output: the name of the output topic (no default, only created if specified)
   -a, --artifact: path to the function artifact, source code or jar file
                   (defaults to function name with extension appended based on language: 
-                      '.sh' for shell, '.jar' for java, 'js' for node and '.py' for python)
+                      '.sh' for shell, '.jar' for java, '.js' for node and '.py' for python)
   --classname: the fully qualified class name of the Java function class (required for Java functions)
+  --riff-version: the version of riff to use when building containers
   --push: push the image to Docker registry
 
 EOF
@@ -97,8 +97,7 @@ Options:
   -f, --filename: filename or directory to be used for the function resources, 
                   if a file is specified then the file's directory will be used 
                   (defaults to the current directory)
-  -f, --filename: filename, directory, or URL for the resource definition[s] (defaults to the current directory)
-  -l, --language: the language used for the functiuon source
+  -l, --language: the language used for the function source
                   (defaults to filename extension language type or 'shell' if directory specified)
   -p, --protocol: the protocol to use for function invocations
                   (defaults to 'stdio' for shell and python, to 'http' for java and node)
@@ -106,8 +105,9 @@ Options:
   -o, --output: the name of the output topic (no default, only created if specified)
   -a, --artifact: path to the function artifact, source code or jar file
                   (defaults to function name with extension appended based on language: 
-                      '.sh' for shell, '.jar' for java, 'js' for node and '.py' for python)
+                      '.sh' for shell, '.jar' for java, '.js' for node and '.py' for python)
   --classname: the fully qualified class name of the Java function class (required for Java functions)
+  --riff-version: the version of riff to use when building containers
   --push: push the image to Docker registry
 
 EOF
@@ -212,7 +212,7 @@ EOF
 }
 
 function init() {
-  # assume the file extension based on languag - might be overridden as necessary later
+  # assume the file extension based on language - might be overridden as necessary later
   if [[ $FNLANG == "" || $FNLANG == "shell" ]] ; then
     FNEXT="sh"
   elif [[ $FNLANG == "java" ]] ; then
@@ -583,6 +583,10 @@ case ${key} in
   ;;
   -o|--output)
   TOPIC_OUT="$2"
+  shift
+  ;;
+  --riff-version)
+  RIFF_VERSION="$2"
   shift
   ;;
   -t|--tail)
