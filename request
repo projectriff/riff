@@ -8,7 +8,7 @@ fi
 
 type=$(kubectl get svc -l component=http-gateway -o jsonpath='{.items[0].spec.type}')
 if [[ $type == "NodePort" ]] ; then
-  address=$(minikube ip 2>nul)
+  address=$(minikube ip 2>/dev/null)
   if [[ "$address" == "" ]] ; then
     address=127.0.0.1
   fi
