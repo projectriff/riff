@@ -137,10 +137,14 @@ Delete the resource definition[s] for the function specified.
 Usage:
 
   riff delete -n <name>
+    or
+  riff delete -f <path> --all
 
 Options:
 
-  -n, --name: the name of the function (defaults to the name of the current directory)
+  -n, --name: the name of the function resource to delete (defaults to the name of the current directory)
+  -f, --filename: filename, directory, or URL for the resource definition[s] (defaults to the current directory)
+  --all: delete all resources including topics, not just the function resource
 
 EOF
 }
@@ -427,7 +431,11 @@ function create() {
 
 function delete() {
   echo "Deleting $FUNCTION resource[s]"
-  kubectl delete function $FUNCTION
+  if [[ $DELETEALL == "true" ]] ; then
+    kubectl delete -f $FNPATH
+  else
+    kubectl delete function $FUNCTION
+  fi
 }
 
 function list() {
@@ -543,6 +551,9 @@ case ${key} in
   ;;
   --push)
   DOCKERPUSH="true"
+  ;;
+  --all)
+  DELETEALL="true"
   ;;
   --help)
   print_usage
