@@ -277,7 +277,14 @@ function init() {
     TOPIC_IN=$FUNCTION
   fi
   # ready to initialize
-  echo "Initializing $FNLANG function $FUNCTION"
+  # but first look for function source
+  if [ -f "${ARTRELPATH}" ] ; then
+    echo "Initializing $FNLANG function $FUNCTION"
+  else
+    echo "Source file ${FNFILE} not found, not able to initialize $FNLANG function $FUNCTION"
+    exit 1
+  fi
+
   FNDOCKER="$FNDIR/Dockerfile"
   if [ -f $FNDOCKER ] ; then
     echo "Docker file already exists in $FNDIR"
@@ -414,12 +421,8 @@ function create() {
   if [ -f "${FNPATH}" ] ; then
     FNPATH=$(dirname "$FNPATH")
   fi
-  if [ -f "${ARTRELPATH}" ] ; then
-    build
-    apply
-  else
-    echo "File ${FNFILE} not found, not able to build"
-  fi
+  build
+  apply
 }
 
 function delete() {
