@@ -212,9 +212,9 @@ Usage:
 Options:
 
   -i, --input: the name of the input topic (defaults to the name of the current directory)
-  -d, --data: the data to post to the http-gatewy using the input topic
+  -d, --data: the data to post to the http-gateway using the input topic
   --count: the number of times to post the data (defaults to 1)
-  --pause: the number of seconds to wait bewteen postings (defaults to 0)
+  --pause: the number of seconds to wait between postings (defaults to 0)
   -t, --tail: tail, waiting for the function response
 
 EOF
