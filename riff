@@ -489,10 +489,10 @@ function update() {
 function delete() {
   echo "Deleting $FUNCTION resource[s]"
   if [[ $DELETEALL == "true" ]] ; then
-    if [ -e $FNPATH/*.yaml ] ; then
-      kubectl delete -f $FNPATH
-    else
+    if [[ "$(ls -A $FNPATH/*.yaml 2>/dev/null)" = "" ]] ; then
       echo "No resource definitions found in the $(cd "${FNPATH}"; pwd) directory"
+    else
+      kubectl delete -f $FNPATH
     fi
   else
     kubectl delete function $FUNCTION
