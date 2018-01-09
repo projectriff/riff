@@ -6,32 +6,26 @@
 *Protocol*:: HTTP
 *Input*:: numbers
 
-=== Build the Docker container for the function code
+=== prerequisites
+
+1. riff is deployed
+2. the `riff` script is on your PATH
+3. the working directory is `samples/node/square`
+
+=== create the function and its input topic
 
 ```
-./riff build -n square -v 0.0.2 -f samples/node/square
+riff create
 ```
 
-=== Create the Function and Topic(s)
+=== publish a message and wait for the result
 
 ```
-./riff apply -f samples/node/square
+riff publish -d 99 -t
 ```
 
-=== Publish a Message
+=== delete the function and its input topic
 
 ```
-./request numbers 2
-```
-
-=== Tail the Sidecar Log
-
-```
-./riff logs -n square -t
-```
-
-=== Delete the function
-
-```
-./riff delete -n square
+riff delete --all
 ```
