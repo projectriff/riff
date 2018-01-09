@@ -540,10 +540,15 @@ function publish() {
   fi
 
   for ((i=1; i<=$count; i++)); do
-    if [[ $TAIL == "-f" ]] ; then
-      curl -w "\n" -H "Content-Type: text/plain" http://$address:$port/requests/$TOPIC_IN -d $(eval echo "$PUB_DATA")
+    if [[ $PUB_DATA =~ .*\".* ]] ; then
+      CURL_DATA=$PUB_DATA
     else
-      curl -H "Content-Type: text/plain" http://$address:$port/messages/$TOPIC_IN -d $(eval echo "$PUB_DATA")
+      CURL_DATA=$(eval echo "$PUB_DATA")
+    fi
+    if [[ $TAIL == "-f" ]] ; then
+      curl -w "\n" -H "Content-Type: text/plain" http://$address:$port/requests/$TOPIC_IN -d \"$CURL_DATA\"
+    else
+      curl -H "Content-Type: text/plain" http://$address:$port/messages/$TOPIC_IN -d \"$CURL_DATA\"
     fi
     sleep $pause
   done
