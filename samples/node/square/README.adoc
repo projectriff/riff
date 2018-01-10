@@ -18,10 +18,10 @@
 riff create
 ```
 
-=== publish a message and wait for the result
+=== publish a message and wait for a reply
 
 ```
-riff publish -d 99 -t
+riff publish -d 99 -r
 ```
 
 === delete the function and its input topic
