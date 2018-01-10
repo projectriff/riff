@@ -34,11 +34,10 @@ Initialize the function based on the function source code specified as the filen
 
 Usage:
 
-  riff init -u <useraccount> -n <name> -v <version> -f <source> -l <language> -p <protocol> -i <input-topic> -o <output-topic> [-a <artifact>] [--classname <class-name>] [--push]
+  riff init -n <name> -v <version> -f <source> -l <language> -p <protocol> -i <input-topic> -o <output-topic> [-a <artifact>] [--handler <handler-name>]
 
 Options:
 
-  -u, --useraccount: the Docker user account to be used for the image repository (defaults to current OS username)
   -n, --name: the name of the function (defaults to the name of the current directory)
   -v, --version: the version of the function (defaults to 0.0.1)
   -f, --filename: filename or directory to be used for the function resources, 
@@ -53,9 +52,9 @@ Options:
   -a, --artifact: path to the function artifact, source code or jar file
                   (defaults to function name with extension appended based on language: 
                       '.sh' for shell, '.jar' for java, '.js' for node and '.py' for python)
-  --classname: the fully qualified class name of the Java function class (required for Java functions)
+  --handler: the name of the handler, for Java it is the fully qualified class name of the Java class where the function is defined
   --riff-version: the version of riff to use when building containers
-  --push: push the image to Docker registry
+  --force: overwrite existing Dockerfile and function definitions
 
 EOF
 }
@@ -68,10 +67,11 @@ Build the function based on the code available in the path directory, using the 
 
 Usage:
 
-  riff build -n <name> -v <version> -f <path> [--push]
+  riff build -u <useraccount> -n <name> -v <version> -f <path> [--push]
 
 Options:
 
+  -u, --useraccount: the Docker user account to be used for the image repository (defaults to current OS username)
   -n, --name: the name of the function (defaults to the name of the current directory)
   -v, --version: the version of the function (defaults to 0.0.1)
   -f, --filename: filename, directory, or URL for the code or resource (defaults to the current directory)
@@ -88,7 +88,7 @@ Create the resource[s] for the function based on the function source code specif
 
 Usage:
 
-  riff create -u <useraccount> -n <name> -v <version> -f <source> -l <language> -p <protocol> -i <input-topic> -o <output-topic> [-a <artifact>] [--classname <class-name>] [--push]
+  riff create -u <useraccount> -n <name> -v <version> -f <source> -l <language> -p <protocol> -i <input-topic> -o <output-topic> [-a <artifact>] [--handler <handler-name>] [--push]
 
 Options:
 
@@ -107,8 +107,9 @@ Options:
   -a, --artifact: path to the function artifact, source code or jar file
                   (defaults to function name with extension appended based on language: 
                       '.sh' for shell, '.jar' for java, '.js' for node and '.py' for python)
-  --classname: the fully qualified class name of the Java function class (required for Java functions)
+  --handler: the name of the handler, for Java it is the fully qualified class name of the Java class where the function is defined
   --riff-version: the version of riff to use when building containers
+  --force: overwrite existing Dockerfile and function definitions
   --push: push the image to Docker registry
 
 EOF
@@ -214,6 +215,8 @@ Options:
   -i, --input: the name of the input topic (defaults to the name of the current directory)
   -d, --data: the data to post to the http-gateway using the input topic
   -r, --reply: wait for a reply containing the results of the function execution
+  -e, --eval: evaluate the data and substitute variables
+              (e.g. you can use ${i} to capture the iteration when using --count)
   --count: the number of times to post the data (defaults to 1)
   --pause: the number of seconds to wait between postings (defaults to 0)
 
@@ -274,7 +277,7 @@ function init() {
     ARTRELPATH=$FNFILE
     ARTRELDIR="."
   else
-    if [ -f "${FNARTIFACT}" ] ; then
+    if [ -f "${FNDIR}/${FNARTIFACT}" ] ; then
       ARTDIR=$(dirname "$FNARTIFACT")
       if [[ $ARTDIR == /* ]] ; then
         ARTRELDIR=$(make_path_relative $ARTDIR $FNDIR)
@@ -323,7 +326,7 @@ function init() {
   fi
   # ready to initialize
   # but first look for function source
-  if [ -f "${ARTRELPATH}" ] ; then
+  if [ -f "$FNDIR/${ARTRELPATH}" ] ; then
     echo "Initializing $FNLANG function $FUNCTION"
   else
     echo "Source file ${FNFILE} not found, not able to initialize $FNLANG function $FUNCTION"
@@ -331,19 +334,19 @@ function init() {
   fi
 
   FNDOCKER="$FNDIR/Dockerfile"
-  if [ -f $FNDOCKER ] ; then
+  if [ -f $FNDOCKER ] && [[ ! $FORCE == "true" ]] ; then
     echo "Docker file already exists in $FNDIR"
   else
     write_dockerfile
   fi
   FNDEF="$FNDIR/$FUNCTION-function.yaml"
-  if [ -f $FNDEF ] ; then
+  if [ -f $FNDEF ] && [[ ! $FORCE == "true" ]] ; then
     echo "Function definition file already exists in $FNDIR"
   else
     write_function_yaml
   fi
   FNTOPICS="$FNDIR/$FUNCTION-topics.yaml"
-  if [ -f $FNTOPICS ] ; then
+  if [ -f $FNTOPICS ] && [[ ! $FORCE == "true" ]] ; then
     echo "Topics definition file already exists in $FNDIR"
   else
     write_topics_yaml
@@ -371,31 +374,31 @@ function make_path_relative() {
 
 function write_dockerfile() {
   if [[ $FNLANG == "shell" ]] ; then
-    cat >> $FNDOCKER <<EOF
+    cat > $FNDOCKER <<EOF
 FROM projectriff/${FNLANG}-function-invoker:${RIFF_VERSION}
 ARG FUNCTION_URI="/${FNFILE}"
 ENV FUNCTION_URI \${FUNCTION_URI}
 ADD ${ARTRELPATH} /
 EOF
   elif [[ $FNLANG == "java" ]] ; then
-    cat >> $FNDOCKER <<EOF
+    cat > $FNDOCKER <<EOF
 FROM projectriff/${FNLANG}-function-invoker:${RIFF_VERSION}
 ARG FUNCTION_JAR=/functions/${FNFILE}
-ARG FUNCTION_CLASS=${FNCLASS}
+ARG FUNCTION_CLASS=${FNHANDLER}
 ENV FUNCTION_URI file://\${FUNCTION_JAR}?handler=\${FUNCTION_CLASS}
 ADD ${ARTRELPATH} \${FUNCTION_JAR}
 EOF
   elif [[ $FNLANG == "node" ]] ; then
-    cat >> $FNDOCKER <<EOF
+    cat > $FNDOCKER <<EOF
 FROM projectriff/${FNLANG}-function-invoker:${RIFF_VERSION}
 ENV FUNCTION_URI /functions/${FNFILE}
 ADD ${ARTRELPATH} \${FUNCTION_URI}
 EOF
   elif [[ $FNLANG == "python" ]] ; then
-    cat >> $FNDOCKER <<EOF
+    cat > $FNDOCKER <<EOF
 FROM projectriff/python2-function-invoker:${RIFF_VERSION}
 ARG FUNCTION_MODULE=${FNFILE}
-ARG FUNCTION_HANDLER=process
+ARG FUNCTION_HANDLER=${FNHANDLER}
 ENV FUNCTION_URI file:///\${FUNCTION_MODULE}?handler=\${FUNCTION_HANDLER}
 ADD ${ARTRELPATH} /
 ADD ${ARTRELDIR}/requirements.txt /
@@ -405,7 +408,7 @@ EOF
 }
 
 function write_function_yaml() {
-  cat >> $FNDEF <<EOF
+  cat > $FNDEF <<EOF
 apiVersion: projectriff.io/v1
 kind: Function
 metadata:
@@ -426,7 +429,7 @@ EOF
 }
 
 function write_topics_yaml() {
-  cat >> $FNTOPICS <<EOF
+  cat > $FNTOPICS <<EOF
 apiVersion: projectriff.io/v1
 kind: Topic
 metadata:
@@ -540,10 +543,10 @@ function publish() {
   fi
 
   for ((i=1; i<=$count; i++)); do
-    if [[ $PUB_DATA =~ .*\".* ]] ; then
-      CURL_DATA=$PUB_DATA
-    else
+    if [[ $PUB_EVAL == "true" ]] ; then
       CURL_DATA=$(eval echo "$PUB_DATA")
+    else
+      CURL_DATA=$PUB_DATA
     fi
     if [[ $PUB_REPLY == "true" ]] ; then
       curl -w "\n" -H "Content-Type: text/plain" http://$address:$port/requests/$TOPIC_IN -d "$CURL_DATA"
@@ -627,8 +630,8 @@ case ${key} in
   FNARTIFACT="$2"
   shift
   ;;
-  --classname)
-  FNCLASS="$2"
+  --handler)
+  FNHANDLER="$2"
   shift
   ;;
   -l|--language)
@@ -662,6 +665,9 @@ case ${key} in
   PUB_DATA="$2"
   shift
   ;;
+  -e|--eval)
+  PUB_EVAL="true"
+  ;;
   --count)
   PUB_COUNT="$2"
   shift
@@ -679,6 +685,9 @@ case ${key} in
   ;;
   -r|--reply)
   PUB_REPLY="true"
+  ;;
+  --force)
+  FORCE="true"
   ;;
   --push)
   DOCKERPUSH="true"
@@ -701,8 +710,19 @@ shift
 done
 
 # ======================================= DEFAULTS ============================================
-FUNCTION="${FUNCTION:-${PWD##*/}}"
 FNPATH="${FNPATH:-.}"
+if [ -z $FUNCTION ] ; then
+  if [ -f "${FNPATH}" ] ; then
+    _path=$(basename $(dirname "$FNPATH"))
+  else
+    _path=$FNPATH    
+  fi
+  if [[ $_path == "." ]] ; then
+    FUNCTION=$(basename $(cd "$(dirname "$_path")" && pwd))
+  else
+    FUNCTION=$(basename "$_path")
+  fi
+fi
 FNLANG="${FNLANG:-}"
 FNPROT="${FNPROT:-}"
 USERACCT="${USERACCT:-${USER}}"
