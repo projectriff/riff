@@ -1,6 +1,6 @@
 #!/bin/bash
 
-RIFF_VERSION=0.0.2
+RIFF_VERSION="${RIFF_VERSION:-0.0.2}"
 
 function print_usage() {
 cat <<EOF
