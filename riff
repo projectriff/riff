@@ -15,7 +15,7 @@ Commands:
   apply        Apply function resource definitions
   create       Create function resources, build container and apply the function resources
   update       Build the container and apply the modified function resources
-  delete       Delete function resource definitions
+  delete       Delete function resources
   list         List current function resources
   logs         Show logs for a function resource
   publish      Publish data to a topic using the http-gateway
@@ -153,7 +153,7 @@ EOF
 function print_delete_usage() {
 cat <<EOF
 
-Delete the resource definition[s] for the function specified.
+Delete the resource[s] for the function or path specified.
 
 Usage:
 

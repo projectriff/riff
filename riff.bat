@@ -217,7 +217,7 @@ echo   build        Build a function container
 echo   apply        Apply function resource definitions
 echo   create       Create function resources (Not yet available for Windows)
 echo   update       Upfate function resources (Not yet available for Windows)
-echo   delete       Delete function resource definitions
+echo   delete       Delete function resources
 echo   list         List current function resources
 echo   logs         Show logs for a function resource
 echo   publish      Publish data to a topic using the http-gateway (Not yet available for Windows)
@@ -285,7 +285,7 @@ exit /B 0
 
 :print_delete_usage
 echo.
-echo Delete the resource definition[s] for the function specified.
+echo Delete the resource[s] for the function specified.
 echo.
 echo Usage:
 echo.
