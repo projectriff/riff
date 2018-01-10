@@ -207,15 +207,15 @@ Publish data to a topic using the http-gateway.
 
 Usage:
 
-  riff publish -i <input-topic> -d <data> [--count <count>] [--pause <pause>] [-t]
+  riff publish -i <input-topic> -d <data> [-r] [--count <count>] [--pause <pause>]
 
 Options:
 
   -i, --input: the name of the input topic (defaults to the name of the current directory)
   -d, --data: the data to post to the http-gateway using the input topic
+  -r, --reply: wait for a reply containing the results of the function execution
   --count: the number of times to post the data (defaults to 1)
   --pause: the number of seconds to wait between postings (defaults to 0)
-  -t, --tail: tail, waiting for the function response
 
 EOF
 }
@@ -540,7 +540,7 @@ function publish() {
   fi
 
   for ((i=1; i<=$count; i++)); do
-    if [[ $TAIL == "-f" ]] ; then
+    if [[ $PUB_REPLY == "true" ]] ; then
       curl -w "\n" -H "Content-Type: text/plain" http://$address:$port/requests/$TOPIC_IN -d $(eval echo "$PUB_DATA")
     else
       curl -H "Content-Type: text/plain" http://$address:$port/messages/$TOPIC_IN -d $(eval echo "$PUB_DATA")
@@ -671,6 +671,9 @@ case ${key} in
   ;;
   -t|--tail)
   TAIL="-f"
+  ;;
+  -r|--reply)
+  PUB_REPLY="true"
   ;;
   --push)
   DOCKERPUSH="true"
