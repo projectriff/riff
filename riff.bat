@@ -58,6 +58,7 @@ if [%1]==[--output] set key=-o
 if [%1]==[--useraccount] set key=-u
 if [%1]==[--data] set key=-d
 if [%1]==[--reply] set key=-r
+if [%1]==[--eval] set key=-e
 if [%1]==[--tail] set key=-t
 if [%1]==[--help] set key=-h
 if [%1]==[--riff-version] (
@@ -141,6 +142,10 @@ if [%key%]==[-d] (
 if [%key%]==[-r] (
     set match=true
     set PUB_REPLY=true
+)
+if [%key%]==[-e] (
+    set match=true
+    set PUB_EVAL=true
 )
 if [%key%]==[-u] (
     set match=true
@@ -264,7 +269,6 @@ exit /B 1
       for /F "delims=" %%i in ("%FNPATH%") do set FNDIR=%%~dspi
     ) else (
       :: FNPATH is a directory
-      :: look for function file
       if exist %FNDIR%\%FUNCTION%.sh set FNEXT=.sh& set FNFILE=%FUNCTION%.sh
       if exist %FNDIR%\%FUNCTION%.jar set FNEXT=.jar& set FNFILE=%FUNCTION%.jar
       if exist %FNDIR%\%FUNCTION%.js set FNEXT=.js& set FNFILE=%FUNCTION%.js
@@ -510,12 +514,24 @@ exit /B 1
   exit /B %ERRORLEVEL%
 
 :do_post_content
-if "%PUB_REPLY%"=="true" (
-  curl -H "Content-Type: text/plain" -X POST http://%address%:%port%/requests/%TOPIC_IN% -d %PUB_DATA%
+if "%PUB_EVAL%"=="true" (
+  call :capture_echo _message %PUB_DATA% %1
 ) else (
-  curl -H "Content-Type: text/plain" -X POST http://%address%:%port%/messages/%TOPIC_IN% -d %PUB_DATA%
+  set _message=%PUB_DATA%
+)
+if "%PUB_REPLY%"=="true" (
+  curl -H "Content-Type: text/plain" -X POST http://%address%:%port%/requests/%TOPIC_IN% -d %_message%
+) else (
+  curl -H "Content-Type: text/plain" -X POST http://%address%:%port%/messages/%TOPIC_IN% -d %_message%
 )
 timeout /t %pause% /nobreak > NUL
+exit /B %ERRORLEVEL%
+
+:capture_echo
+set i=%3
+for /f "tokens=* usebackq" %%f in (`echo %2`) do (
+  set %1=%%f
+)
 exit /B %ERRORLEVEL%
 
 :capture_cmd
@@ -724,6 +740,8 @@ echo.
 echo   -i, --input: the name of the input topic (defaults to the name of the current directory)
 echo   -d, --data: the data to post to the http-gateway using the input topic
 echo   -r, --reply: wait for a reply containing the results of the function execution
+echo   -e, --eval: evaluate the data and substitute variables
+echo               (e.g. you can use %%%%i%%%% to capture the iteration when using --count)
 echo   --count: the number of times to post the data (defaults to 1)
 echo   --pause: the number of seconds to wait between postings (defaults to 0)
 echo.
