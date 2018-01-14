@@ -1,6 +1,6 @@
 = riff CLI tool
 
-built with [cobra]https://github.com/spf13/cobra
+built with https://github.com/spf13/cobra[cobra]
 
 == Building
 ```
