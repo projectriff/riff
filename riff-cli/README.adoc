@@ -1,0 +1,11 @@
+= riff CLI tool
+
+built with [cobra]https://github.com/spf13/cobra
+
+== Building
+```
+cd $(go env GOPATH)
+git clone https://github.com/dturanski/riff-cli
+cd src/github.com/projectriff/riff-cli/riff
+go install
+```
