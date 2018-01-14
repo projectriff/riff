@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/projectriff/riff-cli/cmd"
+import "github.com/dturanski/riff-cli/cmd"
 
 func main() {
 	cmd.Execute()

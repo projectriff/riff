@@ -18,14 +18,15 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/projectriff/riff-cli/kubectl"
-	"github.com/projectriff/riff-cli/ioutils"
-	"github.com/projectriff/riff-cli/minikube"
-	"github.com/projectriff/riff-cli/jsonpath"
+	"github.com/dturanski/riff-cli/kubectl"
+	"github.com/dturanski/riff-cli/ioutils"
+	"github.com/dturanski/riff-cli/minikube"
+	"github.com/dturanski/riff-cli/jsonpath"
 	"fmt"
 	"net/http"
 	"path/filepath"
 	"os"
+	"io/ioutil"
 )
 
 type PublishOptions struct {
@@ -61,7 +62,7 @@ will post 'hello' to the 'greetings' topic and wait for a reply.
 			if err != nil {
 				panic(err)
 			}
-			input := filepath.Dir(cwd)
+			input := filepath.Base(cwd)
 			publishOptions.input = input
 		}
 
@@ -115,23 +116,27 @@ will post 'hello' to the 'greetings' topic and wait for a reply.
 }
 
 func publish(ipAddress string, port string) {
-	fmt.Printf("%s:%s\n",ipAddress, port)
-
 	resource := "messages"
 	if publishOptions.reply {
 		resource = "requests"
 	}
-	
-	url := fmt.Sprintf("http://%s:%s/%s/%s",ipAddress, port, resource, publishOptions.input )
 
-	fmt.Printf("Posting to %s\n",url)
+	url := fmt.Sprintf("http://%s:%s/%s/%s", ipAddress, port, resource, publishOptions.input)
+
+	fmt.Printf("Posting to %s\n", url)
 
 	resp, err := http.Post(url, "text/plain", strings.NewReader(publishOptions.data))
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(resp)
-
+	if (publishOptions.reply) {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(string(body))
+	}
 }
 
 func init() {

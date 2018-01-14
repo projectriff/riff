@@ -4,7 +4,7 @@ import (
 	"os/exec"
 	"time"
 	"context"
-	"github.com/projectriff/riff-cli/ioutils"
+	"github.com/dturanski/riff-cli/ioutils"
 )
 
 func QueryForString(cmdArgs []string) (string, error) {
