@@ -16,60 +16,66 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os/exec"
 	"os"
 	"bufio"
+
+	"github.com/spf13/cobra"
+	"github.com/projectriff/riff-cli/ioutils"
+	"github.com/projectriff/riff-cli/kubectl"
 )
 
 type LogsOptions struct {
-	Function        string
-	Container 		string
-	Tail            bool
+	function  string
+	container string
+	tail      bool
 }
 
-var options LogsOptions
+var logsOptions LogsOptions
 
 // logsCmd represents the logs command
 var logsCmd = &cobra.Command{
 	Use:   "logs",
-	Short: "Show logs for a function resource",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Display the logs for a running function",
+	Long: `Display the logs for a running function For example:
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+riff logs -n myfunc -t
+
+will tail the logs from the 'sidecar' container for the function 'myfunc'
+
+`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Displaying logs for container %v of function %v\n", options.Container, options.Function)
 
-		//kubectl logs ${TAIL} -c ${CONTAINER} $(kubectl get pod -l function=${FUNCTION} -o jsonpath='{.items[0].metadata.name}')
+		if logsOptions.function == "" {
+			ioutils.Error("Missing required flag 'name'.")
+			cmd.Usage()
+			return;
+		}
 
-		cmdName := "kubectl"
-		cmdArgs := []string{"get","pod","-l","function="+ options.Function, "-o", "jsonpath={.items[0].metadata.name}"}
+		fmt.Printf("Displaying logs for container %v of function %v\n", logsOptions.container, logsOptions.function)
 
-		command := exec.Command(cmdName, cmdArgs...)
+		cmdArgs := []string{"get", "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.name}"}
 
+		output, err := kubectl.QueryForString(cmdArgs)
 
-		output, err := command.CombinedOutput()
-		if (err != nil) {
-			fmt.Printf("Error getting pod %v for function %v\n", err, options.Function)
-			fmt.Println(string(output))
+		if err != nil {
+			ioutils.Errorf("Error getting pod %v for function %v\n%v", err, logsOptions.function, output)
 			return
 		}
 
-		pod:= string(output)
+		pod := output
 
-		tail:= ""
-		if options.Tail {tail = "-f"}
+		tail := ""
+		if logsOptions.tail {
+			tail = "-f"
+		}
 
+		cmdArgs = []string{"logs", "-c", logsOptions.container, tail, pod}
 
-		cmdArgs = []string{"logs", "-c", options.Container, tail, pod}
-
-		command = exec.Command(cmdName, cmdArgs...)
-		cmdReader, err := command.StdoutPipe()
+		kubectlCmd := exec.Command("kubectl", cmdArgs...)
+		cmdReader, err := kubectlCmd.StdoutPipe()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for command", err)
+			fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for kubectlCmd", err)
 			return
 		}
 
@@ -80,21 +86,20 @@ to quickly create a Cobra application.`,
 			}
 		}()
 
-		err = command.Start()
+		err = kubectlCmd.Start()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error starting command", err)
+			fmt.Fprintln(os.Stderr, "Error starting kubectlCmd", err)
 			return
 		}
 
-		err = command.Wait()
+		err = kubectlCmd.Wait()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error waiting for command", err)
+			fmt.Fprintln(os.Stderr, "Error waiting for kubectlCmd", err)
 			return
 		}
 
 	},
 }
-
 
 func init() {
 	rootCmd.AddCommand(logsCmd)
@@ -109,7 +114,7 @@ func init() {
 	// is called directly, e.g.:
 	// logsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	logsCmd.Flags().StringVarP(&options.Container, "container", "c", "sidecar", "The name of the function container (sidecar or main)")
-	logsCmd.Flags().StringVarP(&options.Function, "name", "n", "", "The name of the function")
-	logsCmd.Flags().BoolVarP(&options.Tail,"tail","t",false, "Tail the logs" )
+	logsCmd.Flags().StringVarP(&logsOptions.container, "container", "c", "sidecar", "The name of the function container (sidecar or main)")
+	logsCmd.Flags().StringVarP(&logsOptions.function, "name", "n", "", "The name of the function")
+	logsCmd.Flags().BoolVarP(&logsOptions.tail, "tail", "t", false, "Tail the logs")
 }

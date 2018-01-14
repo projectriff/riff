@@ -1,0 +1,58 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "creationTimestamp": "2018-01-09T16:40:15Z",
+                "labels": {
+                    "app": "riff",
+                    "chart": "riff-0.0.2",
+                    "component": "http-gateway",
+                    "heritage": "Tiller",
+                    "release": "demo"
+                },
+                "name": "demo-riff-http-gateway",
+                "namespace": "default",
+                "resourceVersion": "3380",
+                "selfLink": "/api/v1/namespaces/default/services/demo-riff-http-gateway",
+                "uid": "c50fdf3f-f55b-11e7-9f39-42010a8e0080"
+            },
+            "spec": {
+                "clusterIP": "10.63.251.94",
+                "externalTrafficPolicy": "Cluster",
+                "ports": [
+                    {
+                        "name": "http",
+                        "nodePort": 32627,
+                        "port": 80,
+                        "protocol": "TCP",
+                        "targetPort": 8080
+                    }
+                ],
+                "selector": {
+                    "app": "riff",
+                    "component": "http-gateway",
+                    "release": "demo"
+                },
+                "sessionAffinity": "None",
+                "type": "LoadBalancer"
+            },
+            "status": {
+                "loadBalancer": {
+                    "ingress": [
+                        {
+                            "ip": "35.196.105.42"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": "",
+        "selfLink": ""
+    }
+}
