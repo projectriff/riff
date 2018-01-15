@@ -9,6 +9,6 @@ func Errorf(format string, a ...interface{}) {
 	fmt.Fprintf(os.Stderr, format, a...)
 }
 
-func Error(msg string) {
+func Error(msg interface{}) {
 	Errorf("%s\n", msg)
 }

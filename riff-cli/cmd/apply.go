@@ -18,7 +18,11 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/dturanski/riff-cli/pkg/kubectl"
+	"github.com/dturanski/riff-cli/pkg/ioutils"
 )
+
+var filePath string
 
 // applyCmd represents the apply command
 var applyCmd = &cobra.Command{
@@ -31,20 +35,17 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("apply called")
+		fmt.Println(args)
+		output, err := kubectl.ExecForString([]string{"apply", "-f", filePath})
+		if err != nil {
+			return
+		}
+		fmt.Println(output)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(applyCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// applyCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// applyCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	applyCmd.Flags().StringVarP(&filePath, "filepath", "f", "", "Filename, directory, or URL to files that contains the configuration to apply")
+	applyCmd.MarkFlagRequired("filepath")
 }

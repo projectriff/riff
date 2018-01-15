@@ -25,6 +25,8 @@ import (
 
 var cfgFile string
 
+var RIFF_VERSION = "0.0.2"
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "riff",
@@ -45,6 +47,7 @@ func Execute() {
 }
 
 func init() {
+
 	cobra.OnInitialize(initConfig)
 
 	// Here you will define your flags and configuration settings.
@@ -54,11 +57,17 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	version := os.Getenv("RIFF_VERSION")
+	if (version != "") {
+		RIFF_VERSION = version
+	}
+
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -70,7 +79,7 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".riff" (without extension).
+		// Search config in home directory with functionName ".riff" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".riff")
 	}

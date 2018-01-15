@@ -46,17 +46,11 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if logsOptions.function == "" {
-			ioutils.Error("Missing required flag 'name'.")
-			cmd.Usage()
-			return;
-		}
-
 		fmt.Printf("Displaying logs for container %v of function %v\n", logsOptions.container, logsOptions.function)
 
-		cmdArgs := []string{"get", "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.name}"}
+		cmdArgs := []string{"get", "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.functionName}"}
 
-		output, err := kubectl.QueryForString(cmdArgs)
+		output, err := kubectl.ExecForString(cmdArgs)
 
 		if err != nil {
 			ioutils.Errorf("Error %v - Function %v may not be currently active\n%", err, logsOptions.function)
@@ -114,7 +108,9 @@ func init() {
 	// is called directly, e.g.:
 	// logsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	logsCmd.Flags().StringVarP(&logsOptions.container, "container", "c", "sidecar", "The name of the function container (sidecar or main)")
-	logsCmd.Flags().StringVarP(&logsOptions.function, "name", "n", "", "The name of the function")
+	logsCmd.Flags().StringVarP(&logsOptions.function, "functionName", "n", "", "The functionName of the function")
+	logsCmd.Flags().StringVarP(&logsOptions.container, "container", "c", "sidecar", "The functionName of the function container (sidecar or main)")
 	logsCmd.Flags().BoolVarP(&logsOptions.tail, "tail", "t", false, "Tail the logs")
+
+	logsCmd.MarkFlagRequired("functionName")
 }

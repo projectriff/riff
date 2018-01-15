@@ -5,14 +5,16 @@ import (
 	"time"
 	"context"
 	"github.com/dturanski/riff-cli/pkg/ioutils"
+	"bytes"
+	"fmt"
 )
 
-func QueryForString(cmdArgs []string) (string, error) {
-	out, err := QueryForBytes(cmdArgs)
+func ExecForString(cmdArgs []string) (string, error) {
+	out, err := ExecForBytes(cmdArgs)
 	return string(out), err
 }
 
-func QueryForBytes(cmdArgs []string) ([]byte, error) {
+func ExecForBytes(cmdArgs []string) ([]byte, error) {
 
 	// Create a new context and add a timeout to it
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
@@ -22,8 +24,13 @@ func QueryForBytes(cmdArgs []string) ([]byte, error) {
 	// Create the command with our context
 	cmd := exec.CommandContext(ctx, cmdName, cmdArgs...)
 
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
 	// This time we can simply use Output() to get the result.
 	out, err := cmd.Output()
+	if err != nil {
+		ioutils.Error(fmt.Sprint(err) + ": " + stderr.String())
+	}
 
 	// We want to check the context error to see if the timeout was executed.
 	// The error returned by cmd.Output() will be OS specific based on what
@@ -32,6 +39,7 @@ func QueryForBytes(cmdArgs []string) ([]byte, error) {
 		ioutils.Error("Command timed out")
 		return nil, ctx.Err()
 	}
+
 
 	return out, err
 }

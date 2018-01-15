@@ -18,15 +18,15 @@ import (
 	"strings"
 	"fmt"
 	"net/http"
-	"path/filepath"
-	"os"
 	"io/ioutil"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/dturanski/riff-cli/pkg/kubectl"
 	"github.com/dturanski/riff-cli/pkg/ioutils"
 	"github.com/dturanski/riff-cli/pkg/minikube"
 	"github.com/dturanski/riff-cli/pkg/jsonpath"
+	"github.com/dturanski/riff-cli/pkg/osutils"
 )
 
 type PublishOptions struct {
@@ -51,23 +51,8 @@ will post 'hello' to the 'greetings' topic and wait for a reply.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if publishOptions.data == "" {
-			ioutils.Error("Missing required flag 'data'.")
-			cmd.Usage()
-			return;
-		}
-
-		if publishOptions.input == "" {
-			cwd, err := os.Getwd()
-			if err != nil {
-				panic(err)
-			}
-			input := filepath.Base(cwd)
-			publishOptions.input = input
-		}
-
 		cmdArgs := []string{"get", "svc", "-l", "component=http-gateway", "-o", "json"}
-		output, err := kubectl.QueryForBytes(cmdArgs)
+		output, err := kubectl.ExecForBytes(cmdArgs)
 
 		if err != nil {
 			ioutils.Errorf("Error querying http-gateway %v\n %v\n", err, output)
@@ -83,7 +68,7 @@ will post 'hello' to the 'greetings' topic and wait for a reply.
 			return
 		}
 
-		port := parser.Value(`$.items[0].spec.ports[*]?(@.name == "http").nodePort+`)
+		port := parser.Value(`$.items[0].spec.ports[*]?(@.functionName == "http").nodePort+`)
 
 		if port == "" {
 			ioutils.Error("unable to determine http-gateway port")
@@ -125,17 +110,23 @@ func publish(ipAddress string, port string) {
 
 	fmt.Printf("Posting to %s\n", url)
 
-	resp, err := http.Post(url, "text/plain", strings.NewReader(publishOptions.data))
-	if err != nil {
-		panic(err)
-	}
-	if (publishOptions.reply) {
+	for i := 0; i < publishOptions.count; i++ {
+
+		resp, err := http.Post(url, "text/plain", strings.NewReader(publishOptions.data))
+		if err != nil {
+			panic(err)
+		}
+
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			panic(err)
 		}
 		fmt.Println(string(body))
+
+		if (publishOptions.pause > 0) {
+			time.Sleep(time.Duration(publishOptions.pause) * time.Second)
+		}
 	}
 }
 
@@ -151,10 +142,13 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// publishCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	publishCmd.Flags().StringVarP(&publishOptions.input, "input", "i", "", "The name of the input topic (defaults to the name of the current directory)")
+
 	publishCmd.Flags().StringVarP(&publishOptions.data, "data", "d", "", "The data to post to the http-gateway using the input topic")
+	publishCmd.Flags().StringVarP(&publishOptions.input, "input", "i", osutils.GetCurrentBasePath(), "The functionName of the input topic (defaults to the functionName of the current directory)")
 	publishCmd.Flags().BoolVarP(&publishOptions.reply, "reply", "r", false, "Wait for a reply containing the results of the function execution")
 	publishCmd.Flags().IntVarP(&publishOptions.count, "count", "c", 1, "The number of times to post the data")
 	publishCmd.Flags().IntVarP(&publishOptions.pause, "pause", "p", 0, "The number of seconds to wait between postings")
+
+	publishCmd.MarkFlagRequired("data")
 
 }
