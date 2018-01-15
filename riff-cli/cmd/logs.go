@@ -21,8 +21,8 @@ import (
 	"bufio"
 
 	"github.com/spf13/cobra"
-	"github.com/dturanski/riff-cli/ioutils"
-	"github.com/dturanski/riff-cli/kubectl"
+	"github.com/dturanski/riff-cli/pkg/ioutils"
+	"github.com/dturanski/riff-cli/pkg/kubectl"
 )
 
 type LogsOptions struct {
@@ -59,7 +59,7 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 		output, err := kubectl.QueryForString(cmdArgs)
 
 		if err != nil {
-			ioutils.Errorf("Error getting pod %v for function %v\n%v", err, logsOptions.function, output)
+			ioutils.Errorf("Error %v - Function %v may not be currently active\n%", err, logsOptions.function)
 			return
 		}
 

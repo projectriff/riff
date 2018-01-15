@@ -6,6 +6,6 @@ built with https://github.com/spf13/cobra[cobra]
 ```
 cd $(go env GOPATH)
 git clone https://github.com/dturanski/riff-cli
-cd src/github.com/dturanski/riff-cli/riff
-go install
+cd src/github.com/dturanski/riff-cli
+make
 ```

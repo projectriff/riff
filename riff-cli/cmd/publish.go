@@ -16,25 +16,25 @@ package cmd
 
 import (
 	"strings"
-
-	"github.com/spf13/cobra"
-	"github.com/dturanski/riff-cli/kubectl"
-	"github.com/dturanski/riff-cli/ioutils"
-	"github.com/dturanski/riff-cli/minikube"
-	"github.com/dturanski/riff-cli/jsonpath"
 	"fmt"
 	"net/http"
 	"path/filepath"
 	"os"
 	"io/ioutil"
+
+	"github.com/spf13/cobra"
+	"github.com/dturanski/riff-cli/pkg/kubectl"
+	"github.com/dturanski/riff-cli/pkg/ioutils"
+	"github.com/dturanski/riff-cli/pkg/minikube"
+	"github.com/dturanski/riff-cli/pkg/jsonpath"
 )
 
 type PublishOptions struct {
 	input string
 	data  string
 	reply bool
-	count int16
-	pause int16
+	count int
+	pause int
 }
 
 var publishOptions PublishOptions
@@ -154,7 +154,7 @@ func init() {
 	publishCmd.Flags().StringVarP(&publishOptions.input, "input", "i", "", "The name of the input topic (defaults to the name of the current directory)")
 	publishCmd.Flags().StringVarP(&publishOptions.data, "data", "d", "", "The data to post to the http-gateway using the input topic")
 	publishCmd.Flags().BoolVarP(&publishOptions.reply, "reply", "r", false, "Wait for a reply containing the results of the function execution")
-	publishCmd.Flags().Int16VarP(&publishOptions.count, "count", "c", 1, "The number of times to post the data")
-	publishCmd.Flags().Int16VarP(&publishOptions.pause, "pause", "p", 0, "The number of seconds to wait between postings")
+	publishCmd.Flags().IntVarP(&publishOptions.count, "count", "c", 1, "The number of times to post the data")
+	publishCmd.Flags().IntVarP(&publishOptions.pause, "pause", "p", 0, "The number of seconds to wait between postings")
 
 }
