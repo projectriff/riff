@@ -19,7 +19,6 @@ import (
 	"github.com/dturanski/riff-cli/pkg/osutils"
 	"path/filepath"
 	"github.com/dturanski/riff-cli/pkg/ioutils"
-	"container/heap"
 	"fmt"
 	"os"
 )

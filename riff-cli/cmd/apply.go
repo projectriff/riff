@@ -19,7 +19,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/dturanski/riff-cli/pkg/kubectl"
-	"github.com/dturanski/riff-cli/pkg/ioutils"
 )
 
 var filePath string

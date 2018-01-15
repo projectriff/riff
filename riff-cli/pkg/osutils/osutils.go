@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"os/user"
-	"fmt"
 	"github.com/dturanski/riff-cli/pkg/ioutils"
 )
 
