@@ -4,35 +4,28 @@
 *Language*:: Shell
 *Function*:: link:wordcount.sh[wordcount.sh]
 *Protocol*:: stdio
-*Input*:: names
-*Output*:: greetings
+*Input*:: words
 
-=== Build the Docker container for the function code
+=== prerequisites
 
-```
-./riff build -n wordcount -v 0.0.2 -f samples/shell/wordcount
-```
+1. riff is deployed
+2. the `riff` script is on your PATH
+3. the working directory is `samples/shell/wordcount`
 
-=== Create the Function and Topic(s)
-
-```
-./riff apply -f samples/shell/wordcount
-```
-
-=== Publish a Message to the Input Topic
+=== create the function and its input topic
 
 ```
-./publish names hello
+riff create --input words
 ```
 
-=== Tail the Sidecar Log
+=== publish a message and wait for a reply
 
 ```
-./riff logs -n wordcount -t
+riff publish --input words --data "riff is for functions" --reply
 ```
 
-=== Delete the function
+=== delete the function and its input topic
 
 ```
-./riff delete -n wordcount
+riff delete --all
 ```
