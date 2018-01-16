@@ -17,40 +17,13 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/dturanski/riff-cli/pkg/osutils"
-	"path/filepath"
+	"github.com/dturanski/riff-cli/pkg/function"
 	"github.com/dturanski/riff-cli/pkg/ioutils"
-	"fmt"
-	"os"
 )
 
 //TODO: This command maybe should be split out into sub commands, e.g. , 'riff init <language>', e.g., classname only applies to java
 
-type InitOptions struct {
-	userAccount  string
-	functionName string
-	version      string
-	functionPath string
-	language     string
-	protocol     string
-	input        string
-	output       string
-	artifact     string
-	classname    string
-	riffVersion  string
-	push         bool
-}
-
-var initOptions InitOptions
-
-var fileExtenstions = map[string]string{
-	"shell"		:  "sh",
-	"java"		:   "java",
-	"node"		:   "js",
-	"js"		:   "js",
-	"python"	: 	"py",
-}
-
-var functionFile string
+var initOptions function.InitOptions
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
@@ -64,65 +37,30 @@ riff init
 
 This will generate the required Dockerfile and resource definitions using sensible defaults.`,
 
-	PreRun: func(cmd *cobra.Command, args []string) {
-		if initOptions.input == "" {
-			initOptions.input = initOptions.functionName
-		}
-
-		if !osutils.FileExists(initOptions.functionPath) {
-			ioutils.Errorf("File does not exist %s\n", initOptions.functionPath)
-			os.Exit(1)
-		}
-
-		if osutils.IsDirectory(initOptions.functionPath) {
-			if initOptions.language == "" {
-				for lang, ext := range fileExtenstions {
-					fileName := fmt.Sprintf("%s.%s",initOptions.functionName, ext)
-					functionFile = filepath.Join(initOptions.functionPath, fileName)
-					if osutils.FileExists(functionFile) {
-						initOptions.language = lang
-						break
-					}
-				}
-				if initOptions.language == "" {
-					ioutils.Errorf("cannot find function source for function %s in directory %s\n", initOptions.functionName, initOptions.functionPath)
-					os.Exit(1)
-				}
-			} else {
-				ext := fileExtenstions[initOptions.language]
-				if ext == "" {
-					ioutils.Errorf("language %s is unsupported \n", initOptions.language)
-					os.Exit(1)
-				}
-
-				fileName := fmt.Sprintf("%s.%s",initOptions.functionName, ext)
-				functionFile = filepath.Join(initOptions.functionPath, fileName)
-				if !osutils.FileExists(functionFile) {
-					ioutils.Errorf("cannot find function source for function %s\n", functionFile)
-				}
-			}
-		}
-	},
 
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Function file: %s\n", functionFile)
+		initializer := function.NewInitializer()
+		err := initializer.Initialize(initOptions)
+		if err != nil {
+			ioutils.Error(err)
+			return
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(initCmd)
 
-	initCmd.Flags().StringVarP(&initOptions.userAccount, "useraccount", "u", osutils.GetCurrentUsername(), "the Docker user account to be used for the image repository (defaults to current OS username")
-	initCmd.Flags().StringVarP(&initOptions.functionName, "functionName", "n", osutils.GetCurrentBasePath(), "the functionName of the function (defaults to the functionName of the current directory)")
-	initCmd.Flags().StringVarP(&initOptions.version, "version", "v", "0.0.1", "the version of the function (defaults to 0.0.1)")
-	initCmd.Flags().StringVarP(&initOptions.functionPath, "functionPath", "f", osutils.GetCurrentBasePath(), "functionPath or directory to be used for the function resources, if a file is specified then the file's directory will be used (defaults to the current directory)")
-	initCmd.Flags().StringVarP(&initOptions.language, "language", "l", "", "the language used for the function source (defaults to functionPath extension language type or 'shell' if directory specified)")
-	initCmd.Flags().StringVarP(&initOptions.protocol, "protocol", "p", "", "the protocol to use for function invocations (defaults to 'stdio' for shell and python, to 'http' for java and node)")
-	initCmd.Flags().StringVarP(&initOptions.input, "input", "i", "", "the functionName of the input topic (defaults to function functionName)")
-	initCmd.Flags().StringVarP(&initOptions.input, "output", "o", "", "the functionName of the output topic (optional)")
-	initCmd.Flags().StringVarP(&initOptions.artifact, "artifact", "a", "", "path to the function artifact, source code or jar file(defaults to function functionName with extension appended based on language:'.sh' for shell, '.jar' for java, '.js' for node and '.py' for python)")
-	initCmd.Flags().StringVarP(&initOptions.classname, "classname", "", "", "the fully qualified class functionName of the Java function class (required for Java functions)")
-	//TODO: Default?
-	initCmd.Flags().StringVarP(&initOptions.riffVersion, "riffversion", "", "", "the version of riff to use when building containers")
-	initCmd.Flags().BoolVarP(&initOptions.push, "push", "", false, "push the image to Docker registry")
+	initCmd.Flags().StringVarP(&initOptions.UserAccount, "useraccount", "u", osutils.GetCurrentUsername(), "the Docker user account to be used for the image repository (defaults to current OS username")
+	initCmd.Flags().StringVarP(&initOptions.FunctionName, "name", "n", "", "the functionName of the function (defaults to the functionName of the current directory)")
+	initCmd.Flags().StringVarP(&initOptions.Version, "version", "v", "0.0.1", "the version of the function (defaults to 0.0.1)")
+	initCmd.Flags().StringVarP(&initOptions.FunctionPath, "functionPath", "f", osutils.GetCWD(), "functionPath or directory to be used for the function resources, if a file is specified then the file's directory will be used (defaults to the current directory)")
+	initCmd.Flags().StringVarP(&initOptions.Language, "language", "l", "", "the language used for the function source (defaults to functionPath extension language type or 'shell' if directory specified)")
+	initCmd.Flags().StringVarP(&initOptions.Protocol, "protocol", "p", "", "the protocol to use for function invocations (defaults to 'stdio' for shell and python, to 'http' for java and node)")
+	initCmd.Flags().StringVarP(&initOptions.Input, "input", "i", "", "the functionName of the input topic (defaults to function functionName)")
+	initCmd.Flags().StringVarP(&initOptions.Output, "output", "o", "", "the functionName of the output topic (optional)")
+	initCmd.Flags().StringVarP(&initOptions.Artifact, "artifact", "a", "", "path to the function artifact, source code or jar file(defaults to function functionName with extension appended based on language:'.sh' for shell, '.jar' for java, '.js' for node and '.py' for python)")
+	initCmd.Flags().StringVarP(&initOptions.Classname, "classname", "", "", "the fully qualified class functionName of the Java function class (required for Java functions)")
+	initCmd.Flags().StringVarP(&initOptions.RiffVersion, "riff-version", "", "0.0.1", "the version of riff to use when building containers")
+	initCmd.Flags().BoolVarP(&initOptions.Push, "push", "", false, "push the image to Docker registry")
 }
