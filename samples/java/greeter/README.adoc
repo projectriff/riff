@@ -5,40 +5,33 @@
 *Function*:: link:src/main/java/functions/Greeter.java[Greeter.java]
 *Protocol*:: HTTP
 *Input*:: names
-*Output*:: greetings
 
-=== Build the JAR
+=== prerequisites
 
-```
-pushd samples/java/greeter/ ; ./mvnw clean package ; popd
-```
+1. riff is deployed
+2. the `riff` script is on your PATH
+3. the working directory is `samples/java/greeter`
 
-=== Build the Docker container for the function code
-
-```
-./riff build -n greeter -v 0.0.2 -f samples/java/greeter
-```
-
-=== Create the Function and Topic(s)
+=== compile the Java code and build the JAR
 
 ```
-./riff apply -f samples/java/greeter
+./mvnw clean package
 ```
 
-=== Publish a Message
+=== create the function and its input topic
 
 ```
-./publish names World
+riff create --input names --protocol pipes --artifact target/greeter-1.0.0.jar --handler functions.Greeter
 ```
 
-=== Tail the Sidecar Log
+=== publish a message and wait for a reply
 
 ```
-./riff logs -n greeter -t
+riff publish --input names --data World --reply
 ```
 
-=== Delete the function
+=== delete the function and its input topic
 
 ```
-./riff delete -n greeter
+riff delete --all
 ```

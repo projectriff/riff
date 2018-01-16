@@ -5,37 +5,27 @@
 *Function*:: link:sentiment_service.py[sentiment_service.py]
 *Protocol*:: stdio
 *Input*:: tweets
-*Output*:: sentiments
 
-=== Build the Docker container for the function code
+=== prerequisites
 
-```
-./riff build -n sentiments -v 0.0.2 -f samples/python/sentiments
-```
+1. riff is deployed
+2. the `riff` script is on your PATH
+3. the working directory is `samples/python/sentiments`
 
-=== Create the Function and Topic(s)
-
-```
-./riff apply -f samples/python/sentiments
-```
-
-=== Publish a Message
-
-The function performs sentiment analysis on tweets. It accepts JSON and looks only at the `text` field. The input
-is in the form of an array (sorry about the escaped quotes).
+=== create the function and its input topic
 
 ```
-./publish tweets "[{\"text\":\"happy happy happy\"},{\"text\":\"sad sad sad\"}]"
+riff create --input tweets --artifact sentiment_service.py --handler process
 ```
 
-=== Tail the Sidecar Log
+=== publish a message and wait for a reply
 
 ```
-./riff logs -n sentiments -t
+riff publish --input tweets --data "[{\"text\":\"happy happy happy\"},{\"text\":\"sad sad sad\"}]" --reply
 ```
 
-=== Delete the function
+=== delete the function and its input topic
 
 ```
-./riff delete -n sentiments
+riff delete --all
 ```

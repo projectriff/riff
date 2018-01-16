@@ -1,6 +1,0 @@
-apiVersion: projectriff.io/v1
-kind: Topic
-metadata:
-  name: greetings
-spec:
-  partitions: 3
