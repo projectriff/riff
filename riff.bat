@@ -66,9 +66,9 @@ if [%1]==[--riff-version] (
     set RIFF_VERSION=%2
     shift
 )
-if [%1]==[--classname] (
+if [%1]==[--handler] (
     set match=true
-    set FNCLASS=%2
+    set FNHANDLER=%2
     shift
 )
 if [%1]==[--push] (
@@ -460,7 +460,7 @@ exit /B 1
   if "%FNLANG%"=="java" (
     echo FROM projectriff/%FNLANG%-function-invoker:%RIFF_VERSION% >> %FNDOCKER%
     echo ARG FUNCTION_JAR=/functions/%FNFILE% >> %FNDOCKER%
-    echo ARG FUNCTION_CLASS=%FNCLASS% >> %FNDOCKER%
+    echo ARG FUNCTION_CLASS=%FNHANDLER% >> %FNDOCKER%
     echo ENV FUNCTION_URI file://${FUNCTION_JAR}?handler=${FUNCTION_CLASS} >> %FNDOCKER%
     echo ADD %ARTRELPATH% ${FUNCTION_JAR} >> %FNDOCKER%
   )
@@ -585,7 +585,7 @@ echo   and version specified for the function image repository and tag.
 echo.
 echo Usage:
 echo.
-echo   riff init -u ^<useraccount^> -n ^<name^> -v ^<version^> -f ^<source^> -l ^<language^> -p ^<protocol^> -i ^<input-topic^> -o ^<output-topic^> [-a ^<artifact^>] [--classname ^<class-name^>] [--push]
+echo   riff init -u ^<useraccount^> -n ^<name^> -v ^<version^> -f ^<source^> -l ^<language^> -p ^<protocol^> -i ^<input-topic^> -o ^<output-topic^> [-a ^<artifact^>] [--handler ^<handler-name^>] [--push]
 echo.
 echo Options:
 echo.
@@ -604,7 +604,7 @@ echo   -o, --output: the name of the output topic (no default, only created if s
 echo   -a, --artifact: path to the function artifact, source code or jar file
 echo                   (defaults to function name with extension appended based on language: 
 echo                       '.sh' for shell, '.jar' for java, '.js' for node and '.py' for python)
-echo   --classname: the fully qualified class name of the Java function class (required for Java functions)
+echo   --handler: the name of the handler, for Java it is the fully qualified class name of the Java class where the function is defined
 echo   --riff-version: the version of riff to use when building containers
 echo   --push: push the image to Docker registry
 echo.
@@ -635,7 +635,7 @@ echo   and version specified for the function image repository and tag. Build th
 echo.
 echo Usage:
 echo.
-echo   riff create -u ^<useraccount^> -n ^<name^> -v ^<version^> -f ^<source^> -l ^<language^> -p ^<protocol^> -i ^<input-topic^> -o ^<output-topic^> [-a ^<artifact^>] [--classname ^<class-name^>] [--push]
+echo   riff create -u ^<useraccount^> -n ^<name^> -v ^<version^> -f ^<source^> -l ^<language^> -p ^<protocol^> -i ^<input-topic^> -o ^<output-topic^> [-a ^<artifact^>] [--handler ^<handler-name^>] [--push]
 echo.
 echo Options:
 echo.
@@ -654,7 +654,7 @@ echo   -o, --output: the name of the output topic (no default, only created if s
 echo   -a, --artifact: path to the function artifact, source code or jar file
 echo                   (defaults to function name with extension appended based on language: 
 echo                       '.sh' for shell, '.jar' for java, '.js' for node and '.py' for python)
-echo   --classname: the fully qualified class name of the Java function class (required for Java functions)
+echo   --handler: the name of the handler, for Java it is the fully qualified class name of the Java class where the function is defined
 echo   --riff-version: the version of riff to use when building containers
 echo   --push: push the image to Docker registry
 echo.
