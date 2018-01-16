@@ -5,7 +5,6 @@
 *Function*:: link:src/main/java/functions/Greeter.java[Greeter.java]
 *Protocol*:: HTTP
 *Input*:: names
-*Output*:: greetings
 
 === prerequisites
 

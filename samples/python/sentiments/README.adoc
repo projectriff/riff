@@ -5,7 +5,6 @@
 *Function*:: link:sentiment_service.py[sentiment_service.py]
 *Protocol*:: stdio
 *Input*:: tweets
-*Output*:: sentiments
 
 === prerequisites
 
