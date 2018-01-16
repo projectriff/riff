@@ -34,7 +34,7 @@ Initialize the function based on the function source code specified as the filen
 
 Usage:
 
-  riff init -u <useraccount> -n <name> -v <version> -f <source> -l <language> -p <protocol> -i <input-topic> -o <output-topic> [-a <artifact>] [--classname <class-name>] [--push]
+  riff init -u <useraccount> -n <name> -v <version> -f <source> -l <language> -p <protocol> -i <input-topic> -o <output-topic> [-a <artifact>] [--handler <handler-name>] [--push]
 
 Options:
 
@@ -53,7 +53,7 @@ Options:
   -a, --artifact: path to the function artifact, source code or jar file
                   (defaults to function name with extension appended based on language: 
                       '.sh' for shell, '.jar' for java, '.js' for node and '.py' for python)
-  --classname: the fully qualified class name of the Java function class (required for Java functions)
+  --handler: the name of the handler, for Java it is the fully qualified class name of the Java class where the function is defined
   --riff-version: the version of riff to use when building containers
   --push: push the image to Docker registry
 
@@ -88,7 +88,7 @@ Create the resource[s] for the function based on the function source code specif
 
 Usage:
 
-  riff create -u <useraccount> -n <name> -v <version> -f <source> -l <language> -p <protocol> -i <input-topic> -o <output-topic> [-a <artifact>] [--classname <class-name>] [--push]
+  riff create -u <useraccount> -n <name> -v <version> -f <source> -l <language> -p <protocol> -i <input-topic> -o <output-topic> [-a <artifact>] [--handler <handler-name>] [--push]
 
 Options:
 
@@ -107,7 +107,7 @@ Options:
   -a, --artifact: path to the function artifact, source code or jar file
                   (defaults to function name with extension appended based on language: 
                       '.sh' for shell, '.jar' for java, '.js' for node and '.py' for python)
-  --classname: the fully qualified class name of the Java function class (required for Java functions)
+  --handler: the name of the handler, for Java it is the fully qualified class name of the Java class where the function is defined
   --riff-version: the version of riff to use when building containers
   --push: push the image to Docker registry
 
@@ -383,7 +383,7 @@ EOF
     cat >> $FNDOCKER <<EOF
 FROM projectriff/${FNLANG}-function-invoker:${RIFF_VERSION}
 ARG FUNCTION_JAR=/functions/${FNFILE}
-ARG FUNCTION_CLASS=${FNCLASS}
+ARG FUNCTION_CLASS=${FNHANDLER}
 ENV FUNCTION_URI file://\${FUNCTION_JAR}?handler=\${FUNCTION_CLASS}
 ADD ${ARTRELPATH} \${FUNCTION_JAR}
 EOF
@@ -629,8 +629,8 @@ case ${key} in
   FNARTIFACT="$2"
   shift
   ;;
-  --classname)
-  FNCLASS="$2"
+  --handler)
+  FNHANDLER="$2"
   shift
   ;;
   -l|--language)
