@@ -472,7 +472,7 @@ exit /B 1
   if "%FNLANG%"=="python" (
     echo FROM projectriff/python2-function-invoker:%RIFF_VERSION% >> %FNDOCKER%
     echo ARG FUNCTION_MODULE=%FNFILE% >> %FNDOCKER%
-    echo ARG FUNCTION_HANDLER=process >> %FNDOCKER%
+    echo ARG FUNCTION_HANDLER=%FNHANDLER% >> %FNDOCKER%
     echo ENV FUNCTION_URI file:///${FUNCTION_MODULE}?handler=${FUNCTION_HANDLER} >> %FNDOCKER%
     echo ADD %ARTRELPATH% / >> %FNDOCKER%
     echo ADD %ARTRELDIR%/requirements.txt / >> %FNDOCKER%
