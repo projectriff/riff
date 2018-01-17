@@ -1,16 +1,18 @@
-// Copyright © 2018 NAME HERE <EMAIL ADDRESS>
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ * Copyright 2018 the original author or authors.
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *  
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 
 package cmd
 
@@ -144,7 +146,7 @@ func init() {
 	// publishCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	publishCmd.Flags().StringVarP(&publishOptions.data, "data", "d", "", "The data to post to the http-gateway using the input topic")
-	publishCmd.Flags().StringVarP(&publishOptions.input, "input", "i", osutils.GetCurrentBasePath(), "The functionName of the input topic (defaults to the functionName of the current directory)")
+	publishCmd.Flags().StringVarP(&publishOptions.input, "input", "i", osutils.GetCWDBasePath(), "The functionName of the input topic (defaults to the functionName of the current directory)")
 	publishCmd.Flags().BoolVarP(&publishOptions.reply, "reply", "r", false, "Wait for a reply containing the results of the function execution")
 	publishCmd.Flags().IntVarP(&publishOptions.count, "count", "c", 1, "The number of times to post the data")
 	publishCmd.Flags().IntVarP(&publishOptions.pause, "pause", "p", 0, "The number of seconds to wait between postings")

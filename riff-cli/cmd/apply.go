@@ -1,16 +1,18 @@
-// Copyright © 2018 NAME HERE <EMAIL ADDRESS>
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ * Copyright 2018 the original author or authors.
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *  
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 
 package cmd
 
@@ -21,7 +23,7 @@ import (
 	"github.com/dturanski/riff-cli/pkg/kubectl"
 )
 
-var filePath string
+var applyFilePath string
 
 // applyCmd represents the apply command
 var applyCmd = &cobra.Command{
@@ -35,7 +37,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(args)
-		output, err := kubectl.ExecForString([]string{"apply", "-f", filePath})
+		output, err := kubectl.ExecForString([]string{"apply", "-f", applyFilePath})
 		if err != nil {
 			return
 		}
@@ -45,6 +47,6 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(applyCmd)
-	applyCmd.Flags().StringVarP(&filePath, "filepath", "f", "", "Filename, directory, or URL to files that contains the configuration to apply")
+	applyCmd.Flags().StringVarP(&applyFilePath, "filepath", "f", "", "Filename, directory, or URL to files that contains the configuration to apply")
 	applyCmd.MarkFlagRequired("filepath")
 }
