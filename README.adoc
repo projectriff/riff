@@ -2,6 +2,8 @@
 
 A FaaS for Kubernetes
 
+GKE image:https://ci.faas.to.cf-app.com/api/v1/teams/main/pipelines/riff/jobs/run-riff-system-tests-gke/badge[GKE status] &nbsp; CFCR image:https://ci.faas.to.cf-app.com/api/v1/teams/main/pipelines/riff/jobs/run-riff-system-tests-kubo/badge[CF Container Runtime status]
+
 == Installation
 
 You can install the system using link:Getting-Started.adoc#helm[a Helm chart] or by link:#manual[manually building and deploying] the components.
