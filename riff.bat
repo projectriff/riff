@@ -284,13 +284,22 @@ exit /B 1
     set _artifact=false
     if exist %FNARTIFACT% set _artifact=true
   )
+  if [%_artifact%]==[true] (
+    set _artdir=.
+  )
+  if [%_artifact%]==[false] (
+    if exist %FNDIR%\%FNARTIFACT% (
+      set _artifact=true
+      set _artdir=%FNDIR%
+    )
+  )
   if [%_artifact%]==[false] (
       echo Artifact %FNARTIFACT%: No such file
       exit /B 1
   ) 
   if [%_artifact%]==[true] (
     set ARTRELPATH=%FNARTIFACT%
-    set ARTRELDIR="."
+    set ARTRELDIR=%_artdir%
     for /F %%i in ("%FNARTIFACT%") do set FNFILE=%%~ni%%~xi
     for /F %%i in ("%FNARTIFACT%") do set FNEXT=%%~xi
   )
@@ -312,7 +321,7 @@ exit /B 1
   if [%TOPIC_IN%]==[] set TOPIC_IN=%FUNCTION%
   :: ready to initialize
   :: but first look for function source
-  if exist "%ARTRELPATH%" (
+  if exist "%FNDIR%\%FNFILE%" (
     echo Initializing %FNLANG% function %FUNCTION%
   ) else (
     echo Source file %FNFILE% not found, not able to initialize %FNLANG% function %FUNCTION%
