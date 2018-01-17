@@ -276,7 +276,7 @@ function init() {
     ARTRELPATH=$FNFILE
     ARTRELDIR="."
   else
-    if [ -f "${FNARTIFACT}" ] ; then
+    if [ -f "${FNDIR}/${FNARTIFACT}" ] ; then
       ARTDIR=$(dirname "$FNARTIFACT")
       if [[ $ARTDIR == /* ]] ; then
         ARTRELDIR=$(make_path_relative $ARTDIR $FNDIR)
