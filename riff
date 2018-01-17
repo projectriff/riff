@@ -707,10 +707,17 @@ done
 
 # ======================================= DEFAULTS ============================================
 FNPATH="${FNPATH:-.}"
-if [[ $FNPATH == "." ]] ; then
-  FUNCTION="${FUNCTION:-${PWD##*/}}"
-else
-  FUNCTION="${FUNCTION:-${FNPATH##*/}}"
+if [ -z $FUNCTION ] ; then
+  if [ -f "${FNPATH}" ] ; then
+    _path=$(basename $(dirname "$FNPATH"))
+  else
+    _path=$FNPATH    
+  fi
+  if [[ $_path == "." ]] ; then
+    FUNCTION=$(basename $(cd "$(dirname "$_path")" && pwd))
+  else
+    FUNCTION=$(basename "$_path")
+  fi
 fi
 FNLANG="${FNLANG:-}"
 FNPROT="${FNPROT:-}"
