@@ -325,7 +325,7 @@ function init() {
   fi
   # ready to initialize
   # but first look for function source
-  if [ -f "$FNPATH/${ARTRELPATH}" ] ; then
+  if [ -f "$FNDIR/${ARTRELPATH}" ] ; then
     echo "Initializing $FNLANG function $FUNCTION"
   else
     echo "Source file ${FNFILE} not found, not able to initialize $FNLANG function $FUNCTION"
