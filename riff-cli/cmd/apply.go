@@ -21,6 +21,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/dturanski/riff-cli/pkg/kubectl"
+	"github.com/dturanski/riff-cli/pkg/ioutils"
+	"os"
 )
 
 var applyFilePath string
@@ -36,17 +38,26 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(args)
 		output, err := kubectl.ExecForString([]string{"apply", "-f", applyFilePath})
 		if err != nil {
 			return
 		}
 		fmt.Println(output)
 	},
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if len(args) > 0 {
+			if len(args) == 1 && applyFilePath == "" {
+				applyFilePath = args[0]
+			} else {
+				ioutils.Errorf("Invalid argument(s) %v\n", args)
+				cmd.Usage()
+				os.Exit(1)
+			}
+		}
+	},
 }
 
 func init() {
 	rootCmd.AddCommand(applyCmd)
 	applyCmd.Flags().StringVarP(&applyFilePath, "filepath", "f", "", "Filename, directory, or URL to files that contains the configuration to apply")
-	applyCmd.MarkFlagRequired("filepath")
 }

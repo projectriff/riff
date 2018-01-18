@@ -18,6 +18,7 @@ package cmd
 import (
 	"text/template"
 	"os"
+	"bytes"
 )
 
 const (
@@ -114,4 +115,24 @@ spec:
 	return err
 }
 
+type LongVals struct {
+	Process string
+	Command string
+	Result  string
+}
 
+func createCmdLong(longDescr string,  vals LongVals) string {
+	tmpl, err := template.New("longDescr").Parse(longDescr)
+	if err != nil {
+		panic(err)
+	}
+
+	var tpl bytes.Buffer
+	err = tmpl.Execute(&tpl, vals)
+	if err != nil {
+		panic(err)
+	}
+
+	return tpl.String()
+
+}
