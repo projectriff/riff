@@ -55,6 +55,7 @@ Options:
                       '.sh' for shell, '.jar' for java, '.js' for node and '.py' for python)
   --handler: the name of the handler, for Java it is the fully qualified class name of the Java class where the function is defined
   --riff-version: the version of riff to use when building containers
+  --force: overwrite existing Dockerfile and function definitions
   --push: push the image to Docker registry
 
 EOF
@@ -109,6 +110,7 @@ Options:
                       '.sh' for shell, '.jar' for java, '.js' for node and '.py' for python)
   --handler: the name of the handler, for Java it is the fully qualified class name of the Java class where the function is defined
   --riff-version: the version of riff to use when building containers
+  --force: overwrite existing Dockerfile and function definitions
   --push: push the image to Docker registry
 
 EOF
@@ -333,19 +335,19 @@ function init() {
   fi
 
   FNDOCKER="$FNDIR/Dockerfile"
-  if [ -f $FNDOCKER ] ; then
+  if [ -f $FNDOCKER ] && [[ ! $FORCE == "true" ]] ; then
     echo "Docker file already exists in $FNDIR"
   else
     write_dockerfile
   fi
   FNDEF="$FNDIR/$FUNCTION-function.yaml"
-  if [ -f $FNDEF ] ; then
+  if [ -f $FNDEF ] && [[ ! $FORCE == "true" ]] ; then
     echo "Function definition file already exists in $FNDIR"
   else
     write_function_yaml
   fi
   FNTOPICS="$FNDIR/$FUNCTION-topics.yaml"
-  if [ -f $FNTOPICS ] ; then
+  if [ -f $FNTOPICS ] && [[ ! $FORCE == "true" ]] ; then
     echo "Topics definition file already exists in $FNDIR"
   else
     write_topics_yaml
@@ -373,14 +375,14 @@ function make_path_relative() {
 
 function write_dockerfile() {
   if [[ $FNLANG == "shell" ]] ; then
-    cat >> $FNDOCKER <<EOF
+    cat > $FNDOCKER <<EOF
 FROM projectriff/${FNLANG}-function-invoker:${RIFF_VERSION}
 ARG FUNCTION_URI="/${FNFILE}"
 ENV FUNCTION_URI \${FUNCTION_URI}
 ADD ${ARTRELPATH} /
 EOF
   elif [[ $FNLANG == "java" ]] ; then
-    cat >> $FNDOCKER <<EOF
+    cat > $FNDOCKER <<EOF
 FROM projectriff/${FNLANG}-function-invoker:${RIFF_VERSION}
 ARG FUNCTION_JAR=/functions/${FNFILE}
 ARG FUNCTION_CLASS=${FNHANDLER}
@@ -388,13 +390,13 @@ ENV FUNCTION_URI file://\${FUNCTION_JAR}?handler=\${FUNCTION_CLASS}
 ADD ${ARTRELPATH} \${FUNCTION_JAR}
 EOF
   elif [[ $FNLANG == "node" ]] ; then
-    cat >> $FNDOCKER <<EOF
+    cat > $FNDOCKER <<EOF
 FROM projectriff/${FNLANG}-function-invoker:${RIFF_VERSION}
 ENV FUNCTION_URI /functions/${FNFILE}
 ADD ${ARTRELPATH} \${FUNCTION_URI}
 EOF
   elif [[ $FNLANG == "python" ]] ; then
-    cat >> $FNDOCKER <<EOF
+    cat > $FNDOCKER <<EOF
 FROM projectriff/python2-function-invoker:${RIFF_VERSION}
 ARG FUNCTION_MODULE=${FNFILE}
 ARG FUNCTION_HANDLER=${FNHANDLER}
@@ -407,7 +409,7 @@ EOF
 }
 
 function write_function_yaml() {
-  cat >> $FNDEF <<EOF
+  cat > $FNDEF <<EOF
 apiVersion: projectriff.io/v1
 kind: Function
 metadata:
@@ -428,7 +430,7 @@ EOF
 }
 
 function write_topics_yaml() {
-  cat >> $FNTOPICS <<EOF
+  cat > $FNTOPICS <<EOF
 apiVersion: projectriff.io/v1
 kind: Topic
 metadata:
@@ -684,6 +686,9 @@ case ${key} in
   ;;
   -r|--reply)
   PUB_REPLY="true"
+  ;;
+  --force)
+  FORCE="true"
   ;;
   --push)
   DOCKERPUSH="true"
