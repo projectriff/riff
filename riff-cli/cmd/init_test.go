@@ -67,6 +67,17 @@ func TestValidateArtifactIsInSubDirectory(t *testing.T) {
 	as.NoError(err)
 }
 
+func TestValidateArtifactIsInCWD(t *testing.T) {
+	currentDir := osutils.GetCWD()
+	os.Chdir(osutils.Path("test_dir/python/demo"))
+
+	as := assert.New(t)
+	options:= InitOptions{functionPath: "", artifact: "demo.py"}
+	err := validateAndCleanInitOptions(&options)
+	as.NoError(err)
+	os.Chdir(currentDir)
+}
+
 func TestArtifactCannotBeExternalToFilePath(t *testing.T) {
 	currentDir := osutils.GetCWD()
 	os.Chdir(osutils.Path("test_dir/python/demo"))

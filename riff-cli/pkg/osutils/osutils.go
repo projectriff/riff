@@ -20,7 +20,6 @@ import (
 	"os"
 	"path/filepath"
 	"os/user"
-	"github.com/dturanski/riff-cli/pkg/ioutils"
 	"strings"
 )
 
@@ -57,7 +56,6 @@ func FileExists(path string) bool {
 func IsDirectory(path string) bool {
 	fi, err := os.Stat(path)
 	if err != nil {
-		ioutils.Error(err.Error())
 		return false
 	}
 	return fi.Mode().IsDir()

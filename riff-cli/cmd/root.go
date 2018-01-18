@@ -23,7 +23,6 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/dturanski/riff-cli/pkg/ioutils"
 )
 
 var cfgFile string
@@ -36,13 +35,13 @@ var rootCmd = &cobra.Command{
 	Short: "Commands for creating and managing function resources",
 	Long: `riff is a CLI tool that creates and manages function resources for the riff FaaS platform https://projectriff.io/`,
 	// Currently do not support standalone arguments, everything is a flag
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		if len(args) > 0 {
-			ioutils.Errorf("Invalid argument(s) %v\n", args)
-			cmd.Usage()
-			os.Exit(1)
-		}
-	},
+	//PersistentPreRun: func(cmd *cobra.Command, args []string) {
+	//	if len(args) > 0 {
+	//		ioutils.Errorf("Invalid argument(s) %v\n", args)
+	//		cmd.Usage()
+	//		os.Exit(1)
+	//	}
+	//},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

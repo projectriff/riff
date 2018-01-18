@@ -219,9 +219,11 @@ func (this *LanguageDetectingInitializer) initialize(options HandlerAwareInitOpt
 	case "node":
 		NewNodeInitializer().initialize(options)
 	case "java":
-		NewJavaInitializer().initialize(options)
+		fmt.Println("java resources detected. Use 'riff init java' to provide additional required options")
+		return nil
 	case  "python":
-		NewPythonInitializer().initialize(options)
+		fmt.Println("python resources detected. Use 'riff init python' to provide additional required options")
+		return nil
 	default:
 		//TODO: Should never get here
 		return errors.New(fmt.Sprintf("unsupported language %s\n",language))
@@ -239,16 +241,9 @@ func (this Initializer) initialize(opts InitOptionsAccessor) error {
 	}
 
 	// Create function resources in function Path
-
 	workDir := filepath.Dir(functionPath)
-
 	fmt.Println(functionPath, workDir, opts.FunctionName())
-
 	os.Chdir(workDir)
-
-
-
-
 	return nil
 }
 

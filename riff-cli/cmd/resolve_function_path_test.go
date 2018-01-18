@@ -29,7 +29,7 @@ func TestResolveDefaultFunctionResource(t *testing.T) {
 	as := assert.New(t)
 	currentDir := osutils.GetCWD()
 	os.Chdir(osutils.Path("test_dir/python/demo"))
-	options := InitOptions{functionPath: ".", functionName: "demo"}
+	options := InitOptions{functionPath: ""}
 	functionPath, err := resolveFunctionPath(options, "py")
 	if as.NoError(err) {
 		absPath, _ := filepath.Abs(osutils.Path("demo.py"))
