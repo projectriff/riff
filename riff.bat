@@ -71,6 +71,10 @@ if [%1]==[--handler] (
     set FNHANDLER=%2
     shift
 )
+if [%1]==[--force] (
+    set match=true
+    set FORCE=true
+)
 if [%1]==[--push] (
     set match=true
     set DOCKERPUSH=true
@@ -327,24 +331,16 @@ exit /B 1
     echo Source file %FNFILE% not found, not able to initialize %FNLANG% function %FUNCTION%
     exit /B 1
   )
+
   set FNDOCKER=%FNDIR%\Dockerfile
-  if exist %FNDOCKER% (
-    echo Docker file already exists in %FNDIR%
-  ) else (
-    call :write_dockerfile
-  )
+  call :write_dockerfile
+
   set FNDEF=%FNDIR%\%FUNCTION%-function.yaml
-  if exist %FNDEF% (
-    echo Function definition file already exists in %FNDIR%
-  ) else (
-    call :write_function_yaml
-  )
+  call :write_func_yaml
+
   set FNTOPICS=%FNDIR%\%FUNCTION%-topics.yaml
-  if exist %FNTOPICS% (
-    echo Topics definition file already exists in %FNDIR%
-  ) else (
-    call :write_topics_yaml
-  )
+  call :write_topics_yaml
+
   exit /B 1
 
 :build
@@ -460,6 +456,14 @@ exit /B 1
   exit /B 0
 
 :write_dockerfile
+  if exist %FNDOCKER% (
+    if "%FORCE%"=="true" (
+      del %FNDOCKER%
+    ) else (
+      echo Docker file already exists in %FNDIR%
+      exit /B %ERRORLEVEL%
+    )
+  )
   if "%FNLANG%"=="shell" (
     echo FROM projectriff/%FNLANG%-function-invoker:%RIFF_VERSION% >> %FNDOCKER%
     echo ARG FUNCTION_URI="${FNFILE}" >> %FNDOCKER%
@@ -489,7 +493,15 @@ exit /B 1
   )
   exit /B %ERRORLEVEL%
 
-:write_function_yaml
+:write_func_yaml
+  if exist %FNDEF% (
+    if "%FORCE%"=="true" (
+      del %FNDEF%
+    ) else (
+      echo Function definition file already exists in %FNDIR%
+      exit /B %ERRORLEVEL%
+    )
+  )
   echo apiVersion: projectriff.io/v1 >> %FNDEF%
   echo kind: Function >> %FNDEF%
   echo metadata: >> %FNDEF%
@@ -505,6 +517,14 @@ exit /B 1
   exit /B %ERRORLEVEL%
 
 :write_topics_yaml
+  if exist %FNTOPICS% (
+    if "%FORCE%"=="true" (
+      del %FNTOPICS%
+    ) else (
+      echo Topics definition file already exists in %FNDIR%
+      exit /B %ERRORLEVEL%
+    )
+  )
   echo apiVersion: projectriff.io/v1 >> %FNTOPICS%
   echo kind: Topic >> %FNTOPICS%
   echo metadata: >> %FNTOPICS%
@@ -594,11 +614,10 @@ echo   and version specified for the function image repository and tag.
 echo.
 echo Usage:
 echo.
-echo   riff init -u ^<useraccount^> -n ^<name^> -v ^<version^> -f ^<source^> -l ^<language^> -p ^<protocol^> -i ^<input-topic^> -o ^<output-topic^> [-a ^<artifact^>] [--handler ^<handler-name^>] [--push]
+echo   riff init -n ^<name^> -v ^<version^> -f ^<source^> -l ^<language^> -p ^<protocol^> -i ^<input-topic^> -o ^<output-topic^> [-a ^<artifact^>] [--handler ^<handler-name^>]
 echo.
 echo Options:
 echo.
-echo   -u, --useraccount: the Docker user account to be used for the image repository (defaults to current OS username)
 echo   -n, --name: the name of the function (defaults to the name of the current directory)
 echo   -v, --version: the version of the function (defaults to 0.0.1)
 echo   -f, --filename: filename or directory to be used for the function resources, 
@@ -615,7 +634,6 @@ echo                   (defaults to function name with extension appended based 
 echo                       '.sh' for shell, '.jar' for java, '.js' for node and '.py' for python)
 echo   --handler: the name of the handler, for Java it is the fully qualified class name of the Java class where the function is defined
 echo   --riff-version: the version of riff to use when building containers
-echo   --push: push the image to Docker registry
 echo.
 exit /B 0
 
@@ -626,10 +644,11 @@ echo   and version specified for the image that is built.
 echo.
 echo Usage:
 echo.
-echo   riff build -n ^<name^> -v ^<version^> -f ^<path^> [--push]
+echo   riff build -u ^<useraccount^> -n ^<name^> -v ^<version^> -f ^<path^> [--push]
 echo.
 echo Options:
 echo.
+echo   -u, --useraccount: the Docker user account to be used for the image repository (defaults to current OS username)
 echo   -n, --name: the name of the function (defaults to the name of the current directory)
 echo   -v, --version: the version of the function (defaults to 0.0.1)
 echo   -f, --filename: filename, directory, or URL for the code or resource (defaults to the current directory)
@@ -665,6 +684,7 @@ echo                   (defaults to function name with extension appended based 
 echo                       '.sh' for shell, '.jar' for java, '.js' for node and '.py' for python)
 echo   --handler: the name of the handler, for Java it is the fully qualified class name of the Java class where the function is defined
 echo   --riff-version: the version of riff to use when building containers
+echo   --force: overwrite existing Dockerfile and function definitions
 echo   --push: push the image to Docker registry
 echo.
 exit /B 0
