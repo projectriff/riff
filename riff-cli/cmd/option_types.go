@@ -16,23 +16,6 @@
 
 package cmd
 
-type InitOptionsAccessor interface {
-	FunctionName() string
-
-	Artifact() string
-
-	Version() string
-
-	FunctionPath() string
-
-	Protocol() string
-
-	Input() string
-
-	Output() string
-}
-
-//
 type InitOptions struct {
 	functionName string
 	version      string
@@ -43,68 +26,13 @@ type InitOptions struct {
 	artifact     string
 }
 
-func (this InitOptions) FunctionName() string {
-	return this.functionName
-}
-
-func (this InitOptions) Version() string {
-	return this.version
-}
-
-func (this InitOptions) FunctionPath() string {
-	return this.functionPath
-}
-
-func (this InitOptions) Protocol() string {
-	return this.protocol
-}
-
-func (this InitOptions) Artifact() string {
-	return this.artifact
-}
-
-func (this InitOptions) Input() string {
-	return this.input
-}
-
-func (this InitOptions) Output() string {
-	return this.output
-}
-
-//
-
-type HandlerAwareInitOptionsAccessor interface {
-	InitOptionsAccessor
-	Handler() string
-}
-
 type HandlerAwareInitOptions struct {
 	InitOptions
 	handler string
 }
 
-func NewHandlerAwareInitOptions(options InitOptionsAccessor, handler string) *HandlerAwareInitOptions {
-	handlerAwareInitOptions := &HandlerAwareInitOptions{handler: handler}
-	handlerAwareInitOptions.functionName = options.FunctionName()
-	handlerAwareInitOptions.protocol = options.Protocol()
-	handlerAwareInitOptions.functionPath = options.FunctionPath()
-	handlerAwareInitOptions.version = options.Version()
-	handlerAwareInitOptions.input = options.Input()
-	handlerAwareInitOptions.output = options.Output()
-	handlerAwareInitOptions.artifact = options.Artifact()
-
-	return handlerAwareInitOptions
-}
-
 func (this HandlerAwareInitOptions) Handler() string {
 	return this.handler
-}
-
-//
-type BuildOptionsAccessor interface {
-	UserAccount() string
-	RiffVersion() string
-	Push() bool
 }
 
 type BuildOptions struct {
@@ -113,48 +41,16 @@ type BuildOptions struct {
 	riffVersion string
 }
 
-func (this BuildOptions) UserAccount() string {
-	return this.userAccount
-}
-
-func (this BuildOptions) RiffVersion() string {
-	return this.riffVersion
-}
-
-func (this BuildOptions) Push() bool {
-	return this.push
-}
-
-//
-type CreateOptionsAccessor interface {
-	InitOptionsAccessor
-	BuildOptionsAccessor
-}
 type CreateOptions struct {
 	InitOptions
 	BuildOptions
 }
 
-func NewCreateOptions(init InitOptionsAccessor, build BuildOptionsAccessor) *CreateOptions {
+func NewCreateOptions(init InitOptions, build BuildOptions) *CreateOptions {
 	createOptions := &CreateOptions{}
-	createOptions.riffVersion = build.RiffVersion()
-	createOptions.push = build.Push()
-	createOptions.userAccount = build.UserAccount()
-	createOptions.input = init.Input()
-	createOptions.output = init.Output()
-	createOptions.functionPath = init.FunctionPath()
-	createOptions.functionName = init.FunctionName()
-	createOptions.artifact = init.Artifact()
-	createOptions.protocol = init.Protocol()
-	createOptions.version = init.Version()
-
+	createOptions.InitOptions = init
+	createOptions.BuildOptions = build
 	return createOptions
-}
-
-//
-type HandlerAwareCreateOptionsAccessor interface {
-	HandlerAwareInitOptionsAccessor
-	BuildOptionsAccessor
 }
 
 type HandlerAwareCreateOptions struct {
@@ -162,19 +58,9 @@ type HandlerAwareCreateOptions struct {
 	BuildOptions
 }
 
-func NewHandlerAwareCreateOptions(init HandlerAwareInitOptionsAccessor, build BuildOptionsAccessor) *HandlerAwareCreateOptions {
+func NewHandlerAwareCreateOptions(init HandlerAwareInitOptions, build BuildOptions) *HandlerAwareCreateOptions {
 	createOptions := &HandlerAwareCreateOptions{}
-	createOptions.riffVersion = build.RiffVersion()
-	createOptions.push = build.Push()
-	createOptions.userAccount = build.UserAccount()
-	createOptions.input = init.Input()
-	createOptions.output = init.Output()
-	createOptions.functionPath = init.FunctionPath()
-	createOptions.functionName = init.FunctionName()
-	createOptions.artifact = init.Artifact()
-	createOptions.protocol = init.Protocol()
-	createOptions.version = init.Version()
-	createOptions.handler = init.Handler()
-
+	createOptions.HandlerAwareInitOptions = init
+	createOptions.BuildOptions = build
 	return createOptions
 }

@@ -34,6 +34,9 @@ const (
 	initDefinition = `Generate`
 )
 
+/*
+ * init Command
+ */
 const initCommandDescription =  `{{.Process}} the function based on the function source code specified as the filename, using the name
 and version specified for the function image repository and tag. 
 For example, if you have a directory named 'square' containing a function 'square.js', you can simply type :
@@ -56,7 +59,7 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		initializer := NewLanguageDetectingInitializer()
-		err := initializer.initialize(*makeHandlerAwareOptions(cmd))
+		err := initializer.initialize(*newHandlerAwareOptions(cmd))
 		if err != nil {
 			ioutils.Error(err)
 			return
@@ -84,6 +87,9 @@ var initCmd = &cobra.Command{
 	},
 }
 
+/*
+ * init java Command
+ */
 const initJavaDescription = `{{.Process}} the function based on the function source code specified as the filename, using the artifact (jar file), 
 the function handler(classname), the name and version specified for the function image repository and tag. 
 For example from a maven project directory named 'greeter', type:
@@ -100,14 +106,16 @@ var initJavaCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		initializer := NewJavaInitializer()
-		err := initializer.initialize(*makeHandlerAwareOptions(cmd))
+		err := initializer.initialize(*newHandlerAwareOptions(cmd))
 		if err != nil {
 			ioutils.Error(err)
 			return
 		}
 	},
 }
-
+/*
+ * init shell ommand
+ */
 const initShellDescription = `{{.Process}} the function based on the function script specified as the filename, 
 using the name and version specified for the function image repository and tag. 
 For example, if you have a directory named 'echo' containing a function 'echo.sh', you can simply type :
@@ -136,7 +144,9 @@ var initShellCmd = &cobra.Command{
 		}
 	},
 }
-
+/*
+ * init node Command
+ */
 const initNodeDescription = `{{.Process}} the function based on the function source code specified as the filename, using the name
 and version specified for the function image repository and tag.
 For example, if you have a directory named 'square' containing a function 'square.js', you can simply type :
@@ -154,11 +164,20 @@ to {{.Result}}.`
 var initNodeCmd = &cobra.Command{
 	Use:   "node",
 	Short: "Initialize a node.js function",
-	Long: 	createCmdLong(initNodeDescription, LongVals{Process:initDefinition, Command:"init node", Result:initResult}),
+	Long:  createCmdLong(initNodeDescription, LongVals{Process: initDefinition, Command: "init node", Result: initResult}),
 
-	Run: initializeNode,
+	Run: func(cmd *cobra.Command, args []string) {
+		initializer := NewNodeInitializer()
+		err := initializer.initialize(initOptions)
+		if err != nil {
+			ioutils.Error(err)
+			return
+		}
+	},
 }
-
+/*
+ * init js Command (alias for node)
+ */
 var initJsCmd = &cobra.Command{
 	Use:   "js",
 	Short: initNodeCmd.Short,
@@ -166,16 +185,9 @@ var initJsCmd = &cobra.Command{
 	Run:   initNodeCmd.Run,
 }
 
-func initializeNode(cmd *cobra.Command, args []string) {
-
-	initializer := NewNodeInitializer()
-	err := initializer.initialize(initOptions)
-	if err != nil {
-		ioutils.Error(err)
-		return
-	}
-}
-
+/*
+ * init python Command
+ */
 const initPythonDescription = `{{.Process}} the function based on the function source code specified as the filename, handler, name, artifact
   and version specified for the function image repository and tag. 
 For example, type:
@@ -195,7 +207,7 @@ var initPythonCmd = &cobra.Command{
 
 		initializer := NewPythonInitializer()
 
-		err := initializer.initialize(*makeHandlerAwareOptions(cmd))
+		err := initializer.initialize(*newHandlerAwareOptions(cmd))
 		if err != nil {
 			ioutils.Error(err)
 			return
@@ -203,9 +215,11 @@ var initPythonCmd = &cobra.Command{
 	},
 }
 
-func makeHandlerAwareOptions(cmd *cobra.Command) *HandlerAwareInitOptions {
+func newHandlerAwareOptions(cmd *cobra.Command) *HandlerAwareInitOptions {
 	handler, _ := cmd.Flags().GetString("handler")
-	options := NewHandlerAwareInitOptions(initOptions, handler)
+	options := &HandlerAwareInitOptions{}
+	options.InitOptions = initOptions
+	options.handler = handler
 	return options
 }
 
@@ -229,7 +243,7 @@ func validateAndCleanInitOptions(options *InitOptions) error {
 		}
 	}
 
-	if options.Artifact() != "" {
+	if options.artifact != "" {
 
 		if filepath.IsAbs(options.artifact) {
 			return errors.New(fmt.Sprintf("artifact %s must be relative to function path", options.artifact))
@@ -290,14 +304,7 @@ func validateAndCleanInitOptions(options *InitOptions) error {
 func init() {
 	rootCmd.AddCommand(initCmd)
 
-	initCmd.PersistentFlags().StringVarP(&initOptions.functionName, "name", "n", "", "the functionName of the function (defaults to the functionName of the current directory)")
-	initCmd.PersistentFlags().StringVarP(&initOptions.version, "version", "v", "0.0.1", "the version of the function (defaults to 0.0.1)")
-	initCmd.PersistentFlags().StringVarP(&initOptions.functionPath, "filepath", "f", "", "path or directory to be used for the function resources, if a file is specified then the file's directory will be used (defaults to the current directory)")
-	initCmd.PersistentFlags().StringVarP(&initOptions.protocol, "protocol", "p", "", "the protocol to use for function invocations (defaults to 'stdio' for shell and python, to 'http' for java and node)")
-	initCmd.PersistentFlags().StringVarP(&initOptions.input, "input", "i", "", "the functionName of the input topic (defaults to function functionName)")
-	initCmd.PersistentFlags().StringVarP(&initOptions.output, "output", "o", "", "the functionName of the output topic (optional)")
-	initCmd.PersistentFlags().StringVarP(&initOptions.artifact, "artifact", "a", "", "path to the function artifact, source code or jar file")
-
+	createInitOptionFlags(initCmd, &initOptions)
 
 	initCmd.AddCommand(initJavaCmd)
 	initCmd.AddCommand(initJsCmd)

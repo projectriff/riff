@@ -30,7 +30,7 @@ var supportedExtensions = []string{"js", "java", "py",}
 
 //
 type Initializer struct {
-	initOptions InitOptionsAccessor
+	initOptions InitOptions
 
 	functionFile string
 	language     string
@@ -48,7 +48,7 @@ func NewShellInitializer() *Initializer {
 //
 type PythonInitializer struct {
 	Initializer
-	initOptions HandlerAwareInitOptionsAccessor
+	initOptions HandlerAwareInitOptions
 }
 
 func NewPythonInitializer() *PythonInitializer {
@@ -57,7 +57,7 @@ func NewPythonInitializer() *PythonInitializer {
 	pythonInitializer.extension = "py"
 	return pythonInitializer
 }
-func (this *PythonInitializer) initialize(options HandlerAwareInitOptionsAccessor) error {
+func (this *PythonInitializer) initialize(options HandlerAwareInitOptions) error {
 	fmt.Println("language: " + this.language)
 	return nil
 }
@@ -65,7 +65,7 @@ func (this *PythonInitializer) initialize(options HandlerAwareInitOptionsAccesso
 //
 type JavaInitializer struct {
 	Initializer
-	initOptions HandlerAwareInitOptionsAccessor
+	initOptions HandlerAwareInitOptions
 }
 
 func NewJavaInitializer() *JavaInitializer {
@@ -75,7 +75,7 @@ func NewJavaInitializer() *JavaInitializer {
 	return javaInitializer
 }
 
-func (this *JavaInitializer) initialize(options HandlerAwareInitOptionsAccessor) error {
+func (this *JavaInitializer) initialize(options HandlerAwareInitOptions) error {
 	fmt.Println("language: " + this.language)
 	return nil
 }
@@ -89,8 +89,8 @@ func NewLanguageDetectingInitializer() *LanguageDetectingInitializer {
 	return &LanguageDetectingInitializer{}
 }
 
-func (this *LanguageDetectingInitializer) initialize(options HandlerAwareInitOptionsAccessor) error {
-	functionPath, err := resolveFunctionPath(options, "")
+func (this *LanguageDetectingInitializer) initialize(options HandlerAwareInitOptions) error {
+	functionPath, err := resolveFunctionPath(options.InitOptions, "")
 	if err != nil {
 		return err
 	}
@@ -106,9 +106,9 @@ func (this *LanguageDetectingInitializer) initialize(options HandlerAwareInitOpt
 
 	switch language {
 	case "shell":
-		NewShellInitializer().initialize(options)
+		NewShellInitializer().initialize(options.InitOptions)
 	case "node":
-		NewNodeInitializer().initialize(options)
+		NewNodeInitializer().initialize(options.InitOptions)
 	case "java":
 		fmt.Println("java resources detected. Use 'riff init java' to provide additional required options")
 		return nil
@@ -124,7 +124,7 @@ func (this *LanguageDetectingInitializer) initialize(options HandlerAwareInitOpt
 
 }
 
-func (this Initializer) initialize(opts InitOptionsAccessor) error {
+func (this Initializer) initialize(opts InitOptions) error {
 	fmt.Println("language: " + this.language)
 	functionPath, err := resolveFunctionPath(opts, this.extension)
 	if err != nil {
@@ -133,24 +133,24 @@ func (this Initializer) initialize(opts InitOptionsAccessor) error {
 
 	// Create function resources in function Path
 	workDir := filepath.Dir(functionPath)
-	fmt.Println(functionPath, workDir, opts.FunctionName())
+	fmt.Println(functionPath, workDir, opts.functionName)
 	os.Chdir(workDir)
 	return nil
 }
 
 
-func createDockerfile(workDir string, opts InitOptionsAccessor) error {
+func createDockerfile(workDir string, opts InitOptions) error {
 	return nil
 }
 
 //Assumes given file paths have been sanity checked and are valid
-func resolveFunctionPath(options InitOptionsAccessor, ext string) (string, error) {
+func resolveFunctionPath(options InitOptions, ext string) (string, error) {
 
-	functionName := options.FunctionName()
+	functionName := options.functionName
 	if functionName == "" {
-		functionName = filepath.Base(options.FunctionPath())
+		functionName = filepath.Base(options.functionPath)
 	}
-	absFilePath, err := filepath.Abs(options.FunctionPath())
+	absFilePath, err := filepath.Abs(options.functionPath)
 	if err != nil {
 		return "", err
 	}
@@ -159,7 +159,7 @@ func resolveFunctionPath(options InitOptionsAccessor, ext string) (string, error
 	var functionDir string
 	var functionFile string
 	if osutils.IsDirectory(absFilePath) {
-		if options.Artifact() == "" {
+		if options.artifact == "" {
 			functionFile = functionName
 			functionDir = absFilePath
 			if ext != "" {
@@ -172,7 +172,7 @@ func resolveFunctionPath(options InitOptionsAccessor, ext string) (string, error
 				resolvedFunctionPath = functionFile
 			}
 		} else {
-			resolvedFunctionPath = filepath.Join(absFilePath, options.Artifact())
+			resolvedFunctionPath = filepath.Join(absFilePath, options.artifact)
 		}
 	} else {
 		resolvedFunctionPath = absFilePath
@@ -212,7 +212,4 @@ func searchForFunctionResource(dir string, functionName string) (string, error) 
 	return foundFile, nil
 }
 
-func (this Initializer) FunctionPath() string {
-	return this.initOptions.FunctionPath()
-}
 

@@ -41,7 +41,7 @@ type Function struct {
 }
 
 //TODO: Flag for number of partitions?
-func CreateTopics(workDir string, opts InitOptionsAccessor, ) error {
+func CreateTopics(workDir string, opts InitOptions) error {
 
 
 		var topicTemplate = `
@@ -57,9 +57,9 @@ spec:
 			return err
 		}
 
-		input := Topic{ApiVersion:"projectriff.io/v1", Name: opts.Input(), Partitions: 1}
+		input := Topic{ApiVersion:apiVersion, Name: opts.input, Partitions: 1}
 
-		output := Topic{ApiVersion:"projectriff.io/v1", Name: opts.Output(), Partitions: 1}
+		output := Topic{ApiVersion:apiVersion, Name: opts.output, Partitions: 1}
 
 		err = tmpl.Execute(os.Stdout, input)
 		if err != nil {
@@ -71,7 +71,7 @@ spec:
 
 }
 
-func createFunction(workDir string, image string, opts InitOptionsAccessor) error {
+func createFunction(workDir string, image string, opts InitOptions) error {
 	var functionTemplate = `
 apiVersion: {{.ApiVersion}}
 kind: Function
@@ -96,7 +96,7 @@ spec:
     image: {{.Image}}
 `
 
-	function := Function{ApiVersion:apiVersion, Name:opts.FunctionName(), Input:opts.Input(), Output:opts.Output(), Protocol:opts.Protocol(), Image:image}
+	function := Function{ApiVersion:apiVersion, Name:opts.functionName, Input:opts.input, Output:opts.output, Protocol:opts.protocol, Image:image}
 
 	var tmpl *template.Template
 	var err error

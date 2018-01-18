@@ -71,7 +71,7 @@ func init() {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	version := os.Getenv("RIFF_VERSION")
-	if (version != "") {
+	if version != "" {
 		RIFF_VERSION = version
 	}
 
