@@ -1,6 +1,7 @@
 .PHONY: build clean
 OUTPUT = riff
 OUTPUT_LINUX = $(OUTPUT)-linux
+OUTPUT_WINDOWS = $(OUTPUT)-windows
 BUILD_FLAGS =
 
 ifeq ($(OS),Windows_NT)
@@ -33,6 +34,13 @@ $(OUTPUT_LINUX): $(GO_SOURCES) vendor
 	# See e.g. https://blog.codeship.com/building-minimal-docker-containers-for-go-applications/ for details
 	CGO_ENABLED=0 GOOS=linux go build $(BUILD_FLAGS) -v -a -installsuffix cgo -o $(OUTPUT_LINUX) riff.go
 
+$(OUTPUT_WINDOWS): $(GO_SOURCES) vendor
+	# This builds the executable from Go sources on *your* machine, targeting Windows
+	# and linking everything statically, to minimize Docker image size
+	# See e.g. https://blog.codeship.com/building-minimal-docker-containers-for-go-applications/ for details
+	CGO_ENABLED=0 GOOS=windows go build $(BUILD_FLAGS) -v -a -installsuffix cgo -o $(OUTPUT_WINDOWS) riff.go
+
 clean:
 	rm -f $(OUTPUT)
 	rm -f $(OUTPUT_LINUX)
+	rm -f $(OUTPUT_WINDOWS)
