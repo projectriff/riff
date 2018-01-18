@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"fmt"
 	"errors"
+	"os"
 	"strings"
 )
 
@@ -48,10 +49,18 @@ to generate the required Dockerfile and resource definitions using sensible defa
 	Run: func(cmd *cobra.Command, args []string) {
 
 		initializer := NewLanguageDetectingInitializer()
-		err := initializer.initialize(makeHandlerAwareOptions(cmd))
+		err := initializer.initialize(*makeHandlerAwareOptions(cmd))
 		if err != nil {
 			ioutils.Error(err)
 			return
+		}
+	},
+
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		err := validateAndCleanInitOptions(&initOptions)
+		if err != nil {
+			ioutils.Error(err)
+			os.Exit(1)
 		}
 	},
 }
@@ -69,14 +78,35 @@ to generate the required Dockerfile and resource definitions using sensible defa
 
 
 	Run: func(cmd *cobra.Command, args []string) {
-		err := validateAndCleanInitOptions(&initOptions)
+
+		initializer := NewJavaInitializer()
+		err := initializer.initialize(*makeHandlerAwareOptions(cmd))
 		if err != nil {
 			ioutils.Error(err)
 			return
 		}
+	},
+}
 
-		initializer := NewJavaInitializer()
-		err = initializer.initialize(makeHandlerAwareOptions(cmd))
+var initShellCmd = &cobra.Command{
+	Use:   "shell",
+	Short: "Initialize a shell script function",
+	Long: `Initialize the function based on the function script specified as the filename, using the name
+and version specified for the function image repository and tag. For example, if you have a directory named 'echo' containing a function 'echo.sh', you can simply type :
+
+riff init shell -f echo
+
+or
+
+riff init shell
+
+from the 'echo' directory
+
+to generate the required Dockerfile and resource definitions using sensible defaults.`,
+
+	Run: func(cmd *cobra.Command, args []string) {
+		initializer := NewShellInitializer()
+		err := initializer.initialize(initOptions)
 		if err != nil {
 			ioutils.Error(err)
 			return
@@ -111,15 +141,9 @@ var initJsCmd = &cobra.Command{
 }
 
 func initializeNode(cmd *cobra.Command, args []string) {
-	err := validateAndCleanInitOptions(&initOptions)
-	if err != nil {
-		ioutils.Error(err)
-		return
-	}
 
 	initializer := NewNodeInitializer()
-	err = initializer.initialize(initOptions)
-
+	err := initializer.initialize(initOptions)
 	if err != nil {
 		ioutils.Error(err)
 		return
@@ -139,15 +163,10 @@ to generate the required Dockerfile and resource definitions using sensible defa
 
 
 	Run: func(cmd *cobra.Command, args []string) {
-		err := validateAndCleanInitOptions(&initOptions)
-		if err != nil {
-			ioutils.Error(err)
-			return
-		}
 
 		initializer := NewPythonInitializer()
 
-		err = initializer.initialize(makeHandlerAwareOptions(cmd))
+		err := initializer.initialize(*makeHandlerAwareOptions(cmd))
 		if err != nil {
 			ioutils.Error(err)
 			return
@@ -155,13 +174,17 @@ to generate the required Dockerfile and resource definitions using sensible defa
 	},
 }
 
-func makeHandlerAwareOptions(cmd *cobra.Command) HandlerAwareInitOptions {
+func makeHandlerAwareOptions(cmd *cobra.Command) *HandlerAwareInitOptions {
 	handler, _ := cmd.Flags().GetString("handler")
-	return *NewHandlerAwareInitOptions(initOptions, handler)
+	options := NewHandlerAwareInitOptions(initOptions, handler)
+	return options
 }
 
 /*
- * Basic sanity check, given files exist, valid protocol given
+ * Basic sanity check that given paths exist and valid protocol given.
+ * Artifact must be a regular file.
+ * If artifact is given, it must be relative to the function path.
+ * If function path is given as a regular file, and artifact is also given, they must reference the same path (edge case).
  * TODO: Format (regex) check on function name, input, output, version, riff_version
  */
 func validateAndCleanInitOptions(options *InitOptions) error {
@@ -178,14 +201,22 @@ func validateAndCleanInitOptions(options *InitOptions) error {
 	}
 
 	if options.Artifact() != "" {
-		absArtifactPath, err := filepath.Abs(options.artifact)
-		if err != nil {
-			return err
+
+		if filepath.IsAbs(options.artifact) {
+			return errors.New(fmt.Sprintf("artifact %s must be relative to function path", options.artifact))
 		}
 
 		absFilePath, err := filepath.Abs(options.functionPath)
 		if err != nil {
 			return err
+		}
+
+		var absArtifactPath string
+
+		if osutils.IsDirectory(absFilePath) {
+			absArtifactPath = filepath.Join(absFilePath, options.artifact)
+		} else {
+			absArtifactPath = filepath.Join(filepath.Dir(absFilePath), options.artifact)
 		}
 
 		if osutils.IsDirectory(absArtifactPath) {
@@ -197,10 +228,9 @@ func validateAndCleanInitOptions(options *InitOptions) error {
 			absFilePathDir = filepath.Dir(absFilePath)
 		}
 
-		if absFilePathDir != filepath.Dir(absArtifactPath) {
+		if !strings.HasPrefix(filepath.Dir(absArtifactPath), absFilePathDir) {
 			return errors.New(fmt.Sprintf("artifact %s cannot be external to filepath %", absArtifactPath, absFilePath))
 		}
-
 
 		if !osutils.FileExists(absArtifactPath) {
 			return errors.New(fmt.Sprintf("artifact %s does not exist", absArtifactPath))
@@ -234,7 +264,7 @@ func init() {
 	initCmd.PersistentFlags().StringVarP(&initOptions.userAccount, "useraccount", "u", osutils.GetCurrentUsername(), "the Docker user account to be used for the image repository (defaults to current OS username")
 	initCmd.PersistentFlags().StringVarP(&initOptions.functionName, "name", "n", "", "the functionName of the function (defaults to the functionName of the current directory)")
 	initCmd.PersistentFlags().StringVarP(&initOptions.version, "version", "v", "0.0.1", "the version of the function (defaults to 0.0.1)")
-	initCmd.PersistentFlags().StringVarP(&initOptions.functionPath, "filepath", "f", osutils.GetCWD(), "Path or directory to be used for the function resources, if a file is specified then the file's directory will be used (defaults to the current directory)")
+	initCmd.PersistentFlags().StringVarP(&initOptions.functionPath, "filepath", "f", osutils.GetCWD(), "path or directory to be used for the function resources, if a file is specified then the file's directory will be used (defaults to the current directory)")
 	initCmd.PersistentFlags().StringVarP(&initOptions.protocol, "protocol", "p", "", "the protocol to use for function invocations (defaults to 'stdio' for shell and python, to 'http' for java and node)")
 	initCmd.PersistentFlags().StringVarP(&initOptions.input, "input", "i", "", "the functionName of the input topic (defaults to function functionName)")
 	initCmd.PersistentFlags().StringVarP(&initOptions.output, "output", "o", "", "the functionName of the output topic (optional)")
@@ -243,6 +273,10 @@ func init() {
 	initCmd.PersistentFlags().BoolVarP(&initOptions.push, "push", "", false, "push the image to Docker registry")
 
 	initCmd.AddCommand(initJavaCmd)
+	initCmd.AddCommand(initJsCmd)
+	initCmd.AddCommand(initNodeCmd)
+	initCmd.AddCommand(initPythonCmd)
+	initCmd.AddCommand(initShellCmd)
 
 	initJavaCmd.Flags().String("handler", "", "the fully qualified class name of the function handler")
 	initJavaCmd.MarkFlagRequired("handler")

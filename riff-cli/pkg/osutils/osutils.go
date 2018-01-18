@@ -57,7 +57,7 @@ func FileExists(path string) bool {
 func IsDirectory(path string) bool {
 	fi, err := os.Stat(path)
 	if err != nil {
-		ioutils.Error(err)
+		ioutils.Error(err.Error())
 		return false
 	}
 	return fi.Mode().IsDir()

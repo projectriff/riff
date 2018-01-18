@@ -33,13 +33,12 @@ func TestValidateDefaultFunctionResources(t *testing.T) {
 }
 
 func TestValidateCleansFunctionResources(t *testing.T) {
-	filePath := filepath.Join("test_dir","python","demo") + string(os.PathSeparator)
-	artifact := filePath + string(os.PathSeparator) + string(os.PathSeparator) + "demo.py"
+	filePath := filepath.Join("test_dir","python","demo") + string(os.PathSeparator) + string(os.PathSeparator)
+	artifact := "demo.py"
 	as := assert.New(t)
 	options:= InitOptions{functionPath: filePath, artifact:artifact}
 	as.NoError(validateAndCleanInitOptions(&options))
 	as.Equal(osutils.Path("test_dir/python/demo"),options.functionPath)
-	as.Equal(osutils.Path("test_dir/python/demo/demo.py"),options.artifact)
 }
 
 func TestValidateFunctionResourceDoesNotExist(t *testing.T) {
@@ -52,12 +51,20 @@ func TestValidateFunctionResourceDoesNotExist(t *testing.T) {
 }
 
 func TestValidateArtifactIsRegularFile(t *testing.T) {
-	filePath := osutils.Path("test_dir/python/demo")
+	filePath := osutils.Path("test_dir/python")
 	as := assert.New(t)
-	options:= InitOptions{functionPath: filePath, artifact: filePath}
+	options:= InitOptions{functionPath: filePath, artifact: "demo"}
 	err := validateAndCleanInitOptions(&options)
 	as.Error(err)
 	as.Contains(err.Error(), "must be a regular file")
+}
+
+func TestValidateArtifactIsInSubDirectory(t *testing.T) {
+	filePath := osutils.Path("test_dir")
+	as := assert.New(t)
+	options:= InitOptions{functionPath: filePath, artifact: "python/demo/demo.py"}
+	err := validateAndCleanInitOptions(&options)
+	as.NoError(err)
 }
 
 func TestArtifactCannotBeExternalToFilePath(t *testing.T) {
@@ -72,28 +79,19 @@ func TestArtifactCannotBeExternalToFilePath(t *testing.T) {
 	os.Chdir(currentDir)
 }
 
-func TestArtifactSameAsFilePath(t *testing.T) {
-	filePath := osutils.Path("test_dir/python/demo/demo.py")
+func TestArtifactRelativeToFilePath(t *testing.T) {
+	filePath := osutils.Path("test_dir/python/demo")
+	artifact := "demo.py"
 	as := assert.New(t)
-	options:= InitOptions{functionPath: filePath, artifact: filePath}
-	err := validateAndCleanInitOptions(&options)
-	as.NoError(err)
-	as.Equal(options.artifact,filePath)
-}
-
-func TestAbsoluteArtifactPathMatchesFilePath(t *testing.T) {
-	filePath := osutils.Path("test_dir/python/demo/demo.py")
-	artifact,_ := filepath.Abs(filePath)
-	as := assert.New(t)
-
 	options:= InitOptions{functionPath: filePath, artifact: artifact}
 	err := validateAndCleanInitOptions(&options)
 	as.NoError(err)
 }
 
+
 func TestAbsoluteArtifactPathConflctsFilePath(t *testing.T) {
 	filePath := osutils.Path("test_dir/python/multiple/one.py")
-	artifact :=  osutils.Path("test_dir/python/multiple/two.py")
+	artifact :=  osutils.Path("two.py")
 	as := assert.New(t)
 
 	options:= InitOptions{functionPath: filePath, artifact: artifact}

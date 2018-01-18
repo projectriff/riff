@@ -32,6 +32,8 @@ type InitOptionsAccessor interface {
 
 	FunctionName() string
 
+	Artifact() string
+
 	Version() string
 
 	FunctionPath() string
@@ -45,8 +47,6 @@ type InitOptionsAccessor interface {
 	RiffVersion() string
 
 	Push() bool
-
-	Artifact() string
 }
 
 type HandlerAwareInitOptionsAccessor interface {
@@ -55,7 +55,6 @@ type HandlerAwareInitOptionsAccessor interface {
 }
 
 type InitOptions struct {
-	InitOptionsAccessor
 	userAccount  string
 	functionName string
 	version      string
@@ -100,13 +99,23 @@ func (this InitOptions) Artifact() string {
 	return this.artifact
 }
 
+func (this InitOptions) Input() string {
+	return this.input
+}
+
+func (this InitOptions) Output() string {
+	return this.output
+}
+
+
+
 type HandlerAwareInitOptions struct {
 	InitOptions
 	handler string
 }
 
 func NewHandlerAwareInitOptions(options InitOptions, handler string) *HandlerAwareInitOptions {
-	handlerAwareInitOptions := &HandlerAwareInitOptions{}
+	handlerAwareInitOptions := &HandlerAwareInitOptions{handler:handler}
 	handlerAwareInitOptions.functionName = options.functionName
 	handlerAwareInitOptions.push = options.push
 	handlerAwareInitOptions.protocol = options.protocol
@@ -116,7 +125,7 @@ func NewHandlerAwareInitOptions(options InitOptions, handler string) *HandlerAwa
 	handlerAwareInitOptions.userAccount = options.userAccount
 	handlerAwareInitOptions.input = options.input
 	handlerAwareInitOptions.output = options.output
-	handlerAwareInitOptions.handler = handler
+	handlerAwareInitOptions.artifact = options.artifact
 
 	return handlerAwareInitOptions
 }
@@ -149,9 +158,13 @@ type PythonInitializer struct {
 }
 
 func NewPythonInitializer() *PythonInitializer {
-	return &PythonInitializer{}
+	pythonInitializer := &PythonInitializer{}
+	pythonInitializer.language = "python"
+	pythonInitializer.extension = "py"
+	return pythonInitializer
 }
-func (this *PythonInitializer) initialize(options HandlerAwareInitOptions) error {
+func (this *PythonInitializer) initialize(options HandlerAwareInitOptionsAccessor) error {
+	fmt.Println("language: " + this.language)
 	return nil
 }
 
@@ -162,10 +175,14 @@ type JavaInitializer struct {
 }
 
 func NewJavaInitializer() *JavaInitializer {
-	return &JavaInitializer{}
+	javaInitializer := &JavaInitializer{}
+	javaInitializer.language="java"
+	javaInitializer.extension="java"
+	return javaInitializer
 }
 
-func (this *JavaInitializer) initialize(options HandlerAwareInitOptions) error {
+func (this *JavaInitializer) initialize(options HandlerAwareInitOptionsAccessor) error {
+	fmt.Println("language: " + this.language)
 	return nil
 }
 
@@ -178,40 +195,43 @@ func NewLanguageDetectingInitializer() *LanguageDetectingInitializer {
 	return &LanguageDetectingInitializer{}
 }
 
-func (this *LanguageDetectingInitializer) initialize(options HandlerAwareInitOptions) error {
+func (this *LanguageDetectingInitializer) initialize(options HandlerAwareInitOptionsAccessor) error {
+	functionPath, err := resolveFunctionPath(options, "")
+	if err != nil {
+		return err
+	}
+
+	var languageForFileExtenstion = map[string]string{
+		"sh"	:  	"sh",
+		"java"	: 	"java",
+		"js"	:   "node",
+		"py"	: 	"python",
+	}
+
+	language := languageForFileExtenstion[filepath.Ext(functionPath)[1:]]
+
+	switch language {
+	case "shell":
+		NewShellInitializer().initialize(options)
+	case "node":
+		NewNodeInitializer().initialize(options)
+	case "java":
+		NewJavaInitializer().initialize(options)
+	case  "python":
+		NewPythonInitializer().initialize(options)
+	default:
+		//TODO: Should never get here
+		return errors.New(fmt.Sprintf("unsupported language %s\n",language))
+	}
+
 	return nil
+
 }
 
-//
-//	var fileExtenstions = map[string]string{
-//		"shell":  "sh",
-//		"java":   "java",
-//		"node":   "js",
-//		"js":     "js",
-//		"python": "py",
-//	}
-//
-//
-//
-//
-//
-////	language := ""
-//	for lang, ext := range fileExtenstions {
-////		fileName := fmt.Sprintf("%s.%s", options.FunctionName(), ext)
-////		functionFile := filepath.Join(absPath, fileName)
-////		if osutils.FileExists(functionFile) {
-////			language = lang
-//			break
-//		}
-//	}
-//
-//
-//	if (language == "") {
-//		return errors.New(fmt.Sprintf("cannot find function source for function %s in directory %s", options.FunctionName(), absPath))
-//	}
-//
-//	return nil
-//}
+func (this Initializer) initialize(opts InitOptionsAccessor) error {
+	fmt.Println("language: " + this.language)
+	return nil
+}
 
 //Assumes given file paths have been sanity checked and are valid
 func resolveFunctionPath(options InitOptionsAccessor, ext string) (string, error) {
@@ -282,192 +302,7 @@ func searchForFunctionResource(dir string, functionName string) (string, error) 
 	return foundFile, nil
 }
 
-//} else {
-//ext := fileExtenstions[opts.Language]
-//if ext == "" {
-//return errors.New(fmt.Sprintf("language %s is unsupported", opts.Language))
-//}
-//this.options.Language = opts.Language
-//
-//fileName := fmt.Sprintf("%s.%s", this.options.FunctionName, ext)
-//this.functionFile = filepath.Join(this.options.FunctionPath, fileName)
-//if !osutils.FileExists(this.functionFile) {
-//return errors.New(fmt.Sprintf("cannot find function source for function %s", this.functionFile))
-//}
-//}
-//}
-
-/////////////////////////
-
 func (this Initializer) FunctionPath() string {
 	return this.initOptions.FunctionPath()
 }
 
-//func (this * Initializer) SetFunctionPath(path string) error {
-//	if !osutils.FileExists(path){
-//		return errors.New(fmt.Sprintf("File does not exist %s", path))
-//	}
-//
-//	this.initOptions.functionPath, _ = filepath.Abs(path)
-//	return nil
-//}
-
-func (this Initializer) initialize(opts InitOptions) error {
-	return nil
-}
-
-//
-//		err := this.deriveOptionsFromFunctionPath(opts)
-//		if err != nil{
-//		return err
-//	}
-//
-//		err = this.resolveArtifact(opts.Artifact)
-//		if err != nil{
-//		return err
-//	}
-//
-//		err = this.resolveProtocol(opts.Protocol)
-//		if err != nil{
-//		return err
-//	}
-//
-//		if this.options.Language == "java"{
-//		if opts.Classname == ""{
-//		return errors.New("'classname is required for java")
-//	}
-//	}
-//
-//
-//		if opts.Input == ""{
-//		this.options.Input = this.options.FunctionName
-//	}
-//
-//		this.options.Output = opts.Output
-//		this.options.UserAccount = opts.UserAccount
-//		this.options.Push = opts.Push
-//		this.options.RiffVersion = opts.RiffVersion
-//		this.options.Version = opts.Version
-//
-//		fmt.Printf("function file: %s\noptions: %+v\n", this.functionFile, this.options)
-//
-//		return nil
-//	}
-//
-//	func(this *Initializer) deriveOptionsFromFunctionPath(opts InitOptions) error{
-//		var fileExtenstions = map[string]string{
-//		"shell":    "sh",
-//		"java":   "java",
-//		"node":   "js",
-//		"js":   "js",
-//		"python":    "py",
-//	}
-//
-//
-//
-//		err := this.SetFunctionPath(opts.FunctionPath)
-//		if err != nil {
-//			return err
-//		}
-//
-//		if osutils.IsDirectory(this.options.FunctionPath){
-//		if opts.FunctionName == ""{
-//		this.options.FunctionName = filepath.Base(this.options.FunctionPath)
-//	} else{
-//		this.options.FunctionName = opts.FunctionName
-//	}
-//
-//		if opts.Language == ""{
-//		for lang, ext := range fileExtenstions{
-//		fileName := fmt.Sprintf("%s.%s", this.options.FunctionName, ext)
-//		functionFile := filepath.Join(this.options.FunctionPath, fileName)
-//		if osutils.FileExists(functionFile){
-//		this.options.Language = lang
-//		this.functionFile = functionFile
-//		break
-//	}
-//	}
-//		if this.options.Language == ""{
-//		return errors.New(fmt.Sprintf("cannot find function source for function %s in directory %s", this.options.FunctionName, this.options.FunctionPath))
-//	}
-//	} else{
-//		ext := fileExtenstions[opts.Language]
-//		if ext == ""{
-//		return errors.New(fmt.Sprintf("language %s is unsupported", opts.Language))
-//	}
-//		this.options.Language = opts.Language
-//
-//		fileName := fmt.Sprintf("%s.%s", this.options.FunctionName, ext)
-//		this.functionFile = filepath.Join(this.options.FunctionPath, fileName)
-//		if !osutils.FileExists(this.functionFile){
-//		return errors.New(fmt.Sprintf("cannot find function source for function %s", this.functionFile))
-//	}
-//	}
-//	} else{
-//		//regular file given
-//		ext := filepath.Ext(this.options.FunctionPath)
-//		if opts.Language == ""{
-//		for lang, e := range fileExtenstions{
-//		if e == ext{
-//		this.options.Language = lang
-//		break
-//	}
-//	}
-//		if this.options.Language == ""{
-//		return errors.New(fmt.Sprintf("cannot find function source for function %s in directory %s", this.options.FunctionName, this.options.FunctionPath))
-//	}
-//	} else{
-//		this.options.Language = opts.Language
-//		if fileExtenstions[this.options.Language] != ext{
-//		fmt.Printf("WARNING non standard extension %s given for language %s. We'll see what we can do", ext, this.options.Language)
-//	}
-//	}
-//	}
-//
-//
-//		return nil
-//	}
-//
-//	func(this *Initializer) resolveProtocol(protocol
-//	string) error{
-//		var defaultProtocols = map[string]string{
-//		"shell":    "stdio",
-//		"java":   "http",
-//		"node":   "http",
-//		"js":   "http",
-//		"python":    "stdio",
-//	}
-//
-//		var supportedProtocols = []string{"stdio", "http", "grpc"}
-//
-//		if protocol == ""{
-//		this.options.Protocol = defaultProtocols[this.options.Language]
-//	} else{
-//		supported := false
-//		for _, p := range supportedProtocols{
-//		if protocol == p{
-//		supported = true
-//	}
-//	}
-//		if (!supported){
-//		return errors.New(fmt.Sprintf("protocol %s is unsupported \n", protocol))
-//	}
-//		this.options.Protocol = protocol
-//	}
-//		return nil
-//	}
-//
-//	func(this *Initializer) resolveArtifact(artifact
-//	string) error{
-//		if artifact == ""{
-//		////TODO: Needs work...
-//		this.options.Artifact = filepath.Base(this.functionFile)
-//		return nil
-//	}
-//
-//		//TODO: What if the artifact ext doesn't match the language?
-//		if !osutils.FileExists(artifact){
-//		return errors.New(fmt.Sprintf("Artifact does not exist %s", artifact))
-//	}
-//		return nil
-//	}

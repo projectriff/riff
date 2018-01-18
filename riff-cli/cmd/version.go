@@ -34,7 +34,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		fmt.Printf("riff version %s\n", RIFF_VERSION)
+		fmt.Println(RIFF_VERSION)
 	},
 }
 
