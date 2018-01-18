@@ -34,11 +34,10 @@ Initialize the function based on the function source code specified as the filen
 
 Usage:
 
-  riff init -u <useraccount> -n <name> -v <version> -f <source> -l <language> -p <protocol> -i <input-topic> -o <output-topic> [-a <artifact>] [--handler <handler-name>] [--push]
+  riff init -n <name> -v <version> -f <source> -l <language> -p <protocol> -i <input-topic> -o <output-topic> [-a <artifact>] [--handler <handler-name>]
 
 Options:
 
-  -u, --useraccount: the Docker user account to be used for the image repository (defaults to current OS username)
   -n, --name: the name of the function (defaults to the name of the current directory)
   -v, --version: the version of the function (defaults to 0.0.1)
   -f, --filename: filename or directory to be used for the function resources, 
@@ -56,7 +55,6 @@ Options:
   --handler: the name of the handler, for Java it is the fully qualified class name of the Java class where the function is defined
   --riff-version: the version of riff to use when building containers
   --force: overwrite existing Dockerfile and function definitions
-  --push: push the image to Docker registry
 
 EOF
 }
@@ -69,10 +67,11 @@ Build the function based on the code available in the path directory, using the 
 
 Usage:
 
-  riff build -n <name> -v <version> -f <path> [--push]
+  riff build -u <useraccount> -n <name> -v <version> -f <path> [--push]
 
 Options:
 
+  -u, --useraccount: the Docker user account to be used for the image repository (defaults to current OS username)
   -n, --name: the name of the function (defaults to the name of the current directory)
   -v, --version: the version of the function (defaults to 0.0.1)
   -f, --filename: filename, directory, or URL for the code or resource (defaults to the current directory)
