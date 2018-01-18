@@ -24,11 +24,11 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/dturanski/riff-cli/pkg/kubectl"
-	"github.com/dturanski/riff-cli/pkg/ioutils"
-	"github.com/dturanski/riff-cli/pkg/minikube"
-	"github.com/dturanski/riff-cli/pkg/jsonpath"
-	"github.com/dturanski/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff-cli/pkg/kubectl"
+	"github.com/projectriff/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff-cli/pkg/minikube"
+	"github.com/projectriff/riff-cli/pkg/jsonpath"
+	"github.com/projectriff/riff-cli/pkg/osutils"
 )
 
 type PublishOptions struct {

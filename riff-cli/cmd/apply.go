@@ -20,8 +20,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/dturanski/riff-cli/pkg/kubectl"
-	"github.com/dturanski/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff-cli/pkg/kubectl"
+	"github.com/projectriff/riff-cli/pkg/ioutils"
 	"os"
 )
 

@@ -18,8 +18,8 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/dturanski/riff-cli/pkg/osutils"
-	"github.com/dturanski/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff-cli/pkg/ioutils"
 	"path/filepath"
 	"fmt"
 	"errors"

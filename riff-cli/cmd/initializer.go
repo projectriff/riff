@@ -22,7 +22,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/dturanski/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff-cli/pkg/osutils"
 )
 
 var supportedProtocols = []string{"stdio", "http", "grpc"}

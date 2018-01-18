@@ -34,7 +34,7 @@ func TestFunction (t *testing.T) {
 	as := assert.New(t)
 
 	opts := InitOptions{functionName: "myfunc", input: "in", output: "out", protocol:"http"}
-	err := createFunction(".", "dturanski/myfunc:0.0.1", opts)
+	err := createFunction(".", "projectriff/myfunc:0.0.1", opts)
 
 	as.NoError(err)
 }

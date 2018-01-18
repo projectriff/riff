@@ -17,7 +17,7 @@
 package main
 
 import (
-	"github.com/dturanski/riff-cli/cmd"
+	"github.com/projectriff/riff-cli/cmd"
 )
 
 func main() {

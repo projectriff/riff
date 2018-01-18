@@ -19,7 +19,7 @@ package cmd
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"github.com/dturanski/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff-cli/pkg/osutils"
 	"path/filepath"
 	"os"
 	"fmt"

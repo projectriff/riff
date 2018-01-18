@@ -23,8 +23,8 @@ import (
 	"bufio"
 
 	"github.com/spf13/cobra"
-	"github.com/dturanski/riff-cli/pkg/ioutils"
-	"github.com/dturanski/riff-cli/pkg/kubectl"
+	"github.com/projectriff/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff-cli/pkg/kubectl"
 )
 
 type LogsOptions struct {
