@@ -20,12 +20,15 @@ import (
 	"path/filepath"
 	"fmt"
 	"errors"
+	"os"
 
 	"github.com/dturanski/riff-cli/pkg/osutils"
 )
 
 var supportedProtocols = []string{"stdio", "http", "grpc"}
 var supportedExtensions = []string{"js", "java", "py",}
+
+
 
 type InitOptionsAccessor interface {
 	UserAccount() string
@@ -230,6 +233,27 @@ func (this *LanguageDetectingInitializer) initialize(options HandlerAwareInitOpt
 
 func (this Initializer) initialize(opts InitOptionsAccessor) error {
 	fmt.Println("language: " + this.language)
+	functionPath, err := resolveFunctionPath(opts, this.extension)
+	if err != nil {
+		return err
+	}
+
+	// Create function resources in function Path
+
+	workDir := filepath.Dir(functionPath)
+
+	fmt.Println(functionPath, workDir, opts.FunctionName())
+
+	os.Chdir(workDir)
+
+
+
+
+	return nil
+}
+
+
+func createDockerfile(workDir string, opts InitOptionsAccessor) error {
 	return nil
 }
 
