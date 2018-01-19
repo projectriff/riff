@@ -20,13 +20,12 @@ import (
 	"path/filepath"
 	"fmt"
 	"errors"
-	"os"
 
 	"github.com/projectriff/riff-cli/pkg/osutils"
 )
 
 var supportedProtocols = []string{"stdio", "http", "grpc"}
-var supportedExtensions = []string{"js", "java", "py",}
+var supportedExtensions = []string{"js", "java", "py", "sh"}
 
 //
 type Initializer struct {
@@ -59,7 +58,7 @@ func NewPythonInitializer() *PythonInitializer {
 }
 func (this *PythonInitializer) initialize(options HandlerAwareInitOptions) error {
 	fmt.Println("language: " + this.language)
-	return nil
+	return doInitialize(this.language, this.extension, options)
 }
 
 //
@@ -76,8 +75,51 @@ func NewJavaInitializer() *JavaInitializer {
 }
 
 func (this *JavaInitializer) initialize(options HandlerAwareInitOptions) error {
-	fmt.Println("language: " + this.language)
-	return nil
+	return doInitialize(this.language, this.extension, options)
+}
+
+func doInitialize(language string, ext string, opts HandlerAwareInitOptions) error {
+	fmt.Println("language: " + language)
+	functionPath, err := resolveFunctionPath(opts.InitOptions, ext)
+	if err != nil {
+		return err
+	}
+	// Create function resources in function Path
+	if opts.functionName == "" {
+		b := filepath.Base(functionPath);
+		opts.functionName = b[0:len(b)-len(filepath.Ext(functionPath))]
+	}
+
+	if opts.input == "" {
+		opts.input = opts.functionName
+	}
+
+	var protocolForLanguage = map[string]string{
+		"shell"	:  	"stdio",
+		"java"	: 	"http",
+		"js"	:   "http",
+		"node"	:   "http",
+		"py"	: 	"stdio",
+	}
+
+	if opts.protocol == "" {
+		opts.protocol = protocolForLanguage[language]
+	}
+
+	image := fmt.Sprintf("%s/%s:%s",opts.userAccount,opts.functionName,opts.version)
+
+	workdir := filepath.Dir(functionPath)
+
+	err = createTopics(workdir,opts.InitOptions)
+	if err != nil {
+		return err
+	}
+	err = createFunction(workdir, image, opts.InitOptions)
+	if err != nil {
+		return err
+	}
+
+	return createDockerfile(workdir, language, opts)
 }
 
 //
@@ -96,7 +138,7 @@ func (this *LanguageDetectingInitializer) initialize(options HandlerAwareInitOpt
 	}
 
 	var languageForFileExtenstion = map[string]string{
-		"sh"	:  	"sh",
+		"sh"	:  	"shell",
 		"java"	: 	"java",
 		"js"	:   "node",
 		"py"	: 	"python",
@@ -125,21 +167,26 @@ func (this *LanguageDetectingInitializer) initialize(options HandlerAwareInitOpt
 }
 
 func (this Initializer) initialize(opts InitOptions) error {
-	fmt.Println("language: " + this.language)
-	functionPath, err := resolveFunctionPath(opts, this.extension)
-	if err != nil {
-		return err
-	}
+	haOpts := &HandlerAwareInitOptions{}
+	haOpts.InitOptions = opts
+	return doInitialize(this.language, this.extension, *haOpts)
 
-	// Create function resources in function Path
-	workDir := filepath.Dir(functionPath)
-	fmt.Println(functionPath, workDir, opts.functionName)
-	os.Chdir(workDir)
-	return nil
 }
 
 
-func createDockerfile(workDir string, opts InitOptions) error {
+func createDockerfile(workDir string, language string, opts HandlerAwareInitOptions) error {
+	switch language {
+	case "java":
+		return createJavaFunctionDockerFile(workDir, opts)
+	case "python":
+		return createPythonFunctionDockerFile(workDir, opts)
+	case "shell":
+		return createShellFunctionDockerFile(workDir, opts.InitOptions)
+	case "node":
+		return createNodeFunctionDockerFile(workDir, opts.InitOptions)
+	case "js":
+		return createNodeFunctionDockerFile(workDir, opts.InitOptions)
+	}
 	return nil
 }
 

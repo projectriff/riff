@@ -27,25 +27,21 @@ const (
 
 var createOptions CreateOptions
 
-var createChainCmd = CommandChain(initCmd, buildCmd)
+var createChainCmd = commandChain(initCmd, buildCmd)
 
-var createJavaChainCmd = CommandChain(initJavaCmd, buildCmd)
+var createJavaChainCmd = commandChain(initJavaCmd, buildCmd)
 
-var createNodeChainCmd = CommandChain(initNodeCmd, buildCmd)
+var createNodeChainCmd = commandChain(initNodeCmd, buildCmd)
 
-var createPythonChainCmd = CommandChain(initPythonCmd, buildCmd)
+var createPythonChainCmd = commandChain(initPythonCmd, buildCmd)
 
-
-
-var createShellChainCmd = CommandChain(initShellCmd, buildCmd)
-
+var createShellChainCmd = commandChain(initShellCmd, buildCmd)
 
 var createCmd = &cobra.Command{
 	Use:   "create [language]",
 	Short: "Create a function",
 	Long:  createCmdLong(initCommandDescription, LongVals{Process: createDefinition, Command: "create", Result: createResult}),
-
-	Run: createChainCmd.Run,
+	Run:   createChainCmd.Run,
 	PreRun: createChainCmd.PreRun,
 	PersistentPreRun: createChainCmd.PersistentPreRun,
 }
@@ -80,14 +76,13 @@ var createNodeCmd = &cobra.Command{
 }
 
 var createJsCmd = &cobra.Command{
-	Use:   "js",
-	Short: createNodeCmd.Short,
-	Long:  createNodeCmd.Long,
+	Use:              "js",
+	Short:            createNodeCmd.Short,
+	Long:             createNodeCmd.Long,
 	Run:              createNodeChainCmd.Run,
 	PreRun:           createNodeChainCmd.PreRun,
 	PersistentPreRun: createNodeChainCmd.PersistentPreRun,
 }
-
 
 var createPythonCmd = &cobra.Command{
 	Use:   "python",
@@ -102,8 +97,9 @@ var createPythonCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(createCmd)
+
 	createInitOptionFlags(createCmd, &createOptions.InitOptions)
-    createBuildOptionFlags(createCmd, &createOptions.BuildOptions)
+	createBuildOptionFlags(createCmd, &createOptions.BuildOptions)
 
 	createCmd.AddCommand(createJavaCmd)
 	createCmd.AddCommand(createJsCmd)
@@ -111,8 +107,9 @@ func init() {
 	createCmd.AddCommand(createPythonCmd)
 	createCmd.AddCommand(createShellCmd)
 
-	createJavaCmd.Flags().AddFlagSet(initCmd.Flags())
+	createJavaCmd.Flags().String("handler", "", "the fully qualified class name of the function handler")
 	createJavaCmd.MarkFlagRequired("handler")
-	createPythonCmd.Flags().AddFlagSet(initCmd.Flags())
+
+	createPythonCmd.Flags().String("handler", "", "the name of the function handler")
 	createPythonCmd.MarkFlagRequired("handler")
 }

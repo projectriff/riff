@@ -13,7 +13,6 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
-
 package cmd
 
 type InitOptions struct {
@@ -24,6 +23,8 @@ type InitOptions struct {
 	input        string
 	output       string
 	artifact     string
+	riffVersion  string
+	userAccount  string
 }
 
 type HandlerAwareInitOptions struct {
@@ -36,9 +37,7 @@ func (this HandlerAwareInitOptions) Handler() string {
 }
 
 type BuildOptions struct {
-	userAccount string
 	push        bool
-	riffVersion string
 }
 
 type CreateOptions struct {
@@ -46,21 +45,8 @@ type CreateOptions struct {
 	BuildOptions
 }
 
-func NewCreateOptions(init InitOptions, build BuildOptions) *CreateOptions {
-	createOptions := &CreateOptions{}
-	createOptions.InitOptions = init
-	createOptions.BuildOptions = build
-	return createOptions
-}
-
 type HandlerAwareCreateOptions struct {
 	HandlerAwareInitOptions
 	BuildOptions
 }
 
-func NewHandlerAwareCreateOptions(init HandlerAwareInitOptions, build BuildOptions) *HandlerAwareCreateOptions {
-	createOptions := &HandlerAwareCreateOptions{}
-	createOptions.HandlerAwareInitOptions = init
-	createOptions.BuildOptions = build
-	return createOptions
-}

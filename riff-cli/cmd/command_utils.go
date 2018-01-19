@@ -29,18 +29,19 @@ func createInitOptionFlags(cmd *cobra.Command , options *InitOptions) {
 	cmd.PersistentFlags().StringVarP(&options.input, "input", "i", "", "the functionName of the input topic (defaults to function functionName)")
 	cmd.PersistentFlags().StringVarP(&options.output, "output", "o", "", "the functionName of the output topic (optional)")
 	cmd.PersistentFlags().StringVarP(&options.artifact, "artifact", "a", "", "path to the function artifact, source code or jar file")
+	cmd.PersistentFlags().StringVarP(&options.riffVersion, "riff-version", "", RIFF_VERSION, "the version of riff to use when building containers")
+	cmd.PersistentFlags().StringVarP(&options.userAccount, "useraccount", "u", osutils.GetCurrentUsername(), "the Docker user account to be used for the image repository (defaults to current OS username")
 }
 
 func createBuildOptionFlags(cmd *cobra.Command , options *BuildOptions) {
-	createCmd.PersistentFlags().StringVarP(&options.userAccount, "useraccount", "u", osutils.GetCurrentUsername(), "the Docker user account to be used for the image repository (defaults to current OS username")
-	createCmd.PersistentFlags().StringVarP(&options.riffVersion, "riff-version", "", "0.0.1", "the version of riff to use when building containers")
+
 	createCmd.PersistentFlags().BoolVarP(&options.push, "push", "", false, "push the image to Docker registry")
 }
 
 /*
  * Runs a chain of commands
  */
-func CommandChain(commands... *cobra.Command)  *cobra.Command {
+func commandChain(commands... *cobra.Command)  *cobra.Command {
 
 	run := func(cmd *cobra.Command, args []string) {
 		for _,command := range commands {
@@ -103,11 +104,15 @@ func CommandChain(commands... *cobra.Command)  *cobra.Command {
 	}
 
 	persistentPreRun := func(cmd *cobra.Command, args []string) {
-		for _,command := range commands {
-			if command.PersistentPreRun != nil {
-				command.PersistentPreRun(cmd, args)
-			}
-		}
+		//TODO: A little hacky; maybe recursive walk through cmd.Parent
+		initOptions = createOptions.InitOptions
+		initCmd.PersistentPreRun(cmd,args)
+
+		//for _,command := range commands {
+		//	if command.PersistentPreRun != nil {
+		//		command.PersistentPreRun(cmd, args)
+		//	}
+		//}
 	}
 
 	persistentPreRunE := func(cmd *cobra.Command, args []string) error {

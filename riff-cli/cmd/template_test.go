@@ -25,7 +25,7 @@ func TestTopics (t *testing.T) {
 	as := assert.New(t)
 
 	opts := InitOptions{functionName: "myfunc", input: "in", output: "out"}
-	err := CreateTopics(".", opts)
+	err := createTopics(".", opts)
 
 	as.NoError(err)
 }

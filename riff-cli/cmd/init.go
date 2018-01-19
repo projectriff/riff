@@ -30,14 +30,14 @@ import (
 var initOptions InitOptions
 
 const (
-	initResult = `generate the required Dockerfile and resource definitions using sensible defaults`
+	initResult     = `generate the required Dockerfile and resource definitions using sensible defaults`
 	initDefinition = `Generate`
 )
 
 /*
  * init Command
  */
-const initCommandDescription =  `{{.Process}} the function based on the function source code specified as the filename, using the name
+const initCommandDescription = `{{.Process}} the function based on the function source code specified as the filename, using the name
 and version specified for the function image repository and tag. 
 For example, if you have a directory named 'square' containing a function 'square.js', you can simply type :
 
@@ -54,10 +54,9 @@ to {{.Result}}.`
 var initCmd = &cobra.Command{
 	Use:   "init [language]",
 	Short: "Initialize a function",
-	Long: createCmdLong(initCommandDescription, LongVals{Process: initDefinition, Command:"init", Result:initResult}),
+	Long:  createCmdLong(initCommandDescription, LongVals{Process: initDefinition, Command: "init", Result: initResult}),
 
 	Run: func(cmd *cobra.Command, args []string) {
-
 		initializer := NewLanguageDetectingInitializer()
 		err := initializer.initialize(*newHandlerAwareOptions(cmd))
 		if err != nil {
@@ -102,7 +101,7 @@ to generate the required Dockerfile and resource definitions using sensible defa
 var initJavaCmd = &cobra.Command{
 	Use:   "java",
 	Short: "Initialize a Java function",
-	Long: 	createCmdLong(initJavaDescription, LongVals{Process:initDefinition, Command:"init java", Result:initResult}),
+	Long:  createCmdLong(initJavaDescription, LongVals{Process: initDefinition, Command: "init java", Result: initResult}),
 	Run: func(cmd *cobra.Command, args []string) {
 
 		initializer := NewJavaInitializer()
@@ -133,7 +132,7 @@ to {{.Result}}.`
 var initShellCmd = &cobra.Command{
 	Use:   "shell",
 	Short: "Initialize a shell script function",
-	Long: 	createCmdLong(initShellDescription, LongVals{Process:initDefinition, Command:"init shell", Result:initResult}),
+	Long:  createCmdLong(initShellDescription, LongVals{Process: initDefinition, Command: "init shell", Result: initResult}),
 
 	Run: func(cmd *cobra.Command, args []string) {
 		initializer := NewShellInitializer()
@@ -174,15 +173,7 @@ var initNodeCmd = &cobra.Command{
 			return
 		}
 	},
-}
-/*
- * init js Command (alias for node)
- */
-var initJsCmd = &cobra.Command{
-	Use:   "js",
-	Short: initNodeCmd.Short,
-	Long:  initNodeCmd.Long,
-	Run:   initNodeCmd.Run,
+	Aliases: []string{"js"},
 }
 
 /*
@@ -200,7 +191,7 @@ to {{.Result}}.`
 var initPythonCmd = &cobra.Command{
 	Use:   "python",
 	Short: "Initialize a Python function",
-	Long: createCmdLong(initPythonDescription, LongVals{Process:initDefinition, Command:"init python", Result:initResult}),
+	Long:  createCmdLong(initPythonDescription, LongVals{Process: initDefinition, Command: "init python", Result: initResult}),
 
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -303,11 +294,9 @@ func validateAndCleanInitOptions(options *InitOptions) error {
 
 func init() {
 	rootCmd.AddCommand(initCmd)
-
 	createInitOptionFlags(initCmd, &initOptions)
 
 	initCmd.AddCommand(initJavaCmd)
-	initCmd.AddCommand(initJsCmd)
 	initCmd.AddCommand(initNodeCmd)
 	initCmd.AddCommand(initPythonCmd)
 	initCmd.AddCommand(initShellCmd)
