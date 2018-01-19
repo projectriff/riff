@@ -85,9 +85,7 @@ func doInitialize(language string, ext string, opts HandlerAwareInitOptions) err
 		return err
 	}
 	// Create function resources in function Path
-	if opts.functionName == "" {
-		opts.functionName = filepath.Base(filepath.Dir(functionPath))
-	}
+	opts.functionName = deriveFunctionName(opts.InitOptions)
 
 	if opts.input == "" {
 		opts.input = opts.functionName
@@ -187,6 +185,14 @@ func createDockerfile(workDir string, language string, opts HandlerAwareInitOpti
 		return createNodeFunctionDockerFile(workDir, opts.InitOptions)
 	}
 	return nil
+}
+
+func deriveFunctionName(opts InitOptions) string {
+	// Create function resources in function Path
+	if opts.functionName == "" {
+		return filepath.Base(opts.functionPath)
+	}
+	return opts.functionName
 }
 
 //Assumes given file paths have been sanity checked and are valid
