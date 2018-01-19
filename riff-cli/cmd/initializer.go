@@ -86,8 +86,7 @@ func doInitialize(language string, ext string, opts HandlerAwareInitOptions) err
 	}
 	// Create function resources in function Path
 	if opts.functionName == "" {
-		b := filepath.Base(functionPath);
-		opts.functionName = b[0:len(b)-len(filepath.Ext(functionPath))]
+		opts.functionName = filepath.Base(filepath.Dir(functionPath))
 	}
 
 	if opts.input == "" {

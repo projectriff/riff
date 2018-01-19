@@ -70,7 +70,7 @@ will post 'hello' to the 'greetings' topic and wait for a reply.
 			return
 		}
 
-		port := parser.Value(`$.items[0].spec.ports[*]?(@.functionName == "http").nodePort+`)
+		port := parser.Value(`$.items[0].spec.ports[*]?(@.name == "http").nodePort+`)
 
 		if port == "" {
 			ioutils.Error("unable to determine http-gateway port")

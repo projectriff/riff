@@ -50,7 +50,7 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 
 		fmt.Printf("Displaying logs for container %v of function %v\n", logsOptions.container, logsOptions.function)
 
-		cmdArgs := []string{"get", "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.functionName}"}
+		cmdArgs := []string{"get", "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.name}"}
 
 		output, err := kubectl.ExecForString(cmdArgs)
 
