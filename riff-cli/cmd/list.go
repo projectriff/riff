@@ -20,20 +20,30 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/projectriff/riff-cli/pkg/kubectl"
+	"github.com/projectriff/riff-cli/pkg/ioutils"
 )
 
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List current function resources",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long: `List the currently defined function resources.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("list called")
+
+		fmt.Printf("Listing current function resources\n\n")
+
+		cmdArgs := []string{"get", "functions"}
+
+		output, err := kubectl.ExecForString(cmdArgs)
+
+		if err != nil {
+			ioutils.Errorf("Error %v\n", err)
+			return
+		}
+
+		fmt.Printf("%v\n", output)
+
 	},
 }
 
