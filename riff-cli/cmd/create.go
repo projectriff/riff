@@ -18,14 +18,13 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"fmt"
 )
 
 const (
 	createResult     = `create the required Dockerfile and resource definitions, and apply the resources, using sensible defaults`
 	createDefinition = `Create`
 )
-
-var createOptions CreateOptions
 
 var createChainCmd = commandChain(initCmd, buildCmd)
 
@@ -98,8 +97,11 @@ var createPythonCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(createCmd)
 
-	createInitOptionFlags(createCmd, &createOptions.InitOptions)
-	createBuildOptionFlags(createCmd, &createOptions.BuildOptions)
+	fmt.Println("create")
+
+	createInitOptionFlags(createCmd)
+
+	createCmd.PersistentFlags().BoolP("push", "", false, "push the image to Docker registry")
 
 	createCmd.AddCommand(createJavaCmd)
 	createCmd.AddCommand(createJsCmd)

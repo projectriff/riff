@@ -22,12 +22,10 @@ import (
 	"github.com/projectriff/riff-cli/pkg/ioutils"
 	"path/filepath"
 	"fmt"
-	"errors"
-	"os"
 	"strings"
+	"os"
+	"errors"
 )
-
-var initOptions InitOptions
 
 const (
 	initResult     = `generate the required Dockerfile and resource definitions using sensible defaults`
@@ -36,6 +34,7 @@ const (
 
 /*
  * init Command
+ * TODO: Use cmd.Example
  */
 const initCommandDescription = `{{.Process}} the function based on the function source code specified as the filename, using the name
 and version specified for the function image repository and tag. 
@@ -66,6 +65,7 @@ var initCmd = &cobra.Command{
 	},
 
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		initOptions := loadInitOptions(*cmd.PersistentFlags())
 		if len(args) > 0 {
 			if len(args) == 1 && initOptions.functionPath == "" {
 				initOptions.functionPath = args[0]
@@ -136,7 +136,7 @@ var initShellCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		initializer := NewShellInitializer()
-		err := initializer.initialize(initOptions)
+		err := initializer.initialize(loadInitOptions(*cmd.PersistentFlags()))
 		if err != nil {
 			ioutils.Error(err)
 			return
@@ -167,7 +167,7 @@ var initNodeCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		initializer := NewNodeInitializer()
-		err := initializer.initialize(initOptions)
+		err := initializer.initialize(loadInitOptions(*cmd.PersistentFlags()))
 		if err != nil {
 			ioutils.Error(err)
 			return
@@ -209,7 +209,7 @@ var initPythonCmd = &cobra.Command{
 func newHandlerAwareOptions(cmd *cobra.Command) *HandlerAwareInitOptions {
 	handler, _ := cmd.Flags().GetString("handler")
 	options := &HandlerAwareInitOptions{}
-	options.InitOptions = initOptions
+	options.InitOptions = loadInitOptions(*cmd.PersistentFlags())
 	options.handler = handler
 	return options
 }
@@ -293,8 +293,11 @@ func validateAndCleanInitOptions(options *InitOptions) error {
 }
 
 func init() {
+
 	rootCmd.AddCommand(initCmd)
-	createInitOptionFlags(initCmd, &initOptions)
+	fmt.Println("init")
+
+	createInitOptionFlags(initCmd)
 
 	initCmd.AddCommand(initJavaCmd)
 	initCmd.AddCommand(initNodeCmd)
