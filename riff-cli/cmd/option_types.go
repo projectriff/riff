@@ -25,6 +25,7 @@ type InitOptions struct {
 	artifact     string
 	riffVersion  string
 	userAccount  string
+	initialized  bool
 }
 
 type HandlerAwareInitOptions struct {

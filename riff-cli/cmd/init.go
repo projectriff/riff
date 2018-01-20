@@ -50,6 +50,8 @@ from the 'square' directory
 
 to {{.Result}}.`
 
+var initOptions InitOptions
+
 var initCmd = &cobra.Command{
 	Use:   "init [language]",
 	Short: "Initialize a function",
@@ -65,7 +67,13 @@ var initCmd = &cobra.Command{
 	},
 
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		initOptions := loadInitOptions(*cmd.PersistentFlags())
+		if !initOptions.initialized {
+			if cmd.Parent() == rootCmd {
+				initOptions = loadInitOptions(*cmd.PersistentFlags())
+			} else {
+				initOptions = loadInitOptions(*cmd.Parent().PersistentFlags())
+			}
+		}
 		if len(args) > 0 {
 			if len(args) == 1 && initOptions.functionPath == "" {
 				initOptions.functionPath = args[0]
@@ -136,7 +144,7 @@ var initShellCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		initializer := NewShellInitializer()
-		err := initializer.initialize(loadInitOptions(*cmd.PersistentFlags()))
+		err := initializer.initialize(initOptions)
 		if err != nil {
 			ioutils.Error(err)
 			return
@@ -167,7 +175,7 @@ var initNodeCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		initializer := NewNodeInitializer()
-		err := initializer.initialize(loadInitOptions(*cmd.PersistentFlags()))
+		err := initializer.initialize(initOptions)
 		if err != nil {
 			ioutils.Error(err)
 			return
@@ -209,7 +217,7 @@ var initPythonCmd = &cobra.Command{
 func newHandlerAwareOptions(cmd *cobra.Command) *HandlerAwareInitOptions {
 	handler, _ := cmd.Flags().GetString("handler")
 	options := &HandlerAwareInitOptions{}
-	options.InitOptions = loadInitOptions(*cmd.PersistentFlags())
+	options.InitOptions = initOptions
 	options.handler = handler
 	return options
 }
@@ -295,7 +303,7 @@ func validateAndCleanInitOptions(options *InitOptions) error {
 func init() {
 
 	rootCmd.AddCommand(initCmd)
-	fmt.Println("init")
+
 
 	createInitOptionFlags(initCmd)
 

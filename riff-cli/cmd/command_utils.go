@@ -64,7 +64,7 @@ func commandChain(commands ... *cobra.Command) *cobra.Command {
 	runE := func(cmd *cobra.Command, args []string) error {
 		for _, command := range commands {
 			if command.RunE != nil {
-				err := command.RunE(cmd, args)
+				err := command.RunE(command, args)
 				if err != nil {
 					return err
 				}
@@ -76,7 +76,7 @@ func commandChain(commands ... *cobra.Command) *cobra.Command {
 	preRun := func(cmd *cobra.Command, args []string) {
 		for _, command := range commands {
 			if command.PreRun != nil {
-				command.PreRun(cmd, args)
+				command.PreRun(command, args)
 			}
 		}
 	}
@@ -84,7 +84,7 @@ func commandChain(commands ... *cobra.Command) *cobra.Command {
 	preRunE := func(cmd *cobra.Command, args []string) error {
 		for _, command := range commands {
 			if command.PreRunE != nil {
-				err := command.PreRunE(cmd, args)
+				err := command.PreRunE(command, args)
 				if err != nil {
 					return err
 				}
@@ -96,7 +96,7 @@ func commandChain(commands ... *cobra.Command) *cobra.Command {
 	postRun := func(cmd *cobra.Command, args []string) {
 		for _, command := range commands {
 			if command.PostRun != nil {
-				command.PostRun(cmd, args)
+				command.PostRun(command, args)
 			}
 		}
 	}
@@ -104,7 +104,7 @@ func commandChain(commands ... *cobra.Command) *cobra.Command {
 	postRunE := func(cmd *cobra.Command, args []string) error {
 		for _, command := range commands {
 			if command.PostRunE != nil {
-				err := command.PostRunE(cmd, args)
+				err := command.PostRunE(command, args)
 				if err != nil {
 					return err
 				}
@@ -120,7 +120,7 @@ func commandChain(commands ... *cobra.Command) *cobra.Command {
 				command = command.Root()
 			}
 			if command.PersistentPreRun != nil {
-				command.PersistentPreRun(cmd, args)
+				command.PersistentPreRun(command, args)
 			}
 		}
 	}
@@ -131,7 +131,7 @@ func commandChain(commands ... *cobra.Command) *cobra.Command {
 				command = command.Root()
 			}
 			if command.PersistentPreRunE != nil {
-				err := command.PersistentPreRunE(cmd, args)
+				err := command.PersistentPreRunE(command, args)
 				if err != nil {
 					return err
 				}
@@ -147,7 +147,7 @@ func commandChain(commands ... *cobra.Command) *cobra.Command {
 				command = command.Root()
 			}
 			if command.PersistentPostRun != nil {
-				command.PersistentPostRun(cmd, args)
+				command.PersistentPostRun(command, args)
 			}
 		}
 	}
@@ -158,7 +158,7 @@ func commandChain(commands ... *cobra.Command) *cobra.Command {
 				command = command.Root()
 			}
 			if command.PersistentPostRunE != nil {
-				err := command.PersistentPostRunE(cmd, args)
+				err := command.PersistentPostRunE(command, args)
 				if err != nil {
 					return err
 				}

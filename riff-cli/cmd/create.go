@@ -18,8 +18,9 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"fmt"
 )
+
+var createOptions CreateOptions
 
 const (
 	createResult     = `create the required Dockerfile and resource definitions, and apply the resources, using sensible defaults`
@@ -41,8 +42,15 @@ var createCmd = &cobra.Command{
 	Short: "Create a function",
 	Long:  createCmdLong(initCommandDescription, LongVals{Process: createDefinition, Command: "create", Result: createResult}),
 	Run:   createChainCmd.Run,
-	PreRun: createChainCmd.PreRun,
-	PersistentPreRun: createChainCmd.PersistentPreRun,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if cmd.Parent() == rootCmd {
+			initOptions = loadInitOptions(*cmd.PersistentFlags())
+		} else {
+			initOptions = loadInitOptions(*cmd.Parent().PersistentFlags())
+		}
+		initOptions.initialized = true
+		createChainCmd.PersistentPreRun(cmd,args)
+	},
 }
 
 var createJavaCmd = &cobra.Command{
@@ -60,8 +68,6 @@ var createShellCmd = &cobra.Command{
 	Long:  createCmdLong(initShellDescription, LongVals{Process: createDefinition, Command: "create shell", Result: createResult}),
 
 	Run:              createShellChainCmd.Run,
-	PreRun:           createShellChainCmd.PreRun,
-	PersistentPreRun: createShellChainCmd.PersistentPreRun,
 }
 
 var createNodeCmd = &cobra.Command{
@@ -70,8 +76,6 @@ var createNodeCmd = &cobra.Command{
 	Long:  createCmdLong(initNodeDescription, LongVals{Process: createDefinition, Command: "create node", Result: createResult}),
 
 	Run:              createNodeChainCmd.Run,
-	PreRun:           createNodeChainCmd.PreRun,
-	PersistentPreRun: createNodeChainCmd.PersistentPreRun,
 }
 
 var createJsCmd = &cobra.Command{
@@ -79,8 +83,6 @@ var createJsCmd = &cobra.Command{
 	Short:            createNodeCmd.Short,
 	Long:             createNodeCmd.Long,
 	Run:              createNodeChainCmd.Run,
-	PreRun:           createNodeChainCmd.PreRun,
-	PersistentPreRun: createNodeChainCmd.PersistentPreRun,
 }
 
 var createPythonCmd = &cobra.Command{
@@ -90,14 +92,10 @@ var createPythonCmd = &cobra.Command{
 
 
 	Run:              createPythonChainCmd.Run,
-	PreRun:           createPythonChainCmd.PreRun,
-	PersistentPreRun: createPythonChainCmd.PersistentPreRun,
 }
 
 func init() {
 	rootCmd.AddCommand(createCmd)
-
-	fmt.Println("create")
 
 	createInitOptionFlags(createCmd)
 
