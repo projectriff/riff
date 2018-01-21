@@ -53,12 +53,12 @@ type Function struct {
 func createTopics(opts options.InitOptions) (string, error) {
 
 	var topicTemplate = `
-apiversion : {{.ApiVersion}}
+apiVersion : {{.ApiVersion}}
 kind: Topic
 metadata:	
-	name: {{.Name}}
+  name: {{.Name}}
 spec:
-	partitions: {{.Partitions}}
+  partitions: {{.Partitions}}
 `
 	tmpl, err := template.New("topic").Parse(topicTemplate)
 	if err != nil {

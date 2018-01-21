@@ -29,7 +29,10 @@ import (
 func TestValidateDefaultFunctionResources(t *testing.T) {
 	filePath,_ := initCmd.PersistentFlags().GetString("filepath")
 	as := assert.New(t)
-	opts:= options.InitOptions{FunctionPath: filePath, FunctionName:"foo"}
+	opts:= options.InitOptions{
+		FunctionPath: filePath,
+		FunctionName:"foo",
+		DryRun:true}
 	as.NoError(options.ValidateAndCleanInitOptions(&opts))
 }
 
@@ -37,7 +40,7 @@ func TestValidateCleansFunctionResources(t *testing.T) {
 	filePath := filepath.Join("test_dir","python","demo") + string(os.PathSeparator) + string(os.PathSeparator)
 	artifact := "demo.py"
 	as := assert.New(t)
-	opts := options.InitOptions{FunctionPath: filePath, Artifact:artifact}
+	opts := options.InitOptions{FunctionPath: filePath, Artifact:artifact, DryRun:true}
 	as.NoError(options.ValidateAndCleanInitOptions(&opts))
 	as.Equal(osutils.Path("test_dir/python/demo"),opts.FunctionPath)
 }
@@ -45,7 +48,7 @@ func TestValidateCleansFunctionResources(t *testing.T) {
 func TestValidateFunctionResourceDoesNotExist(t *testing.T) {
 	filePath := osutils.Path("does/not/exist")
 	as := assert.New(t)
-	opts := options.InitOptions{FunctionPath: filePath}
+	opts := options.InitOptions{FunctionPath: filePath, DryRun:true}
 	err := options.ValidateAndCleanInitOptions(&opts)
 	as.Error(err)
 	as.Equal(fmt.Sprintf("filepath %s does not exist", filePath),err.Error())

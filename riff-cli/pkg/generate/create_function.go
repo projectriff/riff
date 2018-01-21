@@ -19,9 +19,14 @@ package generate
 import (
 	"fmt"
 	"github.com/projectriff/riff-cli/pkg/options"
+	"io/ioutil"
+	"path/filepath"
+	"strings"
+	"github.com/projectriff/riff-cli/pkg/osutils"
+	"errors"
 )
 
-func CreateFunction(workDir, language string, opts options.HandlerAwareInitOptions) error {
+func CreateFunction(workdir, language string, opts options.HandlerAwareInitOptions) error {
 	var functionResources FunctionResources
 	var err error
 	functionResources.Topics, err = createTopics(opts.InitOptions)
@@ -45,7 +50,43 @@ func CreateFunction(workDir, language string, opts options.HandlerAwareInitOptio
 		fmt.Println("\nGenerated Dockerfile:\n")
 		fmt.Printf("%s\n",functionResources.DockerFile)
 	} else {
-		//Write Files
+		var err error
+		err = writeFile(
+				filepath.Join(workdir,
+				fmt.Sprintf("%s-%s.yaml",opts.FunctionName,"topics")),
+				functionResources.Topics)
+		if err != nil {
+			return err
+		}
+
+		err = writeFile(
+			filepath.Join(workdir,
+				fmt.Sprintf("%s-%s.yaml",opts.FunctionName,"topics")),
+			functionResources.Topics)
+		if err != nil {
+			return err
+		}
+
+		err = writeFile(
+			filepath.Join(workdir, "Dockerfile"),
+			functionResources.DockerFile)
+		if err != nil {
+			return err
+		}
+
+
 	}
 	return nil
+}
+
+func writeFile(filename string, text string) error {
+	overwrite := true
+
+	if !overwrite && osutils.FileExists(filename) {
+		return errors.New(fmt.Sprintf("file %s already exists", filename))
+
+	}
+	//fmt.Printf("creating %s\n", filename)
+	return ioutil.WriteFile(filename,[]byte(strings.TrimLeft(text,"\n")), 0644)
+
 }
