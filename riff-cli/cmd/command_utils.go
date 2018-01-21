@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/pflag"
 	"bytes"
 	"text/template"
+	"github.com/projectriff/riff-cli/pkg/options"
 )
 
 func createInitOptionFlags(cmd *cobra.Command) {
@@ -37,18 +38,18 @@ func createInitOptionFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().Bool("dry-run", false, "print generated resources to stdout")
 }
 
-func loadInitOptions(flagset pflag.FlagSet) InitOptions {
-	opts := InitOptions{}
-	opts.functionName, _ = flagset.GetString("name")
-	opts.version, _ = flagset.GetString("version")
-	opts.functionPath, _ = flagset.GetString("filepath")
-	opts.protocol, _ = flagset.GetString("protocol")
-	opts.input, _ = flagset.GetString("input")
-	opts.output, _ = flagset.GetString("output")
-	opts.artifact, _ = flagset.GetString("artifact")
-	opts.riffVersion, _ = flagset.GetString("riff-version")
-	opts.userAccount, _ = flagset.GetString("useraccount")
-	opts.dryRun, _ = flagset.GetBool("dry-run")
+func loadInitOptions(flagset pflag.FlagSet) options.InitOptions {
+	opts := options.InitOptions{}
+	opts.FunctionName, _ = flagset.GetString("name")
+	opts.Version, _ = flagset.GetString("version")
+	opts.FunctionPath, _ = flagset.GetString("filepath")
+	opts.Protocol, _ = flagset.GetString("protocol")
+	opts.Input, _ = flagset.GetString("input")
+	opts.Output, _ = flagset.GetString("output")
+	opts.Artifact, _ = flagset.GetString("artifact")
+	opts.RiffVersion, _ = flagset.GetString("riff-version")
+	opts.UserAccount, _ = flagset.GetString("useraccount")
+	opts.DryRun, _ = flagset.GetBool("dry-run")
 	return opts
 }
 

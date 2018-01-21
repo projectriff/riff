@@ -41,8 +41,8 @@ func TestCreateCommandImplicitPath(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(initOptions.functionPath)
-	as.Equal("test_dir/shell/echo",initOptions.functionPath)
+	as.NotEmpty(initOptions.FunctionPath)
+	as.Equal("test_dir/shell/echo",initOptions.FunctionPath)
 	as.NoError(err)
 }
 
@@ -55,8 +55,8 @@ func TestCreateCommandExplicitPath(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(initOptions.functionPath)
-	as.Equal("test_dir/shell/echo",initOptions.functionPath)
+	as.NotEmpty(initOptions.FunctionPath)
+	as.Equal("test_dir/shell/echo",initOptions.FunctionPath)
 	as.NoError(err)
 }
 
@@ -69,8 +69,8 @@ func TestCreateCommandExplicitPathAndLang(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(initOptions.functionPath)
-	as.Equal("test_dir/shell/echo",initOptions.functionPath)
+	as.NotEmpty(initOptions.FunctionPath)
+	as.Equal("test_dir/shell/echo",initOptions.FunctionPath)
 	as.NoError(err)
 }
 
@@ -96,8 +96,8 @@ func TestInitCommandImplicitPath(t *testing.T) {
 	as.NoError(err)
 
 
-	as.NotEmpty(initOptions.functionPath)
-	as.Equal("test_dir/shell/echo",initOptions.functionPath)
+	as.NotEmpty(initOptions.FunctionPath)
+	as.Equal("test_dir/shell/echo",initOptions.FunctionPath)
 	as.NoError(err)
 }
 
@@ -110,8 +110,8 @@ func TestInitCommandExplicitPath(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(initOptions.functionPath)
-	as.Equal("test_dir/shell/echo",initOptions.functionPath)
+	as.NotEmpty(initOptions.FunctionPath)
+	as.Equal("test_dir/shell/echo",initOptions.FunctionPath)
 	as.NoError(err)
 }
 
@@ -124,12 +124,12 @@ func TestInitCommandExplicitPathAndLang(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(initOptions.functionPath)
-	as.Equal("test_dir/shell/echo",initOptions.functionPath)
+	as.NotEmpty(initOptions.FunctionPath)
+	as.Equal("test_dir/shell/echo",initOptions.FunctionPath)
 	as.NoError(err)
 }
 
 func clearInitOptions(){
-	initOptions.initialized = false
-	initOptions.functionPath=""
+	initOptions.Initialized = false
+	initOptions.FunctionPath=""
 }

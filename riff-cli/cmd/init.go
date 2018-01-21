@@ -20,11 +20,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff-cli/pkg/osutils"
 	"github.com/projectriff/riff-cli/pkg/ioutils"
-	"path/filepath"
-	"fmt"
-	"strings"
+	"github.com/projectriff/riff-cli/pkg/options"
 	"os"
-	"errors"
 )
 
 const (
@@ -50,7 +47,7 @@ from the 'square' directory
 
 to {{.Result}}.`
 
-var initOptions InitOptions
+var initOptions options.InitOptions
 
 var initCmd = &cobra.Command{
 	Use:   "init [language]",
@@ -67,7 +64,7 @@ var initCmd = &cobra.Command{
 	},
 
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		if !initOptions.initialized {
+		if !initOptions.Initialized {
 			if cmd.Parent() == rootCmd {
 				initOptions = loadInitOptions(*cmd.PersistentFlags())
 			} else {
@@ -75,18 +72,18 @@ var initCmd = &cobra.Command{
 			}
 		}
 		if len(args) > 0 {
-			if len(args) == 1 && initOptions.functionPath == "" {
-				initOptions.functionPath = args[0]
+			if len(args) == 1 && initOptions.FunctionPath == "" {
+				initOptions.FunctionPath = args[0]
 			} else {
 				ioutils.Errorf("Invalid argument(s) %v\n", args)
 				cmd.Usage()
 				os.Exit(1)
 			}
 		}
-		if initOptions.functionPath == "" {
-			initOptions.functionPath = osutils.GetCWD()
+		if initOptions.FunctionPath == "" {
+			initOptions.FunctionPath = osutils.GetCWD()
 		}
-		err := validateAndCleanInitOptions(&initOptions)
+		err := options.ValidateAndCleanInitOptions(&initOptions)
 		if err != nil {
 			ioutils.Error(err)
 			os.Exit(1)
@@ -214,91 +211,15 @@ var initPythonCmd = &cobra.Command{
 	},
 }
 
-func newHandlerAwareOptions(cmd *cobra.Command) *HandlerAwareInitOptions {
+func newHandlerAwareOptions(cmd *cobra.Command) *options.HandlerAwareInitOptions {
 	handler, _ := cmd.Flags().GetString("handler")
-	options := &HandlerAwareInitOptions{}
+	options := &options.HandlerAwareInitOptions{}
 	options.InitOptions = initOptions
-	options.handler = handler
+	options.Handler = handler
 	return options
 }
 
-/*
- * Basic sanity check that given paths exist and valid protocol given.
- * Artifact must be a regular file.
- * If artifact is given, it must be relative to the function path.
- * If function path is given as a regular file, and artifact is also given, they must reference the same path (edge case).
- * TODO: Format (regex) check on function name, input, output, version, riff_version
- */
-func validateAndCleanInitOptions(options *InitOptions) error {
 
-	options.functionPath = filepath.Clean(options.functionPath)
-	if options.artifact != "" {
-		options.artifact = filepath.Clean(options.artifact)
-	}
-
-	if options.functionPath != "" {
-		if !osutils.FileExists(options.functionPath) {
-			return errors.New(fmt.Sprintf("filepath %s does not exist", options.functionPath))
-		}
-	}
-
-	if options.artifact != "" {
-
-		if filepath.IsAbs(options.artifact) {
-			return errors.New(fmt.Sprintf("artifact %s must be relative to function path", options.artifact))
-		}
-
-		absFilePath, err := filepath.Abs(options.functionPath)
-		if err != nil {
-			return err
-		}
-
-		var absArtifactPath string
-
-		if osutils.IsDirectory(absFilePath) {
-			absArtifactPath = filepath.Join(absFilePath, options.artifact)
-		} else {
-			absArtifactPath = filepath.Join(filepath.Dir(absFilePath), options.artifact)
-		}
-
-		if osutils.IsDirectory(absArtifactPath) {
-			return errors.New(fmt.Sprintf("artifact %s must be a regular file", absArtifactPath))
-		}
-
-		absFilePathDir := absFilePath
-		if !osutils.IsDirectory(absFilePath) {
-			absFilePathDir = filepath.Dir(absFilePath)
-		}
-
-		if !strings.HasPrefix(filepath.Dir(absArtifactPath), absFilePathDir) {
-			return errors.New(fmt.Sprintf("artifact %s cannot be external to filepath %", absArtifactPath, absFilePath))
-		}
-
-		if !osutils.FileExists(absArtifactPath) {
-			return errors.New(fmt.Sprintf("artifact %s does not exist", absArtifactPath))
-		}
-
-		if !osutils.IsDirectory(absFilePath) && absFilePath != absArtifactPath {
-			return errors.New(fmt.Sprintf("artifact %s conflicts with filepath %s", absArtifactPath, absFilePath))
-		}
-	}
-
-	if options.protocol != "" {
-
-		supported := false
-		options.protocol = strings.ToLower(options.protocol)
-		for _, p := range supportedProtocols {
-			if options.protocol == p {
-				supported = true
-			}
-		}
-		if (!supported) {
-			return errors.New(fmt.Sprintf("protocol %s is unsupported \n", options.protocol))
-		}
-	}
-
-	return nil
-}
 
 func init() {
 

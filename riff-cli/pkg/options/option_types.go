@@ -13,30 +13,29 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
-package cmd
+package options
+
+var SupportedProtocols = []string{"stdio", "http", "grpc"}
 
 type InitOptions struct {
-	functionName string
-	version      string
-	functionPath string
-	protocol     string
-	input        string
-	output       string
-	artifact     string
-	riffVersion  string
-	userAccount  string
-	initialized  bool
-	dryRun		 bool
+	FunctionName string
+	Version      string
+	FunctionPath string
+	Protocol     string
+	Input        string
+	Output       string
+	Artifact     string
+	RiffVersion  string
+	UserAccount  string
+	Initialized  bool
+	DryRun		 bool
 }
 
 type HandlerAwareInitOptions struct {
 	InitOptions
-	handler string
+	Handler string
 }
 
-func (this HandlerAwareInitOptions) Handler() string {
-	return this.handler
-}
 
 type BuildOptions struct {
 	push        bool

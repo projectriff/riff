@@ -23,29 +23,30 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"github.com/projectriff/riff-cli/pkg/options"
 )
 
 func TestValidateDefaultFunctionResources(t *testing.T) {
 	filePath,_ := initCmd.PersistentFlags().GetString("filepath")
 	as := assert.New(t)
-	options:= InitOptions{functionPath: filePath, functionName:"foo"}
-	as.NoError(validateAndCleanInitOptions(&options))
+	opts:= options.InitOptions{FunctionPath: filePath, FunctionName:"foo"}
+	as.NoError(options.ValidateAndCleanInitOptions(&opts))
 }
 
 func TestValidateCleansFunctionResources(t *testing.T) {
 	filePath := filepath.Join("test_dir","python","demo") + string(os.PathSeparator) + string(os.PathSeparator)
 	artifact := "demo.py"
 	as := assert.New(t)
-	options:= InitOptions{functionPath: filePath, artifact:artifact}
-	as.NoError(validateAndCleanInitOptions(&options))
-	as.Equal(osutils.Path("test_dir/python/demo"),options.functionPath)
+	opts := options.InitOptions{FunctionPath: filePath, Artifact:artifact}
+	as.NoError(options.ValidateAndCleanInitOptions(&opts))
+	as.Equal(osutils.Path("test_dir/python/demo"),opts.FunctionPath)
 }
 
 func TestValidateFunctionResourceDoesNotExist(t *testing.T) {
 	filePath := osutils.Path("does/not/exist")
 	as := assert.New(t)
-	options:= InitOptions{functionPath: filePath}
-	err := validateAndCleanInitOptions(&options)
+	opts := options.InitOptions{FunctionPath: filePath}
+	err := options.ValidateAndCleanInitOptions(&opts)
 	as.Error(err)
 	as.Equal(fmt.Sprintf("filepath %s does not exist", filePath),err.Error())
 }
@@ -53,8 +54,8 @@ func TestValidateFunctionResourceDoesNotExist(t *testing.T) {
 func TestValidateArtifactIsRegularFile(t *testing.T) {
 	filePath := osutils.Path("test_dir/python")
 	as := assert.New(t)
-	options:= InitOptions{functionPath: filePath, artifact: "demo"}
-	err := validateAndCleanInitOptions(&options)
+	opts := options.InitOptions{FunctionPath: filePath, Artifact: "demo"}
+	err := options.ValidateAndCleanInitOptions(&opts)
 	as.Error(err)
 	as.Contains(err.Error(), "must be a regular file")
 }
@@ -62,8 +63,8 @@ func TestValidateArtifactIsRegularFile(t *testing.T) {
 func TestValidateArtifactIsInSubDirectory(t *testing.T) {
 	filePath := osutils.Path("test_dir")
 	as := assert.New(t)
-	options:= InitOptions{functionPath: filePath, artifact: "python/demo/demo.py"}
-	err := validateAndCleanInitOptions(&options)
+	opts := options.InitOptions{FunctionPath: filePath, Artifact: "python/demo/demo.py"}
+	err := options.ValidateAndCleanInitOptions(&opts)
 	as.NoError(err)
 }
 
@@ -72,8 +73,8 @@ func TestValidateArtifactIsInCWD(t *testing.T) {
 	os.Chdir(osutils.Path("test_dir/python/demo"))
 
 	as := assert.New(t)
-	options:= InitOptions{functionPath: "", artifact: "demo.py"}
-	err := validateAndCleanInitOptions(&options)
+	opts := options.InitOptions{FunctionPath: "", Artifact: "demo.py"}
+	err := options.ValidateAndCleanInitOptions(&opts)
 	as.NoError(err)
 	os.Chdir(currentDir)
 }
@@ -83,8 +84,8 @@ func TestArtifactCannotBeExternalToFilePath(t *testing.T) {
 	os.Chdir(osutils.Path("test_dir/python/demo"))
 	filePath := osutils.GetCWD()
 	as := assert.New(t)
-	options:= InitOptions{functionPath: filePath, artifact: osutils.Path("../multiple/one.py")}
-	err := validateAndCleanInitOptions(&options)
+	opts := options.InitOptions{FunctionPath: filePath, Artifact: osutils.Path("../multiple/one.py")}
+	err := options.ValidateAndCleanInitOptions(&opts)
 	as.Error(err)
 	as.Contains(err.Error(), "cannot be external to filepath",)
 	os.Chdir(currentDir)
@@ -94,8 +95,8 @@ func TestArtifactRelativeToFilePath(t *testing.T) {
 	filePath := osutils.Path("test_dir/python/demo")
 	artifact := "demo.py"
 	as := assert.New(t)
-	options:= InitOptions{functionPath: filePath, artifact: artifact}
-	err := validateAndCleanInitOptions(&options)
+	opts := options.InitOptions{FunctionPath: filePath, Artifact: artifact}
+	err := options.ValidateAndCleanInitOptions(&opts)
 	as.NoError(err)
 }
 
@@ -105,25 +106,25 @@ func TestAbsoluteArtifactPathConflctsFilePath(t *testing.T) {
 	artifact :=  osutils.Path("two.py")
 	as := assert.New(t)
 
-	options:= InitOptions{functionPath: filePath, artifact: artifact}
-	err := validateAndCleanInitOptions(&options)
+	opts:= options.InitOptions{FunctionPath: filePath, Artifact: artifact}
+	err := options.ValidateAndCleanInitOptions(&opts)
 	as.Contains(err.Error(), "conflicts with filepath")
 	as.Error(err)
 }
 
 func TestInvalidProtocol(t *testing.T) {
 	as := assert.New(t)
-	options:= InitOptions{protocol:"grpz"}
-	err := validateAndCleanInitOptions(&options)
+	opts:= options.InitOptions{Protocol:"grpz"}
+	err := options.ValidateAndCleanInitOptions(&opts)
 	as.Error(err)
 	as.Contains(err.Error(),"unsupported")
 }
 
 func TestCleanedProtocol(t *testing.T) {
 	as := assert.New(t)
-	options:= InitOptions{protocol:"gRPC"}
-	err := validateAndCleanInitOptions(&options)
+	opts:= options.InitOptions{Protocol:"gRPC"}
+	err := options.ValidateAndCleanInitOptions(&opts)
 	as.NoError(err)
-	as.Equal("grpc",options.protocol)
+	as.Equal("grpc",opts.Protocol)
 }
 

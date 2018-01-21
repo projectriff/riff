@@ -22,14 +22,16 @@ import (
 	"errors"
 
 	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff-cli/pkg/generate"
 )
 
-var supportedProtocols = []string{"stdio", "http", "grpc"}
+
 var supportedExtensions = []string{"js", "java", "py", "sh"}
 
 //
 type Initializer struct {
-	initOptions InitOptions
+	initOptions options.InitOptions
 
 	functionFile string
 	language     string
@@ -47,7 +49,7 @@ func NewShellInitializer() *Initializer {
 //
 type PythonInitializer struct {
 	Initializer
-	initOptions HandlerAwareInitOptions
+	initOptions options.HandlerAwareInitOptions
 }
 
 func NewPythonInitializer() *PythonInitializer {
@@ -56,7 +58,7 @@ func NewPythonInitializer() *PythonInitializer {
 	pythonInitializer.extension = "py"
 	return pythonInitializer
 }
-func (this *PythonInitializer) initialize(options HandlerAwareInitOptions) error {
+func (this *PythonInitializer) initialize(options options.HandlerAwareInitOptions) error {
 	fmt.Println("language: " + this.language)
 	return doInitialize(this.language, this.extension, options)
 }
@@ -64,7 +66,7 @@ func (this *PythonInitializer) initialize(options HandlerAwareInitOptions) error
 //
 type JavaInitializer struct {
 	Initializer
-	initOptions HandlerAwareInitOptions
+	initOptions options.HandlerAwareInitOptions
 }
 
 func NewJavaInitializer() *JavaInitializer {
@@ -74,24 +76,24 @@ func NewJavaInitializer() *JavaInitializer {
 	return javaInitializer
 }
 
-func (this *JavaInitializer) initialize(options HandlerAwareInitOptions) error {
+func (this *JavaInitializer) initialize(options options.HandlerAwareInitOptions) error {
 	return doInitialize(this.language, this.extension, options)
 }
 
-func doInitialize(language string, ext string, opts HandlerAwareInitOptions) error {
+func doInitialize(language string, ext string, opts options.HandlerAwareInitOptions) error {
 	functionPath, err := resolveFunctionPath(opts.InitOptions, ext)
 	if err != nil {
 		return err
 	}
 	// Create function resources in function Path
-	opts.functionName = deriveFunctionName(opts.InitOptions)
+	opts.FunctionName = deriveFunctionName(opts.InitOptions)
 
-	if opts.input == "" {
-		opts.input = opts.functionName
+	if opts.Input == "" {
+		opts.Input = opts.FunctionName
 	}
 
-	if opts.artifact =="" {
-		opts.artifact = filepath.Base(functionPath)
+	if opts.Artifact =="" {
+		opts.Artifact = filepath.Base(functionPath)
 	}
 
 	var protocolForLanguage = map[string]string{
@@ -102,13 +104,13 @@ func doInitialize(language string, ext string, opts HandlerAwareInitOptions) err
 		"py"	: 	"stdio",
 	}
 
-	if opts.protocol == "" {
-		opts.protocol = protocolForLanguage[language]
+	if opts.Protocol == "" {
+		opts.Protocol = protocolForLanguage[language]
 	}
 
 	workdir := filepath.Dir(functionPath)
 
-	err = createFunctionResources(workdir,language, opts)
+	err = generate.CreateFunction(workdir,language, opts)
 	return err
 }
 
@@ -121,7 +123,7 @@ func NewLanguageDetectingInitializer() *LanguageDetectingInitializer {
 	return &LanguageDetectingInitializer{}
 }
 
-func (this *LanguageDetectingInitializer) initialize(options HandlerAwareInitOptions) error {
+func (this *LanguageDetectingInitializer) initialize(options options.HandlerAwareInitOptions) error {
 	functionPath, err := resolveFunctionPath(options.InitOptions, "")
 	if err != nil {
 		return err
@@ -156,30 +158,30 @@ func (this *LanguageDetectingInitializer) initialize(options HandlerAwareInitOpt
 
 }
 
-func (this Initializer) initialize(opts InitOptions) error {
-	haOpts := &HandlerAwareInitOptions{}
+func (this Initializer) initialize(opts options.InitOptions) error {
+	haOpts := &options.HandlerAwareInitOptions{}
 	haOpts.InitOptions = opts
 	return doInitialize(this.language, this.extension, *haOpts)
 
 }
 
 
-func deriveFunctionName(opts InitOptions) string {
+func deriveFunctionName(opts options.InitOptions) string {
 	// Create function resources in function Path
-	if opts.functionName == "" {
-		return filepath.Base(opts.functionPath)
+	if opts.FunctionName == "" {
+		return filepath.Base(opts.FunctionPath)
 	}
-	return opts.functionName
+	return opts.FunctionName
 }
 
 //Assumes given file paths have been sanity checked and are valid
-func resolveFunctionPath(options InitOptions, ext string) (string, error) {
+func resolveFunctionPath(options options.InitOptions, ext string) (string, error) {
 
-	functionName := options.functionName
+	functionName := options.FunctionName
 	if functionName == "" {
-		functionName = filepath.Base(options.functionPath)
+		functionName = filepath.Base(options.FunctionPath)
 	}
-	absFilePath, err := filepath.Abs(options.functionPath)
+	absFilePath, err := filepath.Abs(options.FunctionPath)
 	if err != nil {
 		return "", err
 	}
@@ -188,7 +190,7 @@ func resolveFunctionPath(options InitOptions, ext string) (string, error) {
 	var functionDir string
 	var functionFile string
 	if osutils.IsDirectory(absFilePath) {
-		if options.artifact == "" {
+		if options.Artifact == "" {
 			functionFile = functionName
 			functionDir = absFilePath
 			if ext != "" {
@@ -201,7 +203,7 @@ func resolveFunctionPath(options InitOptions, ext string) (string, error) {
 				resolvedFunctionPath = functionFile
 			}
 		} else {
-			resolvedFunctionPath = filepath.Join(absFilePath, options.artifact)
+			resolvedFunctionPath = filepath.Join(absFilePath, options.Artifact)
 		}
 	} else {
 		resolvedFunctionPath = absFilePath

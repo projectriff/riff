@@ -18,9 +18,10 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/projectriff/riff-cli/pkg/options"
 )
 
-var createOptions CreateOptions
+var createOptions options.CreateOptions
 
 const (
 	createResult     = `create the required Dockerfile and resource definitions, and apply the resources, using sensible defaults`
@@ -48,7 +49,7 @@ var createCmd = &cobra.Command{
 		} else {
 			initOptions = loadInitOptions(*cmd.Parent().PersistentFlags())
 		}
-		initOptions.initialized = true
+		initOptions.Initialized = true
 		createChainCmd.PersistentPreRun(cmd,args)
 	},
 }
