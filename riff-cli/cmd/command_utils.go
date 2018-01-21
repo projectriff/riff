@@ -20,6 +20,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff-cli/pkg/osutils"
 	"github.com/spf13/pflag"
+	"bytes"
+	"text/template"
 )
 
 func createInitOptionFlags(cmd *cobra.Command) {
@@ -32,19 +34,21 @@ func createInitOptionFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringP("artifact", "a", "", "path to the function artifact, source code or jar file")
 	cmd.PersistentFlags().StringP("riff-version", "", RIFF_VERSION, "the version of riff to use when building containers")
 	cmd.PersistentFlags().StringP("useraccount", "u", osutils.GetCurrentUsername(), "the Docker user account to be used for the image repository (defaults to current OS username")
+	cmd.PersistentFlags().Bool("dry-run", false, "print generated resources to stdout")
 }
 
 func loadInitOptions(flagset pflag.FlagSet) InitOptions {
 	opts := InitOptions{}
-	opts.functionName, _ 	= flagset.GetString("name")
-	opts.version, _ 		= flagset.GetString("version")
-	opts.functionPath, _ 	= flagset.GetString("filepath")
-	opts.protocol, _ 		= flagset.GetString("protocol")
-	opts.input, _ 			= flagset.GetString("input")
-	opts.output, _ 			= flagset.GetString("output")
-	opts.artifact, _ 		= flagset.GetString("artifact")
-	opts.riffVersion, _ 	= flagset.GetString("riff-version")
-	opts.userAccount, _ 	= flagset.GetString("useraccount")
+	opts.functionName, _ = flagset.GetString("name")
+	opts.version, _ = flagset.GetString("version")
+	opts.functionPath, _ = flagset.GetString("filepath")
+	opts.protocol, _ = flagset.GetString("protocol")
+	opts.input, _ = flagset.GetString("input")
+	opts.output, _ = flagset.GetString("output")
+	opts.artifact, _ = flagset.GetString("artifact")
+	opts.riffVersion, _ = flagset.GetString("riff-version")
+	opts.userAccount, _ = flagset.GetString("useraccount")
+	opts.dryRun, _ = flagset.GetBool("dry-run")
 	return opts
 }
 
@@ -181,4 +185,25 @@ func commandChain(commands ... *cobra.Command) *cobra.Command {
 	}
 
 	return chain
+}
+
+type LongVals struct {
+	Process string
+	Command string
+	Result  string
+}
+
+func createCmdLong(longDescr string, vals LongVals) string {
+	tmpl, err := template.New("longDescr").Parse(longDescr)
+	if err != nil {
+		panic(err)
+	}
+
+	var tpl bytes.Buffer
+	err = tmpl.Execute(&tpl, vals)
+	if err != nil {
+		panic(err)
+	}
+
+	return tpl.String()
 }

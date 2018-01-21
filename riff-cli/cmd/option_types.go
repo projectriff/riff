@@ -26,6 +26,7 @@ type InitOptions struct {
 	riffVersion  string
 	userAccount  string
 	initialized  bool
+	dryRun		 bool
 }
 
 type HandlerAwareInitOptions struct {

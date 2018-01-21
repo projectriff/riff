@@ -79,7 +79,6 @@ func (this *JavaInitializer) initialize(options HandlerAwareInitOptions) error {
 }
 
 func doInitialize(language string, ext string, opts HandlerAwareInitOptions) error {
-	fmt.Println("language: " + language)
 	functionPath, err := resolveFunctionPath(opts.InitOptions, ext)
 	if err != nil {
 		return err
@@ -89,6 +88,10 @@ func doInitialize(language string, ext string, opts HandlerAwareInitOptions) err
 
 	if opts.input == "" {
 		opts.input = opts.functionName
+	}
+
+	if opts.artifact =="" {
+		opts.artifact = filepath.Base(functionPath)
 	}
 
 	var protocolForLanguage = map[string]string{
@@ -103,20 +106,10 @@ func doInitialize(language string, ext string, opts HandlerAwareInitOptions) err
 		opts.protocol = protocolForLanguage[language]
 	}
 
-	image := fmt.Sprintf("%s/%s:%s",opts.userAccount,opts.functionName,opts.version)
-
 	workdir := filepath.Dir(functionPath)
 
-	err = createTopics(workdir,opts.InitOptions)
-	if err != nil {
-		return err
-	}
-	err = createFunction(workdir, image, opts.InitOptions)
-	if err != nil {
-		return err
-	}
-
-	return createDockerfile(workdir, language, opts)
+	err = createFunctionResources(workdir,language, opts)
+	return err
 }
 
 //
@@ -170,22 +163,6 @@ func (this Initializer) initialize(opts InitOptions) error {
 
 }
 
-
-func createDockerfile(workDir string, language string, opts HandlerAwareInitOptions) error {
-	switch language {
-	case "java":
-		return createJavaFunctionDockerFile(workDir, opts)
-	case "python":
-		return createPythonFunctionDockerFile(workDir, opts)
-	case "shell":
-		return createShellFunctionDockerFile(workDir, opts.InitOptions)
-	case "node":
-		return createNodeFunctionDockerFile(workDir, opts.InitOptions)
-	case "js":
-		return createNodeFunctionDockerFile(workDir, opts.InitOptions)
-	}
-	return nil
-}
 
 func deriveFunctionName(opts InitOptions) string {
 	// Create function resources in function Path
