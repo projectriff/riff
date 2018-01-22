@@ -36,13 +36,13 @@ func TestCreateCommandImplicitPath(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
 	//os.Chdir("test_dir/shell/echo")
-	rootCmd.SetArgs([]string{"create", "--dry-run","test_dir/shell/echo","-v","0.0.1-snapshot"})
+	rootCmd.SetArgs([]string{"create", "--dry-run", "test_dir/shell/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
 	as.NotEmpty(initOptions.FunctionPath)
-	as.Equal("test_dir/shell/echo",initOptions.FunctionPath)
+	as.Equal("test_dir/shell/echo", initOptions.FunctionPath)
 	as.NoError(err)
 }
 
@@ -50,13 +50,13 @@ func TestCreateCommandExplicitPath(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
 	//os.Chdir("test_dir/shell/echo")
-	rootCmd.SetArgs([]string{"create","--dry-run","-f","test_dir/shell/echo","-v","0.0.1-snapshot"})
+	rootCmd.SetArgs([]string{"create", "--dry-run", "-f", "test_dir/shell/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
 	as.NotEmpty(initOptions.FunctionPath)
-	as.Equal("test_dir/shell/echo",initOptions.FunctionPath)
+	as.Equal("test_dir/shell/echo", initOptions.FunctionPath)
 	as.NoError(err)
 }
 
@@ -64,13 +64,13 @@ func TestCreateCommandExplicitPathAndLang(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
 	//os.Chdir("test_dir/shell/echo")
-	rootCmd.SetArgs([]string{"create", "shell","--dry-run","-f","test_dir/shell/echo","-v","0.0.1-snapshot"})
+	rootCmd.SetArgs([]string{"create", "shell", "--dry-run", "-f", "test_dir/shell/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
 	as.NotEmpty(initOptions.FunctionPath)
-	as.Equal("test_dir/shell/echo",initOptions.FunctionPath)
+	as.Equal("test_dir/shell/echo", initOptions.FunctionPath)
 	as.NoError(err)
 }
 
@@ -78,26 +78,23 @@ func TestCreatePythonCommand(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
 	//os.Chdir("test_dir/shell/echo")
-	rootCmd.SetArgs([]string{"create", "python","--dry-run","-f","test_dir/python/demo","-v","0.0.1-snapshot","--handler","process"})
+	rootCmd.SetArgs([]string{"create", "python", "--dry-run", "-f", "test_dir/python/demo", "-v", "0.0.1-snapshot", "--handler", "process"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 }
 
-
-
 func TestInitCommandImplicitPath(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
 	//os.Chdir("test_dir/shell/echo")
-	rootCmd.SetArgs([]string{"init", "test_dir/shell/echo","-v","0.0.1-snapshot"})
+	rootCmd.SetArgs([]string{"init", "--dry-run", "test_dir/shell/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-
 	as.NotEmpty(initOptions.FunctionPath)
-	as.Equal("test_dir/shell/echo",initOptions.FunctionPath)
+	as.Equal("test_dir/shell/echo", initOptions.FunctionPath)
 	as.NoError(err)
 }
 
@@ -105,13 +102,13 @@ func TestInitCommandExplicitPath(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
 	//os.Chdir("test_dir/shell/echo")
-	rootCmd.SetArgs([]string{"init","-f","test_dir/shell/echo","-v","0.0.1-snapshot"})
+	rootCmd.SetArgs([]string{"init", "--dry-run", "-f", "test_dir/shell/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
 	as.NotEmpty(initOptions.FunctionPath)
-	as.Equal("test_dir/shell/echo",initOptions.FunctionPath)
+	as.Equal("test_dir/shell/echo", initOptions.FunctionPath)
 	as.NoError(err)
 }
 
@@ -119,17 +116,17 @@ func TestInitCommandExplicitPathAndLang(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
 	//os.Chdir("test_dir/shell/echo")
-	rootCmd.SetArgs([]string{"init", "shell","-f","test_dir/shell/echo","-v","0.0.1-snapshot"})
+	rootCmd.SetArgs([]string{"init", "shell", "--dry-run", "-f", "test_dir/shell/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
 	as.NotEmpty(initOptions.FunctionPath)
-	as.Equal("test_dir/shell/echo",initOptions.FunctionPath)
+	as.Equal("test_dir/shell/echo", initOptions.FunctionPath)
 	as.NoError(err)
 }
 
-func clearInitOptions(){
+func clearInitOptions() {
 	initOptions.Initialized = false
-	initOptions.FunctionPath=""
+	initOptions.FunctionPath = ""
 }
