@@ -50,6 +50,7 @@ func TestPythonDockerfile (t *testing.T) {
 	opts := options.InitOptions{
 		Artifact:     "demo.py",
 		RiffVersion:   "0.0.3",
+		FunctionPath: "test_dir/python/demo",
 	}
 
 	haOpts := options.HandlerAwareInitOptions{
@@ -63,6 +64,32 @@ func TestPythonDockerfile (t *testing.T) {
 	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_MODULE=%s",opts.Artifact))
 	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_HANDLER=%s",haOpts.Handler))
 	as.Contains(docker, fmt.Sprintf("ADD ./%s /",opts.Artifact))
+	as.NotContains(docker, "requirements.txt")
+	as.NotContains(docker, "pip")
+}
+
+func TestPythonDockerfileWithDeps (t *testing.T) {
+	as := assert.New(t)
+
+	opts := options.InitOptions{
+		Artifact:     "demo.py",
+		RiffVersion:   "0.0.3",
+		FunctionPath: "../../cmd/test_dir/python/demo_with_deps",
+	}
+
+	haOpts := options.HandlerAwareInitOptions{
+		InitOptions:opts,
+		Handler:"process",
+	}
+
+	docker, err := generateDockerfile("python",haOpts)
+	as.NoError(err)
+	as.Contains(docker, fmt.Sprintf("FROM projectriff/python2-function-invoker:%s",opts.RiffVersion))
+	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_MODULE=%s",opts.Artifact))
+	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_HANDLER=%s",haOpts.Handler))
+	as.Contains(docker, fmt.Sprintf("ADD ./%s /",opts.Artifact))
+	as.Contains(docker, "requirements.txt")
+	as.Contains(docker, "pip")
 }
 
 func TestNodeDockerfile (t *testing.T) {

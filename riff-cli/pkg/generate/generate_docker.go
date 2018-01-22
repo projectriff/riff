@@ -23,6 +23,7 @@ import (
 	"errors"
 	"text/template"
 	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff-cli/pkg/osutils"
 )
 
 //TODO: Enable custom templates
@@ -31,8 +32,10 @@ FROM projectriff/python2-function-invoker:{{.RiffVersion}}
 ARG FUNCTION_MODULE={{.ArtifactBase}}
 ARG FUNCTION_HANDLER={{.Handler}}
 ADD ./{{.ArtifactBase}} /
+{{- if .RequirementsTextExists }}
 ADD ./requirements.txt /
 RUN  pip install --upgrade pip && pip install -r /requirements.txt
+{{ end -}}
 ENV FUNCTION_URI file:///${FUNCTION_MODULE}?handler=${FUNCTION_HANDLER}
 `
 var nodeFunctionDockerfileTemplate = `
@@ -59,6 +62,11 @@ type DockerFileTokens struct {
 	ArtifactBase string
 	RiffVersion  string
 	Handler      string
+}
+
+type PythonDockerFileTokens struct {
+	DockerFileTokens
+	RequirementsTextExists bool
 }
 
 func generateDockerfile(language string, opts options.HandlerAwareInitOptions) (string, error) {
@@ -106,17 +114,24 @@ func generateJavaFunctionDockerFile(opts options.HandlerAwareInitOptions) (strin
 }
 
 func generatePythonFunctionDockerFile(opts options.HandlerAwareInitOptions) (string, error) {
-	dockerFileTokens := DockerFileTokens{
-		Artifact:     opts.Artifact,
-		ArtifactBase: filepath.Base(opts.Artifact),
-		RiffVersion:  opts.RiffVersion,
-		Handler:      opts.Handler,
-	}
+	dockerFileTokens := PythonDockerFileTokens{}
+	dockerFileTokens.Artifact = opts.Artifact
+	dockerFileTokens.ArtifactBase = filepath.Base(opts.Artifact)
+	dockerFileTokens.RiffVersion = opts.RiffVersion
+	dockerFileTokens.Handler = opts.Handler
+	dockerFileTokens.RequirementsTextExists = requirementTextExists(opts.FunctionPath)
 
 	return generateFunctionDockerFileContents(pythonFunctionDockerfileTemplate, "docker-python", dockerFileTokens)
 }
 
-func generateFunctionDockerFileContents(tmpl string, name string, tokens DockerFileTokens) (string, error) {
+func requirementTextExists(functionPath string) bool {
+	if !osutils.IsDirectory(functionPath) {
+		functionPath = filepath.Dir(functionPath)
+	}
+	return osutils.FileExists(filepath.Join(functionPath, "requirements.txt"))
+}
+
+func generateFunctionDockerFileContents(tmpl string, name string, tokens interface{}) (string, error) {
 	t, err := template.New(name).Parse(tmpl)
 	if err != nil {
 		return "", err
@@ -128,4 +143,3 @@ func generateFunctionDockerFileContents(tmpl string, name string, tokens DockerF
 	}
 	return buffer.String(), nil
 }
-
