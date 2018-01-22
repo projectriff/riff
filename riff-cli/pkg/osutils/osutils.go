@@ -21,6 +21,12 @@ import (
 	"path/filepath"
 	"os/user"
 	"strings"
+	"time"
+	"bytes"
+	"github.com/projectriff/riff-cli/pkg/ioutils"
+	"fmt"
+	"context"
+	"os/exec"
 )
 
 func GetCWD() string {
@@ -67,4 +73,31 @@ func Path(filename string) string {
 		return path
 	}
 	return filepath.Join(strings.Split(path,"/")...)
+}
+
+func Exec(cmdName string, cmdArgs [] string) ([]byte, error) {
+	// Create a new context and add a timeout to it
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel() // The cancel should be deferred so resources are cleaned up
+
+	// Create the command with our context
+	cmd := exec.CommandContext(ctx, cmdName, cmdArgs...)
+
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	// This time we can simply use Output() to get the result.
+	out, err := cmd.Output()
+	if err != nil {
+		ioutils.Error(fmt.Sprint(err) + ": " + stderr.String())
+	}
+
+	// We want to check the context error to see if the timeout was executed.
+	// The error returned by cmd.Output() will be OS specific based on what
+	// happens when a process is killed.
+	if ctx.Err() == context.DeadlineExceeded {
+		ioutils.Error("Command timed out")
+		return nil, ctx.Err()
+	}
+
+	return out, err
 }

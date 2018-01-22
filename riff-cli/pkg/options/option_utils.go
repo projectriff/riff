@@ -24,6 +24,10 @@ import (
 	"errors"
 )
 
+func ImageName(opts InitOptions) string {
+	return fmt.Sprintf("%s/%s:%s",opts.UserAccount,opts.FunctionName,opts.Version)
+}
+
 /*
  * Basic sanity check that given paths exist and valid protocol given.
  * Artifact must be a regular file.
@@ -38,10 +42,15 @@ func ValidateAndCleanInitOptions(options *InitOptions) error {
 		options.Artifact = filepath.Clean(options.Artifact)
 	}
 
-	if options.FunctionPath != "" {
-		if !osutils.FileExists(options.FunctionPath) {
-			return errors.New(fmt.Sprintf("filepath %s does not exist", options.FunctionPath))
-		}
+	if options.FunctionPath == "" {
+		options.FunctionPath = osutils.GetCWD()
+	}
+	if options.FunctionName == "" {
+		options.FunctionName = filepath.Base(options.FunctionPath)
+	}
+
+	if !osutils.FileExists(options.FunctionPath) {
+		return errors.New(fmt.Sprintf("filepath %s does not exist", options.FunctionPath))
 	}
 
 	if options.Artifact != "" {
@@ -84,6 +93,7 @@ func ValidateAndCleanInitOptions(options *InitOptions) error {
 			return errors.New(fmt.Sprintf("artifact %s conflicts with filepath %s", absArtifactPath, absFilePath))
 		}
 	}
+
 
 	if options.Protocol != "" {
 

@@ -23,7 +23,6 @@ import (
 	"path/filepath"
 	"strings"
 	"github.com/projectriff/riff-cli/pkg/osutils"
-	"errors"
 )
 
 func CreateFunction(workdir, language string, opts options.HandlerAwareInitOptions) error {
@@ -42,7 +41,7 @@ func CreateFunction(workdir, language string, opts options.HandlerAwareInitOptio
 		return err
 	}
 
-	if (opts.DryRun) {
+	if opts.DryRun {
 		fmt.Println("Generated Topics:\n")
 		fmt.Printf("%s\n",functionResources.Topics)
 		fmt.Println("\nGenerated Function:\n")
@@ -54,39 +53,38 @@ func CreateFunction(workdir, language string, opts options.HandlerAwareInitOptio
 		err = writeFile(
 				filepath.Join(workdir,
 				fmt.Sprintf("%s-%s.yaml",opts.FunctionName,"topics")),
-				functionResources.Topics)
+				functionResources.Topics,
+				opts.Force)
 		if err != nil {
 			return err
 		}
 
 		err = writeFile(
 			filepath.Join(workdir,
-				fmt.Sprintf("%s-%s.yaml",opts.FunctionName,"topics")),
-			functionResources.Topics)
+				fmt.Sprintf("%s-%s.yaml",opts.FunctionName,"function")),
+			functionResources.Function,
+				opts.Force)
 		if err != nil {
 			return err
 		}
 
 		err = writeFile(
 			filepath.Join(workdir, "Dockerfile"),
-			functionResources.DockerFile)
+			functionResources.DockerFile,
+			opts.Force)
 		if err != nil {
 			return err
 		}
-
-
 	}
 	return nil
 }
 
-func writeFile(filename string, text string) error {
-	overwrite := true
-
+func writeFile(filename string, text string, overwrite bool) error {
 	if !overwrite && osutils.FileExists(filename) {
-		return errors.New(fmt.Sprintf("file %s already exists", filename))
+		fmt.Printf("skipping existing file %s  - set --force to overwrite.\n", filename)
+		return nil
 
+	} else {
+		return ioutil.WriteFile(filename, []byte(strings.TrimLeft(text, "\n")), 0644)
 	}
-	//fmt.Printf("creating %s\n", filename)
-	return ioutil.WriteFile(filename,[]byte(strings.TrimLeft(text,"\n")), 0644)
-
 }

@@ -18,10 +18,10 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/projectriff/riff-cli/pkg/osutils"
 	"github.com/projectriff/riff-cli/pkg/ioutils"
 	"github.com/projectriff/riff-cli/pkg/options"
 	"os"
+	"github.com/spf13/pflag"
 )
 
 const (
@@ -49,46 +49,53 @@ to {{.Result}}.`
 
 var initOptions options.InitOptions
 
+var handler string
+
 var initCmd = &cobra.Command{
 	Use:   "init [language]",
 	Short: "Initialize a function",
 	Long:  createCmdLong(initCommandDescription, LongVals{Process: initDefinition, Command: "init", Result: initResult}),
 
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		initializer := NewLanguageDetectingInitializer()
 		err := initializer.initialize(*newHandlerAwareOptions(cmd))
 		if err != nil {
-			ioutils.Error(err)
-			return
+			return err
 		}
+		return nil
 	},
 
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		initOptions = createOptions.InitOptions
 		if !initOptions.Initialized {
+			initOptions = options.InitOptions{}
+			var flagset pflag.FlagSet
 			if cmd.Parent() == rootCmd {
-				initOptions = loadInitOptions(*cmd.PersistentFlags())
+				flagset = *cmd.PersistentFlags()
 			} else {
-				initOptions = loadInitOptions(*cmd.Parent().PersistentFlags())
+				flagset = *cmd.Parent().PersistentFlags()
 			}
-		}
-		if len(args) > 0 {
-			if len(args) == 1 && initOptions.FunctionPath == "" {
-				initOptions.FunctionPath = args[0]
-			} else {
-				ioutils.Errorf("Invalid argument(s) %v\n", args)
-				cmd.Usage()
+			mergeInitOptions(flagset, &initOptions)
+
+
+			if len(args) > 0 {
+				if len(args) == 1 && initOptions.FunctionPath == "" {
+					initOptions.FunctionPath = args[0]
+				} else {
+					ioutils.Errorf("Invalid argument(s) %v\n", args)
+					cmd.Usage()
+					os.Exit(1)
+				}
+			}
+
+			err := options.ValidateAndCleanInitOptions(&initOptions)
+			if err != nil {
 				os.Exit(1)
 			}
-		}
-		if initOptions.FunctionPath == "" {
-			initOptions.FunctionPath = osutils.GetCWD()
-		}
-		err := options.ValidateAndCleanInitOptions(&initOptions)
-		if err != nil {
-			ioutils.Error(err)
-			os.Exit(1)
+			initOptions.Initialized = true
 		}
 	},
+
 }
 
 /*
@@ -107,14 +114,14 @@ var initJavaCmd = &cobra.Command{
 	Use:   "java",
 	Short: "Initialize a Java function",
 	Long:  createCmdLong(initJavaDescription, LongVals{Process: initDefinition, Command: "init java", Result: initResult}),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
 		initializer := NewJavaInitializer()
 		err := initializer.initialize(*newHandlerAwareOptions(cmd))
 		if err != nil {
-			ioutils.Error(err)
-			return
+			return err
 		}
+		return nil
 	},
 }
 /*
@@ -139,14 +146,15 @@ var initShellCmd = &cobra.Command{
 	Short: "Initialize a shell script function",
 	Long:  createCmdLong(initShellDescription, LongVals{Process: initDefinition, Command: "init shell", Result: initResult}),
 
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		initializer := NewShellInitializer()
 		err := initializer.initialize(initOptions)
 		if err != nil {
-			ioutils.Error(err)
-			return
+			return err
 		}
+		return nil
 	},
+
 }
 /*
  * init node Command
@@ -170,13 +178,13 @@ var initNodeCmd = &cobra.Command{
 	Short: "Initialize a node.js function",
 	Long:  createCmdLong(initNodeDescription, LongVals{Process: initDefinition, Command: "init node", Result: initResult}),
 
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		initializer := NewNodeInitializer()
 		err := initializer.initialize(initOptions)
 		if err != nil {
-			ioutils.Error(err)
-			return
+			return err
 		}
+		return nil
 	},
 	Aliases: []string{"js"},
 }
@@ -199,34 +207,34 @@ var initPythonCmd = &cobra.Command{
 	Long:  createCmdLong(initPythonDescription, LongVals{Process: initDefinition, Command: "init python", Result: initResult}),
 
 
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
 		initializer := NewPythonInitializer()
 
 		err := initializer.initialize(*newHandlerAwareOptions(cmd))
 		if err != nil {
-			ioutils.Error(err)
-			return
+			return err
 		}
+		return nil
 	},
 }
 
 func newHandlerAwareOptions(cmd *cobra.Command) *options.HandlerAwareInitOptions {
-	handler, _ := cmd.Flags().GetString("handler")
-	options := &options.HandlerAwareInitOptions{}
-	options.InitOptions = initOptions
-	options.Handler = handler
-	return options
+	opts := &options.HandlerAwareInitOptions{}
+	opts.InitOptions = initOptions
+	if handler == "" {
+		handler,_ = cmd.Flags().GetString("handler")
+	}
+	opts.Handler = handler
+	return opts
 }
-
-
 
 func init() {
 
 	rootCmd.AddCommand(initCmd)
 
 
-	createInitOptionFlags(initCmd)
+	createInitFlags(initCmd.PersistentFlags())
 
 	initCmd.AddCommand(initJavaCmd)
 	initCmd.AddCommand(initNodeCmd)

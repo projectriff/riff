@@ -19,6 +19,9 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/spf13/pflag"
+	"github.com/projectriff/riff-cli/pkg/ioutils"
+	"os"
 )
 
 var createOptions options.CreateOptions
@@ -28,28 +31,53 @@ const (
 	createDefinition = `Create`
 )
 
-var createChainCmd = commandChain(initCmd, buildCmd)
+var createChainCmd = commandChain(initCmd, buildCmd, applyCmd)
 
-var createJavaChainCmd = commandChain(initJavaCmd, buildCmd)
+var createJavaChainCmd = commandChain(initJavaCmd, buildCmd, applyCmd)
 
-var createNodeChainCmd = commandChain(initNodeCmd, buildCmd)
+var createNodeChainCmd = commandChain(initNodeCmd, buildCmd, applyCmd)
 
-var createPythonChainCmd = commandChain(initPythonCmd, buildCmd)
+var createPythonChainCmd = commandChain(initPythonCmd, buildCmd, applyCmd)
 
-var createShellChainCmd = commandChain(initShellCmd, buildCmd)
+var createShellChainCmd = commandChain(initShellCmd, buildCmd, applyCmd)
 
 var createCmd = &cobra.Command{
 	Use:   "create [language]",
 	Short: "Create a function",
 	Long:  createCmdLong(initCommandDescription, LongVals{Process: createDefinition, Command: "create", Result: createResult}),
-	Run:   createChainCmd.Run,
+	RunE:   createChainCmd.RunE,
+	PreRun: createChainCmd.PreRun,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		if cmd.Parent() == rootCmd {
-			initOptions = loadInitOptions(*cmd.PersistentFlags())
-		} else {
-			initOptions = loadInitOptions(*cmd.Parent().PersistentFlags())
+		if !createOptions.Initialized {
+			createOptions = options.CreateOptions{}
+			var flagset pflag.FlagSet
+			if cmd.Parent() == rootCmd {
+				flagset = *cmd.PersistentFlags()
+			} else {
+				flagset = *cmd.Parent().PersistentFlags()
+			}
+
+			mergeInitOptions(flagset, &createOptions.InitOptions)
+			mergeBuildOptions(flagset, &createOptions)
+			mergeApplyOptions(flagset, &createOptions.InitOptions)
+
+			if len(args) > 0 {
+				if len(args) == 1 && initOptions.FunctionPath == "" {
+					createOptions.FunctionPath = args[0]
+				} else {
+					ioutils.Errorf("Invalid argument(s) %v\n", args)
+					cmd.Usage()
+					os.Exit(1)
+				}
+			}
+
+			err := options.ValidateAndCleanInitOptions(&createOptions.InitOptions)
+			if err != nil {
+				ioutils.Error(err)
+				os.Exit(1)
+			}
+			createOptions.Initialized = true
 		}
-		initOptions.Initialized = true
 		createChainCmd.PersistentPreRun(cmd,args)
 	},
 }
@@ -58,8 +86,12 @@ var createJavaCmd = &cobra.Command{
 	Use:              "java",
 	Short:            "Create a Java function",
 	Long:             createCmdLong(initJavaDescription, LongVals{Process: createDefinition, Command: "create java", Result: createResult}),
-	Run:              createJavaChainCmd.Run,
-	PreRun:           createJavaChainCmd.PreRun,
+	RunE:              createJavaChainCmd.RunE,
+
+	PreRun: func(cmd *cobra.Command, args []string) {
+		handler,_ = cmd.Flags().GetString("handler")
+		createJavaChainCmd.PreRun(cmd, args)
+	},
 	PersistentPreRun: createJavaChainCmd.PersistentPreRun,
 }
 
@@ -67,23 +99,23 @@ var createShellCmd = &cobra.Command{
 	Use:   "shell",
 	Short: "Create a shell script function",
 	Long:  createCmdLong(initShellDescription, LongVals{Process: createDefinition, Command: "create shell", Result: createResult}),
-
-	Run:              createShellChainCmd.Run,
+	PreRun: createShellChainCmd.PreRun,
+	RunE:    createShellChainCmd.RunE,
 }
 
 var createNodeCmd = &cobra.Command{
 	Use:   "node",
 	Short: "Create a node.js function",
 	Long:  createCmdLong(initNodeDescription, LongVals{Process: createDefinition, Command: "create node", Result: createResult}),
-
-	Run:              createNodeChainCmd.Run,
+	PreRun: createNodeChainCmd.PreRun,
+	RunE:    createNodeChainCmd.RunE,
 }
 
 var createJsCmd = &cobra.Command{
 	Use:              "js",
 	Short:            createNodeCmd.Short,
 	Long:             createNodeCmd.Long,
-	Run:              createNodeChainCmd.Run,
+	RunE:              createNodeChainCmd.RunE,
 }
 
 var createPythonCmd = &cobra.Command{
@@ -91,16 +123,19 @@ var createPythonCmd = &cobra.Command{
 	Short: "Create a Python function",
 	Long:  createCmdLong(initPythonDescription, LongVals{Process: createDefinition, Command: "create python", Result: createResult}),
 
-
-	Run:              createPythonChainCmd.Run,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		handler,_ = cmd.Flags().GetString("handler")
+		createPythonChainCmd.PreRun(cmd, args)
+	},
+	RunE: createPythonChainCmd.RunE,
 }
 
 func init() {
 	rootCmd.AddCommand(createCmd)
 
-	createInitOptionFlags(createCmd)
-
-	createCmd.PersistentFlags().BoolP("push", "", false, "push the image to Docker registry")
+	createInitFlags(createCmd.PersistentFlags())
+	createBuildFlags(createCmd.PersistentFlags())
+	createApplyFlags(createCmd.PersistentFlags())
 
 	createCmd.AddCommand(createJavaCmd)
 	createCmd.AddCommand(createJsCmd)

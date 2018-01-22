@@ -23,9 +23,10 @@ import (
 	"github.com/projectriff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff-cli/pkg/ioutils"
 	"os"
+	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff-cli/pkg/osutils"
+	"path/filepath"
 )
-
-var applyFilePath string
 
 // applyCmd represents the apply command
 var applyCmd = &cobra.Command{
@@ -37,27 +38,51 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		output, err := kubectl.ExecForString([]string{"apply", "-f", applyFilePath})
-		if err != nil {
-			return
+	RunE: func(cmd *cobra.Command, args []string) error {
+		var functionPath string
+		if osutils.IsDirectory(initOptions.FunctionPath) {
+			functionPath = initOptions.FunctionPath
+		}else {
+			functionPath = filepath.Dir(initOptions.FunctionPath)
+
 		}
-		fmt.Println(output)
+		if initOptions.DryRun {
+			fmt.Printf("\nApply Command: kubectl apply -f %s\n\n", functionPath)
+		} else {
+			output, err := kubectl.ExecForString([]string{"apply", "-f", functionPath})
+			if err != nil {
+				return err
+			}
+			fmt.Println(output)
+		}
+		return nil
 	},
 	PreRun: func(cmd *cobra.Command, args []string) {
-		if len(args) > 0 {
-			if len(args) == 1 && applyFilePath == "" {
-				applyFilePath = args[0]
-			} else {
-				ioutils.Errorf("Invalid argument(s) %v\n", args)
-				cmd.Usage()
+		initOptions = createOptions.InitOptions
+		if !initOptions.Initialized {
+			initOptions = options.InitOptions{}
+			mergeApplyOptions(*cmd.Flags(), &initOptions)
+			if len(args) > 0 {
+				if len(args) == 1 && initOptions.FunctionPath == "" {
+					initOptions.FunctionPath = args[0]
+				} else {
+					ioutils.Errorf("Invalid argument(s) %v\n", args)
+					cmd.Usage()
+					os.Exit(1)
+				}
+			}
+
+			err := options.ValidateAndCleanInitOptions(&initOptions)
+			if err != nil {
+				ioutils.Error(err)
 				os.Exit(1)
 			}
 		}
+		initOptions.Initialized = true
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(applyCmd)
-	applyCmd.Flags().StringVarP(&applyFilePath, "filepath", "f", "", "Filename, directory, or URL to files that contains the configuration to apply")
+	createApplyFlags(applyCmd.Flags())
 }

@@ -18,7 +18,6 @@ package generate
 import (
 	"text/template"
 	"bytes"
-	"fmt"
 	"github.com/projectriff/riff-cli/pkg/options"
 )
 
@@ -101,14 +100,13 @@ spec:
 `
 
 func createFunction(opts options.InitOptions) (string, error) {
-	image := fmt.Sprintf("%s/%s:%s",opts.UserAccount,opts.FunctionName,opts.Version)
 	function := Function{
 		ApiVersion: apiVersion,
 		Name:       opts.FunctionName,
 		Input:      opts.Input,
 		Output:     opts.Output,
 		Protocol:   opts.Protocol,
-		Image:      image}
+		Image:      options.ImageName(opts)}
 
 	var tmpl *template.Template
 	var err error

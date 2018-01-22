@@ -20,27 +20,95 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/projectriff/riff-cli/pkg/options"
+	"strings"
+	"github.com/projectriff/riff-cli/pkg/docker"
+	"github.com/projectriff/riff-cli/pkg/ioutils"
+	"os"
+	"github.com/projectriff/riff-cli/pkg/osutils"
+	"path/filepath"
 )
 
 var buildCmd = &cobra.Command{
 	Use:   "build",
 	Short: "Build a function container",
-	Long: ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("build called")
+	Long: `Build the function based on the code available in the path directory, using the name
+  and version specified for the image that is built.`,
+	Example: `riff build -n <name> -v <version> -f <path> [--push]`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return build(createOptions)
 	},
+	//TODO: DRY
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if !createOptions.Initialized {
+			createOptions = options.CreateOptions{}
+			mergeBuildOptions(*cmd.Flags(), &createOptions)
+
+			if len(args) > 0 {
+				if len(args) == 1 && createOptions.FunctionPath == "" {
+					createOptions.FunctionPath = args[0]
+				} else {
+					ioutils.Errorf("Invalid argument(s) %v\n", args)
+					cmd.Usage()
+					os.Exit(1)
+				}
+			}
+
+			err := options.ValidateAndCleanInitOptions(&createOptions.InitOptions)
+			if err != nil {
+				ioutils.Error(err)
+				os.Exit(1)
+			}
+		}
+		createOptions.Initialized = true
+	},
+}
+
+func build(opts options.CreateOptions) error {
+	buildArgs := buildArgs(opts)
+	pushArgs := pushArgs(opts)
+	if opts.DryRun {
+		fmt.Printf("\nBuild command: docker build %s\n", strings.Join(buildArgs, " "))
+		if (opts.Push) {
+			fmt.Printf("\nPush command: docker %s\n", strings.Join(pushArgs, " "))
+		}
+		return nil
+	}
+
+	out, err := docker.Exec(buildArgs)
+	if err != nil {
+		ioutils.Errorf("Error %v\n", err)
+		return err
+	}
+	fmt.Println(out)
+
+	if opts.Push {
+		out, err = docker.Exec(pushArgs)
+		if err != nil {
+			ioutils.Errorf("Error %v\n", err)
+			return err
+		}
+		fmt.Println(out)
+	}
+
+	return nil
+}
+
+func buildArgs(opts options.CreateOptions) []string {
+	image := options.ImageName(opts.InitOptions)
+	path := opts.FunctionPath
+	if !osutils.IsDirectory(opts.FunctionPath) {
+		path = filepath.Dir(path)
+	}
+	return []string{"build", "-t", image, path}
+}
+
+func pushArgs(opts options.CreateOptions) []string {
+	image := options.ImageName(opts.InitOptions)
+	return []string{"push", image}
 }
 
 func init() {
 	rootCmd.AddCommand(buildCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// buildCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// buildCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	createBuildFlags(buildCmd.Flags())
 }

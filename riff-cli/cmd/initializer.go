@@ -29,6 +29,13 @@ import (
 
 var supportedExtensions = []string{"js", "java", "py", "sh"}
 
+var languageForFileExtenstion = map[string]string{
+	"sh"	:  	"shell",
+	"java"	: 	"java",
+	"js"	:   "node",
+	"py"	: 	"python",
+}
+
 //
 type Initializer struct {
 	initOptions options.InitOptions
@@ -59,7 +66,6 @@ func NewPythonInitializer() *PythonInitializer {
 	return pythonInitializer
 }
 func (this *PythonInitializer) initialize(options options.HandlerAwareInitOptions) error {
-	fmt.Println("language: " + this.language)
 	return doInitialize(this.language, this.extension, options)
 }
 
@@ -85,6 +91,12 @@ func doInitialize(language string, ext string, opts options.HandlerAwareInitOpti
 	if err != nil {
 		return err
 	}
+
+	if opts.Artifact != "" && languageForFileExtenstion[filepath.Ext(opts.Artifact)[1:]] != language {
+		return errors.New(fmt.Sprintf("language %s conflicts with artifact file extension %s",language, opts.Artifact))
+	}
+
+
 	// Create function resources in function Path
 	opts.FunctionName = deriveFunctionName(opts.InitOptions)
 
@@ -123,26 +135,22 @@ func NewLanguageDetectingInitializer() *LanguageDetectingInitializer {
 	return &LanguageDetectingInitializer{}
 }
 
-func (this *LanguageDetectingInitializer) initialize(options options.HandlerAwareInitOptions) error {
-	functionPath, err := resolveFunctionPath(options.InitOptions, "")
+func (this *LanguageDetectingInitializer) initialize(opts options.HandlerAwareInitOptions) error {
+	functionPath, err := resolveFunctionPath(opts.InitOptions, "")
 	if err != nil {
 		return err
 	}
 
-	var languageForFileExtenstion = map[string]string{
-		"sh"	:  	"shell",
-		"java"	: 	"java",
-		"js"	:   "node",
-		"py"	: 	"python",
-	}
+
 
 	language := languageForFileExtenstion[filepath.Ext(functionPath)[1:]]
 
+
 	switch language {
 	case "shell":
-		NewShellInitializer().initialize(options.InitOptions)
+		NewShellInitializer().initialize(opts.InitOptions)
 	case "node":
-		NewNodeInitializer().initialize(options.InitOptions)
+		NewNodeInitializer().initialize(opts.InitOptions)
 	case "java":
 		fmt.Println("java resources detected. Use 'riff init java' to provide additional required options")
 		return nil
@@ -177,10 +185,7 @@ func deriveFunctionName(opts options.InitOptions) string {
 //Assumes given file paths have been sanity checked and are valid
 func resolveFunctionPath(options options.InitOptions, ext string) (string, error) {
 
-	functionName := options.FunctionName
-	if functionName == "" {
-		functionName = filepath.Base(options.FunctionPath)
-	}
+
 	absFilePath, err := filepath.Abs(options.FunctionPath)
 	if err != nil {
 		return "", err
@@ -191,12 +196,12 @@ func resolveFunctionPath(options options.InitOptions, ext string) (string, error
 	var functionFile string
 	if osutils.IsDirectory(absFilePath) {
 		if options.Artifact == "" {
-			functionFile = functionName
+			functionFile = options.FunctionName
 			functionDir = absFilePath
 			if ext != "" {
 				resolvedFunctionPath = filepath.Join(functionDir, fmt.Sprintf("%s.%s", functionFile, ext))
 			} else {
-				functionFile, err = searchForFunctionResource(functionDir, functionName)
+				functionFile, err = searchForFunctionResource(functionDir, options.FunctionName)
 				if err != nil {
 					return "", err
 				}

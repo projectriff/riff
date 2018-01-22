@@ -30,8 +30,9 @@ func TestResolveDefaultFunctionResource(t *testing.T) {
 	as := assert.New(t)
 	currentDir := osutils.GetCWD()
 	os.Chdir(osutils.Path("test_dir/python/demo"))
-	options := options.InitOptions{FunctionPath: osutils.GetCWD()}
-	functionPath, err := resolveFunctionPath(options, "py")
+	opts := options.InitOptions{FunctionPath: osutils.GetCWD()}
+	options.ValidateAndCleanInitOptions(&opts)
+	functionPath, err := resolveFunctionPath(opts, "py")
 	if as.NoError(err) {
 		absPath, _ := filepath.Abs(osutils.Path("demo.py"))
 		as.Equal(absPath, functionPath)
@@ -41,8 +42,9 @@ func TestResolveDefaultFunctionResource(t *testing.T) {
 
 func TestResolveFunctionResourceFromFilePath(t *testing.T) {
 	as := assert.New(t)
-	options := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/demo")}
-	functionPath, err := resolveFunctionPath(options, "py")
+	opts := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/demo")}
+	options.ValidateAndCleanInitOptions(&opts)
+	functionPath, err := resolveFunctionPath(opts, "py")
 	as.NoError(err)
 
 	absPath, _ := filepath.Abs(osutils.Path("test_dir/python/demo/demo.py"))
@@ -52,8 +54,9 @@ func TestResolveFunctionResourceFromFilePath(t *testing.T) {
 
 func TestResolveFunctionResourceFromFunctionFile(t *testing.T) {
 	as := assert.New(t)
-	options := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/demo/demo.py")}
-	functionPath, err := resolveFunctionPath(options, "py")
+	opts := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/demo/demo.py")}
+	options.ValidateAndCleanInitOptions(&opts)
+	functionPath, err := resolveFunctionPath(opts, "py")
 	as.NoError(err)
 
 	absPath, _ := filepath.Abs(osutils.Path("test_dir/python/demo/demo.py"))
@@ -63,8 +66,9 @@ func TestResolveFunctionResourceFromFunctionFile(t *testing.T) {
 
 func TestResolveFunctionResourceWithMultipleFilesPresent(t *testing.T) {
 	as := assert.New(t)
-	options := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/multiple")}
-	functionPath, err := resolveFunctionPath(options, "py")
+	opts := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/multiple")}
+	options.ValidateAndCleanInitOptions(&opts)
+	functionPath, err := resolveFunctionPath(opts, "py")
 	as.NoError(err)
 
 	absPath, _ := filepath.Abs(osutils.Path("test_dir/python/multiple/multiple.py"))
@@ -74,8 +78,9 @@ func TestResolveFunctionResourceWithMultipleFilesPresent(t *testing.T) {
 
 func TestResolveFunctionResourceFromArtifact(t *testing.T) {
 	as := assert.New(t)
-	options := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/multiple"), Artifact: "one.py"}
-	functionPath, err := resolveFunctionPath(options, "py")
+	opts := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/multiple"), Artifact: "one.py"}
+	options.ValidateAndCleanInitOptions(&opts)
+	functionPath, err := resolveFunctionPath(opts, "py")
 	as.NoError(err)
 
 	absPath, _ := filepath.Abs(osutils.Path("test_dir/python/multiple/one.py"))
@@ -85,16 +90,18 @@ func TestResolveFunctionResourceFromArtifact(t *testing.T) {
 
 func TestFunctionResourceDoesNotExist(t *testing.T) {
 	as := assert.New(t)
-	options := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/demo")}
-	functionPath, err := resolveFunctionPath(options, "js")
+	opts := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/demo")}
+	options.ValidateAndCleanInitOptions(&opts)
+	functionPath, err := resolveFunctionPath(opts, "js")
 	as.Error(err)
 	fmt.Println(functionPath)
 }
 
 func TestResolveFunctionResourceWithNoExtensionGiven(t *testing.T) {
 	as := assert.New(t)
-	options := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/demo")}
-	functionPath, err := resolveFunctionPath(options, "")
+	opts := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/demo")}
+	options.ValidateAndCleanInitOptions(&opts)
+	functionPath, err := resolveFunctionPath(opts, "")
 	if as.NoError(err) {
 		absPath, _ := filepath.Abs(osutils.Path("test_dir/python/demo/demo.py"))
 		as.Equal(absPath, functionPath)
@@ -103,16 +110,18 @@ func TestResolveFunctionResourceWithNoExtensionGiven(t *testing.T) {
 
 func TestFunctionResourceWithNoExtensionGivenDoesNotMatchFunctionName(t *testing.T) {
 	as := assert.New(t)
-	options := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/demo"), FunctionName: "foo"}
-	functionPath, err := resolveFunctionPath(options, "")
+	opts := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/demo"), FunctionName: "foo"}
+	options.ValidateAndCleanInitOptions(&opts)
+	functionPath, err := resolveFunctionPath(opts, "")
 	fmt.Println(functionPath)
 	as.Error(err)
 }
 
 func TestFunctionResourceWithNoExtensionGivenNotUnique(t *testing.T) {
 	as := assert.New(t)
-	options := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/multiple"), FunctionName: "one"}
-	_, err := resolveFunctionPath(options, "")
+	opts := options.InitOptions{FunctionPath: osutils.Path("test_dir/python/multiple"), FunctionName: "one"}
+	options.ValidateAndCleanInitOptions(&opts)
+	_, err := resolveFunctionPath(opts, "")
 	as.Error(err)
 	as.Contains(err.Error(),"function file is not unique")
 }

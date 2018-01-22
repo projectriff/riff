@@ -19,23 +19,12 @@ package cmd
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"os"
+	"github.com/projectriff/riff-cli/pkg/options"
 )
-
-const Ignore = false
-
-func TestMain(m *testing.M) {
-	var code int
-	if !Ignore {
-		code = m.Run()
-	}
-	os.Exit(code)
-}
 
 func TestCreateCommandImplicitPath(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
-	//os.Chdir("test_dir/shell/echo")
 	rootCmd.SetArgs([]string{"create", "--dry-run", "test_dir/shell/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
@@ -43,13 +32,12 @@ func TestCreateCommandImplicitPath(t *testing.T) {
 
 	as.NotEmpty(initOptions.FunctionPath)
 	as.Equal("test_dir/shell/echo", initOptions.FunctionPath)
-	as.NoError(err)
+
 }
 
 func TestCreateCommandExplicitPath(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
-	//os.Chdir("test_dir/shell/echo")
 	rootCmd.SetArgs([]string{"create", "--dry-run", "-f", "test_dir/shell/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
@@ -57,13 +45,11 @@ func TestCreateCommandExplicitPath(t *testing.T) {
 
 	as.NotEmpty(initOptions.FunctionPath)
 	as.Equal("test_dir/shell/echo", initOptions.FunctionPath)
-	as.NoError(err)
 }
 
 func TestCreateCommandExplicitPathAndLang(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
-	//os.Chdir("test_dir/shell/echo")
 	rootCmd.SetArgs([]string{"create", "shell", "--dry-run", "-f", "test_dir/shell/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
@@ -71,23 +57,30 @@ func TestCreateCommandExplicitPathAndLang(t *testing.T) {
 
 	as.NotEmpty(initOptions.FunctionPath)
 	as.Equal("test_dir/shell/echo", initOptions.FunctionPath)
-	as.NoError(err)
+}
+
+func TestCreateLanguageDoesNotMatchArtifact(t *testing.T) {
+	clearInitOptions()
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"create", "shell", "--dry-run", "-f", "test_dir/python/demo", "-a","demo.py"})
+
+	_, err := rootCmd.ExecuteC()
+	as.Error(err)
 }
 
 func TestCreatePythonCommand(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
-	//os.Chdir("test_dir/shell/echo")
 	rootCmd.SetArgs([]string{"create", "python", "--dry-run", "-f", "test_dir/python/demo", "-v", "0.0.1-snapshot", "--handler", "process"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
+	as.Equal("process",handler)
 }
 
 func TestInitCommandImplicitPath(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
-	//os.Chdir("test_dir/shell/echo")
 	rootCmd.SetArgs([]string{"init", "--dry-run", "test_dir/shell/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
@@ -95,13 +88,11 @@ func TestInitCommandImplicitPath(t *testing.T) {
 
 	as.NotEmpty(initOptions.FunctionPath)
 	as.Equal("test_dir/shell/echo", initOptions.FunctionPath)
-	as.NoError(err)
 }
 
 func TestInitCommandExplicitPath(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
-	//os.Chdir("test_dir/shell/echo")
 	rootCmd.SetArgs([]string{"init", "--dry-run", "-f", "test_dir/shell/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
@@ -109,13 +100,11 @@ func TestInitCommandExplicitPath(t *testing.T) {
 
 	as.NotEmpty(initOptions.FunctionPath)
 	as.Equal("test_dir/shell/echo", initOptions.FunctionPath)
-	as.NoError(err)
 }
 
 func TestInitCommandExplicitPathAndLang(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
-	//os.Chdir("test_dir/shell/echo")
 	rootCmd.SetArgs([]string{"init", "shell", "--dry-run", "-f", "test_dir/shell/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
@@ -123,10 +112,9 @@ func TestInitCommandExplicitPathAndLang(t *testing.T) {
 
 	as.NotEmpty(initOptions.FunctionPath)
 	as.Equal("test_dir/shell/echo", initOptions.FunctionPath)
-	as.NoError(err)
 }
 
 func clearInitOptions() {
-	initOptions.Initialized = false
-	initOptions.FunctionPath = ""
+	initOptions = options.InitOptions{}
+	createOptions = options.CreateOptions{}
 }

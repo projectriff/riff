@@ -29,6 +29,7 @@ type InitOptions struct {
 	UserAccount  string
 	Initialized  bool
 	DryRun		 bool
+	Force		 bool
 }
 
 type HandlerAwareInitOptions struct {
@@ -38,7 +39,7 @@ type HandlerAwareInitOptions struct {
 
 
 type BuildOptions struct {
-	push        bool
+	Push        bool
 }
 
 type CreateOptions struct {
