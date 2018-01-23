@@ -21,7 +21,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/projectriff/riff-cli/pkg/options"
 	"gopkg.in/yaml.v2"
-	"fmt"
 )
 
 func TestTopics(t *testing.T) {
