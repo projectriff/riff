@@ -34,7 +34,6 @@ type Defaults struct {
 	version     string
 }
 
-
 var DEFAULTS = Defaults{
 	riffVersion: RIFF_VERSION,
 	userAccount: osutils.GetCurrentUsername(),
@@ -43,7 +42,6 @@ var DEFAULTS = Defaults{
 	push:        false,
 	version:     "0.0.1",
 }
-
 
 func createInitFlags(flagset *pflag.FlagSet) {
 	setVersionFlag(flagset)
@@ -68,7 +66,6 @@ func createBuildFlags(flagset *pflag.FlagSet) {
 	setDryRunFlag(flagset)
 	setPushFlag(flagset)
 	setUserAccountFlag(flagset)
-
 }
 
 func createApplyFlags(flagset *pflag.FlagSet) {
@@ -76,11 +73,11 @@ func createApplyFlags(flagset *pflag.FlagSet) {
 	setDryRunFlag(flagset)
 }
 
-func mergeInitOptions(flagset pflag.FlagSet,opts *options.InitOptions)  {
+func mergeInitOptions(flagset pflag.FlagSet, opts *options.InitOptions) {
 	if opts.FunctionName == "" {
 		opts.FunctionName, _ = flagset.GetString("name")
 	}
-	if opts.Version == ""{
+	if opts.Version == "" {
 		opts.Version, _ = flagset.GetString("version")
 	}
 	if opts.FunctionPath == "" {
@@ -107,12 +104,12 @@ func mergeInitOptions(flagset pflag.FlagSet,opts *options.InitOptions)  {
 	if opts.DryRun == false {
 		opts.DryRun, _ = flagset.GetBool("dry-run")
 	}
-	if opts.Force == false{
+	if opts.Force == false {
 		opts.Force, _ = flagset.GetBool("force")
 	}
 }
 
-func mergeBuildOptions(flagset pflag.FlagSet, opts *options.CreateOptions ) {
+func mergeBuildOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 	if opts.FunctionName == "" {
 		opts.FunctionName, _ = flagset.GetString("name")
 	}
@@ -147,13 +144,13 @@ func mergeApplyOptions(flagset pflag.FlagSet, opts *options.InitOptions) {
 
 func setNameFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "name") {
-		flagset.StringP("name", "n", "", "the functionName of the function (defaults to the functionName of the current directory)")
+		flagset.StringP("name", "n", "", "the name of the function (defaults to the functionName of the current directory)")
 	}
 }
 
 func setVersionFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "version") {
-		flagset.StringP("version", "v", DEFAULTS.version, "the version of the function (defaults to 0.0.1)")
+		flagset.StringP("version", "v", DEFAULTS.version, "the version of the function image")
 	}
 }
 
@@ -177,7 +174,7 @@ func setRiffVersionFlag(flagset *pflag.FlagSet) {
 
 func setUserAccountFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "useraccount") {
-		flagset.StringP("useraccount", "u", DEFAULTS.userAccount, "the Docker user account to be used for the image repository (defaults to current OS username")
+		flagset.StringP("useraccount", "u", DEFAULTS.userAccount, "the Docker user account to be used for the image repository (defaults to current OS username)")
 	}
 }
 
@@ -189,12 +186,12 @@ func setProtocolFlag(flagset *pflag.FlagSet) {
 
 func setInputFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "input") {
-		flagset.StringP("input", "i", "", "the functionName of the input topic (defaults to function functionName)")
+		flagset.StringP("input", "i", "", "the name of the input topic (defaults to function name)")
 	}
 }
 func setOutputFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "output") {
-		flagset.StringP("output", "o", "", "the functionName of the output topic (optional)")
+		flagset.StringP("output", "o", "", "the name of the output topic (optional)")
 	}
 }
 

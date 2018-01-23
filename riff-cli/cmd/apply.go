@@ -24,32 +24,20 @@ import (
 	"github.com/projectriff/riff-cli/pkg/ioutils"
 	"os"
 	"github.com/projectriff/riff-cli/pkg/options"
-	"github.com/projectriff/riff-cli/pkg/osutils"
-	"path/filepath"
 )
 
 // applyCmd represents the apply command
 var applyCmd = &cobra.Command{
 	Use:   "apply",
 	Short: "Apply function resource definitions",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long: `Apply the resource definition[s] included in the path. A resource will be created if
+  it doesn't exist yet.`,
+  Example: `riff apply -f <path>`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var functionPath string
-		if osutils.IsDirectory(initOptions.FunctionPath) {
-			functionPath = initOptions.FunctionPath
-		}else {
-			functionPath = filepath.Dir(initOptions.FunctionPath)
-
-		}
 		if initOptions.DryRun {
-			fmt.Printf("\nApply Command: kubectl apply -f %s\n\n", functionPath)
+			fmt.Printf("\nApply Command: kubectl apply -f %s\n\n", initOptions.FunctionPath)
 		} else {
-			output, err := kubectl.ExecForString([]string{"apply", "-f", functionPath})
+			output, err := kubectl.ExecForString([]string{"apply", "-f", initOptions.FunctionPath})
 			if err != nil {
 				return err
 			}
