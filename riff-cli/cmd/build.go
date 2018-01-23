@@ -27,6 +27,8 @@ import (
 	"os"
 	"github.com/projectriff/riff-cli/pkg/osutils"
 	"path/filepath"
+	"github.com/projectriff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff-cli/cmd/opts"
 )
 
 var buildCmd = &cobra.Command{
@@ -36,16 +38,16 @@ var buildCmd = &cobra.Command{
   and version specified for the image that is built.`,
 	Example: `riff build -n <name> -v <version> -f <path> [--push]`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return build(options.GetBuildOptions(createOptions))
+		return build(options.GetBuildOptions(opts.CreateOptions))
 	},
 	//TODO: DRY
 	PreRun: func(cmd *cobra.Command, args []string) {
-		if !createOptions.Initialized {
-			mergeBuildOptions(*cmd.Flags(), &createOptions)
+		if !opts.CreateOptions.Initialized {
+			utils.MergeBuildOptions(*cmd.Flags(), &opts.CreateOptions)
 
 			if len(args) > 0 {
-				if len(args) == 1 && createOptions.FunctionPath == "" {
-					createOptions.FunctionPath = args[0]
+				if len(args) == 1 && opts.CreateOptions.FunctionPath == "" {
+					opts.CreateOptions.FunctionPath = args[0]
 				} else {
 					ioutils.Errorf("Invalid argument(s) %v\n", args)
 					cmd.Usage()
@@ -53,13 +55,13 @@ var buildCmd = &cobra.Command{
 				}
 			}
 
-			err := options.ValidateAndCleanInitOptions(&createOptions.InitOptions)
+			err := options.ValidateAndCleanInitOptions(&opts.CreateOptions.InitOptions)
 			if err != nil {
 				ioutils.Error(err)
 				os.Exit(1)
 			}
 		}
-		createOptions.Initialized = true
+		opts.CreateOptions.Initialized = true
 	},
 }
 
@@ -111,5 +113,5 @@ func pushArgs(opts options.BuildOptions) []string {
 
 func init() {
 	rootCmd.AddCommand(buildCmd)
-	createBuildFlags(buildCmd.Flags())
+	utils.CreateBuildFlags(buildCmd.Flags())
 }

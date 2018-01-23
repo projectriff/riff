@@ -99,6 +99,4 @@ func init() {
 	deleteCmd.Flags().StringVarP(&deleteOptions.name, "name", "n", "", "the name of the function")
 	deleteCmd.Flags().StringVarP(&deleteOptions.path, "filepath", "f", "", "path or directory for the function resources, if a file is specified then the file's directory will be used (defaults to the current directory)")
 	deleteCmd.Flags().BoolVarP(&deleteOptions.all, "all", "", false, "delete all resources including topics, not just the function resource")
-
-	setFilePathFlag(deleteCmd.Flags())
 }

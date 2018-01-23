@@ -14,7 +14,7 @@
  *   limitations under the License.
  */
 
-package generate
+package core
 
 import (
 	"fmt"
@@ -25,45 +25,69 @@ import (
 	"github.com/projectriff/riff-cli/pkg/osutils"
 )
 
-func CreateFunction(workdir, language string, opts options.InitOptions) error {
+const (
+	ApiVersion = "projectriff.io/v1"
+)
+
+type FunctionResources struct {
+	Topics     string
+	Function   string
+	DockerFile string
+}
+
+type Function struct {
+	ApiVersion string
+	Name       string
+	Input      string
+	Output     string
+	Image      string
+	Protocol   string
+}
+
+type ArtifactsGenerator struct {
+	GenerateFunction   func(options.InitOptions) (string, error)
+	GenerateDockerFile func(options.InitOptions) (string, error)
+}
+
+func GenerateFunctionArtfacts(generator ArtifactsGenerator, workdir string, opts options.InitOptions) error {
 	var functionResources FunctionResources
 	var err error
 	functionResources.Topics, err = createTopics(opts)
 	if err != nil {
 		return err
 	}
-	functionResources.Function, err = createFunction(opts)
+	functionResources.Function, err = generator.GenerateFunction(opts)
 	if err != nil {
 		return err
 	}
-	functionResources.DockerFile, err = generateDockerfile(language,opts)
+	functionResources.DockerFile, err = generator.GenerateDockerFile(opts)
 	if err != nil {
 		return err
 	}
 
 	if opts.DryRun {
 		fmt.Println("Generated Topics:\n")
-		fmt.Printf("%s\n",functionResources.Topics)
+		fmt.Printf("%s\n", functionResources.Topics)
 		fmt.Println("\nGenerated Function:\n")
-		fmt.Printf("%s\n",functionResources.Function)
+		fmt.Printf("%s\n", functionResources.Function)
 		fmt.Println("\nGenerated Dockerfile:\n")
-		fmt.Printf("%s\n",functionResources.DockerFile)
+		fmt.Printf("%s\n", functionResources.DockerFile)
 	} else {
 		var err error
 		err = writeFile(
-				filepath.Join(workdir,
-				fmt.Sprintf("%s-%s.yaml",opts.FunctionName,"topics")),
-				functionResources.Topics,
-				opts.Force)
+			filepath.Join(workdir,
+				fmt.Sprintf("%s-%s.yaml", opts.FunctionName, "topics")),
+			functionResources.Topics,
+			opts.Force)
 		if err != nil {
 			return err
 		}
 
 		err = writeFile(
 			filepath.Join(workdir,
-				fmt.Sprintf("%s-%s.yaml",opts.FunctionName,"function")),
+				fmt.Sprintf("%s-%s.yaml", opts.FunctionName, "function")),
 			functionResources.Function,
-				opts.Force)
+			opts.Force)
 		if err != nil {
 			return err
 		}

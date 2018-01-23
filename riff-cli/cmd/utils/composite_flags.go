@@ -14,15 +14,15 @@
  *   limitations under the License.
  */
 
-package cmd
+package utils
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/projectriff/riff-cli/pkg/osutils"
 	"github.com/spf13/pflag"
-	"bytes"
-	"text/template"
 	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff-cli/global"
+	"github.com/spf13/cobra"
+	"github.com/projectriff/riff-cli/cmd/opts"
 )
 
 type Defaults struct {
@@ -34,8 +34,8 @@ type Defaults struct {
 	version     string
 }
 
-var DEFAULTS = Defaults{
-	riffVersion: RIFF_VERSION,
+var defaults = Defaults{
+	riffVersion: global.RIFF_VERSION,
 	userAccount: osutils.GetCurrentUsername(),
 	force:       false,
 	dryRun:      false,
@@ -43,7 +43,7 @@ var DEFAULTS = Defaults{
 	version:     "0.0.1",
 }
 
-func createInitFlags(flagset *pflag.FlagSet) {
+func CreateInitFlags(flagset *pflag.FlagSet) {
 	setVersionFlag(flagset)
 	setNameFlag(flagset)
 	setFilePathFlag(flagset)
@@ -58,7 +58,7 @@ func createInitFlags(flagset *pflag.FlagSet) {
 	setDryRunFlag(flagset)
 }
 
-func createBuildFlags(flagset *pflag.FlagSet) {
+func CreateBuildFlags(flagset *pflag.FlagSet) {
 	setNameFlag(flagset)
 	setFilePathFlag(flagset)
 	setVersionFlag(flagset)
@@ -68,12 +68,12 @@ func createBuildFlags(flagset *pflag.FlagSet) {
 	setUserAccountFlag(flagset)
 }
 
-func createApplyFlags(flagset *pflag.FlagSet) {
+func CreateApplyFlags(flagset *pflag.FlagSet) {
 	setFilePathFlag(flagset)
 	setDryRunFlag(flagset)
 }
 
-func mergeInitOptions(flagset pflag.FlagSet, opts *options.InitOptions) {
+func MergeInitOptions(flagset pflag.FlagSet, opts *options.InitOptions) {
 	if opts.FunctionName == "" {
 		opts.FunctionName, _ = flagset.GetString("name")
 	}
@@ -109,7 +109,7 @@ func mergeInitOptions(flagset pflag.FlagSet, opts *options.InitOptions) {
 	}
 }
 
-func mergeBuildOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
+func MergeBuildOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 	if opts.FunctionName == "" {
 		opts.FunctionName, _ = flagset.GetString("name")
 	}
@@ -133,7 +133,7 @@ func mergeBuildOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 	}
 }
 
-func mergeApplyOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
+func MergeApplyOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 	if opts.FunctionPath == "" {
 		opts.FunctionPath, _ = flagset.GetString("filepath")
 	}
@@ -141,6 +141,14 @@ func mergeApplyOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 		opts.DryRun, _ = flagset.GetBool("dry-run")
 	}
 }
+
+func GetHandler(cmd *cobra.Command) string {
+	if opts.Handler == "" {
+		opts.Handler, _ = cmd.Flags().GetString("handler")
+	}
+	return opts.Handler
+}
+
 
 func setNameFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "name") {
@@ -150,7 +158,7 @@ func setNameFlag(flagset *pflag.FlagSet) {
 
 func setVersionFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "version") {
-		flagset.StringP("version", "v", DEFAULTS.version, "the version of the function image")
+		flagset.StringP("version", "v", defaults.version, "the version of the function image")
 	}
 }
 
@@ -162,19 +170,19 @@ func setFilePathFlag(flagset *pflag.FlagSet) {
 
 func setDryRunFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "dry-run") {
-		flagset.Bool("dry-run", DEFAULTS.dryRun, "print generated function artifacts content to stdout only")
+		flagset.Bool("dry-run", defaults.dryRun, "print generated function artifacts content to stdout only")
 	}
 }
 
 func setRiffVersionFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "riff-version") {
-		flagset.StringP("riff-version", "", DEFAULTS.riffVersion, "the version of riff to use when building containers")
+		flagset.StringP("riff-version", "", defaults.riffVersion, "the version of riff to use when building containers")
 	}
 }
 
 func setUserAccountFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "useraccount") {
-		flagset.StringP("useraccount", "u", DEFAULTS.userAccount, "the Docker user account to be used for the image repository (defaults to current OS username)")
+		flagset.StringP("useraccount", "u", defaults.userAccount, "the Docker user account to be used for the image repository (defaults to current OS username)")
 	}
 }
 
@@ -203,177 +211,16 @@ func setArtifactFlag(flagset *pflag.FlagSet) {
 
 func setForceFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "force") {
-		flagset.Bool("force", DEFAULTS.force, "overwrite existing functions artifacts")
+		flagset.Bool("force", defaults.force, "overwrite existing functions artifacts")
 	}
 }
 
 func setPushFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "push") {
-		flagset.BoolP("push", "", DEFAULTS.push, "push the image to Docker registry")
+		flagset.BoolP("push", "", defaults.push, "push the image to Docker registry")
 	}
 }
 
 func flagDefined(flagset *pflag.FlagSet, name string) bool {
 	return flagset.Lookup(name) != nil
-}
-
-/*
- * Runs a chain of commands
- */
-func commandChain(commands ... *cobra.Command) *cobra.Command {
-
-	run := func(cmd *cobra.Command, args []string) {
-		for _, command := range commands {
-			if command.Run != nil {
-				command.Run(cmd, args)
-			}
-		}
-	}
-
-	/*
-	 * Composite command using RunE to fail fast. SilenceUsage enabled to supress usage message following
-	 * run time errors. If it gets this far, the usage was likely correct.
-	 */
-	runE := func(cmd *cobra.Command, args []string) error {
-		for _, command := range commands {
-			if command.RunE != nil {
-				err := command.RunE(command, args)
-				if err != nil {
-					cmd.SilenceUsage = true
-					return err
-				}
-			}
-		}
-		return nil
-	}
-
-	preRun := func(cmd *cobra.Command, args []string) {
-		for _, command := range commands {
-			if command.PreRun != nil {
-				command.PreRun(command, args)
-			}
-		}
-	}
-
-	preRunE := func(cmd *cobra.Command, args []string) error {
-		for _, command := range commands {
-			if command.PreRunE != nil {
-				err := command.PreRunE(command, args)
-				if err != nil {
-					return err
-				}
-			}
-		}
-		return nil
-	}
-
-	postRun := func(cmd *cobra.Command, args []string) {
-		for _, command := range commands {
-			if command.PostRun != nil {
-				command.PostRun(command, args)
-			}
-		}
-	}
-
-	postRunE := func(cmd *cobra.Command, args []string) error {
-		for _, command := range commands {
-			if command.PostRunE != nil {
-				err := command.PostRunE(command, args)
-				if err != nil {
-					return err
-				}
-			}
-		}
-		return nil
-	}
-
-	persistentPreRun := func(cmd *cobra.Command, args []string) {
-
-		for _, command := range commands {
-			for ; command.Root() != nil && command.Root().PersistentPreRun != nil; {
-				command = command.Root()
-			}
-			if command.PersistentPreRun != nil {
-				command.PersistentPreRun(command, args)
-			}
-		}
-	}
-
-	persistentPreRunE := func(cmd *cobra.Command, args []string) error {
-		for _, command := range commands {
-			for ; command.Root() != nil && command.Root().PersistentPreRun != nil; {
-				command = command.Root()
-			}
-			if command.PersistentPreRunE != nil {
-				err := command.PersistentPreRunE(command, args)
-				if err != nil {
-					return err
-				}
-			}
-		}
-		return nil
-	}
-
-	persistentPostRun := func(cmd *cobra.Command, args []string) {
-
-		for _, command := range commands {
-			for ; command.Root() != nil && command.Root().PersistentPreRun != nil; {
-				command = command.Root()
-			}
-			if command.PersistentPostRun != nil {
-				command.PersistentPostRun(command, args)
-			}
-		}
-	}
-
-	persistentPostRunE := func(cmd *cobra.Command, args []string) error {
-		for _, command := range commands {
-			for ; command.Root() != nil && command.Root().PersistentPreRun != nil; {
-				command = command.Root()
-			}
-			if command.PersistentPostRunE != nil {
-				err := command.PersistentPostRunE(command, args)
-				if err != nil {
-					return err
-				}
-			}
-		}
-		return nil
-	}
-
-	var chain = &cobra.Command{
-		Run:                run,
-		RunE:               runE,
-		PreRun:             preRun,
-		PreRunE:            preRunE,
-		PostRun:            postRun,
-		PostRunE:           postRunE,
-		PersistentPreRun:   persistentPreRun,
-		PersistentPreRunE:  persistentPreRunE,
-		PersistentPostRun:  persistentPostRun,
-		PersistentPostRunE: persistentPostRunE,
-	}
-
-	return chain
-}
-
-type LongVals struct {
-	Process string
-	Command string
-	Result  string
-}
-
-func createCmdLong(longDescr string, vals LongVals) string {
-	tmpl, err := template.New("longDescr").Parse(longDescr)
-	if err != nil {
-		panic(err)
-	}
-
-	var tpl bytes.Buffer
-	err = tmpl.Execute(&tpl, vals)
-	if err != nil {
-		panic(err)
-	}
-
-	return tpl.String()
 }

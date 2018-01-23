@@ -14,7 +14,7 @@
  *   limitations under the License.
  */
 
-package generate
+package core
 
 import (
 	"testing"
@@ -38,16 +38,15 @@ func TestTopics(t *testing.T) {
 	as.Contains(topic, "name: out")
 }
 
-
 type YFunction struct {
 	ApiVersion string
-	Kind string
+	Kind       string
 	Metadata struct {
 		Name string
 	}
 	Spec struct {
 		Protocol string
-		Input string
+		Input    string
 		Container struct {
 			Image string
 		}
@@ -62,25 +61,25 @@ func TestFunction(t *testing.T) {
 		Input:        "in",
 		Output:       "out",
 		Protocol:     "http",
-		UserAccount:   "me",
-		Version:       "0.0.1",
+		UserAccount:  "me",
+		Version:      "0.0.1",
 	}
 
-	f, err := createFunction(opts)
+	f, err := DefaultGenerateFunction(opts)
 	as.NoError(err)
 	as.Contains(f, "input:")
 	as.Contains(f, "output:")
 
 	opts.Output = ""
 
-	f, err = createFunction(opts)
+	f, err = DefaultGenerateFunction(opts)
 	as.NoError(err)
 
 	yf := YFunction{}
 	err = yaml.Unmarshal([]byte(f), &yf)
 	as.NoError(err)
-	as.Equal("http",yf.Spec.Protocol)
-	as.Equal("in",yf.Spec.Input)
-	as.Equal("myfunc",yf.Metadata.Name)
-	as.Equal("me/myfunc:0.0.1",yf.Spec.Container.Image)
+	as.Equal("http", yf.Spec.Protocol)
+	as.Equal("in", yf.Spec.Input)
+	as.Equal("myfunc", yf.Metadata.Name)
+	as.Equal("me/myfunc:0.0.1", yf.Spec.Container.Image)
 }

@@ -13,72 +13,14 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
-package generate
+
+package core
 
 import (
-	"text/template"
-	"bytes"
 	"github.com/projectriff/riff-cli/pkg/options"
+	"bytes"
+	"text/template"
 )
-
-const (
-	apiVersion = "projectriff.io/v1"
-)
-
-type FunctionResources struct {
-	Topics     string
-	Function   string
-	DockerFile string
-}
-
-type Topic struct {
-	ApiVersion string
-	Name       string
-	Partitions int
-}
-
-type Function struct {
-	ApiVersion string
-	Name       string
-	Input      string
-	Output     string
-	Image      string
-	Protocol   string
-}
-
-//TODO: Flag for number of partitions?
-func createTopics(opts options.InitOptions) (string, error) {
-
-	var topicTemplate = `
-apiVersion : {{.ApiVersion}}
-kind: Topic
-metadata:	
-  name: {{.Name}}
-spec:
-  partitions: {{.Partitions}}
-`
-	tmpl, err := template.New("topic").Parse(topicTemplate)
-	if err != nil {
-		return "", err
-	}
-
-	var buffer bytes.Buffer
-
-	input := Topic{ApiVersion: apiVersion, Name: opts.Input, Partitions: 1}
-	err = tmpl.Execute(&buffer, input)
-	if err != nil {
-		return "", err
-	}
-	if opts.Output != "" {
-		output := Topic{ApiVersion: apiVersion, Name: opts.Output, Partitions: 1}
-		err = tmpl.Execute(&buffer, output)
-		if err != nil {
-			return "", err
-		}
-	}
-
-	return buffer.String(), nil
-}
 
 //TODO: Kludgy '-' used to supress blank line, {{else}} adds a new line.
 var functionTemplate = `
@@ -96,10 +38,9 @@ spec:
     image: {{.Image}}
 `
 
-func createFunction(opts options.InitOptions) (string, error) {
-
+func DefaultGenerateFunction(opts options.InitOptions) (string, error) {
 	function := Function{
-		ApiVersion: apiVersion,
+		ApiVersion: ApiVersion,
 		Name:       opts.FunctionName,
 		Input:      opts.Input,
 		Output:     opts.Output,
@@ -121,3 +62,4 @@ func createFunction(opts options.InitOptions) (string, error) {
 	}
 	return buffer.String(), nil
 }
+

@@ -22,64 +22,46 @@ import (
 	"github.com/projectriff/riff-cli/pkg/options"
 	"os"
 	"github.com/spf13/pflag"
-	"github.com/projectriff/riff-cli/pkg/initializer"
+	"github.com/projectriff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff-cli/cmd/opts"
+	"github.com/projectriff/riff-cli/pkg/initializers"
 )
 
-const (
-	initResult     = `generate the required Dockerfile and resource definitions using sensible defaults`
-	initDefinition = `Generate`
-)
+
 
 /*
  * init Command
  * TODO: Use cmd.Example
  */
-const initCommandDescription = `{{.Process}} the function based on the function source code specified as the filename, using the name
-and version specified for the function image repository and tag. 
-For example, if you have a directory named 'square' containing a function 'square.js', you can simply type :
 
-riff {{.Command}} node -f square
-
-or
-
-riff  {{.Command}} node
-
-from the 'square' directory
-
-to {{.Result}}.`
-
-var initOptions options.InitOptions
-
-var handler string
 
 var initCmd = &cobra.Command{
 	Use:   "init [language]",
 	Short: "Initialize a function",
-	Long:  createCmdLong(initCommandDescription, LongVals{Process: initDefinition, Command: "init", Result: initResult}),
+	Long:  	utils.InitCmdLong(),
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := initializer.Initialize(initOptions)
+		err := initializers.Initialize(opts.InitOptions)
 		if err != nil {
 			return err
 		}
 		return nil
 	},
-
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		initOptions = createOptions.InitOptions
-		if !createOptions.Initialized {
-			initOptions = createOptions.InitOptions
+		opts.InitOptions = opts.CreateOptions.InitOptions
+		if !opts.CreateOptions.Initialized {
+			opts.InitOptions = opts.CreateOptions.InitOptions
 			var flagset pflag.FlagSet
 			if cmd.Parent() == rootCmd {
 				flagset = *cmd.PersistentFlags()
 			} else {
 				flagset = *cmd.Parent().PersistentFlags()
 			}
-			mergeInitOptions(flagset, &initOptions)
+			utils.MergeInitOptions(flagset, &opts.InitOptions)
 
 			if len(args) > 0 {
-				if len(args) == 1 && initOptions.FunctionPath == "" {
-					initOptions.FunctionPath = args[0]
+				if len(args) == 1 && opts.InitOptions.FunctionPath == "" {
+					opts.InitOptions.FunctionPath = args[0]
 				} else {
 					ioutils.Errorf("Invalid argument(s) %v\n", args)
 					cmd.Usage()
@@ -87,12 +69,12 @@ var initCmd = &cobra.Command{
 				}
 			}
 
-			err := options.ValidateAndCleanInitOptions(&initOptions)
+			err := options.ValidateAndCleanInitOptions(&opts.InitOptions)
 			if err != nil {
 				os.Exit(1)
 			}
 
-			createOptions.Initialized = true
+			opts.CreateOptions.Initialized = true
 		}
 	},
 }
@@ -100,22 +82,15 @@ var initCmd = &cobra.Command{
 /*
  * init java Command
  */
-const initJavaDescription = `{{.Process}} the function based on the function source code specified as the filename, using the artifact (jar file), 
-the function handler(classname), the name and version specified for the function image repository and tag. 
-For example from a maven project directory named 'greeter', type:
 
-riff {{.Command}} -i greetings -l java -a target/greeter-1.0.0.jar --handler=Greeter
-
-
-to generate the required Dockerfile and resource definitions using sensible defaults.`
 
 var initJavaCmd = &cobra.Command{
 	Use:   "java",
 	Short: "Initialize a Java function",
-	Long:  createCmdLong(initJavaDescription, LongVals{Process: initDefinition, Command: "init java", Result: initResult}),
+	Long: 	utils.InitJavaCmdLong(),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		initOptions.Handler = getHandler(cmd)
-		err := initializer.InitializeJava(initOptions)
+		opts.InitOptions.Handler = utils.GetHandler(cmd)
+		err := initializers.Java().Initialize(opts.InitOptions)
 		if err != nil {
 			return err
 		}
@@ -125,27 +100,15 @@ var initJavaCmd = &cobra.Command{
 /*
  * init shell ommand
  */
-const initShellDescription = `{{.Process}} the function based on the function script specified as the filename, 
-using the name and version specified for the function image repository and tag. 
-For example, if you have a directory named 'echo' containing a function 'echo.sh', you can simply type :
 
-riff {{.Command}} -f echo
-
-or
-
-riff {{.Command}}
-
-from the 'echo' directory
-
-to {{.Result}}.`
 
 var initShellCmd = &cobra.Command{
 	Use:   "shell",
 	Short: "Initialize a shell script function",
-	Long:  createCmdLong(initShellDescription, LongVals{Process: initDefinition, Command: "init shell", Result: initResult}),
+	Long:	utils.InitShellCmdLong(),
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := initializer.InitializeShell(initOptions)
+		err := initializers.Shell().Initialize(opts.InitOptions)
 		if err != nil {
 			return err
 		}
@@ -155,27 +118,14 @@ var initShellCmd = &cobra.Command{
 /*
  * init node Command
  */
-const initNodeDescription = `{{.Process}} the function based on the function source code specified as the filename, using the name
-and version specified for the function image repository and tag.
-For example, if you have a directory named 'square' containing a function 'square.js', you can simply type :
-
-riff {{.Command}} -f square
-
-or
-
-riff {{.Command}}
-
-from the 'square' directory
-
-to {{.Result}}.`
 
 var initNodeCmd = &cobra.Command{
 	Use:   "node",
 	Short: "Initialize a node.js function",
-	Long:  createCmdLong(initNodeDescription, LongVals{Process: initDefinition, Command: "init node", Result: initResult}),
+	Long:	utils.InitNodeCmdLong(),
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := initializer.InitializeNode(initOptions)
+		err := initializers.Node().Initialize(opts.InitOptions)
 		if err != nil {
 			return err
 		}
@@ -187,24 +137,16 @@ var initNodeCmd = &cobra.Command{
 /*
  * init python Command
  */
-const initPythonDescription = `{{.Process}} the function based on the function source code specified as the filename, handler, name, artifact
-  and version specified for the function image repository and tag. 
-For example, type:
 
-riff {{.Command}} -i words -l python  --n uppercase --handler=process
-
-
-to {{.Result}}.`
 
 var initPythonCmd = &cobra.Command{
 	Use:   "python",
 	Short: "Initialize a Python function",
-	Long:  createCmdLong(initPythonDescription, LongVals{Process: initDefinition, Command: "init python", Result: initResult}),
-
+	Long:	utils.InitPythonCmdLong(),
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		initOptions.Handler = getHandler(cmd)
-		err := initializer.InitializePython(initOptions)
+		opts.InitOptions.Handler = utils.GetHandler(cmd)
+		err := initializers.Python().Initialize(opts.InitOptions)
 		if err != nil {
 			return err
 		}
@@ -212,18 +154,12 @@ var initPythonCmd = &cobra.Command{
 	},
 }
 
-func getHandler(cmd *cobra.Command) string {
-	if handler == "" {
-		handler, _ = cmd.Flags().GetString("handler")
-	}
-	return handler
-}
 
 func init() {
 
 	rootCmd.AddCommand(initCmd)
 
-	createInitFlags(initCmd.PersistentFlags())
+	utils.CreateInitFlags(initCmd.PersistentFlags())
 
 	initCmd.AddCommand(initJavaCmd)
 	initCmd.AddCommand(initNodeCmd)

@@ -24,6 +24,8 @@ import (
 	"github.com/projectriff/riff-cli/pkg/ioutils"
 	"os"
 	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff-cli/cmd/opts"
 )
 
 // applyCmd represents the apply command
@@ -36,10 +38,11 @@ riff apply -f some/function/path
 riff apply -f some/function/path/some.yaml
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if createOptions.DryRun {
-			fmt.Printf("\nApply Command: kubectl apply -f %s\n\n", createOptions.FunctionPath)
+
+		if opts.CreateOptions.DryRun {
+			fmt.Printf("\nApply Command: kubectl apply -f %s\n\n", opts.CreateOptions.FunctionPath)
 		} else {
-			output, err := kubectl.ExecForString([]string{"apply", "-f", createOptions.FunctionPath})
+			output, err := kubectl.ExecForString([]string{"apply", "-f", opts.CreateOptions.FunctionPath})
 			if err != nil {
 				cmd.SilenceUsage = true
 				return err
@@ -50,11 +53,11 @@ riff apply -f some/function/path/some.yaml
 	},
 	PreRun: func(cmd *cobra.Command, args []string) {
 
-		if !createOptions.Initialized {
-			mergeApplyOptions(*cmd.Flags(), &createOptions)
+		if !opts.CreateOptions.Initialized {
+			utils.MergeApplyOptions(*cmd.Flags(), &opts.CreateOptions)
 			if len(args) > 0 {
-				if len(args) == 1 && createOptions.FunctionPath == "" {
-					initOptions.FunctionPath = args[0]
+				if len(args) == 1 && opts.CreateOptions.FunctionPath == "" {
+					opts.InitOptions.FunctionPath = args[0]
 				} else {
 					ioutils.Errorf("Invalid argument(s) %v\n", args)
 					cmd.Usage()
@@ -62,17 +65,17 @@ riff apply -f some/function/path/some.yaml
 				}
 			}
 
-			err := options.ValidateAndCleanInitOptions(&createOptions.InitOptions)
+			err := options.ValidateAndCleanInitOptions(&opts.CreateOptions.InitOptions)
 			if err != nil {
 				ioutils.Error(err)
 				os.Exit(1)
 			}
 		}
-		createOptions.Initialized = true
+		opts.CreateOptions.Initialized = true
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(applyCmd)
-	createApplyFlags(applyCmd.Flags())
+	utils.CreateApplyFlags(applyCmd.Flags())
 }

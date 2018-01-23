@@ -20,6 +20,7 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff-cli/cmd/opts"
 )
 
 func TestBuildCommandImplicitPath(t *testing.T) {
@@ -27,8 +28,8 @@ func TestBuildCommandImplicitPath(t *testing.T) {
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"build", "--dry-run", osutils.Path("../test_data/shell/echo"), "-v", "0.0.1-snapshot"})
 	_, err := rootCmd.ExecuteC()
-	as.Equal("echo", createOptions.FunctionName)
-	as.Equal("0.0.1-snapshot", createOptions.Version)
+	as.Equal("echo", opts.CreateOptions.FunctionName)
+	as.Equal("0.0.1-snapshot", opts.CreateOptions.Version)
 	as.NoError(err)
 
 }
@@ -40,9 +41,9 @@ func TestBuildCommandExplicitPath(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("echo", createOptions.FunctionName)
-	as.Equal("0.0.2-snapshot", createOptions.Version)
-	as.True(createOptions.Push)
+	as.Equal("echo", opts.CreateOptions.FunctionName)
+	as.Equal("0.0.2-snapshot", opts.CreateOptions.Version)
+	as.True(opts.CreateOptions.Push)
 }
 
 func TestBuildCommandWithUserAccountAndVersion(t *testing.T) {
@@ -52,9 +53,9 @@ func TestBuildCommandWithUserAccountAndVersion(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("echo", createOptions.FunctionName)
-	as.Equal("0.0.1-snapshot", createOptions.Version)
-	as.Equal("projectriff",createOptions.UserAccount)
-	as.True(createOptions.Push)
+	as.Equal("echo", opts.CreateOptions.FunctionName)
+	as.Equal("0.0.1-snapshot", opts.CreateOptions.Version)
+	as.Equal("projectriff", opts.CreateOptions.UserAccount)
+	as.True(opts.CreateOptions.Push)
 }
 

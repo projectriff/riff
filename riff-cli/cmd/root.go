@@ -63,10 +63,6 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	version := os.Getenv("RIFF_VERSION")
-	if version != "" {
-		RIFF_VERSION = version
-	}
 
 	if cfgFile != "" {
 		// Use config file from the flag.

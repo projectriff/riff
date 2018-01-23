@@ -20,8 +20,10 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/projectriff/riff-cli/pkg/options"
+
 	"os"
 	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff-cli/cmd/opts"
 )
 
 func TestCreateCommandImplicitPath(t *testing.T) {
@@ -32,8 +34,8 @@ func TestCreateCommandImplicitPath(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(initOptions.FunctionPath)
-	as.Equal("../test_data/shell/echo", initOptions.FunctionPath)
+	as.NotEmpty(opts.InitOptions.FunctionPath)
+	as.Equal("../test_data/shell/echo", opts.InitOptions.FunctionPath)
 
 }
 
@@ -60,8 +62,8 @@ func TestCreateCommandExplicitPath(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(initOptions.FunctionPath)
-	as.Equal("../test_data/shell/echo", initOptions.FunctionPath)
+	as.NotEmpty(opts.InitOptions.FunctionPath)
+	as.Equal("../test_data/shell/echo", opts.InitOptions.FunctionPath)
 }
 
 func TestCreateCommandExplicitPathAndLang(t *testing.T) {
@@ -72,8 +74,8 @@ func TestCreateCommandExplicitPathAndLang(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(initOptions.FunctionPath)
-	as.Equal("../test_data/shell/echo", initOptions.FunctionPath)
+	as.NotEmpty(opts.InitOptions.FunctionPath)
+	as.Equal("../test_data/shell/echo", opts.InitOptions.FunctionPath)
 }
 
 func TestCreateLanguageDoesNotMatchArtifact(t *testing.T) {
@@ -92,7 +94,7 @@ func TestCreatePythonCommand(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("process",handler)
+	as.Equal("process", opts.Handler)
 }
 
 func TestInitCommandImplicitPath(t *testing.T) {
@@ -103,8 +105,8 @@ func TestInitCommandImplicitPath(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(initOptions.FunctionPath)
-	as.Equal("../test_data/shell/echo", initOptions.FunctionPath)
+	as.NotEmpty(opts.InitOptions.FunctionPath)
+	as.Equal("../test_data/shell/echo", opts.InitOptions.FunctionPath)
 }
 
 func TestInitCommandExplicitPath(t *testing.T) {
@@ -115,8 +117,8 @@ func TestInitCommandExplicitPath(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(initOptions.FunctionPath)
-	as.Equal("../test_data/shell/echo", initOptions.FunctionPath)
+	as.NotEmpty(opts.InitOptions.FunctionPath)
+	as.Equal("../test_data/shell/echo", opts.InitOptions.FunctionPath)
 }
 
 func TestInitCommandExplicitPathAndLang(t *testing.T) {
@@ -127,11 +129,12 @@ func TestInitCommandExplicitPathAndLang(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(initOptions.FunctionPath)
-	as.Equal("../test_data/shell/echo", initOptions.FunctionPath)
+	as.NotEmpty(opts.InitOptions.FunctionPath)
+	as.Equal("../test_data/shell/echo", opts.InitOptions.FunctionPath)
 }
 
 func clearInitOptions() {
-	initOptions = options.InitOptions{}
-	createOptions = options.CreateOptions{}
+	opts.InitOptions = options.InitOptions{}
+	opts.CreateOptions = options.CreateOptions{}
+	opts.Handler = ""
 }
