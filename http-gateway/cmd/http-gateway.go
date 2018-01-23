@@ -61,10 +61,8 @@ func messageHandler(producer sarama.AsyncProducer) http.HandlerFunc {
 			return
 		}
 
-		select {
-		case producer.Input() <- kafkaMsg:
-			w.Write([]byte("message published to topic: " + topic + "\n"))
-		}
+		producer.Input() <- kafkaMsg
+		w.Write([]byte("message published to topic: " + topic + "\n"))
 	}
 }
 
@@ -94,17 +92,16 @@ func replyHandler(producer sarama.AsyncProducer, replies *repliesMap) http.Handl
 		}
 		kafkaMsg.Topic = topic
 
+		producer.Input() <- kafkaMsg
+
 		select {
-		case producer.Input() <- kafkaMsg:
-			select {
-			case reply := <-replyChan:
-				replies.delete(correlationId)
-				propagateOutgoingHeaders(reply, w)
-				w.Write(reply.Payload())
-			case <-time.After(time.Second * 60):
-				replies.delete(correlationId)
-				w.WriteHeader(404)
-			}
+		case reply := <-replyChan:
+			replies.delete(correlationId)
+			propagateOutgoingHeaders(reply, w)
+			w.Write(reply.Payload())
+		case <-time.After(time.Second * 60):
+			replies.delete(correlationId)
+			w.WriteHeader(404)
 		}
 	}
 }
