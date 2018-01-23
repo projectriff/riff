@@ -48,12 +48,11 @@ riff apply -f some/function/path/some.yaml
 		return nil
 	},
 	PreRun: func(cmd *cobra.Command, args []string) {
-		initOptions = createOptions.InitOptions
-		if !initOptions.Initialized {
-			initOptions = options.InitOptions{}
-			mergeApplyOptions(*cmd.Flags(), &initOptions)
+
+		if !createOptions.Initialized {
+			mergeApplyOptions(*cmd.Flags(), &createOptions)
 			if len(args) > 0 {
-				if len(args) == 1 && initOptions.FunctionPath == "" {
+				if len(args) == 1 && createOptions.FunctionPath == "" {
 					initOptions.FunctionPath = args[0]
 				} else {
 					ioutils.Errorf("Invalid argument(s) %v\n", args)
@@ -62,13 +61,13 @@ riff apply -f some/function/path/some.yaml
 				}
 			}
 
-			err := options.ValidateAndCleanInitOptions(&initOptions)
+			err := options.ValidateAndCleanInitOptions(&createOptions.InitOptions)
 			if err != nil {
 				ioutils.Error(err)
 				os.Exit(1)
 			}
 		}
-		initOptions.Initialized = true
+		createOptions.Initialized = true
 	},
 }
 

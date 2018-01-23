@@ -36,29 +36,25 @@ var languageForFileExtension = map[string]string{
 }
 
 
-func  InitializePython(options options.HandlerAwareInitOptions) error {
+func  InitializePython(options options.InitOptions) error {
 	return doInitialize("python", "py", options)
 }
 
-func InitializeJava(options options.HandlerAwareInitOptions) error {
+func InitializeJava(options options.InitOptions) error {
 	return doInitialize("java", "java", options)
 }
 
 func InitializeShell(opts options.InitOptions) error {
-	haOpts := options.HandlerAwareInitOptions{}
-	haOpts.InitOptions = opts
-	return doInitialize("shell", "sh", haOpts)
+	return doInitialize("shell", "sh", opts)
 }
 
 func InitializeNode(opts options.InitOptions) error {
-	haOpts := options.HandlerAwareInitOptions{}
-	haOpts.InitOptions = opts
-	return doInitialize("node", "js", haOpts)
+	return doInitialize("node", "js", opts)
 }
 
 
-func Initialize(opts options.HandlerAwareInitOptions) error {
-	functionPath, err := resolveFunctionPath(opts.InitOptions, "")
+func Initialize(opts options.InitOptions) error {
+	functionPath, err := resolveFunctionPath(opts, "")
 	if err != nil {
 		return err
 	}
@@ -67,9 +63,9 @@ func Initialize(opts options.HandlerAwareInitOptions) error {
 
 	switch language {
 	case "shell":
-		InitializeShell(opts.InitOptions)
+		InitializeShell(opts)
 	case "node":
-		InitializeNode(opts.InitOptions)
+		InitializeNode(opts)
 	case "java":
 		fmt.Println("Java resources detected. Use 'riff init java' to provide additional required options")
 		return nil
@@ -83,8 +79,8 @@ func Initialize(opts options.HandlerAwareInitOptions) error {
 	return nil
 }
 
-func doInitialize(language string, ext string, opts options.HandlerAwareInitOptions) error {
-	functionPath, err := resolveFunctionPath(opts.InitOptions, ext)
+func doInitialize(language string, ext string, opts options.InitOptions) error {
+	functionPath, err := resolveFunctionPath(opts, ext)
 	if err != nil {
 		return err
 	}
@@ -95,7 +91,7 @@ func doInitialize(language string, ext string, opts options.HandlerAwareInitOpti
 
 
 	// Create function resources in function Path
-	opts.FunctionName = deriveFunctionName(opts.InitOptions)
+	opts.FunctionName = deriveFunctionName(opts)
 
 	if opts.Input == "" {
 		opts.Input = opts.FunctionName

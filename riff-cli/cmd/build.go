@@ -36,12 +36,11 @@ var buildCmd = &cobra.Command{
   and version specified for the image that is built.`,
 	Example: `riff build -n <name> -v <version> -f <path> [--push]`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return build(createOptions)
+		return build(options.GetBuildOptions(createOptions))
 	},
 	//TODO: DRY
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if !createOptions.Initialized {
-			createOptions = options.CreateOptions{}
 			mergeBuildOptions(*cmd.Flags(), &createOptions)
 
 			if len(args) > 0 {
@@ -64,7 +63,7 @@ var buildCmd = &cobra.Command{
 	},
 }
 
-func build(opts options.CreateOptions) error {
+func build(opts options.BuildOptions) error {
 	buildArgs := buildArgs(opts)
 	pushArgs := pushArgs(opts)
 	if opts.DryRun {
@@ -94,8 +93,8 @@ func build(opts options.CreateOptions) error {
 	return nil
 }
 
-func buildArgs(opts options.CreateOptions) []string {
-	image := options.ImageName(opts.InitOptions)
+func buildArgs(opts options.BuildOptions) []string {
+	image := options.ImageName(opts)
 	path := opts.FunctionPath
 	if !osutils.IsDirectory(opts.FunctionPath) {
 		path = filepath.Dir(path)
@@ -103,8 +102,8 @@ func buildArgs(opts options.CreateOptions) []string {
 	return []string{"build", "-t", image, path}
 }
 
-func pushArgs(opts options.CreateOptions) []string {
-	image := options.ImageName(opts.InitOptions)
+func pushArgs(opts options.BuildOptions) []string {
+	image := options.ImageName(opts)
 	return []string{"push", image}
 }
 

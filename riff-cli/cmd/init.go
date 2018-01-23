@@ -58,7 +58,7 @@ var initCmd = &cobra.Command{
 	Long:  createCmdLong(initCommandDescription, LongVals{Process: initDefinition, Command: "init", Result: initResult}),
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := initializer.Initialize(*newHandlerAwareOptions(cmd))
+		err := initializer.Initialize(initOptions)
 		if err != nil {
 			return err
 		}
@@ -67,8 +67,8 @@ var initCmd = &cobra.Command{
 
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		initOptions = createOptions.InitOptions
-		if !initOptions.Initialized {
-			initOptions = options.InitOptions{}
+		if !createOptions.Initialized {
+			initOptions = createOptions.InitOptions
 			var flagset pflag.FlagSet
 			if cmd.Parent() == rootCmd {
 				flagset = *cmd.PersistentFlags()
@@ -76,7 +76,6 @@ var initCmd = &cobra.Command{
 				flagset = *cmd.Parent().PersistentFlags()
 			}
 			mergeInitOptions(flagset, &initOptions)
-
 
 			if len(args) > 0 {
 				if len(args) == 1 && initOptions.FunctionPath == "" {
@@ -92,10 +91,10 @@ var initCmd = &cobra.Command{
 			if err != nil {
 				os.Exit(1)
 			}
-			initOptions.Initialized = true
+
+			createOptions.Initialized = true
 		}
 	},
-
 }
 
 /*
@@ -115,8 +114,8 @@ var initJavaCmd = &cobra.Command{
 	Short: "Initialize a Java function",
 	Long:  createCmdLong(initJavaDescription, LongVals{Process: initDefinition, Command: "init java", Result: initResult}),
 	RunE: func(cmd *cobra.Command, args []string) error {
-
-		err := initializer.InitializeJava(*newHandlerAwareOptions(cmd))
+		initOptions.Handler = getHandler(cmd)
+		err := initializer.InitializeJava(initOptions)
 		if err != nil {
 			return err
 		}
@@ -152,7 +151,6 @@ var initShellCmd = &cobra.Command{
 		}
 		return nil
 	},
-
 }
 /*
  * init node Command
@@ -205,7 +203,8 @@ var initPythonCmd = &cobra.Command{
 
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := initializer.InitializePython(*newHandlerAwareOptions(cmd))
+		initOptions.Handler = getHandler(cmd)
+		err := initializer.InitializePython(initOptions)
 		if err != nil {
 			return err
 		}
@@ -213,20 +212,16 @@ var initPythonCmd = &cobra.Command{
 	},
 }
 
-func newHandlerAwareOptions(cmd *cobra.Command) *options.HandlerAwareInitOptions {
-	opts := &options.HandlerAwareInitOptions{}
-	opts.InitOptions = initOptions
+func getHandler(cmd *cobra.Command) string {
 	if handler == "" {
-		handler,_ = cmd.Flags().GetString("handler")
+		handler, _ = cmd.Flags().GetString("handler")
 	}
-	opts.Handler = handler
-	return opts
+	return handler
 }
 
 func init() {
 
 	rootCmd.AddCommand(initCmd)
-
 
 	createInitFlags(initCmd.PersistentFlags())
 
@@ -240,5 +235,4 @@ func init() {
 
 	initPythonCmd.Flags().String("handler", "", "the name of the function handler")
 	initPythonCmd.MarkFlagRequired("handler")
-
 }

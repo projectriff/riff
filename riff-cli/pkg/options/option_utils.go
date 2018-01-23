@@ -24,8 +24,8 @@ import (
 	"errors"
 )
 
-func ImageName(opts InitOptions) string {
-	return fmt.Sprintf("%s/%s:%s",opts.UserAccount,opts.FunctionName,opts.Version)
+func ImageName(opts ImageOptions) string {
+	return fmt.Sprintf("%s/%s:%s",opts.GetUserAccount(),opts.GetFunctionName(),opts.GetVersion())
 }
 
 /*

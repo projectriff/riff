@@ -25,14 +25,14 @@ import (
 	"github.com/projectriff/riff-cli/pkg/osutils"
 )
 
-func CreateFunction(workdir, language string, opts options.HandlerAwareInitOptions) error {
+func CreateFunction(workdir, language string, opts options.InitOptions) error {
 	var functionResources FunctionResources
 	var err error
-	functionResources.Topics, err = createTopics(opts.InitOptions)
+	functionResources.Topics, err = createTopics(opts)
 	if err != nil {
 		return err
 	}
-	functionResources.Function, err = createFunction(opts.InitOptions)
+	functionResources.Function, err = createFunction(opts)
 	if err != nil {
 		return err
 	}

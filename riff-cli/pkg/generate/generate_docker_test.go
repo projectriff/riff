@@ -29,18 +29,15 @@ func TestJavaDockerfile (t *testing.T) {
 	opts := options.InitOptions{
 		Artifact:     "target/greeter-1.0.0.jar",
 		RiffVersion:   "0.0.2",
-	}
-
-	haOpts := options.HandlerAwareInitOptions{
-		InitOptions:opts,
 		Handler:"functions.Greeter",
 	}
 
-	docker, err := generateDockerfile("java",haOpts)
+
+	docker, err := generateDockerfile("java",opts)
 	as.NoError(err)
 	as.Contains(docker, fmt.Sprintf("FROM projectriff/java-function-invoker:%s",opts.RiffVersion))
 	as.Contains(docker, "ARG FUNCTION_JAR=/functions/greeter-1.0.0.jar")
-	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_CLASS=%s",haOpts.Handler))
+	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_CLASS=%s",opts.Handler))
 	as.Contains(docker, fmt.Sprintf("ADD %s $FUNCTION_JAR",opts.Artifact))
 }
 
@@ -51,18 +48,14 @@ func TestPythonDockerfile (t *testing.T) {
 		Artifact:     "demo.py",
 		RiffVersion:   "0.0.3",
 		FunctionPath: "test_dir/python/demo",
-	}
-
-	haOpts := options.HandlerAwareInitOptions{
-		InitOptions:opts,
 		Handler:"process",
 	}
 
-	docker, err := generateDockerfile("python",haOpts)
+	docker, err := generateDockerfile("python",opts)
 	as.NoError(err)
 	as.Contains(docker, fmt.Sprintf("FROM projectriff/python2-function-invoker:%s",opts.RiffVersion))
 	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_MODULE=%s",opts.Artifact))
-	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_HANDLER=%s",haOpts.Handler))
+	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_HANDLER=%s",opts.Handler))
 	as.Contains(docker, fmt.Sprintf("ADD ./%s /",opts.Artifact))
 	as.NotContains(docker, "requirements.txt")
 	as.NotContains(docker, "pip")
@@ -75,18 +68,14 @@ func TestPythonDockerfileWithDeps (t *testing.T) {
 		Artifact:     "demo.py",
 		RiffVersion:   "0.0.3",
 		FunctionPath: "../../test_data/python/demo_with_deps",
-	}
-
-	haOpts := options.HandlerAwareInitOptions{
-		InitOptions:opts,
 		Handler:"process",
 	}
 
-	docker, err := generateDockerfile("python",haOpts)
+	docker, err := generateDockerfile("python",opts)
 	as.NoError(err)
 	as.Contains(docker, fmt.Sprintf("FROM projectriff/python2-function-invoker:%s",opts.RiffVersion))
 	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_MODULE=%s",opts.Artifact))
-	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_HANDLER=%s",haOpts.Handler))
+	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_HANDLER=%s",opts.Handler))
 	as.Contains(docker, fmt.Sprintf("ADD ./%s /",opts.Artifact))
 	as.Contains(docker, "requirements.txt")
 	as.Contains(docker, "pip")
@@ -98,14 +87,10 @@ func TestNodeDockerfile (t *testing.T) {
 	opts := options.InitOptions{
 		Artifact:     "square.js",
 		RiffVersion:   "0.0.3",
-	}
-
-	haOpts := options.HandlerAwareInitOptions{
-		InitOptions:opts,
 		Handler:"process",
 	}
 
-	docker, err := generateDockerfile("node",haOpts)
+	docker, err := generateDockerfile("node",opts)
 	as.NoError(err)
 	as.Contains(docker, fmt.Sprintf("FROM projectriff/node-function-invoker:%s",opts.RiffVersion))
 	as.Contains(docker, fmt.Sprintf("ENV FUNCTION_URI /functions/%s",opts.Artifact))
@@ -118,14 +103,10 @@ func TestShellDockerfile (t *testing.T) {
 	opts := options.InitOptions{
 		Artifact:     "echo.sh",
 		RiffVersion:   "0.0.1-snapshot",
-	}
-
-	haOpts := options.HandlerAwareInitOptions{
-		InitOptions:opts,
 		Handler:"process",
 	}
 
-	docker, err := generateDockerfile("shell",haOpts)
+	docker, err := generateDockerfile("shell",opts)
 	as.NoError(err)
 	as.Contains(docker, fmt.Sprintf("FROM projectriff/shell-function-invoker:%s",opts.RiffVersion))
 	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_URI=\"/%s\"",opts.Artifact))

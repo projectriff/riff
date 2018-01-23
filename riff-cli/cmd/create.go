@@ -59,7 +59,7 @@ var createCmd = &cobra.Command{
 
 			mergeInitOptions(flagset, &createOptions.InitOptions)
 			mergeBuildOptions(flagset, &createOptions)
-			mergeApplyOptions(flagset, &createOptions.InitOptions)
+			mergeApplyOptions(flagset, &createOptions)
 
 			if len(args) > 0 {
 				if len(args) == 1 && initOptions.FunctionPath == "" {

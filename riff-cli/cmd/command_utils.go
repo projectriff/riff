@@ -133,7 +133,7 @@ func mergeBuildOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 	}
 }
 
-func mergeApplyOptions(flagset pflag.FlagSet, opts *options.InitOptions) {
+func mergeApplyOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 	if opts.FunctionPath == "" {
 		opts.FunctionPath, _ = flagset.GetString("filepath")
 	}

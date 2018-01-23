@@ -69,18 +69,18 @@ type PythonDockerFileTokens struct {
 	RequirementsTextExists bool
 }
 
-func generateDockerfile(language string, opts options.HandlerAwareInitOptions) (string, error) {
+func generateDockerfile(language string, opts options.InitOptions) (string, error) {
 	switch language {
 	case "java":
 		return generateJavaFunctionDockerFile(opts)
 	case "python":
 		return generatePythonFunctionDockerFile(opts)
 	case "shell":
-		return generateShellFunctionDockerFile(opts.InitOptions)
+		return generateShellFunctionDockerFile(opts)
 	case "node":
-		return generateNodeFunctionDockerFile(opts.InitOptions)
+		return generateNodeFunctionDockerFile(opts)
 	case "js":
-		return generateNodeFunctionDockerFile(opts.InitOptions)
+		return generateNodeFunctionDockerFile(opts)
 	}
 	return "", errors.New(fmt.Sprintf("unsupported language %s", language))
 }
@@ -103,7 +103,7 @@ func generateNodeFunctionDockerFile(opts options.InitOptions) (string, error) {
 	return generateFunctionDockerFileContents(nodeFunctionDockerfileTemplate, "docker-node", dockerFileTokens)
 }
 
-func generateJavaFunctionDockerFile(opts options.HandlerAwareInitOptions) (string, error) {
+func generateJavaFunctionDockerFile(opts options.InitOptions) (string, error) {
 	dockerFileTokens := DockerFileTokens{
 		Artifact:     opts.Artifact,
 		ArtifactBase: filepath.Base(opts.Artifact),
@@ -113,7 +113,7 @@ func generateJavaFunctionDockerFile(opts options.HandlerAwareInitOptions) (strin
 	return generateFunctionDockerFileContents(javaFunctionDockerfileTemplate, "docker-java", dockerFileTokens)
 }
 
-func generatePythonFunctionDockerFile(opts options.HandlerAwareInitOptions) (string, error) {
+func generatePythonFunctionDockerFile(opts options.InitOptions) (string, error) {
 	dockerFileTokens := PythonDockerFileTokens{}
 	dockerFileTokens.Artifact = opts.Artifact
 	dockerFileTokens.ArtifactBase = filepath.Base(opts.Artifact)

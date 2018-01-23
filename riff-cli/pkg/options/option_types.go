@@ -18,6 +18,7 @@ package options
 var SupportedProtocols = []string{"stdio", "http", "grpc"}
 
 type InitOptions struct {
+	ImageOptions
 	FunctionName string
 	Version      string
 	FunctionPath string
@@ -30,25 +31,75 @@ type InitOptions struct {
 	Initialized  bool
 	DryRun		 bool
 	Force		 bool
+	Handler 	string
 }
 
-type HandlerAwareInitOptions struct {
-	InitOptions
-	Handler string
+func (this InitOptions) GetFunctionName() string {
+	return this.FunctionName
 }
 
+func (this InitOptions) GetVersion() string {
+	return this.Version
+}
+
+func (this InitOptions) GetUserAccount() string {
+	return this.UserAccount
+}
 
 type BuildOptions struct {
-	Push        bool
+	ImageOptions
+	FunctionPath string
+	FunctionName string
+	Version      string
+	RiffVersion  string
+	UserAccount  string
+	Push         bool
+	DryRun		 bool
+}
+
+func (this BuildOptions) GetFunctionName() string {
+	return this.FunctionName
+}
+
+func (this BuildOptions) GetVersion() string {
+	return this.Version
+}
+
+func (this BuildOptions) GetUserAccount() string {
+	return this.UserAccount
+}
+
+type ApplyOptions struct {
+	FunctionPath string
+	DryRun		 bool
 }
 
 type CreateOptions struct {
 	InitOptions
-	BuildOptions
+	Push        bool
 }
 
-type HandlerAwareCreateOptions struct {
-	HandlerAwareInitOptions
-	BuildOptions
+type ImageOptions interface {
+	GetFunctionName() string
+	GetVersion()      string
+	GetUserAccount()  string
 }
+
+func GetApplyOptions(opts CreateOptions) ApplyOptions {
+	return ApplyOptions{FunctionPath:opts.FunctionPath, DryRun:opts.DryRun}
+}
+
+func GetBuildOptions(opts CreateOptions) BuildOptions {
+	return BuildOptions{
+		FunctionPath:opts.FunctionPath,
+		FunctionName:opts.FunctionName,
+		Version:opts.Version,
+		RiffVersion:opts.RiffVersion,
+		UserAccount:opts.UserAccount,
+		Push:opts.Push,
+		DryRun:opts.DryRun,
+	}
+}
+
+
 
