@@ -41,6 +41,7 @@ riff apply -f some/function/path/some.yaml
 		} else {
 			output, err := kubectl.ExecForString([]string{"apply", "-f", initOptions.FunctionPath})
 			if err != nil {
+				cmd.SilenceUsage = true
 				return err
 			}
 			fmt.Println(output)
