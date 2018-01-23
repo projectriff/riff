@@ -24,6 +24,7 @@ import (
 	"github.com/projectriff/riff-cli/pkg/osutils"
 	"github.com/projectriff/riff-cli/pkg/options"
 	"github.com/projectriff/riff-cli/pkg/generate"
+	"github.com/projectriff/riff-cli/pkg/functions"
 )
 
 var supportedExtensions = []string{"js", "java", "py", "sh"}
@@ -91,7 +92,7 @@ func doInitialize(language string, ext string, opts options.InitOptions) error {
 
 
 	// Create function resources in function Path
-	opts.FunctionName = deriveFunctionName(opts)
+	opts.FunctionName, _ = functions.FunctionNameFromPath(opts.FunctionPath)
 
 	if opts.Input == "" {
 		opts.Input = opts.FunctionName
@@ -119,13 +120,6 @@ func doInitialize(language string, ext string, opts options.InitOptions) error {
 	return err
 }
 
-func deriveFunctionName(opts options.InitOptions) string {
-	// Create function resources in function Path
-	if opts.FunctionName == "" {
-		return filepath.Base(opts.FunctionPath)
-	}
-	return opts.FunctionName
-}
 
 //Assumes given file paths have been sanity checked and are valid
 func resolveFunctionPath(options options.InitOptions, ext string) (string, error) {
