@@ -46,8 +46,6 @@ type Function struct {
 	Protocol   string
 }
 
-
-
 //TODO: Flag for number of partitions?
 func createTopics(opts options.InitOptions) (string, error) {
 
@@ -93,20 +91,21 @@ spec:
   input: {{.Input}}
 {{- if .Output}} 
   output: {{.Output}}
-{{ else }}
-{{ end -}}
+{{ else }}{{ end }}
   container:
     image: {{.Image}}
 `
 
 func createFunction(opts options.InitOptions) (string, error) {
+
 	function := Function{
 		ApiVersion: apiVersion,
 		Name:       opts.FunctionName,
 		Input:      opts.Input,
 		Output:     opts.Output,
 		Protocol:   opts.Protocol,
-		Image:      options.ImageName(opts)}
+		Image:      options.ImageName(opts),
+	}
 
 	var tmpl *template.Template
 	var err error
@@ -122,4 +121,3 @@ func createFunction(opts options.InitOptions) (string, error) {
 	}
 	return buffer.String(), nil
 }
-

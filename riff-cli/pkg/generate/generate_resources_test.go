@@ -19,8 +19,9 @@ package generate
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-
 	"github.com/projectriff/riff-cli/pkg/options"
+	"gopkg.in/yaml.v2"
+	"fmt"
 )
 
 func TestTopics(t *testing.T) {
@@ -38,6 +39,22 @@ func TestTopics(t *testing.T) {
 	as.Contains(topic, "name: out")
 }
 
+
+type YFunction struct {
+	ApiVersion string
+	Kind string
+	Metadata struct {
+		Name string
+	}
+	Spec struct {
+		Protocol string
+		Input string
+		Container struct {
+			Image string
+		}
+	}
+}
+
 func TestFunction(t *testing.T) {
 	as := assert.New(t)
 
@@ -46,20 +63,25 @@ func TestFunction(t *testing.T) {
 		Input:        "in",
 		Output:       "out",
 		Protocol:     "http",
+		UserAccount:   "me",
+		Version:       "0.0.1",
 	}
+
 	f, err := createFunction(opts)
 	as.NoError(err)
 	as.Contains(f, "input:")
 	as.Contains(f, "output:")
 
-	opts = options.InitOptions{
-		FunctionName: "myfunc",
-		Input:        "in",
-		Protocol:     "http",
-	}
+	opts.Output = ""
 
 	f, err = createFunction(opts)
 	as.NoError(err)
-	as.Contains(f, "input:")
-	as.NotContains(f, "output:")
+
+	yf := YFunction{}
+	err = yaml.Unmarshal([]byte(f), &yf)
+	as.NoError(err)
+	as.Equal("http",yf.Spec.Protocol)
+	as.Equal("in",yf.Spec.Input)
+	as.Equal("myfunc",yf.Metadata.Name)
+	as.Equal("me/myfunc:0.0.1",yf.Spec.Container.Image)
 }
