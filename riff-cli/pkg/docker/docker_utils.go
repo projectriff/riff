@@ -18,9 +18,10 @@ package docker
 
 import (
 	"github.com/projectriff/riff-cli/pkg/osutils"
+	"time"
 )
 
 func Exec(cmdArgs [] string) (string, error) {
-	out, err :=  osutils.Exec("docker", cmdArgs)
+	out, err :=  osutils.Exec("docker", cmdArgs,60*time.Second)
 	return string(out), err
 }

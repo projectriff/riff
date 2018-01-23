@@ -75,9 +75,9 @@ func Path(filename string) string {
 	return filepath.Join(strings.Split(path,"/")...)
 }
 
-func Exec(cmdName string, cmdArgs [] string) ([]byte, error) {
+func Exec(cmdName string, cmdArgs [] string, timeout time.Duration) ([]byte, error) {
 	// Create a new context and add a timeout to it
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel() // The cancel should be deferred so resources are cleaned up
 
 	// Create the command with our context

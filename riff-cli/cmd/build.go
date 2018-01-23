@@ -67,13 +67,14 @@ func build(opts options.BuildOptions) error {
 	buildArgs := buildArgs(opts)
 	pushArgs := pushArgs(opts)
 	if opts.DryRun {
-		fmt.Printf("\nBuild command: docker build %s\n", strings.Join(buildArgs, " "))
+		fmt.Printf("\nBuild command: docker %s\n", strings.Join(buildArgs, " "))
 		if (opts.Push) {
 			fmt.Printf("\nPush command: docker %s\n", strings.Join(pushArgs, " "))
 		}
 		return nil
 	}
 
+	fmt.Println("building image...")
 	out, err := docker.Exec(buildArgs)
 	if err != nil {
 		ioutils.Errorf("Error %v\n", err)
@@ -82,6 +83,7 @@ func build(opts options.BuildOptions) error {
 	fmt.Println(out)
 
 	if opts.Push {
+		fmt.Println("pushing image...")
 		out, err = docker.Exec(pushArgs)
 		if err != nil {
 			ioutils.Errorf("Error %v\n", err)

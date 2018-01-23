@@ -18,6 +18,7 @@ package kubectl
 
 import (
 	"github.com/projectriff/riff-cli/pkg/osutils"
+	"time"
 )
 
 func ExecForString(cmdArgs []string) (string, error) {
@@ -26,5 +27,5 @@ func ExecForString(cmdArgs []string) (string, error) {
 }
 
 func ExecForBytes(cmdArgs []string) ([]byte, error) {
-	return osutils.Exec("kubectl", cmdArgs)
+	return osutils.Exec("kubectl", cmdArgs, 20*time.Second)
 }

@@ -18,7 +18,6 @@ package options
 var SupportedProtocols = []string{"stdio", "http", "grpc"}
 
 type InitOptions struct {
-	ImageOptions
 	FunctionName string
 	Version      string
 	FunctionPath string
@@ -47,7 +46,6 @@ func (this InitOptions) GetUserAccount() string {
 }
 
 type BuildOptions struct {
-	ImageOptions
 	FunctionPath string
 	FunctionName string
 	Version      string
