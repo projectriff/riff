@@ -37,12 +37,12 @@ func TestValidateDefaultFunctionResources(t *testing.T) {
 }
 
 func TestValidateCleansFunctionResources(t *testing.T) {
-	filePath := filepath.Join("test_dir","python","demo") + string(os.PathSeparator) + string(os.PathSeparator)
+	filePath := filepath.Join("../test_data","python","demo") + string(os.PathSeparator) + string(os.PathSeparator)
 	artifact := "demo.py"
 	as := assert.New(t)
 	opts := options.InitOptions{FunctionPath: filePath, Artifact:artifact, DryRun:true}
 	as.NoError(options.ValidateAndCleanInitOptions(&opts))
-	as.Equal(osutils.Path("test_dir/python/demo"),opts.FunctionPath)
+	as.Equal(osutils.Path("../test_data/python/demo"),opts.FunctionPath)
 }
 
 func TestValidateFunctionResourceDoesNotExist(t *testing.T) {
@@ -55,7 +55,7 @@ func TestValidateFunctionResourceDoesNotExist(t *testing.T) {
 }
 
 func TestValidateArtifactIsRegularFile(t *testing.T) {
-	filePath := osutils.Path("test_dir/python")
+	filePath := osutils.Path("../test_data/python")
 	as := assert.New(t)
 	opts := options.InitOptions{FunctionPath: filePath, Artifact: "demo"}
 	err := options.ValidateAndCleanInitOptions(&opts)
@@ -64,7 +64,7 @@ func TestValidateArtifactIsRegularFile(t *testing.T) {
 }
 
 func TestValidateArtifactIsInSubDirectory(t *testing.T) {
-	filePath := osutils.Path("test_dir")
+	filePath := osutils.Path("../test_data")
 	as := assert.New(t)
 	opts := options.InitOptions{FunctionPath: filePath, Artifact: "python/demo/demo.py"}
 	err := options.ValidateAndCleanInitOptions(&opts)
@@ -73,7 +73,7 @@ func TestValidateArtifactIsInSubDirectory(t *testing.T) {
 
 func TestValidateArtifactIsInCWD(t *testing.T) {
 	currentDir := osutils.GetCWD()
-	os.Chdir(osutils.Path("test_dir/python/demo"))
+	os.Chdir(osutils.Path("../test_data/python/demo"))
 
 	as := assert.New(t)
 	opts := options.InitOptions{FunctionPath: "", Artifact: "demo.py"}
@@ -84,7 +84,7 @@ func TestValidateArtifactIsInCWD(t *testing.T) {
 
 func TestArtifactCannotBeExternalToFilePath(t *testing.T) {
 	currentDir := osutils.GetCWD()
-	os.Chdir(osutils.Path("test_dir/python/demo"))
+	os.Chdir(osutils.Path("../test_data/python/demo"))
 	filePath := osutils.GetCWD()
 	as := assert.New(t)
 	opts := options.InitOptions{FunctionPath: filePath, Artifact: osutils.Path("../multiple/one.py")}
@@ -95,7 +95,7 @@ func TestArtifactCannotBeExternalToFilePath(t *testing.T) {
 }
 
 func TestArtifactRelativeToFilePath(t *testing.T) {
-	filePath := osutils.Path("test_dir/python/demo")
+	filePath := osutils.Path("../test_data/python/demo")
 	artifact := "demo.py"
 	as := assert.New(t)
 	opts := options.InitOptions{FunctionPath: filePath, Artifact: artifact}
@@ -105,7 +105,7 @@ func TestArtifactRelativeToFilePath(t *testing.T) {
 
 
 func TestAbsoluteArtifactPathConflctsFilePath(t *testing.T) {
-	filePath := osutils.Path("test_dir/python/multiple/one.py")
+	filePath := osutils.Path("../test_data/python/multiple/one.py")
 	artifact :=  osutils.Path("two.py")
 	as := assert.New(t)
 

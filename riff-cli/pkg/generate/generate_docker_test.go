@@ -74,7 +74,7 @@ func TestPythonDockerfileWithDeps (t *testing.T) {
 	opts := options.InitOptions{
 		Artifact:     "demo.py",
 		RiffVersion:   "0.0.3",
-		FunctionPath: "../../cmd/test_dir/python/demo_with_deps",
+		FunctionPath: "../../test_data/python/demo_with_deps",
 	}
 
 	haOpts := options.HandlerAwareInitOptions{

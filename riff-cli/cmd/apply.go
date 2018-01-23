@@ -30,9 +30,11 @@ import (
 var applyCmd = &cobra.Command{
 	Use:   "apply",
 	Short: "Apply function resource definitions",
-	Long: `Apply the resource definition[s] included in the path. A resource will be created if
-  it doesn't exist yet.`,
-  Example: `riff apply -f <path>`,
+	Long: `Apply the resource definition[s] included in the path. A resource will be created if it doesn't exist yet.`,
+  Example: `
+riff apply -f some/function/path
+riff apply -f some/function/path/some.yaml
+`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if initOptions.DryRun {
 			fmt.Printf("\nApply Command: kubectl apply -f %s\n\n", initOptions.FunctionPath)

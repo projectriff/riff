@@ -22,6 +22,7 @@ import (
 	"github.com/projectriff/riff-cli/pkg/options"
 	"os"
 	"github.com/spf13/pflag"
+	"github.com/projectriff/riff-cli/pkg/initializer"
 )
 
 const (
@@ -57,8 +58,7 @@ var initCmd = &cobra.Command{
 	Long:  createCmdLong(initCommandDescription, LongVals{Process: initDefinition, Command: "init", Result: initResult}),
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		initializer := NewLanguageDetectingInitializer()
-		err := initializer.initialize(*newHandlerAwareOptions(cmd))
+		err := initializer.Initialize(*newHandlerAwareOptions(cmd))
 		if err != nil {
 			return err
 		}
@@ -116,8 +116,7 @@ var initJavaCmd = &cobra.Command{
 	Long:  createCmdLong(initJavaDescription, LongVals{Process: initDefinition, Command: "init java", Result: initResult}),
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		initializer := NewJavaInitializer()
-		err := initializer.initialize(*newHandlerAwareOptions(cmd))
+		err := initializer.InitializeJava(*newHandlerAwareOptions(cmd))
 		if err != nil {
 			return err
 		}
@@ -147,8 +146,7 @@ var initShellCmd = &cobra.Command{
 	Long:  createCmdLong(initShellDescription, LongVals{Process: initDefinition, Command: "init shell", Result: initResult}),
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		initializer := NewShellInitializer()
-		err := initializer.initialize(initOptions)
+		err := initializer.InitializeShell(initOptions)
 		if err != nil {
 			return err
 		}
@@ -179,8 +177,7 @@ var initNodeCmd = &cobra.Command{
 	Long:  createCmdLong(initNodeDescription, LongVals{Process: initDefinition, Command: "init node", Result: initResult}),
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		initializer := NewNodeInitializer()
-		err := initializer.initialize(initOptions)
+		err := initializer.InitializeNode(initOptions)
 		if err != nil {
 			return err
 		}
@@ -208,10 +205,7 @@ var initPythonCmd = &cobra.Command{
 
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-
-		initializer := NewPythonInitializer()
-
-		err := initializer.initialize(*newHandlerAwareOptions(cmd))
+		err := initializer.InitializePython(*newHandlerAwareOptions(cmd))
 		if err != nil {
 			return err
 		}
