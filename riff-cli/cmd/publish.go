@@ -70,14 +70,8 @@ will post 'hello' to the 'greetings' topic and wait for a reply.
 			return
 		}
 
-		port := parser.Value(`$.items[0].spec.ports[*]?(@.name == "http").nodePort+`)
-
-		if port == "" {
-			ioutils.Error("unable to determine http-gateway port")
-			return
-		}
-
 		var ipAddress string
+		var port string
 
 		switch portType {
 		case "NodePort":
@@ -85,15 +79,22 @@ will post 'hello' to the 'greetings' topic and wait for a reply.
 			if err != nil || strings.Contains(ipAddress, "Error getting IP") {
 				ipAddress = "127.0.0.1"
 			}
+			port = parser.Value(`$.items[0].spec.ports[*]?(@.name == "http").nodePort+`)
 		case "LoadBalancer":
-			ipAddress := parser.Value(`$.items[0].status.loadBalancer.ingress[0].ip+`)
+			ipAddress = parser.Value(`$.items[0].status.loadBalancer.ingress[0].ip+`)
 			if ipAddress == "" {
 				ioutils.Error("unable to determine http-gateway ip address")
 				return
 			}
+			port = parser.Value(`$.items[0].spec.ports[*]?(@.name == "http").port+`)
 
 		default:
 			ioutils.Errorf("Unkown port type %s", portType)
+			return
+		}
+
+		if port == "" {
+			ioutils.Error("Unable to determine gateway port")
 			return
 		}
 
