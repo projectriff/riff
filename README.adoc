@@ -27,19 +27,19 @@ minikube start --memory=4096
 
 * A Java 8 environment.
 
-* A working Go environment, with clones of the customized fabric8io/kubernetes-model,
-the function-sidecar repository, the topic-controller repository and the http-gateway repository.
+* A working Go environment, with clones of the function-sidecar, function-controller,
+topic-controller and http-gateway repositories.
 +
 [source, bash]
 ----
 cd $(go env GOPATH)   #defaults to ~/go
-git clone -o upstream https://github.com/projectriff/kubernetes-model src/github.com/fabric8io/kubernetes-model/
 git clone -o upstream https://github.com/projectriff/function-sidecar src/github.com/projectriff/function-sidecar/
+git clone -o upstream https://github.com/projectriff/function-controller src/github.com/projectriff/function-controller/
 git clone -o upstream https://github.com/projectriff/topic-controller src/github.com/projectriff/topic-controller/
 git clone -o upstream https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway/
 ----
 
-* A clone of the riff, function-controller, java-function-invoker, node-function-invoker, shell-function-invoker and python2-function-invoker repos.
+* A clone of the riff, java-function-invoker, node-function-invoker, shell-function-invoker and python2-function-invoker repos.
 +
 NOTE: These repos should be cloned under a unique root directory since we will be using relative paths during the build.
 +
@@ -47,7 +47,6 @@ NOTE: These repos should be cloned under a unique root directory since we will b
 ----
 #cd <some_root_dir>
 git clone -o upstream https://github.com/projectriff/riff.git
-git clone -o upstream https://github.com/projectriff/function-controller.git
 git clone -o upstream https://github.com/projectriff/java-function-invoker.git
 git clone -o upstream https://github.com/projectriff/node-function-invoker.git
 git clone -o upstream https://github.com/projectriff/shell-function-invoker.git
@@ -61,13 +60,6 @@ From now on, this README assumes you're running commands from the `riff` reposit
 cd riff
 ----
 
-==== Build the kubernetes-model jar Enhanced with the Types for the CustomResources
-
-[source, bash]
-----
-./build-model upstream riff
-----
-
 ==== Point your local Docker environment to the Docker environment running in minikube:
 
 [source, bash]
@@ -75,7 +67,7 @@ cd riff
 eval $(minikube docker-env)
 ----
 
-==== Build the Function Sidecar, HTTP Gateway and Topic Controller
+==== Build the Function Sidecar, HTTP Gateway, and Topic Controller
 
 [source, bash]
 ----
@@ -99,7 +91,6 @@ kubectl apply -f config/types
 ----
 ./build-function-controller upstream master
 ----
-
 
 ==== Build the java-function-invoker, node-function-invoker, shell-function-invoker and python2-function-invoker
 
