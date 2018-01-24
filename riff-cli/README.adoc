@@ -4,8 +4,13 @@ built with https://github.com/spf13/cobra[cobra]
 
 == Building
 ```
-cd $(go env GOPATH)
-git clone https://github.com/projectriff/riff-cli
-cd src/github.com/projectriff/riff-cli
+go get github.com/projectriff/riff-cli
+cd $(go env GOPATH)/src/github.com/projectriff/riff-cli
 make
+```
+
+== Running tests
+```
+cd $(go env GOPATH)/src/github.com/projectriff/riff-cli
+make test
 ```
