@@ -1,2 +1,2 @@
 #!/bin/bash
-./build-helper "$PWD/../function-controller/" ${1:-''} ${2:-''} './mvnw clean package && ./mvnw dockerfile:build -pl function-controller'
+./build-helper "$(go env GOPATH)/src/github.com/projectriff/function-controller/" ${1:-''} ${2:-''} 'make clean dockerize'
