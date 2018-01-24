@@ -20,6 +20,8 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/projectriff/riff-cli/pkg/options"
+	"os"
+	"github.com/projectriff/riff-cli/pkg/osutils"
 )
 
 func TestCreateCommandImplicitPath(t *testing.T) {
@@ -35,10 +37,25 @@ func TestCreateCommandImplicitPath(t *testing.T) {
 
 }
 
+func TestCreateCommandFromCWD(t *testing.T) {
+	clearInitOptions()
+	currentdir := osutils.GetCWD()
+
+	path := osutils.Path("../test_data/shell/echo")
+	os.Chdir(path)
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"create", "--dry-run"})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+
+	os.Chdir(currentdir)
+}
+
 func TestCreateCommandExplicitPath(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"create", "--dry-run", "-f", "../test_data/shell/echo", "-v", "0.0.1-snapshot"})
+	rootCmd.SetArgs([]string{"create", "--dry-run", "-f", osutils.Path("../test_data/shell/echo"), "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
@@ -50,7 +67,7 @@ func TestCreateCommandExplicitPath(t *testing.T) {
 func TestCreateCommandExplicitPathAndLang(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"create", "shell", "--dry-run", "-f", "../test_data/shell/echo", "-v", "0.0.1-snapshot"})
+	rootCmd.SetArgs([]string{"create", "shell", "--dry-run", "-f", osutils.Path("../test_data/shell/echo"), "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
@@ -62,7 +79,7 @@ func TestCreateCommandExplicitPathAndLang(t *testing.T) {
 func TestCreateLanguageDoesNotMatchArtifact(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"create", "shell", "--dry-run", "-f", "../test_data/python/demo", "-a","demo.py"})
+	rootCmd.SetArgs([]string{"create", "shell", "--dry-run", "-f", osutils.Path("../test_data/python/demo"), "-a","demo.py"})
 
 	_, err := rootCmd.ExecuteC()
 	as.Error(err)
@@ -71,7 +88,7 @@ func TestCreateLanguageDoesNotMatchArtifact(t *testing.T) {
 func TestCreatePythonCommand(t *testing.T) {
 	clearInitOptions()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"create", "python", "--dry-run", "-f", "../test_data/python/demo", "-v", "0.0.1-snapshot", "--handler", "process"})
+	rootCmd.SetArgs([]string{"create", "python", "--dry-run", "-f", osutils.Path("../test_data/python/demo"), "-v", "0.0.1-snapshot", "--handler", "process"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)

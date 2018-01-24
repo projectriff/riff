@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"strings"
 	"errors"
+	"github.com/projectriff/riff-cli/pkg/functions"
 )
 
 func ImageName(opts ImageOptions) string {
@@ -43,14 +44,16 @@ func ValidateAndCleanInitOptions(options *InitOptions) error {
 	}
 
 	if options.FunctionPath == "" {
-		options.FunctionPath = osutils.GetCWD()
-	}
-	if options.FunctionName == "" {
-		options.FunctionName = filepath.Base(options.FunctionPath)
+		path, _ := filepath.Abs(".")
+		options.FunctionPath = path
 	}
 
-	if !osutils.FileExists(options.FunctionPath) {
-		return errors.New(fmt.Sprintf("filepath %s does not exist", options.FunctionPath))
+	var err error
+	if options.FunctionName == "" {
+		options.FunctionName, err = functions.FunctionNameFromPath(options.FunctionPath)
+		if err != nil {
+			return err
+		}
 	}
 
 	if options.Artifact != "" {
