@@ -30,8 +30,6 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 5
         env:
-        - name: JAVA_TOOL_OPTIONS
-          value: '-Xmx512m'
         - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
           value: kafka:9092
         - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
