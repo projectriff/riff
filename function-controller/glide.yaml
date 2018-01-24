@@ -1,0 +1,25 @@
+package: github.com/projectriff/function-controller
+import:
+- package: github.com/projectriff/kubernetes-crds
+  version: master 
+  subpackages:
+  - pkg/apis/projectriff.io/v1
+  - pkg/client/clientset/versioned
+  - pkg/client/informers/externalversions
+  - pkg/client/informers/externalversions/projectriff/v1
+- package: github.com/bsm/sarama-cluster
+  version: v2.1.11
+- package: k8s.io/api
+  subpackages:
+  - extensions/v1beta1
+- package: k8s.io/apimachinery
+  subpackages:
+  - pkg/apis/meta/v1
+- package: k8s.io/client-go
+  subpackages:
+  - kubernetes
+  - rest
+  - tools/cache
+  - tools/clientcmd
+- package: github.com/stretchr/testify
+  version: v1.2.0

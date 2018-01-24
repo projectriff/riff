@@ -1,0 +1,48 @@
+= Function Controller
+
+== Purpose
+The *function controller* runs inside kubernetes and continuously monitors the *function* and *topic* custom resource
+definitions for changes. It then reacts by requesting the deployment of functions, and scales them according to new
+events being detected on their input topics.
+
+== Development
+=== Prerequisites
+The following tools are required to build this project:
+
+- `make`
+- Docker
+- https://github.com/Masterminds/glide#install[Glide] for dependency management
+
+If you intend to re-generate mocks for testing, also install:
+- https://github.com/vektra/mockery#installation[Mockery]
+
+=== Get the source
+[source, bash]
+====
+cd $(go env GOPATH)   #defaults to ~/go
+git clone -o upstream https://github.com/projectriff/function-controller src/github.com/projectriff/function-controller
+====
+
+=== Building
+* To build locally (this will produce a binary named `function-controller` on _your_ machine):
++
+[source, bash]
+====
+make build
+====
+
+* To build for docker (and deploy as part of the whole https://github.com/projectriff/riff#-manual-install-of-riff[riff]
+installation):
++
+[source, bash]
+====
+make dockerize
+====
+This assumes that your docker client is correctly configured to target the daemon where you want the image built.
+
+* To run tests:
++
+[source, bash]
+====
+make test
+====
