@@ -36,10 +36,10 @@ riff apply -f some/function/path
 riff apply -f some/function/path/some.yaml
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if initOptions.DryRun {
-			fmt.Printf("\nApply Command: kubectl apply -f %s\n\n", initOptions.FunctionPath)
+		if createOptions.DryRun {
+			fmt.Printf("\nApply Command: kubectl apply -f %s\n\n", createOptions.FunctionPath)
 		} else {
-			output, err := kubectl.ExecForString([]string{"apply", "-f", initOptions.FunctionPath})
+			output, err := kubectl.ExecForString([]string{"apply", "-f", createOptions.FunctionPath})
 			if err != nil {
 				cmd.SilenceUsage = true
 				return err
