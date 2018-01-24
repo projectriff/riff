@@ -17,7 +17,10 @@
 package controller
 
 import (
+	"context"
+	"fmt"
 	"log"
+	"net/http"
 
 	"time"
 
@@ -79,6 +82,8 @@ type ctrl struct {
 
 	scalerInterval time.Duration
 	scalingPolicy  scalingPolicy
+
+	httpServer *http.Server
 }
 
 type fnKey struct {
@@ -118,6 +123,13 @@ func (c *ctrl) Run(stopCh <-chan struct{}) {
 			c.scale()
 		case <-stopCh: // Maybe listen in another goroutine
 			close(informerStop)
+			if c.httpServer != nil {
+				timeout, ctx := context.WithTimeout(context.Background(), 1*time.Second)
+				defer ctx()
+				if err := c.httpServer.Shutdown(timeout); err != nil {
+					panic(err) // failure/timeout shutting down the server gracefully
+				}
+			}
 			return
 		}
 	}
@@ -224,7 +236,8 @@ func New(topicInformer informersV1.TopicInformer,
 	functionInformer informersV1.FunctionInformer,
 	deploymentInformer informersV1Beta1.DeploymentInformer,
 	deployer Deployer,
-	tracker LagTracker) Controller {
+	tracker LagTracker,
+	port int) Controller {
 
 	pctrl := &ctrl{
 		topicsAddedOrUpdated:      make(chan *v1.Topic, 100),
@@ -284,6 +297,24 @@ func New(topicInformer informersV1.TopicInformer,
 		UpdateFunc: func(old interface{}, new interface{}) { pctrl.deploymentsAddedOrUpdated <- new.(*v1beta1.Deployment) },
 		DeleteFunc: func(obj interface{}) { pctrl.deploymentsDeleted <- obj.(*v1beta1.Deployment) },
 	})
+
+	if port > 0 {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/health", func(writer http.ResponseWriter, request *http.Request) {
+			writer.Write([]byte(`{"status":"UP"}`))
+		})
+		addr := fmt.Sprintf(":%v", port)
+		pctrl.httpServer = &http.Server{Addr: addr,
+			Handler: mux,
+		}
+		go func() {
+			log.Printf("Listening on %v", addr)
+			if err := pctrl.httpServer.ListenAndServe(); err != nil {
+				log.Printf("Httpserver: ListenAndServe() error: %s", err)
+			}
+		}()
+	}
+
 	return pctrl
 }
 

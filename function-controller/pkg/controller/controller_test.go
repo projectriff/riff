@@ -70,7 +70,7 @@ var _ = Describe("Controller", func() {
 		})
 		siiDeployments.On("Run", mock.Anything)
 
-		ctrl = controller.New(topicInformer, functionInformer, deploymentInformer, deployer, tracker)
+		ctrl = controller.New(topicInformer, functionInformer, deploymentInformer, deployer, tracker, -1)
 		closeCh = make(chan struct{}, 2) // 2 allows to easily send in a .Runt() func() on stubs w/o blocking
 	})
 
