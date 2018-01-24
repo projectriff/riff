@@ -51,7 +51,7 @@ func TestValidateFunctionResourceDoesNotExist(t *testing.T) {
 	opts := options.InitOptions{FunctionPath: filePath, DryRun:true}
 	err := options.ValidateAndCleanInitOptions(&opts)
 	as.Error(err)
-	as.Equal(fmt.Sprintf("path %s does not exist", filePath),err.Error())
+	as.Equal(fmt.Sprintf("path '%s' does not exist", filePath),err.Error())
 }
 
 func TestValidateArtifactIsRegularFile(t *testing.T) {
