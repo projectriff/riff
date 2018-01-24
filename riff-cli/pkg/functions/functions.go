@@ -23,10 +23,7 @@ import (
 )
 
 func FunctionNameFromPath(path string) (string, error) {
-	if !osutils.FileExists(path) {
-		return "", errors.New(fmt.Sprintf("path %s does not exist",path));
-	}
-	abs,err := filepath.Abs(path)
+	abs,err := AbsPath(path)
 	if err != nil {
 		return "", err
 	}
@@ -34,5 +31,18 @@ func FunctionNameFromPath(path string) (string, error) {
 		return filepath.Base(abs), nil
 	}
 	return filepath.Base(filepath.Dir(abs)), nil
+}
 
+func AbsPath(path string) (string, error) {
+	if path == "" {
+		path = "."
+	}
+	if !osutils.FileExists(path) {
+		return "", errors.New(fmt.Sprintf("path '%s' does not exist",path));
+	}
+	abs,err := filepath.Abs(path)
+	if err != nil {
+		return "", err
+	}
+	return abs, nil
 }

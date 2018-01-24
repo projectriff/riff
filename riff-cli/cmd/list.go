@@ -38,7 +38,7 @@ var listCmd = &cobra.Command{
 		output, err := kubectl.ExecForString(cmdArgs)
 
 		if err != nil {
-			ioutils.Errorf("Error %v\n", err)
+			ioutils.Errorf("Error: %v\n", err)
 			return
 		}
 

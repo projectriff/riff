@@ -20,33 +20,85 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/projectriff/riff-cli/pkg/functions"
+	"github.com/projectriff/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff-cli/pkg/kubectl"
+	"github.com/projectriff/riff-cli/pkg/osutils"
+	"path/filepath"
 )
 
+type DeleteOptions struct {
+	name string
+	path string
+	all  bool
+}
+
+var deleteOptions DeleteOptions
+
 // deleteCmd represents the delete command
-var deleteCmd = &cobra.Command{
+var deleteCmd = &cobra.Command {
 	Use:   "delete",
 	Short: "Delete function resources",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Long: `Delete the resource[s] for the function or path specified.`,
+	Example: `  riff delete -n square
+    or
+  riff delete -f function/square`,
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("delete called")
+
+		if deleteOptions.name == "" {
+			var err error
+			deleteOptions.name, err = functions.FunctionNameFromPath(deleteOptions.path)
+			if err != nil {
+				ioutils.Errorf("Error: %v\n", err)
+				return
+			}
+		}
+
+		abs,err := functions.AbsPath(deleteOptions.path)
+		if err != nil {
+			ioutils.Errorf("Error: %v\n", err)
+			return
+		}
+
+		var cmdArgs []string
+
+		if deleteOptions.all {
+			optionPath := deleteOptions.path
+			if !osutils.IsDirectory(abs) {
+				abs = filepath.Dir(abs)
+				optionPath = filepath.Dir(optionPath)
+			}
+			fmt.Printf("Deleting %v resources\n\n", optionPath)
+			cmdArgs = []string{"delete", "-f", abs}
+		} else {
+			if osutils.IsDirectory(abs) {
+				fmt.Printf("Deleting %v function\n\n", deleteOptions.name)
+				cmdArgs = []string{"delete", "function", deleteOptions.name}
+			} else {
+				fmt.Printf("Deleting %v resource\n\n", deleteOptions.path)
+				cmdArgs = []string{"delete", "-f", abs}
+			}
+		}
+
+		output, err := kubectl.ExecForString(cmdArgs)
+		if err != nil {
+			ioutils.Errorf("Error: %v\n", err)
+			return
+		}
+		fmt.Printf("%v\n", output)
+
+		return
+
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(deleteCmd)
 
-	// Here you will define your flags and configuration settings.
+	deleteCmd.Flags().StringVarP(&deleteOptions.name, "name", "n", "", "the name of the function")
+	deleteCmd.Flags().StringVarP(&deleteOptions.path, "filepath", "f", "", "path or directory for the function resources, if a file is specified then the file's directory will be used (defaults to the current directory)")
+	deleteCmd.Flags().BoolVarP(&deleteOptions.all, "all", "", false, "delete all resources including topics, not just the function resource")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// deleteCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// deleteCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	setFilePathFlag(deleteCmd.Flags())
 }
