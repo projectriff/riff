@@ -39,11 +39,7 @@ spec:
           ports:
             - containerPort: 8080
           env:
-          - name: JAVA_TOOL_OPTIONS
-            value: '-Xmx512m'
-          - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
-            value: {{ template "fullname" . }}-kafka:9092
-          - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
+          - name: KAFKA_ZK_NODES
             value: {{ template "fullname" . }}-zookeeper:2181
       serviceAccountName: {{ template "fullname" . }}-sa
 {{- end -}}

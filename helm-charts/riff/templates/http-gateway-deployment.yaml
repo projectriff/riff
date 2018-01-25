@@ -36,6 +36,6 @@ spec:
           ports:
             - containerPort: 8080
           env:
-          - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+          - name: KAFKA_BROKERS
             value: {{ template "fullname" . }}-kafka:9092
 {{- end -}}

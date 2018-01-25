@@ -5,51 +5,33 @@ create:
   crd: true
   faas: true
   rbac: false
-enable:
-  tracingDashboard: false
 rbac:
   apiVersion: v1beta1
 functionController:
   replicaCount: 1
   image:
     repository: projectriff/function-controller
-    tag: 0.0.2
+    tag: 0.0.3
     pullPolicy: IfNotPresent
   sidecar:
     image:
-      tag: 0.0.2
-  service:
-    name: http
-    type: ClusterIP
-    externalPort: 80
-    internalPort: 8080
+      tag: 0.0.3
 topicController:
   replicaCount: 1
   image:
     repository: projectriff/topic-controller
-    tag: 0.0.2
+    tag: 0.0.3
     pullPolicy: IfNotPresent
 httpGateway:
   replicaCount: 1
   image:
     repository: projectriff/http-gateway
-    tag: 0.0.2
+    tag: 0.0.3
     pullPolicy: IfNotPresent
   service:
     name: http
     type: LoadBalancer
     externalPort: 80
-zipkin:
-  replicaCount: 1
-  image:
-    repository: openzipkin/zipkin
-    tag: 2.2
-    pullPolicy: IfNotPresent
-  service:
-    name: zipkin
-    type: LoadBalancer
-    externalPort: 9411
-    internalPort: 9411
 zookeeper:
   replicaCount: 1
   image:
