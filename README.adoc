@@ -2,8 +2,6 @@
 
 A FaaS for Kubernetes
 
-GKE image:https://ci.faas.to.cf-app.com/api/v1/teams/main/pipelines/riff/jobs/run-riff-system-tests-gke/badge[GKE status] &nbsp; CFCR image:https://ci.faas.to.cf-app.com/api/v1/teams/main/pipelines/riff/jobs/run-riff-system-tests-kubo/badge[CF Container Runtime status]
-
 == Installation
 
 You can install the system using link:Getting-Started.adoc#helm[a Helm chart] or by link:#manual[manually building and deploying] the components.
@@ -14,13 +12,13 @@ You can install the system using link:Getting-Started.adoc#helm[a Helm chart] or
 
 You need:
 
-* A running 1.7+ Kubernetes cluster with at least 4GB of memory. These instructions assume minikube for now.
+* A running 1.7+ Kubernetes cluster. These instructions assume minikube for now.
 +
 TIP: We recommend using Minikube v0.23.0 or v0.24.1 and avoiding v0.24.0 due to some DNS issues
 +
 [source,bash]
 ----
-minikube start --memory=4096
+minikube start
 ----
 
 * Git installed.
@@ -60,39 +58,28 @@ From now on, this README assumes you're running commands from the `riff` reposit
 cd riff
 ----
 
-==== Point your local Docker environment to the Docker environment running in minikube:
+==== Point your local Docker environment to the Docker environment running in minikube
 
 [source, bash]
 ----
 eval $(minikube docker-env)
 ----
 
-==== Build the Function Sidecar, HTTP Gateway, and Topic Controller
+==== Build the core riff components
+
+This builds the Function Sidecar, HTTP Gateway, Topic Controller, and Function Controller
 
 [source, bash]
 ----
 ./build-function-sidecar upstream master
 ./build-http-gateway upstream master
 ./build-topic-controller upstream master
-----
-
-==== Setup the Kubernetes environment
-
-Create Function and Topic Custom Resource Definitions:
-
-[source, bash]
-----
-kubectl apply -f config/types
-----
-
-==== Build the Function Controller
-
-[source, bash]
-----
 ./build-function-controller upstream master
 ----
 
-==== Build the java-function-invoker, node-function-invoker, shell-function-invoker and python2-function-invoker
+==== Build the function invokers
+
+This builds the java-function-invoker, node-function-invoker, shell-function-invoker, and python2-function-invoker
 
 [source, bash]
 ----
@@ -106,7 +93,18 @@ kubectl apply -f config/types
 kubectl apply -f config/kafka
 ----
 
-==== Deploy RIFF
+==== Deploy the riff custom resources
+
+This creates the Function and Topic CRDs (Custom Resource Definitions):
+
+[source, bash]
+----
+kubectl apply -f config/types
+----
+
+==== Deploy the riff core components
+
+This deploys the HTTP Gateway, Topic Controller, and Function Controller
 
 [source, bash]
 ----
@@ -119,15 +117,6 @@ If your cluster has RBAC enabled, then you also need to create a Role and a Role
 ----
 kubectl apply -f config/rbac
 ----
-
-==== Deploy Tracing (Zipkin) Dashboard
-
-[source, bash]
-----
-kubectl apply -f config/zipkin
-----
-
-See how to use the link:Monitoring.adoc#dashboards[dashboards].
 
 ==== To tear it all down
 

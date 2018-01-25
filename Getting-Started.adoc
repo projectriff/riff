@@ -11,21 +11,11 @@ The following instructions cover how to initialize helm and install riff.
 
 * A running 1.7+ Kubernetes cluster
 
-TIP: We recommend using Minikube v0.23.0 or v0.24.1 and avoiding v0.24.0 due to some DNS issues
-
-[NOTE]
-====
-If using Minikube, we recommend at least 4GB of memory:
-
-[source, bash]
-----
-minikube start --memory=4096
-----
-====
+TIP: If using Minikube, we recommend using Minikube v0.23.0 or v0.24.1 and avoiding v0.24.0 due to some DNS issues
 
 * Kubernetes CLI `kubectl` installed and on the local system PATH. We recommend using the same version or later as the Kubernetes cluster you are using.
 
-* Docker, if you plan on building samples or your own functions then you will need Docker installed. We have used Docker version 17.x.
+* Docker, if you plan on building samples or your own functions then you will need Docker installed. We have used Docker version 17.x or later.
 
 ==== Install Helm
 
@@ -131,8 +121,6 @@ The provided Helm chart installs the following components:
 
 * HTTP Gateway - the external facing gateway that listens for data posted to the various topics and forwards the data as a message for the corresponding Kafka topic
 
-* Zipkin (optional) - the dashboard used for distributed tracing
-
 ==== Customizing the Installation
 
 The Helm chart contains a https://github.com/projectriff/helm-charts/blob/master/riff/values.yaml[values.yaml] file that specifies the default values used when installing the chart. They can all be overridden by using the flag `--set` as described in the documentation for https://docs.helm.sh/helm/#helm-install[Helm Install].
@@ -145,29 +133,29 @@ NOTE: The same commands work for all of the riff components: `functionController
 
 * Overriding the version of a riff component:
 +
-To set the version tag for the `functionController` to `0.0.2-build.1` use the following:
+To set the version tag for the `functionController` to `0.0.3-build.1` use the following:
 +
 [source, bash]
 ----
-helm install riffrepo/riff --name demo --set functionController.image.tag=0.0.2-build.1
+helm install riffrepo/riff --name demo --set functionController.image.tag=0.0.3-build.1
 ----
 
 * Overriding the image repository and version tag of a riff component with a custom built component image:
 +
-To set the image repository to `mycustom/function-controller` and the version tag to `0.0.2-test.1` for the `functionController`, use the following:
+To set the image repository to `mycustom/function-controller` and the version tag to `0.0.3-test.1` for the `functionController`, use the following:
 +
 [source, bash]
 ----
-helm install riffrepo/riff --name demo --set functionController.image.repository=mycustom/function-controller --set functionController.image.tag=0.0.2-test.1
+helm install riffrepo/riff --name demo --set functionController.image.repository=mycustom/function-controller --set functionController.image.tag=0.0.3-test.1
 ----
 
 * Overriding the version of the `sidecar` component:
 +
-The `sidecar` component is only used by the `functionController`, so to set the version for the `sidecar` to `0.0.2-build.1` use the following:
+The `sidecar` component is only used by the `functionController`, so to set the version for the `sidecar` to `0.0.3-build.1` use the following:
 +
 [source, bash]
 ----
-helm install riffrepo/riff --name demo --set functionController.sidecar.image.tag=0.0.2-build.1
+helm install riffrepo/riff --name demo --set functionController.sidecar.image.tag=0.0.3-build.1
 ----
 
 ==== Installing locally built snapshot components with Minikube
@@ -183,21 +171,6 @@ To install locally built Docker images with Helm on minikube, use the `values-sn
 ----
 helm install riffrepo/riff --name demo --values helm/values-snapshot.yaml --set httpGateway.service.type=NodePort
 ----
-
-==== Enable Tracing Dashboard
-
-You can enable the tracing dashboard by setting a flag for the helm release.
-To enable the Tracing Dashboard use `--set enable.tracingDashboard=true`.
-
-This flag can be set when installing the chart or you can apply it during an upgrade operation.
-Here is an example of upgrading the release and enabling the Tracing Dashboard:
-
-[source, bash]
-----
-helm upgrade demo riffrepo/riff --set enable.tracingDashboard=true --reuse-values
-----
-
-See how to use the link:Monitoring.adoc#dashboards[dashboards] and run some link:samples/README.adoc[samples].
 
 ==== To tear it all down
 
