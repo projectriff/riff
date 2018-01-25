@@ -58,7 +58,7 @@ var createCmd = &cobra.Command{
 			utils.MergeApplyOptions(flagset, &opts.CreateOptions)
 
 			if len(args) > 0 {
-				if len(args) == 1 && opts.InitOptions.FunctionPath == "" {
+				if len(args) == 1 && opts.CreateOptions.FunctionPath == "" {
 					opts.CreateOptions.FunctionPath = args[0]
 				} else {
 					ioutils.Errorf("Invalid argument(s) %v\n", args)

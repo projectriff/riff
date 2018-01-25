@@ -38,18 +38,7 @@ riff apply -f some/function/path
 riff apply -f some/function/path/some.yaml
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-
-		if opts.CreateOptions.DryRun {
-			fmt.Printf("\nApply Command: kubectl apply -f %s\n\n", opts.CreateOptions.FunctionPath)
-		} else {
-			output, err := kubectl.ExecForString([]string{"apply", "-f", opts.CreateOptions.FunctionPath})
-			if err != nil {
-				cmd.SilenceUsage = true
-				return err
-			}
-			fmt.Println(output)
-		}
-		return nil
+		return apply(cmd, options.GetApplyOptions(opts.CreateOptions))
 	},
 	PreRun: func(cmd *cobra.Command, args []string) {
 
@@ -57,7 +46,7 @@ riff apply -f some/function/path/some.yaml
 			utils.MergeApplyOptions(*cmd.Flags(), &opts.CreateOptions)
 			if len(args) > 0 {
 				if len(args) == 1 && opts.CreateOptions.FunctionPath == "" {
-					opts.InitOptions.FunctionPath = args[0]
+					opts.CreateOptions.FunctionPath = args[0]
 				} else {
 					ioutils.Errorf("Invalid argument(s) %v\n", args)
 					cmd.Usage()
@@ -73,6 +62,20 @@ riff apply -f some/function/path/some.yaml
 		}
 		opts.CreateOptions.Initialized = true
 	},
+}
+
+func apply(cmd *cobra.Command, opts options.ApplyOptions) error {
+	if opts.DryRun {
+		fmt.Printf("\nApply Command: kubectl apply -f %s\n\n", opts.FunctionPath)
+	} else {
+		output, err := kubectl.ExecForString([]string{"apply", "-f", opts.FunctionPath})
+		if err != nil {
+			cmd.SilenceUsage = true
+			return err
+		}
+		fmt.Println(output)
+	}
+	return nil
 }
 
 func init() {
