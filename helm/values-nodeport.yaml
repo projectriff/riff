@@ -1,6 +1,3 @@
 httpGateway:
   service:
     type: NodePort
-zipkin:
-  service:
-    type: NodePort
