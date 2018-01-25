@@ -26,5 +26,5 @@ spec:
             port: 8080
           periodSeconds: 5
         env:
-        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+        - name: KAFKA_BROKERS
           value: kafka:9092
