@@ -11,4 +11,3 @@ kubectl delete crd/functions.projectriff.io
 kubectl delete crd/topics.projectriff.io
 
 kubectl delete all,svc -l app=kafka
-kubectl delete all,svc -l app=zipkin
