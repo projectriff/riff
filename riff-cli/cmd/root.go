@@ -38,6 +38,7 @@ version ` + global.CLI_VERSION + `
 
 the riff tool creates and manages function resources for the riff FaaS platform https://projectriff.io/`,
 	SilenceErrors: true,
+	DisableAutoGenTag: true,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
