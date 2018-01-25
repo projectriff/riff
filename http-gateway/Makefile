@@ -1,7 +1,7 @@
 .PHONY: build clean dockerize test
 OUTPUT = http-gateway
 
-GO_SOURCES = $(shell find cmd -type f -name '*.go')
+GO_SOURCES = $(shell find cmd pkg -type f -name '*.go')
 TAG = 0.0.4-snapshot
 
 build: $(OUTPUT)
@@ -12,8 +12,15 @@ test: build
 $(OUTPUT): $(GO_SOURCES) vendor
 	go build cmd/http-gateway.go
 
-vendor: Gopkg.toml
-	dep ensure
+vendor: glide.lock
+	glide install -v --force
+
+glide.lock: glide.yaml
+	glide up -v --force
+
+gen-mocks: $(GO_SOURCES)
+	go get -u github.com/vektra/mockery/.../
+	go generate ./...
 
 clean:
 	rm -f $(OUTPUT)

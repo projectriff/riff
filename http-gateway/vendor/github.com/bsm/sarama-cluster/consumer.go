@@ -17,10 +17,12 @@ type Consumer struct {
 	consumer sarama.Consumer
 	subs     *partitionMap
 
-	consumerID   string
-	generationID int32
-	groupID      string
+	consumerID string
+	groupID    string
+
 	memberID     string
+	generationID int32
+	membershipMu sync.RWMutex
 
 	coreTopics  []string
 	extraTopics []string
@@ -159,21 +161,55 @@ func (c *Consumer) MarkOffsets(s *OffsetStash) {
 	}
 }
 
+// ResetOffsets marks the provided message as processed, alongside a metadata string
+// that represents the state of the partition consumer at that point in time. The
+// metadata string can be used by another consumer to restore that state, so it
+// can resume consumption.
+//
+// Difference between ResetOffset and MarkOffset is that it allows to rewind to an earlier offset
+func (c *Consumer) ResetOffset(msg *sarama.ConsumerMessage, metadata string) {
+	c.subs.Fetch(msg.Topic, msg.Partition).ResetOffset(msg.Offset+1, metadata)
+}
+
+// ResetPartitionOffset marks an offset of the provided topic/partition as processed.
+// See ResetOffset for additional explanation.
+func (c *Consumer) ResetPartitionOffset(topic string, partition int32, offset int64, metadata string) {
+	c.subs.Fetch(topic, partition).ResetOffset(offset+1, metadata)
+}
+
+// ResetOffsets marks stashed offsets as processed.
+// See ResetOffset for additional explanation.
+func (c *Consumer) ResetOffsets(s *OffsetStash) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for tp, info := range s.offsets {
+		c.subs.Fetch(tp.Topic, tp.Partition).ResetOffset(info.Offset+1, info.Metadata)
+		delete(s.offsets, tp)
+	}
+}
+
 // Subscriptions returns the consumed topics and partitions
 func (c *Consumer) Subscriptions() map[string][]int32 {
 	return c.subs.Info()
 }
 
-// CommitOffsets manually commits marked offsets.
+// CommitOffsets allows to manually commit previously marked offsets. By default there is no
+// need to call this function as the consumer will commit offsets automatically
+// using the Config.Consumer.Offsets.CommitInterval setting.
+//
+// Please be aware that calling this function during an internal rebalance cycle may return
+// broker errors (e.g. sarama.ErrUnknownMemberId or sarama.ErrIllegalGeneration).
 func (c *Consumer) CommitOffsets() error {
 	c.commitMu.Lock()
 	defer c.commitMu.Unlock()
 
+	memberID, generationID := c.membership()
 	req := &sarama.OffsetCommitRequest{
 		Version:                 2,
 		ConsumerGroup:           c.groupID,
-		ConsumerGroupGeneration: c.generationID,
-		ConsumerID:              c.memberID,
+		ConsumerGroupGeneration: generationID,
+		ConsumerID:              memberID,
 		RetentionTime:           -1,
 	}
 
@@ -237,6 +273,17 @@ func (c *Consumer) Close() (err error) {
 		}
 		close(c.partitions)
 		close(c.notifications)
+
+		// drain
+		for range c.messages {
+		}
+		for range c.errors {
+		}
+		for p := range c.partitions {
+			_ = p.Close()
+		}
+		for range c.notifications {
+		}
 
 		c.client.release()
 		if c.ownClient {
@@ -480,10 +527,11 @@ func (c *Consumer) heartbeat() error {
 		return err
 	}
 
+	memberID, generationID := c.membership()
 	resp, err := broker.Heartbeat(&sarama.HeartbeatRequest{
 		GroupId:      c.groupID,
-		MemberId:     c.memberID,
-		GenerationId: c.generationID,
+		MemberId:     memberID,
+		GenerationId: generationID,
 	})
 	if err != nil {
 		c.closeCoordinator(broker, err)
@@ -494,7 +542,8 @@ func (c *Consumer) heartbeat() error {
 
 // Performs a rebalance, part of the mainLoop()
 func (c *Consumer) rebalance() (map[string][]int32, error) {
-	sarama.Logger.Printf("cluster/consumer %s rebalance\n", c.memberID)
+	memberID, _ := c.membership()
+	sarama.Logger.Printf("cluster/consumer %s rebalance\n", memberID)
 
 	allTopics, err := c.client.Topics()
 	if err != nil {
@@ -507,12 +556,13 @@ func (c *Consumer) rebalance() (map[string][]int32, error) {
 	strategy, err := c.joinGroup()
 	switch {
 	case err == sarama.ErrUnknownMemberId:
+		c.membershipMu.Lock()
 		c.memberID = ""
+		c.membershipMu.Unlock()
 		return nil, err
 	case err != nil:
 		return nil, err
 	}
-	// sarama.Logger.Printf("cluster/consumer %s/%d joined group %s\n", c.memberID, c.generationID, c.groupID)
 
 	// Sync consumer group state, fetch subscriptions
 	subs, err := c.syncGroup(strategy)
@@ -567,9 +617,10 @@ func (c *Consumer) subscribe(tomb *loopTomb, subs map[string][]int32) error {
 
 // Send a request to the broker to join group on rebalance()
 func (c *Consumer) joinGroup() (*balancer, error) {
+	memberID, _ := c.membership()
 	req := &sarama.JoinGroupRequest{
 		GroupId:        c.groupID,
-		MemberId:       c.memberID,
+		MemberId:       memberID,
 		SessionTimeout: int32(c.client.config.Group.Session.Timeout / time.Millisecond),
 		ProtocolType:   "consumer",
 	}
@@ -616,8 +667,10 @@ func (c *Consumer) joinGroup() (*balancer, error) {
 		}
 	}
 
+	c.membershipMu.Lock()
 	c.memberID = resp.MemberId
 	c.generationID = resp.GenerationId
+	c.membershipMu.Unlock()
 
 	return strategy, nil
 }
@@ -625,10 +678,11 @@ func (c *Consumer) joinGroup() (*balancer, error) {
 // Send a request to the broker to sync the group on rebalance().
 // Returns a list of topics and partitions to consume.
 func (c *Consumer) syncGroup(strategy *balancer) (map[string][]int32, error) {
+	memberID, generationID := c.membership()
 	req := &sarama.SyncGroupRequest{
 		GroupId:      c.groupID,
-		MemberId:     c.memberID,
-		GenerationId: c.generationID,
+		MemberId:     memberID,
+		GenerationId: generationID,
 	}
 
 	for memberID, topics := range strategy.Perform(c.client.config.Group.PartitionStrategy) {
@@ -726,9 +780,10 @@ func (c *Consumer) leaveGroup() error {
 		return err
 	}
 
+	memberID, _ := c.membership()
 	if _, err = broker.LeaveGroup(&sarama.LeaveGroupRequest{
 		GroupId:  c.groupID,
-		MemberId: c.memberID,
+		MemberId: memberID,
 	}); err != nil {
 		c.closeCoordinator(broker, err)
 	}
@@ -738,7 +793,8 @@ func (c *Consumer) leaveGroup() error {
 // --------------------------------------------------------------------
 
 func (c *Consumer) createConsumer(tomb *loopTomb, topic string, partition int32, info offsetInfo) error {
-	sarama.Logger.Printf("cluster/consumer %s consume %s/%d from %d\n", c.memberID, topic, partition, info.NextOffset(c.client.config.Consumer.Offsets.Initial))
+	memberID, _ := c.membership()
+	sarama.Logger.Printf("cluster/consumer %s consume %s/%d from %d\n", memberID, topic, partition, info.NextOffset(c.client.config.Consumer.Offsets.Initial))
 
 	// Create partitionConsumer
 	pc, err := newPartitionConsumer(c.consumer, topic, partition, info, c.client.config.Consumer.Offsets.Initial)
@@ -836,5 +892,12 @@ func (c *Consumer) refreshMetadata() (err error) {
 	case sarama.ErrTopicAuthorizationFailed:
 		err = c.client.RefreshMetadata(c.coreTopics...)
 	}
+	return
+}
+
+func (c *Consumer) membership() (memberID string, generationID int32) {
+	c.membershipMu.RLock()
+	memberID, generationID = c.memberID, c.generationID
+	c.membershipMu.RUnlock()
 	return
 }

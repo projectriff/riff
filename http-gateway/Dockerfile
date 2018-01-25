@@ -6,6 +6,8 @@ ARG COMMAND=cmd/http-gateway.go
 WORKDIR /go/src/${PACKAGE}
 COPY vendor/ vendor/
 COPY cmd/ cmd/
+COPY pkg/ pkg/
+
 RUN CGO_ENABLED=0 go build -v -a -installsuffix cgo ${COMMAND}
 
 ###########

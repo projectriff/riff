@@ -23,46 +23,46 @@ If you would like to run tests using the `ginkgo` command, install:
 
 === Get the source
 [source, bash]
-====
+----
 cd $(go env GOPATH)   #defaults to ~/go
 git clone -o upstream https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway
-====
+----
 
 === Building
 * To build locally (this will produce a binary named `http-gateway` on _your_ machine):
 +
 [source, bash]
-====
+----
 make build
-====
+----
 
 * To build for docker (and deploy as part of the whole https://github.com/projectriff/riff#-manual-install-of-riff[riff]
 installation):
 +
 [source, bash]
-====
+----
 make dockerize
-====
+----
 This assumes that your docker client is correctly configured to target the daemon where you want the image built.
 
 * To run tests:
 +
 [source, bash]
-====
+----
 make test
-====
+----
 
 * To attach a https://github.com/derekparker/delve/blob/master/Documentation/EditorIntegration.md[delve capable] debugger (such as Goland)
 to an `http-gateway` running _inside_ k8s:
 +
 [source, bash]
-====
+----
 make debug-dockerize
-====
+----
 Then expose the `2345` port as a service, using `riff/config/delve/http-gateway-debug.yaml`:
 +
 [source, bash]
-====
+----
 kubectl apply -f riff/config/delve/http-gateway-debug.yaml
-====
+----
 Then you can connect the debugger through port `30100`.

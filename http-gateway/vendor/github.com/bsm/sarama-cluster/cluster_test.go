@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	testKafkaRoot  = "kafka_2.12-0.10.2.1"
+	testKafkaRoot  = "kafka_2.12-1.0.0"
 	testKafkaAddrs = []string{"127.0.0.1:29092"}
 	testTopics     = []string{"topic-a", "topic-b"}
 
@@ -74,6 +74,9 @@ var _ = BeforeSuite(func() {
 		testDataDir("server.properties"),
 	)
 
+	// Remove old test data before starting
+	Expect(os.RemoveAll(testKafkaData)).NotTo(HaveOccurred())
+
 	Expect(os.MkdirAll(testKafkaData, 0777)).To(Succeed())
 	Expect(testZkCmd.Start()).To(Succeed())
 	Expect(testKafkaCmd.Start()).To(Succeed())
@@ -96,7 +99,7 @@ var _ = BeforeSuite(func() {
 	}, "30s", "1s").Should(Succeed())
 
 	// Seed a few messages
-	Expect(testSeed(1000)).To(Succeed())
+	Expect(testSeed(1000, testTopics)).To(Succeed())
 })
 
 var _ = AfterSuite(func() {
@@ -123,7 +126,7 @@ func testDataDir(tokens ...string) string {
 	return filepath.Join(tokens...)
 }
 
-func testSeed(n int) error {
+func testSeed(n int, testTopics []string) error {
 	producer, err := sarama.NewSyncProducerFromClient(testClient)
 	if err != nil {
 		return err
