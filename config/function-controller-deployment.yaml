@@ -30,12 +30,8 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 5
         env:
-        - name: JAVA_TOOL_OPTIONS
-          value: '-Xmx512m'
-        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+        - name: KAFKA_BROKERS
           value: kafka:9092
-        - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES
-          value: zookeeper:2181
         - name: RIFF_FUNCTION_SIDECAR_TAG
           value: 0.0.3-snapshot
       serviceAccountName: riff-sa
