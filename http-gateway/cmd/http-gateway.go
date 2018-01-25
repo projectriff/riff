@@ -32,6 +32,7 @@ import (
 	"github.com/projectriff/function-sidecar/pkg/dispatcher"
 	"github.com/projectriff/function-sidecar/pkg/wireformat"
 	"github.com/satori/go.uuid"
+	"strings"
 )
 
 const ContentType = "Content-Type"
@@ -152,7 +153,7 @@ func main() {
 	// Key is correlationId, value is channel used to pass message received from main Kafka consumer loop
 	replies := newRepliesMap()
 
-	brokers := []string{os.Getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS")}
+	brokers := strings.Split(os.Getenv("KAFKA_BROKERS"), ",")
 	producer, err := sarama.NewAsyncProducer(brokers, nil)
 	if err != nil {
 		panic(err)
