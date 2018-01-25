@@ -17,6 +17,8 @@
 package main
 
 import (
+	"strings"
+
 	riffcs "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned"
 	informers "github.com/projectriff/kubernetes-crds/pkg/client/informers/externalversions"
 	"k8s.io/client-go/tools/clientcmd"
@@ -40,7 +42,7 @@ func main() {
 
 	kubeconfig := flag.String("kubeconf", "", "Path to a kube config. Only required if out-of-cluster.")
 	masterURL := flag.String("master-url", "", "Path to master URL. Useful eg when using proxy")
-	brokers := []string{os.Getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS")} // TODO change to flag
+	brokers := strings.Split(os.Getenv("KAFKA_BROKERS"), ",")
 	flag.Parse()
 	config, err := clientcmd.BuildConfigFromFlags(*masterURL, *kubeconfig)
 	if err != nil {
