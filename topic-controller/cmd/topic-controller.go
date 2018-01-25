@@ -86,7 +86,7 @@ func main() {
 	riffInformerFactory := informers.NewSharedInformerFactory(riffClient, time.Second*30)
 	topicsInformer := riffInformerFactory.Projectriff().V1().Topics()
 
-	provisioner := kafka.NewKafkaProvisioner(os.Getenv("SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES"))
+	provisioner := kafka.NewKafkaProvisioner(os.Getenv("KAFKA_ZK_NODES"))
 
 	// Set up an event handler for when Foo resources change
 	topicsInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
