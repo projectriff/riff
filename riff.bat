@@ -317,7 +317,7 @@ exit /B 1
   :: figure out protocol if not provided in --protocol arg
   if [%FNPROT%]==[] (
     if "%FNEXT%"==".sh" set FNPROT=stdio
-    if "%FNEXT%"==".jar" set FNPROT=http
+    if "%FNEXT%"==".jar" set FNPROT=pipes
     if "%FNEXT%"==".js" set FNPROT=http
     if "%FNEXT%"==".py" set FNPROT=stdio      
   )

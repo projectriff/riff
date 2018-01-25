@@ -313,7 +313,7 @@ function init() {
     if [[ $FNEXT == "sh" ]] ; then
       FNPROT="stdio"
     elif [[ $FNEXT == "jar" ]] ; then
-      FNPROT="http"
+      FNPROT="pipes"
     elif [[ $FNEXT == "js" ]] ; then
       FNPROT="http"
     elif [[ $FNEXT == "py" ]] ; then
