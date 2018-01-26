@@ -8,10 +8,8 @@ To riff link:../README.adoc[README]
   - link:java/greeter/README.adoc[greeter]
 * Node
   - link:node/square/README.adoc[square]
-  - link:node/slack/README.adoc[slack-command]
 * Python
   - link:python/sentiments/README.adoc[sentiments]
-  - link:python/uppercase/README.adoc[uppercase]
 * Shell
   - link:shell/echo/README.adoc[echo]
   - link:shell/wordcount/README.adoc[wordcount]
