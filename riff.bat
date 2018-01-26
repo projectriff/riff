@@ -7,7 +7,7 @@
 setlocal enabledelayedexpansion
 
 if [%RIFF_VERSION%]==[] (
-    set RIFF_VERSION=0.0.2
+    set RIFF_VERSION=0.0.3
 )
 
 :: handle general help

@@ -133,7 +133,7 @@ NOTE: The same commands work for all of the riff components: `functionController
 
 * Overriding the version of a riff component:
 +
-To set the version tag for the `functionController` to `0.0.3-build.1` use the following:
+To set the version tag for the `functionController` to `0.0.4-build.1` use the following:
 +
 [source, bash]
 ----
