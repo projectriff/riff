@@ -21,7 +21,7 @@ pushd samples/python/uppercase; ./dockerize ; popd
 === Publish a Message to the Input Topic
 
 ```
-./request greetings hello
+./riff publish -i  greetings -d hello -r
 ```
 
 === Tail the Sidecar Log
