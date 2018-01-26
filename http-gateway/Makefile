@@ -41,4 +41,4 @@ clean:
 	rm -f $(OUTPUT_LINUX)
 
 dockerize: build-for-docker
-	docker build . -t projectriff/http-gateway:0.0.3-snapshot
+	docker build . -t projectriff/http-gateway:0.0.3
