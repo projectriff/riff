@@ -72,9 +72,26 @@ type ApplyOptions struct {
 	DryRun		 bool
 }
 
+type DeleteOptions struct {
+	FunctionPath string
+	FunctionName string
+	DryRun		 bool
+	All		     bool
+}
+
+func (this DeleteOptions) GetAll() bool {
+	return this.All
+}
+
 type CreateOptions struct {
 	InitOptions
 	Push        bool
+}
+
+type AllOptions struct {
+	InitOptions
+	Push         bool
+	All		     bool
 }
 
 type ImageOptions interface {
@@ -85,6 +102,10 @@ type ImageOptions interface {
 
 func GetApplyOptions(opts CreateOptions) ApplyOptions {
 	return ApplyOptions{FunctionPath:opts.FunctionPath, DryRun:opts.DryRun}
+}
+
+func GetDeleteOptions(opts AllOptions) DeleteOptions {
+	return DeleteOptions{FunctionPath:opts.FunctionPath, FunctionName:opts.FunctionName, DryRun:opts.DryRun, All:opts.All}
 }
 
 func GetBuildOptions(opts CreateOptions) BuildOptions {

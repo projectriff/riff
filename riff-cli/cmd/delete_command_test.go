@@ -23,39 +23,43 @@ import (
 	"github.com/projectriff/riff-cli/cmd/opts"
 )
 
-func TestBuildCommandImplicitPath(t *testing.T) {
+func TestDeleteCommandImplicitPath(t *testing.T) {
 	clearAllOptions()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"build", "--dry-run", osutils.Path("../test_data/shell/echo"), "-v", "0.0.1-snapshot"})
-	_, err := rootCmd.ExecuteC()
-	as.Equal("echo", opts.CreateOptions.FunctionName)
-	as.Equal("0.0.1-snapshot", opts.CreateOptions.Version)
-	as.NoError(err)
-
-}
-
-func TestBuildCommandExplicitPath(t *testing.T) {
-	clearAllOptions()
-	as := assert.New(t)
-	rootCmd.SetArgs([]string{"build", "--dry-run", "--push", "-f", osutils.Path("../test_data/shell/echo"), "-v", "0.0.2-snapshot"})
+	rootCmd.SetArgs([]string{"delete", "--dry-run", osutils.Path("../test_data/shell/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("echo", opts.CreateOptions.FunctionName)
-	as.Equal("0.0.2-snapshot", opts.CreateOptions.Version)
-	as.True(opts.CreateOptions.Push)
+	as.Equal("../test_data/shell/echo", opts.AllOptions.FunctionPath)
 }
 
-func TestBuildCommandWithUserAccountAndVersion(t *testing.T) {
+func TestDeleteCommandExplicitPath(t *testing.T) {
 	clearAllOptions()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"build", "--dry-run", "--push", "-f", osutils.Path("../test_data/shell/echo"), "-v", "0.0.1-snapshot","-u","projectriff"})
+	rootCmd.SetArgs([]string{"delete", "--dry-run", "-f", osutils.Path("../test_data/shell/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("echo", opts.CreateOptions.FunctionName)
-	as.Equal("0.0.1-snapshot", opts.CreateOptions.Version)
-	as.Equal("projectriff", opts.CreateOptions.UserAccount)
-	as.True(opts.CreateOptions.Push)
+	as.Equal("../test_data/shell/echo", opts.AllOptions.FunctionPath)
 }
 
+func TestDeleteCommandExplicitFile(t *testing.T) {
+	clearAllOptions()
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"delete", "--dry-run", "-f", osutils.Path("../test_data/shell/echo/echo-topics.yaml")})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	as.Equal("../test_data/shell/echo/echo-topics.yaml", opts.AllOptions.FunctionPath)
+}
+
+func TestDeleteCommandAllFlag(t *testing.T) {
+	clearAllOptions()
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"delete", "--dry-run", "-f", osutils.Path("../test_data/shell/echo"), "--all"})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	as.Equal("../test_data/shell/echo", opts.AllOptions.FunctionPath)
+	as.Equal(true, opts.AllOptions.All)
+}

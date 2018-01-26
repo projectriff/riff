@@ -1,0 +1,6 @@
+apiVersion: projectriff.io/v1
+kind: Topic
+metadata:
+  name: echo
+spec:
+  partitions: 1

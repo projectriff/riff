@@ -33,10 +33,9 @@ var applyCmd = &cobra.Command{
 	Use:   "apply",
 	Short: "Apply function resource definitions",
 	Long: `Apply the resource definition[s] included in the path. A resource will be created if it doesn't exist yet.`,
-  Example: `
-riff apply -f some/function/path
-riff apply -f some/function/path/some.yaml
-`,
+  Example: `  riff apply -f some/function/path
+  riff apply -f some/function/path/some.yaml`,
+
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return apply(cmd, options.GetApplyOptions(opts.CreateOptions))
 	},

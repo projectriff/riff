@@ -73,6 +73,13 @@ func CreateApplyFlags(flagset *pflag.FlagSet) {
 	setDryRunFlag(flagset)
 }
 
+func CreateDeleteFlags(flagset *pflag.FlagSet) {
+	setFilePathFlag(flagset)
+	setNameFlag(flagset)
+	setDryRunFlag(flagset)
+	flagset.Bool("all", false, "delete all resources including topics, not just the function resource")
+}
+
 func MergeInitOptions(flagset pflag.FlagSet, opts *options.InitOptions) {
 	if opts.FunctionName == "" {
 		opts.FunctionName, _ = flagset.GetString("name")
@@ -139,6 +146,18 @@ func MergeApplyOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 	}
 	if opts.DryRun == false {
 		opts.DryRun, _ = flagset.GetBool("dry-run")
+	}
+}
+
+func MergeDeleteOptions(flagset pflag.FlagSet, opts *options.AllOptions) {
+	if opts.FunctionPath == "" {
+		opts.FunctionPath, _ = flagset.GetString("filepath")
+	}
+	if opts.DryRun == false {
+		opts.DryRun, _ = flagset.GetBool("dry-run")
+	}
+	if opts.All == false {
+		opts.All, _ = flagset.GetBool("all")
 	}
 }
 

@@ -21,19 +21,16 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff-cli/pkg/functions"
-	"github.com/projectriff/riff-cli/pkg/ioutils"
 	"github.com/projectriff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff-cli/pkg/osutils"
 	"path/filepath"
+	"github.com/projectriff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff-cli/cmd/opts"
+	"github.com/projectriff/riff-cli/pkg/ioutils"
+	"os"
+	"strings"
 )
-
-type DeleteOptions struct {
-	name string
-	path string
-	all  bool
-}
-
-var deleteOptions DeleteOptions
 
 // deleteCmd represents the delete command
 var deleteCmd = &cobra.Command {
@@ -44,59 +41,88 @@ var deleteCmd = &cobra.Command {
     or
   riff delete -f function/square`,
 
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
-		if deleteOptions.name == "" {
-			var err error
-			deleteOptions.name, err = functions.FunctionNameFromPath(deleteOptions.path)
-			if err != nil {
-				ioutils.Errorf("Error: %v\n", err)
-				return
-			}
-		}
-
-		abs,err := functions.AbsPath(deleteOptions.path)
-		if err != nil {
-			ioutils.Errorf("Error: %v\n", err)
-			return
-		}
-
-		var cmdArgs []string
-
-		if deleteOptions.all {
-			optionPath := deleteOptions.path
-			if !osutils.IsDirectory(abs) {
-				abs = filepath.Dir(abs)
-				optionPath = filepath.Dir(optionPath)
-			}
-			fmt.Printf("Deleting %v resources\n\n", optionPath)
-			cmdArgs = []string{"delete", "-f", abs}
-		} else {
-			if osutils.IsDirectory(abs) {
-				fmt.Printf("Deleting %v function\n\n", deleteOptions.name)
-				cmdArgs = []string{"delete", "function", deleteOptions.name}
-			} else {
-				fmt.Printf("Deleting %v resource\n\n", deleteOptions.path)
-				cmdArgs = []string{"delete", "-f", abs}
-			}
-		}
-
-		output, err := kubectl.ExecForString(cmdArgs)
-		if err != nil {
-			ioutils.Errorf("Error: %v\n", err)
-			return
-		}
-		fmt.Printf("%v\n", output)
-
-		return
+		return delete(cmd, options.GetDeleteOptions(opts.AllOptions))
 
 	},
+	PreRun: func(cmd *cobra.Command, args []string) {
+
+		if !opts.AllOptions.Initialized {
+			utils.MergeDeleteOptions(*cmd.Flags(), &opts.AllOptions)
+			if len(args) > 0 {
+				if len(args) == 1 && opts.AllOptions.FunctionPath == "" {
+					opts.AllOptions.FunctionPath = args[0]
+				} else {
+					ioutils.Errorf("Invalid argument(s) %v\n", args)
+					cmd.Usage()
+					os.Exit(1)
+				}
+			}
+
+			err := options.ValidateAndCleanInitOptions(&opts.AllOptions.InitOptions)
+			if err != nil {
+				ioutils.Error(err)
+				os.Exit(1)
+			}
+		}
+		opts.AllOptions.Initialized = true
+	},
+}
+
+func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
+
+	if opts.FunctionName == "" {
+		var err error
+		opts.FunctionName, err = functions.FunctionNameFromPath(opts.FunctionPath)
+		if err != nil {
+			cmd.SilenceUsage = true
+			return err
+		}
+	}
+
+	abs,err := functions.AbsPath(opts.FunctionPath)
+	if err != nil {
+		cmd.SilenceUsage = true
+		return err
+	}
+
+	var cmdArgs []string
+
+	if opts.All {
+		optionPath := opts.FunctionPath
+		if !osutils.IsDirectory(abs) {
+			abs = filepath.Dir(abs)
+			optionPath = filepath.Dir(optionPath)
+		}
+		fmt.Printf("Deleting %v resources\n\n", optionPath)
+		cmdArgs = []string{"delete", "-f", abs}
+	} else {
+		if osutils.IsDirectory(abs) {
+			fmt.Printf("Deleting %v function\n\n", opts.FunctionName)
+			cmdArgs = []string{"delete", "function", opts.FunctionName}
+		} else {
+			fmt.Printf("Deleting %v resource\n\n", opts.FunctionPath)
+			cmdArgs = []string{"delete", "-f", abs}
+		}
+	}
+
+	if opts.DryRun {
+		//args := []string{"delete", "-f", abs}
+		fmt.Printf("\nDelete Command: kubectl %s\n\n", strings.Trim(fmt.Sprint(cmdArgs), "[]"))
+	} else {
+		output, err := kubectl.ExecForString(cmdArgs)
+		if err != nil {
+			cmd.SilenceUsage = true
+			return err
+		}
+		fmt.Printf("%v\n", output)
+	}
+
+	return nil
 }
 
 func init() {
 	rootCmd.AddCommand(deleteCmd)
-
-	deleteCmd.Flags().StringVarP(&deleteOptions.name, "name", "n", "", "the name of the function")
-	deleteCmd.Flags().StringVarP(&deleteOptions.path, "filepath", "f", "", "path or directory for the function resources, if a file is specified then the file's directory will be used (defaults to the current directory)")
-	deleteCmd.Flags().BoolVarP(&deleteOptions.all, "all", "", false, "delete all resources including topics, not just the function resource")
+	utils.CreateDeleteFlags(deleteCmd.Flags())
 }

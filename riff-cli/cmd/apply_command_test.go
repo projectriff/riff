@@ -24,7 +24,7 @@ import (
 )
 
 func TestApplyCommandImplicitPath(t *testing.T) {
-	clearInitOptions()
+	clearAllOptions()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"apply", "--dry-run", osutils.Path("../test_data/shell/echo")})
 
@@ -34,7 +34,7 @@ func TestApplyCommandImplicitPath(t *testing.T) {
 }
 
 func TestApplyCommandExplicitPath(t *testing.T) {
-	clearInitOptions()
+	clearAllOptions()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"apply", "--dry-run", "-f", osutils.Path("../test_data/shell/echo")})
 
