@@ -24,6 +24,7 @@ import (
 // +genclient
 // +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:defaulter-gen=true
 
 // Represents the functions.projectriff.io CRD
 type Function struct {
@@ -71,4 +72,12 @@ type FunctionList struct {
 	meta_v1.TypeMeta `json:",inline"`
 	meta_v1.ListMeta `json:"metadata"`
 	Items            []Function `json:"items"`
+}
+
+var defaultIdleTimeout = int32(10000)
+
+func SetDefaults_FunctionSpec(obj *FunctionSpec) {
+	if obj.IdleTimeoutMs == nil {
+		obj.IdleTimeoutMs = &defaultIdleTimeout
+	}
 }
