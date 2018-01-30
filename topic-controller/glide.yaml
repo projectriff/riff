@@ -1,0 +1,19 @@
+package: github.com/projectriff/topic-controller
+import:
+- package: github.com/golang/glog
+  version: master
+- package: github.com/projectriff/kubernetes-crds
+  version: master
+  subpackages:
+  - pkg/apis/projectriff.io/v1
+  - pkg/client/clientset/versioned
+  - pkg/client/informers/externalversions
+- package: github.com/wvanbergen/kazoo-go
+  repo: https://github.com/ericbottard/kazoo-go.git
+  version: topic-management
+- package: k8s.io/client-go
+  version: v5.0.1
+  subpackages:
+  - rest
+  - tools/cache
+  - tools/clientcmd
