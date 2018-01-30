@@ -1,0 +1,18 @@
+FROM golang:1.9
+
+RUN go get github.com/derekparker/delve/cmd/dlv
+
+ARG PACKAGE=github.com/projectriff/http-gateway
+ARG COMMAND=cmd/http-gateway.go
+
+
+WORKDIR /go/src/${PACKAGE}
+COPY vendor/ vendor/
+COPY cmd/ cmd/
+
+# This does not work atm, see https://github.com/derekparker/delve/issues/952#issuecomment-323801491
+# As a consequence, the app will start in a paused state and won't 'run' until a debugger is attached
+RUN echo "continue" > /tmp/initfile
+
+RUN go build -gcflags="-N -l" ${COMMAND}
+CMD dlv --headless --listen :2345 --api-version 2 --init /tmp/initfile exec ./http-gateway

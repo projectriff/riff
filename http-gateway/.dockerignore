@@ -1,2 +1,4 @@
 *
+!cmd/
+!vendor/
 !http-gateway-linux
