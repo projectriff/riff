@@ -1,2 +1,4 @@
 #!/bin/bash
-./build-helper "$PWD/../java-function-invoker/" ${1:-''} ${2:-''} './mvnw clean package dockerfile:build'
+pushd "$PWD/../java-function-invoker/"
+    ./mvnw clean package dockerfile:build
+popd

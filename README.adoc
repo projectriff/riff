@@ -25,8 +25,11 @@ minikube start
 
 * A Java 8 environment.
 
-* A working Go environment, with clones of the function-sidecar, function-controller,
-topic-controller and http-gateway repositories.
+* A working Go environment, with clones of the 
+https://github.com/projectriff/function-sidecar[function-sidecar], 
+https://github.com/projectriff/function-controller[function-controller],
+https://github.com/projectriff/topic-controller[topic-controller] and 
+https://github.com/projectriff/http-gateway[http-gateway] repositories.
 +
 [source, bash]
 ----
@@ -37,7 +40,12 @@ git clone -o upstream https://github.com/projectriff/topic-controller src/github
 git clone -o upstream https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway/
 ----
 
-* A clone of the riff, java-function-invoker, node-function-invoker, shell-function-invoker and python2-function-invoker repos.
+* A clone of the 
+https://github.com/projectriff/riff[riff], 
+https://github.com/projectriff/java-function-invoker[java-function-invoker], 
+https://github.com/projectriff/node-function-invoker[node-function-invoker], 
+https://github.com/projectriff/shell-function-invoker[shell-function-invoker] and 
+https://github.com/projectriff/python2-function-invoker[python2-function-invoker] repos.
 +
 NOTE: These repos should be cloned under a unique root directory since we will be using relative paths during the build.
 +
@@ -67,23 +75,23 @@ eval $(minikube docker-env)
 
 ==== Build the core riff components
 
-This builds the Function Sidecar, HTTP Gateway, Topic Controller, and Function Controller
+This builds the Function Sidecar, HTTP Gateway, Topic Controller, and Function Controller:
 
 [source, bash]
 ----
-./build-function-sidecar upstream master
-./build-http-gateway upstream master
-./build-topic-controller upstream master
-./build-function-controller upstream master
+./build-function-sidecar
+./build-http-gateway
+./build-topic-controller
+./build-function-controller
 ----
 
 ==== Build the function invokers
 
-This builds the java-function-invoker, node-function-invoker, shell-function-invoker, and python2-function-invoker
+This builds the `java-function-invoker`, `node-function-invoker`, `shell-function-invoker`, and `python2-function-invoker`:
 
 [source, bash]
 ----
-./build-function-invokers upstream master
+./build-function-invokers
 ----
 
 ==== Deploy Kafka/Zookeeper
@@ -104,7 +112,7 @@ kubectl apply -f config/types
 
 ==== Deploy the riff core components
 
-This deploys the HTTP Gateway, Topic Controller, and Function Controller
+This deploys the HTTP Gateway, Topic Controller, and Function Controller:
 
 [source, bash]
 ----

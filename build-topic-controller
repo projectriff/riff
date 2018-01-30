@@ -1,2 +1,4 @@
 #!/bin/bash
-./build-helper "$(go env GOPATH)/src/github.com/projectriff/topic-controller/" ${1:-''} ${2:-''} 'make clean dockerize'
+pushd "$(go env GOPATH)/src/github.com/projectriff/topic-controller/"
+    make dockerize
+popd
