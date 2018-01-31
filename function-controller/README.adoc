@@ -23,31 +23,31 @@ If you would like to run tests using the `ginkgo` command, install:
 
 === Get the source
 [source, bash]
-====
+----
 cd $(go env GOPATH)   #defaults to ~/go
 git clone -o upstream https://github.com/projectriff/function-controller src/github.com/projectriff/function-controller
-====
+----
 
 === Building
 * To build locally (this will produce a binary named `function-controller` on _your_ machine):
 +
 [source, bash]
-====
+----
 make build
-====
+----
 
 * To build for docker (and deploy as part of the whole https://github.com/projectriff/riff#-manual-install-of-riff[riff]
 installation):
 +
 [source, bash]
-====
+----
 make dockerize
-====
+----
 This assumes that your docker client is correctly configured to target the daemon where you want the image built.
 
 * To run tests:
 +
 [source, bash]
-====
+----
 make test
-====
+----
