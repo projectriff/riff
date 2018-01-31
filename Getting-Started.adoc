@@ -77,7 +77,16 @@ For a cluster that has RBAC enabled add `--set create.rbac=true`:
 
 [source, bash]
 ----
-helm install riffrepo/riff --version 0.0.3 --name demo --set create.rbac=true
+helm install riffrepo/riff --name demo --set create.rbac=true
+----
+====
+
+[WARNING]
+====
+The 0.0.3 version of riff needs a fix to the RBAC configuration that is provided in version `0.0.3-rbac` of the chart. Use the following command to install riff `0.0.3` with RBAC enabled:
+
+----
+helm install riffrepo/riff --version 0.0.3-rbac --name demo
 ----
 ====
 
@@ -96,7 +105,16 @@ For a cluster that has RBAC enabled add `--set create.rbac=true`:
 
 [source, bash]
 ----
-helm install riffrepo/riff --version 0.0.3 --name demo --set create.rbac=true --set httpGateway.service.type=NodePort
+helm install riffrepo/riff --name demo --set create.rbac=true --set httpGateway.service.type=NodePort
+----
+====
+
+[WARNING]
+====
+The 0.0.3 version of riff needs a fix to the RBAC configuration that is provided in version `0.0.3-rbac` of the chart. Use the following command to install riff `0.0.3` with RBAC enabled:
+
+----
+helm install riffrepo/riff --version 0.0.3-rbac --name demo --set httpGateway.service.type=NodePort
 ----
 ====
 
