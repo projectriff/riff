@@ -2,6 +2,20 @@
 
 A FaaS for Kubernetes
 
+[grid="none", frame="none", width="100%", cols=">,<,>,<,>,<,>,<,>,<"]
+|=====
+| Acceptance          | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/run-riff-system-tests-gke/badge[Acceptance Tests Status]
+| Topic Controller    | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-topic-controller-container/badge[Topic Controller Status]
+| Function Controller | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-function-controller-container/badge[Function Controller Status]
+| HTTP Gateway        | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-http-gateway-container/badge[HTTP Gateway Status]
+| Function Sidecar    | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-function-sidecar-container/badge[Function Sidecar Status]
+| Helm charts         | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-riff-chart/badge[Helm Charts]
+| Java Invoker        | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-java-function-invoker-container/badge[Java Invoker]
+| NodeJS Invoker      | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-node-function-invoker-container/badge[NodeJS Invoker]
+| Python2 Invoker     | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-python2-function-invoker-container/badge[Python2 Invoker Status]
+| Shell Invoker       | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-shell-function-invoker-container/badge[Shell Invoker Status]
+|====
+
 == Installation
 
 You can install the system using link:Getting-Started.adoc#helm[a Helm chart] or by link:#manual[manually building and deploying] the components.
