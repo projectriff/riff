@@ -14,7 +14,7 @@ A FaaS for Kubernetes
 | NodeJS Invoker      | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-node-function-invoker-container/badge[NodeJS Invoker]
 | Python2 Invoker     | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-python2-function-invoker-container/badge[Python2 Invoker Status]
 | Shell Invoker       | image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-shell-function-invoker-container/badge[Shell Invoker Status]
-|====
+|=====
 
 == Installation
 
