@@ -14,6 +14,7 @@ ifeq ($(detected_OS),Linux)
 endif
 
 GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
+TAG = 0.0.4-snapshot
 
 build: $(OUTPUT)
 
@@ -42,3 +43,9 @@ clean:
 
 dockerize: build-for-docker
 	docker build . -t projectriff/http-gateway:0.0.4-snapshot
+
+debug-dockerize: $(GO_SOURCES) vendor
+	# Need to remove probes as delve starts app in paused state
+	-kubectl patch deploy/http-gateway --type=json -p='[{"op":"remove", "path":"/spec/template/spec/containers/0/livenessProbe"}]'
+	-kubectl patch deploy/http-gateway --type=json -p='[{"op":"remove", "path":"/spec/template/spec/containers/0/readinessProbe"}]'
+	docker build . -t projectriff/http-gateway:$(TAG) -f Dockerfile-debug
