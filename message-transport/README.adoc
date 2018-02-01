@@ -25,4 +25,17 @@ This repository is a dependency of the https://github.com/projectriff/http-gatew
 and https://github.com/projectriff/function-sidecar[function-sidecar] repositories
 and is built by them.
 
+=== Testing
 
+For now, issue:
+[source, bash]
+----
+go test ./...
+----
+
+== Generating Mocks
+
+Transport interface mocks can be regenerated as follows _and should then be checked in_:
+----
+go generate ./...
+----
