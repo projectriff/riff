@@ -1,0 +1,28 @@
+= Message Transport
+
+== Purpose
+The *message transport* is a https://projectriff.io/[Riff] component that enables the HTTP gateway to send messages
+to function pods and, when appropriate, to receive replies.
+
+It provides a message type and an abstract transport interface for sending and
+receiving messages. It also provides an implementation of the transport interface
+based on https://kafka.apache.org/[Apache Kafka].
+
+== Development
+
+The code in this repository is written in Go.
+
+=== Get the source
+[source, bash]
+----
+cd $(go env GOPATH)
+git clone -o upstream https://github.com/projectriff/message-transport src/github.com/projectriff/message-transport
+----
+
+=== Building
+
+This repository is a dependency of the https://github.com/projectriff/http-gateway[http-gateway]
+and https://github.com/projectriff/function-sidecar[function-sidecar] repositories
+and is built by them.
+
+
