@@ -21,7 +21,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/projectriff/message-transport/pkg/message"
-	"reflect"
 )
 
 var _ = Describe("Wireformat", func() {
@@ -50,5 +49,5 @@ func encodeThenDecode(msg message.Message) {
 	msg2, err := extractMessage(bytes)
 	Expect(err).NotTo(HaveOccurred())
 
-	Expect(reflect.DeepEqual(msg, msg2)).To(BeTrue())
+	Expect(msg).To(Equal(msg2))
 }

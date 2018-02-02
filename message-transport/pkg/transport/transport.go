@@ -23,7 +23,6 @@ import (
 
 //go:generate mockery -name=Producer -output mocktransport -outpkg mocktransport
 
-
 // Producer is an interface for sending messages to arbitrary topics.
 type Producer interface {
 	// Send sends a message to a topic.
