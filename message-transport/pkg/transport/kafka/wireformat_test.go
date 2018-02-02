@@ -17,36 +17,38 @@
 package kafka
 
 import (
-	"testing"
-	"reflect"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
 	"github.com/projectriff/message-transport/pkg/message"
+	"reflect"
 )
 
-func TestEmptyMessage(t *testing.T) {
-	msg := message.NewEmptyMessage()
-	encodeThenDecode(msg, t)
-}
+var _ = Describe("Wireformat", func() {
 
-func TestMessageWithOnlyPayload(t *testing.T) {
-	msg := message.NewMessage([]byte("Hello"), nil)
-	encodeThenDecode(msg, t)
-}
+	It("should preserve an empty message", func() {
+		msg := message.NewEmptyMessage()
+		encodeThenDecode(msg)
+	})
 
-func TestMessageWithOnlyHeaders(t *testing.T) {
-	msg := message.NewMessage(nil, map[string][]string{"key1":{"value1"}, "k2":{"18.0", "other"}})
-	encodeThenDecode(msg, t)
-}
+	It("should preserve a message with just a payload", func() {
+		msg := message.NewMessage([]byte("Hello"), nil)
+		encodeThenDecode(msg)
+	})
 
-func encodeThenDecode(msg message.Message, t *testing.T) {
+	It("should preserve a message with just headers", func() {
+		msg := message.NewMessage(nil, map[string][]string{"key1":{"value1"}, "k2":{"18.0", "other"}})
+		encodeThenDecode(msg)
+	})
+
+})
+
+func encodeThenDecode(msg message.Message) {
 	bytes, err := encodeMessage(msg)
-	if err != nil {
-		t.Fatal(err)
-	}
+	Expect(err).NotTo(HaveOccurred())
+
 	msg2, err := extractMessage(bytes)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(msg, msg2) {
-		t.Fatal("Expected identical messages: ", msg, msg2)
-	}
+	Expect(err).NotTo(HaveOccurred())
+
+	Expect(reflect.DeepEqual(msg, msg2)).To(BeTrue())
 }
