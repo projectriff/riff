@@ -13,3 +13,4 @@
 # Output of the go coverage tool
 *.coverprofile
 
+.idea/
