@@ -1,9 +1,53 @@
 = Topic Controller
 
-== Building
-```
-cd $(go env GOPATH)
-git clone https://github.com/projectriff/topic-controller src/github.com/projectriff/topic-controller
-cd src/github.com/projectriff/topic-controller
+== Purpose
+The *topic controller* runs inside kubernetes and continuously monitors the *topic* custom resource
+definitions for changes. It reacts by creating new topics (with given characteristics such as number of partitions)
+in the messaging broker.
+
+== Development
+=== Prerequisites
+The following tools are required to build this project:
+
+- `make`
+- Docker
+- https://github.com/Masterminds/glide#install[Glide] for dependency management
+
+If you intend to re-generate mocks for testing, install:
+
+- https://github.com/vektra/mockery#installation[Mockery]
+
+If you would like to run tests using the `ginkgo` command, install:
+
+- http://onsi.github.io/ginkgo/[Ginkgo]
+
+=== Get the source
+[source, bash]
+----
+cd $(go env GOPATH)   #defaults to ~/go
+git clone -o upstream https://github.com/projectriff/topic-controller src/github.com/projectriff/topic-controller
+----
+
+=== Building
+* To build locally (this will produce a binary named `topic-controller` on _your_ machine):
++
+[source, bash]
+----
+make build
+----
+
+* To build for docker (and deploy as part of the whole https://github.com/projectriff/riff#-manual-install-of-riff[riff]
+installation):
++
+[source, bash]
+----
 make dockerize
-```
+----
+This assumes that your docker client is correctly configured to target the daemon where you want the image built.
+
+* To run tests:
++
+[source, bash]
+----
+make test
+----
