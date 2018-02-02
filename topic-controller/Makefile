@@ -1,37 +1,16 @@
-.PHONY: build build-for-docker clean dockerize
+.PHONY: build clean dockerize
 OUTPUT = topic-controller
-OUTPUT_LINUX = $(OUTPUT)-linux
-BUILD_FLAGS =
 TAG = 0.0.4-snapshot
-
-ifeq ($(OS),Windows_NT)
-    detected_OS := Windows
-else
-    detected_OS := $(shell sh -c 'uname -s 2>/dev/null || echo not')
-endif
-
-ifeq ($(detected_OS),Linux)
-	BUILD_FLAGS += -ldflags "-linkmode external -extldflags -static"
-endif
-
 
 GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
 
 build: $(OUTPUT)
 
-build-for-docker: $(OUTPUT_LINUX)
-
-test: build
+test:
 	go test -v ./...
 
 $(OUTPUT): $(GO_SOURCES)
 	go build cmd/topic-controller.go
-
-$(OUTPUT_LINUX): $(GO_SOURCES)
-	# This builds the executable from Go sources on *your* machine, targeting Linux OS
-	# and linking everything statically, to minimize Docker image size
-	# See e.g. https://blog.codeship.com/building-minimal-docker-containers-for-go-applications/ for details
-	CGO_ENABLED=0 GOOS=linux go build $(BUILD_FLAGS) -v -a -installsuffix cgo -o $(OUTPUT_LINUX) cmd/topic-controller.go
 
 vendor: glide.lock
 	glide install -v --force
@@ -41,7 +20,6 @@ glide.lock: glide.yaml
 
 clean:
 	rm -f $(OUTPUT)
-	rm -f $(OUTPUT_LINUX)
 
-dockerize: build-for-docker
+dockerize:
 	docker build . -t projectriff/topic-controller:$(TAG)
