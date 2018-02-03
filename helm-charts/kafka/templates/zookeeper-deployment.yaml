@@ -1,8 +1,7 @@
-{{- if .Values.create.faas -}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-zookeeper
+  name: {{ template "zkname" . }}
   labels:
     app: {{ template "name" . }}
     component: zookeeper
@@ -29,4 +28,3 @@ spec:
             value: "1"
           - name: ZOOKEEPER_SERVER_1
             value: {{ template "fullname" . }}-zookeeper
-{{- end -}}

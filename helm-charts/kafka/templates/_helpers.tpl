@@ -16,12 +16,10 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
-Create the name of the service account to use
+Create a default fully qualified app name for zookeeper.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
-{{- define "serviceAccountName" -}}
-{{- if .Values.serviceAccount.create -}}
-    {{ default (include "fullname" .) .Values.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.serviceAccount.name }}
-{{- end -}}
+{{- define "zkname" -}}
+{{- $name := default "zookeeper" .Values.zookeeperNameOverride -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}

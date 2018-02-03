@@ -1,0 +1,25 @@
+# Default values for riff.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+zookeeper:
+  replicaCount: 1
+  image:
+    repository: wurstmeister/zookeeper
+    tag: 3.4.6
+    pullPolicy: IfNotPresent
+  service:
+    name: zookeeper
+    type: ClusterIP
+    externalPort: 2181
+    internalPort: 2181
+kafka:
+  replicaCount: 1
+  image:
+    repository: wurstmeister/kafka
+    tag: 0.11.0.1
+    pullPolicy: IfNotPresent
+  service:
+    name: kafka
+    type: ClusterIP
+    externalPort: 9092
+    internalPort: 9092

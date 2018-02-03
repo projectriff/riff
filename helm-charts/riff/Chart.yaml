@@ -1,7 +1,7 @@
 apiVersion: v1
 description: riff is for functions - a FaaS for Kubernetes
 name: riff
-version: 0.0.3
-appVersion: 0.0.3
+version: 0.0.4-snapshot
+appVersion: 0.0.4-snapshot
 home: https://projectriff.io/
 icon: https://raw.githubusercontent.com/projectriff/projectriff.io/master/images/riff.png

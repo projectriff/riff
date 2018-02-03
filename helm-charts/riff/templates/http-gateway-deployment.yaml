@@ -37,5 +37,6 @@ spec:
             - containerPort: 8080
           env:
           - name: KAFKA_BROKERS
-            value: {{ template "fullname" . }}-kafka:9092
+            value: {{ .Values.kafka.broker.nodes }}
+      serviceAccountName: {{ template "serviceAccountName" . }}
 {{- end -}}

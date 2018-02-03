@@ -40,8 +40,8 @@ spec:
             - containerPort: 8080
           env:
           - name: KAFKA_BROKERS
-            value: {{ template "fullname" . }}-kafka:9092
+            value: {{ .Values.kafka.broker.nodes }}
           - name: RIFF_FUNCTION_SIDECAR_TAG
             value: {{ .Values.functionController.sidecar.image.tag }}
-      serviceAccountName: {{ template "fullname" . }}-sa
+      serviceAccountName: {{ template "serviceAccountName" . }}
 {{- end -}}
