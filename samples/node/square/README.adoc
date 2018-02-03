@@ -15,13 +15,13 @@
 === create the function and its input topic
 
 ```
-riff create
+riff create -i numbers
 ```
 
 === publish a message and wait for a reply
 
 ```
-riff publish -d 99 -r
+riff publish -i numbers -d 99 -r
 ```
 
 === delete the function and its input topic
