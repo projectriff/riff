@@ -23,18 +23,19 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Shopify/sarama"
-	"github.com/bsm/sarama-cluster"
-
 	"flag"
 	dispatch "github.com/projectriff/function-sidecar/pkg/dispatcher"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher/http"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher/pipes"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher/stdio"
-	"github.com/projectriff/function-sidecar/pkg/wireformat"
 	"io"
 	"strings"
+	"github.com/projectriff/message-transport/pkg/transport"
+	"github.com/projectriff/message-transport/pkg/transport/kafka"
+	"github.com/bsm/sarama-cluster"
+	"github.com/Shopify/sarama"
+	"github.com/projectriff/function-sidecar/pkg/carrier"
 )
 
 type stringSlice []string
@@ -80,30 +81,26 @@ func main() {
 
 	log.Printf("Sidecar for function '%v' (%v->%v) using %v dispatcher starting\n", group, input, output, protocol)
 
-	var producer sarama.AsyncProducer
+	var producer transport.Producer
 	var err error
 	if output != "" {
-		producer, err = sarama.NewAsyncProducer(brokers, nil)
+		producer, err = kafka.NewProducer(brokers)
 		if err != nil {
 			panic(err)
 		}
-		defer producer.Close()
+
+		if prod, ok := producer.(io.Closer); ok {
+			defer prod.Close()
+		}
 	}
 
 	consumerConfig := makeConsumerConfig()
 	consumerConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
-
-	consumer, err := cluster.NewConsumer(brokers, group, []string{input}, consumerConfig)
+	consumer, err := kafka.NewConsumer(brokers, group, []string{input}, consumerConfig)
 	if err != nil {
 		panic(err)
 	}
 	defer consumer.Close()
-	if consumerConfig.Consumer.Return.Errors {
-		go consumeErrors(consumer)
-	}
-	if consumerConfig.Group.Return.Notifications {
-		go consumeNotifications(consumer)
-	}
 
 	dispatcher, err := createDispatcher(protocol)
 	if err != nil {
@@ -115,69 +112,12 @@ func main() {
 		defer d.Close()
 	}
 
-	go func() {
-		for {
-			select {
-			// Incoming message
-			case msg, open := <-consumer.Messages():
-				if open {
-					messageIn, err := wireformat.FromKafka(msg)
-					log.Printf(">>> %s\n", messageIn)
-					if err != nil {
-						log.Printf("Error receiving message from Kafka: %v", err)
-						break
-					}
-					dispatcher.Input() <- messageIn
-					consumer.MarkOffset(msg, "") // mark message as processed
-				} else {
-					// Kafka closed
-					log.Print("Exiting Kafka Consumer loop")
-					return
-				}
-			}
-		}
-	}()
-
-	go func() {
-		for {
-			select {
-			// Result message
-			case resultMsg, open := <-dispatcher.Output(): // Make sure to drain channel even if output==""
-				if open {
-					if output != "" {
-						log.Printf("<<< %s\n", resultMsg)
-						producerMessage, err := wireformat.ToKafka(resultMsg)
-						if err != nil {
-							log.Printf("Error encoding message: %v", err)
-							break
-						}
-						producerMessage.Topic = output
-						select {
-						case producer.Input() <- producerMessage:
-						}
-					} else {
-						log.Printf("=== Not sending function return value as function did not provide an output channel. Raw result = %s\n", resultMsg)
-					}
-				} else {
-					log.Print("Exiting Kafka Producer loop")
-					return
-				}
-			}
-		}
-	}()
+	carrier.Run(consumer, producer, dispatcher, output)
 
 	// trap SIGINT, SIGTERM, and SIGKILL to trigger a shutdown.
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, os.Kill)
-	// consume messages, watch signals
-	for {
-		select {
-		// Request for shutdown
-		case <-signals:
-			close(dispatcher.Input())
-			return
-		}
-	}
+	<-signals
 }
 
 func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
@@ -196,18 +136,6 @@ func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
 		return grpc.NewGrpcDispatcher(10382)
 	default:
 		panic("Unsupported Dispatcher " + protocol)
-	}
-}
-
-func consumeNotifications(consumer *cluster.Consumer) {
-	for ntf := range consumer.Notifications() {
-		log.Printf("Rebalanced: %+v\n", ntf)
-	}
-}
-
-func consumeErrors(consumer *cluster.Consumer) {
-	for err := range consumer.Errors() {
-		log.Printf("Error: %s\n", err.Error())
 	}
 }
 

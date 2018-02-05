@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"github.com/giantswarm/retry-go"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher"
+	"github.com/projectriff/message-transport/pkg/message"
 	"io/ioutil"
 	"log"
 	"net"
@@ -34,7 +35,7 @@ const ConnectionAttemptInterval = 100 * time.Millisecond
 type httpDispatcher struct {
 }
 
-func (httpDispatcher) Dispatch(in dispatcher.Message) (dispatcher.Message, error) {
+func (httpDispatcher) Dispatch(in message.Message) (message.Message, error) {
 	client := http.Client{
 		Timeout: time.Duration(60 * time.Second),
 	}
@@ -57,12 +58,12 @@ func (httpDispatcher) Dispatch(in dispatcher.Message) (dispatcher.Message, error
 		return nil, err
 	}
 
-	result := dispatcher.NewMessage(out, make(map[string][]string))
+	result := message.NewMessage(out, make(map[string][]string))
 	propagateOutgoingHeaders(resp, result)
 	return result, nil
 }
 
-func propagateIncomingHeaders(message dispatcher.Message, request *http.Request) {
+func propagateIncomingHeaders(message message.Message, request *http.Request) {
 	for h, ss := range message.Headers() {
 		for _, s := range ss {
 			request.Header.Add(h, s)
@@ -70,7 +71,7 @@ func propagateIncomingHeaders(message dispatcher.Message, request *http.Request)
 	}
 }
 
-func propagateOutgoingHeaders(resp *http.Response, message dispatcher.Message) {
+func propagateOutgoingHeaders(resp *http.Response, message message.Message) {
 	for h, v := range resp.Header {
 		message.Headers()[h] = v
 	}

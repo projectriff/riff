@@ -20,6 +20,7 @@ import (
 	"bufio"
 	"errors"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher"
+	"github.com/projectriff/message-transport/pkg/message"
 	"log"
 	"os"
 	"strings"
@@ -32,15 +33,15 @@ const (
 )
 
 type pipesDispatcher struct {
-	input  chan<- dispatcher.Message
-	output <-chan dispatcher.Message
+	input  chan<- message.Message
+	output <-chan message.Message
 }
 
-func (this pipesDispatcher) Input() chan<- dispatcher.Message {
+func (this pipesDispatcher) Input() chan<- message.Message {
 	return this.input
 }
 
-func (this pipesDispatcher) Output() <-chan dispatcher.Message {
+func (this pipesDispatcher) Output() <-chan message.Message {
 	return this.output
 }
 
@@ -86,8 +87,8 @@ func NewPipesDispatcher() (dispatcher.Dispatcher, error) {
 	}
 	reader := bufio.NewReader(infile)
 
-	i := make(chan dispatcher.Message, 100) // TODO buffered
-	o := make(chan dispatcher.Message, 100)
+	i := make(chan message.Message, 100) // TODO buffered
+	o := make(chan message.Message, 100)
 
 	go func() {
 		for {
@@ -124,7 +125,7 @@ func NewPipesDispatcher() (dispatcher.Dispatcher, error) {
 	return pipesDispatcher{input: i, output: o}, nil
 }
 
-func readMessage(reader *bufio.Reader) (dispatcher.Message, error) {
+func readMessage(reader *bufio.Reader) (message.Message, error) {
 	line, err := reader.ReadString('\n')
 	if err != nil {
 		return nil, err
@@ -155,10 +156,10 @@ func readMessage(reader *bufio.Reader) (dispatcher.Message, error) {
 	// Strip last CR
 	payload = payload[0: len(payload)-1]
 
-	return dispatcher.NewMessage(payload, headers), nil
+	return message.NewMessage(payload, headers), nil
 }
 
-func writeMessage(writer *bufio.Writer, in dispatcher.Message) error {
+func writeMessage(writer *bufio.Writer, in message.Message) error {
 	_, err := writer.WriteString("#headers\n")
 	if err != nil {
 		return err

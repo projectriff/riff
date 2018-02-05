@@ -19,6 +19,7 @@ package stdio
 import (
 	"bufio"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher"
+	"github.com/projectriff/message-transport/pkg/message"
 	"log"
 	"os"
 	"syscall"
@@ -34,7 +35,7 @@ type stdioDispatcher struct {
 	writer *bufio.Writer
 }
 
-func (this stdioDispatcher) Dispatch(in dispatcher.Message) (dispatcher.Message, error) {
+func (this stdioDispatcher) Dispatch(in message.Message) (message.Message, error) {
 	_, err := this.writer.WriteString(string(in.Payload()) + "\n")
 	if err != nil {
 		log.Printf("Error writing to %v: %v", OUTPUT_PIPE, err)
@@ -50,7 +51,7 @@ func (this stdioDispatcher) Dispatch(in dispatcher.Message) (dispatcher.Message,
 		log.Printf("Error reading from %v: %v", INPUT_PIPE, err)
 		return nil, err
 	}
-	return dispatcher.NewMessage([]byte(line[0 : len(line)-1]), nil), nil
+	return message.NewMessage([]byte(line[0 : len(line)-1]), nil), nil
 }
 
 func (this stdioDispatcher) Close() error {

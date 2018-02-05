@@ -11,9 +11,9 @@ import (
 	"github.com/bsm/sarama-cluster"
 	"math/rand"
 	"time"
-	"github.com/projectriff/function-sidecar/pkg/wireformat"
-	"github.com/projectriff/function-sidecar/pkg/dispatcher"
 	"github.com/Shopify/sarama"
+	"github.com/projectriff/message-transport/pkg/message"
+	"github.com/projectriff/message-transport/pkg/transport/kafka"
 )
 
 const sourceMsg = `World`
@@ -67,17 +67,16 @@ func TestIntegrationWithKafka(t *testing.T) {
 		http.ListenAndServe(":8080", nil)
 	}()
 
-	kafkaProducer, kafkaProducerErr := sarama.NewAsyncProducer([]string{broker}, nil)
+	kafkaProducer, kafkaProducerErr := kafka.NewProducer([]string{broker})
 	if kafkaProducerErr != nil {
 		t.Fatal(kafkaProducerErr)
 	}
 
-	testMessage, err := wireformat.ToKafka(dispatcher.NewMessage([]byte(sourceMsg), nil))
+	err := kafkaProducer.Send(input, message.NewMessage([]byte(sourceMsg), nil))
 	if err != nil {
 		t.Fatal(err)
 	}
-	testMessage.Topic = input
-	kafkaProducer.Input() <- testMessage
+
 	producerCloseErr := kafkaProducer.Close()
 	if producerCloseErr != nil {
 		t.Fatal(producerCloseErr)
@@ -86,19 +85,15 @@ func TestIntegrationWithKafka(t *testing.T) {
 	consumerConfig := cluster.NewConfig()
 	consumerConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
 	group2 := randString(10)
-	consumer, err := cluster.NewConsumer([]string{broker}, group2, []string{output}, consumerConfig)
+	consumer, err := kafka.NewConsumer([]string{broker}, group2, []string{output}, consumerConfig)
 	if err != nil {
 		panic(err)
 	}
 	defer consumer.Close()
 
 	select {
-	case consumerMessage, ok := <-consumer.Messages():
+	case msg, ok := <-consumer.Messages():
 		if ok {
-			msg, err := wireformat.FromKafka(consumerMessage)
-			if err != nil {
-				t.Fatal(err)
-			}
 			reply := string(msg.Payload())
 			if reply != expectedReply {
 				t.Fatal(fmt.Errorf("Received reply [%s] does not match expected reply [%s]", reply, expectedReply))

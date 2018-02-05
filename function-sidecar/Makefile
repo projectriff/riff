@@ -13,7 +13,6 @@ ifeq ($(detected_OS),Linux)
         BUILD_FLAGS += -ldflags "-linkmode external -extldflags -static"
 endif
 
-
 GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
 
 GRPC_DIR = pkg/dispatcher/grpc
@@ -31,8 +30,11 @@ $(OUTPUT_LINUX): $(GO_SOURCES) vendor
 	# See e.g. https://blog.codeship.com/building-minimal-docker-containers-for-go-applications/ for details
 	CGO_ENABLED=0 GOOS=linux go build $(BUILD_FLAGS) -v -a -installsuffix cgo -o $(OUTPUT_LINUX) cmd/function-sidecar.go
 
-vendor: Gopkg.toml
-	dep ensure
+vendor: glide.lock
+	glide install -v --force
+
+glide.lock: glide.yaml
+	glide up -v --force
 
 clean:
 	rm -f $(OUTPUT)

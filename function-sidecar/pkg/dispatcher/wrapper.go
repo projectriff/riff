@@ -16,19 +16,22 @@
 
 package dispatcher
 
-import "log"
+import (
+	"log"
+	"github.com/projectriff/message-transport/pkg/message"
+)
 
 type wrapper struct {
 	old    SynchDispatcher
-	input  chan<- Message
-	output <-chan Message
+	input  chan<- message.Message
+	output <-chan message.Message
 }
 
-func (w *wrapper) Input() chan<- Message {
+func (w *wrapper) Input() chan<- message.Message {
 	return w.input
 }
 
-func (w *wrapper) Output() <-chan Message {
+func (w *wrapper) Output() <-chan message.Message {
 	return w.output
 }
 
@@ -37,7 +40,7 @@ func (w *wrapper) Output() <-chan Message {
 var PropagatedHeaders = []string{"correlationId"}
 
 // copy headers from incomingMessage that need to be propagated into resultMessage.Headers
-func propagateHeaders(incomingMessage Message, resultMessage Message) {
+func propagateHeaders(incomingMessage message.Message, resultMessage message.Message) {
 	for _, h := range PropagatedHeaders {
 		if value, ok := incomingMessage.Headers()[h]; ok {
 			resultMessage.Headers()[h] = value
@@ -47,8 +50,8 @@ func propagateHeaders(incomingMessage Message, resultMessage Message) {
 
 // NewWrapper wraps a SynchDispatcher to conform to the channel based Dispatcher interface
 func NewWrapper(synch SynchDispatcher) (*wrapper, error) {
-	i := make(chan Message)
-	o := make(chan Message)
+	i := make(chan message.Message)
+	o := make(chan message.Message)
 
 	go func() {
 		for {

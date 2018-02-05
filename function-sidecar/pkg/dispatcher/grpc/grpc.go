@@ -25,20 +25,21 @@ import (
 
 	"github.com/projectriff/function-sidecar/pkg/dispatcher"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/function"
+	"github.com/projectriff/message-transport/pkg/message"
 	"golang.org/x/net/context"
 )
 
 type grpcDispatcher struct {
 	stream function.MessageFunction_CallClient
-	input  chan dispatcher.Message
-	output chan dispatcher.Message
+	input  chan message.Message
+	output chan message.Message
 }
 
-func (this *grpcDispatcher) Input() chan<- dispatcher.Message {
+func (this *grpcDispatcher) Input() chan<- message.Message {
 	return this.input
 }
 
-func (this *grpcDispatcher) Output() <-chan dispatcher.Message {
+func (this *grpcDispatcher) Output() <-chan message.Message {
 	return this.output
 }
 
@@ -85,14 +86,14 @@ func NewGrpcDispatcher(port int) (dispatcher.Dispatcher, error) {
 		return nil, err
 	}
 
-	result := &grpcDispatcher{fnStream, make(chan dispatcher.Message, 100), make(chan dispatcher.Message, 100)}
+	result := &grpcDispatcher{fnStream, make(chan message.Message, 100), make(chan message.Message, 100)}
 	go result.handleIncoming()
 	go result.handleOutgoing()
 
 	return result, nil
 }
 
-func toGRPC(message dispatcher.Message) *function.Message {
+func toGRPC(message message.Message) *function.Message {
 	grpcHeaders := make(map[string]*function.Message_HeaderValue, len(message.Headers()))
 	for k, vv := range message.Headers() {
 		values := function.Message_HeaderValue{}
@@ -106,10 +107,10 @@ func toGRPC(message dispatcher.Message) *function.Message {
 	return &result
 }
 
-func toDispatcher(grpc *function.Message) dispatcher.Message {
+func toDispatcher(grpc *function.Message) message.Message {
 	dHeaders := make(map[string][]string, len(grpc.Headers))
 	for k, pv := range grpc.Headers {
 		dHeaders[k] = pv.Values
 	}
-	return dispatcher.NewMessage(grpc.Payload, dHeaders)
+	return message.NewMessage(grpc.Payload, dHeaders)
 }

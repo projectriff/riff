@@ -26,10 +26,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/projectriff/function-sidecar/pkg/dispatcher"
 	gdispatcher "github.com/projectriff/function-sidecar/pkg/dispatcher/grpc"
 	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/function"
 	"google.golang.org/grpc"
+	"github.com/projectriff/message-transport/pkg/message"
 )
 
 func init() {
@@ -82,7 +82,7 @@ func Test(t *testing.T) {
 		close(d.Input())
 	}()
 
-	d.Input() <- dispatcher.NewMessage([]byte("3:world"), nil)
+	d.Input() <- message.NewMessage([]byte("3:world"), nil)
 
 	for i := 0; i < 3; i++ {
 		select {
@@ -94,7 +94,7 @@ func Test(t *testing.T) {
 			t.Fatal("Timed out waiting for reply")
 		}
 		if i == 1 { // Send another input in the middle of processing first reply
-			d.Input() <- dispatcher.NewMessage([]byte("2:gRPC"), nil)
+			d.Input() <- message.NewMessage([]byte("2:gRPC"), nil)
 		}
 	}
 	for i := 0; i < 2; i++ {

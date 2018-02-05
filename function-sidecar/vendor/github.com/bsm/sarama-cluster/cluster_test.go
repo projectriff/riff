@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	testKafkaRoot  = "kafka_2.12-0.10.2.0"
+	testKafkaRoot  = "kafka_2.12-1.0.0"
 	testKafkaAddrs = []string{"127.0.0.1:29092"}
 	testTopics     = []string{"topic-a", "topic-b"}
 
@@ -62,31 +62,24 @@ var _ = Describe("int32Slice", func() {
 // --------------------------------------------------------------------
 
 var _ = BeforeSuite(func() {
-	testZkCmd = exec.Command(
+	testZkCmd = testCmd(
 		testDataDir(testKafkaRoot, "bin", "kafka-run-class.sh"),
 		"org.apache.zookeeper.server.quorum.QuorumPeerMain",
 		testDataDir("zookeeper.properties"),
 	)
-	testZkCmd.Env = []string{"KAFKA_HEAP_OPTS=-Xmx512M -Xms512M"}
-	if testing.Verbose() || os.Getenv("CI") != "" {
-		testZkCmd.Stderr = os.Stderr
-		testZkCmd.Stdout = os.Stdout
-	}
 
-	testKafkaCmd = exec.Command(
+	testKafkaCmd = testCmd(
 		testDataDir(testKafkaRoot, "bin", "kafka-run-class.sh"),
 		"-name", "kafkaServer", "kafka.Kafka",
 		testDataDir("server.properties"),
 	)
-	testKafkaCmd.Env = []string{"KAFKA_HEAP_OPTS=-Xmx1G -Xms1G"}
-	if testing.Verbose() || os.Getenv("CI") != "" {
-		testKafkaCmd.Stderr = os.Stderr
-		testKafkaCmd.Stdout = os.Stdout
-	}
 
-	Expect(os.MkdirAll(testKafkaData, 0777)).NotTo(HaveOccurred())
-	Expect(testZkCmd.Start()).NotTo(HaveOccurred())
-	Expect(testKafkaCmd.Start()).NotTo(HaveOccurred())
+	// Remove old test data before starting
+	Expect(os.RemoveAll(testKafkaData)).NotTo(HaveOccurred())
+
+	Expect(os.MkdirAll(testKafkaData, 0777)).To(Succeed())
+	Expect(testZkCmd.Start()).To(Succeed())
+	Expect(testKafkaCmd.Start()).To(Succeed())
 
 	// Wait for client
 	Eventually(func() error {
@@ -97,16 +90,16 @@ var _ = BeforeSuite(func() {
 		testConf.Producer.Return.Successes = true
 		testClient, err = sarama.NewClient(testKafkaAddrs, testConf)
 		return err
-	}, "30s", "1s").ShouldNot(HaveOccurred())
+	}, "30s", "1s").Should(Succeed())
 
 	// Ensure we can retrieve partition info
 	Eventually(func() error {
 		_, err := testClient.Partitions(testTopics[0])
 		return err
-	}, "30s", "1s").ShouldNot(HaveOccurred())
+	}, "30s", "1s").Should(Succeed())
 
 	// Seed a few messages
-	Expect(testSeed(1000)).NotTo(HaveOccurred())
+	Expect(testSeed(1000, testTopics)).To(Succeed())
 })
 
 var _ = AfterSuite(func() {
@@ -133,12 +126,12 @@ func testDataDir(tokens ...string) string {
 	return filepath.Join(tokens...)
 }
 
-// Seed messages
-func testSeed(n int) error {
+func testSeed(n int, testTopics []string) error {
 	producer, err := sarama.NewSyncProducerFromClient(testClient)
 	if err != nil {
 		return err
 	}
+	defer producer.Close()
 
 	for i := 0; i < n; i++ {
 		kv := sarama.StringEncoder(fmt.Sprintf("PLAINDATA-%08d", i))
@@ -149,7 +142,17 @@ func testSeed(n int) error {
 			}
 		}
 	}
-	return producer.Close()
+	return nil
+}
+
+func testCmd(name string, arg ...string) *exec.Cmd {
+	cmd := exec.Command(name, arg...)
+	if testing.Verbose() || os.Getenv("CI") != "" {
+		cmd.Stderr = os.Stderr
+		cmd.Stdout = os.Stdout
+	}
+	cmd.Env = []string{"KAFKA_HEAP_OPTS=-Xmx1G -Xms1G"}
+	return cmd
 }
 
 type testConsumerMessage struct {

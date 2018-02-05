@@ -16,65 +16,19 @@
 
 package dispatcher
 
-import "fmt"
+import (
+	"github.com/projectriff/message-transport/pkg/message"
+)
 
 type SynchDispatcher interface {
-	Dispatch(in Message) (Message, error)
+	Dispatch(in message.Message) (message.Message, error)
 }
+
+//go:generate mockery -name=Dispatcher -output mockdispatcher -outpkg mockdispatcher
 
 type Dispatcher interface {
 
-	Input() chan<- Message
+	Input() chan<- message.Message
 
-	Output() <-chan Message
-}
-
-type Message interface {
-	Payload() []byte
-	Headers() Headers
-}
-
-type message struct {
-	payload []byte
-	headers Headers
-}
-
-type Headers map[string][]string
-
-func (msg *message) String() string {
-	return fmt.Sprintf("Message{%v, %v}", string(msg.payload), msg.headers)
-}
-
-func (msg *message) Payload() []byte {
-	return (*msg).payload
-}
-
-func (msg *message) Headers() Headers {
-	return (*msg).headers
-}
-
-func (h Headers) GetOrDefault(key string, value string) string {
-	if v, ok := h[key] ; ok {
-		if len(v) == 0 {
-			return value
-		} else {
-			return v[0]
-		}
-	} else {
-		return value
-	}
-}
-
-func NewEmptyMessage() Message {
-	return NewMessage([]byte{}, map[string][]string{})
-}
-
-func NewMessage(payload []byte, headers Headers) Message {
-	if payload == nil {
-		payload = make([]byte, 0)
-	}
-	if headers == nil {
-		headers = make(map[string][]string, 0)
-	}
-	return &message{payload:payload, headers:headers}
+	Output() <-chan message.Message
 }
