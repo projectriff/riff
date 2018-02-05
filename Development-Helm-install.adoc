@@ -1,0 +1,163 @@
+= Installing the riff development version using Helm
+
+== Prerequisites
+
+* A running 1.7+ Kubernetes cluster
+
+TIP: If using Minikube, we recommend using Minikube v0.23.0 or v0.24.1 and avoiding v0.24.0 due to some DNS issues
+
+* Kubernetes CLI `kubectl` installed and on the local system PATH. We recommend using the same version or later as the Kubernetes cluster you are using.
+
+* Helm, you need helm installed, see instructions link:Getting-Started.adoc#helm[here]. 
+
+* Docker, you only need Docker when building custom versions of riff components or the samples. We have used Docker version 17.x or later.
+
+== Add the riff repository to your helm configuration
+
+Riff offers helm charts for deploying the FaaS and its required services to a Kubernetes Cluster.
+The following instructions cover how to configure helm to be able to install the riff charts.
+
+Run the following commands to add the repository:
+
+[source, bash]
+----
+helm repo add riffrepo https://riff-charts.storage.googleapis.com
+helm repo update
+----
+
+Run the following command to see that the `riff` chart is available and also what versions you can install:
+
+[source, bash]
+----
+helm search riff -l
+----
+
+== [[devel]]Install a riff development version on Minikube
+
+Starting with the 0.0.4 version we have separated the Kafka installation from the riff chart. This requires an extra step of installing Kafka in order yo use riff. You can use the single-node Kafka chart provided by riff or the three-node kafka/zookeeper service provided by the Kubeapps.
+
+=== Install Kafka chart
+
+We provide a lightweight single node Kafka installation in the `riffrepo/kafka` chart. This works well for development purposes.
+
+Create the `riff-system` namespace:
+
+[source, bash]
+----
+kubectl create namespace riff-system
+----
+
+Install the kafka/zookeeper service provided by riff using:
+
+[source, bash]
+----
+helm install --name transport --namespace riff-system riffrepo/kafka
+----
+
+[TIP]
+====
+Alternatively, install the three-node kafka/zookeeper service provided by the Kubeapps `incubator/kafka` chart using:
+
+[source, bash]
+----
+helm install --name transport --namespace riff-system incubator/kafka
+----
+
+Just be aware that this chart requires significantly more resources to run.
+====
+
+=== Install "devel" version of riff chart
+
+Install the development version of the riff chart in the default namespace. When using Minikube configure the httpGateway to use `NodePort` with:
+
+[source, bash]
+----
+helm install --name control riffrepo/riff --devel --set create.rbac=false --set httpGateway.service.type=NodePort
+----
+
+
+[TIP]
+====
+Alternatively, install riff in the `riff-system` namespace:
+
+[source, bash]
+----
+helm install --name control --namespace riff-system riffrepo/riff --devel --set create.rbac=false --set httpGateway.service.type=NodePort
+----
+
+If you do this you need to provide the `--namespace riff-system` option for the `riff publish` command since the `http-gateway` now runs in the `-riff-system` namespace.
+====
+
+[NOTE]
+====
+For a cluster that supports `LoadBalancer` leave out the `--set httpGateway.service.type=NodePort` option. For a cluster that uses RBAC leave out the `--set create.rbac=false` option.
+====
+
+=== Customizing the Installation
+
+The Helm chart contains a https://github.com/projectriff/helm-charts/blob/master/riff/values.yaml[values.yaml] file that specifies the default values used when installing the chart. They can all be overridden by using the flag `--set` as described in the documentation for https://docs.helm.sh/helm/#helm-install[Helm Install].
+
+Some values that you might want to override are listed in the https://github.com/projectriff/helm-charts/blob/master/riff/README.md#configuration[Configuration section of the README].
+
+The following are some scenarios for customizing your installation:
+
+NOTE: The same commands work for all of the riff components: `functionController`, `topicController`, and `httpGateway`
+
+* Overriding the version of a riff component:
++
+To set the version tag for the `functionController` to `0.0.4-build.1` use something like the following:
++
+[source, bash]
+----
+helm install riffrepo/riff --name control --set functionController.image.tag=0.0.4-build.1 --devel --set create.rbac=false --set httpGateway.service.type=NodePort
+----
+
+* Overriding the image repository and version tag of a riff component with a custom built component image:
++
+To set the image repository to `mycustom/function-controller` and the version tag to `0.0.4-test.1` for the `functionController`, use something like the following:
++
+[source, bash]
+----
+helm install riffrepo/riff --name control --set functionController.image.repository=mycustom/function-controller --set functionController.image.tag=0.0.4-test.1 --devel --set create.rbac=false --set httpGateway.service.type=NodePort
+----
+
+* Overriding the version of the `sidecar` component:
++
+The `sidecar` component is only used by the `functionController`, so to set the version for the `sidecar` to `0.0.4-build.1` use something like the following:
++
+[source, bash]
+----
+helm install riffrepo/riff --name control --set functionController.sidecar.image.tag=0.0.4-build.1 --devel --set create.rbac=false --set httpGateway.service.type=NodePort
+----
+
+==== Installing locally built snapshot components with Minikube
+
+Clone the https://github.com/projectriff/riff[riff] repository.
+The `helm install` commands in this section assume you are in the root directory of that project.
+
+[TIP]
+====
+
+Configure Docker to use the Docker environment running in minikube:
+
+[source, bash]
+----
+eval $(minikube docker-env)
+----
+====
+
+Build the riff components following the link:README.adoc#manual[manual build and deploy] instructions.
+
+To install locally built Docker images with Helm on minikube, use the `values-snapshot.yaml` file, which overrides image tags with snapshot versions:
+
+[source, bash]
+----
+helm install riffrepo/riff --name control --values helm/values-snapshot.yaml  --devel --set create.rbac=false --set httpGateway.service.type=NodePort
+----
+
+=== To tear it all down
+
+[source, bash]
+----
+helm delete --purge control
+----
