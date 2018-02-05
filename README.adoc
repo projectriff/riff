@@ -188,3 +188,11 @@ Once you're done playing with riff (see samples below), you can destroy everythi
 == [[samples]]Try Some Samples
 
 With riff running try some of the link:samples/README.adoc[samples].
+
+== Contributing to riff
+
+Please refer to the link:CONTRIBUTING.adoc[Contributors' Guide].
+
+== Maintaining riff
+
+Please refer to the link:MAINTAINING.adoc[Maintainers' Guide].

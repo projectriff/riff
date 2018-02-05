@@ -1,6 +1,10 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
 
+# Sample artifacts
+samples/**/Dockerfile
+samples/**/*.yaml
+
 ### STS ###
 .apt_generated
 .classpath
