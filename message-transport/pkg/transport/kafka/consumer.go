@@ -38,8 +38,9 @@ func NewConsumer(addrs []string, groupID string, topics []string, consumerConfig
 	messages := make(chan message.Message)
 
 	go func(clusterConsumer *cluster.Consumer) {
+		consumerMessages := clusterConsumer.Messages()
 		for {
-			kafkaMsg, ok := <-clusterConsumer.Messages()
+			kafkaMsg, ok := <-consumerMessages
 			if ok {
 				messageWithHeaders, err := fromKafka(kafkaMsg)
 				if err != nil {

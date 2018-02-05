@@ -25,19 +25,30 @@ This repository is a dependency of the https://github.com/projectriff/http-gatew
 and https://github.com/projectriff/function-sidecar[function-sidecar] repositories
 and is built by them.
 
-=== Testing
-
-For now, issue:
+You can check that the code in this repository compiles cleanly by issuing:
 [source, bash]
 ----
-kafka-topics --delete --zookeeper localhost:2181 --topic test-topic
-kafka-topics --create --zookeeper localhost:2181 --topic test-topic --partitions 1 --replication-factor 1
-KAFKA_BROKERS=localhost:9092 go test ./...
+make build
+----
+
+=== Testing
+
+Ensure Kafka and Zookeepr are running locally, then issue:
+[source, bash]
+----
+make test
 ----
 
 == Generating Mocks
 
-Transport interface mocks can be regenerated as follows _and should then be checked in_:
+Mocks can be regenerated as follows _and should then be checked in_:
+[source, bash]
 ----
-go generate ./...
+make gen-mocks
+----
+
+You can verify that generated mocks which are committed or staged are up to date using:
+[source, bash]
+----
+make verify-mocks
 ----
