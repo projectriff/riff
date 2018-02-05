@@ -1,0 +1,22 @@
+= Maintaining riff
+
+Once you have commit rights to riff, please adhere to these guidelines.
+
+== Merging Pull Requests
+
+Before merging a pull request (PR):
+
+. rebase the PR on upstream/master to ensure a https://stackoverflow.com/questions/20348629/what-are-advantages-of-keeping-linear-history-in-git[linear history],
+. run the repository’s tests and make sure they pass,
+. run one or more riff samples in kubernetes with the PR applied,
+. squash multiple commits into one.
+
+== Creating Repositories
+
+Initialize the repository with an initial, empty commit, so that we can easily reorder *all* history if needed:
+
+[source, bash]
+----
+git init
+git commit --allow-empty -m "Initial, empty commit"
+----
