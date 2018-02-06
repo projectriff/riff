@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: topic-controller-debug
+  labels:
+    app: riff
+    component: topic-controller
+spec:
+  type: NodePort
+  ports:
+  - name: delve
+    port: 2345
+    nodePort: 30101
+    targetPort: 2345
+  selector:
+    component: topic-controller
