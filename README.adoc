@@ -52,9 +52,13 @@ A FaaS for Kubernetes
 
 
 
-== Installation
+== Installation of latest release
 
-You can install the system using link:Getting-Started.adoc#helm[a Helm chart] or by link:#manual[manually building and deploying] the components.
+You can install the latest release using link:Getting-Started.adoc[a Helm chart]. 
+
+== Developer installation
+
+If you want to run the current development version of riff read the link:Development-Helm-install.adoc[Helm chart] doc. You an also link:#manual[build and deploy riff manually], this is the best option if you want to modify the riff components.
 
 === [[manual]] Manual install of riff
 
