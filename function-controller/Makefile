@@ -1,36 +1,15 @@
-.PHONY: build build-for-docker clean dockerize gen-mocks test
+.PHONY: build clean dockerize gen-mocks test
 OUTPUT = function-controller
-OUTPUT_LINUX = $(OUTPUT)-linux
-BUILD_FLAGS =
-
-ifeq ($(OS),Windows_NT)
-    detected_OS := Windows
-else
-    detected_OS := $(shell sh -c 'uname -s 2>/dev/null || echo not')
-endif
-
-ifeq ($(detected_OS),Linux)
-	BUILD_FLAGS += -ldflags "-linkmode external -extldflags -static"
-endif
-
-
 GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
+TAG = 0.0.4-snapshot
 
-build: $(OUTPUT)
+build: $(OUTPUT) vendor
 
-build-for-docker: $(OUTPUT_LINUX)
-
-test:
+test: vendor
 	go test -v `glide novendor`
 
-$(OUTPUT): $(GO_SOURCES)
+$(OUTPUT): $(GO_SOURCES) vendor
 	go build cmd/function-controller.go
-
-$(OUTPUT_LINUX): $(GO_SOURCES)
-	# This builds the executable from Go sources on *your* machine, targeting Linux OS
-	# and linking everything statically, to minimize Docker image size
-	# See e.g. https://blog.codeship.com/building-minimal-docker-containers-for-go-applications/ for details
-	CGO_ENABLED=0 GOOS=linux go build $(BUILD_FLAGS) -v -a -installsuffix cgo -o $(OUTPUT_LINUX) cmd/function-controller.go
 
 vendor: glide.lock
 	glide install -v --force
@@ -46,7 +25,6 @@ gen-mocks:
 
 clean:
 	rm -f $(OUTPUT)
-	rm -f $(OUTPUT_LINUX)
 
-dockerize: build-for-docker
-	docker build . -t projectriff/function-controller:0.0.4-snapshot
+dockerize: $(GO_SOURCES) vendor
+	docker build . -t projectriff/function-controller:$(TAG)
