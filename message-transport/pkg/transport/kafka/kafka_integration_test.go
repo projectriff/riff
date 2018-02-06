@@ -33,15 +33,16 @@ import (
 
 var _ = Describe("Kafka Integration", func() {
 
-	const topic = "test-topic"
-
 	var (
+		topic string
 		producer    transport.Producer
 		consumer    transport.Consumer
 		testMessage message.Message
 	)
 
 	BeforeEach(func() {
+		topic = fmt.Sprintf("topic-%d", time.Now().Nanosecond())
+
 		testMessage = message.NewMessage([]byte("hello"), message.Headers{"Content-Type": []string{"bag/plastic"}})
 
 		brokers := brokers()

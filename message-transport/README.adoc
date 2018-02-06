@@ -33,10 +33,11 @@ make build
 
 === Testing
 
-Ensure Kafka and Zookeepr are running locally, then issue:
+Ensure Kafka (with `auto.create.topics.enable=true`, which is the default) and Zookeepr are running locally,
+then issue:
 [source, bash]
 ----
-make test
+KAFKA_BROKERS=localhost:9092 make test
 ----
 
 == Generating Mocks
