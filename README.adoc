@@ -58,7 +58,7 @@ You can install the latest release using link:Getting-Started.adoc[a Helm chart]
 
 == Developer installation
 
-If you want to run the current development version of riff read the link:Development-Helm-install.adoc[Helm chart] doc.
+If you want to run the current development version of riff read link:Development-Helm-install.adoc[Installing the riff development version using Helm].
 You can also link:#manual[build and deploy riff manually], this is the best option if you want to modify the riff components.
 
 === [[manual]] Manual install of riff
