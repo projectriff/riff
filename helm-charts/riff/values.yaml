@@ -21,24 +21,24 @@ functionController:
   replicaCount: 1
   image:
     repository: projectriff/function-controller
-    tag: 0.0.4-build.5
+    tag: latest
     pullPolicy: IfNotPresent
   sidecar:
     image:
-      tag: 0.0.4-build.4 
+      tag: latest 
 
 topicController:
   replicaCount: 1
   image:
     repository: projectriff/topic-controller
-    tag: 0.0.4-build.4
+    tag: latest
     pullPolicy: IfNotPresent
 
 httpGateway:
   replicaCount: 1
   image:
     repository: projectriff/http-gateway
-    tag: 0.0.4-build.7
+    tag: latest
     pullPolicy: IfNotPresent
   service:
     name: http
