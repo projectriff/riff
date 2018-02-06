@@ -1,4 +1,4 @@
-.PHONY: build clean fetch-grpc grpc dockerize
+.PHONY: build clean fetch-grpc grpc dockerize test
 OUTPUT = function-sidecar
 OUTPUT_LINUX = function-sidecar-linux
 BUILD_FLAGS =
@@ -40,7 +40,7 @@ clean:
 	rm -f $(OUTPUT)
 	rm -f $(OUTPUT_LINUX)
 
-test: build
+test:
 	go test -v ./...
 
 grpc: $(GRPC_DIR)/function/function.pb.go
