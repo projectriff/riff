@@ -14,10 +14,10 @@ vendor: glide.lock
 glide.lock: glide.yaml
 	glide up -v --force
 
-build: $(GO_SOURCES) vendor
+build: $(GO_SOURCES)
 	go build $(PKGS)
 
-test: $(GO_SOURCES) vendor
+test: $(GO_SOURCES)
 	-kafka-topics --delete --zookeeper localhost:2181 --topic test-topic
 	-kafka-topics --create --zookeeper localhost:2181 --topic test-topic --partitions 1 --replication-factor 1
 	KAFKA_BROKERS=localhost:9092 go test -v ./...

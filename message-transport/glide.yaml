@@ -4,3 +4,12 @@ import:
   version: ~1.15.0
 - package: github.com/bsm/sarama-cluster
   version: ~2.1.12
+- package: github.com/stretchr/testify
+  version: v1.2.0
+  subpackages:
+  - mock
+testImport:
+- package: github.com/onsi/ginkgo
+  version: v1.4.0
+- package: github.com/onsi/gomega
+  version: v1.3.0
