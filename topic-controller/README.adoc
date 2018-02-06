@@ -51,3 +51,18 @@ This assumes that your docker client is correctly configured to target the daemo
 ----
 make test
 ----
+
+* To attach a https://github.com/derekparker/delve/blob/master/Documentation/EditorIntegration.md[delve capable] debugger (such as Goland)
+to a `topic-controller` running _inside_ k8s:
++
+[source, bash]
+----
+make debug-dockerize
+----
+Then expose the `2345` port as a service, using `riff/config/delve/topic-controller-debug.yaml`:
++
+[source, bash]
+----
+kubectl apply -f riff/config/delve/topic-controller-debug.yaml
+----
+Then you can connect the debugger through port `30101`.
