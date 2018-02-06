@@ -28,3 +28,9 @@ clean:
 
 dockerize: $(GO_SOURCES) vendor
 	docker build . -t projectriff/function-controller:$(TAG)
+
+debug-dockerize: $(GO_SOURCES) vendor
+	# Need to remove probes as delve starts app in paused state
+	-kubectl patch deploy/function-controller --type=json -p='[{"op":"remove", "path":"/spec/template/spec/containers/0/livenessProbe"}]'
+	-kubectl patch deploy/function-controller --type=json -p='[{"op":"remove", "path":"/spec/template/spec/containers/0/readinessProbe"}]'
+	docker build . -t projectriff/function-controller:$(TAG) -f Dockerfile-debug
