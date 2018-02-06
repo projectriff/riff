@@ -27,6 +27,8 @@ import (
 	"github.com/bsm/sarama-cluster"
 	"github.com/projectriff/message-transport/pkg/message"
 	"github.com/Shopify/sarama"
+	"time"
+	"fmt"
 )
 
 var _ = Describe("Kafka Integration", func() {
@@ -50,8 +52,16 @@ var _ = Describe("Kafka Integration", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		config := cluster.NewConfig()
+
+		// Use "oldest" initial offset in case there is a race between the asynchronous construction of the consumer
+		// machinery and the producer writing the “new” message.
 		config.Consumer.Offsets.Initial = sarama.OffsetOldest
-		consumer, err = kafka.NewConsumer(brokers, "message-transport-integration-test", []string{topic}, config)
+
+		// Use a fresh group id so that runs in close succession won't suffer from Kafka broker delays
+		// due to consumers coming and going in the same group
+		groupId := fmt.Sprintf("group-%d", time.Now().Nanosecond())
+		
+		consumer, err = kafka.NewConsumer(brokers, groupId, []string{topic}, config)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
