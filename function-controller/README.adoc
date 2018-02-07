@@ -1,4 +1,4 @@
-= Function Controller
+= Function Controller image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-function-controller-container/badge[Function Controller Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-function-controller-container/builds/latest]
 
 == Purpose
 The *function controller* runs inside kubernetes and continuously monitors the *function* and *topic* custom resource
