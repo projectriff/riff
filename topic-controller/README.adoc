@@ -1,4 +1,4 @@
-= Topic Controller
+= Topic Controller image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-topic-controller-container/badge[Topic Controller Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-topic-controller-container/builds/latest]
 
 == Purpose
 The *topic controller* runs inside kubernetes and continuously monitors the *topic* custom resource
