@@ -1,0 +1,20 @@
+= Helm Charts for Riff image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-riff-chart/badge[Helm Charts Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-riff-chart/builds/latest]
+
+== Add the riff repository to your helm configuration
+
+Run the following commands to add the repository:
+
+[source, bash]
+----
+helm repo add riffrepo https://riff-charts.storage.googleapis.com
+helm repo update
+----
+
+Run the following command to see that the `riff` chart is available and also what versions you can install:
+
+[source, bash]
+----
+helm search riff -l
+----
+
+For detailed instruction see the https://github.com/projectriff/riff/blob/master/Getting-Started.adoc#getting-started-with-riff[Getting Started with riff] instructions.
