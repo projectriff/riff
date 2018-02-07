@@ -1,4 +1,4 @@
-= HTTP Gateway
+= HTTP Gateway image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-http-gateway-container/badge[HTTP Gateway Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-http-gateway-container/builds/latest]
 
 == Purpose
 The *http gateway* runs accepts http requests and trasforms those to messages emitted on the broker.
