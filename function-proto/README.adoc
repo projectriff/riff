@@ -6,6 +6,8 @@ To enable gRPC streaming, specify the `grpc` protocol in your function yaml. Add
 
 riff currently supports only https://grpc.io/docs/guides/concepts.html[gRPC bidirectional streaming]. Language specific instructions for implementing a gRPC server are provided in the links below.
 
+link:go/README.adoc[Go]
+
 link:java/README.adoc[Java]
 
 link:python/README.adoc[Python]
