@@ -1,56 +1,6 @@
-= riff is for functions
+= riff is for functions image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/badge[Riff Pipeline, link=https://ci.projectriff.io/teams/main/pipelines/riff]
 
 A FaaS for Kubernetes
-
-[grid="none", frame="none", cols=">,<,>,<,>,<", options="header"]
-|=====
-2+| Pipelines 2+| Component Builds 2+| Invoker Builds
-// 1
-| https://github.com/projectriff/ci/blob/master/pipelines/riff.yml[riff]
-| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/badge[Riff Pipeline, link=https://ci.projectriff.io/teams/main/pipelines/riff]
-| https://github.com/pivotal-cf/pfs-system-test[Acceptance Tests]
-| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/run-riff-system-tests-gke/badge[Acceptance Tests Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/run-riff-system-tests-gke/builds/latest]
-| https://github.com/projectriff/java-function-invoker[Java Invoker]
-| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-java-function-invoker-container/badge[Java Invoker, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-java-function-invoker-container/builds/latest]
-
-
-// 2
-| https://github.com/projectriff/ci/blob/master/pipelines/riff-pr.yml[riff-pr]
-| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/badge[Riff Pipeline, link=https://ci.projectriff.io/teams/main/pipelines/riff-pr]
-| https://github.com/projectriff/topic-controller[Topic Controller]
-| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-topic-controller-container/badge[Topic Controller Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-topic-controller-container/builds/latest]
-| https://github.com/projectriff/node-function-invoker[NodeJS Invoker]
-| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-node-function-invoker-container/badge[NodeJS Invoker, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-node-function-invoker-container/builds/latest]
-
-// 3
-| https://github.com/projectriff/ci/blob/master/pipelines/dockerimages.yml[dockerimages]
-| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/badge[Riff Pipeline, link=https://ci.projectriff.io/teams/main/pipelines/dockerimages]
-| https://github.com/projectriff/function-controller[Function Controller]
-| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-function-controller-container/badge[Function Controller Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-function-controller-container/builds/latest]
-| https://github.com/projectriff/python2-function-invoker[Python2 Invoker]
-| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-python2-function-invoker-container/badge[Python2 Invoker Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-python2-function-invoker-containe/builds/latest]
-
-// 4
-| |
-| https://github.com/projectriff/http-gateway[HTTP Gateway]
-| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-http-gateway-container/badge[HTTP Gateway Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-http-gateway-container/builds/latest]
-| https://github.com/projectriff/shell-function-invoker[Shell Invoker]
-| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-shell-function-invoker-container/badge[Shell Invoker Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/build-shell-function-invoker-container/builds/latest]
-
-// 5
-| |
-| https://github.com/projectriff/function-sidecar[Function Sidecar]
-| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-function-sidecar-container/badge[Function Sidecar Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-function-sidecar-container/builds/latest]
-| |
-
-// 6
-| |
-| https://github.com/projectriff/helm-charts[Helm charts]
-| image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-riff-chart/badge[Helm Charts]
-| |
-|=====
-
-
 
 == Installation of latest release
 
