@@ -1,4 +1,4 @@
-= Function Sidecar
+= Function Sidecar image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-function-sidecar-container/badge[Function Sidecar Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-function-sidecar-container/builds/latest]
 
 == Building
 ```
