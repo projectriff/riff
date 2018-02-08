@@ -1,1 +1,3 @@
-echo "received: $1"
+#!/bin/sh
+
+printf "received at `date -u`: `cat`"
