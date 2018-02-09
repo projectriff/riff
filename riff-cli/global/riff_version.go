@@ -18,7 +18,7 @@ package global
 
 import "os"
 
-var RIFF_VERSION = "0.0.2"
+var RIFF_VERSION = "0.0.4-snapshot"
 
 func init() {
 	version := os.Getenv("RIFF_VERSION")

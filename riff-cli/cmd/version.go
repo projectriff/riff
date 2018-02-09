@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/projectriff/riff-cli/global"
 )
 
 // versionCmd represents the version command
@@ -31,7 +32,7 @@ var versionCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		fmt.Println(RIFF_VERSION)
+		fmt.Println(global.RIFF_VERSION)
 	},
 }
 

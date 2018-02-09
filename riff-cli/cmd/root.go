@@ -23,11 +23,10 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/projectriff/riff-cli/global"
 )
 
 var cfgFile string
-
-var RIFF_VERSION = "0.0.4"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -35,7 +34,7 @@ var rootCmd = &cobra.Command{
 	Short: "Commands for creating and managing function resources",
 	Long: `riff is for functions
 
-version ` + RIFF_VERSION + `
+version ` + global.RIFF_VERSION + `
 
 the riff tool creates and manages function resources for the riff FaaS platform https://projectriff.io/`,
 	SilenceErrors: true,
@@ -62,7 +61,6 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
 }
 
 // initConfig reads in config file and ENV variables if set.
