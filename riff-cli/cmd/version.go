@@ -32,7 +32,8 @@ var versionCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		fmt.Println(global.RIFF_VERSION)
+		fmt.Printf("riff CLI version: %v\n", global.CLI_VERSION)
+		fmt.Printf("riff function invoker version: %v\n", global.RIFF_VERSION)
 	},
 }
 
