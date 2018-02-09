@@ -1,17 +1,18 @@
-= gRPC Node.js
+gRPC Node.js
+============
 
 Create node module wrapping function.proto
 
 `npm install --save @projectriff/function-proto`
 
 ```js
-const { FunctionService, FunctionClient } = require('@projectriff/function-proto');
+const { FunctionInvokerService, FunctionInvokerClient } = require('@projectriff/function-proto');
 const grpc = require('grpc');
 const address = '127.0.0.1:50051';
 
 // server
 const server = new grpc.Server();
-server.addService(FunctionService, {
+server.addService(FunctionInvokerService, {
     call(call) {
         // TODO implement service
     }
@@ -20,7 +21,7 @@ server.bind(address, grpc.ServerCredentials.createInsecure());
 server.start();
 
 // client
-const client = new FunctionClient(address, grpc.credentials.createInsecure());
+const client = new FunctionInvokerClient(address, grpc.credentials.createInsecure());
 ```
 
-See the official https://grpc.io/docs/quickstart/node.html[gRPC for Node.js] reference guide.
+See the official [gRPC for Node.js](https://grpc.io/docs/quickstart/node.html) reference guide.
