@@ -17,36 +17,65 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
+	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff-cli/cmd/opts"
+	"github.com/spf13/pflag"
+	"os"
 )
+
+var updateChainCmd = utils.CommandChain(buildCmd, applyCmd)
 
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
 	Use:   "update",
-	Short: "Build the container and apply the modified function resources",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Update a function",
+	Long: `Build the function based on the code available in the path directory, using the name and version specified 
+  for the image that is built. Then Apply the resource definition[s] included in the path.`,
+	Example: `  riff update -n <name> -v <version> -f <path> [--push]`,
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("update called")
+	RunE:   updateChainCmd.RunE,
+	PreRun: updateChainCmd.PreRun,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if !opts.CreateOptions.Initialized {
+			opts.CreateOptions = options.CreateOptions{}
+			var flagset pflag.FlagSet
+			if cmd.Parent() == rootCmd {
+				flagset = *cmd.PersistentFlags()
+			} else {
+				flagset = *cmd.Parent().PersistentFlags()
+			}
+
+			utils.MergeInitOptions(flagset, &opts.CreateOptions.InitOptions)
+			utils.MergeBuildOptions(flagset, &opts.CreateOptions)
+			utils.MergeApplyOptions(flagset, &opts.CreateOptions)
+
+			if len(args) > 0 {
+				if len(args) == 1 && opts.CreateOptions.FunctionPath == "" {
+					opts.CreateOptions.FunctionPath = args[0]
+				} else {
+					ioutils.Errorf("Invalid argument(s) %v\n", args)
+					cmd.Usage()
+					os.Exit(1)
+				}
+			}
+
+			err := options.ValidateAndCleanInitOptions(&opts.CreateOptions.InitOptions)
+			if err != nil {
+				ioutils.Error(err)
+				os.Exit(1)
+			}
+			opts.CreateOptions.Initialized = true
+		}
+		updateChainCmd.PersistentPreRun(cmd, args)
 	},
 }
 
+
 func init() {
 	rootCmd.AddCommand(updateCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// updateCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// updateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	utils.CreateBuildFlags(updateCmd.PersistentFlags())
+	utils.CreateApplyFlags(updateCmd.PersistentFlags())
 }

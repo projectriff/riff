@@ -67,6 +67,7 @@ func apply(cmd *cobra.Command, opts options.ApplyOptions) error {
 	if opts.DryRun {
 		fmt.Printf("\nApply Command: kubectl apply -f %s\n\n", opts.FunctionPath)
 	} else {
+		fmt.Printf("applying resources in %v\n", opts.FunctionPath)
 		output, err := kubectl.ExecForString([]string{"apply", "-f", opts.FunctionPath})
 		if err != nil {
 			cmd.SilenceUsage = true
