@@ -71,6 +71,7 @@ var initCmd = &cobra.Command{
 
 			err := options.ValidateAndCleanInitOptions(&opts.InitOptions)
 			if err != nil {
+				println(err.Error())
 				os.Exit(1)
 			}
 

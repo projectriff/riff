@@ -25,7 +25,7 @@ import (
 
 const (
 	language = "java"
-	extension = "java"
+	extension = "jar"
 )
 
 
@@ -36,7 +36,7 @@ func Initialize(opts options.InitOptions) error {
 	}
 	utils.ResolveOptions(functionfile, language, &opts)
 
-	workdir := filepath.Dir(functionfile)
+	workdir, _ := filepath.Abs(opts.FunctionPath)
 
 	generator := core.ArtifactsGenerator{
 		GenerateFunction: core.DefaultGenerateFunction,

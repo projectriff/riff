@@ -105,10 +105,11 @@ func GenerateFunctionArtfacts(generator ArtifactsGenerator, workdir string, opts
 
 func writeFile(filename string, text string, overwrite bool) error {
 	if !overwrite && osutils.FileExists(filename) {
-		fmt.Printf("skipping existing file %s  - set --force to overwrite.\n", filename)
+		fmt.Printf("Skipping existing file %s  - set --force to overwrite.\n", filename)
 		return nil
 
 	} else {
+		fmt.Printf("Initializing %s`\n", filename)
 		return ioutil.WriteFile(filename, []byte(strings.TrimLeft(text, "\n")), 0644)
 	}
 }

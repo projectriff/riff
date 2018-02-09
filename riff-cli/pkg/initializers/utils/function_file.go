@@ -28,7 +28,7 @@ var supportedExtensions = []string{"js", "java", "py", "sh"}
 
 var languageForFileExtensions = map[string]string{
 	"sh":   "shell",
-	"java": "java",
+	"jar": "java",
 	"js":   "node",
 	"py":   "python",
 }

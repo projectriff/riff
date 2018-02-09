@@ -37,7 +37,7 @@ func ResolveOptions(functionArtifact string, language string, opts *options.Init
 
 	protocolForLanguage := map[string]string{
 		"shell": "stdio",
-		"java":  "http",
+		"java":  "pipes",
 		"js":    "http",
 		"node":  "http",
 		"py":    "stdio",
