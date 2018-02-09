@@ -37,7 +37,7 @@ type Initializer struct {
 
 var languageForFileExtension = map[string]string{
 	"sh":   "shell",
-	"java": "java",
+	"jar": "java",
 	"js":   "node",
 	"py":   "python",
 }

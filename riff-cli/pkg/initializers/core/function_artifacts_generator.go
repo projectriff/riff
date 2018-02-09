@@ -109,7 +109,7 @@ func writeFile(filename string, text string, overwrite bool) error {
 		return nil
 
 	} else {
-		fmt.Printf("Initializing %s`\n", filename)
+		fmt.Printf("Initializing %s\n", filename)
 		return ioutil.WriteFile(filename, []byte(strings.TrimLeft(text, "\n")), 0644)
 	}
 }
