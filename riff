@@ -480,7 +480,7 @@ function update() {
   FNDOCKER="$FNPATH/Dockerfile"
   if [ -f $FNDOCKER ] ; then
     echo "Updating $FNPATH resource[s]"
-    kubectl delete -n $NAME_SPACE -f $FNPATH
+    kubectl delete -n $NAME_SPACE --force=true -f $FNPATH
     build
     apply
   else
