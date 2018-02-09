@@ -60,4 +60,21 @@ func TestFunctionNameFromInvalidPathIsEmpty(t *testing.T) {
 	as.Empty(fname)
 }
 
+func TestFunctionDirFromRelativePath(t *testing.T) {
+	as := assert.New(t)
+	fndir, err := FunctionDirFromPath(osutils.Path("../../test_data/shell/echo"))
+	as.NoError(err)
+	absEcho, _ := AbsPath("../../test_data/shell/echo")
+	as.Equal(absEcho,fndir)
+}
+
+func TestFunctionDirFromRegularFile(t *testing.T) {
+	as := assert.New(t)
+	fndir, err := FunctionDirFromPath(osutils.Path("../../test_data/shell/echo/echo.sh"))
+	as.NoError(err)
+	absEcho, _ := AbsPath("../../test_data/shell/echo")
+	as.Equal(absEcho,fndir)
+}
+
+
 

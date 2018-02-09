@@ -26,6 +26,7 @@ import (
 	"github.com/projectriff/riff-cli/pkg/options"
 	"github.com/projectriff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff-cli/cmd/opts"
+	"github.com/projectriff/riff-cli/pkg/functions"
 )
 
 // applyCmd represents the apply command
@@ -64,11 +65,12 @@ var applyCmd = &cobra.Command{
 }
 
 func apply(cmd *cobra.Command, opts options.ApplyOptions) error {
+	fnDir, _ := functions.FunctionDirFromPath(opts.FunctionPath)
 	if opts.DryRun {
-		fmt.Printf("\nApply Command: kubectl apply -f %s\n\n", opts.FunctionPath)
+		fmt.Printf("\nApply Command: kubectl apply -f %s\n\n", fnDir)
 	} else {
 		fmt.Printf("Applying resources in %v\n", opts.FunctionPath)
-		output, err := kubectl.ExecForString([]string{"apply", "-f", opts.FunctionPath})
+		output, err := kubectl.ExecForString([]string{"apply", "-f", fnDir})
 		if err != nil {
 			cmd.SilenceUsage = true
 			return err

@@ -33,6 +33,17 @@ func FunctionNameFromPath(path string) (string, error) {
 	return filepath.Base(filepath.Dir(abs)), nil
 }
 
+func FunctionDirFromPath(path string) (string, error) {
+	abs,err := AbsPath(path)
+	if err != nil {
+		return "", err
+	}
+	if osutils.IsDirectory(abs) {
+		return abs, nil
+	}
+	return filepath.Dir(abs), nil
+}
+
 func AbsPath(path string) (string, error) {
 	if path == "" {
 		path = "."
