@@ -183,7 +183,7 @@ func setVersionFlag(flagset *pflag.FlagSet) {
 
 func setFilePathFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "filepath") {
-		flagset.StringP("filepath", "f", "", "path or directory to be used for the function resources, if a file is specified then the file's directory will be used (defaults to the current directory)")
+		flagset.StringP("filepath", "f", "", "path or directory to be used for the function resources (defaults to the current directory)")
 	}
 }
 
@@ -201,13 +201,13 @@ func setRiffVersionFlag(flagset *pflag.FlagSet) {
 
 func setUserAccountFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "useraccount") {
-		flagset.StringP("useraccount", "u", defaults.userAccount, "the Docker user account to be used for the image repository (defaults to current OS username)")
+		flagset.StringP("useraccount", "u", defaults.userAccount, "the Docker user account to be used for the image repository")
 	}
 }
 
 func setProtocolFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "protocol") {
-		flagset.StringP("protocol", "p", "", "the protocol to use for function invocations (defaults to 'stdio' for shell and python, to 'http' for java and node)")
+		flagset.StringP("protocol", "p", "", "the protocol to use for function invocations")
 	}
 }
 

@@ -36,7 +36,7 @@ var buildCmd = &cobra.Command{
 	Short: "Build a function container",
 	Long: `Build the function based on the code available in the path directory, using the name
   and version specified for the image that is built.`,
-	Example: `riff build -n <name> -v <version> -f <path> [--push]`,
+	Example: `  riff build -n <name> -v <version> -f <path> [--push]`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return build(options.GetBuildOptions(opts.CreateOptions))
 	},
@@ -76,7 +76,7 @@ func build(opts options.BuildOptions) error {
 		return nil
 	}
 
-	fmt.Println("building image...")
+	fmt.Println("Building image ...")
 	out, err := docker.Exec(buildArgs)
 	if err != nil {
 		ioutils.Errorf("Error %v\n", err)

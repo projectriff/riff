@@ -27,13 +27,17 @@ import (
 
 var cfgFile string
 
-var RIFF_VERSION = "0.0.2"
+var RIFF_VERSION = "0.0.4"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "riff",
 	Short: "Commands for creating and managing function resources",
-	Long: `riff is a CLI tool that creates and manages function resources for the riff FaaS platform https://projectriff.io/`,
+	Long: `riff is for functions
+
+version `+RIFF_VERSION+`
+
+the riff tool creates and manages function resources for the riff FaaS platform https://projectriff.io/`,
 	SilenceErrors: true,
 }
 

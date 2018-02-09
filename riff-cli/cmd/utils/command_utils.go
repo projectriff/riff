@@ -29,62 +29,59 @@ const (
 )
 
 const baseCommandDescription = `{{.Process}} the function based on the function source code specified as the filename, using the name
-and version specified for the function image repository and tag. 
-For example, if you have a directory named 'square' containing a function 'square.js', you can simply type :
+  and version specified for the function image repository and tag. 
+
+For example, from a directory named 'square' containing a function 'square.js', you can simply type :
 
 riff {{.Command}} node -f square
 
-or
+  or
 
 riff  {{.Command}} node
 
-from the 'square' directory
-
 to {{.Result}}.`
 
-const baseJavaDescription = `{{.Process}} the function based on the function source code specified as the filename, using the artifact (jar file), 
-the function handler(classname), the name and version specified for the function image repository and tag. 
-For example from a maven project directory named 'greeter', type:
+const baseJavaDescription = `{{.Process}} the function based on the function source code specified as the filename, using the artifact (jar file),
+  the function handler(classname), the name and version specified for the function image repository and tag. 
+
+For example, from a maven project directory named 'greeter', type:
 
 riff {{.Command}} -i greetings -l java -a target/greeter-1.0.0.jar --handler=Greeter
 
+to {{.Result}}.`
 
-to generate the required Dockerfile and resource definitions using sensible defaults.`
+const baseShellDescription = `{{.Process}} the function based on the function script specified as the filename, using the name
+  and version specified for the function image repository and tag. 
 
-const baseShellDescription = `{{.Process}} the function based on the function script specified as the filename, 
-using the name and version specified for the function image repository and tag. 
-For example, if you have a directory named 'echo' containing a function 'echo.sh', you can simply type :
+For example, from a directory named 'echo' containing a function 'echo.sh', you can simply type :
 
 riff {{.Command}} -f echo
 
-or
+  or
 
 riff {{.Command}}
-
-from the 'echo' directory
 
 to {{.Result}}.`
 
 const baseNodeDescription = `{{.Process}} the function based on the function source code specified as the filename, using the name
-and version specified for the function image repository and tag.
-For example, if you have a directory named 'square' containing a function 'square.js', you can simply type :
+  and version specified for the function image repository and tag.  
+
+For example, from a directory  named 'square' containing a function 'square.js', you can simply type :
 
 riff {{.Command}} -f square
 
-or
+  or
 
 riff {{.Command}}
 
-from the 'square' directory
-
 to {{.Result}}.`
 
-const basePythonDescription = `{{.Process}} the function based on the function source code specified as the filename, handler, name, artifact
-  and version specified for the function image repository and tag. 
+const basePythonDescription = `{{.Process}} the function based on the function source code specified as the filename, handler, 
+  name, artifact and version specified for the function image repository and tag. 
+
 For example, type:
 
 riff {{.Command}} -i words -l python  --n uppercase --handler=process
-
 
 to {{.Result}}.`
 
