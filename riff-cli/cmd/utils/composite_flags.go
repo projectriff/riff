@@ -171,7 +171,7 @@ func GetHandler(cmd *cobra.Command) string {
 
 func setNameFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "name") {
-		flagset.StringP("name", "n", "", "the name of the function (defaults to the functionName of the current directory)")
+		flagset.StringP("name", "n", "", "the name of the function (defaults to the name of the current directory)")
 	}
 }
 
