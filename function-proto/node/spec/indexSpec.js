@@ -21,7 +21,16 @@ describe('function-proto', () => {
                 }
             },
             payload: Buffer.from('riff')
-        })
+        });
+    });
+
+    it('builds an empty message', () => {
+        const theMessage = new MessageBuilder().build();
+
+        expect(theMessage).toEqual({
+            headers: {},
+            payload: Buffer.from([])
+        });
     });
 
     it('generates a grpc client and server', done => {

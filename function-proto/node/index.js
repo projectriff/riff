@@ -39,7 +39,7 @@ MessageBuilder.prototype = {
                 headers[name] = { values: this._headers[name] };
                 return headers;
             }, {}),
-            payload: Buffer.from(this._payload)
+            payload: Buffer.from(this._payload == null ? [] : this._payload)
         };
     }
 };
