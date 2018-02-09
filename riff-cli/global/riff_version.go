@@ -20,7 +20,7 @@ import "os"
 
 var CLI_VERSION = "0.0.4"
 
-var RIFF_VERSION = "0.0.4-snapshot"
+var RIFF_VERSION = "latest"
 
 func init() {
 	version := os.Getenv("RIFF_VERSION")
