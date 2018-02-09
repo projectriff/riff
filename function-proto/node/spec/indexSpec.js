@@ -1,22 +1,37 @@
 describe('function-proto', () => {
-    const { FunctionService, FunctionClient } = require('..');
+    const { FunctionInvokerService, FunctionInvokerClient, MessageBuilder } = require('..');
     const grpc = require('grpc');
     const port = 50051;
 
-    it('can generate a grpc client and server', done => {
-        const theMessage = {
+    it('builds a message', () => {
+        const theMessage = new MessageBuilder()
+            .addHeader('Header-Name', 'headerValue 1')
+            .addHeader('Header-Name', 'headerValue 2')
+            .payload('will be replaced')
+            .payload('riff')
+            .build();
+
+        expect(theMessage).toEqual({
             headers: {
                 'Header-Name': {
                     values: [
-                        'headerValue'
+                        'headerValue 1',
+                        'headerValue 2'
                     ]
                 }
             },
             payload: Buffer.from('riff')
-        };
+        })
+    });
+
+    it('generates a grpc client and server', done => {
+        const theMessage = new MessageBuilder()
+            .addHeader('Header-Name', 'headerValue')
+            .payload('riff')
+            .build();
 
         const server = new grpc.Server();
-        server.addService(FunctionService, {
+        server.addService(FunctionInvokerService, {
             call(call) {
                 call.on('data', message => {
                     expect(message).toEqual(theMessage);
@@ -31,7 +46,7 @@ describe('function-proto', () => {
         server.start();
 
         // client
-        const client = new FunctionClient(`127.0.0.1:${port}`, grpc.credentials.createInsecure());
+        const client = new FunctionInvokerClient(`127.0.0.1:${port}`, grpc.credentials.createInsecure());
         const call = client.call();
         call.on('data', message => {
             expect(message).toEqual(theMessage);

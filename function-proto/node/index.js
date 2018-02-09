@@ -19,7 +19,33 @@ const path = require('path');
 
 const fn = grpc.load(path.resolve(__dirname, 'function.proto')).function;
 
+function MessageBuilder(headers, payload) {
+    this._headers = headers || {};
+    this._payload = payload || null;
+}
+MessageBuilder.prototype = {
+    addHeader(name, value) {
+        return new MessageBuilder(
+            Object.assign({}, this._headers, { [name]: [...(this._headers[name] || []), '' + value] }),
+            this._payload
+        );
+    },
+    payload(payload) {
+        return new MessageBuilder(this._headers, payload);
+    },
+    build() {
+        return {
+            headers: Object.keys(this._headers).reduce((headers, name) => {
+                headers[name] = { values: this._headers[name] };
+                return headers;
+            }, {}),
+            payload: Buffer.from(this._payload)
+        };
+    }
+};
+
 module.exports = {
-    FunctionService: fn.MessageFunction.service,
-    FunctionClient: fn.MessageFunction
+    MessageBuilder,
+    FunctionInvokerService: fn.MessageFunction.service,
+    FunctionInvokerClient: fn.MessageFunction
 };
