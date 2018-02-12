@@ -1,7 +1,99 @@
 describe('function-proto', () => {
-    const { FunctionInvokerService, FunctionInvokerClient, MessageBuilder } = require('..');
+    const { FunctionInvokerService, FunctionInvokerClient, MessageBuilder, MessageHeaders } = require('..');
     const grpc = require('grpc');
     const port = 50051;
+
+    describe('MessageHeaders', () => {
+        it('parses a plain JS object', () => {
+            const obj = {
+                'Content-Type': {
+                    values: ['application/json']
+                }
+            }
+            const headers = MessageHeaders.fromObject(obj);
+            expect(headers.getValue('content-type')).toBe('application/json')
+        });
+
+        it('creates a plain JS object', () => {
+            const headers = new MessageHeaders()
+                .addHeader('Content-Type', 'application/json');
+            expect(headers.toObject()).toEqual({
+                'Content-Type': {
+                    values: ['application/json']
+                }
+            });
+        });
+
+        it('creates a plain JS object', () => {
+            const headers = new MessageHeaders()
+                .addHeader('Content-Type', 'application/json');
+            expect(headers.toObject()).toEqual({
+                'Content-Type': {
+                    values: ['application/json']
+                }
+            });
+        });
+
+        it('allows for multiple values', () => {
+            const headers = new MessageHeaders()
+                .addHeader('Accept', '*/*;q=0.1', 'text/plain;q=0.9');
+            expect(headers.getValues('accept')).toEqual(['*/*;q=0.1', 'text/plain;q=0.9']);
+        });
+
+        it('returns the first value for a header', () => {
+            const headers = new MessageHeaders()
+                .addHeader('Accept', '*/*;q=0.1', 'text/plain;q=0.9');
+            expect(headers.getValue('accept')).toEqual('*/*;q=0.1');
+        });
+
+        it('conflates header names to be case insensite', () => {
+            const headers = new MessageHeaders()
+                .addHeader('Accept', '*/*;q=0.1')
+                .addHeader('accept', 'text/plain;q=0.9');
+            expect(headers.toObject()).toEqual({
+                'Accept': {
+                    values: ['*/*;q=0.1', 'text/plain;q=0.9']
+                }
+            });
+        });
+
+        it('converts header values to strings', () => {
+            const headers = new MessageHeaders()
+                .addHeader('correlationId', 1234);
+            expect(headers.toObject()).toEqual({
+                'correlationId': {
+                    values: ['1234']
+                }
+            });
+        });
+
+        it('handles multiple headers', () => {
+            const headers = new MessageHeaders()
+                .addHeader('Accept', '*/*;q=0.1')
+                .addHeader('accept', 'text/plain;q=0.9')
+                .addHeader('Content-Type', 'application/json');
+            expect(headers.toObject()).toEqual({
+                'Accept': {
+                    values: ['*/*;q=0.1', 'text/plain;q=0.9']
+                },
+                'Content-Type': {
+                    values: ['application/json']
+                }
+            });
+        });
+
+        it('is immutable', () => {
+            const empty = new MessageHeaders();
+            const one = empty.addHeader('correlationId', '1234');
+            expect(one).not.toBe(empty);
+            expect(empty.toObject()).toEqual({});
+            expect(one.toObject()).toEqual({
+                correlationId: {
+                    values: ['1234']
+                }
+            });
+        });
+    });
 
     it('builds a message', () => {
         const theMessage = new MessageBuilder()
