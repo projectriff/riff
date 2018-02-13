@@ -57,19 +57,19 @@ func ValidateNamePathOptions(name *string, filePath *string) error {
  */
 func ValidateAndCleanInitOptions(options *InitOptions) error {
 
-	options.FunctionPath = filepath.Clean(options.FunctionPath)
+	options.FilePath = filepath.Clean(options.FilePath)
 	if options.Artifact != "" {
 		options.Artifact = filepath.Clean(options.Artifact)
 	}
 
-	if options.FunctionPath == "" {
+	if options.FilePath == "" {
 		path, _ := filepath.Abs(".")
-		options.FunctionPath = path
+		options.FilePath = path
 	}
 
 	var err error
 	if options.FunctionName == "" {
-		options.FunctionName, err = functions.FunctionNameFromPath(options.FunctionPath)
+		options.FunctionName, err = functions.FunctionNameFromPath(options.FilePath)
 		if err != nil {
 			return err
 		}
@@ -81,7 +81,7 @@ func ValidateAndCleanInitOptions(options *InitOptions) error {
 			return errors.New(fmt.Sprintf("artifact %s must be relative to function path", options.Artifact))
 		}
 
-		absFilePath, err := filepath.Abs(options.FunctionPath)
+		absFilePath, err := filepath.Abs(options.FilePath)
 		if err != nil {
 			return err
 		}

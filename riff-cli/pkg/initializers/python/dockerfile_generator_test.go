@@ -27,10 +27,10 @@ func TestPythonDockerfile(t *testing.T) {
 	as := assert.New(t)
 
 	opts := options.InitOptions{
-		Artifact:     "demo.py",
-		RiffVersion:  "0.0.3",
-		FunctionPath: "test_dir/python/demo",
-		Handler:      "process",
+		Artifact:    "demo.py",
+		RiffVersion: "0.0.3",
+		FilePath:    "test_dir/python/demo",
+		Handler:     "process",
 	}
 
 	docker, err := generatePythonFunctionDockerFile(opts)

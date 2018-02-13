@@ -75,14 +75,14 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 
 	if opts.FunctionName == "" {
 		var err error
-		opts.FunctionName, err = functions.FunctionNameFromPath(opts.FunctionPath)
+		opts.FunctionName, err = functions.FunctionNameFromPath(opts.FilePath)
 		if err != nil {
 			cmd.SilenceUsage = true
 			return err
 		}
 	}
 
-	abs,err := functions.AbsPath(opts.FunctionPath)
+	abs,err := functions.AbsPath(opts.FilePath)
 	if err != nil {
 		cmd.SilenceUsage = true
 		return err
@@ -91,7 +91,7 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 	var cmdArgs []string
 
 	if opts.All {
-		optionPath := opts.FunctionPath
+		optionPath := opts.FilePath
 		if !osutils.IsDirectory(abs) {
 			abs = filepath.Dir(abs)
 			optionPath = filepath.Dir(optionPath)
@@ -103,7 +103,7 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 			fmt.Printf("Deleting %v function\n\n", opts.FunctionName)
 			cmdArgs = []string{"delete", "--namespace", opts.Namespace, "function", opts.FunctionName}
 		} else {
-			fmt.Printf("Deleting %v resource\n\n", opts.FunctionPath)
+			fmt.Printf("Deleting %v resource\n\n", opts.FilePath)
 			cmdArgs = []string{"delete", "--namespace", opts.Namespace, "-f", abs}
 		}
 	}

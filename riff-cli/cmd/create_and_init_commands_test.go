@@ -36,8 +36,8 @@ func TestCreateCommandImplicitPath(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(opts.CreateOptions.FunctionPath)
-	as.Equal("../test_data/shell/echo", opts.CreateOptions.FunctionPath)
+	as.NotEmpty(opts.CreateOptions.FilePath)
+	as.Equal("../test_data/shell/echo", opts.CreateOptions.FilePath)
 
 }
 
@@ -64,8 +64,8 @@ func TestCreateCommandExplicitPath(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(opts.CreateOptions.FunctionPath)
-	as.Equal("../test_data/shell/echo", opts.CreateOptions.FunctionPath)
+	as.NotEmpty(opts.CreateOptions.FilePath)
+	as.Equal("../test_data/shell/echo", opts.CreateOptions.FilePath)
 }
 
 func TestCreateCommandExplicitPathAndLang(t *testing.T) {
@@ -76,8 +76,8 @@ func TestCreateCommandExplicitPathAndLang(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(opts.CreateOptions.FunctionPath)
-	as.Equal("../test_data/shell/echo", opts.CreateOptions.FunctionPath)
+	as.NotEmpty(opts.CreateOptions.FilePath)
+	as.Equal("../test_data/shell/echo", opts.CreateOptions.FilePath)
 }
 
 func TestCreateLanguageDoesNotMatchArtifact(t *testing.T) {
@@ -108,8 +108,8 @@ func TestInitCommandImplicitPath(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(opts.InitOptions.FunctionPath)
-	as.Equal("../test_data/shell/echo", opts.InitOptions.FunctionPath)
+	as.NotEmpty(opts.InitOptions.FilePath)
+	as.Equal("../test_data/shell/echo", opts.InitOptions.FilePath)
 }
 
 func TestInitCommandExplicitPath(t *testing.T) {
@@ -120,8 +120,8 @@ func TestInitCommandExplicitPath(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(opts.InitOptions.FunctionPath)
-	as.Equal("../test_data/shell/echo", opts.InitOptions.FunctionPath)
+	as.NotEmpty(opts.InitOptions.FilePath)
+	as.Equal("../test_data/shell/echo", opts.InitOptions.FilePath)
 }
 
 func TestInitCommandExplicitPathAndLang(t *testing.T) {
@@ -132,8 +132,8 @@ func TestInitCommandExplicitPathAndLang(t *testing.T) {
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
 
-	as.NotEmpty(opts.InitOptions.FunctionPath)
-	as.Equal("../test_data/shell/echo", opts.InitOptions.FunctionPath)
+	as.NotEmpty(opts.InitOptions.FilePath)
+	as.Equal("../test_data/shell/echo", opts.InitOptions.FilePath)
 }
 
 func TestInitJava(t *testing.T) {

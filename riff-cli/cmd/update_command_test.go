@@ -30,7 +30,7 @@ func TestUpdateCommandImplicitPath(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.CreateOptions.FunctionPath)
+	as.Equal("../test_data/shell/echo", opts.CreateOptions.FilePath)
 }
 
 func TestUpdateCommandExplicitPath(t *testing.T) {
@@ -40,5 +40,5 @@ func TestUpdateCommandExplicitPath(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.CreateOptions.FunctionPath)
+	as.Equal("../test_data/shell/echo", opts.CreateOptions.FilePath)
 }

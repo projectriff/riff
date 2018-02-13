@@ -30,9 +30,9 @@ func TestValidateDefaultFunctionResources(t *testing.T) {
 	filePath,_ := initCmd.PersistentFlags().GetString("filepath")
 	as := assert.New(t)
 	opts:= options.InitOptions{
-		FunctionPath: filePath,
-		FunctionName:"foo",
-		DryRun:true}
+		FilePath:     filePath,
+		FunctionName: "foo",
+		DryRun:       true}
 	as.NoError(options.ValidateAndCleanInitOptions(&opts))
 }
 
@@ -40,15 +40,15 @@ func TestValidateCleansFunctionResources(t *testing.T) {
 	filePath := filepath.Join("../test_data","python","demo") + string(os.PathSeparator) + string(os.PathSeparator)
 	artifact := "demo.py"
 	as := assert.New(t)
-	opts := options.InitOptions{FunctionPath: filePath, Artifact:artifact, DryRun:true}
+	opts := options.InitOptions{FilePath: filePath, Artifact:artifact, DryRun:true}
 	as.NoError(options.ValidateAndCleanInitOptions(&opts))
-	as.Equal(osutils.Path("../test_data/python/demo"),opts.FunctionPath)
+	as.Equal(osutils.Path("../test_data/python/demo"),opts.FilePath)
 }
 
 func TestValidateFunctionResourceDoesNotExist(t *testing.T) {
 	filePath := osutils.Path("does/not/exist")
 	as := assert.New(t)
-	opts := options.InitOptions{FunctionPath: filePath, DryRun:true}
+	opts := options.InitOptions{FilePath: filePath, DryRun:true}
 	err := options.ValidateAndCleanInitOptions(&opts)
 	as.Error(err)
 	as.Equal(fmt.Sprintf("path '%s' does not exist", filePath),err.Error())
@@ -57,7 +57,7 @@ func TestValidateFunctionResourceDoesNotExist(t *testing.T) {
 func TestValidateArtifactIsRegularFile(t *testing.T) {
 	filePath := osutils.Path("../test_data/python")
 	as := assert.New(t)
-	opts := options.InitOptions{FunctionPath: filePath, Artifact: "demo"}
+	opts := options.InitOptions{FilePath: filePath, Artifact: "demo"}
 	err := options.ValidateAndCleanInitOptions(&opts)
 	as.Error(err)
 	as.Contains(err.Error(), "must be a regular file")
@@ -66,7 +66,7 @@ func TestValidateArtifactIsRegularFile(t *testing.T) {
 func TestValidateArtifactIsInSubDirectory(t *testing.T) {
 	filePath := osutils.Path("../test_data")
 	as := assert.New(t)
-	opts := options.InitOptions{FunctionPath: filePath, Artifact: "python/demo/demo.py"}
+	opts := options.InitOptions{FilePath: filePath, Artifact: "python/demo/demo.py"}
 	err := options.ValidateAndCleanInitOptions(&opts)
 	as.NoError(err)
 }
@@ -76,7 +76,7 @@ func TestValidateArtifactIsInCWD(t *testing.T) {
 	os.Chdir(osutils.Path("../test_data/python/demo"))
 
 	as := assert.New(t)
-	opts := options.InitOptions{FunctionPath: "", Artifact: "demo.py"}
+	opts := options.InitOptions{FilePath: "", Artifact: "demo.py"}
 	err := options.ValidateAndCleanInitOptions(&opts)
 	as.NoError(err)
 	os.Chdir(currentDir)
@@ -87,7 +87,7 @@ func TestArtifactCannotBeExternalToFilePath(t *testing.T) {
 	os.Chdir(osutils.Path("../test_data/python/demo"))
 	filePath := osutils.GetCWD()
 	as := assert.New(t)
-	opts := options.InitOptions{FunctionPath: filePath, Artifact: osutils.Path("../multiple/one.py")}
+	opts := options.InitOptions{FilePath: filePath, Artifact: osutils.Path("../multiple/one.py")}
 	err := options.ValidateAndCleanInitOptions(&opts)
 	as.Error(err)
 	as.Contains(err.Error(), "cannot be external to filepath",)
@@ -98,7 +98,7 @@ func TestArtifactRelativeToFilePath(t *testing.T) {
 	filePath := osutils.Path("../test_data/python/demo")
 	artifact := "demo.py"
 	as := assert.New(t)
-	opts := options.InitOptions{FunctionPath: filePath, Artifact: artifact}
+	opts := options.InitOptions{FilePath: filePath, Artifact: artifact}
 	err := options.ValidateAndCleanInitOptions(&opts)
 	as.NoError(err)
 }
@@ -109,7 +109,7 @@ func TestAbsoluteArtifactPathConflctsFilePath(t *testing.T) {
 	artifact :=  osutils.Path("two.py")
 	as := assert.New(t)
 
-	opts:= options.InitOptions{FunctionPath: filePath, Artifact: artifact}
+	opts:= options.InitOptions{FilePath: filePath, Artifact: artifact}
 	err := options.ValidateAndCleanInitOptions(&opts)
 	as.Contains(err.Error(), "conflicts with filepath")
 	as.Error(err)

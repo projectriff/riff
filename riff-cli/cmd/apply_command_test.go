@@ -30,7 +30,7 @@ func TestApplyCommandImplicitPath(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.CreateOptions.FunctionPath)
+	as.Equal("../test_data/shell/echo", opts.CreateOptions.FilePath)
 }
 
 func TestApplyCommandExplicitPath(t *testing.T) {
@@ -40,7 +40,7 @@ func TestApplyCommandExplicitPath(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.CreateOptions.FunctionPath)
+	as.Equal("../test_data/shell/echo", opts.CreateOptions.FilePath)
 }
 
 func TestApplyCommandDefaultNamespace(t *testing.T) {

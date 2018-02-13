@@ -45,8 +45,8 @@ var applyCmd = &cobra.Command{
 		if !opts.CreateOptions.Initialized {
 			utils.MergeApplyOptions(*cmd.Flags(), &opts.CreateOptions)
 			if len(args) > 0 {
-				if len(args) == 1 && opts.CreateOptions.FunctionPath == "" {
-					opts.CreateOptions.FunctionPath = args[0]
+				if len(args) == 1 && opts.CreateOptions.FilePath == "" {
+					opts.CreateOptions.FilePath = args[0]
 				} else {
 					ioutils.Errorf("Invalid argument(s) %v\n", args)
 					cmd.Usage()
@@ -65,11 +65,11 @@ var applyCmd = &cobra.Command{
 }
 
 func apply(cmd *cobra.Command, opts options.ApplyOptions) error {
-	fnDir, _ := functions.FunctionDirFromPath(opts.FunctionPath)
+	fnDir, _ := functions.FunctionDirFromPath(opts.FilePath)
 	if opts.DryRun {
 		fmt.Printf("\nApply Command: kubectl apply --namespace %s -f %s\n\n", opts.Namespace, fnDir)
 	} else {
-		fmt.Printf("Applying resources in %v\n", opts.FunctionPath)
+		fmt.Printf("Applying resources in %v\n", opts.FilePath)
 		output, err := kubectl.ExecForString([]string{"apply", "--namespace", opts.Namespace, "-f", fnDir})
 		if err != nil {
 			cmd.SilenceUsage = true

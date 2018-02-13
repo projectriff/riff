@@ -20,7 +20,7 @@ var SupportedProtocols = []string{"stdio", "http", "grpc"}
 type InitOptions struct {
 	FunctionName string
 	Version      string
-	FunctionPath string
+	FilePath     string
 	Protocol     string
 	Input        string
 	Output       string
@@ -46,14 +46,14 @@ func (this InitOptions) GetUserAccount() string {
 }
 
 type BuildOptions struct {
-	FunctionPath string
+	FilePath     string
 	FunctionName string
 	Version      string
 	RiffVersion  string
 	UserAccount  string
 	Namespace    string
 	Push         bool
-	DryRun		 bool
+	DryRun       bool
 }
 
 func (this BuildOptions) GetFunctionName() string {
@@ -73,17 +73,17 @@ func (this BuildOptions) GetNamespace() string {
 }
 
 type ApplyOptions struct {
-	FunctionPath string
-	Namespace    string
-	DryRun		 bool
+	FilePath  string
+	Namespace string
+	DryRun    bool
 }
 
 type DeleteOptions struct {
-	FunctionPath string
+	FilePath     string
 	FunctionName string
 	Namespace    string
-	DryRun		 bool
-	All		     bool
+	DryRun       bool
+	All          bool
 }
 
 func (this DeleteOptions) GetAll() bool {
@@ -112,26 +112,26 @@ type ImageOptions interface {
 }
 
 func GetApplyOptions(opts CreateOptions) ApplyOptions {
-	return ApplyOptions{FunctionPath:opts.FunctionPath, Namespace:opts.Namespace, DryRun:opts.DryRun}
+	return ApplyOptions{FilePath:opts.FilePath, Namespace:opts.Namespace, DryRun:opts.DryRun}
 }
 
 func GetDeleteOptions(opts DeleteAllOptions) DeleteOptions {
 	return DeleteOptions{
-		FunctionPath:opts.FilePath,
-		FunctionName:opts.FunctionName,
-		Namespace:opts.Namespace,
-		DryRun:opts.DryRun, All:opts.All}
+		FilePath:     opts.FilePath,
+		FunctionName: opts.FunctionName,
+		Namespace:    opts.Namespace,
+		DryRun:       opts.DryRun, All: opts.All}
 }
 
 func GetBuildOptions(opts CreateOptions) BuildOptions {
 	return BuildOptions{
-		FunctionPath:opts.FunctionPath,
-		FunctionName:opts.FunctionName,
-		Version:opts.Version,
-		RiffVersion:opts.RiffVersion,
-		UserAccount:opts.UserAccount,
-		Push:opts.Push,
-		DryRun:opts.DryRun,
+		FilePath:     opts.FilePath,
+		FunctionName: opts.FunctionName,
+		Version:      opts.Version,
+		RiffVersion:  opts.RiffVersion,
+		UserAccount:  opts.UserAccount,
+		Push:         opts.Push,
+		DryRun:       opts.DryRun,
 	}
 }
 

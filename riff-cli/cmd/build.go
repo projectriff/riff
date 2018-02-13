@@ -46,8 +46,8 @@ var buildCmd = &cobra.Command{
 			utils.MergeBuildOptions(*cmd.Flags(), &opts.CreateOptions)
 
 			if len(args) > 0 {
-				if len(args) == 1 && opts.CreateOptions.FunctionPath == "" {
-					opts.CreateOptions.FunctionPath = args[0]
+				if len(args) == 1 && opts.CreateOptions.FilePath == "" {
+					opts.CreateOptions.FilePath = args[0]
 				} else {
 					ioutils.Errorf("Invalid argument(s) %v\n", args)
 					cmd.Usage()
@@ -99,8 +99,8 @@ func build(opts options.BuildOptions) error {
 
 func buildArgs(opts options.BuildOptions) []string {
 	image := options.ImageName(opts)
-	path := opts.FunctionPath
-	if !osutils.IsDirectory(opts.FunctionPath) {
+	path := opts.FilePath
+	if !osutils.IsDirectory(opts.FilePath) {
 		path = filepath.Dir(path)
 	}
 	return []string{"build", "-t", image, path}

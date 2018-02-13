@@ -36,7 +36,7 @@ func Initialize(opts options.InitOptions) error {
 	}
 	utils.ResolveOptions(functionfile, language, &opts)
 
-	workdir, _ := filepath.Abs(opts.FunctionPath)
+	workdir, _ := filepath.Abs(opts.FilePath)
 
 	generator := core.ArtifactsGenerator{
 		GenerateFunction: core.DefaultGenerateFunction,

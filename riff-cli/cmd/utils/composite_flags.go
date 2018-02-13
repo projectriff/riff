@@ -91,8 +91,8 @@ func MergeInitOptions(flagset pflag.FlagSet, opts *options.InitOptions) {
 	if opts.Version == "" {
 		opts.Version, _ = flagset.GetString("version")
 	}
-	if opts.FunctionPath == "" {
-		opts.FunctionPath, _ = flagset.GetString("filepath")
+	if opts.FilePath == "" {
+		opts.FilePath, _ = flagset.GetString("filepath")
 	}
 	if opts.Protocol == "" {
 		opts.Protocol, _ = flagset.GetString("protocol")
@@ -127,8 +127,8 @@ func MergeBuildOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 	if opts.Version == "" {
 		opts.Version, _ = flagset.GetString("version")
 	}
-	if opts.FunctionPath == "" {
-		opts.FunctionPath, _ = flagset.GetString("filepath")
+	if opts.FilePath == "" {
+		opts.FilePath, _ = flagset.GetString("filepath")
 	}
 	if opts.RiffVersion == "" {
 		opts.RiffVersion, _ = flagset.GetString("riff-version")
@@ -145,8 +145,8 @@ func MergeBuildOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 }
 
 func MergeApplyOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
-	if opts.FunctionPath == "" {
-		opts.FunctionPath, _ = flagset.GetString("filepath")
+	if opts.FilePath == "" {
+		opts.FilePath, _ = flagset.GetString("filepath")
 	}
 	if opts.Namespace == "" {
 		opts.Namespace, _ = flagset.GetString("namespace")
@@ -157,6 +157,9 @@ func MergeApplyOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 }
 
 func MergeDeleteOptions(flagset pflag.FlagSet, opts *options.DeleteAllOptions) {
+	if opts.FunctionName == "" {
+		opts.FunctionName, _ = flagset.GetString("name")
+	}
 	if opts.FilePath == "" {
 		opts.FilePath, _ = flagset.GetString("filepath")
 	}

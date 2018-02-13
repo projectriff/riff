@@ -46,7 +46,7 @@ func generatePythonFunctionDockerFile(opts options.InitOptions) (string, error) 
 	dockerFileTokens.ArtifactBase = filepath.Base(opts.Artifact)
 	dockerFileTokens.RiffVersion = opts.RiffVersion
 	dockerFileTokens.Handler = opts.Handler
-	dockerFileTokens.RequirementsTextExists = requirementTextExists(opts.FunctionPath)
+	dockerFileTokens.RequirementsTextExists = requirementTextExists(opts.FilePath)
 
 	return core.GenerateFunctionDockerFileContents(pythonFunctionDockerfileTemplate, "docker-python", dockerFileTokens)
 }

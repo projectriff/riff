@@ -57,8 +57,8 @@ var initCmd = &cobra.Command{
 			utils.MergeInitOptions(flagset, &opts.InitOptions)
 
 			if len(args) > 0 {
-				if len(args) == 1 && opts.InitOptions.FunctionPath == "" {
-					opts.InitOptions.FunctionPath = args[0]
+				if len(args) == 1 && opts.InitOptions.FilePath == "" {
+					opts.InitOptions.FilePath = args[0]
 				} else {
 					ioutils.Errorf("Invalid argument(s) %v\n", args)
 					cmd.Usage()

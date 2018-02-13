@@ -25,7 +25,7 @@ import (
 
 func ResolveOptions(functionArtifact string, language string, opts *options.InitOptions) {
 
-	opts.FunctionName, _ = functions.FunctionNameFromPath(opts.FunctionPath)
+	opts.FunctionName, _ = functions.FunctionNameFromPath(opts.FilePath)
 
 	if opts.Input == "" {
 		opts.Input = opts.FunctionName

@@ -36,12 +36,12 @@ var languageForFileExtensions = map[string]string{
 //Assumes given file paths have been sanity checked and are valid
 func ResolveFunctionFile(opts options.InitOptions, language string, ext string) (string, error) {
 
-	absFilePath, err := filepath.Abs(opts.FunctionPath)
+	absFilePath, err := filepath.Abs(opts.FilePath)
 	if err != nil {
 		return "", err
 	}
 
-	var resolvedFunctionPath string
+	var resolvedFilePath string
 	var functionDir string
 	var functionFile string
 	if osutils.IsDirectory(absFilePath) {
@@ -49,29 +49,29 @@ func ResolveFunctionFile(opts options.InitOptions, language string, ext string) 
 			functionFile = opts.FunctionName
 			functionDir = absFilePath
 			if ext != "" {
-				resolvedFunctionPath = filepath.Join(functionDir, fmt.Sprintf("%s.%s", functionFile, ext))
+				resolvedFilePath = filepath.Join(functionDir, fmt.Sprintf("%s.%s", functionFile, ext))
 			} else {
 				functionFile, err = searchForFunctionResource(functionDir, opts.FunctionName)
 				if err != nil {
 					return "", err
 				}
-				resolvedFunctionPath = functionFile
+				resolvedFilePath = functionFile
 			}
 		} else {
-			resolvedFunctionPath = filepath.Join(absFilePath, opts.Artifact)
+			resolvedFilePath = filepath.Join(absFilePath, opts.Artifact)
 		}
 	} else {
-		resolvedFunctionPath = absFilePath
+		resolvedFilePath = absFilePath
 	}
-	if !osutils.FileExists(resolvedFunctionPath) {
-		return "", errors.New(fmt.Sprintf("function path %s does not exist", resolvedFunctionPath))
+	if !osutils.FileExists(resolvedFilePath) {
+		return "", errors.New(fmt.Sprintf("function path %s does not exist", resolvedFilePath))
 	}
 
-	if opts.Artifact != "" && language != "" && languageForFileExtensions[filepath.Ext(resolvedFunctionPath)[1:]] != language {
+	if opts.Artifact != "" && language != "" && languageForFileExtensions[filepath.Ext(resolvedFilePath)[1:]] != language {
 		return "", errors.New(fmt.Sprintf("language %s conflicts with artifact file extension %s", language, opts.Artifact))
 	}
 
-	return resolvedFunctionPath, nil
+	return resolvedFilePath, nil
 }
 
 func searchForFunctionResource(dir string, name string) (string, error) {
