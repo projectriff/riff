@@ -32,6 +32,7 @@ import (
 )
 
 type PublishOptions struct {
+	namespace string
 	input string
 	data  string
 	reply bool
@@ -53,7 +54,7 @@ will post 'hello' to the 'greetings' topic and wait for a reply.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		cmdArgs := []string{"get", "svc", "-l", "component=http-gateway", "-o", "json"}
+		cmdArgs := []string{"get", "--namespace", publishOptions.namespace, "svc", "-l", "component=http-gateway", "-o", "json"}
 		output, err := kubectl.ExecForBytes(cmdArgs)
 
 		if err != nil {
@@ -66,7 +67,7 @@ will post 'hello' to the 'greetings' topic and wait for a reply.
 		portType := parser.Value(`$.items[0].spec.type+`)
 
 		if portType == "" {
-			ioutils.Error("unable to locate http-gateway")
+			ioutils.Errorf("Unable to locate http-gateway in namespace %v\n", publishOptions.namespace)
 			return
 		}
 
@@ -146,11 +147,12 @@ func init() {
 	// is called directly, e.g.:
 	// publishCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	publishCmd.Flags().StringVarP(&publishOptions.data, "data", "d", "", "The data to post to the http-gateway using the input topic")
-	publishCmd.Flags().StringVarP(&publishOptions.input, "input", "i", osutils.GetCWDBasePath(), "The functionName of the input topic (defaults to the functionName of the current directory)")
-	publishCmd.Flags().BoolVarP(&publishOptions.reply, "reply", "r", false, "Wait for a reply containing the results of the function execution")
-	publishCmd.Flags().IntVarP(&publishOptions.count, "count", "c", 1, "The number of times to post the data")
-	publishCmd.Flags().IntVarP(&publishOptions.pause, "pause", "p", 0, "The number of seconds to wait between postings")
+	publishCmd.Flags().StringVarP(&publishOptions.namespace, "namespace", "", "default", "the namespace used for the deployed resources")
+	publishCmd.Flags().StringVarP(&publishOptions.data, "data", "d", "", "the data to post to the http-gateway using the input topic")
+	publishCmd.Flags().StringVarP(&publishOptions.input, "input", "i", osutils.GetCWDBasePath(), "the name of the input topic, defaults to name of current directory")
+	publishCmd.Flags().BoolVarP(&publishOptions.reply, "reply", "r", false, "wait for a reply containing the results of the function execution")
+	publishCmd.Flags().IntVarP(&publishOptions.count, "count", "c", 1, "the number of times to post the data")
+	publishCmd.Flags().IntVarP(&publishOptions.pause, "pause", "p", 0, "the number of seconds to wait between postings")
 
 	publishCmd.MarkFlagRequired("data")
 

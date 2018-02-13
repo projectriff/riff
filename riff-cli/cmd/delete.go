@@ -52,8 +52,8 @@ var deleteCmd = &cobra.Command {
 		if !DeleteAllOptions.Initialized {
 			utils.MergeDeleteOptions(*cmd.Flags(), &DeleteAllOptions)
 			if len(args) > 0 {
-				if len(args) == 1 && DeleteAllOptions.FunctionPath == "" {
-					DeleteAllOptions.FunctionPath = args[0]
+				if len(args) == 1 && DeleteAllOptions.FilePath == "" {
+					DeleteAllOptions.FilePath = args[0]
 				} else {
 					ioutils.Errorf("Invalid argument(s) %v\n", args)
 					cmd.Usage()
@@ -61,7 +61,7 @@ var deleteCmd = &cobra.Command {
 				}
 			}
 
-			err := options.ValidateNamePathOptions(&DeleteAllOptions.FunctionName, &DeleteAllOptions.FunctionPath)
+			err := options.ValidateNamePathOptions(&DeleteAllOptions.FunctionName, &DeleteAllOptions.FilePath)
 			if err != nil {
 				ioutils.Error(err)
 				os.Exit(1)
@@ -97,14 +97,14 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 			optionPath = filepath.Dir(optionPath)
 		}
 		fmt.Printf("Deleting %v resources\n\n", optionPath)
-		cmdArgs = []string{"delete", "-f", abs}
+		cmdArgs = []string{"delete", "--namespace", opts.Namespace, "-f", abs}
 	} else {
 		if osutils.IsDirectory(abs) {
 			fmt.Printf("Deleting %v function\n\n", opts.FunctionName)
-			cmdArgs = []string{"delete", "function", opts.FunctionName}
+			cmdArgs = []string{"delete", "--namespace", opts.Namespace, "function", opts.FunctionName}
 		} else {
 			fmt.Printf("Deleting %v resource\n\n", opts.FunctionPath)
-			cmdArgs = []string{"delete", "-f", abs}
+			cmdArgs = []string{"delete", "--namespace", opts.Namespace, "-f", abs}
 		}
 	}
 

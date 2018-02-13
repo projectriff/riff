@@ -28,6 +28,7 @@ import (
 type Defaults struct {
 	riffVersion string
 	userAccount string
+	namespace   string
 	force       bool
 	dryRun      bool
 	push        bool
@@ -37,6 +38,7 @@ type Defaults struct {
 var defaults = Defaults{
 	riffVersion: global.RIFF_VERSION,
 	userAccount: osutils.GetCurrentUsername(),
+	namespace:   "default",
 	force:       false,
 	dryRun:      false,
 	push:        false,
@@ -70,12 +72,14 @@ func CreateBuildFlags(flagset *pflag.FlagSet) {
 
 func CreateApplyFlags(flagset *pflag.FlagSet) {
 	setFilePathFlag(flagset)
+	setNamespaceFlag(flagset)
 	setDryRunFlag(flagset)
 }
 
 func CreateDeleteFlags(flagset *pflag.FlagSet) {
 	setFilePathFlag(flagset)
 	setNameFlag(flagset)
+	setNamespaceFlag(flagset)
 	setDryRunFlag(flagset)
 	flagset.Bool("all", false, "delete all resources including topics, not just the function resource")
 }
@@ -144,14 +148,20 @@ func MergeApplyOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 	if opts.FunctionPath == "" {
 		opts.FunctionPath, _ = flagset.GetString("filepath")
 	}
+	if opts.Namespace == "" {
+		opts.Namespace, _ = flagset.GetString("namespace")
+	}
 	if opts.DryRun == false {
 		opts.DryRun, _ = flagset.GetBool("dry-run")
 	}
 }
 
 func MergeDeleteOptions(flagset pflag.FlagSet, opts *options.DeleteAllOptions) {
-	if opts.FunctionPath == "" {
-		opts.FunctionPath, _ = flagset.GetString("filepath")
+	if opts.FilePath == "" {
+		opts.FilePath, _ = flagset.GetString("filepath")
+	}
+	if opts.Namespace == "" {
+		opts.Namespace, _ = flagset.GetString("namespace")
 	}
 	if opts.DryRun == false {
 		opts.DryRun, _ = flagset.GetBool("dry-run")
@@ -183,7 +193,13 @@ func setVersionFlag(flagset *pflag.FlagSet) {
 
 func setFilePathFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "filepath") {
-		flagset.StringP("filepath", "f", "", "path or directory to be used for the function resources (defaults to the current directory)")
+		flagset.StringP("filepath", "f", "", "path or directory used for the function resources (defaults to the current directory)")
+	}
+}
+
+func setNamespaceFlag(flagset *pflag.FlagSet) {
+	if !flagDefined(flagset, "namespace") {
+		flagset.String("namespace", defaults.namespace, "the namespace used for the deployed resources")
 	}
 }
 

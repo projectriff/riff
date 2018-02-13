@@ -65,12 +65,12 @@ func Shell() Initializer {
 }
 
 func Initialize(opts options.InitOptions) error {
-	functionPath, err := utils.ResolveFunctionFile(opts, "","")
+	filePath, err := utils.ResolveFunctionFile(opts, "","")
 	if err != nil {
 		return err
 	}
 
-	language := languageForFileExtension[filepath.Ext(functionPath)[1:]]
+	language := languageForFileExtension[filepath.Ext(filePath)[1:]]
 
 	switch language {
 	case "shell":

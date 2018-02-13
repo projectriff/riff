@@ -42,3 +42,23 @@ func TestApplyCommandExplicitPath(t *testing.T) {
 	as.NoError(err)
 	as.Equal("../test_data/shell/echo", opts.CreateOptions.FunctionPath)
 }
+
+func TestApplyCommandDefaultNamespace(t *testing.T) {
+	clearAllOptions()
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"apply", "--dry-run", "-f", osutils.Path("../test_data/shell/echo")})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	as.Equal("default", opts.CreateOptions.Namespace)
+}
+
+func TestApplyCommandWithNamespace(t *testing.T) {
+	clearAllOptions()
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"apply", "--dry-run", "--namespace", "test-test", "-f", osutils.Path("../test_data/shell/echo")})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	as.Equal("test-test", opts.CreateOptions.Namespace)
+}

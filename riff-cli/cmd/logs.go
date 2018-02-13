@@ -30,6 +30,7 @@ import (
 type LogsOptions struct {
 	function  string
 	container string
+	namespace string
 	tail      bool
 }
 
@@ -48,14 +49,14 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		fmt.Printf("Displaying logs for container %v of function %v\n", logsOptions.container, logsOptions.function)
+		fmt.Printf("Displaying logs for container %v of function %v in namespace %v\n", logsOptions.container, logsOptions.function, logsOptions.namespace)
 
-		cmdArgs := []string{"get", "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.name}"}
+		cmdArgs := []string{"--namespace", logsOptions.namespace, "get", "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.name}"}
 
 		output, err := kubectl.ExecForString(cmdArgs)
 
 		if err != nil {
-			ioutils.Errorf("Error %v - Function %v may not be currently active\n%", err, logsOptions.function)
+			ioutils.Errorf("Error %v - Function %v may not be currently active\n\n", err, logsOptions.function)
 			return
 		}
 
@@ -66,7 +67,7 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 			tail = "-f"
 		}
 
-		cmdArgs = []string{"logs", "-c", logsOptions.container, tail, pod}
+		cmdArgs = []string{"--namespace", logsOptions.namespace, "logs", "-c", logsOptions.container, tail, pod}
 
 		kubectlCmd := exec.Command("kubectl", cmdArgs...)
 		cmdReader, err := kubectlCmd.StdoutPipe()
@@ -78,7 +79,7 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 		scanner := bufio.NewScanner(cmdReader)
 		go func() {
 			for scanner.Scan() {
-				fmt.Printf("%s\n", scanner.Text())
+				fmt.Printf("%s\n\n", scanner.Text())
 			}
 		}()
 
@@ -100,9 +101,10 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 func init() {
 	rootCmd.AddCommand(logsCmd)
 
-	logsCmd.Flags().StringVarP(&logsOptions.function, "functionName", "n", "", "The functionName of the function")
-	logsCmd.Flags().StringVarP(&logsOptions.container, "container", "c", "sidecar", "The functionName of the function container (sidecar or main)")
-	logsCmd.Flags().BoolVarP(&logsOptions.tail, "tail", "t", false, "Tail the logs")
+	logsCmd.Flags().StringVarP(&logsOptions.function, "name", "n", "", "the name of the function")
+	logsCmd.Flags().StringVarP(&logsOptions.container, "container", "c", "sidecar", "the name of the function container (sidecar or main)")
+	logsCmd.Flags().StringVarP(&logsOptions.namespace, "namespace", "", "default", "the namespace used for the deployed resources")
+	logsCmd.Flags().BoolVarP(&logsOptions.tail, "tail", "t", false, "tail the logs")
 
-	logsCmd.MarkFlagRequired("functionName")
+	logsCmd.MarkFlagRequired("name")
 }

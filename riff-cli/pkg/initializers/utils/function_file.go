@@ -74,7 +74,7 @@ func ResolveFunctionFile(opts options.InitOptions, language string, ext string) 
 	return resolvedFunctionPath, nil
 }
 
-func searchForFunctionResource(dir string, functionName string) (string, error) {
+func searchForFunctionResource(dir string, name string) (string, error) {
 	files, err := filepath.Glob(filepath.Join(dir, "*"))
 	if err != nil {
 		return "", err
@@ -82,7 +82,7 @@ func searchForFunctionResource(dir string, functionName string) (string, error) 
 
 	foundFile := ""
 	for _, f := range (files) {
-		if b := filepath.Base(f); b[0:len(b)-len(filepath.Ext(f))] == functionName {
+		if b := filepath.Base(f); b[0:len(b)-len(filepath.Ext(f))] == name {
 			for _, e := range supportedExtensions {
 				if filepath.Ext(f) == "."+e {
 					if foundFile == "" {

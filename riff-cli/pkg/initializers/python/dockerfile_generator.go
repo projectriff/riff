@@ -51,9 +51,9 @@ func generatePythonFunctionDockerFile(opts options.InitOptions) (string, error) 
 	return core.GenerateFunctionDockerFileContents(pythonFunctionDockerfileTemplate, "docker-python", dockerFileTokens)
 }
 
-func requirementTextExists(functionPath string) bool {
-	if !osutils.IsDirectory(functionPath) {
-		functionPath = filepath.Dir(functionPath)
+func requirementTextExists(filePath string) bool {
+	if !osutils.IsDirectory(filePath) {
+		filePath = filepath.Dir(filePath)
 	}
-	return osutils.FileExists(filepath.Join(functionPath, "requirements.txt"))
+	return osutils.FileExists(filepath.Join(filePath, "requirements.txt"))
 }

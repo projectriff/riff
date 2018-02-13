@@ -24,16 +24,22 @@ import (
 	"github.com/projectriff/riff-cli/pkg/ioutils"
 )
 
+type ListOptions struct {
+	namespace string
+}
+
+var listOptions ListOptions
+
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List current function resources",
+	Short: "List function resources",
 	Long: `List the currently defined function resources.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		fmt.Printf("Listing current function resources\n\n")
+		fmt.Printf("Listing function resources in namespace %v\n\n", listOptions.namespace)
 
-		cmdArgs := []string{"get", "functions"}
+		cmdArgs := []string{"get", "--namespace", listOptions.namespace, "functions"}
 
 		output, err := kubectl.ExecForString(cmdArgs)
 
@@ -49,6 +55,8 @@ var listCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCmd)
+
+	listCmd.Flags().StringVarP(&listOptions.namespace, "namespace", "", "default", "the namespace used for the deployed resources")
 
 	// Here you will define your flags and configuration settings.
 

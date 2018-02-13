@@ -67,10 +67,10 @@ var applyCmd = &cobra.Command{
 func apply(cmd *cobra.Command, opts options.ApplyOptions) error {
 	fnDir, _ := functions.FunctionDirFromPath(opts.FunctionPath)
 	if opts.DryRun {
-		fmt.Printf("\nApply Command: kubectl apply -f %s\n\n", fnDir)
+		fmt.Printf("\nApply Command: kubectl apply --namespace %s -f %s\n\n", opts.Namespace, fnDir)
 	} else {
 		fmt.Printf("Applying resources in %v\n", opts.FunctionPath)
-		output, err := kubectl.ExecForString([]string{"apply", "-f", fnDir})
+		output, err := kubectl.ExecForString([]string{"apply", "--namespace", opts.Namespace, "-f", fnDir})
 		if err != nil {
 			cmd.SilenceUsage = true
 			return err

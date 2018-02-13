@@ -51,6 +51,7 @@ type BuildOptions struct {
 	Version      string
 	RiffVersion  string
 	UserAccount  string
+	Namespace    string
 	Push         bool
 	DryRun		 bool
 }
@@ -67,14 +68,20 @@ func (this BuildOptions) GetUserAccount() string {
 	return this.UserAccount
 }
 
+func (this BuildOptions) GetNamespace() string {
+	return this.Namespace
+}
+
 type ApplyOptions struct {
 	FunctionPath string
+	Namespace    string
 	DryRun		 bool
 }
 
 type DeleteOptions struct {
 	FunctionPath string
 	FunctionName string
+	Namespace    string
 	DryRun		 bool
 	All		     bool
 }
@@ -85,14 +92,16 @@ func (this DeleteOptions) GetAll() bool {
 
 type CreateOptions struct {
 	InitOptions
+	Namespace    string
 	Push        bool
 }
 
 type DeleteAllOptions struct {
 	FunctionName string
-	FunctionPath string
-	DryRun		 bool
-	All		     bool
+	FilePath     string
+	Namespace    string
+	DryRun       bool
+	All          bool
 	Initialized  bool
 }
 
@@ -103,11 +112,15 @@ type ImageOptions interface {
 }
 
 func GetApplyOptions(opts CreateOptions) ApplyOptions {
-	return ApplyOptions{FunctionPath:opts.FunctionPath, DryRun:opts.DryRun}
+	return ApplyOptions{FunctionPath:opts.FunctionPath, Namespace:opts.Namespace, DryRun:opts.DryRun}
 }
 
 func GetDeleteOptions(opts DeleteAllOptions) DeleteOptions {
-	return DeleteOptions{FunctionPath:opts.FunctionPath, FunctionName:opts.FunctionName, DryRun:opts.DryRun, All:opts.All}
+	return DeleteOptions{
+		FunctionPath:opts.FilePath,
+		FunctionName:opts.FunctionName,
+		Namespace:opts.Namespace,
+		DryRun:opts.DryRun, All:opts.All}
 }
 
 func GetBuildOptions(opts CreateOptions) BuildOptions {
