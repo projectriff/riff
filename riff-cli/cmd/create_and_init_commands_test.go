@@ -24,10 +24,12 @@ import (
 	"os"
 	"github.com/projectriff/riff-cli/pkg/osutils"
 	"github.com/projectriff/riff-cli/cmd/opts"
+	"fmt"
+	"github.com/projectriff/riff-cli/cmd/utils"
 )
 
 func TestCreateCommandImplicitPath(t *testing.T) {
-	clearAllOptions()
+	clearAll()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"create", "--dry-run", "../test_data/shell/echo", "-v", "0.0.1-snapshot"})
 
@@ -40,7 +42,7 @@ func TestCreateCommandImplicitPath(t *testing.T) {
 }
 
 func TestCreateCommandFromCWD(t *testing.T) {
-	clearAllOptions()
+	clearAll()
 	currentdir := osutils.GetCWD()
 
 	path := osutils.Path("../test_data/shell/echo")
@@ -55,7 +57,7 @@ func TestCreateCommandFromCWD(t *testing.T) {
 }
 
 func TestCreateCommandExplicitPath(t *testing.T) {
-	clearAllOptions()
+	clearAll()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"create", "--dry-run", "-f", osutils.Path("../test_data/shell/echo"), "-v", "0.0.1-snapshot"})
 
@@ -67,7 +69,7 @@ func TestCreateCommandExplicitPath(t *testing.T) {
 }
 
 func TestCreateCommandExplicitPathAndLang(t *testing.T) {
-	clearAllOptions()
+	clearAll()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"create", "shell", "--dry-run", "-f", osutils.Path("../test_data/shell/echo"), "-v", "0.0.1-snapshot"})
 
@@ -79,16 +81,17 @@ func TestCreateCommandExplicitPathAndLang(t *testing.T) {
 }
 
 func TestCreateLanguageDoesNotMatchArtifact(t *testing.T) {
-	clearAllOptions()
+	clearAll()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"create", "shell", "--dry-run", "-f", osutils.Path("../test_data/python/demo"), "-a","demo.py"})
 
 	_, err := rootCmd.ExecuteC()
 	as.Error(err)
+	as.Equal( "language shell conflicts with artifact file extension demo.py",err.Error())
 }
 
 func TestCreatePythonCommand(t *testing.T) {
-	clearAllOptions()
+	clearAll()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"create", "python", "--dry-run", "-f", osutils.Path("../test_data/python/demo"), "-v", "0.0.1-snapshot", "--handler", "process"})
 
@@ -98,7 +101,7 @@ func TestCreatePythonCommand(t *testing.T) {
 }
 
 func TestInitCommandImplicitPath(t *testing.T) {
-	clearAllOptions()
+	clearAll()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"init", "--dry-run", "../test_data/shell/echo", "-v", "0.0.1-snapshot"})
 
@@ -110,7 +113,7 @@ func TestInitCommandImplicitPath(t *testing.T) {
 }
 
 func TestInitCommandExplicitPath(t *testing.T) {
-	clearAllOptions()
+	clearAll()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"init", "--dry-run", "-f", "../test_data/shell/echo", "-v", "0.0.1-snapshot"})
 
@@ -122,7 +125,7 @@ func TestInitCommandExplicitPath(t *testing.T) {
 }
 
 func TestInitCommandExplicitPathAndLang(t *testing.T) {
-	clearAllOptions()
+	clearAll()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"init", "shell", "--dry-run", "-f", "../test_data/shell/echo", "-v", "0.0.1-snapshot"})
 
@@ -133,9 +136,81 @@ func TestInitCommandExplicitPathAndLang(t *testing.T) {
 	as.Equal("../test_data/shell/echo", opts.InitOptions.FunctionPath)
 }
 
+func TestInitJava(t *testing.T) {
+	clearAll()
+	currentdir := osutils.GetCWD()
+	path := osutils.Path("../test_data/java")
+	os.Chdir(path)
+	as := assert.New(t)
+	//rootCmd.SetArgs([]string{"init", "java", "--dry-run", "-a", "target/dummy.jar", "--handler",  "function.Dummy", "-f","."})
+	rootCmd.SetArgs([]string{"init", "java", "--dry-run", "-a", "target/dummy.jar", "--handler",  "function.Dummy"})
+
+	_, err := rootCmd.ExecuteC()
+	fmt.Printf("%v\n", err)
+	as.NoError(err)
+	os.Chdir(currentdir)
+}
+
+func TestInitJavaWithVersion(t *testing.T) {
+	clearAll()
+	currentdir := osutils.GetCWD()
+	path := osutils.Path("../test_data/java")
+	os.Chdir(path)
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"init", "java", "--dry-run", "-a", "target/upper-1.0.0.jar", "--handler",  "function.Upper"})
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	os.Chdir(currentdir)
+}
+
+func TestCreateJavaWithVersion(t *testing.T) {
+	clearAll()
+	currentdir := osutils.GetCWD()
+	path := osutils.Path("../test_data/java")
+	os.Chdir(path)
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"create", "java", "--dry-run", "-a", "target/upper-1.0.0.jar", "--handler",  "function.Upper"})
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	os.Chdir(currentdir)
+}
+
+func clearAll() {
+	clearAllOptions()
+	clearAllFlags()
+}
+
 func clearAllOptions() {
 	opts.InitOptions = options.InitOptions{}
 	opts.CreateOptions = options.CreateOptions{}
 	opts.AllOptions = options.AllOptions{}
 	opts.Handler = ""
+}
+
+func clearAllFlags() {
+	initCmd.ResetFlags()
+	createCmd.ResetFlags()
+	initJavaCmd.ResetFlags()
+	createJavaCmd.ResetFlags()
+	initPythonCmd.ResetFlags()
+	createPythonCmd.ResetFlags()
+	createShellCmd.ResetFlags()
+	createNodeCmd.ResetFlags()
+
+	utils.CreateInitFlags(initCmd.PersistentFlags())
+	utils.CreateInitFlags(createCmd.PersistentFlags())
+	utils.CreateBuildFlags(createCmd.PersistentFlags())
+	utils.CreateApplyFlags(createCmd.PersistentFlags())
+
+	initJavaCmd.Flags().String("handler", "", "the fully qualified class name of the function handler")
+	initJavaCmd.MarkFlagRequired("handler")
+	createJavaCmd.Flags().String("handler", "", "the fully qualified class name of the function handler")
+	createJavaCmd.MarkFlagRequired("handler")
+
+	initPythonCmd.Flags().String("handler", "", "the name of the function handler")
+	initPythonCmd.MarkFlagRequired("handler")
+	createPythonCmd.Flags().String("handler", "", "the name of the function handler")
+	createPythonCmd.MarkFlagRequired("handler")
+
+
 }

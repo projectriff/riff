@@ -27,18 +27,15 @@ import (
 	"github.com/projectriff/riff-cli/pkg/initializers"
 )
 
-
-
 /*
  * init Command
  * TODO: Use cmd.Example
  */
 
-
 var initCmd = &cobra.Command{
 	Use:   "init [language]",
 	Short: "Initialize a function",
-	Long:  	utils.InitCmdLong(),
+	Long:  utils.InitCmdLong(),
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		err := initializers.Initialize(opts.InitOptions)
@@ -84,11 +81,10 @@ var initCmd = &cobra.Command{
  * init java Command
  */
 
-
 var initJavaCmd = &cobra.Command{
 	Use:   "java",
 	Short: "Initialize a Java function",
-	Long: 	utils.InitJavaCmdLong(),
+	Long:  utils.InitJavaCmdLong(),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		opts.InitOptions.Handler = utils.GetHandler(cmd)
 		err := initializers.Java().Initialize(opts.InitOptions)
@@ -102,11 +98,10 @@ var initJavaCmd = &cobra.Command{
  * init shell ommand
  */
 
-
 var initShellCmd = &cobra.Command{
 	Use:   "shell",
 	Short: "Initialize a shell script function",
-	Long:	utils.InitShellCmdLong(),
+	Long:  utils.InitShellCmdLong(),
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		err := initializers.Shell().Initialize(opts.InitOptions)
@@ -123,7 +118,7 @@ var initShellCmd = &cobra.Command{
 var initNodeCmd = &cobra.Command{
 	Use:   "node",
 	Short: "Initialize a node.js function",
-	Long:	utils.InitNodeCmdLong(),
+	Long:  utils.InitNodeCmdLong(),
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		err := initializers.Node().Initialize(opts.InitOptions)
@@ -139,11 +134,10 @@ var initNodeCmd = &cobra.Command{
  * init python Command
  */
 
-
 var initPythonCmd = &cobra.Command{
 	Use:   "python",
 	Short: "Initialize a Python function",
-	Long:	utils.InitPythonCmdLong(),
+	Long:  utils.InitPythonCmdLong(),
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		opts.InitOptions.Handler = utils.GetHandler(cmd)
@@ -155,11 +149,8 @@ var initPythonCmd = &cobra.Command{
 	},
 }
 
-
 func init() {
-
 	rootCmd.AddCommand(initCmd)
-
 	utils.CreateInitFlags(initCmd.PersistentFlags())
 
 	initCmd.AddCommand(initJavaCmd)

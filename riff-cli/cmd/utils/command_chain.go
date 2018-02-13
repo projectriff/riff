@@ -16,7 +16,9 @@
 
 package utils
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+)
 
 /*
  * Runs a chain of commands
@@ -91,8 +93,8 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 	persistentPreRun := func(cmd *cobra.Command, args []string) {
 
 		for _, command := range commands {
-			for ; command.Root() != nil && command.Root().PersistentPreRun != nil; {
-				command = command.Root()
+			for ; command.Parent() != nil && command.Parent().PersistentPreRun != nil; {
+				command = command.Parent()
 			}
 			if command.PersistentPreRun != nil {
 				command.PersistentPreRun(command, args)
@@ -102,8 +104,8 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 
 	persistentPreRunE := func(cmd *cobra.Command, args []string) error {
 		for _, command := range commands {
-			for ; command.Root() != nil && command.Root().PersistentPreRun != nil; {
-				command = command.Root()
+			for ; command.Parent() != nil && command.Parent().PersistentPreRunE != nil; {
+				command = command.Parent()
 			}
 			if command.PersistentPreRunE != nil {
 				err := command.PersistentPreRunE(command, args)
@@ -118,8 +120,8 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 	persistentPostRun := func(cmd *cobra.Command, args []string) {
 
 		for _, command := range commands {
-			for ; command.Root() != nil && command.Root().PersistentPreRun != nil; {
-				command = command.Root()
+			for ; command.Root() != nil && command.Parent().PersistentPostRun != nil; {
+				command = command.Parent()
 			}
 			if command.PersistentPostRun != nil {
 				command.PersistentPostRun(command, args)
@@ -129,7 +131,7 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 
 	persistentPostRunE := func(cmd *cobra.Command, args []string) error {
 		for _, command := range commands {
-			for ; command.Root() != nil && command.Root().PersistentPreRun != nil; {
+			for ; command.Parent() != nil && command.Parent().PersistentPostRunE != nil; {
 				command = command.Root()
 			}
 			if command.PersistentPostRunE != nil {

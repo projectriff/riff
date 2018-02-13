@@ -88,23 +88,20 @@ var createJavaCmd = &cobra.Command{
 		opts.Handler = utils.GetHandler(cmd)
 		createJavaChainCmd.PreRun(cmd, args)
 	},
-	PersistentPreRun: createJavaChainCmd.PersistentPreRun,
 }
 
 var createShellCmd = &cobra.Command{
-	Use:   "shell",
-	Short: "Create a shell script function",
-	Long:  utils.CreateShellCmdLong(),
-
+	Use:    "shell",
+	Short:  "Create a shell script function",
+	Long:   utils.CreateShellCmdLong(),
 	PreRun: createShellChainCmd.PreRun,
 	RunE:   createShellChainCmd.RunE,
 }
 
 var createNodeCmd = &cobra.Command{
-	Use:   "node",
-	Short: "Create a node.js function",
-	Long:  utils.InitNodeCmdLong(),
-
+	Use:    "node",
+	Short:  "Create a node.js function",
+	Long:   utils.InitNodeCmdLong(),
 	PreRun: createNodeChainCmd.PreRun,
 	RunE:   createNodeChainCmd.RunE,
 }
@@ -113,7 +110,7 @@ var createJsCmd = &cobra.Command{
 	Use:   "js",
 	Short: createNodeCmd.Short,
 	Long:  createNodeCmd.Long,
-	RunE:  createNodeChainCmd.RunE,
+	RunE:  createNodeCmd.RunE,
 }
 
 var createPythonCmd = &cobra.Command{
@@ -130,7 +127,6 @@ var createPythonCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(createCmd)
-
 	utils.CreateInitFlags(createCmd.PersistentFlags())
 	utils.CreateBuildFlags(createCmd.PersistentFlags())
 	utils.CreateApplyFlags(createCmd.PersistentFlags())
