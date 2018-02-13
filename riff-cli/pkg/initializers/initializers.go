@@ -29,7 +29,7 @@ import (
 	"github.com/projectriff/riff-cli/pkg/initializers/utils"
 )
 
-var supportedExtensions = []string{"js", "java", "py", "sh"}
+var supportedExtensions = []string{"js", "jar", "py", "sh"}
 
 type Initializer struct {
 	Initialize func(options.InitOptions) error
@@ -78,11 +78,9 @@ func Initialize(opts options.InitOptions) error {
 	case "node":
 		Node().Initialize(opts)
 	case "java":
-		fmt.Println("Java resources detected. Use 'riff init java' to specify additional required options")
-		return nil
+		return errors.New("Java resources detected. Use 'riff init java' to specify additional required options")
 	case "python":
-		fmt.Println("Python resources detected. Use 'riff init python' to specify additional required options")
-		return nil
+		return errors.New("Python resources detected. Use 'riff init python' to specify additional required options")
 	default:
 		//TODO: Should never get here
 		return errors.New(fmt.Sprintf("unsupported language %s\n", language))

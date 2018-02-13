@@ -67,7 +67,7 @@ func ResolveFunctionFile(opts options.InitOptions, language string, ext string) 
 		return "", errors.New(fmt.Sprintf("function path %s does not exist", resolvedFunctionPath))
 	}
 
-	if opts.Artifact != "" && languageForFileExtensions[filepath.Ext(resolvedFunctionPath)[1:]] != language {
+	if opts.Artifact != "" && language != "" && languageForFileExtensions[filepath.Ext(resolvedFunctionPath)[1:]] != language {
 		return "", errors.New(fmt.Sprintf("language %s conflicts with artifact file extension %s", language, opts.Artifact))
 	}
 
