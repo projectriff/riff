@@ -21,6 +21,5 @@ import "github.com/projectriff/riff-cli/pkg/options"
 var (
 	InitOptions   options.InitOptions
 	CreateOptions options.CreateOptions
-	AllOptions    options.AllOptions
 	Handler       string
 )

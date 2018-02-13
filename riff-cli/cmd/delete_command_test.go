@@ -20,46 +20,50 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/projectriff/riff-cli/pkg/osutils"
-	"github.com/projectriff/riff-cli/cmd/opts"
+	"github.com/projectriff/riff-cli/pkg/options"
 )
 
 func TestDeleteCommandImplicitPath(t *testing.T) {
-	clearAllOptions()
+	clearDeleteOptions()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"delete", "--dry-run", osutils.Path("../test_data/shell/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.AllOptions.FunctionPath)
+	as.Equal("../test_data/shell/echo", DeleteAllOptions.FunctionPath)
 }
 
 func TestDeleteCommandExplicitPath(t *testing.T) {
-	clearAllOptions()
+	clearDeleteOptions()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"delete", "--dry-run", "-f", osutils.Path("../test_data/shell/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.AllOptions.FunctionPath)
+	as.Equal("../test_data/shell/echo", DeleteAllOptions.FunctionPath)
 }
 
 func TestDeleteCommandExplicitFile(t *testing.T) {
-	clearAllOptions()
+	clearDeleteOptions()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"delete", "--dry-run", "-f", osutils.Path("../test_data/shell/echo/echo-topics.yaml")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo/echo-topics.yaml", opts.AllOptions.FunctionPath)
+	as.Equal("../test_data/shell/echo/echo-topics.yaml", DeleteAllOptions.FunctionPath)
 }
 
 func TestDeleteCommandAllFlag(t *testing.T) {
-	clearAllOptions()
+	clearDeleteOptions()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"delete", "--dry-run", "-f", osutils.Path("../test_data/shell/echo"), "--all"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.AllOptions.FunctionPath)
-	as.Equal(true, opts.AllOptions.All)
+	as.Equal("../test_data/shell/echo", DeleteAllOptions.FunctionPath)
+	as.Equal(true, DeleteAllOptions.All)
+}
+
+func clearDeleteOptions() {
+	DeleteAllOptions = options.DeleteAllOptions{}
 }

@@ -26,11 +26,12 @@ import (
 	"path/filepath"
 	"github.com/projectriff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff-cli/pkg/options"
-	"github.com/projectriff/riff-cli/cmd/opts"
 	"github.com/projectriff/riff-cli/pkg/ioutils"
 	"os"
 	"strings"
 )
+
+var DeleteAllOptions options.DeleteAllOptions
 
 // deleteCmd represents the delete command
 var deleteCmd = &cobra.Command {
@@ -43,16 +44,16 @@ var deleteCmd = &cobra.Command {
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		return delete(cmd, options.GetDeleteOptions(opts.AllOptions))
+		return delete(cmd, options.GetDeleteOptions(DeleteAllOptions))
 
 	},
 	PreRun: func(cmd *cobra.Command, args []string) {
 
-		if !opts.AllOptions.Initialized {
-			utils.MergeDeleteOptions(*cmd.Flags(), &opts.AllOptions)
+		if !DeleteAllOptions.Initialized {
+			utils.MergeDeleteOptions(*cmd.Flags(), &DeleteAllOptions)
 			if len(args) > 0 {
-				if len(args) == 1 && opts.AllOptions.FunctionPath == "" {
-					opts.AllOptions.FunctionPath = args[0]
+				if len(args) == 1 && DeleteAllOptions.FunctionPath == "" {
+					DeleteAllOptions.FunctionPath = args[0]
 				} else {
 					ioutils.Errorf("Invalid argument(s) %v\n", args)
 					cmd.Usage()
@@ -60,13 +61,13 @@ var deleteCmd = &cobra.Command {
 				}
 			}
 
-			err := options.ValidateAndCleanInitOptions(&opts.AllOptions.InitOptions)
+			err := options.ValidateNamePathOptions(&DeleteAllOptions.FunctionName, &DeleteAllOptions.FunctionPath)
 			if err != nil {
 				ioutils.Error(err)
 				os.Exit(1)
 			}
 		}
-		opts.AllOptions.Initialized = true
+		DeleteAllOptions.Initialized = true
 	},
 }
 

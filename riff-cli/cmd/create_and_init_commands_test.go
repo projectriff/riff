@@ -183,8 +183,7 @@ func clearAll() {
 func clearAllOptions() {
 	opts.InitOptions = options.InitOptions{}
 	opts.CreateOptions = options.CreateOptions{}
-	opts.AllOptions = options.AllOptions{}
-	opts.Handler = ""
+ 	opts.Handler = ""
 }
 
 func clearAllFlags() {

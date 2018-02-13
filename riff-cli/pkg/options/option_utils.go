@@ -29,6 +29,25 @@ func ImageName(opts ImageOptions) string {
 	return fmt.Sprintf("%s/%s:%s",opts.GetUserAccount(),opts.GetFunctionName(),opts.GetVersion())
 }
 
+func ValidateNamePathOptions(functionName *string, filePath *string) error {
+	*filePath = filepath.Clean(*filePath)
+
+	if *filePath == "" {
+		path, _ := filepath.Abs(".")
+		*filePath = path
+	}
+
+	var err error
+	if *functionName == "" {
+		*functionName, err = functions.FunctionNameFromPath(*filePath)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil;
+}
+
 /*
  * Basic sanity check that given paths exist and valid protocol given.
  * Artifact must be a regular file.

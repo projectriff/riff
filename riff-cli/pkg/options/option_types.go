@@ -28,9 +28,9 @@ type InitOptions struct {
 	RiffVersion  string
 	UserAccount  string
 	Initialized  bool
-	DryRun		 bool
-	Force		 bool
-	Handler 	string
+	DryRun       bool
+	Force        bool
+	Handler      string
 }
 
 func (this InitOptions) GetFunctionName() string {
@@ -88,10 +88,12 @@ type CreateOptions struct {
 	Push        bool
 }
 
-type AllOptions struct {
-	InitOptions
-	Push         bool
+type DeleteAllOptions struct {
+	FunctionName string
+	FunctionPath string
+	DryRun		 bool
 	All		     bool
+	Initialized  bool
 }
 
 type ImageOptions interface {
@@ -104,7 +106,7 @@ func GetApplyOptions(opts CreateOptions) ApplyOptions {
 	return ApplyOptions{FunctionPath:opts.FunctionPath, DryRun:opts.DryRun}
 }
 
-func GetDeleteOptions(opts AllOptions) DeleteOptions {
+func GetDeleteOptions(opts DeleteAllOptions) DeleteOptions {
 	return DeleteOptions{FunctionPath:opts.FunctionPath, FunctionName:opts.FunctionName, DryRun:opts.DryRun, All:opts.All}
 }
 
