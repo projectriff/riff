@@ -27,6 +27,7 @@ import (
 
 const (
 	CorrelationId = "correlationId"
+	Error         = "error"
 	requestPath   = "/requests/"
 )
 
@@ -63,6 +64,12 @@ func (g *gateway) requestsHandler(w http.ResponseWriter, r *http.Request) {
 
 	select {
 	case reply := <-replyChan:
+		replyError := reply.Headers().GetOrDefault(Error, "")
+		if len(replyError) != 0 {
+			// message is an error
+			// TODO set status code based on replyError type
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		propagateOutgoingHeaders(reply, w)
 		w.Write(reply.Payload())
 	case <-time.After(g.timeout):

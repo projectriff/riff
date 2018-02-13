@@ -20,15 +20,16 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/stretchr/testify/mock"
+	"errors"
 	"io/ioutil"
-	"github.com/projectriff/message-transport/pkg/transport/mocktransport"
+	"net/http"
 	"net/http/httptest"
 	"strings"
-	"net/http"
-	"errors"
 	"time"
+
 	"github.com/projectriff/message-transport/pkg/message"
+	"github.com/projectriff/message-transport/pkg/transport/mocktransport"
+	"github.com/stretchr/testify/mock"
 )
 
 var _ = Describe("RequestsHandler", func() {
@@ -213,6 +214,23 @@ var _ = Describe("RequestsHandler", func() {
 			It("should time out with a 404", func() {
 				resp := mockResponseWriter.Result()
 				Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
+			})
+		})
+
+		Context("when sending succeeds but the reply is an error", func() {
+			BeforeEach(func() {
+				mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Run(func(args mock.Arguments) {
+					msg, ok := args[1].(message.Message)
+					Expect(ok).To(BeTrue())
+					headers := msg.Headers()
+					headers["error"] = []string{"error-server-function-invocation"}
+					consumerMessages <- message.NewMessage([]byte(""), headers)
+				}).Return(nil)
+			})
+
+			It("should reply with a 500", func() {
+				resp := mockResponseWriter.Result()
+				Expect(resp.StatusCode).To(Equal(http.StatusInternalServerError))
 			})
 		})
 	})
