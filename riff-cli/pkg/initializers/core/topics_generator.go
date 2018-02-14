@@ -52,6 +52,7 @@ spec:
 		return "", err
 	}
 	if opts.Output != "" {
+		buffer.WriteString("---")
 		output := Topic{ApiVersion: ApiVersion, Name: opts.Output, Partitions: 1}
 		err = tmpl.Execute(&buffer, output)
 		if err != nil {
