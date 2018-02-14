@@ -89,6 +89,7 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 	}
 
 	var cmdArgs []string
+	var message string
 
 	if opts.All {
 		optionPath := opts.FilePath
@@ -96,14 +97,14 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 			abs = filepath.Dir(abs)
 			optionPath = filepath.Dir(optionPath)
 		}
-		fmt.Printf("Deleting %v resources\n\n", optionPath)
+		message = fmt.Sprintf("Deleting %v resources\n\n", optionPath)
 		cmdArgs = []string{"delete", "--namespace", opts.Namespace, "-f", abs}
 	} else {
 		if osutils.IsDirectory(abs) {
-			fmt.Printf("Deleting %v function\n\n", opts.FunctionName)
+			message = fmt.Sprintf("Deleting %v function\n\n", opts.FunctionName)
 			cmdArgs = []string{"delete", "--namespace", opts.Namespace, "function", opts.FunctionName}
 		} else {
-			fmt.Printf("Deleting %v resource\n\n", opts.FilePath)
+			message = fmt.Sprintf("Deleting %v resource\n\n", opts.FilePath)
 			cmdArgs = []string{"delete", "--namespace", opts.Namespace, "-f", abs}
 		}
 	}
@@ -112,6 +113,7 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 		//args := []string{"delete", "-f", abs}
 		fmt.Printf("\nDelete Command: kubectl %s\n\n", strings.Trim(fmt.Sprint(cmdArgs), "[]"))
 	} else {
+		fmt.Print(message)
 		output, err := kubectl.ExecForString(cmdArgs)
 		if err != nil {
 			cmd.SilenceUsage = true

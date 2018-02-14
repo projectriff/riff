@@ -73,6 +73,7 @@ func build(opts options.BuildOptions) error {
 		if (opts.Push) {
 			fmt.Printf("\nPush command: docker %s\n", strings.Join(pushArgs, " "))
 		}
+		fmt.Println("")
 		return nil
 	}
 

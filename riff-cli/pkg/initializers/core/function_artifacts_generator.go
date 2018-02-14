@@ -66,12 +66,19 @@ func GenerateFunctionArtfacts(generator ArtifactsGenerator, workdir string, opts
 	}
 
 	if opts.DryRun {
-		fmt.Println("Generated Topics:\n")
-		fmt.Printf("%s\n", functionResources.Topics)
-		fmt.Println("\nGenerated Function:\n")
-		fmt.Printf("%s\n", functionResources.Function)
-		fmt.Println("\nGenerated Dockerfile:\n")
-		fmt.Printf("%s\n", functionResources.DockerFile)
+		fmt.Printf("%s-%s.yaml\n", opts.FunctionName, "topics")
+		fmt.Print("----")
+		fmt.Printf("%s", functionResources.Topics)
+		fmt.Print("----\n")
+		fmt.Printf("\n%s-%s.yaml\n", opts.FunctionName, "function")
+		fmt.Print("----")
+		fmt.Printf("%s", functionResources.Function)
+		fmt.Print("----\n")
+		fmt.Print("\nDockerfile\n")
+		fmt.Print("----")
+		fmt.Printf("%s", functionResources.DockerFile)
+		fmt.Print("----\n")
+		fmt.Println("")
 	} else {
 		var err error
 		err = writeFile(
