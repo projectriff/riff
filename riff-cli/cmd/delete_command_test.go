@@ -56,6 +56,16 @@ func TestDeleteCommandExplicitFile(t *testing.T) {
 	as.Equal("default", DeleteAllOptions.Namespace)
 }
 
+func TestDeleteCommandWithName(t *testing.T) {
+	clearDeleteOptions()
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"delete", "--dry-run", "--name", "square"})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	as.Equal("square", DeleteAllOptions.FunctionName)
+}
+
 func TestDeleteCommandAllFlag(t *testing.T) {
 	clearDeleteOptions()
 	as := assert.New(t)
