@@ -147,7 +147,7 @@ func init() {
 	// is called directly, e.g.:
 	// publishCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	publishCmd.Flags().StringVarP(&publishOptions.namespace, "namespace", "", "default", "the namespace used for the deployed resources")
+	publishCmd.Flags().StringVarP(&publishOptions.namespace, "namespace", "", "default", "the namespace of the http-gateway")
 	publishCmd.Flags().StringVarP(&publishOptions.data, "data", "d", "", "the data to post to the http-gateway using the input topic")
 	publishCmd.Flags().StringVarP(&publishOptions.input, "input", "i", osutils.GetCWDBasePath(), "the name of the input topic, defaults to name of current directory")
 	publishCmd.Flags().BoolVarP(&publishOptions.reply, "reply", "r", false, "wait for a reply containing the results of the function execution")
