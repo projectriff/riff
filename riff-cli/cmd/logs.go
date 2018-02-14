@@ -49,7 +49,7 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		fmt.Printf("Displaying logs for container %v of function %v in namespace %v\n", logsOptions.container, logsOptions.function, logsOptions.namespace)
+		fmt.Printf("Displaying logs for container %v of function %v in namespace %v\n\n", logsOptions.container, logsOptions.function, logsOptions.namespace)
 
 		cmdArgs := []string{"--namespace", logsOptions.namespace, "get", "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.name}"}
 
@@ -62,37 +62,48 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 
 		pod := output
 
-		tail := ""
 		if logsOptions.tail {
-			tail = "-f"
-		}
 
-		cmdArgs = []string{"--namespace", logsOptions.namespace, "logs", "-c", logsOptions.container, tail, pod}
+			cmdArgs = []string{"--namespace", logsOptions.namespace, "logs", "-c", logsOptions.container, "-f", pod}
 
-		kubectlCmd := exec.Command("kubectl", cmdArgs...)
-		cmdReader, err := kubectlCmd.StdoutPipe()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for kubectlCmd", err)
-			return
-		}
-
-		scanner := bufio.NewScanner(cmdReader)
-		go func() {
-			for scanner.Scan() {
-				fmt.Printf("%s\n\n", scanner.Text())
+			kubectlCmd := exec.Command("kubectl", cmdArgs...)
+			cmdReader, err := kubectlCmd.StdoutPipe()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for kubectlCmd", err)
+				return
 			}
-		}()
 
-		err = kubectlCmd.Start()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error starting kubectlCmd", err)
-			return
-		}
+			scanner := bufio.NewScanner(cmdReader)
+			go func() {
+				for scanner.Scan() {
+					fmt.Printf("%s\n\n", scanner.Text())
+				}
+			}()
 
-		err = kubectlCmd.Wait()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error waiting for kubectlCmd", err)
-			return
+			err = kubectlCmd.Start()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "Error starting kubectlCmd", err)
+				return
+			}
+
+			err = kubectlCmd.Wait()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "Error waiting for kubectlCmd", err)
+				return
+			}
+
+		} else {
+
+			cmdArgs = []string{"--namespace", logsOptions.namespace, "logs", "-c", logsOptions.container, pod}
+
+			output, err := kubectl.ExecForString(cmdArgs)
+
+			if err != nil {
+				ioutils.Errorf("Error: %v\n", err)
+				return
+			}
+
+			fmt.Printf("%v\n", output)
 		}
 
 	},
