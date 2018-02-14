@@ -17,9 +17,10 @@
 package node
 
 import (
-	"github.com/projectriff/riff-cli/pkg/options"
 	"fmt"
 	"testing"
+
+	"github.com/projectriff/riff-cli/pkg/options"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,12 +30,38 @@ func TestNodeDockerfile(t *testing.T) {
 	opts := options.InitOptions{
 		Artifact:    "square.js",
 		RiffVersion: "0.0.3",
+		FilePath:    "../../../test_data/node/square/square.js",
 		Handler:     "process",
 	}
 
 	docker, err := generateNodeFunctionDockerFile(opts)
 	as.NoError(err)
-	as.Contains(docker, fmt.Sprintf("FROM projectriff/node-function-invoker:%s", opts.RiffVersion))
-	as.Contains(docker, fmt.Sprintf("ENV FUNCTION_URI /functions/%s", opts.Artifact))
-	as.Contains(docker, fmt.Sprintf("ADD %s ${FUNCTION_URI}", opts.Artifact))
+	as.Contains(docker, fmt.Sprintf("FROM projectriff/node-function-invoker:%s\n", opts.RiffVersion))
+	as.Contains(docker, fmt.Sprintf("ENV FUNCTION_URI /functions/%s\n", opts.Artifact))
+	as.Contains(docker, fmt.Sprintf("ADD %s ${FUNCTION_URI}\n", opts.Artifact))
+
+	as.NotContains(docker, "ENV FUNCTION_URI /functions/\n")
+	as.NotContains(docker, "COPY . ${FUNCTION_URI}\n")
+	as.NotContains(docker, "RUN (cd ${FUNCTION_URI} && npm install --production)\n")
+}
+
+func TestNodePackageDockerfile(t *testing.T) {
+	as := assert.New(t)
+
+	opts := options.InitOptions{
+		Artifact:    "square.js",
+		RiffVersion: "0.0.3",
+		FilePath:    "../../../test_data/node/square-package/square.js",
+		Handler:     "process",
+	}
+
+	docker, err := generateNodeFunctionDockerFile(opts)
+	as.NoError(err)
+	as.Contains(docker, fmt.Sprintf("FROM projectriff/node-function-invoker:%s\n", opts.RiffVersion))
+	as.Contains(docker, "ENV FUNCTION_URI /functions/\n")
+	as.Contains(docker, "COPY . ${FUNCTION_URI}\n")
+	as.Contains(docker, "RUN (cd ${FUNCTION_URI} && npm install --production)\n")
+
+	as.NotContains(docker, fmt.Sprintf("ENV FUNCTION_URI /functions/%s\n", opts.Artifact))
+	as.NotContains(docker, fmt.Sprintf("ADD %s ${FUNCTION_URI}\n", opts.Artifact))
 }

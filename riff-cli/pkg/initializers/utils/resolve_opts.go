@@ -17,8 +17,8 @@
 package utils
 
 import (
-
 	"path/filepath"
+
 	"github.com/projectriff/riff-cli/pkg/functions"
 	"github.com/projectriff/riff-cli/pkg/options"
 )

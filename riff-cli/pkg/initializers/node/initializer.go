@@ -17,10 +17,11 @@
 package node
 
 import (
-	"github.com/projectriff/riff-cli/pkg/options"
-	"github.com/projectriff/riff-cli/pkg/initializers/core"
 	"path/filepath"
+
+	"github.com/projectriff/riff-cli/pkg/initializers/core"
 	"github.com/projectriff/riff-cli/pkg/initializers/utils"
+	"github.com/projectriff/riff-cli/pkg/options"
 )
 
 const (
@@ -38,8 +39,9 @@ func Initialize(opts options.InitOptions) error {
 	workdir := filepath.Dir(functionfile)
 
 	generator := core.ArtifactsGenerator{
-		GenerateFunction:   core.DefaultGenerateFunction,
-		GenerateDockerFile: generateNodeFunctionDockerFile,
+		GenerateFunction:     core.DefaultGenerateFunction,
+		GenerateDockerFile:   generateNodeFunctionDockerFile,
+		GenerateDockerIgnore: generateNodeFunctionDockerIgnore,
 	}
 
 	return core.GenerateFunctionArtfacts(generator, workdir, opts)

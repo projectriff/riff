@@ -17,19 +17,21 @@
 package utils
 
 import (
-	"github.com/projectriff/riff-cli/pkg/options"
-	"path/filepath"
-	"github.com/projectriff/riff-cli/pkg/osutils"
-	"fmt"
 	"errors"
+	"fmt"
+	"path/filepath"
+
+	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff-cli/pkg/osutils"
 )
 
-var supportedExtensions = []string{"js", "java", "py", "sh"}
+var supportedExtensions = []string{"js", "json", "java", "py", "sh"}
 
 var languageForFileExtensions = map[string]string{
 	"sh":   "shell",
-	"jar": "java",
+	"jar":  "java",
 	"js":   "node",
+	"json": "node",
 	"py":   "python",
 }
 
@@ -81,7 +83,7 @@ func searchForFunctionResource(dir string, name string) (string, error) {
 	}
 
 	foundFile := ""
-	for _, f := range (files) {
+	for _, f := range files {
 		if b := filepath.Base(f); b[0:len(b)-len(filepath.Ext(f))] == name {
 			for _, e := range supportedExtensions {
 				if filepath.Ext(f) == "."+e {

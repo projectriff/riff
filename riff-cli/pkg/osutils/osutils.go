@@ -4,9 +4,9 @@
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
- *  
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *   Unless required by applicable law or agreed to in writing, software
  *   distributed under the License is distributed on an "AS IS" BASIS,
  *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,16 +17,17 @@
 package osutils
 
 import (
+	"bytes"
+	"context"
+	"fmt"
 	"os"
-	"path/filepath"
+	"os/exec"
 	"os/user"
+	"path/filepath"
 	"strings"
 	"time"
-	"bytes"
+
 	"github.com/projectriff/riff-cli/pkg/ioutils"
-	"fmt"
-	"context"
-	"os/exec"
 )
 
 func GetCWD() string {
@@ -49,7 +50,6 @@ func GetCurrentUsername() string {
 	return user.Username
 }
 
-
 func FileExists(path string) bool {
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
@@ -57,6 +57,18 @@ func FileExists(path string) bool {
 		}
 	}
 	return true
+}
+
+func FindRiffResourceDefinitionPaths(path string) ([]string, error) {
+	functions, err := filepath.Glob(filepath.Join(path, "*-function.yaml"))
+	if err != nil {
+		return nil, err
+	}
+	topics, err := filepath.Glob(filepath.Join(path, "*-topics.yaml"))
+	if err != nil {
+		return nil, err
+	}
+	return append(functions, topics...), nil
 }
 
 func IsDirectory(path string) bool {
@@ -72,10 +84,10 @@ func Path(filename string) string {
 	if os.PathSeparator == '/' {
 		return path
 	}
-	return filepath.Join(strings.Split(path,"/")...)
+	return filepath.Join(strings.Split(path, "/")...)
 }
 
-func Exec(cmdName string, cmdArgs [] string, timeout time.Duration) ([]byte, error) {
+func Exec(cmdName string, cmdArgs []string, timeout time.Duration) ([]byte, error) {
 	// Create a new context and add a timeout to it
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel() // The cancel should be deferred so resources are cleaned up

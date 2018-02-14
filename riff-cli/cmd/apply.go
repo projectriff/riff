@@ -4,9 +4,9 @@
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
- *  
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *   Unless required by applicable law or agreed to in writing, software
  *   distributed under the License is distributed on an "AS IS" BASIS,
  *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,25 +18,25 @@ package cmd
 
 import (
 	"fmt"
-
-	"github.com/spf13/cobra"
-	"github.com/projectriff/riff-cli/pkg/kubectl"
-	"github.com/projectriff/riff-cli/pkg/ioutils"
 	"os"
-	"github.com/projectriff/riff-cli/pkg/options"
-	"github.com/projectriff/riff-cli/cmd/utils"
-	"github.com/projectriff/riff-cli/cmd/opts"
-	"github.com/projectriff/riff-cli/pkg/functions"
-	"github.com/projectriff/riff-cli/pkg/osutils"
 	"strings"
+
+	"github.com/projectriff/riff-cli/cmd/opts"
+	"github.com/projectriff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff-cli/pkg/functions"
+	"github.com/projectriff/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff-cli/pkg/kubectl"
+	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/spf13/cobra"
 )
 
 // applyCmd represents the apply command
 var applyCmd = &cobra.Command{
 	Use:   "apply",
 	Short: "Apply function resource definitions",
-	Long: `Apply the resource definition[s] included in the path. A resource will be created if it doesn't exist yet.`,
-  Example: `  riff apply -f some/function/path
+	Long:  `Apply the resource definition[s] included in the path. A resource will be created if it doesn't exist yet.`,
+	Example: `  riff apply -f some/function/path
   riff apply -f some/function/path/some.yaml`,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -67,23 +67,28 @@ var applyCmd = &cobra.Command{
 }
 
 func apply(cmd *cobra.Command, opts options.ApplyOptions) error {
-	//fnDir, _ := functions.FunctionDirFromPath(opts.FilePath)
-	abs,err := functions.AbsPath(opts.FilePath)
+	abs, err := functions.AbsPath(opts.FilePath)
 	if err != nil {
 		cmd.SilenceUsage = true
 		return err
 	}
 
-	var cmdArgs []string
+	cmdArgs := []string{"apply", "--namespace", opts.Namespace}
 	var message string
 
 	if osutils.IsDirectory(abs) {
 		message = fmt.Sprintf("Applying resources in %v\n\n", opts.FilePath)
+		resourceDefinitionPaths, err := osutils.FindRiffResourceDefinitionPaths(abs)
+		if err != nil {
+			return err
+		}
+		for _, resourceDefinitionPath := range resourceDefinitionPaths {
+			cmdArgs = append(cmdArgs, "-f", resourceDefinitionPath)
+		}
 	} else {
 		message = fmt.Sprintf("Applying resource %v\n\n", opts.FilePath)
+		cmdArgs = append(cmdArgs, "-f", abs)
 	}
-	cmdArgs = []string{"apply", "--namespace", opts.Namespace, "-f", abs}
-
 
 	if opts.DryRun {
 		fmt.Printf("\nApply Command: kubectl %s\n\n", strings.Trim(fmt.Sprint(cmdArgs), "[]"))

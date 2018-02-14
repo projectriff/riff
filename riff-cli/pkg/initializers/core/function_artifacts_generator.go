@@ -18,10 +18,11 @@ package core
 
 import (
 	"fmt"
-	"github.com/projectriff/riff-cli/pkg/options"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
+
+	"github.com/projectriff/riff-cli/pkg/options"
 	"github.com/projectriff/riff-cli/pkg/osutils"
 )
 
@@ -30,9 +31,10 @@ const (
 )
 
 type FunctionResources struct {
-	Topics     string
-	Function   string
-	DockerFile string
+	Topics       string
+	Function     string
+	DockerFile   string
+	DockerIgnore string
 }
 
 type Function struct {
@@ -45,8 +47,9 @@ type Function struct {
 }
 
 type ArtifactsGenerator struct {
-	GenerateFunction   func(options.InitOptions) (string, error)
-	GenerateDockerFile func(options.InitOptions) (string, error)
+	GenerateFunction     func(options.InitOptions) (string, error)
+	GenerateDockerFile   func(options.InitOptions) (string, error)
+	GenerateDockerIgnore func(options.InitOptions) (string, error)
 }
 
 func GenerateFunctionArtfacts(generator ArtifactsGenerator, workdir string, opts options.InitOptions) error {
@@ -64,6 +67,13 @@ func GenerateFunctionArtfacts(generator ArtifactsGenerator, workdir string, opts
 	if err != nil {
 		return err
 	}
+	if generator.GenerateDockerIgnore != nil {
+		// optionally generate .dockerignore
+		functionResources.DockerIgnore, err = generator.GenerateDockerIgnore(opts)
+		if err != nil {
+			return err
+		}
+	}
 
 	if opts.DryRun {
 		fmt.Printf("%s-%s.yaml\n", opts.FunctionName, "topics")
@@ -78,6 +88,12 @@ func GenerateFunctionArtfacts(generator ArtifactsGenerator, workdir string, opts
 		fmt.Print("----")
 		fmt.Printf("%s", functionResources.DockerFile)
 		fmt.Print("----\n")
+		if generator.GenerateDockerIgnore != nil {
+			fmt.Print("\n.dockerignore\n")
+			fmt.Print("----")
+			fmt.Printf("%s", functionResources.DockerIgnore)
+			fmt.Print("----\n")
+		}
 		fmt.Println("")
 	} else {
 		var err error
@@ -105,6 +121,16 @@ func GenerateFunctionArtfacts(generator ArtifactsGenerator, workdir string, opts
 			opts.Force)
 		if err != nil {
 			return err
+		}
+
+		if generator.GenerateDockerIgnore != nil {
+			err = writeFile(
+				filepath.Join(workdir, ".dockerignore"),
+				functionResources.DockerIgnore,
+				opts.Force)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

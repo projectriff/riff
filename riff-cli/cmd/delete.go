@@ -4,9 +4,9 @@
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
- *  
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *   Unless required by applicable law or agreed to in writing, software
  *   distributed under the License is distributed on an "AS IS" BASIS,
  *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,25 +19,26 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-	"github.com/projectriff/riff-cli/pkg/functions"
-	"github.com/projectriff/riff-cli/pkg/kubectl"
-	"github.com/projectriff/riff-cli/pkg/osutils"
-	"path/filepath"
-	"github.com/projectriff/riff-cli/cmd/utils"
-	"github.com/projectriff/riff-cli/pkg/options"
-	"github.com/projectriff/riff-cli/pkg/ioutils"
 	"os"
+	"path/filepath"
 	"strings"
+
+	"github.com/projectriff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff-cli/pkg/functions"
+	"github.com/projectriff/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff-cli/pkg/kubectl"
+	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/spf13/cobra"
 )
 
 var DeleteAllOptions options.DeleteAllOptions
 
 // deleteCmd represents the delete command
-var deleteCmd = &cobra.Command {
+var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete function resources",
-	Long: `Delete the resource[s] for the function or path specified.`,
+	Long:  `Delete the resource[s] for the function or path specified.`,
 	Example: `  riff delete -n square
     or
   riff delete -f function/square`,
@@ -82,7 +83,7 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 		}
 	}
 
-	abs,err := functions.AbsPath(opts.FilePath)
+	abs, err := functions.AbsPath(opts.FilePath)
 	if err != nil {
 		cmd.SilenceUsage = true
 		return err
@@ -98,19 +99,25 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 			optionPath = filepath.Dir(optionPath)
 		}
 		message = fmt.Sprintf("Deleting %v resources\n\n", optionPath)
-		cmdArgs = []string{"delete", "--namespace", opts.Namespace, "-f", abs}
+		resourceDefinitionPaths, err := osutils.FindRiffResourceDefinitionPaths(abs)
+		if err != nil {
+			return err
+		}
+		cmdArgs = []string{"delete", "--namespace", opts.Namespace}
+		for _, resourceDefinitionPath := range resourceDefinitionPaths {
+			cmdArgs = append(cmdArgs, "-f", resourceDefinitionPath)
+		}
 	} else {
 		if osutils.IsDirectory(abs) {
 			message = fmt.Sprintf("Deleting %v function\n\n", opts.FunctionName)
 			cmdArgs = []string{"delete", "--namespace", opts.Namespace, "function", opts.FunctionName}
 		} else {
 			message = fmt.Sprintf("Deleting %v resource\n\n", opts.FilePath)
-			cmdArgs = []string{"delete", "--namespace", opts.Namespace, "-f", abs}
+			cmdArgs = []string{"delete", "--namespace", opts.Namespace, "-f", opts.FilePath}
 		}
 	}
 
 	if opts.DryRun {
-		//args := []string{"delete", "-f", abs}
 		fmt.Printf("\nDelete Command: kubectl %s\n\n", strings.Trim(fmt.Sprint(cmdArgs), "[]"))
 	} else {
 		fmt.Print(message)

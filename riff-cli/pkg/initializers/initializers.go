@@ -4,9 +4,9 @@
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
- *  
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *   Unless required by applicable law or agreed to in writing, software
  *   distributed under the License is distributed on an "AS IS" BASIS,
  *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,19 +17,19 @@
 package initializers
 
 import (
-	"path/filepath"
-	"fmt"
 	"errors"
+	"fmt"
+	"path/filepath"
 
-	"github.com/projectriff/riff-cli/pkg/options"
 	"github.com/projectriff/riff-cli/pkg/initializers/java"
-	"github.com/projectriff/riff-cli/pkg/initializers/python"
 	"github.com/projectriff/riff-cli/pkg/initializers/node"
+	"github.com/projectriff/riff-cli/pkg/initializers/python"
 	"github.com/projectriff/riff-cli/pkg/initializers/shell"
 	"github.com/projectriff/riff-cli/pkg/initializers/utils"
+	"github.com/projectriff/riff-cli/pkg/options"
 )
 
-var supportedExtensions = []string{"js", "jar", "py", "sh"}
+var supportedExtensions = []string{"js", "json", "jar", "py", "sh"}
 
 type Initializer struct {
 	Initialize func(options.InitOptions) error
@@ -37,8 +37,9 @@ type Initializer struct {
 
 var languageForFileExtension = map[string]string{
 	"sh":   "shell",
-	"jar": "java",
+	"jar":  "java",
 	"js":   "node",
+	"json": "node",
 	"py":   "python",
 }
 
@@ -65,7 +66,7 @@ func Shell() Initializer {
 }
 
 func Initialize(opts options.InitOptions) error {
-	filePath, err := utils.ResolveFunctionFile(opts, "","")
+	filePath, err := utils.ResolveFunctionFile(opts, "", "")
 	if err != nil {
 		return err
 	}
@@ -87,5 +88,3 @@ func Initialize(opts options.InitOptions) error {
 	}
 	return nil
 }
-
-

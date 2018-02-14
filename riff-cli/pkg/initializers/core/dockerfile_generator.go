@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"text/template"
 )
+
 type DockerFileTokens struct {
 	Artifact     string
 	ArtifactBase string
@@ -28,6 +29,14 @@ type DockerFileTokens struct {
 }
 
 func GenerateFunctionDockerFileContents(tmpl string, name string, tokens interface{}) (string, error) {
+	return generateContents(tmpl, name, tokens)
+}
+
+func GenerateFunctionDockerIgnoreContents(tmpl string, name string, tokens interface{}) (string, error) {
+	return generateContents(tmpl, name, tokens)
+}
+
+func generateContents(tmpl string, name string, tokens interface{}) (string, error) {
 	t, err := template.New(name).Parse(tmpl)
 	if err != nil {
 		return "", err
