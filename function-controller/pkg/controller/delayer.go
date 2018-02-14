@@ -32,7 +32,7 @@ type delayer struct {
 // - when scaling to 0, let some idleTimeout pass. The clock is reset if there is activity
 // - when scaling UP, don't scale up further until at least some activity has been recorded
 func (c *delayer) delay(in replicaCounts, combinedPositions activityCounts) (replicaCounts, activityCounts) {
-	result := make(map[fnKey]int, len(in))
+	result := make(map[fnKey]int32, len(in))
 	now := time.Now()
 	for fn, target := range in {
 		result[fn] = in[fn]

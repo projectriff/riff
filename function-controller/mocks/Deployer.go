@@ -50,3 +50,17 @@ func (_m *Deployer) Undeploy(function *v1.Function) error {
 
 	return r0
 }
+
+// Update provides a mock function with given fields: function, replicas
+func (_m *Deployer) Update(function *v1.Function, replicas int) error {
+	ret := _m.Called(function, replicas)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*v1.Function, int) error); ok {
+		r0 = rf(function, replicas)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}

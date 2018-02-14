@@ -105,6 +105,21 @@ var _ = Describe("Controller", func() {
 		ctrl.Run(closeCh)
 	})
 
+	It("should handle functions being updated", func() {
+		fn1 := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input"}}
+		fn2 := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input2"}}
+
+		tracker.On("StopTracking", controller.Subscription{Topic: "input", Group: "fn"}).Return(nil)
+		deployer.On("Update", fn2, 0).Return(nil).Run(func(args mock.Arguments) {
+			closeCh <- struct{}{}
+		})
+		tracker.On("BeginTracking", controller.Subscription{Topic: "input2", Group: "fn"}).Return(nil)
+
+		functionHandlers.UpdateFunc(fn1, fn2)
+
+		ctrl.Run(closeCh)
+	})
+
 	It("should handle a non-trivial input topic", func() {
 		ctrl.SetScalingInterval(10 * time.Millisecond)
 

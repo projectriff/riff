@@ -45,7 +45,7 @@ type Controller interface {
 }
 
 // type replicaCounts is a mapping from function to wanted number of replicas
-type replicaCounts map[fnKey]int
+type replicaCounts map[fnKey]int32
 
 // type activityCounts is a mapping from function to combined activity marker (we're using sum of position accross all
 // partitions and all topics
@@ -64,7 +64,8 @@ type scalingPostProcessor func(replicaCounts, activityCounts) (replicaCounts, ac
 type ctrl struct {
 	topicsAddedOrUpdated      chan *v1.Topic
 	topicsDeleted             chan *v1.Topic
-	functionsAddedOrUpdated   chan *v1.Function
+	functionsAdded            chan *v1.Function
+	functionsUpdated          chan deltaFn
 	functionsDeleted          chan *v1.Function
 	deploymentsAddedOrUpdated chan *v1beta1.Deployment // TODO investigate deprecation -> apps?
 	deploymentsDeleted        chan *v1beta1.Deployment // TODO investigate deprecation -> apps?
@@ -75,7 +76,7 @@ type ctrl struct {
 
 	functions      map[fnKey]*v1.Function
 	topics         map[topicKey]*v1.Topic
-	actualReplicas map[fnKey]int
+	actualReplicas map[fnKey]int32
 
 	deployer   Deployer
 	lagTracker LagTracker
@@ -95,6 +96,12 @@ type topicKey struct {
 	name string
 }
 
+// A deltaFn represents a pair of functions involved in an update
+type deltaFn struct {
+	before *v1.Function
+	after  *v1.Function
+}
+
 // Run starts the main controller loop, which streamlines concurrent notifications of topics, functions and deployments
 // coming and going, and periodically runs the function scaling logic.
 func (c *ctrl) Run(stopCh <-chan struct{}) {
@@ -111,8 +118,10 @@ func (c *ctrl) Run(stopCh <-chan struct{}) {
 			c.onTopicAddedOrUpdated(topic)
 		case topic := <-c.topicsDeleted:
 			c.onTopicDeleted(topic)
-		case function := <-c.functionsAddedOrUpdated:
-			c.onFunctionAddedOrUpdated(function)
+		case function := <-c.functionsAdded:
+			c.onFunctionAdded(function)
+		case deltaFn := <-c.functionsUpdated:
+			c.onFunctionUpdated(deltaFn.before, deltaFn.after)
 		case function := <-c.functionsDeleted:
 			c.onFunctionDeleted(function)
 		case deployment := <-c.deploymentsAddedOrUpdated:
@@ -153,11 +162,36 @@ func (c *ctrl) onTopicDeleted(topic *v1.Topic) {
 	delete(c.topics, tkey(topic))
 }
 
-func (c *ctrl) onFunctionAddedOrUpdated(function *v1.Function) {
+func (c *ctrl) onFunctionAdded(function *v1.Function) {
 	log.Printf("Function added: %v", function.Name)
 	c.functions[key(function)] = function
 	c.lagTracker.BeginTracking(Subscription{Topic: function.Spec.Input, Group: function.Name})
 	err := c.deployer.Deploy(function)
+	if err != nil {
+		log.Printf("Error %v", err)
+	}
+}
+
+func (c *ctrl) onFunctionUpdated(oldFn *v1.Function, newFn *v1.Function) {
+	if oldFn.Name != newFn.Name {
+		log.Printf("Error: function name cannot change on update: %s -> %s", oldFn.Name, newFn.Name)
+		return
+	}
+	if oldFn.Namespace != newFn.Namespace {
+		log.Printf("Error: function namespace cannot change on update: %s -> %s", oldFn.Namespace, newFn.Namespace)
+		return
+	}
+	log.Printf("Function updated: %v", oldFn.Name)
+
+	fnKey := key(oldFn)
+	c.functions[fnKey] = newFn
+
+	if newFn.Spec.Input != oldFn.Spec.Input {
+		c.lagTracker.StopTracking(Subscription{Topic: oldFn.Spec.Input, Group: oldFn.Name})
+		c.lagTracker.BeginTracking(Subscription{Topic: newFn.Spec.Input, Group: newFn.Name})
+	}
+
+	err := c.deployer.Update(newFn, 0 /*int(c.actualReplicas[fnKey])*/) // See https://github.com/projectriff/function-controller/issues/17
 	if err != nil {
 		log.Printf("Error %v", err)
 	}
@@ -176,7 +210,7 @@ func (c *ctrl) onFunctionDeleted(function *v1.Function) {
 func (c *ctrl) onDeploymentAddedOrUpdated(deployment *v1beta1.Deployment) {
 	if key := functionKey(deployment); key != nil {
 		log.Printf("Deployment added/updated: %v", deployment.Name)
-		c.actualReplicas[*key] = int(deployment.Status.Replicas)
+		c.actualReplicas[*key] = deployment.Status.Replicas
 	}
 }
 
@@ -215,7 +249,7 @@ func (c *ctrl) scale() {
 		//log.Printf("For %v, want %v currently have %v", fn.Name, desired, c.actualReplicas[k])
 
 		if desired != c.actualReplicas[k] {
-			err := c.deployer.Scale(fn, desired)
+			err := c.deployer.Scale(fn, int(desired))
 			c.actualReplicas[k] = desired // This may also be updated by deployments informer later.
 			if err != nil {
 				log.Printf("Error %v", err)
@@ -243,7 +277,8 @@ func New(topicInformer informersV1.TopicInformer,
 		topicsAddedOrUpdated:      make(chan *v1.Topic, 100),
 		topicsDeleted:             make(chan *v1.Topic, 100),
 		topicInformer:             topicInformer,
-		functionsAddedOrUpdated:   make(chan *v1.Function, 100),
+		functionsAdded:            make(chan *v1.Function, 100),
+		functionsUpdated:          make(chan deltaFn, 100),
 		functionsDeleted:          make(chan *v1.Function, 100),
 		functionInformer:          functionInformer,
 		deploymentsAddedOrUpdated: make(chan *v1beta1.Deployment, 100),
@@ -251,7 +286,7 @@ func New(topicInformer informersV1.TopicInformer,
 		deploymentInformer:        deploymentInformer,
 		functions:                 make(map[fnKey]*v1.Function),
 		topics:                    make(map[topicKey]*v1.Topic),
-		actualReplicas:            make(map[fnKey]int),
+		actualReplicas:            make(map[fnKey]int32),
 		deployer:                  deployer,
 		lagTracker:                tracker,
 		scalerInterval:            DefaultScalerInterval,
@@ -279,12 +314,16 @@ func New(topicInformer informersV1.TopicInformer,
 		AddFunc: func(obj interface{}) {
 			fn := obj.(*v1.Function)
 			v1.SetObjectDefaults_Function(fn)
-			pctrl.functionsAddedOrUpdated <- fn
+			pctrl.functionsAdded <- fn
 		},
 		UpdateFunc: func(old interface{}, new interface{}) {
-			fn := new.(*v1.Function)
-			v1.SetObjectDefaults_Function(fn)
-			pctrl.functionsAddedOrUpdated <- fn
+			oldFn := old.(*v1.Function)
+			v1.SetObjectDefaults_Function(oldFn)
+
+			newFn := new.(*v1.Function)
+			v1.SetObjectDefaults_Function(newFn)
+
+			pctrl.functionsUpdated <- deltaFn{before: oldFn, after: newFn}
 		},
 		DeleteFunc: func(obj interface{}) {
 			fn := obj.(*v1.Function)
@@ -363,7 +402,7 @@ func sumCurrentPositions(offsets PartitionedOffsets) int64 {
 	return result
 }
 
-func (c *ctrl) desiredReplicasForTopic(offsets PartitionedOffsets, fnKey fnKey, tKey topicKey) int {
+func (c *ctrl) desiredReplicasForTopic(offsets PartitionedOffsets, fnKey fnKey, tKey topicKey) int32 {
 	maxPartLag := int64(0)
 	for _, o := range offsets {
 		maxPartLag = max64(maxPartLag, o.Lag())
@@ -396,7 +435,7 @@ func (c *ctrl) desiredReplicasForTopic(offsets PartitionedOffsets, fnKey fnKey, 
 	} else {
 		computedReplicas = 0
 	}
-	return int(clamp(computedReplicas, minReplicas, maxReplicas))
+	return clamp(computedReplicas, minReplicas, maxReplicas)
 }
 
 func clamp(value int32, min int32, max int32) int32 {
@@ -408,7 +447,7 @@ func clamp(value int32, min int32, max int32) int32 {
 	return value
 }
 
-func max(a int, b int) int {
+func max(a int32, b int32) int32 {
 	if a > b {
 		return a
 	} else {

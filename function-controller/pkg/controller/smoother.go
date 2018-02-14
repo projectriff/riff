@@ -24,10 +24,10 @@ type smoother struct {
 // smooth adds interpolation to replica counts calculation, so that there are no sudden jumps.
 func (c *smoother) smooth(in replicaCounts, combinedPositions activityCounts) (replicaCounts, activityCounts) {
 	newMemory := make(map[fnKey]float32, len(in)) // recreating map is a lazy way to get rid of keys not present in 'in'
-	replicas := make(map[fnKey]int, len(in))
+	replicas := make(map[fnKey]int32, len(in))
 	for k, v := range in {
 		newMemory[k] = interpolate(c.memory[k], v, 0.05)
-		replicas[k] = int(0.5 + newMemory[k])
+		replicas[k] = int32(0.5 + newMemory[k])
 		// Special case for the 0->1 case to have immediate scale up
 		if in[k] > 0 && c.actualReplicas[k] == 0 {
 			replicas[k] = 1
@@ -38,6 +38,6 @@ func (c *smoother) smooth(in replicaCounts, combinedPositions activityCounts) (r
 	return replicas, combinedPositions
 }
 
-func interpolate(current float32, target int, greed float32) float32 {
+func interpolate(current float32, target int32, greed float32) float32 {
 	return current + (float32(target)-current)*greed
 }
