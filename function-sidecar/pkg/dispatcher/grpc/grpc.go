@@ -27,6 +27,9 @@ import (
 	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/function"
 	"github.com/projectriff/message-transport/pkg/message"
 	"golang.org/x/net/context"
+	"io"
+	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/codes"
 )
 
 type grpcDispatcher struct {
@@ -51,6 +54,10 @@ func (this *grpcDispatcher) handleIncoming() {
 				grpcMessage := toGRPC(in)
 				err := this.stream.Send(grpcMessage)
 				if err != nil {
+					if streamClosureDiagnosed(err) {
+						return
+					}
+
 					log.Printf("Error sending message to function: %v", err)
 				}
 			} else {
@@ -66,12 +73,31 @@ func (this *grpcDispatcher) handleOutgoing() {
 	for {
 		reply, err := this.stream.Recv()
 		if err != nil {
+			if streamClosureDiagnosed(err) {
+				return
+			}
+
 			log.Printf("Error receiving message from function: %v", err)
 			continue
 		}
 		message := toDispatcher(reply)
 		this.output <- message
 	}
+}
+
+func streamClosureDiagnosed(err error) bool {
+	if err == io.EOF {
+		log.Println("Stream to function has closed")
+		return true
+	}
+
+	if sErr, ok := status.FromError(err); ok && sErr.Code() == codes.Unavailable {
+		// See https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
+		log.Printf("Stream to function is closing: %v", err)
+		return true
+	}
+
+	return false
 }
 
 func NewGrpcDispatcher(port int) (dispatcher.Dispatcher, error) {
@@ -102,7 +128,7 @@ func toGRPC(message message.Message) *function.Message {
 			values.Values = append(values.Values, v)
 		}
 	}
-	result := function.Message{Payload:message.Payload(), Headers:grpcHeaders}
+	result := function.Message{Payload: message.Payload(), Headers: grpcHeaders}
 
 	return &result
 }

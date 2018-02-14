@@ -114,10 +114,11 @@ func main() {
 
 	carrier.Run(consumer, producer, dispatcher, output)
 
-	// trap SIGINT, SIGTERM, and SIGKILL to trigger a shutdown.
+	// trap SIGINT and SIGTERM to trigger a shutdown.
 	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, os.Kill)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
 	<-signals
+	log.Println(("Shutting Down..."))
 }
 
 func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
