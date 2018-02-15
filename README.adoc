@@ -14,7 +14,7 @@ invokers and can be deployed using the new go CLI. See below for build instructi
 
 == Developer installation
 
-If you want to run the current development version (git master branch) of riff, read link:Development-Helm-install.adoc[Installing the riff development version using Helm].
+To install the current development version (git master branch) of riff, see link:Development-Helm-install.adoc[Installing the riff development version using Helm].
 
 === [[manual]] Manual install of riff
 
