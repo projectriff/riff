@@ -29,6 +29,7 @@ import (
 	"github.com/projectriff/riff-cli/pkg/minikube"
 	"github.com/projectriff/riff-cli/pkg/jsonpath"
 	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/spf13/viper"
 )
 
 type PublishOptions struct {
@@ -53,6 +54,9 @@ riff publish -i greetings -d hello -r
 will post 'hello' to the 'greetings' topic and wait for a reply.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		// get the viper value from env var, config file or flag option
+		publishOptions.namespace = viper.GetString("namespace")
 
 		cmdArgs := []string{"get", "--namespace", publishOptions.namespace, "svc", "-l", "component=http-gateway", "-o", "json"}
 		output, err := kubectl.ExecForBytes(cmdArgs)
@@ -147,12 +151,14 @@ func init() {
 	// is called directly, e.g.:
 	// publishCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	publishCmd.Flags().StringVarP(&publishOptions.namespace, "namespace", "", "default", "the namespace of the http-gateway")
 	publishCmd.Flags().StringVarP(&publishOptions.data, "data", "d", "", "the data to post to the http-gateway using the input topic")
 	publishCmd.Flags().StringVarP(&publishOptions.input, "input", "i", osutils.GetCWDBasePath(), "the name of the input topic, defaults to name of current directory")
 	publishCmd.Flags().BoolVarP(&publishOptions.reply, "reply", "r", false, "wait for a reply containing the results of the function execution")
 	publishCmd.Flags().IntVarP(&publishOptions.count, "count", "c", 1, "the number of times to post the data")
 	publishCmd.Flags().IntVarP(&publishOptions.pause, "pause", "p", 0, "the number of seconds to wait between postings")
+
+	publishCmd.Flags().StringP("namespace", "", "default", "the namespace of the http-gateway")
+	viper.BindPFlag("namespace", publishCmd.Flags().Lookup("namespace"))
 
 	publishCmd.MarkFlagRequired("data")
 

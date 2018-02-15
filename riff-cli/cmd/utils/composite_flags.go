@@ -111,7 +111,7 @@ func MergeInitOptions(flagset pflag.FlagSet, opts *options.InitOptions) {
 		opts.RiffVersion, _ = flagset.GetString("riff-version")
 	}
 	if opts.UserAccount == "" {
-		opts.UserAccount = getStringValueWithOverride("useraccount", flagset)
+		opts.UserAccount = viper.GetString("useraccount")
 	}
 	if opts.DryRun == false {
 		opts.DryRun, _ = flagset.GetBool("dry-run")
@@ -135,7 +135,7 @@ func MergeBuildOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 		opts.RiffVersion, _ = flagset.GetString("riff-version")
 	}
 	if opts.UserAccount == "" {
-		opts.UserAccount = getStringValueWithOverride("useraccount", flagset)
+		opts.UserAccount = viper.GetString("useraccount")
 	}
 	if opts.DryRun == false {
 		opts.DryRun, _ = flagset.GetBool("dry-run")
@@ -150,7 +150,7 @@ func MergeApplyOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 		opts.FilePath, _ = flagset.GetString("filepath")
 	}
 	if opts.Namespace == "" {
-		opts.Namespace = getStringValueWithOverride("namespace", flagset)
+		opts.Namespace = viper.GetString("namespace")
 	}
 	if opts.DryRun == false {
 		opts.DryRun, _ = flagset.GetBool("dry-run")
@@ -165,7 +165,7 @@ func MergeDeleteOptions(flagset pflag.FlagSet, opts *options.DeleteAllOptions) {
 		opts.FilePath, _ = flagset.GetString("filepath")
 	}
 	if opts.Namespace == "" {
-		opts.Namespace = getStringValueWithOverride("namespace", flagset)
+		opts.Namespace = viper.GetString("namespace")
 	}
 	if opts.DryRun == false {
 		opts.DryRun, _ = flagset.GetBool("dry-run")
@@ -204,6 +204,7 @@ func setFilePathFlag(flagset *pflag.FlagSet) {
 func setNamespaceFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "namespace") {
 		flagset.String("namespace", defaults.namespace, "the namespace used for the deployed resources")
+		viper.BindPFlag("namespace", flagset.Lookup("namespace"))
 	}
 }
 
@@ -222,6 +223,7 @@ func setRiffVersionFlag(flagset *pflag.FlagSet) {
 func setUserAccountFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "useraccount") {
 		flagset.StringP("useraccount", "u", defaults.userAccount, "the Docker user account to be used for the image repository")
+		viper.BindPFlag("useraccount", flagset.Lookup("useraccount"))
 	}
 }
 
@@ -262,12 +264,4 @@ func setPushFlag(flagset *pflag.FlagSet) {
 
 func flagDefined(flagset *pflag.FlagSet, name string) bool {
 	return flagset.Lookup(name) != nil
-}
-
-func getStringValueWithOverride(name string, flagset pflag.FlagSet) string {
-	val := viper.GetString(name)
-	if val == "" {
-		val, _ = flagset.GetString(name)
-	}
-	return val
 }
