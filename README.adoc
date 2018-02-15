@@ -100,7 +100,7 @@ This builds the Function Sidecar, HTTP Gateway, Topic Controller, Function Contr
 ./build-riff-cli
 ----
 
-==== Build the other function invokers
+==== Build the function invokers
 
 This builds the `java-function-invoker`, `node-function-invoker`, `shell-function-invoker`, and `python2-function-invoker`:
 
