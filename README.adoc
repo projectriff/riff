@@ -4,18 +4,21 @@ A FaaS for Kubernetes
 
 == Installation of latest release
 
-You can install the latest release using link:Getting-Started.adoc[a Helm chart]. 
+You can install the latest (v0.0.3) release using link:Getting-Started.adoc[a Helm chart].
 
-== Installation of the riff CLI
+The https://github.com/projectriff/riff/tree/v0.0.3/samples[Tag v0.0.3 samples] will work together
+with the https://github.com/projectriff/riff/releases[v0.0.3 CLI].
 
-You can install the riff CLI by following instructions for the https://github.com/projectriff/riff/releases[latest release].
+Samples on the git master branch of this repo have been updated to work with recently modified
+invokers and can be deployed using the new go CLI. See below for build instructions.
 
 == Developer installation
 
-If you want to run the current development version of riff read link:Development-Helm-install.adoc[Installing the riff development version using Helm].
-You can also link:#manual[build and deploy riff manually], this is the best option if you want to modify the riff components.
+If you want to run the current development version (git master branch) of riff, read link:Development-Helm-install.adoc[Installing the riff development version using Helm].
 
 === [[manual]] Manual install of riff
+
+This is the best option if you want to modify the riff components.
 
 ==== Prerequisites
 
@@ -34,11 +37,13 @@ minikube start
 
 * A Java 8 environment.
 
-* A working Go environment, with clones of the 
-https://github.com/projectriff/function-sidecar[function-sidecar], 
+* A working Go environment with dep, and clones of the
+https://github.com/projectriff/function-sidecar[function-sidecar],
 https://github.com/projectriff/function-controller[function-controller],
-https://github.com/projectriff/topic-controller[topic-controller] and 
-https://github.com/projectriff/http-gateway[http-gateway] repositories.
+https://github.com/projectriff/topic-controller[topic-controller],
+https://github.com/projectriff/http-gateway[http-gateway],
+https://github.com/projectriff/shell-function-invoker[shell-function-invoker], and
+https://github.com/projectriff/shell-function-invoker[riff-cli] repositories.
 +
 [source, bash]
 ----
@@ -47,13 +52,14 @@ git clone -o upstream https://github.com/projectriff/function-sidecar src/github
 git clone -o upstream https://github.com/projectriff/function-controller src/github.com/projectriff/function-controller/
 git clone -o upstream https://github.com/projectriff/topic-controller src/github.com/projectriff/topic-controller/
 git clone -o upstream https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway/
+git clone -o upstream https://github.com/projectriff/shell-function-invoker src/github.com/projectriff/shell-function-invoker/
+git clone -o upstream https://github.com/projectriff/riff-cli src/github.com/projectriff/riff-cli/
 ----
 
 * A clone of the 
 https://github.com/projectriff/riff[riff], 
 https://github.com/projectriff/java-function-invoker[java-function-invoker], 
 https://github.com/projectriff/node-function-invoker[node-function-invoker], 
-https://github.com/projectriff/shell-function-invoker[shell-function-invoker] and 
 https://github.com/projectriff/python2-function-invoker[python2-function-invoker] repos.
 +
 NOTE: These repos should be cloned under a unique root directory since we will be using relative paths during the build.
@@ -64,7 +70,6 @@ NOTE: These repos should be cloned under a unique root directory since we will b
 git clone -o upstream https://github.com/projectriff/riff.git
 git clone -o upstream https://github.com/projectriff/java-function-invoker.git
 git clone -o upstream https://github.com/projectriff/node-function-invoker.git
-git clone -o upstream https://github.com/projectriff/shell-function-invoker.git
 git clone -o upstream https://github.com/projectriff/python2-function-invoker.git
 ----
 
@@ -84,7 +89,7 @@ eval $(minikube docker-env)
 
 ==== Build the core riff components
 
-This builds the Function Sidecar, HTTP Gateway, Topic Controller, and Function Controller:
+This builds the Function Sidecar, HTTP Gateway, Topic Controller, Function Controller, and riff CLI:
 
 [source, bash]
 ----
@@ -92,9 +97,10 @@ This builds the Function Sidecar, HTTP Gateway, Topic Controller, and Function C
 ./build-http-gateway
 ./build-topic-controller
 ./build-function-controller
+./build-riff-cli
 ----
 
-==== Build the function invokers
+==== Build the other function invokers
 
 This builds the `java-function-invoker`, `node-function-invoker`, `shell-function-invoker`, and `python2-function-invoker`:
 
