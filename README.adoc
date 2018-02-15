@@ -4,10 +4,10 @@ A FaaS for Kubernetes
 
 == Installation of latest release
 
-You can install the latest (v0.0.3) release using link:Getting-Started.adoc[a Helm chart].
+You can install the latest (0.0.3) release using link:Getting-Started.adoc[a Helm chart].
 
-The https://github.com/projectriff/riff/tree/v0.0.3/samples[Tag v0.0.3 samples] will work together
-with the https://github.com/projectriff/riff/releases[v0.0.3 CLI].
+The https://github.com/projectriff/riff/tree/v0.0.3/samples[0.0.3 samples] will work together
+with the https://github.com/projectriff/riff/releases[0.0.3 CLI].
 
 Samples on the git master branch of this repo have been updated to work with recently modified
 invokers and can be deployed using the new go CLI. See below for build instructions.
