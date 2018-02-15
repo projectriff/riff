@@ -1,4 +1,4 @@
 #!/bin/bash
-pushd "$PWD/../shell-function-invoker/"
+pushd "$(go env GOPATH)/src/github.com/projectriff/shell-function-invoker/"
     make dockerize
 popd

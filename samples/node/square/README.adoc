@@ -3,13 +3,13 @@
 [horizontal]
 *Language*:: JavaScript
 *Function*:: link:square.js[square.js]
-*Protocol*:: HTTP
+*Protocol*:: grpc
 *Input*:: numbers
 
 === prerequisites
 
 1. riff is deployed
-2. the `riff` script is on your PATH
+2. the `riff` CLI is on your PATH
 3. the working directory is `samples/node/square`
 
 === create the function and its input topic

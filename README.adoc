@@ -4,27 +4,28 @@ A FaaS for Kubernetes
 
 == Installation of latest release
 
-You can install the latest release using link:Getting-Started.adoc[a Helm chart]. 
+You can install the latest (0.0.3) release using link:Getting-Started.adoc[a Helm chart].
 
-== Installation of the riff CLI
+The https://github.com/projectriff/riff/tree/v0.0.3/samples[0.0.3 samples] will work together
+with the https://github.com/projectriff/riff/releases[0.0.3 CLI].
 
-You can install the riff CLI by following instructions for the https://github.com/projectriff/riff/releases[latest release].
+Samples on the git master branch of this repo have been updated to work with recently modified
+invokers and can be deployed using the new go CLI. See below for build instructions.
 
 == Developer installation
 
-If you want to run the current development version of riff read link:Development-Helm-install.adoc[Installing the riff development version using Helm].
-You can also link:#manual[build and deploy riff manually], this is the best option if you want to modify the riff components.
+To use Helm to install the current development version (git master branch) of riff, see link:Development-Helm-install.adoc[Installing the riff development version using Helm].
 
 === [[manual]] Manual install of riff
+
+This is the best option if you want to modify the riff components.
 
 ==== Prerequisites
 
 You need:
 
 * A running 1.7+ Kubernetes cluster. These instructions assume minikube for now.
-+
-TIP: We recommend using Minikube v0.23.0 or v0.24.1 and avoiding v0.24.0 due to some DNS issues
-+
+
 [source,bash]
 ----
 minikube start
@@ -34,38 +35,31 @@ minikube start
 
 * A Java 8 environment.
 
-* A working Go environment, with clones of the 
-https://github.com/projectriff/function-sidecar[function-sidecar], 
-https://github.com/projectriff/function-controller[function-controller],
-https://github.com/projectriff/topic-controller[topic-controller] and 
-https://github.com/projectriff/http-gateway[http-gateway] repositories.
-+
+* A working Go environment with dep
+
+==== Clone the go components
+
 [source, bash]
 ----
-cd $(go env GOPATH)   #defaults to ~/go
-git clone -o upstream https://github.com/projectriff/function-sidecar src/github.com/projectriff/function-sidecar/
-git clone -o upstream https://github.com/projectriff/function-controller src/github.com/projectriff/function-controller/
-git clone -o upstream https://github.com/projectriff/topic-controller src/github.com/projectriff/topic-controller/
-git clone -o upstream https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway/
+go get -d github.com/projectriff/function-sidecar
+go get -d github.com/projectriff/function-controller
+go get -d github.com/projectriff/topic-controller
+go get -d github.com/projectriff/http-gateway
+go get -d github.com/projectriff/shell-function-invoker
+go get -d github.com/projectriff/riff-cli
 ----
 
-* A clone of the 
-https://github.com/projectriff/riff[riff], 
-https://github.com/projectriff/java-function-invoker[java-function-invoker], 
-https://github.com/projectriff/node-function-invoker[node-function-invoker], 
-https://github.com/projectriff/shell-function-invoker[shell-function-invoker] and 
-https://github.com/projectriff/python2-function-invoker[python2-function-invoker] repos.
-+
+==== Clone riff and the other (non-golang) repos
+
 NOTE: These repos should be cloned under a unique root directory since we will be using relative paths during the build.
-+
+
 [source, bash]
 ----
 #cd <some_root_dir>
-git clone -o upstream https://github.com/projectriff/riff.git
-git clone -o upstream https://github.com/projectriff/java-function-invoker.git
-git clone -o upstream https://github.com/projectriff/node-function-invoker.git
-git clone -o upstream https://github.com/projectriff/shell-function-invoker.git
-git clone -o upstream https://github.com/projectriff/python2-function-invoker.git
+git clone https://github.com/projectriff/riff.git
+git clone https://github.com/projectriff/java-function-invoker.git
+git clone https://github.com/projectriff/node-function-invoker.git
+git clone https://github.com/projectriff/python2-function-invoker.git
 ----
 
 From now on, this README assumes you're running commands from the `riff` repository clone:
@@ -82,9 +76,7 @@ cd riff
 eval $(minikube docker-env)
 ----
 
-==== Build the core riff components
-
-This builds the Function Sidecar, HTTP Gateway, Topic Controller, and Function Controller:
+==== Build the riff core components, invokers and CLI
 
 [source, bash]
 ----
@@ -92,15 +84,18 @@ This builds the Function Sidecar, HTTP Gateway, Topic Controller, and Function C
 ./build-http-gateway
 ./build-topic-controller
 ./build-function-controller
+./build-riff-cli
+./build-shell-function-invoker
+./build-java-function-invoker 
+./build-node-function-invoker
+./build-python2-function-invoker
 ----
 
-==== Build the function invokers
-
-This builds the `java-function-invoker`, `node-function-invoker`, `shell-function-invoker`, and `python2-function-invoker`:
+==== Add the compiled riff CLI to your path or alias it.
 
 [source, bash]
 ----
-./build-function-invokers
+alias riff="$(go env GOPATH)/src/github.com/projectriff/riff-cli/riff"
 ----
 
 ==== Deploy Kafka/Zookeeper
