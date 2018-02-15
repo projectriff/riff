@@ -30,6 +30,7 @@ import (
 	"github.com/projectriff/riff-cli/pkg/jsonpath"
 	"github.com/projectriff/riff-cli/pkg/osutils"
 	"github.com/projectriff/riff-cli/cmd/utils"
+	"github.com/spf13/viper"
 )
 
 type PublishOptions struct {
@@ -57,6 +58,18 @@ will post 'hello' to the 'greetings' topic and wait for a reply.
 
 		// get the viper value from env var, config file or flag option
 		publishOptions.namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
+
+		// look for PUBLISH_NAMESPACE
+		if !cmd.Flags().Changed("namespace") && viper.GetString("PUBLISH_NAMESPACE") != "" {
+			publishOptions.namespace = viper.GetString("PUBLISH_NAMESPACE")
+			fmt.Printf("Using namespace: %s\n", publishOptions.namespace)
+		} else {
+			// look for publishNamespace
+			if !cmd.Flags().Changed("namespace") && viper.GetString("publishNamespace") != "" {
+				publishOptions.namespace = viper.GetString("publishNamespace")
+				fmt.Printf("Using namespace: %s\n", publishOptions.namespace)
+			}
+		}
 
 		cmdArgs := []string{"get", "--namespace", publishOptions.namespace, "svc", "-l", "component=http-gateway", "-o", "json"}
 		output, err := kubectl.ExecForBytes(cmdArgs)
