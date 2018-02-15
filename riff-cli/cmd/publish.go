@@ -29,7 +29,7 @@ import (
 	"github.com/projectriff/riff-cli/pkg/minikube"
 	"github.com/projectriff/riff-cli/pkg/jsonpath"
 	"github.com/projectriff/riff-cli/pkg/osutils"
-	"github.com/spf13/viper"
+	"github.com/projectriff/riff-cli/cmd/utils"
 )
 
 type PublishOptions struct {
@@ -56,7 +56,7 @@ will post 'hello' to the 'greetings' topic and wait for a reply.
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// get the viper value from env var, config file or flag option
-		publishOptions.namespace = viper.GetString("namespace")
+		publishOptions.namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
 
 		cmdArgs := []string{"get", "--namespace", publishOptions.namespace, "svc", "-l", "component=http-gateway", "-o", "json"}
 		output, err := kubectl.ExecForBytes(cmdArgs)
@@ -158,7 +158,6 @@ func init() {
 	publishCmd.Flags().IntVarP(&publishOptions.pause, "pause", "p", 0, "the number of seconds to wait between postings")
 
 	publishCmd.Flags().StringP("namespace", "", "default", "the namespace of the http-gateway")
-	viper.BindPFlag("namespace", publishCmd.Flags().Lookup("namespace"))
 
 	publishCmd.MarkFlagRequired("data")
 

@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff-cli/pkg/ioutils"
 	"github.com/projectriff/riff-cli/pkg/kubectl"
-	"github.com/spf13/viper"
+	"github.com/projectriff/riff-cli/cmd/utils"
 )
 
 type LogsOptions struct {
@@ -51,7 +51,7 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// get the viper value from env var, config file or flag option
-		logsOptions.namespace = viper.GetString("namespace")
+		logsOptions.namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
 
 		fmt.Printf("Displaying logs for container %v of function %v in namespace %v\n\n", logsOptions.container, logsOptions.function, logsOptions.namespace)
 
@@ -121,7 +121,6 @@ func init() {
 	logsCmd.Flags().BoolVarP(&logsOptions.tail, "tail", "t", false, "tail the logs")
 
 	logsCmd.Flags().StringP("namespace", "", "default", "the namespace used for the deployed resources")
-	viper.BindPFlag("namespace", logsCmd.Flags().Lookup("namespace"))
 
 	logsCmd.MarkFlagRequired("name")
 }

@@ -22,7 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff-cli/pkg/ioutils"
-	"github.com/spf13/viper"
+	"github.com/projectriff/riff-cli/cmd/utils"
 )
 
 type ListOptions struct {
@@ -39,7 +39,7 @@ var listCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// get the viper value from env var, config file or flag option
-		listOptions.namespace = viper.GetString("namespace")
+		listOptions.namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
 
 		fmt.Printf("Listing function resources in namespace %v\n\n", listOptions.namespace)
 
@@ -61,5 +61,4 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 
 	listCmd.Flags().StringP("namespace", "", "default", "the namespace used for the deployed resources")
-	viper.BindPFlag("namespace", listCmd.Flags().Lookup("namespace"))
 }
