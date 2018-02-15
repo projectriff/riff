@@ -27,6 +27,8 @@ import (
 	"github.com/projectriff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff-cli/cmd/opts"
 	"github.com/projectriff/riff-cli/pkg/functions"
+	"github.com/projectriff/riff-cli/pkg/osutils"
+	"strings"
 )
 
 // applyCmd represents the apply command
@@ -65,17 +67,34 @@ var applyCmd = &cobra.Command{
 }
 
 func apply(cmd *cobra.Command, opts options.ApplyOptions) error {
-	fnDir, _ := functions.FunctionDirFromPath(opts.FilePath)
-	if opts.DryRun {
-		fmt.Printf("\nApply Command: kubectl apply --namespace %s -f %s\n\n", opts.Namespace, fnDir)
+	//fnDir, _ := functions.FunctionDirFromPath(opts.FilePath)
+	abs,err := functions.AbsPath(opts.FilePath)
+	if err != nil {
+		cmd.SilenceUsage = true
+		return err
+	}
+
+	var cmdArgs []string
+	var message string
+
+	if osutils.IsDirectory(abs) {
+		message = fmt.Sprintf("Applying resources in %v\n\n", opts.FilePath)
 	} else {
-		fmt.Printf("Applying resources in %v\n\n", opts.FilePath)
-		output, err := kubectl.ExecForString([]string{"apply", "--namespace", opts.Namespace, "-f", fnDir})
+		message = fmt.Sprintf("Applying resource %v\n\n", opts.FilePath)
+	}
+	cmdArgs = []string{"apply", "--namespace", opts.Namespace, "-f", abs}
+
+
+	if opts.DryRun {
+		fmt.Printf("\nApply Command: kubectl %s\n\n", strings.Trim(fmt.Sprint(cmdArgs), "[]"))
+	} else {
+		fmt.Print(message)
+		output, err := kubectl.ExecForString(cmdArgs)
 		if err != nil {
 			cmd.SilenceUsage = true
 			return err
 		}
-		fmt.Println(output)
+		fmt.Printf("%v\n", output)
 	}
 	return nil
 }
