@@ -100,7 +100,6 @@ This builds the Function Sidecar, HTTP Gateway, Topic Controller, Function Contr
 ./build-riff-cli
 ----
 
-==== Alias the riff CLI
 Add the compiled riff CLI to your path or alias it.
 
 [source, bash]
