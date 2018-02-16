@@ -35,14 +35,10 @@ minikube start
 
 * A Java 8 environment.
 
-* A working Go environment with dep, and clones of the
-https://github.com/projectriff/function-sidecar[function-sidecar],
-https://github.com/projectriff/function-controller[function-controller],
-https://github.com/projectriff/topic-controller[topic-controller],
-https://github.com/projectriff/http-gateway[http-gateway],
-https://github.com/projectriff/shell-function-invoker[shell-function-invoker], and
-https://github.com/projectriff/riff-cli[riff-cli] repositories.
-+
+* A working Go environment with dep
+
+==== Clone the go components
+
 [source, bash]
 ----
 go get -d github.com/projectriff/function-sidecar
@@ -53,14 +49,10 @@ go get -d github.com/projectriff/shell-function-invoker
 go get -d github.com/projectriff/riff-cli
 ----
 
-* A clone of the 
-https://github.com/projectriff/riff[riff], 
-https://github.com/projectriff/java-function-invoker[java-function-invoker], 
-https://github.com/projectriff/node-function-invoker[node-function-invoker], 
-https://github.com/projectriff/python2-function-invoker[python2-function-invoker] repos.
-+
+==== Clone riff and the other (non-golang) repos
+
 NOTE: These repos should be cloned under a unique root directory since we will be using relative paths during the build.
-+
+
 [source, bash]
 ----
 #cd <some_root_dir>
