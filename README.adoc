@@ -45,13 +45,12 @@ https://github.com/projectriff/riff-cli[riff-cli] repositories.
 +
 [source, bash]
 ----
-cd $(go env GOPATH)   #defaults to ~/go
-git clone -o upstream https://github.com/projectriff/function-sidecar src/github.com/projectriff/function-sidecar/
-git clone -o upstream https://github.com/projectriff/function-controller src/github.com/projectriff/function-controller/
-git clone -o upstream https://github.com/projectriff/topic-controller src/github.com/projectriff/topic-controller/
-git clone -o upstream https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway/
-git clone -o upstream https://github.com/projectriff/shell-function-invoker src/github.com/projectriff/shell-function-invoker/
-git clone -o upstream https://github.com/projectriff/riff-cli src/github.com/projectriff/riff-cli/
+go get github.com/projectriff/function-sidecar
+go get github.com/projectriff/function-controller
+go get github.com/projectriff/topic-controller
+go get github.com/projectriff/http-gateway
+go get github.com/projectriff/shell-function-invoker
+go get github.com/projectriff/riff-cli
 ----
 
 * A clone of the 
@@ -65,10 +64,10 @@ NOTE: These repos should be cloned under a unique root directory since we will b
 [source, bash]
 ----
 #cd <some_root_dir>
-git clone -o upstream https://github.com/projectriff/riff.git
-git clone -o upstream https://github.com/projectriff/java-function-invoker.git
-git clone -o upstream https://github.com/projectriff/node-function-invoker.git
-git clone -o upstream https://github.com/projectriff/python2-function-invoker.git
+git clone https://github.com/projectriff/riff.git
+git clone https://github.com/projectriff/java-function-invoker.git
+git clone https://github.com/projectriff/node-function-invoker.git
+git clone https://github.com/projectriff/python2-function-invoker.git
 ----
 
 From now on, this README assumes you're running commands from the `riff` repository clone:
