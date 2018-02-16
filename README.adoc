@@ -1,5 +1,7 @@
 = riff is for functions image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/badge[Riff Pipeline, link=https://ci.projectriff.io/teams/main/pipelines/riff]
 
+image::logo.png[riff logo]
+
 A FaaS for Kubernetes
 
 == Installation of latest release
