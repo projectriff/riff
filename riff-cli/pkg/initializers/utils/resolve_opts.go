@@ -40,7 +40,7 @@ func ResolveOptions(functionArtifact string, language string, opts *options.Init
 		"java":  "pipes",
 		"js":    "grpc",
 		"node":  "grpc",
-		"py":    "stdio",
+		"python": "stdio",
 	}
 
 	if opts.Protocol == "" {
