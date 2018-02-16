@@ -7,8 +7,6 @@ This guide covers installing riff using https://helm.sh/[Helm], which is a commo
 
 * A running 1.7+ Kubernetes cluster
 
-TIP: If using Minikube, we recommend using Minikube v0.23.0 or v0.24.1 and avoiding v0.24.0 due to some DNS issues
-
 * Kubernetes CLI `kubectl` installed and on the local system PATH. We recommend using the same version or later as the Kubernetes cluster you are using.
 
 * Docker, if you plan on building samples or your own functions then you will need Docker installed. We have used Docker version 17.x or later.

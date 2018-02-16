@@ -25,9 +25,7 @@ This is the best option if you want to modify the riff components.
 You need:
 
 * A running 1.7+ Kubernetes cluster. These instructions assume minikube for now.
-+
-TIP: We recommend using Minikube v0.23.0 or v0.24.1 and avoiding v0.24.0 due to some DNS issues
-+
+
 [source,bash]
 ----
 minikube start
