@@ -19,13 +19,10 @@ package utils
 import (
 	"path/filepath"
 
-	"github.com/projectriff/riff-cli/pkg/functions"
 	"github.com/projectriff/riff-cli/pkg/options"
 )
 
 func ResolveOptions(functionArtifact string, language string, opts *options.InitOptions) {
-
-	opts.FunctionName, _ = functions.FunctionNameFromPath(opts.FilePath)
 
 	if opts.Input == "" {
 		opts.Input = opts.FunctionName
