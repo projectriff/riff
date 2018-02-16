@@ -89,4 +89,21 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+
+	InitGlobal()
+}
+
+func InitGlobal() {
+
+	if os.Getenv("RIFF_VERSION") != "" {
+		global.RIFF_VERSION = os.Getenv("RIFF_VERSION")
+	} else {
+		if viper.GetString("riffVersion") != "" {
+			global.RIFF_VERSION = viper.GetString("riffVersion")
+		} else {
+			if viper.GetString("riff-version") != "" {
+				global.RIFF_VERSION = viper.GetString("riff-version")
+			}
+		}
+	}
 }

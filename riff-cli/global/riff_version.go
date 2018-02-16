@@ -16,15 +16,6 @@
 
 package global
 
-import "os"
-
 var CLI_VERSION = "0.0.4"
 
 var RIFF_VERSION = "latest"
-
-func init() {
-	version := os.Getenv("RIFF_VERSION")
-	if version != "" {
-		RIFF_VERSION = version
-	}
-}
