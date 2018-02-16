@@ -1,3 +1,3 @@
 #!/bin/sh
 
-printf "received at `date -u`: `cat`"
+echo hello ; cat
