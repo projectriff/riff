@@ -50,7 +50,6 @@ func CreateInitFlags(flagset *pflag.FlagSet) {
 	setVersionFlag(flagset)
 	setNameFlag(flagset)
 	setFilePathFlag(flagset)
-	setRiffVersionFlag(flagset)
 	setProtocolFlag(flagset)
 	setInputFlag(flagset)
 	setOutputFlag(flagset)
@@ -108,7 +107,7 @@ func MergeInitOptions(flagset pflag.FlagSet, opts *options.InitOptions) {
 		opts.Artifact, _ = flagset.GetString("artifact")
 	}
 	if opts.RiffVersion == "" {
-		opts.RiffVersion, _ = flagset.GetString("riff-version")
+		opts.RiffVersion = getRiffVersionWithGlobalOverride(flagset)
 	}
 	if opts.UserAccount == "" {
 		opts.UserAccount = GetStringValueWithOverride("useraccount", flagset)
@@ -132,7 +131,7 @@ func MergeBuildOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 		opts.FilePath, _ = flagset.GetString("filepath")
 	}
 	if opts.RiffVersion == "" {
-		opts.RiffVersion, _ = flagset.GetString("riff-version")
+		opts.RiffVersion = getRiffVersionWithGlobalOverride(flagset)
 	}
 	if opts.UserAccount == "" {
 		opts.UserAccount = GetStringValueWithOverride("useraccount", flagset)
@@ -262,6 +261,14 @@ func setPushFlag(flagset *pflag.FlagSet) {
 
 func flagDefined(flagset *pflag.FlagSet, name string) bool {
 	return flagset.Lookup(name) != nil
+}
+
+func getRiffVersionWithGlobalOverride(flagset pflag.FlagSet) string {
+	val, _ := flagset.GetString("riff-version")
+	if flagset.Changed("riff-version") {
+		return val
+	}
+	return global.RIFF_VERSION
 }
 
 func GetStringValueWithOverride(name string, flagset pflag.FlagSet) string {
