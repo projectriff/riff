@@ -21,7 +21,7 @@
 === create the function and its input topic
 
 ```
-riff create --input names --artifact target/greeter-1.0.0.jar --handler functions.Greeter
+riff create java --input names --artifact target/greeter-1.0.0.jar --handler functions.Greeter
 ```
 
 === publish a message and wait for a reply
