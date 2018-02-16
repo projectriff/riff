@@ -84,9 +84,7 @@ cd riff
 eval $(minikube docker-env)
 ----
 
-==== Build the core riff components
-
-This builds the Function Sidecar, HTTP Gateway, Topic Controller, Function Controller, and riff CLI:
+==== Build the core riff components and CLI
 
 [source, bash]
 ----
@@ -106,11 +104,12 @@ alias riff="$(go env GOPATH)/src/github.com/projectriff/riff-cli/riff"
 
 ==== Build the function invokers
 
-This builds the `java-function-invoker`, `node-function-invoker`, `shell-function-invoker`, and `python2-function-invoker`:
-
 [source, bash]
 ----
-./build-function-invokers
+./build-java-function-invoker 
+./build-node-function-invoker
+./build-shell-function-invoker
+./build-python2-function-invoker
 ----
 
 ==== Deploy Kafka/Zookeeper
