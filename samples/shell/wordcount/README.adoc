@@ -3,7 +3,7 @@
 [horizontal]
 *Language*:: Shell
 *Function*:: link:wordcount.sh[wordcount.sh]
-*Protocol*:: stdio
+*Protocol*:: grpc
 *Input*:: words
 
 === prerequisites

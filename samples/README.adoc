@@ -12,4 +12,5 @@ To riff link:../README.adoc[README]
   - link:python/sentiments/README.adoc[sentiments]
 * Shell
   - link:shell/echo/README.adoc[echo]
+  - link:shell/hello/README.adoc[hello]
   - link:shell/wordcount/README.adoc[wordcount]
