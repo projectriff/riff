@@ -15,7 +15,7 @@
 === create the function and its input topic
 
 ```
-riff create --input tweets --artifact sentiment_service.py --handler process
+riff create python --input tweets --artifact sentiment_service.py --handler process
 ```
 
 === publish a message and wait for a reply
