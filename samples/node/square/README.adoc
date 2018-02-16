@@ -3,7 +3,7 @@
 [horizontal]
 *Language*:: JavaScript
 *Function*:: link:square.js[square.js]
-*Protocol*:: HTTP
+*Protocol*:: grpc
 *Input*:: numbers
 
 === prerequisites

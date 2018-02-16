@@ -3,7 +3,7 @@
 [horizontal]
 *Language*:: Shell
 *Function*:: link:echo.sh[echo.sh]
-*Protocol*:: stdio
+*Protocol*:: grpc
 *Input*:: greetings
 
 === prerequisites
