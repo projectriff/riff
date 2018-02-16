@@ -43,7 +43,7 @@ https://github.com/projectriff/function-controller[function-controller],
 https://github.com/projectriff/topic-controller[topic-controller],
 https://github.com/projectriff/http-gateway[http-gateway],
 https://github.com/projectriff/shell-function-invoker[shell-function-invoker], and
-https://github.com/projectriff/shell-function-invoker[riff-cli] repositories.
+https://github.com/projectriff/riff-cli[riff-cli] repositories.
 +
 [source, bash]
 ----
