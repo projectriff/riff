@@ -42,6 +42,6 @@ func Initialize(opts options.InitOptions) error {
 		GenerateDockerFile: generateShellFunctionDockerFile,
 	}
 
-	return core.GenerateFunctionArtfacts(generator, workdir, opts)
+	return core.GenerateFunctionArtifacts(generator, workdir, opts)
 }
 

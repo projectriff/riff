@@ -52,7 +52,7 @@ type ArtifactsGenerator struct {
 	GenerateDockerIgnore func(options.InitOptions) (string, error)
 }
 
-func GenerateFunctionArtfacts(generator ArtifactsGenerator, workdir string, opts options.InitOptions) error {
+func GenerateFunctionArtifacts(generator ArtifactsGenerator, workdir string, opts options.InitOptions) error {
 	var functionResources FunctionResources
 	var err error
 	functionResources.Topics, err = createTopics(opts)

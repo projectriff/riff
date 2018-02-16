@@ -44,5 +44,5 @@ func Initialize(opts options.InitOptions) error {
 		GenerateDockerIgnore: generateNodeFunctionDockerIgnore,
 	}
 
-	return core.GenerateFunctionArtfacts(generator, workdir, opts)
+	return core.GenerateFunctionArtifacts(generator, workdir, opts)
 }

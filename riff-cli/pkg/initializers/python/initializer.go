@@ -42,5 +42,5 @@ func Initialize(opts options.InitOptions) error {
 		GenerateDockerFile: generatePythonFunctionDockerFile,
 	}
 
-	return core.GenerateFunctionArtfacts(generator, workdir, opts)
+	return core.GenerateFunctionArtifacts(generator, workdir, opts)
 }
