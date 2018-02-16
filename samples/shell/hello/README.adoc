@@ -1,16 +1,16 @@
-= echo
+= hello world
 
 [horizontal]
 *Language*:: Shell
-*Function*:: link:echo.sh[echo.sh]
+*Function*:: link:hello.sh[hello.sh]
 *Protocol*:: grpc
-*Input*:: echo
+*Input*:: greetings
 
 === prerequisites
 
 1. riff is deployed
 2. the `riff` CLI is on your PATH
-3. the working directory is `samples/shell/echo`
+3. the working directory is `samples/shell/hello`
 
 === create the function and its input topic
 
@@ -21,7 +21,7 @@ riff create
 === publish a message and wait for a reply
 
 ```
-riff publish -d "hello riff" -r
+riff publish --d world -r
 ```
 
 === delete the function and its input topic
