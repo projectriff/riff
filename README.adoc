@@ -2,6 +2,8 @@
 
 image::logo.png[riff logo]
 
+image::logo/logo.jpg[riff logo]
+
 A FaaS for Kubernetes
 
 == Installation of latest release
