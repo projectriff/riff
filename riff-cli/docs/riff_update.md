@@ -28,7 +28,7 @@ riff update [flags]
       --namespace string      the namespace used for the deployed resources (default "default")
       --push                  push the image to Docker registry
       --riff-version string   the version of riff to use when building containers (default "latest")
-  -u, --useraccount string    the Docker user account to be used for the image repository (default "trisberg")
+  -u, --useraccount string    the Docker user account to be used for the image repository (default "current OS user")
   -v, --version string        the version of the function image (default "0.0.1")
 ```
 

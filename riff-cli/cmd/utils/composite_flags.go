@@ -38,7 +38,7 @@ type Defaults struct {
 
 var defaults = Defaults{
 	riffVersion: global.RIFF_VERSION,
-	userAccount: osutils.GetCurrentUsername(),
+	userAccount: "current OS user",
 	namespace:   "default",
 	force:       false,
 	dryRun:      false,
@@ -110,7 +110,7 @@ func MergeInitOptions(flagset pflag.FlagSet, opts *options.InitOptions) {
 		opts.RiffVersion = getRiffVersionWithGlobalOverride(flagset)
 	}
 	if opts.UserAccount == "" {
-		opts.UserAccount = GetStringValueWithOverride("useraccount", flagset)
+		opts.UserAccount = getUseraccountWithOverride("useraccount", flagset)
 	}
 	if opts.DryRun == false {
 		opts.DryRun, _ = flagset.GetBool("dry-run")
@@ -134,7 +134,7 @@ func MergeBuildOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 		opts.RiffVersion = getRiffVersionWithGlobalOverride(flagset)
 	}
 	if opts.UserAccount == "" {
-		opts.UserAccount = GetStringValueWithOverride("useraccount", flagset)
+		opts.UserAccount = getUseraccountWithOverride("useraccount", flagset)
 	}
 	if opts.DryRun == false {
 		opts.DryRun, _ = flagset.GetBool("dry-run")
@@ -269,6 +269,14 @@ func getRiffVersionWithGlobalOverride(flagset pflag.FlagSet) string {
 		return val
 	}
 	return global.RIFF_VERSION
+}
+
+func getUseraccountWithOverride(name string, flagset pflag.FlagSet) string {
+	userAcct := GetStringValueWithOverride("useraccount", flagset)
+	if userAcct == defaults.userAccount {
+		userAcct = osutils.GetCurrentUsername()
+	}
+	return userAcct
 }
 
 func GetStringValueWithOverride(name string, flagset pflag.FlagSet) string {
