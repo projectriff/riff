@@ -10,11 +10,11 @@ Generate the function based on the function script specified as the filename, us
 
 For example, from a directory named 'echo' containing a function 'echo.sh', you can simply type :
 
-riff init shell -f echo
+    riff init shell -f echo
 
   or
 
-riff init shell
+    riff init shell
 
 to generate the required Dockerfile and resource definitions using sensible defaults.
 

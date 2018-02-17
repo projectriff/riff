@@ -43,7 +43,7 @@ var logsCmd = &cobra.Command{
 	Short: "Display the logs for a running function",
 	Long: `Display the logs for a running function For example:
 
-riff logs -n myfunc -t
+    riff logs -n myfunc -t
 
 will tail the logs from the 'sidecar' container for the function 'myfunc'
 

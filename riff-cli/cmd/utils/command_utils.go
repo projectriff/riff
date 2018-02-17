@@ -24,7 +24,7 @@ import (
 const (
 	initResult       = `generate the required Dockerfile and resource definitions using sensible defaults`
 	initDefinition   = `Generate`
-	createResult     = `create the required Dockerfile and resource definitions, and apply the resources, using sensible defaults`
+	createResult     = `create the required Dockerfile and resource definitions, and apply the resources,  using sensible defaults`
 	createDefinition = `Create`
 )
 
@@ -33,11 +33,11 @@ const baseCommandDescription = `{{.Process}} the function based on the function 
 
 For example, from a directory named 'square' containing a function 'square.js', you can simply type :
 
-riff {{.Command}} node -f square
+    riff {{.Command}} node -f square
 
   or
 
-riff  {{.Command}} node
+    riff  {{.Command}} node
 
 to {{.Result}}.`
 
@@ -46,7 +46,7 @@ const baseJavaDescription = `{{.Process}} the function based on the function sou
 
 For example, from a maven project directory named 'greeter', type:
 
-riff {{.Command}} -i greetings -l java -a target/greeter-1.0.0.jar --handler=Greeter
+    riff {{.Command}} -i greetings -l java -a target/greeter-1.0.0.jar --handler=Greeter
 
 to {{.Result}}.`
 
@@ -55,11 +55,11 @@ const baseShellDescription = `{{.Process}} the function based on the function sc
 
 For example, from a directory named 'echo' containing a function 'echo.sh', you can simply type :
 
-riff {{.Command}} -f echo
+    riff {{.Command}} -f echo
 
   or
 
-riff {{.Command}}
+    riff {{.Command}}
 
 to {{.Result}}.`
 
@@ -68,11 +68,11 @@ const baseNodeDescription = `{{.Process}} the function based on the function sou
 
 For example, from a directory  named 'square' containing a function 'square.js', you can simply type :
 
-riff {{.Command}} -f square
+    riff {{.Command}} -f square
 
   or
 
-riff {{.Command}}
+    riff {{.Command}}
 
 to {{.Result}}.`
 
@@ -81,7 +81,7 @@ const basePythonDescription = `{{.Process}} the function based on the function s
 
 For example, type:
 
-riff {{.Command}} -i words -l python  --n uppercase --handler=process
+    riff {{.Command}} -i words -l python  --n uppercase --handler=process
 
 to {{.Result}}.`
 

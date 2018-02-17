@@ -7,7 +7,7 @@ Publish data to a topic using the http-gateway
 
 Publish data to a topic using the http-gateway. For example:
 
-riff publish -i greetings -d hello -r
+    riff publish -i greetings -d hello -r
 
 will post 'hello' to the 'greetings' topic and wait for a reply.
 

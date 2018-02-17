@@ -10,7 +10,7 @@ Create the function based on the function source code specified as the filename,
 
 For example, from a maven project directory named 'greeter', type:
 
-riff create java -i greetings -l java -a target/greeter-1.0.0.jar --handler=Greeter
+    riff create java -i greetings -l java -a target/greeter-1.0.0.jar --handler=Greeter
 
 to create the required Dockerfile and resource definitions, and apply the resources, using sensible defaults.
 

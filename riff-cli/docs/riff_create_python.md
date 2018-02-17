@@ -10,7 +10,7 @@ Generate the function based on the function source code specified as the filenam
 
 For example, type:
 
-riff init python -i words -l python  --n uppercase --handler=process
+    riff init python -i words -l python  --n uppercase --handler=process
 
 to generate the required Dockerfile and resource definitions using sensible defaults.
 

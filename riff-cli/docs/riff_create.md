@@ -10,11 +10,11 @@ Create the function based on the function source code specified as the filename,
 
 For example, from a directory named 'square' containing a function 'square.js', you can simply type :
 
-riff create node -f square
+    riff create node -f square
 
   or
 
-riff  create node
+    riff  create node
 
 to create the required Dockerfile and resource definitions, and apply the resources, using sensible defaults.
 

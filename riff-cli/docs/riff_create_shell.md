@@ -10,11 +10,11 @@ Create the function based on the function script specified as the filename, usin
 
 For example, from a directory named 'echo' containing a function 'echo.sh', you can simply type :
 
-riff create shell -f echo
+    riff create shell -f echo
 
   or
 
-riff create shell
+    riff create shell
 
 to create the required Dockerfile and resource definitions, and apply the resources, using sensible defaults.
 

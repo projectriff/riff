@@ -10,11 +10,11 @@ Generate the function based on the function source code specified as the filenam
 
 For example, from a directory  named 'square' containing a function 'square.js', you can simply type :
 
-riff init node -f square
+    riff init node -f square
 
   or
 
-riff init node
+    riff init node
 
 to generate the required Dockerfile and resource definitions using sensible defaults.
 
