@@ -36,7 +36,7 @@ var rootCmd = &cobra.Command{
 
 version ` + global.CLI_VERSION + `
 
-the riff tool creates and manages function resources for the riff FaaS platform https://projectriff.io/`,
+the riff tool is used to create and manage function resources for the riff FaaS platform https://projectriff.io/`,
 	SilenceErrors: true,
 	DisableAutoGenTag: true,
 }

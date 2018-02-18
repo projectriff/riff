@@ -9,7 +9,7 @@ riff is for functions
 
 version 0.0.4
 
-the riff tool creates and manages function resources for the riff FaaS platform https://projectriff.io/
+the riff tool is used to create and manage function resources for the riff FaaS platform https://projectriff.io/
 
 ### Options
 
