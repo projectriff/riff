@@ -18,4 +18,4 @@ package global
 
 var CLI_VERSION = "0.0.4"
 
-var RIFF_VERSION = "latest"
+var RIFF_VERSION = "0.0.4"

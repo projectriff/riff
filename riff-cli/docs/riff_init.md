@@ -34,7 +34,7 @@ riff init [language] [flags]
   -n, --name string           the name of the function (defaults to the name of the current directory)
   -o, --output string         the name of the output topic (optional)
   -p, --protocol string       the protocol to use for function invocations
-      --riff-version string   the version of riff to use when building containers (default "latest")
+      --riff-version string   the version of riff to use when building containers (default "0.0.4")
   -u, --useraccount string    the Docker user account to be used for the image repository (default "current OS user")
   -v, --version string        the version of the function image (default "0.0.1")
 ```
