@@ -63,6 +63,7 @@ func NewWrapper(synch SynchDispatcher) (*wrapper, error) {
 						message, err := synch.Dispatch(in)
 						if err != nil {
 							log.Printf("Error calling synch dispatcher %v\n", err)
+							return
 						}
 						propagateHeaders(in, message)
 						log.Printf("Wrapper about to forward %v\n", message)

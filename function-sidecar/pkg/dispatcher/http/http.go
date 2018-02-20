@@ -41,6 +41,7 @@ func (httpDispatcher) Dispatch(in message.Message) (message.Message, error) {
 	}
 	req, err := http.NewRequest("POST", "http://localhost:8080", bytes.NewReader(in.Payload()))
 	if err != nil {
+		log.Printf("Error creating POST request to http://localhost:8080: %v", err)
 		return nil, err
 	}
 	propagateIncomingHeaders(in, req)
