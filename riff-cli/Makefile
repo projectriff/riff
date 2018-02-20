@@ -32,13 +32,13 @@ $(OUTPUT_LINUX): $(GO_SOURCES) vendor
 	# This builds the executable from Go sources on *your* machine, targeting Linux OS
 	# and linking everything statically, to minimize Docker image size
 	# See e.g. https://blog.codeship.com/building-minimal-docker-containers-for-go-applications/ for details
-	CGO_ENABLED=0 GOOS=linux go build $(BUILD_FLAGS) -v -a -installsuffix cgo -o $(OUTPUT_LINUX) riff.go
+	CGO_ENABLED=0 GOOS=linux go build $(BUILD_FLAGS) -v -a -installsuffix cgo -o $(OUTPUT_LINUX) github.com/projectriff/riff-cli/cmd/riff
 
 $(OUTPUT_WINDOWS): $(GO_SOURCES) vendor
 	# This builds the executable from Go sources on *your* machine, targeting Windows
 	# and linking everything statically, to minimize Docker image size
 	# See e.g. https://blog.codeship.com/building-minimal-docker-containers-for-go-applications/ for details
-	CGO_ENABLED=0 GOOS=windows go build $(BUILD_FLAGS) -v -a -installsuffix cgo -o $(OUTPUT_WINDOWS) riff.go
+	CGO_ENABLED=0 GOOS=windows go build $(BUILD_FLAGS) -v -a -installsuffix cgo -o $(OUTPUT_WINDOWS) github.com/projectriff/riff-cli/cmd/riff
 
 clean:
 	rm -f $(OUTPUT)
