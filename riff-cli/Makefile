@@ -1,5 +1,6 @@
 .PHONY: build clean test release
 OUTPUT = riff
+OUTPUT_WINDOWS = $(OUTPUT).exe
 GO_SOURCES = $(shell find cmd pkg -type f -name '*.go')
 
 build: $(OUTPUT)
@@ -17,9 +18,9 @@ $(OUTPUT): $(GO_SOURCES) vendor
 	go build -o $(OUTPUT) cmd/riff/main.go
 
 release: $(GO_SOURCES) vendor
-	GOOS=darwin   GOARCH=amd64 go build -o $(OUTPUT) cmd/riff/main.go && tar -czf riff-darwin-amd64.tgz  $(OUTPUT)
-	GOOS=linux    GOARCH=amd64 go build -o $(OUTPUT) cmd/riff/main.go && tar -czf riff-linux-amd64.tgz   $(OUTPUT)
-	GOOS=windows  GOARCH=amd64 go build -o $(OUTPUT) cmd/riff/main.go && zip -mq riff-windows-amd64.zip $(OUTPUT)
+	GOOS=darwin   GOARCH=amd64 go build -o $(OUTPUT) cmd/riff/main.go && tar -czf riff-darwin-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
+	GOOS=linux    GOARCH=amd64 go build -o $(OUTPUT) cmd/riff/main.go && tar -czf riff-linux-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
+	GOOS=windows  GOARCH=amd64 go build -o $(OUTPUT_WINDOWS) cmd/riff/main.go && zip -mq riff-windows-amd64.zip $(OUTPUT_WINDOWS)
 
 $(OUTPUT_LINUX): $(GO_SOURCES) vendor
 	GOOS=linux go build -o $(OUTPUT_LINUX) cmd/riff/main.go
