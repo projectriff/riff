@@ -11,6 +11,11 @@ cd $(go env GOPATH)/src/github.com/projectriff/riff-cli
 make
 ```
 
+Alternatively, the `riff` executable may be installed to `$GOPATH/bin` using:
+```
+go get github.com/projectriff/riff-cli/cmd/riff
+```
+
 == Running tests
 ```
 cd $(go env GOPATH)/src/github.com/projectriff/riff-cli

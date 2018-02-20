@@ -26,7 +26,7 @@ test: build
 	go test -v ./...
 
 $(OUTPUT): $(GO_SOURCES) vendor
-	go build riff.go
+	go build github.com/projectriff/riff-cli/cmd/riff
 
 $(OUTPUT_LINUX): $(GO_SOURCES) vendor
 	# This builds the executable from Go sources on *your* machine, targeting Linux OS
