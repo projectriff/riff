@@ -17,9 +17,9 @@ $(OUTPUT): $(GO_SOURCES) vendor
 	go build -o $(OUTPUT) cmd/riff/main.go
 
 release: $(GO_SOURCES) vendor
-	GOOS=darwin   GOARCH=amd64 go build -o $(OUTPUT) cmd/riff/main.go && zip -m riff-darwin-amd64.zip  $(OUTPUT)
-	GOOS=windows  GOARCH=amd64 go build -o $(OUTPUT) cmd/riff/main.go && zip -m riff-windows-amd64.zip $(OUTPUT)
-	GOOS=linux    GOARCH=amd64 go build -o $(OUTPUT) cmd/riff/main.go && zip -m riff-linux-amd64.zip   $(OUTPUT)
+	GOOS=darwin   GOARCH=amd64 go build -o $(OUTPUT) cmd/riff/main.go && tar -czf riff-darwin-amd64.tgz  $(OUTPUT)
+	GOOS=linux    GOARCH=amd64 go build -o $(OUTPUT) cmd/riff/main.go && tar -czf riff-linux-amd64.tgz   $(OUTPUT)
+	GOOS=windows  GOARCH=amd64 go build -o $(OUTPUT) cmd/riff/main.go && zip -mq riff-windows-amd64.zip $(OUTPUT)
 
 $(OUTPUT_LINUX): $(GO_SOURCES) vendor
 	GOOS=linux go build -o $(OUTPUT_LINUX) cmd/riff/main.go
@@ -29,6 +29,6 @@ $(OUTPUT_WINDOWS): $(GO_SOURCES) vendor
 
 clean:
 	rm -f $(OUTPUT)
-	rm -f riff-darwin-amd64.zip
+	rm -f riff-darwin-amd64.tgz
+	rm -f riff-linux-amd64.tgz
 	rm -f riff-windows-amd64.zip
-	rm -f riff-linux-amd64.zip
