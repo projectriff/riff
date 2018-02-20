@@ -2,7 +2,7 @@
 
 [horizontal]
 *Language*:: Python
-*Function*:: link:sentiment_service.py[sentiment_service.py]
+*Function*:: link:sentiments.py[sentiments.py]
 *Protocol*:: stdio
 *Input*:: tweets
 
@@ -15,7 +15,7 @@
 === create the function and its input topic
 
 ```
-riff create python --input tweets --artifact sentiment_service.py --handler process
+riff create python --input tweets --handler process
 ```
 
 === publish a message and wait for a reply

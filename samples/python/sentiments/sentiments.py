@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-sentiment_service.py
+sentiments.py
 ~~~~~~~~~~~~~~~~~~~~
 
 App implements a sentiment analysis pipeline. 
