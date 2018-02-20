@@ -73,7 +73,6 @@ Install the development version of the riff chart in the default namespace. When
 helm install --name control riffrepo/riff --devel --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
-
 [TIP]
 ====
 Alternatively, install riff in the `riff-system` namespace:
@@ -103,29 +102,29 @@ NOTE: The same commands work for all of the riff components: `functionController
 
 * Overriding the version of a riff component:
 +
-To set the version tag for the `functionController` to `0.0.4-build.1` use something like the following:
+To set the version tag for the `functionController` to `0.0.5-build.1` use something like the following:
 +
 [source, bash]
 ----
-helm install riffrepo/riff --name control --set functionController.image.tag=0.0.4-build.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install riffrepo/riff --name control --set functionController.image.tag=0.0.5-build.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 * Overriding the image repository and version tag of a riff component with a custom built component image:
 +
-To set the image repository to `mycustom/function-controller` and the version tag to `0.0.4-test.1` for the `functionController`, use something like the following:
+To set the image repository to `mycustom/function-controller` and the version tag to `0.0.5-test.1` for the `functionController`, use something like the following:
 +
 [source, bash]
 ----
-helm install riffrepo/riff --name control --set functionController.image.repository=mycustom/function-controller --set functionController.image.tag=0.0.4-test.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install riffrepo/riff --name control --set functionController.image.repository=mycustom/function-controller --set functionController.image.tag=0.0.5-test.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 * Overriding the version of the `sidecar` component:
 +
-The `sidecar` component is only used by the `functionController`, so to set the version for the `sidecar` to `0.0.4-build.1` use something like the following:
+The `sidecar` component is only used by the `functionController`, so to set the version for the `sidecar` to `0.0.5-build.1` use something like the following:
 +
 [source, bash]
 ----
-helm install riffrepo/riff --name control --set functionController.sidecar.image.tag=0.0.4-build.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install riffrepo/riff --name control --set functionController.sidecar.image.tag=0.0.5-build.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 ==== Installing locally built snapshot components with Minikube

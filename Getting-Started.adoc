@@ -24,7 +24,9 @@ For a cluster that does not have RBAC enabled use:
 helm init
 ----
 
-For a cluster that has RBAC enabled use:
+[NOTE]
+====
+For a cluster that has RBAC enabled use (must connect with cluster admin rights):
 
 [source, bash]
 ----
@@ -33,7 +35,9 @@ kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceac
 helm init --service-account=tiller
 ----
 
-NOTE: To verify that the tiller pod has started execute the following command: `kubectl get pod --namespace kube-system -l app=helm` and you should see the `tiller` pod running.
+====
+
+TIP: To verify that the tiller pod has started execute the following command: `kubectl get pod --namespace kube-system -l app=helm` and you should see the `tiller` pod running.
 
 == Add the riff repository to your helm configuration
 
@@ -57,6 +61,38 @@ helm search riff -l
 
 == [[current]]Install the current riff release
 
+Starting with the 0.0.4 version we have separated the Kafka installation from the riff chart. This requires an extra step of installing Kafka in order yo use riff. You can use the single-node Kafka chart provided by riff or the three-node kafka/zookeeper service provided by the Kubeapps.
+
+=== Install Kafka chart
+
+We provide a lightweight single node Kafka installation in the `riffrepo/kafka` chart. This works well for development purposes.
+
+Create the `riff-system` namespace:
+
+[source, bash]
+----
+kubectl create namespace riff-system
+----
+
+Install the kafka/zookeeper service provided by riff using:
+
+[source, bash]
+----
+helm install --name transport --namespace riff-system riffrepo/kafka
+----
+
+[TIP]
+====
+Alternatively, install the three-node kafka/zookeeper service provided by the Kubeapps `incubator/kafka` chart using:
+
+[source, bash]
+----
+helm install --name transport --namespace riff-system incubator/kafka
+----
+
+Just be aware that this chart requires significantly more resources to run.
+====
+
 === Install riff using a Kubernetes cluster supporting LoadBalancer
 
 Install the riff helm chart as follows:
@@ -65,25 +101,16 @@ For an install with default configuration and no RBAC enabled use:
 
 [source, bash]
 ----
-helm install riffrepo/riff --version 0.0.3 --name demo
+helm install riffrepo/riff --version 0.0.4 --name demo --set create.rbac=false
 ----
 
 [NOTE]
 ====
-For a cluster that has RBAC enabled add `--set create.rbac=true`:
+For a cluster that has RBAC enabled use `--set create.rbac=true`:
 
 [source, bash]
 ----
-helm install riffrepo/riff --name demo --set create.rbac=true
-----
-====
-
-[WARNING]
-====
-The 0.0.3 version of riff needs a fix to the RBAC configuration that is provided in version `0.0.3-rbac` of the chart. Use the following command to install riff `0.0.3` with RBAC enabled:
-
-----
-helm install riffrepo/riff --version 0.0.3-rbac --name demo
+helm install riffrepo/riff --version 0.0.4 --name demo --set create.rbac=true
 ----
 ====
 
@@ -93,7 +120,7 @@ For `NodePort` service types (e.g. running on Minikube) configure the httpGatewa
 
 [source, bash]
 ----
-helm install riffrepo/riff --version 0.0.3 --name demo --set httpGateway.service.type=NodePort
+helm install riffrepo/riff --version 0.0.4 --name demo --set create.rbac=false --set httpGateway.service.type=NodePort
 ----
 
 [NOTE]
@@ -102,16 +129,7 @@ For a cluster that has RBAC enabled add `--set create.rbac=true`:
 
 [source, bash]
 ----
-helm install riffrepo/riff --name demo --set create.rbac=true --set httpGateway.service.type=NodePort
-----
-====
-
-[WARNING]
-====
-The 0.0.3 version of riff needs a fix to the RBAC configuration that is provided in version `0.0.3-rbac` of the chart. Use the following command to install riff `0.0.3` with RBAC enabled:
-
-----
-helm install riffrepo/riff --version 0.0.3-rbac --name demo --set httpGateway.service.type=NodePort
+helm install riffrepo/riff --version 0.0.4 --name demo --set create.rbac=true --set httpGateway.service.type=NodePort
 ----
 ====
 
@@ -128,8 +146,6 @@ kubectl get svc,deployments,pods,functions,topics
 
 The provided Helm chart installs the following components:
 
-* Kafka and Zookeeper - the message broker used by the riff components
-
 * Topic Controller - the controller that watches the Topic resources and creates new topics in Kafka
 
 * Function Controller - the controller that watches the Function resources and deploys function images together with the sidecar image
@@ -142,3 +158,57 @@ The provided Helm chart installs the following components:
 ----
 helm delete --purge demo
 ----
+
+== [[CLI]]Install the current riff CLI tool
+
+Starting with the 0.0.4 version we provide a CLI tool written in Go that makes it easy to create and deploy functions.
+Install the CLI by following the instructions on the https://github.com/projectriff/riff/releases[riff release page].
+
+=== [[cli-config]]riff CLI configuration
+
+The riff CLI can be configured either using environment variables or using a config file. 
+The config file to be used can be set using `--config` option and it defaults to `$HOME/.riff.yaml`.
+
+Environmant variables are prefixed with `RIFF_` and the variables from the following example are supported:
+
+```
+RIFF_VERSION=0.0.5-snapshot
+RIFF_USERACCOUNT=myaccount
+RIFF_NAMESPACE=test
+RIFF_PUBLISH_NAMESPACE=riff-system
+```
+
+For the config file, you can create a `~/.riff.yaml` file with something like the following content:
+
+```
+riffVersion: 0.0.5-snapshot
+useraccount: myaccount
+namespace: test
+publishNamespace: riff-system
+```
+
+TIP: the  `publishNamespace`/`RIFF_PUBLISH_NAMESPACE` setting is useful when running the http-gateway in the `riff-system` namespace 
+and the functions in `default` or a `test` namespace
+
+=== [[cli-completion]]riff CLI bash completion
+
+The riff CLI command supports generating a bash completion file in the same way as the `kubectl` command does.
+
+==== [[cli-completion-macos]]riff CLI bash completion on macOS
+
+If you use https://brew.sh/[Homebrew] on a Mac you can install the completion file using:
+
+```
+brew install bash-completion
+riff completion bash > $(brew --prefix)/etc/bash_completion.d/riff 
+```
+
+==== [[cli-completion-linux]]riff CLI bash completion on Linux
+
+If you use Linux you can installl the completion file using:
+
+```
+. <(riff completion bash) 
+```
+
+TIP: You can edit your `.bashrc` file to have this automatically loaded on future shell runs.
