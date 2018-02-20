@@ -6,7 +6,7 @@ built with https://github.com/spf13/cobra[cobra]
 
 == Building
 ```
-go get github.com/projectriff/riff-cli
+go get -d github.com/projectriff/riff-cli/...
 cd $(go env GOPATH)/src/github.com/projectriff/riff-cli
 make
 ```

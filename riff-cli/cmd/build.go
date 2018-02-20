@@ -86,7 +86,7 @@ func build(opts options.BuildOptions) error {
 	fmt.Println(out)
 
 	if opts.Push {
-		fmt.Println("pushing image...")
+		fmt.Println("Pushing image...")
 		out, err = docker.Exec(pushArgs)
 		if err != nil {
 			ioutils.Errorf("Error %v\n", err)

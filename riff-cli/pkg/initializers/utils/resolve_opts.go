@@ -34,7 +34,7 @@ func ResolveOptions(functionArtifact string, language string, opts *options.Init
 
 	protocolForLanguage := map[string]string{
 		"shell": "grpc",
-		"java":  "pipes",
+		"java":  "grpc",
 		"js":    "grpc",
 		"node":  "grpc",
 		"python": "stdio",
