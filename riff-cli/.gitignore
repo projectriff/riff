@@ -1,5 +1,6 @@
 samples/
 .idea
 /riff
-/riff-linux
-/riff-windows
+/riff-darwin-amd64.zip
+/riff-windows-amd64.zip
+/riff-linux-amd64.zip
