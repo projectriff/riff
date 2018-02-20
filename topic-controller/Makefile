@@ -1,6 +1,6 @@
 .PHONY: build clean test dockerize debug-dockerize
 OUTPUT = topic-controller
-TAG = 0.0.4
+TAG = 0.0.5-snapshot
 
 GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
 
