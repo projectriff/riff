@@ -1,7 +1,7 @@
 .PHONY: build clean fetch-grpc grpc dockerize test
 OUTPUT = function-sidecar
 GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
-TAG = 0.0.4
+TAG = 0.0.5-snapshot
 
 GRPC_DIR = pkg/dispatcher/grpc
 
