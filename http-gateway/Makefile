@@ -2,7 +2,7 @@
 OUTPUT = http-gateway
 
 GO_SOURCES = $(shell find cmd pkg -type f -name '*.go')
-TAG = 0.0.4
+TAG = 0.0.5-snapshot
 
 build: $(OUTPUT)
 
