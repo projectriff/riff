@@ -1,7 +1,7 @@
 .PHONY: build clean dockerize gen-mocks test
 OUTPUT = function-controller
 GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
-TAG = 0.0.4-snapshot
+TAG = 0.0.4
 
 build: $(OUTPUT) vendor
 
