@@ -101,12 +101,12 @@ For an install with default configuration and no RBAC enabled use:
 
 [source, bash]
 ----
-helm install riffrepo/riff --version 0.0.4 --name demo --set create.rbac=false
+helm install riffrepo/riff --version 0.0.4 --name demo --set rbac.create=false
 ----
 
 [NOTE]
 ====
-For a cluster that has RBAC enabled use (`create.rbac` is `true` by default):
+For a cluster that has RBAC enabled, use the following (since `rbac.create` is `true` by default):
 
 [source, bash]
 ----
@@ -120,12 +120,12 @@ For `NodePort` service types (e.g. running on Minikube) configure the httpGatewa
 
 [source, bash]
 ----
-helm install riffrepo/riff --version 0.0.4 --name demo --set create.rbac=false --set httpGateway.service.type=NodePort
+helm install riffrepo/riff --version 0.0.4 --name demo --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 [NOTE]
 ====
-For a cluster that has RBAC enabled use (`create.rbac` is `true` by default):
+For a cluster that has RBAC enabled, use the following (since `rbac.create` is `true` by default):
 
 [source, bash]
 ----
