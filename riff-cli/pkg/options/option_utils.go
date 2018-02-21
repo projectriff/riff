@@ -104,7 +104,7 @@ func ValidateAndCleanInitOptions(options *InitOptions) error {
 		}
 
 		if !strings.HasPrefix(filepath.Dir(absArtifactPath), absFilePathDir) {
-			return errors.New(fmt.Sprintf("artifact %s cannot be external to filepath %", absArtifactPath, absFilePath))
+			return errors.New(fmt.Sprintf("artifact %s cannot be external to filepath %s", absArtifactPath, absFilePath))
 		}
 
 		if !osutils.FileExists(absArtifactPath) {

@@ -22,12 +22,6 @@ release: $(GO_SOURCES) vendor
 	GOOS=linux    GOARCH=amd64 go build -o $(OUTPUT) cmd/riff/main.go && tar -czf riff-linux-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
 	GOOS=windows  GOARCH=amd64 go build -o $(OUTPUT_WINDOWS) cmd/riff/main.go && zip -mq riff-windows-amd64.zip $(OUTPUT_WINDOWS)
 
-$(OUTPUT_LINUX): $(GO_SOURCES) vendor
-	GOOS=linux go build -o $(OUTPUT_LINUX) cmd/riff/main.go
-
-$(OUTPUT_WINDOWS): $(GO_SOURCES) vendor
-	GOOS=windows go build -o $(OUTPUT_WINDOWS) cmd/riff/main.go
-
 clean:
 	rm -f $(OUTPUT)
 	rm -f riff-darwin-amd64.tgz
