@@ -10,7 +10,7 @@ and how to install the riff CLI.
 
 === Developer installation
 
-To use Helm to install the current development version (git master branch) of riff, see link:Development-Helm-install.adoc[Installing the riff development version using Helm].
+See link:Development-Helm-install.adoc[Installing the riff development version using Helm] to install the latest unreleased builds (git master branch) of riff.
 
 === [[manual]] Manual build
 
