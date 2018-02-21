@@ -1,24 +1,18 @@
-= riff is for functions image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/badge[Riff Pipeline, link=https://ci.projectriff.io/teams/main/pipelines/riff]
+= riff is for functions
 
-image::logo.png[riff logo]
-
+image::logo.png[riff logo, link=https://projectriff.io/]
 A FaaS for Kubernetes
 
-== Installation of latest release
+=== Installation of the latest release
 
-You can install the latest (0.0.4) release using link:Getting-Started.adoc[a Helm chart].
+See link:Getting-Started.adoc[Getting Started] for how to install riff with a Helm Chart,
+and how to install the riff CLI.
 
-The https://github.com/projectriff/riff/tree/v0.0.4/samples[0.0.4 samples] will work together
-with the https://github.com/projectriff/riff/releases[0.0.4 CLI].
-
-Samples on the git master branch of this repo have been updated to work with recently modified
-invokers and can be deployed using the new go CLI. See below for build instructions.
-
-== Developer installation
+=== Developer installation
 
 To use Helm to install the current development version (git master branch) of riff, see link:Development-Helm-install.adoc[Installing the riff development version using Helm].
 
-=== [[manual]] Manual install of riff
+=== [[manual]] Manual build
 
 This is the best option if you want to modify the riff components.
 
