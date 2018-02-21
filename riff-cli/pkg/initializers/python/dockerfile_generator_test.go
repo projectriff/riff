@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"testing"
 	"github.com/stretchr/testify/assert"
+	"strings"
 )
 
 func TestPythonDockerfile(t *testing.T) {
@@ -35,10 +36,39 @@ func TestPythonDockerfile(t *testing.T) {
 
 	docker, err := generatePythonFunctionDockerFile(opts)
 	as.NoError(err)
-	as.Contains(docker, fmt.Sprintf("FROM projectriff/python2-function-invoker:%s", opts.RiffVersion))
-	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_MODULE=%s", opts.Artifact))
-	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_HANDLER=%s", opts.Handler))
-	as.Contains(docker, fmt.Sprintf("ADD ./%s /", opts.Artifact))
+	lines := strings.Split(docker,"\n")
+	as.Contains(lines, fmt.Sprintf("FROM projectriff/python2-function-invoker:%s", opts.RiffVersion))
+	as.Contains(lines, fmt.Sprintf("ARG FUNCTION_MODULE=%s", opts.Artifact))
+	as.Contains(lines, fmt.Sprintf("ARG FUNCTION_HANDLER=%s", opts.Handler))
+	as.Contains(lines, fmt.Sprintf("ADD ./%s /", opts.Artifact))
 	as.NotContains(docker, "requirements.txt")
 	as.NotContains(docker, "pip")
+
+	as.Contains(lines,"ENV FUNCTION_URI file:///${FUNCTION_MODULE}?handler=${FUNCTION_HANDLER}")
+
+}
+
+func TestPythonWithRequirementsDockerfile(t *testing.T) {
+	as := assert.New(t)
+
+	opts := options.InitOptions{
+		Artifact:    "demo.py",
+		RiffVersion: "0.0.3",
+		FilePath:    "../../../test_data/python/demo_with_deps",
+		Handler:     "process",
+	}
+
+	docker, err := generatePythonFunctionDockerFile(opts)
+	as.NoError(err)
+	lines := strings.Split(docker,"\n")
+	as.Contains(lines, fmt.Sprintf("FROM projectriff/python2-function-invoker:%s", opts.RiffVersion))
+	as.Contains(lines, fmt.Sprintf("ARG FUNCTION_MODULE=%s", opts.Artifact))
+	as.Contains(lines, fmt.Sprintf("ARG FUNCTION_HANDLER=%s", opts.Handler))
+	as.Contains(lines, fmt.Sprintf("ADD ./%s /", opts.Artifact))
+	as.Contains(lines, "ADD ./requirements.txt /")
+	as.Contains(lines,"RUN  pip install --upgrade pip && pip install -r /requirements.txt")
+	as.Contains(lines,"ENV FUNCTION_URI file:///${FUNCTION_MODULE}?handler=${FUNCTION_HANDLER}")
+
+
+
 }

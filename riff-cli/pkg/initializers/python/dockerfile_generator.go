@@ -36,6 +36,7 @@ ADD ./{{.ArtifactBase}} /
 {{- if .RequirementsTextExists }}
 ADD ./requirements.txt /
 RUN  pip install --upgrade pip && pip install -r /requirements.txt
+{{ else }}
 {{ end -}}
 ENV FUNCTION_URI file:///${FUNCTION_MODULE}?handler=${FUNCTION_HANDLER}
 `
