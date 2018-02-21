@@ -36,7 +36,8 @@ func TestPythonDockerfile(t *testing.T) {
 
 	docker, err := generatePythonFunctionDockerFile(opts)
 	as.NoError(err)
-	lines := strings.Split(docker,"\n")
+	lines := strings.Split(strings.TrimSpace(docker),"\n")
+	as.Equal(5, len(lines))
 	as.Contains(lines, fmt.Sprintf("FROM projectriff/python2-function-invoker:%s", opts.RiffVersion))
 	as.Contains(lines, fmt.Sprintf("ARG FUNCTION_MODULE=%s", opts.Artifact))
 	as.Contains(lines, fmt.Sprintf("ARG FUNCTION_HANDLER=%s", opts.Handler))
@@ -60,7 +61,8 @@ func TestPythonWithRequirementsDockerfile(t *testing.T) {
 
 	docker, err := generatePythonFunctionDockerFile(opts)
 	as.NoError(err)
-	lines := strings.Split(docker,"\n")
+	lines := strings.Split(strings.TrimSpace(docker),"\n")
+	as.Equal(7, len(lines))
 	as.Contains(lines, fmt.Sprintf("FROM projectriff/python2-function-invoker:%s", opts.RiffVersion))
 	as.Contains(lines, fmt.Sprintf("ARG FUNCTION_MODULE=%s", opts.Artifact))
 	as.Contains(lines, fmt.Sprintf("ARG FUNCTION_HANDLER=%s", opts.Handler))
