@@ -61,17 +61,17 @@ EOF
 
 function describe() {
   echo "Describing Topic: $TOPIC"
-  kubectl exec $POD -- /opt/kafka/bin/kafka-topics.sh --describe --topic $TOPIC --zookeeper $ZK:2181
+  kubectl exec -n riff-system $POD -- /opt/kafka/bin/kafka-topics.sh --describe --topic $TOPIC --zookeeper $ZK:2181
 }
 
 function list() {
   echo "Listing all Topics"
-  kubectl exec $POD -- /opt/kafka/bin/kafka-topics.sh --list --zookeeper $ZK:2181
+  kubectl exec -n riff-system $POD -- /opt/kafka/bin/kafka-topics.sh --list --zookeeper $ZK:2181
 }
 
 function tail() {
   echo "Tailing Topic: $TOPIC"
-  kubectl exec $POD -- /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic $TOPIC --from-beginning
+  kubectl exec -n riff-system $POD -- /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic $TOPIC --from-beginning
 }
 
 # ======================================= TOPICS END =======================================
@@ -86,8 +86,8 @@ if [[ $# == 0 ]]; then
   exit 0
 fi
 
-POD=$(kubectl get pod -l component=kafka-broker -o jsonpath='{.items[0].metadata.name}')
-ZK=$(kubectl get service -l component=zookeeper -o jsonpath='{.items[0].metadata.name}')
+POD=$(kubectl get -n riff-system pod -l component=kafka-broker -o jsonpath='{.items[0].metadata.name}')
+ZK=$(kubectl get -n riff-system service -l component=zookeeper -o jsonpath='{.items[0].metadata.name}')
 
 COMMAND="$1"
 shift

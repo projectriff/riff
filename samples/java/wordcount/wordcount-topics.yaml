@@ -1,0 +1,13 @@
+apiVersion : projectriff.io/v1
+kind: Topic
+metadata:	
+  name: words
+spec:
+  partitions: 1
+---
+apiVersion : projectriff.io/v1
+kind: Topic
+metadata:	
+  name: counts
+spec:
+  partitions: 1

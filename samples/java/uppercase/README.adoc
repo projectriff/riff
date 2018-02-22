@@ -1,0 +1,38 @@
+= uppercase
+
+[horizontal]
+*Language*:: Java
+*Function*:: link:src/main/java/functions/Uppercase.java[Uppercase.java]
+*Protocol*:: grpc
+*Input*:: words
+
+=== prerequisites
+
+1. riff is deployed
+2. the `riff` CLI is on your PATH
+4. the working directory is `samples/java/uppercase`
+
+=== compile the Java code and build the JAR
+
+```
+./mvnw clean package
+```
+
+=== create the function and its input topic
+
+```
+riff create java --input words --artifact target/uppercase-1.0.0.jar --handler functions.Uppercase
+```
+
+=== publish a message and wait for a reply
+
+In a terminal window:
+```
+riff publish --input words --data hello --reply
+```
+
+=== delete the function and its input topic
+
+```
+riff delete --all
+```

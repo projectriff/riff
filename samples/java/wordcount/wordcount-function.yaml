@@ -1,0 +1,11 @@
+apiVersion: projectriff.io/v1
+kind: Function
+metadata:
+  name: wordcount
+spec:
+  protocol: grpc
+  input: words 
+  output: counts
+  idleTimeoutMs: 60000000
+  container:
+    image: projectriff/wordcount:0.0.1
