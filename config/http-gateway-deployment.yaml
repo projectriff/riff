@@ -12,7 +12,7 @@ spec:
         component: http-gateway
     spec:
       containers:
-      - image: projectriff/http-gateway:0.0.4-snapshot
+      - image: projectriff/http-gateway:0.0.5-snapshot
         name: http-gateway
         imagePullPolicy: IfNotPresent
         livenessProbe:
