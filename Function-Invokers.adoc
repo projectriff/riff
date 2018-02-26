@@ -6,7 +6,7 @@
 
 A function invoker must listen on port 8080 for request-response style interactions via a HTTP POST. The HTTP headers have a content-type that can be used to decode the request body.
 
-=== GRPC
+=== gRPC
 
 A function invoker can also be implemented as a bi-directional stream (as opposed to request-response) in gRPC. The carrier type is a generic `function.Message` defined in the https://github.com/projectriff/function-proto[Function Proto] project. There are language-specific bindings to the `Message` type defined alongside the protobuffer declarations.
 
@@ -26,7 +26,7 @@ One way to run kafka is to use Spring Cloud CLI, or you could use docker. Using 
 docker run -e ADVERTISED_HOST=localhost -p 9092:9092 -ti spotify/kafka
 ```
 
-Then clone and run the gateway. This requires golang 1.9, so check
+Then clone and run the gateway. This requires golang 1.9 or later, so check
 your `go env` and set `GOPATH` and `GOROOT` env vars accordingly. Then
 do this:
 
