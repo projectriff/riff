@@ -20,90 +20,40 @@ This is the best option if you want to modify the riff components.
 
 You need:
 
-* A running 1.7+ Kubernetes cluster. These instructions assume minikube for now.
+* A working Go environment
+* A local 1.7+ Kubernetes cluster
+* A docker daemon
 
-[source,bash]
-----
-minikube start
-----
-
-* Git installed.
-
-* A Java 8 environment.
-
-* A working Go environment with dep
-
-==== Clone the go components
-
-[source, bash]
-----
-go get -d github.com/projectriff/function-sidecar/...
-go get -d github.com/projectriff/function-controller/...
-go get -d github.com/projectriff/topic-controller/...
-go get -d github.com/projectriff/http-gateway/...
-go get -d github.com/projectriff/shell-function-invoker/...
-go get -d github.com/projectriff/riff-cli/...
-----
-
-==== Clone riff and the other (non-golang) repos
-
-NOTE: These repos should be cloned under a unique root directory since we will be using relative paths during the build.
-
-[source, bash]
-----
-#cd <some_root_dir>
-git clone https://github.com/projectriff/riff.git
-git clone https://github.com/projectriff/java-function-invoker.git
-git clone https://github.com/projectriff/node-function-invoker.git
-git clone https://github.com/projectriff/python2-function-invoker.git
-----
-
-From now on, this README assumes you're running commands from the `riff` repository clone:
-
-[source, bash]
-----
-cd riff
-----
-
-==== Point your local Docker environment to the Docker environment running in minikube
+To build images with docker in minikube use
 
 [source, bash]
 ----
 eval $(minikube docker-env)
 ----
 
-==== Build the riff core components, invokers and CLI
+==== Get the main riff repo and install the CLI
 
 [source, bash]
 ----
-./build-function-sidecar
-./build-http-gateway
-./build-topic-controller
-./build-function-controller
-./build-riff-cli
-./build-shell-function-invoker
-./build-java-function-invoker 
-./build-node-function-invoker
-./build-python2-function-invoker
+go get github.com/projectriff/riff
 ----
 
-==== Add the compiled riff CLI to your path or alias it.
+==== Build the riff core components
 
 [source, bash]
 ----
-alias riff="$(go env GOPATH)/src/github.com/projectriff/riff-cli/riff"
+cd $(go env GOPATH)/src/github.com/projectriff/riff
+make dockerize
 ----
 
-==== Deploy Kafka/Zookeeper
+==== Deploy Kafka
 
 [source, bash]
 ----
 kubectl apply -f config/kafka
 ----
 
-==== Deploy the riff custom resources
-
-This creates the Function and Topic CRDs (Custom Resource Definitions):
+==== Deploy the riff Custom Resource Definitions
 
 [source, bash]
 ----
@@ -135,14 +85,14 @@ Once you're done playing with riff (see samples below), you can destroy everythi
 ./teardown
 ----
 
-== [[samples]]Try Some Samples
+=== [[samples]]Try Some Samples
 
 With riff running try some of the link:samples/README.adoc[samples].
 
-== Contributing to riff
+=== Contributing to riff
 
 Please refer to the link:CONTRIBUTING.adoc[Contributors' Guide].
 
-== Maintaining riff
+=== Maintaining riff
 
 Please refer to the link:MAINTAINING.adoc[Maintainers' Guide].
