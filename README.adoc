@@ -20,8 +20,16 @@ This is the best option if you want to modify the riff components.
 
 You need:
 
-* A local 1.7+ Kubernetes cluster and docker
 * A working Go environment
+* A local 1.7+ Kubernetes cluster
+* A docker daemon
+
+To build images with docker in minikube use
+
+[source, bash]
+----
+eval $(minikube docker-env)
+----
 
 ==== Get the main riff repo and install the CLI
 
