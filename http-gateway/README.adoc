@@ -1,0 +1,68 @@
+= HTTP Gateway image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-http-gateway-container/badge[HTTP Gateway Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-http-gateway-container/builds/latest]
+
+== Purpose
+The *http gateway* runs accepts http requests and trasforms those to messages emitted on the broker.
+Optionally (when posting to the `/requests/\{topic\}` endpoint) it waits for a reply on a dedicated internal topic
+and marshalls that message as an http response.
+
+== Development
+=== Prerequisites
+The following tools are required to build this project:
+
+- `make`
+- Docker
+- https://github.com/Masterminds/glide#install[Glide] for dependency management
+
+If you intend to re-generate mocks for testing, install:
+
+- https://github.com/vektra/mockery#installation[Mockery]
+
+If you would like to run tests using the `ginkgo` command, install:
+
+- http://onsi.github.io/ginkgo/[Ginkgo]
+
+=== Get the source
+[source, bash]
+----
+cd $(go env GOPATH)   #defaults to ~/go
+git clone -o upstream https://github.com/projectriff/http-gateway src/github.com/projectriff/http-gateway
+----
+
+=== Building
+* To build locally (this will produce a binary named `http-gateway` on _your_ machine):
++
+[source, bash]
+----
+make build
+----
+
+* To build for docker (and deploy as part of the whole https://github.com/projectriff/riff#-manual-install-of-riff[riff]
+installation):
++
+[source, bash]
+----
+make dockerize
+----
+This assumes that your docker client is correctly configured to target the daemon where you want the image built.
+
+* To run tests:
++
+[source, bash]
+----
+make test
+----
+
+* To attach a https://github.com/derekparker/delve/blob/master/Documentation/EditorIntegration.md[delve capable] debugger (such as Goland)
+to an `http-gateway` running _inside_ k8s:
++
+[source, bash]
+----
+make debug-dockerize
+----
+Then expose the `2345` port as a service, using `riff/config/delve/http-gateway-debug.yaml`:
++
+[source, bash]
+----
+kubectl apply -f riff/config/delve/http-gateway-debug.yaml
+----
+Then you can connect the debugger through port `30100`.

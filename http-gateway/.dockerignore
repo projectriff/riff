@@ -1,0 +1,4 @@
+*
+!cmd/
+!vendor/
+!pkg/
