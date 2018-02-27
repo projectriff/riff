@@ -8,6 +8,7 @@ build:
 	$(MAKE) -C function-sidecar		build
 	$(MAKE) -C http-gateway			build
 	$(MAKE) -C topic-controller		build
+	$(MAKE) -C riff-cli				build
 
 dockerize:
 	$(MAKE) -C function-controller	dockerize
