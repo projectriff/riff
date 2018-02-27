@@ -1,0 +1,6 @@
+hash: fa674b47b2c74a2b992ba5b4747e9ad28b256474b9c9cb8e508398ae5da51ed4
+updated: 2018-01-18T18:07:15.638573+01:00
+imports:
+- name: k8s.io/code-generator
+  version: 306be794f1b124a9c939ab168e9ea3944387e66b
+testImports: []
