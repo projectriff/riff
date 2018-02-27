@@ -1,0 +1,23 @@
+{{- if .Values.create.faas -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}-http-gateway
+  labels:
+    app: {{ template "name" . }}
+    component: http-gateway
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.httpGateway.service.type }}
+  ports:
+    - port: {{ .Values.httpGateway.service.externalPort }}
+      targetPort: 8080
+      protocol: TCP
+      name: {{ .Values.httpGateway.service.name }}
+  selector:
+    app: {{ template "name" . }}
+    component: http-gateway
+    release: {{ .Release.Name }}
+{{- end -}}

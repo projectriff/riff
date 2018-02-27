@@ -1,0 +1,44 @@
+{{- if .Values.create.faas -}}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}-function-controller
+  labels:
+    app: {{ template "name" . }}
+    component: function-controller
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        component: function-controller
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-function-controller
+          image: "{{ .Values.functionController.image.repository }}:{{ .Values.functionController.image.tag }}"
+          imagePullPolicy: {{ .Values.functionController.image.pullPolicy }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 5
+          ports:
+            - containerPort: 8080
+          env:
+          - name: KAFKA_BROKERS
+            value: {{ .Values.kafka.broker.nodes }}
+          - name: RIFF_FUNCTION_SIDECAR_TAG
+            value: {{ .Values.functionController.sidecar.image.tag }}
+      serviceAccountName: {{ template "serviceAccountName" . }}
+{{- end -}}
