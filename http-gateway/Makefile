@@ -6,17 +6,11 @@ TAG = 0.0.5-snapshot
 
 build: $(OUTPUT)
 
-test: build
+test:
 	go test -v ./...
 
-$(OUTPUT): $(GO_SOURCES) vendor
+$(OUTPUT): $(GO_SOURCES)
 	go build cmd/http-gateway.go
-
-vendor: glide.lock
-	glide install -v --force
-
-glide.lock: glide.yaml
-	glide up -v --force
 
 gen-mocks: $(GO_SOURCES)
 	go get -u github.com/vektra/mockery/.../
@@ -25,10 +19,10 @@ gen-mocks: $(GO_SOURCES)
 clean:
 	rm -f $(OUTPUT)
 
-dockerize: $(GO_SOURCES) vendor
+dockerize: $(GO_SOURCES)
 	docker build . -t projectriff/http-gateway:$(TAG)
 
-debug-dockerize: $(GO_SOURCES) vendor
+debug-dockerize: $(GO_SOURCES)
 	# Need to remove probes as delve starts app in paused state
 	-kubectl patch deploy/http-gateway --type=json -p='[{"op":"remove", "path":"/spec/template/spec/containers/0/livenessProbe"}]'
 	-kubectl patch deploy/http-gateway --type=json -p='[{"op":"remove", "path":"/spec/template/spec/containers/0/readinessProbe"}]'

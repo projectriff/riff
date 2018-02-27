@@ -6,25 +6,19 @@ GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
 
 build: $(OUTPUT)
 
-test: vendor
+test:
 	go test -v ./...
 
-$(OUTPUT): $(GO_SOURCES) vendor
+$(OUTPUT): $(GO_SOURCES)
 	go build cmd/topic-controller.go
-
-vendor: glide.lock
-	glide install -v --force
-
-glide.lock: glide.yaml
-	glide up -v --force
 
 clean:
 	rm -f $(OUTPUT)
 
-dockerize: $(GO_SOURCES) vendor
+dockerize: $(GO_SOURCES)
 	docker build . -t projectriff/topic-controller:$(TAG)
 
-debug-dockerize: $(GO_SOURCES) vendor
+debug-dockerize: $(GO_SOURCES)
 	# Need to remove probes as delve starts app in paused state
 	-kubectl patch deploy/topic-controller --type=json -p='[{"op":"remove", "path":"/spec/template/spec/containers/0/livenessProbe"}]'
 	-kubectl patch deploy/topic-controller --type=json -p='[{"op":"remove", "path":"/spec/template/spec/containers/0/readinessProbe"}]'

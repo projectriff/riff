@@ -5,14 +5,8 @@ GO_SOURCES = $(shell find pkg -type f -name '*.go' ! -path $(GENERATED_PATH))
 GENERATED_SOURCES = $(shell find pkg -type f -name '*.go' -path $(GENERATED_PATH))
 PKGS = $(shell go list ./pkg/...)
 
-all: vendor verify-mocks build
+all: verify-mocks build
 	@echo "To run the tests ensure kafka and zookeeper are running locally then issue 'make test'"
-
-vendor: glide.lock
-	glide install -v --force
-
-glide.lock: glide.yaml
-	glide up -v --force
 
 build: $(GO_SOURCES)
 	go build $(PKGS)

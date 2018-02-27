@@ -9,7 +9,7 @@ GO_SOURCES = $(shell find pkg/apis -type f -name '*.go' ! -path $(GENERATED_SOUR
 
 PKGS = $(shell go list ./pkg/...)
 
-build: $(GO_SOURCES) vendor
+build: $(GO_SOURCES)
 	go build $(PKGS)
 
 codegen: $(GENERATED_SOURCE)
@@ -38,12 +38,6 @@ codegen-verify: hack/vendor
 clean:
 	rm -fR pkg/client
 	rm -f $(GENERATED_SOURCE)
-
-vendor: glide.lock
-	glide install -v
-
-glide.lock: glide.yaml
-	glide up -v
 
 hack/vendor: hack/glide.lock
 	# Note the absence of -v
