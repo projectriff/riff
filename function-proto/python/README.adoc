@@ -1,0 +1,5 @@
+= gRPC Python
+
+See the official https://grpc.io/docs/quickstart/python.html[gRPC Python] reference guide.
+
+Also take a look at the https://github.com/projectriff/riff/tree/master/samples/python/uppercase[Python sample].
