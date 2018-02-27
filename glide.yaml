@@ -1,0 +1,87 @@
+package: github.com/projectriff/riff
+import:
+- package: github.com/NodePrime/jsonpath
+  version: v0.3.1
+- package: github.com/Shopify/sarama
+  version: v1.15.0
+- package: github.com/bsm/sarama-cluster
+  version: v2.1.11
+- package: github.com/giantswarm/retry-go
+  version: v0.5.0
+- package: github.com/golang/glog
+- package: github.com/golang/protobuf
+  version: v1.0.0
+  subpackages:
+  - proto
+- package: github.com/mitchellh/go-homedir
+  version: master
+- package: github.com/projectriff/function-controller
+  subpackages:
+  - pkg/controller
+- package: github.com/projectriff/kubernetes-crds
+  subpackages:
+  - pkg/apis/projectriff.io/v1
+  - pkg/client/listers/projectriff/v1
+- package: github.com/satori/go.uuid
+  version: v1.2.0
+- package: github.com/spf13/cobra
+  version: v0.0.1
+  subpackages:
+  - doc
+- package: github.com/spf13/pflag
+  version: v1.0.0
+- package: github.com/spf13/viper
+  version: v1.0.0
+- package: github.com/stretchr/testify
+  version: v1.2.0
+  subpackages:
+  - mock
+- package: github.com/wvanbergen/kazoo-go
+- package: golang.org/x/net
+  subpackages:
+  - context
+- package: google.golang.org/grpc
+  version: v1.9.2
+  subpackages:
+  - codes
+  - status
+- package: k8s.io/api
+  subpackages:
+  - core/v1
+  - extensions/v1beta1
+- package: k8s.io/apimachinery
+  subpackages:
+  - pkg/api/errors
+  - pkg/apis/meta/v1
+  - pkg/conversion
+  - pkg/labels
+  - pkg/runtime
+  - pkg/runtime/schema
+  - pkg/runtime/serializer
+  - pkg/types
+  - pkg/watch
+- package: k8s.io/client-go
+  version: v5.0.1
+  subpackages:
+  - discovery
+  - discovery/fake
+  - informers
+  - informers/extensions/v1beta1
+  - kubernetes
+  - listers/extensions/v1beta1
+  - rest
+  - testing
+  - tools/cache
+  - tools/clientcmd
+  - util/flowcontrol
+# Used by riff-cli, go-md2man uses dep so transitive dependencies of it need to 
+# be expressed here explicitely
+- package: github.com/cpuguy83/go-md2man
+  version: master
+- package: github.com/russross/blackfriday
+  version: v2.0.0
+testImport:
+- package: github.com/onsi/ginkgo
+  version: v1.4.0
+- package: github.com/onsi/gomega
+  version: v1.3.0
