@@ -1,0 +1,26 @@
+package: github.com/projectriff/kubernetes-crds
+import:
+- package: github.com/golang/glog
+- package: k8s.io/api
+  subpackages:
+  - core/v1
+- package: k8s.io/apimachinery
+  subpackages:
+  - pkg/api/errors
+  - pkg/apis/meta/v1
+  - pkg/conversion
+  - pkg/labels
+  - pkg/runtime
+  - pkg/runtime/schema
+  - pkg/runtime/serializer
+  - pkg/types
+  - pkg/watch
+- package: k8s.io/client-go
+  version: v5.0.1
+  subpackages:
+  - discovery
+  - discovery/fake
+  - rest
+  - testing
+  - tools/cache
+  - util/flowcontrol

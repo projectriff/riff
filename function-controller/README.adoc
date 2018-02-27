@@ -1,0 +1,68 @@
+= Function Controller image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-function-controller-container/badge[Function Controller Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-function-controller-container/builds/latest]
+
+== Purpose
+The *function controller* runs inside kubernetes and continuously monitors the *function* and *topic* custom resource
+definitions for changes. It then reacts by requesting the deployment of functions, and scales them according to new
+events being detected on their input topics.
+
+== Development
+=== Prerequisites
+The following tools are required to build this project:
+
+- `make`
+- Docker
+- https://github.com/Masterminds/glide#install[Glide] for dependency management
+
+If you intend to re-generate mocks for testing, install:
+
+- https://github.com/vektra/mockery#installation[Mockery]
+
+If you would like to run tests using the `ginkgo` command, install:
+
+- http://onsi.github.io/ginkgo/[Ginkgo]
+
+=== Get the source
+[source, bash]
+----
+cd $(go env GOPATH)   #defaults to ~/go
+git clone -o upstream https://github.com/projectriff/function-controller src/github.com/projectriff/function-controller
+----
+
+=== Building
+* To build locally (this will produce a binary named `function-controller` on _your_ machine):
++
+[source, bash]
+----
+make build
+----
+
+* To build for docker (and deploy as part of the whole https://github.com/projectriff/riff#-manual-install-of-riff[riff]
+installation):
++
+[source, bash]
+----
+make dockerize
+----
+This assumes that your docker client is correctly configured to target the daemon where you want the image built.
+
+* To run tests:
++
+[source, bash]
+----
+make test
+----
+
+* To attach a https://github.com/derekparker/delve/blob/master/Documentation/EditorIntegration.md[delve capable] debugger (such as Goland)
+to a `function-controller` running _inside_ k8s:
++
+[source, bash]
+----
+make debug-dockerize
+----
+Then expose the `2345` port as a service, using `riff/config/delve/function-controller-debug.yaml`:
++
+[source, bash]
+----
+kubectl apply -f riff/config/delve/function-controller-debug.yaml
+----
+Then you can connect the debugger through port `30102`.

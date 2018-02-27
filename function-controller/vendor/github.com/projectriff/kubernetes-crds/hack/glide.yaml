@@ -1,0 +1,4 @@
+package: github.com/projectriff/kubernetes-crds/hack
+import:
+- package: k8s.io/code-generator
+  version: release-1.8
