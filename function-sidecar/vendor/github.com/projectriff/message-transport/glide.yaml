@@ -1,0 +1,6 @@
+package: github.com/projectriff/message-transport
+import:
+- package: github.com/Shopify/sarama
+  version: ~1.15.0
+- package: github.com/bsm/sarama-cluster
+  version: ~2.1.12

@@ -1,0 +1,15 @@
+= Function Sidecar image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-function-sidecar-container/badge[Function Sidecar Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-function-sidecar-container/builds/latest]
+
+== Building
+```
+cd $GOPATH
+git clone https://github.com/projectriff/function-sidecar src/github.com/projectriff/function-sidecar
+cd src/github.com/projectriff/function-sidecar
+make dockerize
+```
+
+== Tests (including integration with Kafka)
+Assuming kafka is running locally on port 9092,
+```
+KAFKA_BROKER=localhost:9092 make test
+```
