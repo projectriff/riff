@@ -17,16 +17,16 @@
 package carrier_test
 
 import (
-	"github.com/projectriff/function-sidecar/pkg/carrier"
+	"github.com/projectriff/riff/function-sidecar/pkg/carrier"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/projectriff/message-transport/pkg/transport/mocktransport"
-	"github.com/projectriff/function-sidecar/pkg/dispatcher/mockdispatcher"
+	"github.com/projectriff/riff/message-transport/pkg/transport/mocktransport"
+	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher/mockdispatcher"
 	"github.com/stretchr/testify/mock"
 	"sync/atomic"
 	"errors"
-	"github.com/projectriff/message-transport/pkg/message"
+	"github.com/projectriff/riff/message-transport/pkg/message"
 )
 
 var _ = Describe("Carrier", func() {

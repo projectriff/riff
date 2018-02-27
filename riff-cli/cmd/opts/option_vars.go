@@ -16,7 +16,7 @@
 
 package opts
 
-import "github.com/projectriff/riff-cli/pkg/options"
+import "github.com/projectriff/riff/riff-cli/pkg/options"
 
 var (
 	InitOptions   options.InitOptions

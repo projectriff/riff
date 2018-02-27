@@ -17,7 +17,7 @@
 package core
 
 import (
-	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"bytes"
 	"text/template"
 )

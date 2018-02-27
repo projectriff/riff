@@ -17,9 +17,9 @@
 package fake
 
 import (
-	clientset "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned"
-	projectriffv1 "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned/typed/projectriff/v1"
-	fakeprojectriffv1 "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned/typed/projectriff/v1/fake"
+	clientset "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
+	projectriffv1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned/typed/projectriff/v1"
+	fakeprojectriffv1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned/typed/projectriff/v1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

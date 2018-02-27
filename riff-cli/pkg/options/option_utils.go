@@ -18,11 +18,11 @@ package options
 
 import (
 	"path/filepath"
-	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"fmt"
 	"strings"
 	"errors"
-	"github.com/projectriff/riff-cli/pkg/functions"
+	"github.com/projectriff/riff/riff-cli/pkg/functions"
 )
 
 func ImageName(opts ImageOptions) string {

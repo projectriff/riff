@@ -20,9 +20,9 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/projectriff/function-controller/mocks"
-	"github.com/projectriff/function-controller/pkg/controller"
-	"github.com/projectriff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	"github.com/projectriff/riff/function-controller/mocks"
+	"github.com/projectriff/riff/function-controller/pkg/controller"
+	"github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

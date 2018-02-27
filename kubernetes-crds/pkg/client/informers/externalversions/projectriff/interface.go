@@ -19,8 +19,8 @@
 package projectriff
 
 import (
-	internalinterfaces "github.com/projectriff/kubernetes-crds/pkg/client/informers/externalversions/internalinterfaces"
-	v1 "github.com/projectriff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1"
+	internalinterfaces "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/internalinterfaces"
+	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1"
 )
 
 // Interface provides access to each of this group's versions.

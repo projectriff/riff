@@ -20,7 +20,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/projectriff/message-transport/pkg/message"
+	"github.com/projectriff/riff/message-transport/pkg/message"
 )
 
 var _ = Describe("Wireformat", func() {

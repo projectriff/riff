@@ -17,7 +17,7 @@
 package kafka
 
 import (
-	"github.com/projectriff/message-transport/pkg/message"
+	"github.com/projectriff/riff/message-transport/pkg/message"
 	"github.com/bsm/sarama-cluster"
 	"log"
 )

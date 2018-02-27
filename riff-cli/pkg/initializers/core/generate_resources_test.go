@@ -19,7 +19,7 @@ package core
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"gopkg.in/yaml.v2"
 )
 

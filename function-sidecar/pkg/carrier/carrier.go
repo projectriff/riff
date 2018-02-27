@@ -17,8 +17,8 @@
 package carrier
 
 import (
-	dispatch "github.com/projectriff/function-sidecar/pkg/dispatcher"
-	"github.com/projectriff/message-transport/pkg/transport"
+	dispatch "github.com/projectriff/riff/function-sidecar/pkg/dispatcher"
+	"github.com/projectriff/riff/message-transport/pkg/transport"
 	"log"
 )
 

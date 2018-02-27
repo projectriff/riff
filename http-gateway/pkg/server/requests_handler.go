@@ -21,7 +21,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/projectriff/message-transport/pkg/message"
+	"github.com/projectriff/riff/message-transport/pkg/message"
 	"github.com/satori/go.uuid"
 )
 

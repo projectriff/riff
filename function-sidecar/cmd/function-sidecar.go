@@ -24,18 +24,18 @@ import (
 	"syscall"
 
 	"flag"
-	dispatch "github.com/projectriff/function-sidecar/pkg/dispatcher"
-	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc"
-	"github.com/projectriff/function-sidecar/pkg/dispatcher/http"
-	"github.com/projectriff/function-sidecar/pkg/dispatcher/pipes"
-	"github.com/projectriff/function-sidecar/pkg/dispatcher/stdio"
+	dispatch "github.com/projectriff/riff/function-sidecar/pkg/dispatcher"
+	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher/grpc"
+	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher/http"
+	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher/pipes"
+	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher/stdio"
 	"io"
 	"strings"
-	"github.com/projectriff/message-transport/pkg/transport"
-	"github.com/projectriff/message-transport/pkg/transport/kafka"
+	"github.com/projectriff/riff/message-transport/pkg/transport"
+	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
 	"github.com/bsm/sarama-cluster"
 	"github.com/Shopify/sarama"
-	"github.com/projectriff/function-sidecar/pkg/carrier"
+	"github.com/projectriff/riff/function-sidecar/pkg/carrier"
 )
 
 type stringSlice []string

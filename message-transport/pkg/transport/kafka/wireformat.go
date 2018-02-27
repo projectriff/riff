@@ -22,7 +22,7 @@ import (
 	"errors"
 
 	"github.com/Shopify/sarama"
-	"github.com/projectriff/message-transport/pkg/message"
+	"github.com/projectriff/riff/message-transport/pkg/message"
 )
 
 // This file serializes/deserializes a message.Message on a Kafka topic.

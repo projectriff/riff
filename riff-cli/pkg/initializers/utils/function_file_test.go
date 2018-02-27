@@ -19,11 +19,11 @@ package utils
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"path/filepath"
 	"os"
 	"fmt"
-	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
 )
 
 var testDataRoot = "../../../test_data"

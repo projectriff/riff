@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -21,7 +21,7 @@ import (
 	"log"
 	"net/http"
 	"fmt"
-	"github.com/projectriff/message-transport/pkg/transport"
+	"github.com/projectriff/riff/message-transport/pkg/transport"
 	"io"
 	"context"
 )

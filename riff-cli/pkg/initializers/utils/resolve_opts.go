@@ -19,7 +19,7 @@ package utils
 import (
 	"path/filepath"
 
-	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
 )
 
 func ResolveOptions(functionArtifact string, language string, opts *options.InitOptions) {

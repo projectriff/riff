@@ -19,8 +19,8 @@ package pipes
 import (
 	"bufio"
 	"errors"
-	"github.com/projectriff/function-sidecar/pkg/dispatcher"
-	"github.com/projectriff/message-transport/pkg/message"
+	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher"
+	"github.com/projectriff/riff/message-transport/pkg/message"
 	"log"
 	"os"
 	"strings"

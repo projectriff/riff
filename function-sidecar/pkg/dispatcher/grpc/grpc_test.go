@@ -26,10 +26,10 @@ import (
 	"testing"
 	"time"
 
-	gdispatcher "github.com/projectriff/function-sidecar/pkg/dispatcher/grpc"
-	"github.com/projectriff/function-sidecar/pkg/dispatcher/grpc/function"
+	gdispatcher "github.com/projectriff/riff/function-sidecar/pkg/dispatcher/grpc"
+	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher/grpc/function"
 	"google.golang.org/grpc"
-	"github.com/projectriff/message-transport/pkg/message"
+	"github.com/projectriff/riff/message-transport/pkg/message"
 )
 
 func init() {

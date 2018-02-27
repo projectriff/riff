@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/projectriff/riff-cli/global"
+	"github.com/projectriff/riff/riff-cli/global"
 )
 
 // versionCmd represents the version command

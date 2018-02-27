@@ -23,12 +23,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/projectriff/riff-cli/cmd/utils"
-	"github.com/projectriff/riff-cli/pkg/functions"
-	"github.com/projectriff/riff-cli/pkg/ioutils"
-	"github.com/projectriff/riff-cli/pkg/kubectl"
-	"github.com/projectriff/riff-cli/pkg/options"
-	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff/riff-cli/pkg/functions"
+	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/cobra"
 )
 

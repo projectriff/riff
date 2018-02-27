@@ -18,12 +18,12 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/spf13/pflag"
-	"github.com/projectriff/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
 	"os"
-	"github.com/projectriff/riff-cli/cmd/utils"
-	"github.com/projectriff/riff-cli/cmd/opts"
+	"github.com/projectriff/riff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff/riff-cli/cmd/opts"
 )
 
 var createChainCmd = utils.CommandChain(initCmd, buildCmd, applyCmd)

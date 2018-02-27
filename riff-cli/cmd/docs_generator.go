@@ -18,9 +18,9 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/cobra/doc"
-	"github.com/projectriff/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
 	"os"
 )
 

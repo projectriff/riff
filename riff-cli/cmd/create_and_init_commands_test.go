@@ -19,13 +19,13 @@ package cmd
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
 
 	"os"
-	"github.com/projectriff/riff-cli/pkg/osutils"
-	"github.com/projectriff/riff-cli/cmd/opts"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/cmd/opts"
 	"fmt"
-	"github.com/projectriff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff/riff-cli/cmd/utils"
 )
 
 func TestCreateCommandImplicitPath(t *testing.T) {

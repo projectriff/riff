@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/projectriff/riff-cli/pkg/options"
-	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 )
 
 var supportedExtensions = []string{"js", "json", "java", "py", "sh"}

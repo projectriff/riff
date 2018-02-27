@@ -26,12 +26,12 @@ import (
 	"math/rand"
 	"time"
 	"github.com/Shopify/sarama"
-	"github.com/projectriff/message-transport/pkg/message"
-	"github.com/projectriff/message-transport/pkg/transport/kafka"
-	"github.com/projectriff/function-sidecar/pkg/carrier"
-	dispatch "github.com/projectriff/function-sidecar/pkg/dispatcher"
-	dispatchhttp "github.com/projectriff/function-sidecar/pkg/dispatcher/http"
-	"github.com/projectriff/message-transport/pkg/transport"
+	"github.com/projectriff/riff/message-transport/pkg/message"
+	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
+	"github.com/projectriff/riff/function-sidecar/pkg/carrier"
+	dispatch "github.com/projectriff/riff/function-sidecar/pkg/dispatcher"
+	dispatchhttp "github.com/projectriff/riff/function-sidecar/pkg/dispatcher/http"
+	"github.com/projectriff/riff/message-transport/pkg/transport"
 )
 
 const sourceMsg = `World`

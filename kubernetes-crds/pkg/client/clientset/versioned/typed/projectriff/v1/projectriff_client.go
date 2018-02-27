@@ -17,8 +17,8 @@
 package v1
 
 import (
-	v1 "github.com/projectriff/kubernetes-crds/pkg/apis/projectriff.io/v1"
-	"github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned/scheme"
+	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	"github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned/scheme"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"
 )

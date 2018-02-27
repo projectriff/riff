@@ -22,8 +22,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/projectriff/riff-cli/pkg/options"
-	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 )
 
 const (

@@ -19,8 +19,8 @@ package cmd
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"github.com/projectriff/riff-cli/pkg/osutils"
-	"github.com/projectriff/riff-cli/cmd/opts"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/cmd/opts"
 )
 
 func TestBuildCommandImplicitPath(t *testing.T) {

@@ -18,7 +18,7 @@ package dispatcher
 
 import (
 	"log"
-	"github.com/projectriff/message-transport/pkg/message"
+	"github.com/projectriff/riff/message-transport/pkg/message"
 )
 
 type wrapper struct {

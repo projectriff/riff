@@ -20,9 +20,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/projectriff/riff-cli/pkg/kubectl"
-	"github.com/projectriff/riff-cli/pkg/ioutils"
-	"github.com/projectriff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
+	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff/riff-cli/cmd/utils"
 )
 
 type ListOptions struct {

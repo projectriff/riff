@@ -19,7 +19,7 @@ package kafka
 import (
 	kazoo "github.com/wvanbergen/kazoo-go"
 	"log"
-	"github.com/projectriff/topic-controller/pkg/topic/provisioner"
+	"github.com/projectriff/riff/topic-controller/pkg/topic/provisioner"
 )
 
 type KafkaProvisioner struct {

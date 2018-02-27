@@ -20,15 +20,15 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"strings"
-	"github.com/projectriff/riff-cli/pkg/docker"
-	"github.com/projectriff/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff/riff-cli/pkg/docker"
+	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
 	"os"
-	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"path/filepath"
-	"github.com/projectriff/riff-cli/cmd/utils"
-	"github.com/projectriff/riff-cli/cmd/opts"
+	"github.com/projectriff/riff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff/riff-cli/cmd/opts"
 )
 
 var buildCmd = &cobra.Command{

@@ -21,12 +21,12 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/projectriff/riff-cli/pkg/initializers/java"
-	"github.com/projectriff/riff-cli/pkg/initializers/node"
-	"github.com/projectriff/riff-cli/pkg/initializers/python"
-	"github.com/projectriff/riff-cli/pkg/initializers/shell"
-	"github.com/projectriff/riff-cli/pkg/initializers/utils"
-	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/initializers/java"
+	"github.com/projectriff/riff/riff-cli/pkg/initializers/node"
+	"github.com/projectriff/riff/riff-cli/pkg/initializers/python"
+	"github.com/projectriff/riff/riff-cli/pkg/initializers/shell"
+	"github.com/projectriff/riff/riff-cli/pkg/initializers/utils"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
 )
 
 var supportedExtensions = []string{"js", "json", "jar", "py", "sh"}

@@ -19,10 +19,10 @@
 package v1
 
 import (
-	projectriff_io_v1 "github.com/projectriff/kubernetes-crds/pkg/apis/projectriff.io/v1"
-	versioned "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned"
-	internalinterfaces "github.com/projectriff/kubernetes-crds/pkg/client/informers/externalversions/internalinterfaces"
-	v1 "github.com/projectriff/kubernetes-crds/pkg/client/listers/projectriff/v1"
+	projectriff_io_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	versioned "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/internalinterfaces"
+	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/listers/projectriff/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"

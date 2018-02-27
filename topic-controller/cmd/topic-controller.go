@@ -19,9 +19,9 @@ package main
 import (
 	"time"
 
-	riffcs "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned"
-	informers "github.com/projectriff/kubernetes-crds/pkg/client/informers/externalversions"
-	"github.com/projectriff/topic-controller/pkg/topic/provisioner/kafka"
+	riffcs "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
+	informers "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions"
+	"github.com/projectriff/riff/topic-controller/pkg/topic/provisioner/kafka"
 
 	"flag"
 	"os"
@@ -29,8 +29,8 @@ import (
 	"syscall"
 
 	"github.com/golang/glog"
-	informersV1 "github.com/projectriff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1"
-	"github.com/projectriff/topic-controller/pkg/topic"
+	informersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1"
+	"github.com/projectriff/riff/topic-controller/pkg/topic"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"log"

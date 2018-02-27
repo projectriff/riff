@@ -19,9 +19,9 @@
 package externalversions
 
 import (
-	versioned "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned"
-	internalinterfaces "github.com/projectriff/kubernetes-crds/pkg/client/informers/externalversions/internalinterfaces"
-	projectriff "github.com/projectriff/kubernetes-crds/pkg/client/informers/externalversions/projectriff"
+	versioned "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/internalinterfaces"
+	projectriff "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"

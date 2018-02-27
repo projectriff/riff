@@ -19,7 +19,7 @@
 package internalinterfaces
 
 import (
-	versioned "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned"
+	versioned "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	cache "k8s.io/client-go/tools/cache"
 	time "time"

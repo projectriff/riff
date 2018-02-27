@@ -4,7 +4,7 @@ package kafka
 import (
 	"github.com/Shopify/sarama"
 	"log"
-	"github.com/projectriff/message-transport/pkg/message"
+	"github.com/projectriff/riff/message-transport/pkg/message"
 )
 
 func NewProducer(brokerAddrs []string) (*producer, error) {

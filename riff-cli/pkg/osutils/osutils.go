@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/projectriff/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
 )
 
 func GetCWD() string {

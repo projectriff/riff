@@ -19,8 +19,8 @@ package main
 import (
 	"strings"
 
-	riffcs "github.com/projectriff/kubernetes-crds/pkg/client/clientset/versioned"
-	informers "github.com/projectriff/kubernetes-crds/pkg/client/informers/externalversions"
+	riffcs "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
+	informers "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"flag"
@@ -30,8 +30,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/projectriff/function-controller/pkg/controller"
-	riffInformersV1 "github.com/projectriff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1"
+	"github.com/projectriff/riff/function-controller/pkg/controller"
+	riffInformersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1"
 	k8sInformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/informers/extensions/v1beta1"
 	"k8s.io/client-go/kubernetes"

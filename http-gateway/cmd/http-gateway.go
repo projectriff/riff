@@ -25,8 +25,8 @@ import (
 	"time"
 
 	"github.com/bsm/sarama-cluster"
-	"github.com/projectriff/http-gateway/pkg/server"
-	"github.com/projectriff/message-transport/pkg/transport/kafka"
+	"github.com/projectriff/riff/http-gateway/pkg/server"
+	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
 )
 
 func main() {

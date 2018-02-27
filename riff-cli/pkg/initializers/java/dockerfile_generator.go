@@ -18,8 +18,8 @@ package java
 
 import (
 	"path/filepath"
-	"github.com/projectriff/riff-cli/pkg/options"
-	"github.com/projectriff/riff-cli/pkg/initializers/core"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/initializers/core"
 )
 
 var dockerfileTemplate = `

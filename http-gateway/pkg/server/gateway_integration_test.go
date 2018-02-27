@@ -26,9 +26,9 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/projectriff/http-gateway/pkg/server"
-	"github.com/projectriff/message-transport/pkg/message"
-	"github.com/projectriff/message-transport/pkg/transport/mocktransport"
+	"github.com/projectriff/riff/http-gateway/pkg/server"
+	"github.com/projectriff/riff/message-transport/pkg/message"
+	"github.com/projectriff/riff/message-transport/pkg/transport/mocktransport"
 	"github.com/stretchr/testify/mock"
 )
 

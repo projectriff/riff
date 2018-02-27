@@ -21,9 +21,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/projectriff/kubernetes-crds/pkg/apis/projectriff.io/v1"
-	informersV1 "github.com/projectriff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1"
-	"github.com/projectriff/topic-controller/pkg/topic/provisioner"
+	"github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	informersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1"
+	"github.com/projectriff/riff/topic-controller/pkg/topic/provisioner"
 	"k8s.io/client-go/tools/cache"
 	"time"
 	"context"

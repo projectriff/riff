@@ -17,7 +17,7 @@ package functions
 
 import (
 	"path/filepath"
-	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"errors"
 	"fmt"
 )

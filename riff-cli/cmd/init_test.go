@@ -19,11 +19,11 @@ package cmd
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
-	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"fmt"
 	"os"
 	"path/filepath"
-	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
 )
 
 func TestValidateDefaultFunctionResources(t *testing.T) {

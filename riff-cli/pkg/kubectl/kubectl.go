@@ -17,7 +17,7 @@
 package kubectl
 
 import (
-	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"time"
 )
 

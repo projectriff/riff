@@ -24,12 +24,12 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/projectriff/riff-cli/pkg/kubectl"
-	"github.com/projectriff/riff-cli/pkg/ioutils"
-	"github.com/projectriff/riff-cli/pkg/minikube"
-	"github.com/projectriff/riff-cli/pkg/jsonpath"
-	"github.com/projectriff/riff-cli/pkg/osutils"
-	"github.com/projectriff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
+	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
+	"github.com/projectriff/riff/riff-cli/pkg/minikube"
+	"github.com/projectriff/riff/riff-cli/pkg/jsonpath"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/spf13/viper"
 )
 

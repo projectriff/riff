@@ -17,7 +17,7 @@
 package java
 
 import (
-	"github.com/projectriff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"fmt"
 	"testing"
 	"github.com/stretchr/testify/assert"

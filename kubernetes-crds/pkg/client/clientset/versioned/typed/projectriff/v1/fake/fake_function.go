@@ -17,7 +17,7 @@
 package fake
 
 import (
-	projectriff_io_v1 "github.com/projectriff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	projectriff_io_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

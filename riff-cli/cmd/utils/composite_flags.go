@@ -17,12 +17,12 @@
 package utils
 
 import (
-	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/pflag"
-	"github.com/projectriff/riff-cli/pkg/options"
-	"github.com/projectriff/riff-cli/global"
+	"github.com/projectriff/riff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/global"
 	"github.com/spf13/cobra"
-	"github.com/projectriff/riff-cli/cmd/opts"
+	"github.com/projectriff/riff/riff-cli/cmd/opts"
 	"github.com/spf13/viper"
 )
 

@@ -18,7 +18,7 @@
 package transport
 
 import (
-	"github.com/projectriff/message-transport/pkg/message"
+	"github.com/projectriff/riff/message-transport/pkg/message"
 )
 
 //go:generate mockery -name=Producer -output mocktransport -outpkg mocktransport
