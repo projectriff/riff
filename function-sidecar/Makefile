@@ -14,8 +14,8 @@ clean:
 test:
 	go test -v ./...
 
-dockerize: $(GO_SOURCES) vendor
-	docker build . -t projectriff/function-sidecar:$(TAG)
+dockerize: $(GO_SOURCES)
+	docker build .. --build-arg COMPONENT=function-sidecar -t projectriff/function-sidecar:$(TAG)
 
 pkg/dispatcher/grpc/function/function.pb.go: ../function-proto/function.proto
 	protoc -I ../function-proto ../function-proto/function.proto --go_out=plugins=grpc:pkg/dispatcher/grpc/function

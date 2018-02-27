@@ -22,7 +22,7 @@ clean:
 	rm -f $(OUTPUT)
 
 dockerize: $(GO_SOURCES)
-	docker build . -t projectriff/function-controller:$(TAG)
+	docker build .. --build-arg COMPONENT=function-controller -t projectriff/function-controller:$(TAG)
 
 debug-dockerize: $(GO_SOURCES)
 	# Need to remove probes as delve starts app in paused state

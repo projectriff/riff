@@ -20,7 +20,7 @@ clean:
 	rm -f $(OUTPUT)
 
 dockerize: $(GO_SOURCES)
-	docker build . -t projectriff/http-gateway:$(TAG)
+	docker build .. --build-arg COMPONENT=http-gateway -t projectriff/http-gateway:$(TAG)
 
 debug-dockerize: $(GO_SOURCES)
 	# Need to remove probes as delve starts app in paused state
