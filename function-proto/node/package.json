@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/projectriff/function-proto.git"
+    "url": "git+https://github.com/projectriff/riff.git"
   },
   "keywords": [
     "projectriff",
@@ -21,9 +21,9 @@
   "author": "Scott Andrews",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/projectriff/function-proto/issues"
+    "url": "https://github.com/projectriff/riff/issues"
   },
-  "homepage": "https://github.com/projectriff/function-proto#readme",
+  "homepage": "https://github.com/projectriff/riff#readme",
   "peerDependencies": {
     "grpc": "^1.8.4"
   },

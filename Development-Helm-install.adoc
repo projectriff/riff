@@ -4,11 +4,13 @@
 
 * A running 1.7+ Kubernetes cluster
 
-* Kubernetes CLI `kubectl` installed and on the local system PATH. We recommend using the same version or later as the Kubernetes cluster you are using.
+* Kubernetes CLI `kubectl` installed and on the local system PATH.
+We recommend using the same version or later as the Kubernetes cluster you are using.
 
 * Helm, you need helm installed, see instructions link:Getting-Started.adoc#helm[here]. 
 
-* Docker, you only need Docker when building custom versions of riff components or the samples. We have used Docker version 17.x or later.
+* Docker, you only need Docker when building custom versions of riff components or the samples.
+We have used Docker version 17.x or later.
 
 == Add the riff repository to your helm configuration
 
@@ -32,7 +34,9 @@ helm search riff -l
 
 == [[devel]]Install a riff development version on Minikube
 
-Starting with the 0.0.4 version we have separated the Kafka installation from the riff chart. This requires an extra step of installing Kafka in order yo use riff. You can use the single-node Kafka chart provided by riff or the three-node kafka/zookeeper service provided by the Kubeapps.
+Starting with the 0.0.4 version we have separated the Kafka installation from the riff chart.
+This requires an extra step of installing Kafka in order yo use riff.
+You can use the single-node Kafka chart provided by riff or the three-node kafka/zookeeper service provided by the Kubeapps.
 
 === Install Kafka chart
 
@@ -66,7 +70,8 @@ Just be aware that this chart requires significantly more resources to run.
 
 === Install "devel" version of riff chart
 
-Install the development version of the riff chart in the default namespace. When using Minikube configure the httpGateway to use `NodePort` with:
+Install the development version of the riff chart in the default namespace.
+When using Minikube configure the httpGateway to use `NodePort` with:
 
 [source, bash]
 ----
@@ -82,19 +87,25 @@ Alternatively, install riff in the `riff-system` namespace:
 helm install --name control --namespace riff-system riffrepo/riff --devel --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
-If you do this you need to provide the `--namespace riff-system` option for the `riff publish` command since the `http-gateway` now runs in the `-riff-system` namespace.
+If you do this you need to provide the `--namespace riff-system` option for the `riff publish` command
+since the `http-gateway` now runs in the `-riff-system` namespace.
 ====
 
 [NOTE]
 ====
-For a cluster that supports `LoadBalancer` leave out the `--set httpGateway.service.type=NodePort` option. For a cluster that uses RBAC leave out the `--set rbac.create=false` option.
+For a cluster that supports `LoadBalancer` leave out the `--set httpGateway.service.type=NodePort` option.
+For a cluster that uses RBAC leave out the `--set rbac.create=false` option.
 ====
 
 === Customizing the Installation
 
-The Helm chart contains a https://github.com/projectriff/helm-charts/blob/master/riff/values.yaml[values.yaml] file that specifies the default values used when installing the chart. They can all be overridden by using the flag `--set` as described in the documentation for https://docs.helm.sh/helm/#helm-install[Helm Install].
+The Helm chart contains a https://github.com/projectriff/riff/blob/master/helm-charts/riff/values.yaml[values.yaml]
+file that specifies the default values used when installing the chart.
+They can all be overridden by using the flag `--set` as described in the documentation
+for https://docs.helm.sh/helm/#helm-install[Helm Install].
 
-Some values that you might want to override are listed in the https://github.com/projectriff/helm-charts/blob/master/riff/README.md#configuration[Configuration section of the README].
+Some values that you might want to override are listed in the
+https://github.com/projectriff/riff/blob/master/helm-charts/riff/README.md#configuration[Configuration section of the README].
 
 The following are some scenarios for customizing your installation:
 
@@ -111,7 +122,8 @@ helm install riffrepo/riff --name control --set functionController.image.tag=0.0
 
 * Overriding the image repository and version tag of a riff component with a custom built component image:
 +
-To set the image repository to `mycustom/function-controller` and the version tag to `0.0.5-test.1` for the `functionController`, use something like the following:
+To set the image repository to `mycustom/function-controller` and the version tag to `0.0.5-test.1` for
+the `functionController`, use something like the following:
 +
 [source, bash]
 ----
@@ -120,7 +132,8 @@ helm install riffrepo/riff --name control --set functionController.image.reposit
 
 * Overriding the version of the `sidecar` component:
 +
-The `sidecar` component is only used by the `functionController`, so to set the version for the `sidecar` to `0.0.5-build.1` use something like the following:
+The `sidecar` component is only used by the `functionController`, so to set the version for
+the `sidecar` to `0.0.5-build.1` use something like the following:
 +
 [source, bash]
 ----
@@ -145,7 +158,8 @@ eval $(minikube docker-env)
 
 Build the riff components following the link:README.adoc#manual[manual build and deploy] instructions.
 
-To install locally built Docker images with Helm on minikube, use the `values-snapshot.yaml` file, which overrides image tags with snapshot versions:
+To install locally built Docker images with Helm on minikube, use the `values-snapshot.yaml` file,
+which overrides image tags with snapshot versions:
 
 [source, bash]
 ----
