@@ -21,12 +21,12 @@ cd $(go env GOPATH)/github.com/projectriff/riff/message-transport
 
 === Building
 
-This library is a dependency of the
+This component is a dependency of the
 https://github.com/projectriff/riff/tree/master/http-gateway[http-gateway]
 and https://github.com/projectriff/riff/tree/master/function-sidecar[function-sidecar] components
 and is built by them.
 
-You can check that the code in this library compiles cleanly by issuing:
+You can check that the code in this component compiles cleanly by issuing:
 [source, bash]
 ----
 make build

@@ -46,9 +46,8 @@ make dockerize
 ----
 This assumes that your docker client is correctly configured to target the daemon where you want the image built.
 
-* To run tests:
+* To run tests, assuming kafka is running locally on port 9092:
 +
-Assuming kafka is running locally on port 9092,
 [source, bash]
 ----
 KAFKA_BROKER=localhost:9092 make test
