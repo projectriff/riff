@@ -1,15 +1,56 @@
 = Function Sidecar image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-function-sidecar-container/badge[Function Sidecar Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-function-sidecar-container/builds/latest]
 
-== Building
-```
-cd $GOPATH
-git clone https://github.com/projectriff/function-sidecar src/github.com/projectriff/function-sidecar
-cd src/github.com/projectriff/function-sidecar
-make dockerize
-```
+== Purpose
+The *function sidecar* runs alongside the function container in the function pod(s) and takes care of consuming input
+events from the broker. It then forwards those events to the function (via the *invoker*) using gRPC (recommended)
+or other "dispatcher" mechanisms such as `http` (legacy). Likewise, the sidecar marshalls function output back to the
+broker.
 
-== Tests (including integration with Kafka)
+== Development
+=== Prerequisites
+The following tools are required to build this project:
+
+- `make`
+- Docker
+- https://github.com/Masterminds/glide#install[Glide] for dependency management
+
+If you intend to re-generate mocks for testing, install:
+
+- https://github.com/vektra/mockery#installation[Mockery]
+
+If you would like to run tests using the `ginkgo` command, install:
+
+- http://onsi.github.io/ginkgo/[Ginkgo]
+
+=== Get the source
+[source, bash]
+----
+go get github.com/projectriff/riff
+cd $(go env GOPATH)/github.com/projectriff/riff/function-sidecar
+----
+
+=== Building
+* To build locally (this will produce a binary named `function-sidecar` on _your_ machine):
++
+[source, bash]
+----
+make build
+----
+
+* To build for docker (and deploy as part of the whole https://github.com/projectriff/riff#-manual-install-of-riff[riff]
+installation):
++
+[source, bash]
+----
+make dockerize
+----
+This assumes that your docker client is correctly configured to target the daemon where you want the image built.
+
+* To run tests:
++
 Assuming kafka is running locally on port 9092,
-```
+[source, bash]
+----
 KAFKA_BROKER=localhost:9092 make test
-```
+----
+
