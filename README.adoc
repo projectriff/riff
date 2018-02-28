@@ -1,4 +1,4 @@
-= riff is for functions
+= riff is for functions image:https://travis-ci.org/projectriff/riff.svg?branch=master["Build Status", link="https://travis-ci.org/projectriff/riff"]
 
 image::logo.png[riff logo, link=https://projectriff.io/]
 A FaaS for Kubernetes
