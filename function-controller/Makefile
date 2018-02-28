@@ -11,12 +11,11 @@ test:
 $(OUTPUT): $(GO_SOURCES)
 	go build cmd/function-controller.go
 
-#TODO
-#gen-mocks:
-#	mockery -name 'TopicInformer|FunctionInformer' -dir vendor/github.com/projectriff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1
-#	mockery -name 'SharedIndexInformer' -dir vendor/k8s.io/client-go/tools/cache
-#	mockery -name 'DeploymentInformer' -dir vendor/k8s.io/client-go/informers/extensions/v1beta1
-#	mockery -name 'LagTracker|Deployer' -dir pkg/controller
+gen-mocks:
+	mockery -name 'TopicInformer|FunctionInformer' -dir ../kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1
+	mockery -name 'SharedIndexInformer' -dir ../vendor/k8s.io/client-go/tools/cache
+	mockery -name 'DeploymentInformer' -dir ../vendor/k8s.io/client-go/informers/extensions/v1beta1
+	mockery -name 'LagTracker|Deployer' -dir pkg/controller
 
 clean:
 	rm -f $(OUTPUT)
