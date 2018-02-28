@@ -63,6 +63,10 @@ var _ = Describe("HTTP Gateway", func() {
 	JustBeforeEach(func() {
 		port = 1024 + rand.Intn(32768-1024)
 		gw = server.New(port, mockProducer, mockConsumer, timeout)
+
+		gw.Run(done)
+
+		waitForHttpGatewayToBeReady(port)
 	})
 
 	AfterEach(func() {
@@ -70,7 +74,6 @@ var _ = Describe("HTTP Gateway", func() {
 	})
 
 	It("should request/reply OK", func() {
-		gw.Run(done)
 
 		mockProducer.On("Send", "foo", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			defer GinkgoRecover()
@@ -93,11 +96,9 @@ var _ = Describe("HTTP Gateway", func() {
 		Expect(resp.Header.Get("Content-Type")).To(Equal("bag/plastic"))
 
 		defer resp.Body.Close()
-
 	})
 
 	It("should accept messages and fire&forget", func() {
-		gw.Run(done)
 
 		mockProducer.On("Send", "bar", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			defer GinkgoRecover()
@@ -112,7 +113,6 @@ var _ = Describe("HTTP Gateway", func() {
 		Expect(resp.StatusCode).To(Equal(200))
 
 		defer resp.Body.Close()
-
 	})
 })
 
@@ -126,10 +126,26 @@ func doMessage(port int, topic string, body io.Reader, headerKV ...string) *http
 
 func post(port int, path string, body io.Reader, headerKV ...string) *http.Response {
 	client := http.Client{}
-	req, _ := http.NewRequest("POST", fmt.Sprintf("http://localhost:%v%v", port, path), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("http://localhost:%v%v", port, path), body)
+	Expect(err).ToNot(HaveOccurred())
+
 	for i := 0; i < len(headerKV); i += 2 {
 		req.Header.Add(headerKV[i], headerKV[i+1])
 	}
-	resp, _ := client.Do(req)
+	resp, err := client.Do(req)
+	Expect(err).ToNot(HaveOccurred())
+
 	return resp
+}
+
+func waitForHttpGatewayToBeReady(port int) {
+	timeoutDuration := time.Second * 10
+	pollingInterval := time.Millisecond * 100
+
+	url := fmt.Sprintf("http://localhost:%d/application/status", port)
+
+	Eventually(func() error {
+		_, err := http.Get(url)
+		return err
+	}, timeoutDuration, pollingInterval).Should(Succeed())
 }
