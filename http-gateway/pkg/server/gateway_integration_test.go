@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
-	"net"
 	"net/http"
 	"time"
 
@@ -67,7 +66,7 @@ var _ = Describe("HTTP Gateway", func() {
 
 		gw.Run(done)
 
-		waitForHttpGatewayToBeReady()
+		waitForHttpGatewayToBeReady(port)
 	})
 
 	AfterEach(func() {
@@ -143,18 +142,11 @@ func post(port int, path string, body io.Reader, headerKV ...string) *http.Respo
 	return resp
 }
 
-func waitForHttpGatewayToBeReady() {
-	attempts := 20
-	durationBetweenAttempts := time.Millisecond * 100
+func waitForHttpGatewayToBeReady(port int) {
+	url := fmt.Sprintf("http://localhost:%d", port)
 
-	for i := 0; i < attempts; i++ {
-		_, err := net.Dial("tcp", ":http")
-		if err != nil {
-			fmt.Print(".")
-			time.Sleep(durationBetweenAttempts)
-			continue
-		}
-
-		break
-	}
+	Eventually(func() error {
+		_, err := http.Get(url)
+		return err
+	}).Should(Succeed())
 }
