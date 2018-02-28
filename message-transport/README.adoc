@@ -15,17 +15,18 @@ The code in this repository is written in Go.
 === Get the source
 [source, bash]
 ----
-cd $(go env GOPATH)
-git clone -o upstream https://github.com/projectriff/message-transport src/github.com/projectriff/message-transport
+go get github.com/projectriff/riff
+cd $(go env GOPATH)/github.com/projectriff/riff/message-transport
 ----
 
 === Building
 
-This repository is a dependency of the https://github.com/projectriff/http-gateway[http-gateway]
-and https://github.com/projectriff/function-sidecar[function-sidecar] repositories
+This library is a dependency of the
+https://github.com/projectriff/riff/tree/master/http-gateway[http-gateway]
+and https://github.com/projectriff/riff/tree/master/function-sidecar[function-sidecar] components
 and is built by them.
 
-You can check that the code in this repository compiles cleanly by issuing:
+You can check that the code in this library compiles cleanly by issuing:
 [source, bash]
 ----
 make build
