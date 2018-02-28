@@ -15,13 +15,6 @@ import:
   - proto
 - package: github.com/mitchellh/go-homedir
   version: master
-- package: github.com/projectriff/function-controller
-  subpackages:
-  - pkg/controller
-- package: github.com/projectriff/kubernetes-crds
-  subpackages:
-  - pkg/apis/projectriff.io/v1
-  - pkg/client/listers/projectriff/v1
 - package: github.com/satori/go.uuid
   version: v1.2.0
 - package: github.com/spf13/cobra
