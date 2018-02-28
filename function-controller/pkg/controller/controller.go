@@ -191,7 +191,7 @@ func (c *ctrl) onFunctionUpdated(oldFn *v1.Function, newFn *v1.Function) {
 		c.lagTracker.BeginTracking(Subscription{Topic: newFn.Spec.Input, Group: newFn.Name})
 	}
 
-	err := c.deployer.Update(newFn, 0 /*int(c.actualReplicas[fnKey])*/) // See https://github.com/projectriff/function-controller/issues/17
+	err := c.deployer.Update(newFn, int(c.actualReplicas[fnKey]))
 	if err != nil {
 		log.Printf("Error %v", err)
 	}
