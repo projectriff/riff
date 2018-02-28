@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
+	"net"
 	"net/http"
 	"time"
 
@@ -63,6 +64,10 @@ var _ = Describe("HTTP Gateway", func() {
 	JustBeforeEach(func() {
 		port = 1024 + rand.Intn(32768-1024)
 		gw = server.New(port, mockProducer, mockConsumer, timeout)
+
+		gw.Run(done)
+
+		waitForHttpGatewayToBeReady()
 	})
 
 	AfterEach(func() {
@@ -70,7 +75,6 @@ var _ = Describe("HTTP Gateway", func() {
 	})
 
 	It("should request/reply OK", func() {
-		gw.Run(done)
 
 		mockProducer.On("Send", "foo", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			defer GinkgoRecover()
@@ -79,8 +83,8 @@ var _ = Describe("HTTP Gateway", func() {
 				message.Headers{server.CorrelationId: msg.Headers()[server.CorrelationId],
 					"Content-Type": []string{"bag/plastic"},
 				})
-			Expect(msg.Headers()["Content-Type"]).To(Equal([]string{"text/solid"}))
-			Expect(msg.Headers()["Not-Propagated-Header"]).To(BeNil())
+			Eventually(msg.Headers()["Content-Type"]).Should(Equal([]string{"text/solid"}))
+			Eventually(msg.Headers()["Not-Propagated-Header"]).Should(BeNil())
 		})
 
 		resp := doRequest(port, "foo", bytes.NewBufferString("world"), "Content-Type", "text/solid", "Not-Propagated-Header", "secret")
@@ -88,31 +92,28 @@ var _ = Describe("HTTP Gateway", func() {
 		b := make([]byte, 11)
 		resp.Body.Read(b)
 
-		Expect(b).To(Equal([]byte("hello world")))
-		Expect(resp.Header.Get(server.CorrelationId)).To(BeZero())
-		Expect(resp.Header.Get("Content-Type")).To(Equal("bag/plastic"))
+		Eventually(b).Should(Equal([]byte("hello world")))
+		Eventually(resp.Header.Get(server.CorrelationId)).Should(BeZero())
+		Eventually(resp.Header.Get("Content-Type")).Should(Equal("bag/plastic"))
 
 		defer resp.Body.Close()
-
 	})
 
 	It("should accept messages and fire&forget", func() {
-		gw.Run(done)
 
 		mockProducer.On("Send", "bar", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			defer GinkgoRecover()
 			msg := args[1].(message.Message)
-			Expect(msg.Payload()).To(Equal([]byte("world")))
-			Expect(msg.Headers()["Content-Type"]).To(Equal([]string{"text/solid"}))
-			Expect(msg.Headers()["Not-Propagated-Header"]).To(BeNil())
+			Eventually(msg.Payload()).Should(Equal([]byte("world")))
+			Eventually(msg.Headers()["Content-Type"]).Should(Equal([]string{"text/solid"}))
+			Eventually(msg.Headers()["Not-Propagated-Header"]).Should(BeNil())
 		})
 
 		resp := doMessage(port, "bar", bytes.NewBufferString("world"), "Content-Type", "text/solid", "Not-Propagated-Header", "secret")
 
-		Expect(resp.StatusCode).To(Equal(200))
+		Eventually(resp.StatusCode).Should(Equal(200))
 
 		defer resp.Body.Close()
-
 	})
 })
 
@@ -126,10 +127,34 @@ func doMessage(port int, topic string, body io.Reader, headerKV ...string) *http
 
 func post(port int, path string, body io.Reader, headerKV ...string) *http.Response {
 	client := http.Client{}
-	req, _ := http.NewRequest("POST", fmt.Sprintf("http://localhost:%v%v", port, path), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("http://localhost:%v%v", port, path), body)
+	if err != nil {
+		panic(err)
+	}
+
 	for i := 0; i < len(headerKV); i += 2 {
 		req.Header.Add(headerKV[i], headerKV[i+1])
 	}
-	resp, _ := client.Do(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+
 	return resp
+}
+
+func waitForHttpGatewayToBeReady() {
+	attempts := 20
+	durationBetweenAttempts := time.Millisecond * 100
+
+	for i := 0; i < attempts; i++ {
+		_, err := net.Dial("tcp", ":http")
+		if err != nil {
+			fmt.Print(".")
+			time.Sleep(durationBetweenAttempts)
+			continue
+		}
+
+		break
+	}
 }
