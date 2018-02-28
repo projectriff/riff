@@ -24,8 +24,8 @@ If you would like to run tests using the `ginkgo` command, install:
 === Get the source
 [source, bash]
 ----
-cd $(go env GOPATH)   #defaults to ~/go
-git clone -o upstream https://github.com/projectriff/topic-controller src/github.com/projectriff/topic-controller
+go get github.com/projectriff/riff
+cd $(go env GOPATH)/github.com/projectriff/riff/topic-controller
 ----
 
 === Building
