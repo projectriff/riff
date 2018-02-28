@@ -1,6 +1,6 @@
 .PHONY: build clean test dockerize debug-dockerize kubectl-apply
 OUTPUT = topic-controller
-TAG = 0.0.5-snapshot
+TAG ?= $(shell cat ../VERSION)
 
 GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
 

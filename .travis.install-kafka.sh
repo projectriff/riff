@@ -1,4 +1,8 @@
-#!/bin/sh
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
 
 sudo apt-get -qq update
 sudo apt-get install -y default-jre zookeeperd

@@ -1,7 +1,7 @@
 .PHONY: build clean dockerize gen-mocks test kubectl-apply
 OUTPUT = function-controller
 GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
-TAG = 0.0.5-snapshot
+TAG ?= $(shell cat ../VERSION)
 
 build: $(OUTPUT)
 

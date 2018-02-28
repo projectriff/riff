@@ -1,7 +1,7 @@
 .PHONY: build clean grpc dockerize test
 OUTPUT = function-sidecar
 GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
-TAG = 0.0.5-snapshot
+TAG ?= $(shell cat ../VERSION)
 
 build: $(OUTPUT)
 

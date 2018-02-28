@@ -4,19 +4,34 @@ go:
 script: make test
 matrix:
   include:
-    - before_script: cd function-controller
-    - sudo: required
+    - stage: test
+      before_script: cd function-controller
+    - stage: test
+      sudo: required
       env:
         - KAFKA_BROKER=localhost:9092
       before_install:
         - ./.travis.install-kafka.sh
       before_script: cd function-sidecar
-    - before_script: cd http-gateway
-    - sudo: required
+    - stage: test
+      before_script: cd http-gateway
+    - stage: test
+      sudo: required
       env:
         - KAFKA_BROKERS=localhost:9092
       before_install:
         - ./.travis.install-kafka.sh
       before_script: cd message-transport
-    - before_script: cd riff-cli
-    - before_script: cd topic-controller
+    - stage: test
+      before_script: cd riff-cli
+    - stage: test
+      before_script: cd topic-controller
+    - stage: publish
+      sudo: required
+      services:
+      - docker
+      script: ./.travis.docker-push.sh
+stages:
+  - test
+  - name: publish
+    if: branch = master AND type = push
