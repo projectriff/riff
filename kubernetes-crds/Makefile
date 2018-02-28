@@ -1,4 +1,4 @@
-.PHONY: clean codegen codegen-verify
+.PHONY: clean codegen codegen-verify build
 
 
 # This is ONE of the generated files (alongside everything in pkg/client)
@@ -16,21 +16,21 @@ codegen: $(GENERATED_SOURCE)
 
 $(GENERATED_SOURCE): $(GO_SOURCES) hack/vendor
 	hack/vendor/k8s.io/code-generator/generate-groups.sh all \
-      github.com/projectriff/kubernetes-crds/pkg/client \
-      github.com/projectriff/kubernetes-crds/pkg/apis \
+      github.com/projectriff/riff/kubernetes-crds/pkg/client \
+      github.com/projectriff/riff/kubernetes-crds/pkg/apis \
       projectriff.io:v1 \
       --go-header-file  hack/boilerplate.go.txt
 	hack/vendor/k8s.io/code-generator/generate-internal-groups.sh defaulter \
-      github.com/projectriff/kubernetes-crds/pkg/client \
+      github.com/projectriff/riff/kubernetes-crds/pkg/client \
       '' \
-      github.com/projectriff/kubernetes-crds/pkg/apis \
+      github.com/projectriff/riff/kubernetes-crds/pkg/apis \
       projectriff.io:v1 \
       --go-header-file  hack/boilerplate.go.txt
 
 codegen-verify: hack/vendor
 	hack/vendor/k8s.io/code-generator/generate-groups.sh all \
-      github.com/projectriff/kubernetes-crds/pkg/client \
-      github.com/projectriff/kubernetes-crds/pkg/apis \
+      github.com/projectriff/riff/kubernetes-crds/pkg/client \
+      github.com/projectriff/riff/kubernetes-crds/pkg/apis \
       projectriff.io:v1 \
       --go-header-file  hack/boilerplate.go.txt \
       --verify-only
