@@ -1,0 +1,22 @@
+language: go
+go:
+  - "1.9"
+script: make test
+matrix:
+  include:
+    - before_script: cd function-controller
+    - sudo: required
+      env:
+        - KAFKA_BROKER=localhost:9092
+      before_install:
+        - ./.travis.install-kafka.sh
+      before_script: cd function-sidecar
+    - before_script: cd http-gateway
+    - sudo: required
+      env:
+        - KAFKA_BROKERS=localhost:9092
+      before_install:
+        - ./.travis.install-kafka.sh
+      before_script: cd message-transport
+    - before_script: cd riff-cli
+    - before_script: cd topic-controller
