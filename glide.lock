@@ -1,5 +1,5 @@
-hash: 85175197baedbb3557a172dda187523ae6895cd968993c46416c587f9f3b7f1d
-updated: 2018-02-27T16:44:02.797502+01:00
+hash: dbf008044be9131cafef7b9110c236509382bd344918cfa7fe6a9b6c91456cb7
+updated: 2018-02-28T16:24:34.266034+01:00
 imports:
 - name: github.com/bsm/sarama-cluster
   version: 24016d206c730276dfb58f802999066f2f4bfeaa
@@ -125,21 +125,6 @@ imports:
   version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:
   - difflib
-- name: github.com/projectriff/function-controller
-  version: ac945a310e1c005f155e0d43583a747ef9c5370c
-  subpackages:
-  - pkg/controller
-- name: github.com/projectriff/kubernetes-crds
-  version: 04349e8c040840976fdfe4d5de67d5d662b37dac
-  subpackages:
-  - pkg/apis/projectriff.io
-  - pkg/apis/projectriff.io/v1
-  - pkg/client/clientset/versioned
-  - pkg/client/clientset/versioned/scheme
-  - pkg/client/clientset/versioned/typed/projectriff/v1
-  - pkg/client/informers/externalversions/internalinterfaces
-  - pkg/client/informers/externalversions/projectriff/v1
-  - pkg/client/listers/projectriff/v1
 - name: github.com/PuerkitoBio/purell
   version: 8a290539e2e8629dbc4e6bad948158f790ec31f4
 - name: github.com/PuerkitoBio/urlesc
