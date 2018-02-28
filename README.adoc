@@ -3,20 +3,20 @@
 image::logo.png[riff logo, link=https://projectriff.io/]
 A FaaS for Kubernetes
 
-=== Installation of the latest release
+== Installation of the latest release
 
 See link:Getting-Started.adoc[Getting Started] for how to install riff with a Helm Chart,
 and how to install the riff CLI.
 
-=== Developer installation
+== Developer installation
 
 See link:Development-Helm-install.adoc[Installing the riff development version using Helm] to install the latest unreleased builds (git master branch) of riff.
 
-=== [[manual]] Manual build
+== [[manual]] Manual build
 
 This is the best option if you want to modify the riff components.
 
-==== Prerequisites
+=== Prerequisites
 
 You need:
 
@@ -31,14 +31,14 @@ To build images with docker in minikube use
 eval $(minikube docker-env)
 ----
 
-==== Get the main riff repo and install the CLI
+=== Get the main riff repo and install the CLI
 
 [source, bash]
 ----
 go get github.com/projectriff/riff
 ----
 
-==== Build the riff core components
+=== Build the riff core components
 
 [source, bash]
 ----
@@ -46,21 +46,21 @@ cd $(go env GOPATH)/src/github.com/projectriff/riff
 make dockerize
 ----
 
-==== Deploy Kafka
+=== Deploy Kafka
 
 [source, bash]
 ----
 kubectl apply -f config/kafka
 ----
 
-==== Deploy the riff Custom Resource Definitions
+=== Deploy the riff Custom Resource Definitions
 
 [source, bash]
 ----
 kubectl apply -f config/types
 ----
 
-==== Deploy the riff core components
+=== Deploy the riff core components
 
 This deploys the HTTP Gateway, Topic Controller, and Function Controller:
 
@@ -76,7 +76,7 @@ If your cluster has RBAC enabled, then you also need to create a Role and a Role
 kubectl apply -f config/rbac
 ----
 
-==== To tear it all down
+=== To tear it all down
 
 Once you're done playing with riff (see samples below), you can destroy everything created above by running
 
@@ -85,14 +85,14 @@ Once you're done playing with riff (see samples below), you can destroy everythi
 ./teardown
 ----
 
-=== [[samples]]Try Some Samples
+== [[samples]]Try Some Samples
 
 With riff running try some of the link:samples/README.adoc[samples].
 
-=== Contributing to riff
+== Contributing to riff
 
 Please refer to the link:CONTRIBUTING.adoc[Contributors' Guide].
 
-=== Maintaining riff
+== Maintaining riff
 
 Please refer to the link:MAINTAINING.adoc[Maintainers' Guide].
