@@ -169,7 +169,7 @@ Install the CLI by following the instructions on the https://github.com/projectr
 The riff CLI can be configured either using environment variables or using a config file. 
 The config file to be used can be set using `--config` option and it defaults to `$HOME/.riff.yaml`.
 
-Environmant variables are prefixed with `RIFF_` and the variables from the following example are supported:
+Environment variables are prefixed with `RIFF_` and the variables from the following example are supported:
 
 ```
 RIFF_VERSION=0.0.5-snapshot
