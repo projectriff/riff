@@ -146,7 +146,7 @@ func waitForHttpGatewayToBeReady(port int) {
 	timeoutDuration := time.Second * 10
 	pollingInterval := time.Millisecond * 100
 
-	url := fmt.Sprintf("http://localhost:%d", port)
+	url := fmt.Sprintf("http://localhost:%d/application/status", port)
 
 	Eventually(func() error {
 		_, err := http.Get(url)
