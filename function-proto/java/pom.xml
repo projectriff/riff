@@ -47,9 +47,9 @@ limitations under the License.
 	</licenses>
 
 	<scm>
-		<url>https://github.com/projectriff/function-proto</url>
-		<connection>scm:git:git://github.com/projectriff/function-proto.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/projectriff/function-proto.git</developerConnection>
+		<url>https://github.com/projectriff/riff/tree/master/function-proto</url>
+		<connection>scm:git:git://github.com/projectriff/riff.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/projectriff/riff.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 
