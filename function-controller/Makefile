@@ -1,4 +1,4 @@
-.PHONY: build clean dockerize gen-mocks test
+.PHONY: build clean dockerize gen-mocks test kubectl-apply
 OUTPUT = function-controller
 GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
 TAG = 0.0.5-snapshot
@@ -35,3 +35,5 @@ debug-dockerize: $(GO_SOURCES) ../vendor
 ../glide.lock: ../glide.yaml
 	cd .. && glide up -v --force
 
+kubectl-apply:
+	kubectl apply -f config/function-controller-deployment.yaml

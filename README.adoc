@@ -53,20 +53,13 @@ make dockerize
 kubectl apply -f config/kafka
 ----
 
-=== Deploy the riff Custom Resource Definitions
+=== Deploy the riff Custom Resource Definitions and deploy the riff core components
+
+This creates the the _topic_ and _function_ link:kubernetes-crds[CRDS], then deploys the HTTP Gateway, Topic Controller, and Function Controller:
 
 [source, bash]
 ----
-kubectl apply -f config/types
-----
-
-=== Deploy the riff core components
-
-This deploys the HTTP Gateway, Topic Controller, and Function Controller:
-
-[source, bash]
-----
-kubectl apply -f config
+make kubectl-apply
 ----
 
 If your cluster has RBAC enabled, then you also need to create a Role and a RoleBinding:

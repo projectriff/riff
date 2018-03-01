@@ -1,5 +1,5 @@
 
-.PHONY: clean build dockerize
+.PHONY: clean build dockerize kubectl-apply
 
 build:
 	$(MAKE) -C message-transport	build
@@ -16,6 +16,11 @@ dockerize:
 	$(MAKE) -C http-gateway			dockerize
 	$(MAKE) -C topic-controller		dockerize
 
+kubectl-apply:
+	$(MAKE) -C kubernetes-crds		kubectl-apply
+	$(MAKE) -C function-controller	kubectl-apply
+	$(MAKE) -C http-gateway			kubectl-apply
+	$(MAKE) -C topic-controller		kubectl-apply
 
 vendor: glide.lock
 	glide install -v --force

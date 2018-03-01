@@ -1,4 +1,4 @@
-.PHONY: build clean dockerize test
+.PHONY: build clean dockerize test kubectl-apply
 OUTPUT = http-gateway
 
 GO_SOURCES = $(shell find cmd pkg -type f -name '*.go')
@@ -34,3 +34,6 @@ debug-dockerize: $(GO_SOURCES) ../vendor
 ../glide.lock: ../glide.yaml
 	cd .. && glide up -v --force
 
+kubectl-apply:
+	kubectl apply -f config/http-gateway-deployment.yaml
+	kubectl apply -f config/http-gateway-service-nodeport.yaml

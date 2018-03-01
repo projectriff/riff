@@ -1,4 +1,4 @@
-.PHONY: build clean test dockerize debug-dockerize
+.PHONY: build clean test dockerize debug-dockerize kubectl-apply
 OUTPUT = topic-controller
 TAG = 0.0.5-snapshot
 
@@ -30,3 +30,5 @@ debug-dockerize: $(GO_SOURCES) ../vendor
 ../glide.lock: ../glide.yaml
 	cd .. && glide up -v --force
 
+kubectl-apply:
+	kubectl apply -f config/topic-controller-deployment.yaml

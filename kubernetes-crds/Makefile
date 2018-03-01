@@ -1,4 +1,4 @@
-.PHONY: clean codegen codegen-verify build
+.PHONY: clean codegen codegen-verify build kubectl-apply
 
 
 # This is ONE of the generated files (alongside everything in pkg/client)
@@ -52,3 +52,7 @@ hack/vendor: hack/glide.lock
 hack/glide.lock: hack/glide.yaml
 	# Note the absence of -v
 	cd hack && glide up
+
+kubectl-apply:
+	kubectl apply -f config/function-resource.yaml
+	kubectl apply -f config/topic-resource.yaml
