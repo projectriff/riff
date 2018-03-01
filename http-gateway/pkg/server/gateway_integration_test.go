@@ -82,8 +82,8 @@ var _ = Describe("HTTP Gateway", func() {
 				message.Headers{server.CorrelationId: msg.Headers()[server.CorrelationId],
 					"Content-Type": []string{"bag/plastic"},
 				})
-			Eventually(msg.Headers()["Content-Type"]).Should(Equal([]string{"text/solid"}))
-			Eventually(msg.Headers()["Not-Propagated-Header"]).Should(BeNil())
+			Expect(msg.Headers()["Content-Type"]).To(Equal([]string{"text/solid"}))
+			Expect(msg.Headers()["Not-Propagated-Header"]).To(BeNil())
 		})
 
 		resp := doRequest(port, "foo", bytes.NewBufferString("world"), "Content-Type", "text/solid", "Not-Propagated-Header", "secret")
@@ -91,9 +91,9 @@ var _ = Describe("HTTP Gateway", func() {
 		b := make([]byte, 11)
 		resp.Body.Read(b)
 
-		Eventually(b).Should(Equal([]byte("hello world")))
-		Eventually(resp.Header.Get(server.CorrelationId)).Should(BeZero())
-		Eventually(resp.Header.Get("Content-Type")).Should(Equal("bag/plastic"))
+		Expect(b).To(Equal([]byte("hello world")))
+		Expect(resp.Header.Get(server.CorrelationId)).To(BeZero())
+		Expect(resp.Header.Get("Content-Type")).To(Equal("bag/plastic"))
 
 		defer resp.Body.Close()
 	})
@@ -103,14 +103,14 @@ var _ = Describe("HTTP Gateway", func() {
 		mockProducer.On("Send", "bar", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			defer GinkgoRecover()
 			msg := args[1].(message.Message)
-			Eventually(msg.Payload()).Should(Equal([]byte("world")))
-			Eventually(msg.Headers()["Content-Type"]).Should(Equal([]string{"text/solid"}))
-			Eventually(msg.Headers()["Not-Propagated-Header"]).Should(BeNil())
+			Expect(msg.Payload()).To(Equal([]byte("world")))
+			Expect(msg.Headers()["Content-Type"]).To(Equal([]string{"text/solid"}))
+			Expect(msg.Headers()["Not-Propagated-Header"]).To(BeNil())
 		})
 
 		resp := doMessage(port, "bar", bytes.NewBufferString("world"), "Content-Type", "text/solid", "Not-Propagated-Header", "secret")
 
-		Eventually(resp.StatusCode).Should(Equal(200))
+		Expect(resp.StatusCode).To(Equal(200))
 
 		defer resp.Body.Close()
 	})
