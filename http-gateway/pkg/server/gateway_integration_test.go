@@ -143,10 +143,13 @@ func post(port int, path string, body io.Reader, headerKV ...string) *http.Respo
 }
 
 func waitForHttpGatewayToBeReady(port int) {
+	timeoutDuration := time.Second * 10
+	pollingInterval := time.Millisecond * 100
+
 	url := fmt.Sprintf("http://localhost:%d", port)
 
 	Eventually(func() error {
 		_, err := http.Get(url)
 		return err
-	}).Should(Succeed())
+	}, timeoutDuration, pollingInterval).Should(Succeed())
 }
