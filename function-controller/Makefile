@@ -5,13 +5,13 @@ TAG = 0.0.5-snapshot
 
 build: $(OUTPUT)
 
-test:
+test: ../vendor
 	go test ./...
 
-$(OUTPUT): $(GO_SOURCES)
+$(OUTPUT): $(GO_SOURCES) ../vendor
 	go build cmd/function-controller.go
 
-gen-mocks:
+gen-mocks: ../vendor
 	mockery -name 'TopicInformer|FunctionInformer' -dir ../kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1
 	mockery -name 'SharedIndexInformer' -dir ../vendor/k8s.io/client-go/tools/cache
 	mockery -name 'DeploymentInformer' -dir ../vendor/k8s.io/client-go/informers/extensions/v1beta1
@@ -20,11 +20,18 @@ gen-mocks:
 clean:
 	rm -f $(OUTPUT)
 
-dockerize: $(GO_SOURCES)
+dockerize: $(GO_SOURCES) ../vendor
 	docker build .. --build-arg COMPONENT=function-controller -t projectriff/function-controller:$(TAG)
 
-debug-dockerize: $(GO_SOURCES)
+debug-dockerize: $(GO_SOURCES) ../vendor
 	# Need to remove probes as delve starts app in paused state
 	-kubectl patch deploy/function-controller --type=json -p='[{"op":"remove", "path":"/spec/template/spec/containers/0/livenessProbe"}]'
 	-kubectl patch deploy/function-controller --type=json -p='[{"op":"remove", "path":"/spec/template/spec/containers/0/readinessProbe"}]'
 	docker build . -t projectriff/function-controller:$(TAG) -f Dockerfile-debug
+
+../vendor: ../glide.lock
+	cd .. && glide install -v --force
+
+../glide.lock: ../glide.yaml
+	cd .. && glide up -v --force
+

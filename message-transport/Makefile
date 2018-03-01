@@ -8,16 +8,23 @@ PKGS = $(shell go list ./pkg/...)
 all: verify-mocks build
 	@echo "To run the tests ensure kafka and zookeeper are running locally then issue 'make test'"
 
-build: $(GO_SOURCES)
+build: $(GO_SOURCES) ../vendor
 	go build $(PKGS)
 
-test: $(GO_SOURCES)
+test: $(GO_SOURCES) ../vendor
 	go test -v ./...
 
-gen-mocks $(GENERATED_SOURCE): $(GO_SOURCES)
+gen-mocks $(GENERATED_SOURCE): $(GO_SOURCES) ../vendor
 	go get -u github.com/vektra/mockery/.../
 	go generate ./...
 
 # verify generated mocks which are committed or staged are up to date
 verify-mocks: gen-mocks
 	git diff --exit-code $(GENERATED_SOURCES)
+
+../vendor: ../glide.lock
+	cd .. && glide install -v --force
+
+../glide.lock: ../glide.yaml
+	cd .. && glide up -v --force
+

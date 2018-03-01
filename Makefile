@@ -1,9 +1,9 @@
 
-.PHONY: build dockerize
-
-
+.PHONY: clean build dockerize
 
 build:
+	$(MAKE) -C message-transport	build
+	$(MAKE) -C kubernetes-crds		build
 	$(MAKE) -C function-controller	build
 	$(MAKE) -C function-sidecar		build
 	$(MAKE) -C http-gateway			build
@@ -22,4 +22,11 @@ vendor: glide.lock
 
 glide.lock: glide.yaml
 	glide up -v --force
+
+clean:
+	$(MAKE) -C function-controller	clean
+	$(MAKE) -C function-sidecar		clean
+	$(MAKE) -C http-gateway			clean
+	$(MAKE) -C topic-controller		clean
+	$(MAKE) -C riff-cli				clean
 
