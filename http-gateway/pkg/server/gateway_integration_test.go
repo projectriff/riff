@@ -127,17 +127,13 @@ func doMessage(port int, topic string, body io.Reader, headerKV ...string) *http
 func post(port int, path string, body io.Reader, headerKV ...string) *http.Response {
 	client := http.Client{}
 	req, err := http.NewRequest("POST", fmt.Sprintf("http://localhost:%v%v", port, path), body)
-	if err != nil {
-		panic(err)
-	}
+	Expect(err).ToNot(HaveOccurred())
 
 	for i := 0; i < len(headerKV); i += 2 {
 		req.Header.Add(headerKV[i], headerKV[i+1])
 	}
 	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
+	Expect(err).ToNot(HaveOccurred())
 
 	return resp
 }
