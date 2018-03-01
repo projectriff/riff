@@ -10,7 +10,7 @@ COPY message-transport/ message-transport/
 COPY ${COMPONENT}/cmd/ ${COMPONENT}/cmd/
 COPY ${COMPONENT}/pkg/ ${COMPONENT}/pkg/
 
-RUN CGO_ENABLED=0 go build -v -a -installsuffix cgo -o /riff-entrypoint ${COMPONENT}/cmd/${COMPONENT}.go
+RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o /riff-entrypoint ${COMPONENT}/cmd/${COMPONENT}.go
 
 ###########
 
