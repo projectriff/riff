@@ -1,5 +1,4 @@
 target/
-!.mvn/wrapper/maven-wrapper.jar
 
 # Sample artifacts
 samples/**/Dockerfile
@@ -19,14 +18,5 @@ samples/**/*.yaml
 *.iml
 *.ipr
 
-### NetBeans ###
-nbproject/private/
-build/
-nbbuild/
-dist/
-nbdist/
-.nb-gradle/
 .DS_Store
 
-/node-function-web-handler/node_modules/
-samples/python/uppercase/proto
