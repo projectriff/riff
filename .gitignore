@@ -18,5 +18,8 @@ samples/**/*.yaml
 *.iml
 *.ipr
 
+### Coverage artefacts ###
+*.coverprofile
+
 .DS_Store
 
