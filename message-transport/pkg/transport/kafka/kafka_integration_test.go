@@ -34,7 +34,7 @@ import (
 var _ = Describe("Kafka Integration", func() {
 
 	var (
-		topic string
+		topic       string
 		producer    transport.Producer
 		consumer    transport.Consumer
 		testMessage message.Message
@@ -61,7 +61,7 @@ var _ = Describe("Kafka Integration", func() {
 		// Use a fresh group id so that runs in close succession won't suffer from Kafka broker delays
 		// due to consumers coming and going in the same group
 		groupId := fmt.Sprintf("group-%d", time.Now().Nanosecond())
-		
+
 		consumer, err = kafka.NewConsumer(brokers, groupId, []string{topic}, config)
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -70,10 +70,10 @@ var _ = Describe("Kafka Integration", func() {
 		err := producer.Send(topic, testMessage)
 		Expect(err).NotTo(HaveOccurred())
 
-		messages := consumer.Messages()
-		receivedMessage := <-messages
-
-		Expect(receivedMessage).To(Equal(testMessage))
+		msg, topic, err := consumer.Receive()
+		Expect(err).NotTo(HaveOccurred())
+		Expect(msg).To(Equal(testMessage))
+		Expect(topic).To(Equal(topic))
 	})
 
 })

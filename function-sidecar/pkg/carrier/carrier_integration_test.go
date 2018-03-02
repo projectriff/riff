@@ -59,7 +59,9 @@ var _ = Describe("Carrier Integration Test", func() {
 		})
 
 		go func() {
-			http.ListenAndServe(":8080", nil)
+			defer GinkgoRecover()
+			err := http.ListenAndServe(":8080", nil)
+			Expect(err).NotTo(HaveOccurred())
 		}()
 
 		input := randString(10)
@@ -84,16 +86,11 @@ var _ = Describe("Carrier Integration Test", func() {
 		Expect(err).NotTo(HaveOccurred())
 		defer consumer.Close()
 
-		select {
-		case msg, ok := <-consumer.Messages():
-			if ok {
-				reply := string(msg.Payload())
-				Expect(reply).To(Equal(expectedReply))
-				close(done)
-			}
-		case <-time.After(time.Second * 100):
-			Fail("Timed out waiting for reply")
-		}
+		msg, _, err := consumer.Receive()
+		Expect(err).NotTo(HaveOccurred())
+		reply := string(msg.Payload())
+		Expect(reply).To(Equal(expectedReply))
+		close(done)
 	}, 30)
 })
 
