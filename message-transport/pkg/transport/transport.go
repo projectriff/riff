@@ -24,6 +24,7 @@ import (
 //go:generate mockery -name=Producer -output mocktransport -outpkg mocktransport
 
 // Producer is an interface for sending messages to arbitrary topics.
+// If io.Closer is implemented it will be called when the Producer is no longer needed.
 type Producer interface {
 	// Send sends a message to a topic.
 	Send(topic string, message message.Message) error
@@ -34,8 +35,10 @@ type Producer interface {
 
 //go:generate mockery -name=Consumer -output mocktransport -outpkg mocktransport
 
-// Consumer is an interface for receiving messages from a fixed, implementation-defined set of topics.
+// Consumer is an interface for receiving messages, along with their topics, from a fixed, implementation-defined set
+// of topics.
+// If io.Closer is implemented it will be called when the Consumer is no longer needed.
 type Consumer interface {
-	// Messages returns a channel which receives messages.
-	Messages() <-chan message.Message
+	// Receive returns a message along with the topic from which the message was received.
+	Receive() (message.Message, string, error)
 }
