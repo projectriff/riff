@@ -17,6 +17,9 @@ test: ../vendor
 dockerize: $(GO_SOURCES) ../vendor
 	docker build .. --build-arg COMPONENT=function-sidecar -t projectriff/function-sidecar:$(TAG)
 
+debug-dockerize: $(GO_SOURCES) ../vendor
+	docker build .. --build-arg COMPONENT=function-sidecar -t projectriff/function-sidecar:$(TAG) -f ../Dockerfile-debug
+
 pkg/dispatcher/grpc/function/function.pb.go: ../function-proto/function.proto
 	protoc -I ../function-proto ../function-proto/function.proto --go_out=plugins=grpc:pkg/dispatcher/grpc/function
 
