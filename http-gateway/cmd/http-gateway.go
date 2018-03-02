@@ -27,12 +27,15 @@ import (
 	"github.com/bsm/sarama-cluster"
 	"github.com/projectriff/riff/http-gateway/pkg/server"
 	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
+	"github.com/projectriff/riff/message-transport/pkg/transport/metrics/kafka_over_kafka"
+	"github.com/satori/go.uuid"
 )
 
 func main() {
 
 	brokers := brokers()
-	producer, err := kafka.NewProducer(brokers)
+	producerId := uuid.NewV4().String()
+	producer, err := kafka_over_kafka.NewMetricsEmittingProducer(brokers, producerId)
 	if err != nil {
 		panic(err)
 	}
