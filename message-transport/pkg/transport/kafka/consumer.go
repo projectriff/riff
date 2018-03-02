@@ -17,9 +17,10 @@
 package kafka
 
 import (
-	"github.com/projectriff/riff/message-transport/pkg/message"
 	"github.com/bsm/sarama-cluster"
 	"log"
+	"github.com/projectriff/riff/message-transport/pkg/message"
+	"errors"
 )
 
 func NewConsumer(addrs []string, groupID string, topics []string, consumerConfig *cluster.Config) (*consumer, error) {
@@ -35,19 +36,19 @@ func NewConsumer(addrs []string, groupID string, topics []string, consumerConfig
 		go consumeNotifications(clusterConsumer)
 	}
 
-	messages := make(chan message.Message)
+	messages := make(chan messageFromTopic)
 
 	go func(clusterConsumer *cluster.Consumer) {
 		consumerMessages := clusterConsumer.Messages()
 		for {
 			kafkaMsg, ok := <-consumerMessages
 			if ok {
-				messageWithHeaders, err := fromKafka(kafkaMsg)
+				msg, err := fromKafka(kafkaMsg)
 				if err != nil {
 					log.Println("Failed to extract message ", err)
 					continue
 				}
-				messages <- messageWithHeaders
+				sendMessageFromTopic(messages, msg, kafkaMsg.Topic)
 				clusterConsumer.MarkOffset(kafkaMsg, "") // mark message as processed
 			}
 		}
@@ -59,13 +60,29 @@ func NewConsumer(addrs []string, groupID string, topics []string, consumerConfig
 	}, nil
 }
 
-type consumer struct {
-	clusterConsumer *cluster.Consumer
-	messages        <-chan message.Message
+func sendMessageFromTopic(messages chan<- messageFromTopic, messageWithHeaders message.Message, topic string) {
+	messages <- messageFromTopic{
+		Message: messageWithHeaders,
+		topic:   topic,
+	}
 }
 
-func (c *consumer) Messages() <-chan message.Message {
-	return c.messages
+type messageFromTopic struct {
+	message.Message
+	topic string
+}
+
+type consumer struct {
+	clusterConsumer *cluster.Consumer
+	messages        <-chan messageFromTopic
+}
+
+func (c *consumer) Receive() (message.Message, string, error) {
+	mt, ok := <-c.messages
+	if !ok {
+		return nil, "", errors.New("no message available")
+	}
+	return mt.Message, mt.topic, nil
 }
 
 func (c *consumer) Close() error {
