@@ -63,6 +63,6 @@ Then expose the `2345` port as a service, using `riff/config/delve/topic-control
 +
 [source, bash]
 ----
-kubectl apply -f riff/config/delve/topic-controller-debug.yaml
+kubectl apply -f config/debug-service.yaml
 ----
 Then you can connect the debugger through port `30101`.

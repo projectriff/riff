@@ -36,4 +36,4 @@ debug-dockerize: $(GO_SOURCES) ../vendor
 	cd .. && glide up -v --force
 
 kubectl-apply:
-	kubectl apply -f config/function-controller-deployment.yaml
+	kubectl apply -f config/deployment.yaml

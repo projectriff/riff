@@ -35,5 +35,5 @@ debug-dockerize: $(GO_SOURCES) ../vendor
 	cd .. && glide up -v --force
 
 kubectl-apply:
-	kubectl apply -f config/http-gateway-deployment.yaml
-	kubectl apply -f config/http-gateway-service-nodeport.yaml
+	kubectl apply -f config/deployment.yaml
+	kubectl apply -f config/service-nodeport.yaml
