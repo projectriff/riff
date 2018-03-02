@@ -16,6 +16,12 @@ dockerize:
 	$(MAKE) -C http-gateway			dockerize
 	$(MAKE) -C topic-controller		dockerize
 
+debug-dockerize:
+	$(MAKE) -C function-controller	debug-dockerize
+	$(MAKE) -C function-sidecar		debug-dockerize
+	$(MAKE) -C http-gateway			debug-dockerize
+	$(MAKE) -C topic-controller		debug-dockerize
+
 kubectl-apply:
 	kubectl apply -f config/
 	$(MAKE) -C kubernetes-crds		kubectl-apply

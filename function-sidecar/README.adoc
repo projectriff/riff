@@ -53,3 +53,22 @@ This assumes that your docker client is correctly configured to target the daemo
 KAFKA_BROKER=localhost:9092 make test
 ----
 
+* To attach a https://github.com/derekparker/delve/blob/master/Documentation/EditorIntegration.md[delve capable] debugger (such as Goland)
+to a `function-sidecar` running _inside_ k8s:
++
+[source, bash]
+----
+make debug-dockerize
+----
+Then expose the `2345` port as a service, assuming your function is named "`foo`":
++
+[source, bash]
+----
+kubectl expose deployment foo --type=NodePort --name=foo-debug --port=2345
+----
+After restarting the pod of the `function-sidecar`, you can connect the debugger through `localhost:<port>` (or `$(minikube ip):<port>`) where `<port>` is discovered via
++
+[source, bash]
+----
+kubectl get  svc/foo-debug -o jsonpath='{.spec.ports[0].nodePort}'
+----

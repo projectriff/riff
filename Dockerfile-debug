@@ -1,0 +1,19 @@
+FROM golang:1.9
+
+RUN go get github.com/derekparker/delve/cmd/dlv
+
+WORKDIR /go/src/github.com/projectriff/riff
+COPY vendor/ vendor/
+COPY kubernetes-crds/ kubernetes-crds/
+COPY message-transport/ message-transport/
+
+ARG COMPONENT
+COPY ${COMPONENT}/cmd/ ${COMPONENT}/cmd/
+COPY ${COMPONENT}/pkg/ ${COMPONENT}/pkg/
+
+# This does not work atm, see https://github.com/derekparker/delve/issues/952#issuecomment-323801491
+# As a consequence, the app will start in a paused state and won't 'run' until a debugger is attached
+RUN echo "continue" > /tmp/initfile
+
+RUN go build -gcflags="-N -l" -o /riff-entrypoint ${COMPONENT}/cmd/${COMPONENT}.go
+ENTRYPOINT dlv --headless --listen :2345 --api-version 2 --init /tmp/initfile exec /riff-entrypoint --

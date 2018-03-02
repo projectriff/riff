@@ -65,4 +65,4 @@ Then expose the `2345` port as a service, using `riff/config/delve/function-cont
 ----
 kubectl apply -f config/debug-service.yaml
 ----
-Then you can connect the debugger through port `30102`.
+After restarting the `function-controller-...` pod, you can connect the debugger through `localhost:30102` (or `$(minikube ip):30102`).
