@@ -28,100 +28,20 @@ import (
 	"errors"
 )
 
-func TestDeleteCommandImplicitPath(t *testing.T) {
-	clearDeleteOptions()
-	as := assert.New(t)
-	rootCmd.SetArgs([]string{"delete", "--dry-run", osutils.Path("../test_data/shell/echo")})
+var getFunctionCount, deleteFunctionCount, deleteTopicCount, deleteResourceCount int
 
-	_, err := rootCmd.ExecuteC()
-	as.NoError(err)
-	as.Equal("../test_data/shell/echo", DeleteAllOptions.FilePath)
-	as.Equal("default", DeleteAllOptions.Namespace)
-}
+func mockKubeCtl() {
+	fmt.Println("Initializing Stub KubeCtl")
 
-func TestDeleteCommandExplicitPath(t *testing.T) {
-	clearDeleteOptions()
-	as := assert.New(t)
-	rootCmd.SetArgs([]string{"delete", "--dry-run", "-f", osutils.Path("../test_data/shell/echo")})
-
-	_, err := rootCmd.ExecuteC()
-	as.NoError(err)
-	as.Equal("../test_data/shell/echo", DeleteAllOptions.FilePath)
-	as.Equal("default", DeleteAllOptions.Namespace)
-}
-
-func TestDeleteCommandExplicitFile(t *testing.T) {
-	clearDeleteOptions()
-	as := assert.New(t)
-	rootCmd.SetArgs([]string{"delete", "--dry-run", "-f", osutils.Path("../test_data/shell/echo/echo-topics.yaml")})
-
-	_, err := rootCmd.ExecuteC()
-	as.NoError(err)
-	as.Equal("../test_data/shell/echo/echo-topics.yaml", DeleteAllOptions.FilePath)
-	as.Equal("default", DeleteAllOptions.Namespace)
-}
-
-func TestDeleteCommandWithName(t *testing.T) {
-	clearDeleteOptions()
-	actualKubectlExecForBytes:= kubectl.EXEC_FOR_BYTES
-	defer func() {
-		kubectl.EXEC_FOR_BYTES = actualKubectlExecForBytes
-	}()
-
-	// Just to avoid test dependence on kubectl
-	kubectl.EXEC_FOR_BYTES = func(cmdArgs []string) ([]byte, error) {
-		return ([]byte)("Mock: Error from server (NotFound): functions.projectriff.io square") , errors.New("Exit status1")
+	indexOf := func(s []string, e string) int {
+		for i, a := range s {
+			if a == e {
+				return i
+			}
+		}
+		return -1
 	}
 
-	as := assert.New(t)
-	rootCmd.SetArgs([]string{"delete", "--dry-run", "--name", "square"})
-	_, err := rootCmd.ExecuteC()
-	as.Error(err)
-	as.Equal("square", DeleteAllOptions.FunctionName)
-
-}
-
-func TestDeleteCommandAllFlag(t *testing.T) {
-	clearDeleteOptions()
-	as := assert.New(t)
-	rootCmd.SetArgs([]string{"delete", "--dry-run", "-f", osutils.Path("../test_data/shell/echo"), "--all"})
-
-	_, err := rootCmd.ExecuteC()
-	as.NoError(err)
-	as.Equal("../test_data/shell/echo", DeleteAllOptions.FilePath)
-	as.Equal(true, DeleteAllOptions.All)
-	as.Equal("default", DeleteAllOptions.Namespace)
-}
-
-func TestDeleteCommandFromCwdAllFlag(t *testing.T) {
-	clearDeleteOptions()
-	currentdir := osutils.GetCWD()
-	defer func() { os.Chdir(currentdir) }()
-
-	path := osutils.Path("../test_data/shell/echo")
-	os.Chdir(path)
-	as := assert.New(t)
-	rootCmd.SetArgs([]string{"delete", "--dry-run", "--all"})
-
-	_, err := rootCmd.ExecuteC()
-	as.NoError(err)
-	as.Equal("", DeleteAllOptions.FilePath)
-	as.Equal(true, DeleteAllOptions.All)
-	as.Equal("default", DeleteAllOptions.Namespace)
-
-}
-
-func TestDeleteCommandWithFunctionName(t *testing.T) {
-	clearDeleteOptions()
-	actualKubectlExecForString, actualKubectlExecForBytes := kubectl.EXEC_FOR_STRING, kubectl.EXEC_FOR_BYTES
-	defer func() {
-		kubectl.EXEC_FOR_STRING = actualKubectlExecForString
-		kubectl.EXEC_FOR_BYTES = actualKubectlExecForBytes
-	}()
-
-	getFunctionCount := 0;
-	deleteFunctionCount := 0;
-	deleteTopicCount := 0;
 	kubectl.EXEC_FOR_BYTES = func(cmdArgs []string) ([]byte, error) {
 
 		response := ([]byte)(
@@ -143,15 +63,163 @@ func TestDeleteCommandWithFunctionName(t *testing.T) {
 	}
 
 	kubectl.EXEC_FOR_STRING = func(cmdArgs []string) (string, error) {
-		if (cmdArgs[1] == "function") {
+		ifunc := indexOf(cmdArgs,"function")
+		itopic := indexOf(cmdArgs,"topic")
+		iresource :=indexOf(cmdArgs,"-f")
+		if cmdArgs[0] == "delete" && ifunc > 0  {
 			deleteFunctionCount = deleteFunctionCount + 1
-			return fmt.Sprintf("function %s deleted.", cmdArgs[2]), nil
-		} else if (cmdArgs[1] == "topic") {
+			return fmt.Sprintf("function %s deleted.", cmdArgs[ifunc + 1]), nil
+		} else if cmdArgs[0] == "delete" && itopic > 0 {
 			deleteTopicCount = deleteTopicCount + 1
-			return fmt.Sprintf("topic %s deleted.", cmdArgs[2]), nil
-		}
+			return fmt.Sprintf("topic %s deleted.", cmdArgs[itopic + 1]), nil
+		} else if cmdArgs[0] == "delete" && iresource > 0 {
+			deleteResourceCount = deleteResourceCount + 1
+			return fmt.Sprintf("resources %s deleted.", cmdArgs[iresource + 1]), nil
+	}
 		return "",nil
 	}
+}
+
+func TestMain(m *testing.M) {
+	actualKubectlExecForString, actualKubectlExecForBytes := kubectl.EXEC_FOR_STRING, kubectl.EXEC_FOR_BYTES
+	defer func() {
+		kubectl.EXEC_FOR_STRING = actualKubectlExecForString
+		kubectl.EXEC_FOR_BYTES = actualKubectlExecForBytes
+	}()
+	mockKubeCtl()
+	retCode := m.Run()
+	os.Exit(retCode)
+}
+
+func TestDeleteCommandImplicitPath(t *testing.T) {
+	resetTestState()
+
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"delete", osutils.Path("../test_data/shell/echo")})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	as.Equal("../test_data/shell/echo", DeleteAllOptions.FilePath)
+	as.Equal("default", DeleteAllOptions.Namespace)
+	as.Equal(0, getFunctionCount)
+	as.Equal(1, deleteFunctionCount)
+	as.Equal(0, deleteTopicCount)
+}
+
+func TestDeleteCommandExplicitPath(t *testing.T) {
+	resetTestState()
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"delete", "-f", osutils.Path("../test_data/shell/echo")})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	as.Equal("../test_data/shell/echo", DeleteAllOptions.FilePath)
+	as.Equal("default", DeleteAllOptions.Namespace)
+	as.Equal(0, getFunctionCount)
+	as.Equal(1, deleteFunctionCount)
+	as.Equal(0, deleteTopicCount)
+	as.Equal(0, deleteResourceCount)
+}
+
+func TestDeleteCommandExplicitFile(t *testing.T) {
+	resetTestState()
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"delete", "-f", osutils.Path("../test_data/shell/echo/echo-topics.yaml")})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	as.Equal("../test_data/shell/echo/echo-topics.yaml", DeleteAllOptions.FilePath)
+	as.Equal("default", DeleteAllOptions.Namespace)
+	as.Equal(0, getFunctionCount)
+	as.Equal(1, deleteResourceCount)
+	as.Equal(0, deleteTopicCount)
+	as.Equal(0, deleteFunctionCount)
+}
+
+func TestDeleteCommandWithNameDoesNotExist(t *testing.T) {
+	resetTestState()
+	actualKubectlExecForBytes := kubectl.EXEC_FOR_BYTES
+	defer func() {
+		kubectl.EXEC_FOR_BYTES = actualKubectlExecForBytes
+	}()
+	// Just to avoid test dependence on kubectl
+	kubectl.EXEC_FOR_BYTES = func(cmdArgs []string) ([]byte, error) {
+		getFunctionCount = getFunctionCount + 1
+		return ([]byte)("Mock: Error from server (NotFound): functions.projectriff.io square") , errors.New("Exit status1")
+	}
+
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"delete", "--name", "square"})
+	_, err := rootCmd.ExecuteC()
+	as.Error(err)
+	as.Equal("square", DeleteAllOptions.FunctionName)
+	as.Equal(1, getFunctionCount)
+	as.Equal(0, deleteFunctionCount)
+	as.Equal(0, deleteTopicCount)
+	as.Equal(0, deleteResourceCount)
+
+}
+
+func TestDeleteCommandAllFlag(t *testing.T) {
+	resetTestState()
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"delete", "-f", osutils.Path("../test_data/shell/echo"), "--all"})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	as.Equal("../test_data/shell/echo", DeleteAllOptions.FilePath)
+	as.Equal(true, DeleteAllOptions.All)
+	as.Equal("default", DeleteAllOptions.Namespace)
+	as.Equal(0, getFunctionCount)
+	as.Equal(1, deleteResourceCount)
+	as.Equal(0, deleteTopicCount)
+	as.Equal(0, deleteFunctionCount)
+}
+
+func TestDeleteCommandFromCwdAllFlag(t *testing.T) {
+	resetTestState()
+	currentdir := osutils.GetCWD()
+	defer func() { os.Chdir(currentdir) }()
+
+	path := osutils.Path("../test_data/shell/echo")
+	os.Chdir(path)
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"delete", "--all"})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	as.Equal("", DeleteAllOptions.FilePath)
+	as.Equal(true, DeleteAllOptions.All)
+	as.Equal("default", DeleteAllOptions.Namespace)
+	as.Equal(0, getFunctionCount)
+	as.Equal(1, deleteResourceCount)
+	as.Equal(0, deleteTopicCount)
+	as.Equal(0, deleteFunctionCount)
+}
+
+func TestDeleteCommandFromCwdAllFlagNoResources(t *testing.T) {
+	resetTestState()
+	currentdir := osutils.GetCWD()
+	defer func() { os.Chdir(currentdir) }()
+
+	path := osutils.Path("../test_data/node/square")
+	os.Chdir(path)
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"delete", "--all"})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	as.Equal("", DeleteAllOptions.FilePath)
+	as.Equal(true, DeleteAllOptions.All)
+	as.Equal("default", DeleteAllOptions.Namespace)
+	as.Equal(0, getFunctionCount)
+	as.Equal(0, deleteResourceCount)
+	as.Equal(0, deleteTopicCount)
+	as.Equal(0, deleteFunctionCount)
+}
+
+func TestDeleteCommandWithFunctionName(t *testing.T) {
+	resetTestState()
 
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"delete", "--all", "--name", "echo"})
@@ -160,10 +228,11 @@ func TestDeleteCommandWithFunctionName(t *testing.T) {
 	as.Equal(1, getFunctionCount)
 	as.Equal(1, deleteFunctionCount)
 	as.Equal(2, deleteTopicCount)
+	as.Equal(0, deleteResourceCount)
 }
 
 func TestDeleteCommandWithNamespace(t *testing.T) {
-	clearDeleteOptions()
+	resetTestState()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"delete", "--dry-run", "--namespace", "test-test", "-f", osutils.Path("../test_data/shell/echo/")})
 
@@ -173,7 +242,12 @@ func TestDeleteCommandWithNamespace(t *testing.T) {
 	as.Equal("test-test", DeleteAllOptions.Namespace)
 }
 
-func clearDeleteOptions() {
+func resetTestState() {
+	getFunctionCount = 0
+	deleteFunctionCount = 0
+	deleteTopicCount = 0
+	deleteResourceCount = 0
+
 	DeleteAllOptions = options.DeleteAllOptions{}
 	deleteCmd.ResetFlags()
 	utils.CreateDeleteFlags(deleteCmd.Flags())

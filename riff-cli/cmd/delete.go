@@ -104,6 +104,7 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 		return err
 	}
 
+
 	if opts.All {
 		optionPath := opts.FilePath
 		if !osutils.IsDirectory(abs) {
@@ -117,8 +118,13 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 		}
 
 		cmdArgs = []string{"delete", "--namespace", opts.Namespace}
-		for _, resourceDefinitionPath := range resourceDefinitionPaths {
-			cmdArgs = append(cmdArgs, "-f", resourceDefinitionPath)
+		if len(resourceDefinitionPaths) > 0 {
+			for _, resourceDefinitionPath := range resourceDefinitionPaths {
+				cmdArgs = append(cmdArgs, "-f", resourceDefinitionPath)
+			}
+		} else {
+			fmt.Printf("No resources found for path %s\n", abs)
+			return nil
 		}
 	} else {
 		if osutils.IsDirectory(abs) {
