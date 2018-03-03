@@ -21,8 +21,11 @@ import (
 	"time"
 )
 
+var EXEC_FOR_STRING = ExecForString
+var EXEC_FOR_BYTES = ExecForBytes
+
 func ExecForString(cmdArgs []string) (string, error) {
-	out, err := ExecForBytes(cmdArgs)
+	out, err := EXEC_FOR_BYTES(cmdArgs)
 	return string(out), err
 }
 

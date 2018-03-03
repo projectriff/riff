@@ -21,6 +21,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
+	"os"
+	"github.com/projectriff/riff/riff-cli/cmd/utils"
+	"fmt"
+	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
+	"errors"
 )
 
 func TestDeleteCommandImplicitPath(t *testing.T) {
@@ -58,12 +63,22 @@ func TestDeleteCommandExplicitFile(t *testing.T) {
 
 func TestDeleteCommandWithName(t *testing.T) {
 	clearDeleteOptions()
+	actualKubectlExecForBytes:= kubectl.EXEC_FOR_BYTES
+	defer func() {
+		kubectl.EXEC_FOR_BYTES = actualKubectlExecForBytes
+	}()
+
+	// Just to avoid test dependence on kubectl
+	kubectl.EXEC_FOR_BYTES = func(cmdArgs []string) ([]byte, error) {
+		return ([]byte)("Mock: Error from server (NotFound): functions.projectriff.io square") , errors.New("Exit status1")
+	}
+
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"delete", "--dry-run", "--name", "square"})
-
 	_, err := rootCmd.ExecuteC()
-	as.NoError(err)
+	as.Error(err)
 	as.Equal("square", DeleteAllOptions.FunctionName)
+
 }
 
 func TestDeleteCommandAllFlag(t *testing.T) {
@@ -76,6 +91,75 @@ func TestDeleteCommandAllFlag(t *testing.T) {
 	as.Equal("../test_data/shell/echo", DeleteAllOptions.FilePath)
 	as.Equal(true, DeleteAllOptions.All)
 	as.Equal("default", DeleteAllOptions.Namespace)
+}
+
+func TestDeleteCommandFromCwdAllFlag(t *testing.T) {
+	clearDeleteOptions()
+	currentdir := osutils.GetCWD()
+	defer func() { os.Chdir(currentdir) }()
+
+	path := osutils.Path("../test_data/shell/echo")
+	os.Chdir(path)
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"delete", "--dry-run", "--all"})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	as.Equal("", DeleteAllOptions.FilePath)
+	as.Equal(true, DeleteAllOptions.All)
+	as.Equal("default", DeleteAllOptions.Namespace)
+
+}
+
+func TestDeleteCommandWithFunctionName(t *testing.T) {
+	clearDeleteOptions()
+	actualKubectlExecForString, actualKubectlExecForBytes := kubectl.EXEC_FOR_STRING, kubectl.EXEC_FOR_BYTES
+	defer func() {
+		kubectl.EXEC_FOR_STRING = actualKubectlExecForString
+		kubectl.EXEC_FOR_BYTES = actualKubectlExecForBytes
+	}()
+
+	getFunctionCount := 0;
+	deleteFunctionCount := 0;
+	deleteTopicCount := 0;
+	kubectl.EXEC_FOR_BYTES = func(cmdArgs []string) ([]byte, error) {
+
+		response := ([]byte)(
+			`{
+				"apiVersion": "projectriff.io/v1",
+				"kind": "Function",
+				"metadata": {},
+				"spec": {
+					"container": {
+					"image": "test/echo:0.0.1"
+					},
+					"input": "myInputTopic",
+					"output": "myOutputTopic",
+					"protocol": "grpc"
+				}
+			}`)
+		getFunctionCount = getFunctionCount + 1;
+		return response, nil
+	}
+
+	kubectl.EXEC_FOR_STRING = func(cmdArgs []string) (string, error) {
+		if (cmdArgs[1] == "function") {
+			deleteFunctionCount = deleteFunctionCount + 1
+			return fmt.Sprintf("function %s deleted.", cmdArgs[2]), nil
+		} else if (cmdArgs[1] == "topic") {
+			deleteTopicCount = deleteTopicCount + 1
+			return fmt.Sprintf("topic %s deleted.", cmdArgs[2]), nil
+		}
+		return "",nil
+	}
+
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"delete", "--all", "--name", "echo"})
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	as.Equal(1, getFunctionCount)
+	as.Equal(1, deleteFunctionCount)
+	as.Equal(2, deleteTopicCount)
 }
 
 func TestDeleteCommandWithNamespace(t *testing.T) {
@@ -91,4 +175,6 @@ func TestDeleteCommandWithNamespace(t *testing.T) {
 
 func clearDeleteOptions() {
 	DeleteAllOptions = options.DeleteAllOptions{}
+	deleteCmd.ResetFlags()
+	utils.CreateDeleteFlags(deleteCmd.Flags())
 }

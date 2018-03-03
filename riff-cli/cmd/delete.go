@@ -29,6 +29,7 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/riff-cli/pkg/jsonpath"
 	"github.com/spf13/cobra"
 )
 
@@ -52,6 +53,7 @@ var deleteCmd = &cobra.Command{
 
 		if !DeleteAllOptions.Initialized {
 			utils.MergeDeleteOptions(*cmd.Flags(), &DeleteAllOptions)
+
 			if len(args) > 0 {
 				if len(args) == 1 && DeleteAllOptions.FilePath == "" {
 					DeleteAllOptions.FilePath = args[0]
@@ -61,11 +63,15 @@ var deleteCmd = &cobra.Command{
 					os.Exit(1)
 				}
 			}
-
-			err := options.ValidateNamePathOptions(&DeleteAllOptions.FunctionName, &DeleteAllOptions.FilePath)
-			if err != nil {
-				ioutils.Error(err)
-				os.Exit(1)
+			/*
+			 * If name and no file path given, skip this step
+			 */
+			if DeleteAllOptions.FilePath != ""  && DeleteAllOptions.FunctionName == "" {
+				err := options.ValidateNamePathOptions(&DeleteAllOptions.FunctionName, &DeleteAllOptions.FilePath)
+				if err != nil {
+					ioutils.Error(err)
+					os.Exit(1)
+				}
 			}
 		}
 		DeleteAllOptions.Initialized = true
@@ -74,13 +80,22 @@ var deleteCmd = &cobra.Command{
 
 func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 
-	if opts.FunctionName == "" {
-		var err error
-		opts.FunctionName, err = functions.FunctionNameFromPath(opts.FilePath)
-		if err != nil {
+	var cmdArgs []string
+	var message string
+
+	if opts.FilePath == "" && opts.FunctionName != "" {
+		err :=  deleteFunctionByName(opts)
+		if err !=nil {
 			cmd.SilenceUsage = true
-			return err
 		}
+		return err
+	}
+
+	var err error
+	opts.FunctionName, err = functions.FunctionNameFromPath(opts.FilePath)
+	if err != nil {
+		cmd.SilenceUsage = true
+		return err
 	}
 
 	abs, err := functions.AbsPath(opts.FilePath)
@@ -89,48 +104,89 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 		return err
 	}
 
-	var cmdArgs []string
-	var message string
-
 	if opts.All {
 		optionPath := opts.FilePath
 		if !osutils.IsDirectory(abs) {
 			abs = filepath.Dir(abs)
 			optionPath = filepath.Dir(optionPath)
 		}
-		message = fmt.Sprintf("Deleting %v resources\n\n", optionPath)
+		message = fmt.Sprintf("Deleting resources %v\n\n", optionPath)
 		resourceDefinitionPaths, err := osutils.FindRiffResourceDefinitionPaths(abs)
 		if err != nil {
 			return err
 		}
+
 		cmdArgs = []string{"delete", "--namespace", opts.Namespace}
 		for _, resourceDefinitionPath := range resourceDefinitionPaths {
 			cmdArgs = append(cmdArgs, "-f", resourceDefinitionPath)
 		}
 	} else {
 		if osutils.IsDirectory(abs) {
-			message = fmt.Sprintf("Deleting %v function\n\n", opts.FunctionName)
+			message = fmt.Sprintf("Deleting function %v\n\n", opts.FunctionName)
 			cmdArgs = []string{"delete", "--namespace", opts.Namespace, "function", opts.FunctionName}
 		} else {
-			message = fmt.Sprintf("Deleting %v resource\n\n", opts.FilePath)
+			message = fmt.Sprintf("Deleting resource %v\n\n", opts.FilePath)
 			cmdArgs = []string{"delete", "--namespace", opts.Namespace, "-f", opts.FilePath}
 		}
 	}
 
-	if opts.DryRun {
+	err = deleteResources(cmdArgs, message, opts.DryRun)
+
+	if err != nil {
+		cmd.SilenceUsage = true
+	}
+	return err
+}
+
+func deleteFunctionByName(opts options.DeleteOptions) error {
+	json, err := kubectl.EXEC_FOR_BYTES([]string{"get", "function", opts.FunctionName, "-o", "json"})
+	if err != nil {
+		return err
+	}
+
+	err = deleteFunction(opts.FunctionName, opts)
+	if err != nil {
+		return err
+	}
+
+	if opts.All {
+		parser := jsonpath.NewParser(json)
+		inputTopic := parser.Value(`$.spec.input+`)
+		outputTopic := parser.Value(`$.spec.output+`)
+		if inputTopic !="" {
+			err = deleteTopic(inputTopic, opts)
+		}
+		if outputTopic !="" {
+			err = deleteTopic(outputTopic, opts)
+		}
+	}
+	return err
+}
+
+func deleteTopic(topic string, opts options.DeleteOptions) error {
+	cmdArgs := []string{"delete", "topic", topic, "--namespace", opts.Namespace}
+	return deleteResources(cmdArgs, fmt.Sprintf("Deleting topic %v\n\n", topic), opts.DryRun)
+}
+
+func deleteFunction(function string, opts options.DeleteOptions) error {
+	cmdArgs := []string{"delete", "function", function, "--namespace", opts.Namespace}
+	return deleteResources(cmdArgs,  fmt.Sprintf("Deleting function %v\n\n", function), opts.DryRun)
+}
+
+func deleteResources(cmdArgs []string, message string, dryRun bool ) error {
+	if (dryRun) {
 		fmt.Printf("\nDelete Command: kubectl %s\n\n", strings.Trim(fmt.Sprint(cmdArgs), "[]"))
 	} else {
 		fmt.Print(message)
-		output, err := kubectl.ExecForString(cmdArgs)
+		output, err := kubectl.EXEC_FOR_STRING(cmdArgs)
 		if err != nil {
-			cmd.SilenceUsage = true
 			return err
 		}
 		fmt.Printf("%v\n", output)
 	}
-
 	return nil
 }
+
 
 func init() {
 	rootCmd.AddCommand(deleteCmd)
