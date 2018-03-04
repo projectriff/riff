@@ -141,6 +141,9 @@ var initPythonCmd = &cobra.Command{
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		opts.InitOptions.Handler = utils.GetHandler(cmd)
+		if opts.InitOptions.Handler == "" {
+			opts.InitOptions.Handler = opts.InitOptions.FunctionName
+		}
 		err := initializers.Python().Initialize(opts.InitOptions)
 		if err != nil {
 			return err
@@ -162,5 +165,4 @@ func init() {
 	initJavaCmd.MarkFlagRequired("handler")
 
 	initPythonCmd.Flags().String("handler", "", "the name of the function handler")
-	initPythonCmd.MarkFlagRequired("handler")
 }
