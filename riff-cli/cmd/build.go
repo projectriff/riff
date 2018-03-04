@@ -38,7 +38,11 @@ var buildCmd = &cobra.Command{
   and version specified for the image that is built.`,
 	Example: `  riff build -n <name> -v <version> -f <path> [--push]`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return build(options.GetBuildOptions(opts.CreateOptions))
+		err :=  build(options.GetBuildOptions(opts.CreateOptions))
+		if (err != nil) {
+			cmd.SilenceUsage = true
+		}
+		return err
 	},
 	//TODO: DRY
 	PreRun: func(cmd *cobra.Command, args []string) {
@@ -78,21 +82,11 @@ func build(opts options.BuildOptions) error {
 	}
 
 	fmt.Println("Building image ...")
-	out, err := docker.Exec(buildArgs)
-	if err != nil {
-		ioutils.Errorf("Error %v\n", err)
-		return err
-	}
-	fmt.Println(out)
+	 docker.Exec(buildArgs)
 
 	if opts.Push {
 		fmt.Println("Pushing image...")
-		out, err = docker.Exec(pushArgs)
-		if err != nil {
-			ioutils.Errorf("Error %v\n", err)
-			return err
-		}
-		fmt.Println(out)
+		docker.Exec(pushArgs)
 	}
 
 	return nil
