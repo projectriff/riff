@@ -120,6 +120,9 @@ var createPythonCmd = &cobra.Command{
 
 	PreRun: func(cmd *cobra.Command, args []string) {
 		opts.Handler = utils.GetHandler(cmd)
+		if opts.Handler == "" {
+			opts.Handler = opts.CreateOptions.FunctionName
+		}
 		createPythonChainCmd.PreRun(cmd, args)
 	},
 	RunE: createPythonChainCmd.RunE,
@@ -141,5 +144,4 @@ func init() {
 	createJavaCmd.MarkFlagRequired("handler")
 
 	createPythonCmd.Flags().String("handler", "", "the name of the function handler")
-	createPythonCmd.MarkFlagRequired("handler")
 }

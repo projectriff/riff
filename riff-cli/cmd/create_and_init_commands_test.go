@@ -100,6 +100,16 @@ func TestCreatePythonCommand(t *testing.T) {
 	as.Equal("process", opts.Handler)
 }
 
+func TestCreatePythonCommandWithDefaultHandler(t *testing.T) {
+	clearAll()
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"create", "python", "--dry-run", "-f", osutils.Path("../test_data/python/demo"), "-v", "0.0.1-snapshot"})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+	as.Equal("demo", opts.Handler)
+}
+
 func TestInitCommandImplicitPath(t *testing.T) {
 	clearAll()
 	as := assert.New(t)
@@ -209,7 +219,5 @@ func clearAllFlags() {
 	initPythonCmd.Flags().String("handler", "", "the name of the function handler")
 	initPythonCmd.MarkFlagRequired("handler")
 	createPythonCmd.Flags().String("handler", "", "the name of the function handler")
-	createPythonCmd.MarkFlagRequired("handler")
-
 
 }
