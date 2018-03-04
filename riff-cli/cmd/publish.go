@@ -35,6 +35,7 @@ import (
 
 type PublishOptions struct {
 	namespace string
+	contentType string
 	input string
 	data  string
 	reply bool
@@ -50,9 +51,14 @@ var publishCmd = &cobra.Command{
 	Short: "Publish data to a topic using the http-gateway",
 	Long: `Publish data to a topic using the http-gateway. For example:
 
-    riff publish -i greetings -d hello -r
-
+	riff publish -i greetings -d hello -r
+	
 will post 'hello' to the 'greetings' topic and wait for a reply.
+
+	riff publish --content-type application/json -i concat -r -d '{"hello":"world"}'
+
+will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply.
+
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -133,7 +139,7 @@ func publish(ipAddress string, port string) {
 
 	for i := 0; i < publishOptions.count; i++ {
 
-		resp, err := http.Post(url, "text/plain", strings.NewReader(publishOptions.data))
+		resp, err := http.Post(url, publishOptions.contentType, strings.NewReader(publishOptions.data))
 		if err != nil {
 			panic(err)
 		}
@@ -169,8 +175,8 @@ func init() {
 	publishCmd.Flags().BoolVarP(&publishOptions.reply, "reply", "r", false, "wait for a reply containing the results of the function execution")
 	publishCmd.Flags().IntVarP(&publishOptions.count, "count", "c", 1, "the number of times to post the data")
 	publishCmd.Flags().IntVarP(&publishOptions.pause, "pause", "p", 0, "the number of seconds to wait between postings")
-
 	publishCmd.Flags().StringP("namespace", "", "default", "the namespace of the http-gateway")
+	publishCmd.Flags().StringVarP(&publishOptions.contentType,"content-type", "", "text/plain", "the content type")
 
 	publishCmd.MarkFlagRequired("data")
 
