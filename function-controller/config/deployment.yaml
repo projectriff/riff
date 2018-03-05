@@ -31,7 +31,7 @@ spec:
           timeoutSeconds: 5
         env:
         - name: KAFKA_BROKERS
-          value: kafka:9092
+          value: kafka.riff-system:9092
         - name: RIFF_FUNCTION_SIDECAR_TAG
           value: 0.0.5-snapshot
       serviceAccountName: riff-sa

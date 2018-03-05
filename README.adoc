@@ -48,9 +48,18 @@ make dockerize
 
 === Deploy Kafka
 
+Create the `riff-system` namespace:
+
 [source, bash]
 ----
-kubectl apply -f config/kafka
+kubectl create namespace riff-system
+----
+
+Install the kafka/zookeeper deployments and services:
+
+[source, bash]
+----
+kubectl apply -n riff-system -f config/kafka
 ----
 
 === Deploy the riff Custom Resource Definitions and deploy the riff core components
