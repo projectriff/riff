@@ -50,7 +50,7 @@ make dockerize
 
 [source, bash]
 ----
-kubectl apply -f config/kafka
+kubectl apply -n riff-system -f config/kafka
 ----
 
 === Deploy the riff Custom Resource Definitions and deploy the riff core components

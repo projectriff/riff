@@ -31,5 +31,5 @@ spec:
           timeoutSeconds: 5
         env:
         - name: KAFKA_ZK_NODES
-          value: zookeeper:2181
+          value: zookeeper.riff-system:2181
       serviceAccountName: riff-sa

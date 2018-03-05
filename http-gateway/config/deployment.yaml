@@ -27,4 +27,4 @@ spec:
           periodSeconds: 5
         env:
         - name: KAFKA_BROKERS
-          value: kafka:9092
+          value: kafka.riff-system:9092
