@@ -26,7 +26,7 @@ debug-dockerize: $(GO_SOURCES) ../vendor
 	# Need to remove probes as delve starts app in paused state
 	-kubectl patch deploy/http-gateway --type=json -p='[{"op":"remove", "path":"/spec/template/spec/containers/0/livenessProbe"}]'
 	-kubectl patch deploy/http-gateway --type=json -p='[{"op":"remove", "path":"/spec/template/spec/containers/0/readinessProbe"}]'
-	docker build . -t projectriff/http-gateway:$(TAG) -f Dockerfile-debug
+	docker build .. --build-arg COMPONENT=http-gateway -t projectriff/http-gateway:$(TAG) -f ../Dockerfile-debug
 
 ../vendor: ../glide.lock
 	cd .. && glide install -v --force
