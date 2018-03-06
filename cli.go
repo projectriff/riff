@@ -18,8 +18,12 @@ package main
 
 import (
 	"github.com/projectriff/riff/riff-cli/cmd"
+	"github.com/projectriff/riff/riff-cli/global"
 )
 
+var version = "Unknown"
+
 func main() {
+	global.CLI_VERSION = version
 	cmd.Execute()
 }

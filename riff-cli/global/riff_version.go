@@ -16,6 +16,6 @@
 
 package global
 
-var CLI_VERSION = "0.0.5-snapshot"
+var CLI_VERSION string
 
 var RIFF_VERSION = "latest"
