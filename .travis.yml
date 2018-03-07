@@ -1,31 +1,30 @@
 language: go
 go:
   - "1.9"
-script: make test
 matrix:
   include:
     - stage: test
-      before_script: cd function-controller
+      script: cd function-controller && make test
     - stage: test
       sudo: required
       env:
         - KAFKA_BROKER=localhost:9092
       before_install:
         - ./.travis.install-kafka.sh
-      before_script: cd function-sidecar
+      script: cd function-sidecar && make test
     - stage: test
-      before_script: cd http-gateway
+      script: cd http-gateway && make test
     - stage: test
       sudo: required
       env:
         - KAFKA_BROKERS=localhost:9092
       before_install:
         - ./.travis.install-kafka.sh
-      before_script: cd message-transport
+      script: cd message-transport && make test
     - stage: test
-      before_script: cd riff-cli
+      script: cd riff-cli && make test verify-docs
     - stage: test
-      before_script: cd topic-controller
+      script: cd topic-controller && make test
     - stage: publish
       sudo: required
       services:
