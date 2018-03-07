@@ -1,4 +1,4 @@
-.PHONY: build clean test release
+.PHONY: build clean test release verify-docs
 OUTPUT = riff
 OUTPUT_WINDOWS = $(OUTPUT).exe
 GO_SOURCES = $(shell find cmd pkg -type f -name '*.go')
@@ -16,6 +16,12 @@ release: $(GO_SOURCES) ../vendor
 	GOOS=darwin   GOARCH=amd64 go build -ldflags "-X main.version=$(VERSION)" -o $(OUTPUT) ../cli.go && tar -czf riff-darwin-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
 	GOOS=linux    GOARCH=amd64 go build -ldflags "-X main.version=$(VERSION)" -o $(OUTPUT) ../cli.go && tar -czf riff-linux-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
 	GOOS=windows  GOARCH=amd64 go build -ldflags "-X main.version=$(VERSION)" -o $(OUTPUT_WINDOWS) ../cli.go && zip -mq riff-windows-amd64.zip $(OUTPUT_WINDOWS)
+
+docs: build
+	riff docs
+
+verify-docs: docs
+	git diff --exit-code docs
 
 clean:
 	rm -f $(OUTPUT)
