@@ -91,13 +91,7 @@ func Path(filename string) string {
 
 func ExecWaitAndStreamOutput(cmdName string, cmdArgs []string) {
 
-	cmd := exec.Command(cmdName, cmdArgs...)
-	stdout, _ := cmd.StdoutPipe()
-	stderr, _ := cmd.StderrPipe()
-	cmd.Start()
-	print(bufio.NewScanner(stdout),"[STDOUT]")
-	print(bufio.NewScanner(stderr),"[STDERR]")
-	cmd.Wait()
+	ExecWaitAndHandleStreams(cmdName, cmdArgs, print, print)
 }
 
 func ExecWaitAndHandleStreams(cmdName string, cmdArgs []string, stdoutHandler func(io.ReadCloser),
@@ -117,12 +111,13 @@ func ExecWaitAndHandleStreams(cmdName string, cmdArgs []string, stdoutHandler fu
 }
 
 
-// to print the processed information when stdout gets a new line
-func print(scanner *bufio.Scanner, prefix string) {
+// to print the processed information when reader gets a new line
+func print(reader io.ReadCloser) {
+	scanner := bufio.NewScanner(reader)
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		line := scanner.Text()
-		fmt.Printf("%s %s\n",prefix, line)
+		fmt.Println(line)
 	}
 }
 
@@ -139,7 +134,7 @@ func Exec(cmdName string, cmdArgs []string, timeout time.Duration) ([]byte, erro
 	// This time we can simply use Output() to get the result.
 	out, err := cmd.Output()
 	if err != nil {
-		ioutils.Error(fmt.Sprint(err) + ": " + stderr.String())
+		return nil, err
 	}
 
 	// We want to check the context error to see if the timeout was executed.

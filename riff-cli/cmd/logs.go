@@ -18,17 +18,10 @@ package cmd
 
 import (
 	"fmt"
-	"os/exec"
-	"os"
-	"bufio"
-
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
-	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
-	"github.com/projectriff/riff/riff-cli/pkg/osutils"
-	"io"
-	"github.com/juju/errgo/errors"
+	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 )
 
 type LogsOptions struct {
@@ -60,71 +53,21 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 
 		cmdArgs := []string{"--namespace", logsOptions.namespace, "get", "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.name}"}
 
-		var output string
-
-		var err error
-		osutils.ExecWaitAndHandleStreams("kubectl", cmdArgs, func(stdout io.ReadCloser) {
-			scanner := bufio.NewScanner(stdout)
-			scanner.Scan()
-			output = scanner.Text()
-		}, func(stderr io.ReadCloser) {
-			scanner := bufio.NewScanner(stderr)
-			scanner.Scan()
-			if scanner.Text() != "" {
-				err = errors.New("Unable to query function pod")
-			}
-		})
+		output, err := kubectl.EXEC_FOR_STRING(cmdArgs)
 
 		if err != nil {
-			ioutils.Errorf("Error: %v - Function %v may not be currently active\n\n", err, logsOptions.function)
+			ioutils.Errorf("Unable to query function pod - Function %v may not be currently active\n\n", logsOptions.function)
 			return
 		}
 
 		pod := output
 
+		cmdArgs = []string{"--namespace", logsOptions.namespace, "logs", "-c", logsOptions.container, pod}
 		if logsOptions.tail {
-
-			cmdArgs = []string{"--namespace", logsOptions.namespace, "logs", "-c", logsOptions.container, "-f", pod}
-
-			kubectlCmd := exec.Command("kubectl", cmdArgs...)
-			cmdReader, err := kubectlCmd.StdoutPipe()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for kubectlCmd", err)
-				return
-			}
-
-			err = kubectlCmd.Start()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "Error starting kubectlCmd", err)
-				return
-			}
-
-			scanner := bufio.NewScanner(cmdReader)
-			for scanner.Scan() {
-				fmt.Printf("%s\n\n", scanner.Text())
-			}
-
-			err = kubectlCmd.Wait()
-
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "Error waiting for kubectlCmd", err)
-				return
-			}
-
-		} else {
-
-			cmdArgs = []string{"--namespace", logsOptions.namespace, "logs", "-c", logsOptions.container, pod}
-
-			output, err := kubectl.ExecForString(cmdArgs)
-
-			if err != nil {
-				ioutils.Errorf("Error: %v\n", err)
-				return
-			}
-
-			fmt.Printf("%v\n", output)
+			cmdArgs = append(cmdArgs,"-f")
 		}
 
+		kubectl.ExecAndWait(cmdArgs)
 	},
 }
 
