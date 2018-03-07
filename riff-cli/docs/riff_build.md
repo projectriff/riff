@@ -6,7 +6,7 @@ Build a function container
 
 
 Build the function based on the code available in the path directory, using the name
-  and version specified for the image that is built.
+and version specified for the image that is built.
 
 ```
 riff build [flags]
@@ -26,7 +26,7 @@ riff build [flags]
   -h, --help                  help for build
   -n, --name string           the name of the function (defaults to the name of the current directory)
       --push                  push the image to Docker registry
-      --riff-version string   the version of riff to use when building containers (default "0.0.4")
+      --riff-version string   the version of riff to use when building containers (default "latest")
   -u, --useraccount string    the Docker user account to be used for the image repository (default "current OS user")
   -v, --version string        the version of the function image (default "0.0.1")
 ```
