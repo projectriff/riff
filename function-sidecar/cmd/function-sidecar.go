@@ -24,18 +24,17 @@ import (
 	"syscall"
 
 	"flag"
+	"io"
+	"strings"
+
+	"github.com/Shopify/sarama"
+	"github.com/bsm/sarama-cluster"
+	"github.com/projectriff/riff/function-sidecar/pkg/carrier"
 	dispatch "github.com/projectriff/riff/function-sidecar/pkg/dispatcher"
 	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher/grpc"
 	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher/http"
-	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher/pipes"
-	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher/stdio"
-	"io"
-	"strings"
 	"github.com/projectriff/riff/message-transport/pkg/transport"
 	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
-	"github.com/bsm/sarama-cluster"
-	"github.com/Shopify/sarama"
-	"github.com/projectriff/riff/function-sidecar/pkg/carrier"
 )
 
 type stringSlice []string
@@ -58,7 +57,7 @@ func init() {
 	flag.Var(&inputs, "inputs", "kafka topic(s) to listen to, as input for the function")
 	flag.Var(&outputs, "outputs", "kafka topic(s) to write to with results from the function")
 	flag.StringVar(&group, "group", "", "kafka consumer group to act as")
-	flag.StringVar(&protocol, "protocol", "", "dispatcher protocol to use. One of [http, grpc, stdio]")
+	flag.StringVar(&protocol, "protocol", "", "dispatcher protocol to use. One of [http, grpc]")
 }
 
 func main() {
@@ -125,14 +124,6 @@ func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
 	switch protocol {
 	case "http":
 		return dispatch.NewWrapper(http.NewHttpDispatcher())
-	case "pipes":
-		return pipes.NewPipesDispatcher()
-	case "stdio":
-		d, err := stdio.NewStdioDispatcher()
-		if err != nil {
-			return nil, err
-		}
-		return dispatch.NewWrapper(d)
 	case "grpc":
 		return grpc.NewGrpcDispatcher(10382)
 	default:

@@ -82,18 +82,12 @@ func (d *deployer) buildPodSpec(function *v1.Function) corev1.PodSpec {
 	spec := corev1.PodSpec{
 		Containers: []corev1.Container{d.buildMainContainer(function), d.buildSidecarContainer(function)},
 	}
-	if needsVolume(function) {
-		spec.Volumes = []corev1.Volume{corev1.Volume{Name: "pipes", VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}}}}
-	}
 	return spec
 }
 
 func (d *deployer) buildMainContainer(function *v1.Function) corev1.Container {
 	c := function.Spec.Container
 	c.Name = "main"
-	if needsVolume(function) {
-		c.VolumeMounts = []corev1.VolumeMount{corev1.VolumeMount{Name: "pipes", MountPath: "/pipes"}}
-	}
 	return c
 }
 
@@ -111,14 +105,7 @@ func (d *deployer) buildSidecarContainer(function *v1.Function) corev1.Container
 		"--protocol", function.Spec.Protocol,
 		"--brokers", strings.Join(d.brokers, ","),
 	}
-	if needsVolume(function) {
-		c.VolumeMounts = []corev1.VolumeMount{corev1.VolumeMount{Name: "pipes", MountPath: "/pipes"}}
-	}
 	return c
-}
-
-func needsVolume(function *v1.Function) bool {
-	return function.Spec.Protocol == "pipes" || function.Spec.Protocol == "stdio"
 }
 
 func (d *deployer) Undeploy(function *v1.Function) error {
