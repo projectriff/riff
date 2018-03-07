@@ -26,48 +26,36 @@ import (
 	"github.com/projectriff/riff/riff-cli/global"
 )
 
-var cfgFile string
+type config struct {
+	file string
+}
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "riff",
-	Short: "Commands for creating and managing function resources",
-	Long: `riff is for functions
+func Root() *cobra.Command {
+	var cfg config
+
+
+	// rootCmd represents the base command when called without any subcommands
+	var rootCmd = &cobra.Command{
+		Use:   "riff",
+		Short: "Commands for creating and managing function resources",
+		Long: `riff is for functions
 
 the riff tool is used to create and manage function resources for the riff FaaS platform https://projectriff.io/`,
-	SilenceErrors: true,
-	DisableAutoGenTag: true,
-}
-
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		SilenceErrors: true,
+		DisableAutoGenTag: true,
 	}
-}
 
-func init() {
-
-	cobra.OnInitialize(initConfig)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.riff.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	cobra.OnInitialize(cfg.initConfig, initGlobal)
+	rootCmd.PersistentFlags().StringVar(&cfg.file, "config", "", "config file (default is $HOME/.riff.yaml)")
+	return rootCmd
 }
 
 // initConfig reads in config file and ENV variables if set.
-func initConfig() {
+func (c config) initConfig() {
 
-	if cfgFile != "" {
+	if c.file != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		viper.SetConfigFile(c.file)
 	} else {
 		// Find home directory.
 		home, err := homedir.Dir()
@@ -86,11 +74,9 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	viper.ReadInConfig()
-
-	InitGlobal()
 }
 
-func InitGlobal() {
+func initGlobal() {
 
 	if os.Getenv("RIFF_VERSION") != "" {
 		global.RIFF_VERSION = os.Getenv("RIFF_VERSION")

@@ -23,20 +23,19 @@ import (
 	"github.com/projectriff/riff/riff-cli/global"
 )
 
-// versionCmd represents the version command
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Display the riff version",
-	Long: `Display the riff version`,
-	Example: `  riff version`,
+func Version() *cobra.Command {
+	// versionCmd represents the version command
+	var versionCmd = &cobra.Command{
+		Use:     "version",
+		Short:   "Display the riff version",
+		Long:    `Display the riff version`,
+		Example: `  riff version`,
 
-	Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *cobra.Command, args []string) {
 
-		fmt.Printf("riff CLI version: %v\n", global.CLI_VERSION)
-		fmt.Printf("riff function invoker version: %v\n", global.RIFF_VERSION)
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(versionCmd)
+			fmt.Printf("riff CLI version: %v\n", global.CLI_VERSION)
+			fmt.Printf("riff function invoker version: %v\n", global.RIFF_VERSION)
+		},
+	}
+	return versionCmd
 }

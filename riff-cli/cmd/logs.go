@@ -35,87 +35,85 @@ type LogsOptions struct {
 	tail      bool
 }
 
-var logsOptions LogsOptions
+func Logs() *cobra.Command {
 
-// logsCmd represents the logs command
-var logsCmd = &cobra.Command{
-	Use:   "logs",
-	Short: "Display the logs for a running function",
-	Long: `Display the logs for a running function For example:
+	var logsOptions LogsOptions
+
+	// logsCmd represents the logs command
+	var logsCmd = &cobra.Command{
+		Use:   "logs",
+		Short: "Display the logs for a running function",
+		Long: `Display the logs for a running function For example:
 
     riff logs -n myfunc -t
 
 will tail the logs from the 'sidecar' container for the function 'myfunc'
 
 `,
-	Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *cobra.Command, args []string) {
 
-		// get the viper value from env var, config file or flag option
-		logsOptions.namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
+			// get the viper value from env var, config file or flag option
+			logsOptions.namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
 
-		fmt.Printf("Displaying logs for container %v of function %v in namespace %v\n\n", logsOptions.container, logsOptions.function, logsOptions.namespace)
+			fmt.Printf("Displaying logs for container %v of function %v in namespace %v\n\n", logsOptions.container, logsOptions.function, logsOptions.namespace)
 
-		cmdArgs := []string{"--namespace", logsOptions.namespace, "get", "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.name}"}
-
-		output, err := kubectl.ExecForString(cmdArgs)
-
-		if err != nil {
-			ioutils.Errorf("Error %v - Function %v may not be currently active\n\n", err, logsOptions.function)
-			return
-		}
-
-		pod := output
-
-		if logsOptions.tail {
-
-			cmdArgs = []string{"--namespace", logsOptions.namespace, "logs", "-c", logsOptions.container, "-f", pod}
-
-			kubectlCmd := exec.Command("kubectl", cmdArgs...)
-			cmdReader, err := kubectlCmd.StdoutPipe()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for kubectlCmd", err)
-				return
-			}
-
-			scanner := bufio.NewScanner(cmdReader)
-			go func() {
-				for scanner.Scan() {
-					fmt.Printf("%s\n\n", scanner.Text())
-				}
-			}()
-
-			err = kubectlCmd.Start()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "Error starting kubectlCmd", err)
-				return
-			}
-
-			err = kubectlCmd.Wait()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "Error waiting for kubectlCmd", err)
-				return
-			}
-
-		} else {
-
-			cmdArgs = []string{"--namespace", logsOptions.namespace, "logs", "-c", logsOptions.container, pod}
+			cmdArgs := []string{"--namespace", logsOptions.namespace, "get", "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.name}"}
 
 			output, err := kubectl.ExecForString(cmdArgs)
 
 			if err != nil {
-				ioutils.Errorf("Error: %v\n", err)
+				ioutils.Errorf("Error %v - Function %v may not be currently active\n\n", err, logsOptions.function)
 				return
 			}
 
-			fmt.Printf("%v\n", output)
-		}
+			pod := output
 
-	},
-}
+			if logsOptions.tail {
 
-func init() {
-	rootCmd.AddCommand(logsCmd)
+				cmdArgs = []string{"--namespace", logsOptions.namespace, "logs", "-c", logsOptions.container, "-f", pod}
 
+				kubectlCmd := exec.Command("kubectl", cmdArgs...)
+				cmdReader, err := kubectlCmd.StdoutPipe()
+				if err != nil {
+					fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for kubectlCmd", err)
+					return
+				}
+
+				scanner := bufio.NewScanner(cmdReader)
+				go func() {
+					for scanner.Scan() {
+						fmt.Printf("%s\n\n", scanner.Text())
+					}
+				}()
+
+				err = kubectlCmd.Start()
+				if err != nil {
+					fmt.Fprintln(os.Stderr, "Error starting kubectlCmd", err)
+					return
+				}
+
+				err = kubectlCmd.Wait()
+				if err != nil {
+					fmt.Fprintln(os.Stderr, "Error waiting for kubectlCmd", err)
+					return
+				}
+
+			} else {
+
+				cmdArgs = []string{"--namespace", logsOptions.namespace, "logs", "-c", logsOptions.container, pod}
+
+				output, err := kubectl.ExecForString(cmdArgs)
+
+				if err != nil {
+					ioutils.Errorf("Error: %v\n", err)
+					return
+				}
+
+				fmt.Printf("%v\n", output)
+			}
+
+		},
+	}
 	logsCmd.Flags().StringVarP(&logsOptions.function, "name", "n", "", "the name of the function")
 	logsCmd.Flags().StringVarP(&logsOptions.container, "container", "c", "sidecar", "the name of the function container (sidecar or main)")
 	logsCmd.Flags().BoolVarP(&logsOptions.tail, "tail", "t", false, "tail the logs")
@@ -123,4 +121,5 @@ func init() {
 	logsCmd.Flags().StringP("namespace", "", "default", "the namespace used for the deployed resources")
 
 	logsCmd.MarkFlagRequired("name")
+	return logsCmd
 }

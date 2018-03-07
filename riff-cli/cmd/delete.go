@@ -31,51 +31,56 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/projectriff/riff/riff-cli/pkg/jsonpath"
 	"github.com/spf13/cobra"
+	"github.com/projectriff/riff/riff-cli/cmd/opts"
 )
 
-var DeleteAllOptions options.DeleteAllOptions
 
-// deleteCmd represents the delete command
-var deleteCmd = &cobra.Command{
-	Use:   "delete",
-	Short: "Delete function resources",
-	Long:  `Delete the resource[s] for the function or path specified.`,
-	Example: `  riff delete -n square
+func Delete() *cobra.Command {
+
+	// deleteCmd represents the delete command
+	var deleteCmd = &cobra.Command{
+		Use:   "delete",
+		Short: "Delete function resources",
+		Long:  `Delete the resource[s] for the function or path specified.`,
+		Example: `  riff delete -n square
     or
   riff delete -f function/square`,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 
-		return delete(cmd, options.GetDeleteOptions(DeleteAllOptions))
+			return delete(cmd, options.GetDeleteOptions(opts.DeleteAllOptions))
 
-	},
-	PreRun: func(cmd *cobra.Command, args []string) {
+		},
+		PreRun: func(cmd *cobra.Command, args []string) {
 
-		if !DeleteAllOptions.Initialized {
-			utils.MergeDeleteOptions(*cmd.Flags(), &DeleteAllOptions)
+			if !opts.DeleteAllOptions.Initialized {
+				utils.MergeDeleteOptions(*cmd.Flags(), &opts.DeleteAllOptions)
 
-			if len(args) > 0 {
-				if len(args) == 1 && DeleteAllOptions.FilePath == "" {
-					DeleteAllOptions.FilePath = args[0]
-				} else {
-					ioutils.Errorf("Invalid argument(s) %v\n", args)
-					cmd.Usage()
-					os.Exit(1)
+				if len(args) > 0 {
+					if len(args) == 1 && opts.DeleteAllOptions.FilePath == "" {
+						opts.DeleteAllOptions.FilePath = args[0]
+					} else {
+						ioutils.Errorf("Invalid argument(s) %v\n", args)
+						cmd.Usage()
+						os.Exit(1)
+					}
+				}
+				/*
+				 * If name and no file path given, skip this step
+				 */
+				if opts.DeleteAllOptions.FilePath != "" && opts.DeleteAllOptions.FunctionName == "" {
+					err := options.ValidateNamePathOptions(&opts.DeleteAllOptions.FunctionName, &opts.DeleteAllOptions.FilePath)
+					if err != nil {
+						ioutils.Error(err)
+						os.Exit(1)
+					}
 				}
 			}
-			/*
-			 * If name and no file path given, skip this step
-			 */
-			if DeleteAllOptions.FilePath != ""  && DeleteAllOptions.FunctionName == "" {
-				err := options.ValidateNamePathOptions(&DeleteAllOptions.FunctionName, &DeleteAllOptions.FilePath)
-				if err != nil {
-					ioutils.Error(err)
-					os.Exit(1)
-				}
-			}
-		}
-		DeleteAllOptions.Initialized = true
-	},
+			opts.DeleteAllOptions.Initialized = true
+		},
+	}
+	utils.CreateDeleteFlags(deleteCmd.Flags())
+	return deleteCmd
 }
 
 func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
@@ -84,8 +89,8 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 	var message string
 
 	if opts.FilePath == "" && opts.FunctionName != "" {
-		err :=  deleteFunctionByName(opts)
-		if err !=nil {
+		err := deleteFunctionByName(opts)
+		if err != nil {
 			cmd.SilenceUsage = true
 		}
 		return err
@@ -103,7 +108,6 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 		cmd.SilenceUsage = true
 		return err
 	}
-
 
 	if opts.All {
 		optionPath := opts.FilePath
@@ -159,10 +163,10 @@ func deleteFunctionByName(opts options.DeleteOptions) error {
 		parser := jsonpath.NewParser(json)
 		inputTopic := parser.Value(`$.spec.input+`)
 		outputTopic := parser.Value(`$.spec.output+`)
-		if inputTopic !="" {
+		if inputTopic != "" {
 			err = deleteTopic(inputTopic, opts)
 		}
-		if outputTopic !="" {
+		if outputTopic != "" {
 			err = deleteTopic(outputTopic, opts)
 		}
 	}
@@ -176,10 +180,10 @@ func deleteTopic(topic string, opts options.DeleteOptions) error {
 
 func deleteFunction(function string, opts options.DeleteOptions) error {
 	cmdArgs := []string{"delete", "function", function, "--namespace", opts.Namespace}
-	return deleteResources(cmdArgs,  fmt.Sprintf("Deleting function %v\n\n", function), opts.DryRun)
+	return deleteResources(cmdArgs, fmt.Sprintf("Deleting function %v\n\n", function), opts.DryRun)
 }
 
-func deleteResources(cmdArgs []string, message string, dryRun bool ) error {
+func deleteResources(cmdArgs []string, message string, dryRun bool) error {
 	if (dryRun) {
 		fmt.Printf("\nDelete Command: kubectl %s\n\n", strings.Trim(fmt.Sprint(cmdArgs), "[]"))
 	} else {
@@ -191,10 +195,4 @@ func deleteResources(cmdArgs []string, message string, dryRun bool ) error {
 		fmt.Printf("%v\n", output)
 	}
 	return nil
-}
-
-
-func init() {
-	rootCmd.AddCommand(deleteCmd)
-	utils.CreateDeleteFlags(deleteCmd.Flags())
 }

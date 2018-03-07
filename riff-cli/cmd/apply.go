@@ -31,40 +31,45 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// applyCmd represents the apply command
-var applyCmd = &cobra.Command{
-	Use:   "apply",
-	Short: "Apply function resource definitions",
-	Long:  `Apply the resource definition[s] included in the path. A resource will be created if it doesn't exist yet.`,
-	Example: `  riff apply -f some/function/path
+func Apply() *cobra.Command {
+	var applyCmd = &cobra.Command{
+		Use:   "apply",
+		Short: "Apply function resource definitions",
+		Long:  `Apply the resource definition[s] included in the path. A resource will be created if it doesn't exist yet.`,
+		Example: `  riff apply -f some/function/path
   riff apply -f some/function/path/some.yaml`,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return apply(cmd, options.GetApplyOptions(opts.CreateOptions))
-	},
-	PreRun: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return apply(cmd, options.GetApplyOptions(opts.CreateOptions))
+		},
+		PreRun: func(cmd *cobra.Command, args []string) {
 
-		if !opts.CreateOptions.Initialized {
-			utils.MergeApplyOptions(*cmd.Flags(), &opts.CreateOptions)
-			if len(args) > 0 {
-				if len(args) == 1 && opts.CreateOptions.FilePath == "" {
-					opts.CreateOptions.FilePath = args[0]
-				} else {
-					ioutils.Errorf("Invalid argument(s) %v\n", args)
-					cmd.Usage()
+			if !opts.CreateOptions.Initialized {
+				utils.MergeApplyOptions(*cmd.Flags(), &opts.CreateOptions)
+				if len(args) > 0 {
+					if len(args) == 1 && opts.CreateOptions.FilePath == "" {
+						opts.CreateOptions.FilePath = args[0]
+					} else {
+						ioutils.Errorf("Invalid argument(s) %v\n", args)
+						cmd.Usage()
+						os.Exit(1)
+					}
+				}
+
+				err := options.ValidateAndCleanInitOptions(&opts.CreateOptions.InitOptions)
+				if err != nil {
+					ioutils.Error(err)
 					os.Exit(1)
 				}
 			}
-
-			err := options.ValidateAndCleanInitOptions(&opts.CreateOptions.InitOptions)
-			if err != nil {
-				ioutils.Error(err)
-				os.Exit(1)
-			}
-		}
-		opts.CreateOptions.Initialized = true
-	},
+			opts.CreateOptions.Initialized = true
+		},
+	}
+	utils.CreateApplyFlags(applyCmd.Flags())
+	return applyCmd
 }
+
+
 
 func apply(cmd *cobra.Command, opts options.ApplyOptions) error {
 	abs, err := functions.AbsPath(opts.FilePath)
@@ -102,9 +107,4 @@ func apply(cmd *cobra.Command, opts options.ApplyOptions) error {
 		fmt.Printf("%v\n", output)
 	}
 	return nil
-}
-
-func init() {
-	rootCmd.AddCommand(applyCmd)
-	utils.CreateApplyFlags(applyCmd.Flags())
 }

@@ -19,11 +19,19 @@ package main
 import (
 	"github.com/projectriff/riff/riff-cli/cmd"
 	"github.com/projectriff/riff/riff-cli/global"
+	"fmt"
+	"os"
 )
 
 var version = "Unknown"
 
 func main() {
 	global.CLI_VERSION = version
-	cmd.Execute()
+
+	rootCmd := cmd.CreateAndWireRootCommand()
+
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }

@@ -25,30 +25,27 @@ import (
 )
 
 var directory string
-var createDir bool
 
-var docsCmd = &cobra.Command{
-	Use:   "docs",
-	Short: "generate riff-cli command documentation",
-	Long:  `Generate riff-cli command documentation`,
-	Hidden: true,
-	Run: func(cmd *cobra.Command, args []string) {
+func Docs(rootCmd *cobra.Command) *cobra.Command {
 
-		if !osutils.IsDirectory(directory) {
-			os.Mkdir(directory,0744)
-		}
+	var docsCmd = &cobra.Command{
+		Use:    "docs",
+		Short:  "generate riff-cli command documentation",
+		Long:   `Generate riff-cli command documentation`,
+		Hidden: true,
+		Run: func(cmd *cobra.Command, args []string) {
 
-		err := doc.GenMarkdownTree(rootCmd, directory)
-		if err != nil {
-			ioutils.Errorf("Doc generation failed %v\n", err)
-			os.Exit(1)
-		}
-	},
-}
+			if !osutils.IsDirectory(directory) {
+				os.Mkdir(directory, 0744)
+			}
 
-
-func init() {
-	rootCmd.AddCommand(docsCmd)
-	docsCmd.Flags().StringVarP(&directory, "dir", "d", osutils.Path(osutils.GetCWD()+"/docs"),"the output directory for the docs.")
-
+			err := doc.GenMarkdownTree(rootCmd, directory)
+			if err != nil {
+				ioutils.Errorf("Doc generation failed %v\n", err)
+				os.Exit(1)
+			}
+		},
+	}
+	docsCmd.Flags().StringVarP(&directory, "dir", "d", osutils.Path(osutils.GetCWD()+"/docs"), "the output directory for the docs.")
+	return docsCmd
 }

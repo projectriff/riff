@@ -21,17 +21,19 @@ import (
 	"os"
 )
 
-// completionCmd represents the completion command
-var completionCmd = &cobra.Command{
-	Use:   "completion",
-	Short: "Generates bash completion scripts",
-	Long: `Generates bash completion scripts`,
-	Hidden: true,
-	Run: func(cmd *cobra.Command, args []string) {
-		rootCmd.GenBashCompletion(os.Stdout)
-	},
+func Completion(rootCmd *cobra.Command) *cobra.Command {
+
+	// completionCmd represents the completion command
+	var completionCmd = &cobra.Command{
+		Use:   "completion",
+		Short: "Generates bash completion scripts",
+		Long: `Generates bash completion scripts`,
+		Hidden: true,
+		Run: func(cmd *cobra.Command, args []string) {
+			rootCmd.GenBashCompletion(os.Stdout)
+		},
+	}
+	return completionCmd
+
 }
 
-func init() {
-	rootCmd.AddCommand(completionCmd)
-}
