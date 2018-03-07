@@ -3,7 +3,7 @@
 [horizontal]
 *Language*:: Python
 *Function*:: link:sentiments.py[sentiments.py]
-*Protocol*:: stdio
+*Protocol*:: grpc
 *Input*:: tweets
 
 === prerequisites

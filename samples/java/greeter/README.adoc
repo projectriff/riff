@@ -3,7 +3,7 @@
 [horizontal]
 *Language*:: Java
 *Function*:: link:src/main/java/functions/Greeter.java[Greeter.java]
-*Protocol*:: pipes
+*Protocol*:: grpc
 *Input*:: names
 
 === prerequisites

@@ -17,8 +17,8 @@
 package v1
 
 import (
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kapi "k8s.io/api/core/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // +genclient
@@ -37,7 +37,7 @@ type Function struct {
 // Spec (what the user wants) for a function.
 type FunctionSpec struct {
 
-	// Protocol used to communicate between the sidecar and the invoker (eg http, grpc, pipes).
+	// Protocol used to communicate between the sidecar and the invoker (eg http, grpc).
 	Protocol string `json:"protocol"`
 
 	// The name of the topic the function is monitoring for input messages.
@@ -58,7 +58,6 @@ type FunctionSpec struct {
 
 	// Container definition to use for the function.
 	Container kapi.Container `json:"container"`
-
 }
 
 // Status (computed) for a function

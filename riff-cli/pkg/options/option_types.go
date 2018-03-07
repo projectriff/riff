@@ -15,7 +15,7 @@
  */
 package options
 
-var SupportedProtocols = []string{"stdio", "http", "grpc"}
+var SupportedProtocols = []string{"http", "grpc"}
 
 type InitOptions struct {
 	FunctionName string
@@ -92,8 +92,8 @@ func (this DeleteOptions) GetAll() bool {
 
 type CreateOptions struct {
 	InitOptions
-	Namespace    string
-	Push        bool
+	Namespace string
+	Push      bool
 }
 
 type DeleteAllOptions struct {
@@ -107,12 +107,12 @@ type DeleteAllOptions struct {
 
 type ImageOptions interface {
 	GetFunctionName() string
-	GetVersion()      string
-	GetUserAccount()  string
+	GetVersion() string
+	GetUserAccount() string
 }
 
 func GetApplyOptions(opts CreateOptions) ApplyOptions {
-	return ApplyOptions{FilePath:opts.FilePath, Namespace:opts.Namespace, DryRun:opts.DryRun}
+	return ApplyOptions{FilePath: opts.FilePath, Namespace: opts.Namespace, DryRun: opts.DryRun}
 }
 
 func GetDeleteOptions(opts DeleteAllOptions) DeleteOptions {
@@ -134,6 +134,3 @@ func GetBuildOptions(opts CreateOptions) BuildOptions {
 		DryRun:       opts.DryRun,
 	}
 }
-
-
-
