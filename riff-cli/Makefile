@@ -18,7 +18,7 @@ release: $(GO_SOURCES) ../vendor
 	GOOS=windows  GOARCH=amd64 go build -ldflags "-X main.version=$(VERSION)" -o $(OUTPUT_WINDOWS) ../cli.go && zip -mq riff-windows-amd64.zip $(OUTPUT_WINDOWS)
 
 docs: build
-	riff docs
+	./$(OUTPUT) docs
 
 verify-docs: docs
 	git diff --exit-code docs
