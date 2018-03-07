@@ -6,7 +6,7 @@ Build a function container
 
 
 Build the function based on the code available in the path directory, using the name
-  and version specified for the image that is built.
+and version specified for the image that is built.
 
 ```
 riff build [flags]
