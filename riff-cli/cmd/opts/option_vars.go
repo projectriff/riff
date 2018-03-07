@@ -16,10 +16,13 @@
 
 package opts
 
-import "github.com/projectriff/riff/riff-cli/pkg/options"
+import (
+	"github.com/projectriff/riff/riff-cli/pkg/options"
+)
 
 var (
-	InitOptions   options.InitOptions
-	CreateOptions options.CreateOptions
-	Handler       string
+	InitOptions      options.InitOptions
+	CreateOptions    options.CreateOptions
+	DeleteAllOptions options.DeleteAllOptions
+	Handler          string
 )

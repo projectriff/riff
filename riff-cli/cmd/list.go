@@ -29,36 +29,35 @@ type ListOptions struct {
 	namespace string
 }
 
-var listOptions ListOptions
+func List() *cobra.Command {
 
-// listCmd represents the list command
-var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List function resources",
-	Long: `List the currently defined function resources.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	var listOptions ListOptions
+	// listCmd represents the list command
+	var listCmd = &cobra.Command{
+		Use:   "list",
+		Short: "List function resources",
+		Long:  `List the currently defined function resources.`,
+		Run: func(cmd *cobra.Command, args []string) {
 
-		// get the viper value from env var, config file or flag option
-		listOptions.namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
+			// get the viper value from env var, config file or flag option
+			listOptions.namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
 
-		fmt.Printf("Listing function resources in namespace %v\n\n", listOptions.namespace)
+			fmt.Printf("Listing function resources in namespace %v\n\n", listOptions.namespace)
 
-		cmdArgs := []string{"get", "--namespace", listOptions.namespace, "functions"}
+			cmdArgs := []string{"get", "--namespace", listOptions.namespace, "functions"}
 
-		output, err := kubectl.ExecForString(cmdArgs)
+			output, err := kubectl.ExecForString(cmdArgs)
 
-		if err != nil {
-			ioutils.Errorf("Error: %v\n", err)
-			return
-		}
+			if err != nil {
+				ioutils.Errorf("Error: %v\n", err)
+				return
+			}
 
-		fmt.Printf("%v\n", output)
+			fmt.Printf("%v\n", output)
 
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(listCmd)
+		},
+	}
 
 	listCmd.Flags().StringP("namespace", "", "default", "the namespace used for the deployed resources")
+	return listCmd
 }

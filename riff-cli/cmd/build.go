@@ -31,42 +31,47 @@ import (
 	"github.com/projectriff/riff/riff-cli/cmd/opts"
 )
 
-var buildCmd = &cobra.Command{
-	Use:   "build",
-	Short: "Build a function container",
-	Long: `Build the function based on the code available in the path directory, using the name
-  and version specified for the image that is built.`,
-	Example: `  riff build -n <name> -v <version> -f <path> [--push]`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		err :=  build(options.GetBuildOptions(opts.CreateOptions))
-		if (err != nil) {
-			cmd.SilenceUsage = true
-		}
-		return err
-	},
-	//TODO: DRY
-	PreRun: func(cmd *cobra.Command, args []string) {
-		if !opts.CreateOptions.Initialized {
-			utils.MergeBuildOptions(*cmd.Flags(), &opts.CreateOptions)
+func Build() *cobra.Command {
 
-			if len(args) > 0 {
-				if len(args) == 1 && opts.CreateOptions.FilePath == "" {
-					opts.CreateOptions.FilePath = args[0]
-				} else {
-					ioutils.Errorf("Invalid argument(s) %v\n", args)
-					cmd.Usage()
+	var buildCmd = &cobra.Command{
+		Use:   "build",
+		Short: "Build a function container",
+		Long: `Build the function based on the code available in the path directory, using the name
+and version specified for the image that is built.`,
+		Example: `  riff build -n <name> -v <version> -f <path> [--push]`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			err := build(options.GetBuildOptions(opts.CreateOptions))
+			if (err != nil) {
+				cmd.SilenceUsage = true
+			}
+			return err
+		},
+		//TODO: DRY
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if !opts.CreateOptions.Initialized {
+				utils.MergeBuildOptions(*cmd.Flags(), &opts.CreateOptions)
+
+				if len(args) > 0 {
+					if len(args) == 1 && opts.CreateOptions.FilePath == "" {
+						opts.CreateOptions.FilePath = args[0]
+					} else {
+						ioutils.Errorf("Invalid argument(s) %v\n", args)
+						cmd.Usage()
+						os.Exit(1)
+					}
+				}
+
+				err := options.ValidateAndCleanInitOptions(&opts.CreateOptions.InitOptions)
+				if err != nil {
+					ioutils.Error(err)
 					os.Exit(1)
 				}
 			}
-
-			err := options.ValidateAndCleanInitOptions(&opts.CreateOptions.InitOptions)
-			if err != nil {
-				ioutils.Error(err)
-				os.Exit(1)
-			}
-		}
-		opts.CreateOptions.Initialized = true
-	},
+			opts.CreateOptions.Initialized = true
+		},
+	}
+	utils.CreateBuildFlags(buildCmd.Flags())
+	return buildCmd
 }
 
 func build(opts options.BuildOptions) error {
@@ -82,7 +87,7 @@ func build(opts options.BuildOptions) error {
 	}
 
 	fmt.Println("Building image ...")
-	 docker.Exec(buildArgs)
+	docker.Exec(buildArgs)
 
 	if opts.Push {
 		fmt.Println("Pushing image...")
@@ -104,9 +109,4 @@ func buildArgs(opts options.BuildOptions) []string {
 func pushArgs(opts options.BuildOptions) []string {
 	image := options.ImageName(opts)
 	return []string{"push", image}
-}
-
-func init() {
-	rootCmd.AddCommand(buildCmd)
-	utils.CreateBuildFlags(buildCmd.Flags())
 }
