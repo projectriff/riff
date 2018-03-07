@@ -29,6 +29,7 @@ import (
 
 	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
 	"bufio"
+	"io"
 )
 
 func GetCWD() string {
@@ -96,6 +97,22 @@ func ExecWaitAndStreamOutput(cmdName string, cmdArgs []string) {
 	cmd.Start()
 	print(bufio.NewScanner(stdout),"[STDOUT]")
 	print(bufio.NewScanner(stderr),"[STDERR]")
+	cmd.Wait()
+}
+
+func ExecWaitAndHandleStreams(cmdName string, cmdArgs []string, stdoutHandler func(io.ReadCloser),
+	stderrHandler func(io.ReadCloser)) {
+
+	cmd := exec.Command(cmdName, cmdArgs...)
+	stdout, _ := cmd.StdoutPipe()
+	stderr, _ := cmd.StderrPipe()
+	cmd.Start()
+	if stdoutHandler != nil {
+		stdoutHandler(stdout)
+	}
+	if stderrHandler != nil {
+		stderrHandler(stderr)
+	}
 	cmd.Wait()
 }
 

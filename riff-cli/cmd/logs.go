@@ -26,6 +26,9 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
+	"io"
+	"github.com/juju/errgo/errors"
 )
 
 type LogsOptions struct {
@@ -57,10 +60,23 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 
 		cmdArgs := []string{"--namespace", logsOptions.namespace, "get", "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.name}"}
 
-		output, err := kubectl.ExecForString(cmdArgs)
+		var output string
+
+		var err error
+		osutils.ExecWaitAndHandleStreams("kubectl", cmdArgs, func(stdout io.ReadCloser) {
+			scanner := bufio.NewScanner(stdout)
+			scanner.Scan()
+			output = scanner.Text()
+		}, func(stderr io.ReadCloser) {
+			scanner := bufio.NewScanner(stderr)
+			scanner.Scan()
+			if scanner.Text() != "" {
+				err = errors.New("Unable to query function pod")
+			}
+		})
 
 		if err != nil {
-			ioutils.Errorf("Error %v - Function %v may not be currently active\n\n", err, logsOptions.function)
+			ioutils.Errorf("Error: %v - Function %v may not be currently active\n\n", err, logsOptions.function)
 			return
 		}
 
@@ -77,20 +93,19 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 				return
 			}
 
-			scanner := bufio.NewScanner(cmdReader)
-			go func() {
-				for scanner.Scan() {
-					fmt.Printf("%s\n\n", scanner.Text())
-				}
-			}()
-
 			err = kubectlCmd.Start()
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "Error starting kubectlCmd", err)
 				return
 			}
 
+			scanner := bufio.NewScanner(cmdReader)
+			for scanner.Scan() {
+				fmt.Printf("%s\n\n", scanner.Text())
+			}
+
 			err = kubectlCmd.Wait()
+
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "Error waiting for kubectlCmd", err)
 				return
