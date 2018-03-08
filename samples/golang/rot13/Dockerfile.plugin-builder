@@ -1,0 +1,5 @@
+FROM golang:1.10
+
+COPY *.go ./
+RUN go build -buildmode=plugin *.go
+RUN ls -al

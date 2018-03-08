@@ -1,0 +1,65 @@
+= rot13
+
+[horizontal]
+*Language*:: Golang
+*Function*:: link:rot13.go[rot13.go]
+*Protocol*:: grpc
+*Input*:: secrets
+
+=== prerequisites
+
+1. riff is deployed
+2. the `riff` CLI is on your PATH
+4. the working directory is `samples/golang/rot13`
+
+=== compile the Go code and build the .so file
+This compiles the source `*.go` file as a golang https://golang.org/pkg/plugin/[plugin].
+
+[NOTE]
+====
+This is done in a container, using linux, because cross-compiling go plugins is hard. But in a nutshell, it does this
+[source, bash]
+----
+go build -buildmode=plugin -o rot13.so rot13.go
+----
+====
+
+[source, bash]
+----
+make rot13.so
+----
+
+=== create the function and its input topic
+
+[source, bash]
+----
+riff create golang --input secrets --artifact rot13.so --handler Encode
+----
+
+=== publish a message and wait for a reply
+
+In a terminal window:
+[source, bash]
+----
+riff publish --input secrets --data "Hello World" --reply
+----
+
+you get
+[source, bash]
+----
+Hvool Wliow
+----
+
+Pass that to the function again and you get `Hello World` back.
+[source, bash]
+----
+riff publish --input secrets --data "Hvool Wliow" --reply
+----
+
+
+=== delete the function and its input topic
+
+[source, bash]
+----
+riff delete --all
+----
