@@ -32,7 +32,7 @@ riff create [language] [flags]
   -h, --help                  help for create
   -i, --input string          the name of the input topic (defaults to function name)
   -n, --name string           the name of the function (defaults to the name of the current directory)
-      --namespace string      the namespace used for the deployed resources (default "default")
+      --namespace string      the namespace used for the deployed resources
   -o, --output string         the name of the output topic (optional)
   -p, --protocol string       the protocol to use for function invocations
       --push                  push the image to Docker registry

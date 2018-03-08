@@ -29,7 +29,6 @@ riff publish [flags]
   -d, --data string           the data to post to the http-gateway using the input topic
   -h, --help                  help for publish
   -i, --input string          the name of the input topic, defaults to name of current directory (default "riff-cli")
-      --namespace string      the namespace of the http-gateway (default "default")
   -p, --pause int             the number of seconds to wait between postings
   -r, --reply                 wait for a reply containing the results of the function execution
 ```

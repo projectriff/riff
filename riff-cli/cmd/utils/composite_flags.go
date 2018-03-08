@@ -29,7 +29,6 @@ import (
 type Defaults struct {
 	riffVersion string
 	userAccount string
-	namespace   string
 	force       bool
 	dryRun      bool
 	push        bool
@@ -39,7 +38,6 @@ type Defaults struct {
 var defaults = Defaults{
 	riffVersion: global.RIFF_VERSION,
 	userAccount: "current OS user",
-	namespace:   "default",
 	force:       false,
 	dryRun:      false,
 	push:        false,
@@ -202,7 +200,7 @@ func setFilePathFlag(flagset *pflag.FlagSet) {
 
 func setNamespaceFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "namespace") {
-		flagset.String("namespace", defaults.namespace, "the namespace used for the deployed resources")
+		flagset.String("namespace", "", "the namespace used for the deployed resources")
 	}
 }
 

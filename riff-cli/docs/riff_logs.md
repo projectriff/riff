@@ -23,7 +23,7 @@ riff logs [flags]
   -c, --container string   the name of the function container (sidecar or main) (default "sidecar")
   -h, --help               help for logs
   -n, --name string        the name of the function
-      --namespace string   the namespace used for the deployed resources (default "default")
+      --namespace string   the namespace used for the deployed resources
   -t, --tail               tail the logs
 ```
 

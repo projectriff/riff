@@ -175,7 +175,6 @@ Environment variables are prefixed with `RIFF_` and the variables from the follo
 RIFF_VERSION=0.0.5-snapshot
 RIFF_USERACCOUNT=myaccount
 RIFF_NAMESPACE=test
-RIFF_PUBLISH_NAMESPACE=riff-system
 ```
 
 For the config file, you can create a `~/.riff.yaml` file with something like the following content:
@@ -186,9 +185,6 @@ useraccount: myaccount
 namespace: test
 publishNamespace: riff-system
 ```
-
-TIP: the  `publishNamespace`/`RIFF_PUBLISH_NAMESPACE` setting is useful when running the http-gateway in the `riff-system` namespace 
-and the functions in `default` or a `test` namespace
 
 === [[cli-completion]]riff CLI bash completion
 

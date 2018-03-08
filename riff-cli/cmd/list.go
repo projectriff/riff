@@ -42,9 +42,18 @@ func List() *cobra.Command {
 			// get the viper value from env var, config file or flag option
 			listOptions.namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
 
-			fmt.Printf("Listing function resources in namespace %v\n\n", listOptions.namespace)
+			if listOptions.namespace != "" {
+				fmt.Printf("Listing function resources in namespace %v\n\n", listOptions.namespace)
+			} else {
+				fmt.Print("Listing function resources\n\n")
 
-			cmdArgs := []string{"get", "--namespace", listOptions.namespace, "functions"}
+			}
+
+			cmdArgs := []string{"get"}
+			if listOptions.namespace != "" {
+				cmdArgs = append(cmdArgs, "--namespace", listOptions.namespace)
+			}
+			cmdArgs = append(cmdArgs, "functions")
 
 			output, err := kubectl.ExecForString(cmdArgs)
 
@@ -58,6 +67,6 @@ func List() *cobra.Command {
 		},
 	}
 
-	listCmd.Flags().StringP("namespace", "", "default", "the namespace used for the deployed resources")
+	listCmd.Flags().StringP("namespace", "", "", "the namespace used for the deployed resources")
 	return listCmd
 }

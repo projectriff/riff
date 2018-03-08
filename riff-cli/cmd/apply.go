@@ -78,7 +78,11 @@ func apply(cmd *cobra.Command, opts options.ApplyOptions) error {
 		return err
 	}
 
-	cmdArgs := []string{"apply", "--namespace", opts.Namespace}
+	cmdArgs := []string{"apply"}
+	if opts.Namespace != "" {
+		cmdArgs = append(cmdArgs, "--namespace", opts.Namespace)
+	}
+
 	var message string
 
 	if osutils.IsDirectory(abs) {

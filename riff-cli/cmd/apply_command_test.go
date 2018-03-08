@@ -50,7 +50,7 @@ func TestApplyCommandDefaultNamespace(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("default", opts.CreateOptions.Namespace)
+	as.Equal("", opts.CreateOptions.Namespace)
 }
 
 func TestApplyCommandWithNamespace(t *testing.T) {

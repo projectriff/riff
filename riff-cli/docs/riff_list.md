@@ -15,7 +15,7 @@ riff list [flags]
 
 ```
   -h, --help               help for list
-      --namespace string   the namespace used for the deployed resources (default "default")
+      --namespace string   the namespace used for the deployed resources
 ```
 
 ### Options inherited from parent commands
