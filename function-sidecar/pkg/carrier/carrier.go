@@ -28,6 +28,7 @@ func Run(consumer transport.Consumer, producer transport.Producer, dispatcher di
 		for {
 			// Incoming message
 			msg, open := <-consumer.Messages()
+			log.Printf(">>> %s\n", msg)
 			if open {
 				dispatcher.Input() <- msg
 			} else {
