@@ -32,6 +32,8 @@ matrix:
     services:
     - docker
     script: "./.travis.docker-push.sh"
+  - stage: publish
+    script: ./.travis.helm-publish.sh
 stages:
 - test
 - name: publish
