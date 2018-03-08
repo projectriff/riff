@@ -30,5 +30,9 @@ pushd helm-charts
   helm package riff --version "$riff_version" --app-version "$riff_version" --destination $work_dir
   helm repo index $work_dir --url "$helm_charts_url" --merge $work_dir/index.yaml
 
-  gsutil cp $work_dir/* "gs://$helm_charts_bucket"
+  gsutil cp -a public-read "$work_dir/*.tgz" "gs://$helm_charts_bucket"
+  gsutil cp -a public-read "$work_dir/index.yaml" "gs://$helm_charts_bucket"
+  if [ -f "$work_dir/latest_version" ]; then
+    gsutil cp -a public-read "$work_dir/latest_version" "gs://$helm_charts_bucket"
+  fi
 popd
