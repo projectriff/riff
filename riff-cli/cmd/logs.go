@@ -57,7 +57,11 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 
 			fmt.Printf("Displaying logs for container %v of function %v in namespace %v\n\n", logsOptions.container, logsOptions.function, logsOptions.namespace)
 
-			cmdArgs := []string{"--namespace", logsOptions.namespace, "get", "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.name}"}
+			cmdArgs := []string{"get"}
+			if logsOptions.namespace != "" {
+				cmdArgs = append(cmdArgs, "--namespace", logsOptions.namespace)
+			}
+			cmdArgs = append(cmdArgs, "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.name}")
 
 			output, err := kubectl.ExecForString(cmdArgs)
 
@@ -68,9 +72,13 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 
 			pod := output
 
+			cmdArgs = []string{"logs"}
+			if logsOptions.namespace != "" {
+				cmdArgs = append(cmdArgs, "--namespace", logsOptions.namespace)
+			}
+			cmdArgs = append(cmdArgs, pod, "-c", logsOptions.container)
 			if logsOptions.tail {
-
-				cmdArgs = []string{"--namespace", logsOptions.namespace, "logs", "-c", logsOptions.container, "-f", pod}
+				cmdArgs = append(cmdArgs, "-f")
 
 				kubectlCmd := exec.Command("kubectl", cmdArgs...)
 				cmdReader, err := kubectlCmd.StdoutPipe()
@@ -100,8 +108,6 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 
 			} else {
 
-				cmdArgs = []string{"--namespace", logsOptions.namespace, "logs", "-c", logsOptions.container, pod}
-
 				output, err := kubectl.ExecForString(cmdArgs)
 
 				if err != nil {
@@ -118,7 +124,7 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 	logsCmd.Flags().StringVarP(&logsOptions.container, "container", "c", "sidecar", "the name of the function container (sidecar or main)")
 	logsCmd.Flags().BoolVarP(&logsOptions.tail, "tail", "t", false, "tail the logs")
 
-	logsCmd.Flags().StringP("namespace", "", "default", "the namespace used for the deployed resources")
+	logsCmd.Flags().StringP("namespace", "", "", "the namespace used for the deployed resources")
 
 	logsCmd.MarkFlagRequired("name")
 	return logsCmd

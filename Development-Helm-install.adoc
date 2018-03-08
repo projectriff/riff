@@ -78,11 +78,6 @@ When using Minikube configure the httpGateway to use `NodePort` with:
 helm install --name control --namespace riff-system riffrepo/riff --devel --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
-[TIP]
-====
-https://github.com/projectriff/riff/blob/master/Getting-Started.adoc#riff-cli-configuration[Configure] `RIFF_PUBLISH_NAMESPACE=riff-system` for the riff CLI to find the riff-gateway in the `riff-system` namespace.
-====
-
 [NOTE]
 ====
 For a cluster that supports `LoadBalancer` leave out the `--set httpGateway.service.type=NodePort` option.

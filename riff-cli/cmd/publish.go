@@ -29,12 +29,9 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/minikube"
 	"github.com/projectriff/riff/riff-cli/pkg/jsonpath"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
-	"github.com/projectriff/riff/riff-cli/cmd/utils"
-	"github.com/spf13/viper"
 )
 
 type publishOptions struct {
-	namespace   string
 	contentType string
 	input       string
 	data        string
@@ -64,22 +61,7 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 `,
 		Run: func(cmd *cobra.Command, args []string) {
 
-			// get the viper value from env var, config file or flag option
-			publishOptions.namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
-
-			// look for PUBLISH_NAMESPACE
-			if !cmd.Flags().Changed("namespace") && viper.GetString("PUBLISH_NAMESPACE") != "" {
-				publishOptions.namespace = viper.GetString("PUBLISH_NAMESPACE")
-				fmt.Printf("Using namespace: %s\n", publishOptions.namespace)
-			} else {
-				// look for publishNamespace
-				if !cmd.Flags().Changed("namespace") && viper.GetString("publishNamespace") != "" {
-					publishOptions.namespace = viper.GetString("publishNamespace")
-					fmt.Printf("Using namespace: %s\n", publishOptions.namespace)
-				}
-			}
-
-			cmdArgs := []string{"get", "--namespace", publishOptions.namespace, "svc", "-l", "component=http-gateway", "-o", "json"}
+			cmdArgs := []string{"get", "svc", "--all-namespaces", "-l", "app=riff,component=http-gateway", "-o", "json"}
 			output, err := kubectl.ExecForBytes(cmdArgs)
 
 			if err != nil {
@@ -92,7 +74,7 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 			portType := parser.Value(`$.items[0].spec.type+`)
 
 			if portType == "" {
-				ioutils.Errorf("Unable to locate http-gateway in namespace %v\n", publishOptions.namespace)
+				ioutils.Errorf("Unable to locate http-gateway\n")
 				return
 			}
 
@@ -133,7 +115,6 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 	publishCmd.Flags().BoolVarP(&publishOptions.reply, "reply", "r", false, "wait for a reply containing the results of the function execution")
 	publishCmd.Flags().IntVarP(&publishOptions.count, "count", "c", 1, "the number of times to post the data")
 	publishCmd.Flags().IntVarP(&publishOptions.pause, "pause", "p", 0, "the number of seconds to wait between postings")
-	publishCmd.Flags().StringP("namespace", "", "default", "the namespace of the http-gateway")
 	publishCmd.Flags().StringVarP(&publishOptions.contentType, "content-type", "", "text/plain", "the content type")
 
 	publishCmd.MarkFlagRequired("data")

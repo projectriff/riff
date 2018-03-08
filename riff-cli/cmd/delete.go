@@ -109,6 +109,11 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 		return err
 	}
 
+	cmdArgs = []string{"delete"}
+	if opts.Namespace != "" {
+		cmdArgs = append(cmdArgs, "--namespace", opts.Namespace)
+	}
+
 	if opts.All {
 		optionPath := opts.FilePath
 		if !osutils.IsDirectory(abs) {
@@ -121,7 +126,6 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 			return err
 		}
 
-		cmdArgs = []string{"delete", "--namespace", opts.Namespace}
 		if len(resourceDefinitionPaths) > 0 {
 			for _, resourceDefinitionPath := range resourceDefinitionPaths {
 				cmdArgs = append(cmdArgs, "-f", resourceDefinitionPath)
@@ -133,10 +137,10 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 	} else {
 		if osutils.IsDirectory(abs) {
 			message = fmt.Sprintf("Deleting function %v\n\n", opts.FunctionName)
-			cmdArgs = []string{"delete", "--namespace", opts.Namespace, "function", opts.FunctionName}
+			cmdArgs = append(cmdArgs, "function", opts.FunctionName)
 		} else {
 			message = fmt.Sprintf("Deleting resource %v\n\n", opts.FilePath)
-			cmdArgs = []string{"delete", "--namespace", opts.Namespace, "-f", opts.FilePath}
+			cmdArgs = append(cmdArgs, "-f", opts.FilePath)
 		}
 	}
 
@@ -174,12 +178,20 @@ func deleteFunctionByName(opts options.DeleteOptions) error {
 }
 
 func deleteTopic(topic string, opts options.DeleteOptions) error {
-	cmdArgs := []string{"delete", "topic", topic, "--namespace", opts.Namespace}
+	cmdArgs := []string{"delete"}
+	if opts.Namespace != "" {
+		cmdArgs = append(cmdArgs, "--namespace", opts.Namespace)
+	}
+	cmdArgs = append(cmdArgs, "topic", topic)
 	return deleteResources(cmdArgs, fmt.Sprintf("Deleting topic %v\n\n", topic), opts.DryRun)
 }
 
 func deleteFunction(function string, opts options.DeleteOptions) error {
-	cmdArgs := []string{"delete", "function", function, "--namespace", opts.Namespace}
+	cmdArgs := []string{"delete"}
+	if opts.Namespace != "" {
+		cmdArgs = append(cmdArgs, "--namespace", opts.Namespace)
+	}
+	cmdArgs = append(cmdArgs, "function", function)
 	return deleteResources(cmdArgs, fmt.Sprintf("Deleting function %v\n\n", function), opts.DryRun)
 }
 
