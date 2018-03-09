@@ -6,27 +6,29 @@ install:
 matrix:
   include:
   - stage: test
-    script: cd function-controller && make test
+    env: COMPONENT=function-controller
+    script: cd $COMPONENT && make test
   - stage: test
     sudo: required
-    env:
-    - KAFKA_BROKER=localhost:9092
+    env: COMPONENT=function-sidecar
     before_install:
     - "./.travis.install-kafka.sh"
-    script: cd function-sidecar && make test
+    script: cd $COMPONENT && KAFKA_BROKER=localhost:9092  make test
   - stage: test
-    script: cd http-gateway && make test
+    env: COMPONENT=http-gateway
+    script: cd $COMPONENT && make test
   - stage: test
     sudo: required
-    env:
-    - KAFKA_BROKERS=localhost:9092
+    env: COMPONENT=message-transport
     before_install:
     - "./.travis.install-kafka.sh"
-    script: cd message-transport && make test
+    script: cd $COMPONENT && KAFKA_BROKERS=localhost:9092 make test
   - stage: test
-    script: cd riff-cli && make test verify-docs
+    env: COMPONENT=riff-cli
+    script: cd $COMPONENT && make test verify-docs
   - stage: test
-    script: cd topic-controller && make test
+    env: COMPONENT=topic-controller
+    script: cd $COMPONENT && make test
   - stage: publish
     sudo: required
     services:
