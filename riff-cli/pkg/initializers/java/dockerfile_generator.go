@@ -26,7 +26,7 @@ var dockerfileTemplate = `
 FROM projectriff/java-function-invoker:{{.RiffVersion}}
 ARG FUNCTION_JAR=/functions/{{.ArtifactBase}}
 ARG FUNCTION_CLASS={{.Handler}}
-ADD target/{{.ArtifactBase}} $FUNCTION_JAR
+ADD {{.Artifact}} $FUNCTION_JAR
 ENV FUNCTION_URI file://${FUNCTION_JAR}?handler=${FUNCTION_CLASS}
 `
 
