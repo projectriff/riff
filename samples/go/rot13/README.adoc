@@ -1,7 +1,7 @@
 = rot13
 
 [horizontal]
-*Language*:: Golang
+*Language*:: Go
 *Function*:: link:rot13.go[rot13.go]
 *Protocol*:: grpc
 *Input*:: secrets
@@ -13,7 +13,7 @@
 4. the working directory is `samples/golang/rot13`
 
 === compile the Go code and build the .so file
-This compiles the source `*.go` file as a golang https://golang.org/pkg/plugin/[plugin].
+This compiles the source `*.go` file as a go https://golang.org/pkg/plugin/[plugin].
 
 [NOTE]
 ====
@@ -33,7 +33,7 @@ make rot13.so
 
 [source, bash]
 ----
-riff create golang --input secrets --artifact rot13.so --handler Encode
+riff create go --input secrets --artifact rot13.so --handler Encode
 ----
 
 === publish a message and wait for a reply

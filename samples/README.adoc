@@ -6,6 +6,10 @@ To riff link:../README.adoc[README]
 
 * Java
   - link:java/greeter/README.adoc[greeter]
+  - link:java/uppercase/README.adoc[uppercase]
+  - link:java/wordcound/README.adoc[wordcount]
+* Go
+  - link:go/rot13/README.adoc[rot13]
 * Node
   - link:node/square/README.adoc[square]
 * Python
