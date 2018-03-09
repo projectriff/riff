@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -o errexit
-set -o nounset
 set -o pipefail
 
 riff_version=`cat VERSION`
@@ -27,8 +26,8 @@ pushd helm-charts
   fi
 
   sed -E -i '' "s/tag:[ ]*latest/tag: $riff_version/" riff/values.yaml
-  sed -E -i '' "s/|[ ]*latest[ ]*|/|$riff_version|/" riff/README.md
-  helm package riff --version "$riff_version" --app-version "$riff_version" --destination $work_dir
+  sed -E -i '' "s/\|[ ]*latest[ ]*\|/|$riff_version|/" riff/README.md
+  helm package riff --version "$riff_version" --app-version "$riff_gitversion" --destination $work_dir
   helm repo index $work_dir --url "$helm_charts_url" --merge $work_dir/index.yaml
 
   gsutil cp -a public-read "$work_dir/*.tgz" "gs://$helm_charts_bucket"
