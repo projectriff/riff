@@ -3,37 +3,47 @@ go:
 - '1.9'
 install:
 - go get github.com/Masterminds/glide
+script: cd $COMPONENT && make test
 matrix:
   include:
   - stage: test
-    script: cd function-controller && make test
+    env:
+    - COMPONENT=function-controller
   - stage: test
     sudo: required
     env:
+    - COMPONENT=function-sidecar
     - KAFKA_BROKER=localhost:9092
     before_install:
     - "./.travis.install-kafka.sh"
-    script: cd function-sidecar && make test
   - stage: test
-    script: cd http-gateway && make test
+    env:
+    - COMPONENT=http-gateway
   - stage: test
     sudo: required
     env:
+    - COMPONENT=message-transport
     - KAFKA_BROKERS=localhost:9092
     before_install:
     - "./.travis.install-kafka.sh"
-    script: cd message-transport && make test
   - stage: test
+    env:
+    - COMPONENT=riff-cli
     script: cd riff-cli && make test verify-docs
   - stage: test
-    script: cd topic-controller && make test
+    env:
+    - COMPONENT=topic-controller
   - stage: publish
     sudo: required
+    env:
+    - TASK=docker-push
     services:
     - docker
     script: "./.travis.docker-push.sh"
   - stage: publish
     sudo: required
+    env:
+    - TASK=helm-publish
     script: ./.travis.helm-publish.sh
 stages:
 - test
