@@ -11,7 +11,7 @@ work_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/helm-charts/.work"
 if [[ `which helm` == "" ]]; then
   curl https://storage.googleapis.com/kubernetes-helm/helm-v2.8.1-linux-amd64.tar.gz | tar xz
   chmod +x linux-amd64/helm
-  mv linux-amd64/helm /usr/local/bin/
+  sudo mv linux-amd64/helm /usr/local/bin/
   rm -rf linux-amd64
 fi
 
