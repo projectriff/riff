@@ -33,6 +33,7 @@ matrix:
     - docker
     script: "./.travis.docker-push.sh"
   - stage: publish
+    sudo: required
     script: ./.travis.helm-publish.sh
 stages:
 - test
