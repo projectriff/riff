@@ -32,8 +32,8 @@ pushd helm-charts
     echo $riff_version > $work_dir/latest_version
   fi
 
-  sed -E -i '' "s/tag:[ ]*latest/tag: $riff_version/" riff/values.yaml
-  sed -E -i '' "s/\|[ ]*latest[ ]*\|/|$riff_version|/" riff/README.md
+  perl -pi -e "s/tag:\s*latest/tag: $riff_version/g"  riff/values.yaml
+  perl -pi -e "s/\|\s*latest\s*\|/|$riff_version|/g" riff/README.md
   helm package riff --version "$riff_version" --app-version "$riff_version" --destination $work_dir
   helm repo index $work_dir --url "$helm_charts_url" --merge $work_dir/index.yaml
 
