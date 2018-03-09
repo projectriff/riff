@@ -9,7 +9,7 @@ helm_charts_bucket='riff-charts'
 helm_charts_url="https://${helm_charts_bucket}.storage.googleapis.com/"
 work_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/helm-charts/.work"
 
-if [ "$GCLOUD_CLIENT_SECRET" != ""]; then
+if [[ "$GCLOUD_CLIENT_SECRET" != ""]]; then
   echo $GCLOUD_CLIENT_SECRET | base64 --decode > client-secret.json
   gcloud auth activate-service-account --key-file client-secret.json
   rm client-secret.json
@@ -27,12 +27,13 @@ pushd helm-charts
   fi
 
   sed -E -i '' "s/tag:[ ]*latest/tag: $riff_version/" riff/values.yaml
+  sed -E -i '' "s/|[ ]*latest[ ]*|/|$riff_version|/" riff/README.md
   helm package riff --version "$riff_version" --app-version "$riff_version" --destination $work_dir
   helm repo index $work_dir --url "$helm_charts_url" --merge $work_dir/index.yaml
 
   gsutil cp -a public-read "$work_dir/*.tgz" "gs://$helm_charts_bucket"
   gsutil cp -a public-read "$work_dir/index.yaml" "gs://$helm_charts_bucket"
-  if [ -f "$work_dir/latest_version" ]; then
+  if [[ -f "$work_dir/latest_version" ]]; then
     gsutil cp -a public-read "$work_dir/latest_version" "gs://$helm_charts_bucket"
   fi
 popd
