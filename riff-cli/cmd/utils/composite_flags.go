@@ -154,7 +154,7 @@ func MergeApplyOptions(flagset pflag.FlagSet, opts *options.CreateOptions) {
 	}
 }
 
-func MergeDeleteOptions(flagset pflag.FlagSet, opts *options.DeleteAllOptions) {
+func MergeDeleteOptions(flagset pflag.FlagSet, opts *options.DeleteOptions) {
 	if opts.FunctionName == "" {
 		opts.FunctionName, _ = flagset.GetString("name")
 	}
