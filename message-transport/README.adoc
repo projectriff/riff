@@ -34,7 +34,7 @@ make build
 
 === Testing
 
-Ensure Kafka (with `auto.create.topics.enable=true`, which is the default) and Zookeepr are running locally,
+Ensure Kafka (with `auto.create.topics.enable=true`, which is the default) and Zookeeper are running locally,
 then issue:
 [source, bash]
 ----

@@ -80,7 +80,7 @@ kubectl apply -f config/rbac
 
 === To tear it all down
 
-Once you're done playing with riff (see samples below), you can destroy everything created above by running
+Once you're done playing with riff (see samples below), you can destroy everything created above by running:
 
 [source, bash]
 ----
@@ -90,6 +90,17 @@ Once you're done playing with riff (see samples below), you can destroy everythi
 == [[samples]]Try Some Samples
 
 With riff running try some of the link:samples/README.adoc[samples].
+
+== Running the tests
+
+To run all riff's unit and integration tests, ensure Kafka (with `auto.create.topics.enable=true`, which
+is the default) and Zookeeper are running locally, then issue:
+
+[source, bash]
+----
+KAFKA_BROKERS=localhost:9092 KAFKA_BROKER=localhost:9092 make test
+----
+
 
 == Contributing to riff
 

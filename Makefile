@@ -10,6 +10,14 @@ build:
 	$(MAKE) -C topic-controller		build
 	$(MAKE) -C riff-cli				build
 
+test:
+	$(MAKE) -C message-transport	test
+	$(MAKE) -C function-controller	test
+	$(MAKE) -C function-sidecar		test
+	$(MAKE) -C http-gateway			test
+	$(MAKE) -C topic-controller		test
+	$(MAKE) -C riff-cli				test
+
 dockerize:
 	$(MAKE) -C function-controller	dockerize
 	$(MAKE) -C function-sidecar		dockerize
