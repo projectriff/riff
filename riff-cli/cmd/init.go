@@ -154,3 +154,26 @@ func InitPython() *cobra.Command {
 	initPythonCmd.Flags().String("handler", "", "the name of the function handler")
 	return initPythonCmd
 }
+
+
+func InitGo() *cobra.Command {
+	var initGoCmd = &cobra.Command{
+		Use:   "go",
+		Short: "Initialize a go plugin function",
+		Long:  utils.InitGoCmdLong(),
+
+		RunE: func(cmd *cobra.Command, args []string) error {
+			opts.InitOptions.Handler = utils.GetHandler(cmd)
+			if opts.InitOptions.Handler == "" {
+				opts.InitOptions.Handler = opts.InitOptions.FunctionName
+			}
+			err := initializers.Go().Initialize(opts.InitOptions)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	}
+	initGoCmd.Flags().String("handler", "", "the name of the function handler")
+	return initGoCmd
+}

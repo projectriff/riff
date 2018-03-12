@@ -25,7 +25,7 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 )
 
-var supportedExtensions = []string{"js", "json", "java", "py", "sh"}
+var supportedExtensions = []string{"js", "json", "java", "py", "sh", "so"}
 
 var languageForFileExtensions = map[string]string{
 	"sh":   "shell",
@@ -33,6 +33,7 @@ var languageForFileExtensions = map[string]string{
 	"js":   "node",
 	"json": "node",
 	"py":   "python",
+	"so":   "go",
 }
 
 //Assumes given file paths have been sanity checked and are valid

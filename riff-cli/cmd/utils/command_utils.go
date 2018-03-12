@@ -81,7 +81,16 @@ const basePythonDescription = `{{.Process}} the function based on the function s
 
 For example, type:
 
-    riff {{.Command}} -i words -l python  --n uppercase --handler=process
+    riff {{.Command}} -i words -l python -n uppercase --handler=process
+
+to {{.Result}}.`
+
+const baseGoDescription = `{{.Process}} the function based on a shared '.so' library file specified as the filename
+and exported symbol name specified as the handler.
+
+For example, type:
+
+    riff {{.Command}} -i words -l go -n rot13 --handler=Encode
 
 to {{.Result}}.`
 
@@ -109,6 +118,10 @@ func InitNodeCmdLong() string {
 
 func InitPythonCmdLong() string {
 	return createCmdLong(basePythonDescription, LongVals{Process: initDefinition, Command: "init python", Result: initResult})
+}
+
+func InitGoCmdLong() string {
+	return createCmdLong(baseGoDescription, LongVals{Process: initDefinition, Command: "init go", Result: initResult})
 }
 
 func CreateCmdLong() string {
