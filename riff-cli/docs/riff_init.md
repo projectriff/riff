@@ -47,6 +47,7 @@ riff init [language] [flags]
 
 ### SEE ALSO
 * [riff](riff.md)	 - Commands for creating and managing function resources
+* [riff init go](riff_init_go.md)	 - Initialize a go plugin function
 * [riff init java](riff_init_java.md)	 - Initialize a Java function
 * [riff init node](riff_init_node.md)	 - Initialize a node.js function
 * [riff init python](riff_init_python.md)	 - Initialize a Python function

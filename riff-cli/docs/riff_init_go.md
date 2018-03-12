@@ -1,28 +1,28 @@
-## riff create python
+## riff init go
 
-Create a Python function
+Initialize a go plugin function
 
 ### Synopsis
 
 
-Generate the function based on the function source code specified as the filename, handler, 
-  name, artifact and version specified for the function image repository and tag. 
+Generate the function based on a shared '.so' library file specified as the filename
+and exported symbol name specified as the handler.
 
 For example, type:
 
-    riff init python -i words -l python -n uppercase --handler=process
+    riff init go -i words -l go -n rot13 --handler=Encode
 
 to generate the required Dockerfile and resource definitions using sensible defaults.
 
 ```
-riff create python [flags]
+riff init go [flags]
 ```
 
 ### Options
 
 ```
       --handler string   the name of the function handler
-  -h, --help             help for python
+  -h, --help             help for go
 ```
 
 ### Options inherited from parent commands
@@ -35,15 +35,13 @@ riff create python [flags]
       --force                 overwrite existing functions artifacts
   -i, --input string          the name of the input topic (defaults to function name)
   -n, --name string           the name of the function (defaults to the name of the current directory)
-      --namespace string      the namespace used for the deployed resources
   -o, --output string         the name of the output topic (optional)
   -p, --protocol string       the protocol to use for function invocations
-      --push                  push the image to Docker registry
       --riff-version string   the version of riff to use when building containers (default "latest")
   -u, --useraccount string    the Docker user account to be used for the image repository (default "current OS user")
   -v, --version string        the version of the function image (default "0.0.1")
 ```
 
 ### SEE ALSO
-* [riff create](riff_create.md)	 - Create a function
+* [riff init](riff_init.md)	 - Initialize a function
 

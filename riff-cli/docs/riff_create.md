@@ -49,6 +49,7 @@ riff create [language] [flags]
 
 ### SEE ALSO
 * [riff](riff.md)	 - Commands for creating and managing function resources
+* [riff create go](riff_create_go.md)	 - Create a Go function
 * [riff create java](riff_create_java.md)	 - Create a Java function
 * [riff create node](riff_create_node.md)	 - Create a node.js function
 * [riff create python](riff_create_python.md)	 - Create a Python function

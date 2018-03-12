@@ -1,28 +1,28 @@
-## riff create python
+## riff create go
 
-Create a Python function
+Create a Go function
 
 ### Synopsis
 
 
-Generate the function based on the function source code specified as the filename, handler, 
-  name, artifact and version specified for the function image repository and tag. 
+Generate the function based on a shared '.so' library file specified as the filename
+and exported symbol name specified as the handler.
 
 For example, type:
 
-    riff init python -i words -l python -n uppercase --handler=process
+    riff init go -i words -l go -n rot13 --handler=Encode
 
 to generate the required Dockerfile and resource definitions using sensible defaults.
 
 ```
-riff create python [flags]
+riff create go [flags]
 ```
 
 ### Options
 
 ```
       --handler string   the name of the function handler
-  -h, --help             help for python
+  -h, --help             help for go
 ```
 
 ### Options inherited from parent commands
