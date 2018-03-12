@@ -27,9 +27,10 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/initializers/shell"
 	"github.com/projectriff/riff/riff-cli/pkg/initializers/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/initializers/golang"
 )
 
-var supportedExtensions = []string{"js", "json", "jar", "py", "sh"}
+var supportedExtensions = []string{"js", "json", "jar", "py", "sh", "so"}
 
 type Initializer struct {
 	Initialize func(options.InitOptions) error
@@ -41,6 +42,7 @@ var languageForFileExtension = map[string]string{
 	"js":   "node",
 	"json": "node",
 	"py":   "python",
+	"so":   "go",
 }
 
 func Java() Initializer {
@@ -64,6 +66,11 @@ func Shell() Initializer {
 		Initialize: shell.Initialize,
 	}
 }
+func Go() Initializer {
+	return Initializer{
+		Initialize: golang.Initialize,
+	}
+}
 
 func Initialize(opts options.InitOptions) error {
 	filePath, err := utils.ResolveFunctionFile(opts, "", "")
@@ -78,6 +85,8 @@ func Initialize(opts options.InitOptions) error {
 		Shell().Initialize(opts)
 	case "node":
 		Node().Initialize(opts)
+	case "go":
+		Go().Initialize(opts)
 	case "java":
 		return errors.New("Java resources detected. Use 'riff init java' to specify additional required options")
 	case "python":

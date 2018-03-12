@@ -38,6 +38,7 @@ func ResolveOptions(functionArtifact string, language string, opts *options.Init
 		"js":     "grpc",
 		"node":   "grpc",
 		"python": "grpc",
+		"go":     "grpc",
 	}
 
 	if opts.Protocol == "" {

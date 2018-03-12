@@ -27,61 +27,51 @@ func CreateAndWireRootCommand() *cobra.Command {
 
 	rootCmd := Root()
 
-	applyCmd := Apply()
-	rootCmd.AddCommand(applyCmd)
+	initCmd := Init()
+	initJavaCmd := InitJava()
+	initNodeCmd := InitNode()
+	initPythonCmd := InitPython()
+	initShellCmd := InitShell()
+	initGoCmd := InitGo()
+	initCmd.AddCommand(
+		initJavaCmd,
+		initGoCmd,
+		initShellCmd,
+		initPythonCmd,
+		initNodeCmd,
+	)
 
 	buildCmd := Build()
-	rootCmd.AddCommand(buildCmd)
 
-	rootCmd.AddCommand(List())
+	applyCmd := Apply()
+
+	createCmd := Create(utils.CommandChain(initCmd, buildCmd, applyCmd))
+	createCmd.AddCommand(
+		CreateNode(utils.CommandChain(initNodeCmd, buildCmd, applyCmd)),
+		CreateJava(utils.CommandChain(initJavaCmd, buildCmd, applyCmd)),
+		CreatePython(utils.CommandChain(initPythonCmd, buildCmd, applyCmd)),
+		CreateShell(utils.CommandChain(initShellCmd, buildCmd, applyCmd)),
+		CreateGo(utils.CommandChain(initGoCmd, buildCmd, applyCmd)),
+	)
+
+	rootCmd.AddCommand(
+		applyCmd,
+		buildCmd,
+		createCmd,
+		Delete(),
+		initCmd,
+		List(),
+		Logs(),
+		Publish(),
+		Update(utils.CommandChain(buildCmd, applyCmd)),
+		Version(),
+	)
 
 
-	initCmd := Init()
-	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(
+		Completion(rootCmd),
+		Docs(rootCmd),
+	)
 
-	initJavaCmd := InitJava()
-	initCmd.AddCommand(initJavaCmd)
-
-	initNodeCmd := InitNode()
-	initCmd.AddCommand(initNodeCmd)
-
-	initPythonCmd := InitPython()
-	initCmd.AddCommand(initPythonCmd)
-
-	initShellCmd := InitShell()
-	initCmd.AddCommand(initShellCmd)
-
-
-	createChainCmd := utils.CommandChain(initCmd, buildCmd, applyCmd)
-	createCmd := Create(createChainCmd)
-	rootCmd.AddCommand(createCmd)
-
-	createNodeChainCmd := utils.CommandChain(initNodeCmd, buildCmd, applyCmd)
-	createCmd.AddCommand(CreateNode(createNodeChainCmd))
-
-	createJavaChainCmd := utils.CommandChain(initJavaCmd, buildCmd, applyCmd)
-	createCmd.AddCommand(CreateJava(createJavaChainCmd))
-
-	createPythonChainCmd := utils.CommandChain(initPythonCmd, buildCmd, applyCmd)
-	createCmd.AddCommand(CreatePython(createPythonChainCmd))
-
-	createShellChainCmd := utils.CommandChain(initShellCmd, buildCmd, applyCmd)
-	createCmd.AddCommand(CreateShell(createShellChainCmd))
-
-	deleteCmd := Delete()
-	rootCmd.AddCommand(deleteCmd)
-
-	rootCmd.AddCommand(Completion(rootCmd))
-	rootCmd.AddCommand(Docs(rootCmd))
-
-	rootCmd.AddCommand(Publish())
-
-	updateChainCmd := utils.CommandChain(buildCmd, applyCmd)
-	rootCmd.AddCommand(Update(updateChainCmd))
-	
-	logsCmd := Logs()
-	rootCmd.AddCommand(logsCmd)
-
-	rootCmd.AddCommand(Version())
 	return rootCmd
 }

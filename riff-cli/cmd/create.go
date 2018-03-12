@@ -136,3 +136,23 @@ func CreatePython(createPythonChainCmd *cobra.Command) *cobra.Command {
 	return createPythonCmd
 
 }
+
+func CreateGo(createGoChainCmd *cobra.Command) *cobra.Command {
+	var createGoCmd = &cobra.Command{
+		Use:   "go",
+		Short: "Create a Go function",
+		Long:  utils.InitGoCmdLong(),
+
+		PreRun: func(cmd *cobra.Command, args []string) {
+			opts.Handler = utils.GetHandler(cmd)
+			if opts.Handler == "" {
+				opts.Handler = opts.CreateOptions.FunctionName
+			}
+			createGoChainCmd.PreRun(cmd, args)
+		},
+		RunE: createGoChainCmd.RunE,
+	}
+	createGoCmd.Flags().String("handler", "", "the name of the function handler")
+	return createGoCmd
+
+}
