@@ -23,6 +23,6 @@ import (
 var (
 	InitOptions      options.InitOptions
 	CreateOptions    options.CreateOptions
-	DeleteAllOptions options.DeleteAllOptions
+	DeleteOptions    options.DeleteOptions
 	Handler          string
 )

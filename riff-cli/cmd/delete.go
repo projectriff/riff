@@ -48,42 +48,39 @@ func Delete() *cobra.Command {
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			return delete(cmd, options.GetDeleteOptions(opts.DeleteAllOptions))
+			return doDelete(cmd, opts.DeleteOptions)
 
 		},
 		PreRun: func(cmd *cobra.Command, args []string) {
 
-			if !opts.DeleteAllOptions.Initialized {
-				utils.MergeDeleteOptions(*cmd.Flags(), &opts.DeleteAllOptions)
+			utils.MergeDeleteOptions(*cmd.Flags(), &opts.DeleteOptions)
 
-				if len(args) > 0 {
-					if len(args) == 1 && opts.DeleteAllOptions.FilePath == "" {
-						opts.DeleteAllOptions.FilePath = args[0]
-					} else {
-						ioutils.Errorf("Invalid argument(s) %v\n", args)
-						cmd.Usage()
-						os.Exit(1)
-					}
-				}
-				/*
-				 * If name and no file path given, skip this step
-				 */
-				if opts.DeleteAllOptions.FilePath != "" && opts.DeleteAllOptions.FunctionName == "" {
-					err := options.ValidateNamePathOptions(&opts.DeleteAllOptions.FunctionName, &opts.DeleteAllOptions.FilePath)
-					if err != nil {
-						ioutils.Error(err)
-						os.Exit(1)
-					}
+			if len(args) > 0 {
+				if len(args) == 1 && opts.DeleteOptions.FilePath == "" {
+					opts.DeleteOptions.FilePath = args[0]
+				} else {
+					ioutils.Errorf("Invalid argument(s) %v\n", args)
+					cmd.Usage()
+					os.Exit(1)
 				}
 			}
-			opts.DeleteAllOptions.Initialized = true
+			/*
+			 * If name and no file path given, skip this step
+			 */
+			if opts.DeleteOptions.FilePath != "" && opts.DeleteOptions.FunctionName == "" {
+				err := options.ValidateNamePathOptions(&opts.DeleteOptions.FunctionName, &opts.DeleteOptions.FilePath)
+				if err != nil {
+					ioutils.Error(err)
+					os.Exit(1)
+				}
+			}
 		},
 	}
 	utils.CreateDeleteFlags(deleteCmd.Flags())
 	return deleteCmd
 }
 
-func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
+func doDelete(cmd *cobra.Command, opts options.DeleteOptions) error {
 
 	var cmdArgs []string
 	var message string
@@ -153,7 +150,12 @@ func delete(cmd *cobra.Command, opts options.DeleteOptions) error {
 }
 
 func deleteFunctionByName(opts options.DeleteOptions) error {
-	json, err := kubectl.EXEC_FOR_BYTES([]string{"get", "function", opts.FunctionName, "-o", "json"})
+	getArgs := []string{"get"}
+	if opts.Namespace != "" {
+		getArgs = append(getArgs, "--namespace", opts.Namespace)
+	}
+	getArgs = append(getArgs, "function", opts.FunctionName, "-o", "json")
+	json, err := kubectl.EXEC_FOR_BYTES(getArgs)
 	if err != nil {
 		return err
 	}
