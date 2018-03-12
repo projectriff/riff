@@ -21,7 +21,7 @@ Run the following commands to add the repository:
 
 [source, bash]
 ----
-helm repo add riffrepo https://riff-charts.storage.googleapis.com
+helm repo add projectriff https://riff-charts.storage.googleapis.com
 helm repo update
 ----
 
@@ -40,7 +40,7 @@ You can use the single-node Kafka chart provided by riff or the three-node kafka
 
 === Install Kafka chart
 
-We provide a lightweight single node Kafka installation in the `riffrepo/kafka` chart. This works well for development purposes.
+We provide a lightweight single node Kafka installation in the `projectriff/kafka` chart. This works well for development purposes.
 
 Create the `riff-system` namespace:
 
@@ -53,7 +53,7 @@ Install the kafka/zookeeper service provided by riff using:
 
 [source, bash]
 ----
-helm install --name transport --namespace riff-system riffrepo/kafka
+helm install --name transport --namespace riff-system projectriff/kafka
 ----
 
 [TIP]
@@ -75,7 +75,7 @@ When using Minikube configure the httpGateway to use `NodePort` with:
 
 [source, bash]
 ----
-helm install --name control --namespace riff-system riffrepo/riff --devel --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install --name control --namespace riff-system projectriff/riff --devel --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 [NOTE]
@@ -104,7 +104,7 @@ To set the version tag for the `functionController` to `0.0.5-build.1` use somet
 +
 [source, bash]
 ----
-helm install riffrepo/riff --name control --namespace riff-system --set functionController.image.tag=0.0.5-build.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name control --namespace riff-system --set functionController.image.tag=0.0.5-build.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 * Overriding the image repository and version tag of a riff component with a custom built component image:
@@ -114,7 +114,7 @@ the `functionController`, use something like the following:
 +
 [source, bash]
 ----
-helm install riffrepo/riff --name control --namespace riff-system --set functionController.image.repository=mycustom/function-controller --set functionController.image.tag=0.0.5-test.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name control --namespace riff-system --set functionController.image.repository=mycustom/function-controller --set functionController.image.tag=0.0.5-test.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 * Overriding the version of the `sidecar` component:
@@ -124,7 +124,7 @@ the `sidecar` to `0.0.5-build.1` use something like the following:
 +
 [source, bash]
 ----
-helm install riffrepo/riff --name control --namespace riff-system --set functionController.sidecar.image.tag=0.0.5-build.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name control --namespace riff-system --set functionController.sidecar.image.tag=0.0.5-build.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 ==== Installing locally built snapshot components with Minikube
@@ -150,7 +150,7 @@ which overrides image tags with snapshot versions:
 
 [source, bash]
 ----
-helm install riffrepo/riff --name control --namespace riff-system --values helm/values-snapshot.yaml  --devel --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name control --namespace riff-system --values helm/values-snapshot.yaml  --devel --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 === To tear it all down

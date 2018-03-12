@@ -7,9 +7,9 @@ Single-node Kafka for riff
 To install the chart with the release name `my-release`:
 
 ```bash
-$ helm repo add riffrepo https://riff-charts.storage.googleapis.com
+$ helm repo add projectriff https://riff-charts.storage.googleapis.com
 $ helm repo update
-$ helm install --name my-release riffrepo/kafka
+$ helm install --name my-release projectriff/kafka
 ```
 
 ## Uninstalling the Release
