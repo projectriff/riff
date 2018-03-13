@@ -20,128 +20,105 @@ import (
 	"github.com/spf13/cobra"
 )
 
-/*
- * Runs a chain of commands
- */
+// CommandChain returns a composite command that runs the provided commands one after the other.
+// For each run kind, the variants that can error (ie runE vs run) are preferred if defined.
+// postRun variations are run in reversed order
 func CommandChain(commands ... *cobra.Command) *cobra.Command {
 
-	run := func(cmd *cobra.Command, args []string) {
-		for _, command := range commands {
-			if command.Run != nil {
-				command.Run(cmd, args)
-			}
-		}
-	}
-
-	/*
-	 * Composite command using RunE to fail fast. SilenceUsage enabled to supress usage message following
-	 * run time errors. If it gets this far, the usage was likely correct.
-	 */
 	runE := func(cmd *cobra.Command, args []string) error {
 		for _, command := range commands {
 			if command.RunE != nil {
-				err := command.RunE(command, args)
+				err := command.RunE(cmd, args)
 				if err != nil {
-					cmd.SilenceUsage = true
 					return err
 				}
+			} else {
+				command.Run(cmd, args)
 			}
 		}
 		return nil
 	}
-
-	preRun := func(cmd *cobra.Command, args []string) {
-		for _, command := range commands {
-			if command.PreRun != nil {
-				command.PreRun(command, args)
-			}
-		}
+	run := func(cmd *cobra.Command, args []string) {
+		runE(cmd, args)
 	}
 
 	preRunE := func(cmd *cobra.Command, args []string) error {
 		for _, command := range commands {
 			if command.PreRunE != nil {
-				err := command.PreRunE(command, args)
+				err := command.PreRunE(cmd, args)
 				if err != nil {
 					return err
 				}
+			} else if command.PreRun != nil {
+				command.PreRun(cmd, args)
 			}
 		}
 		return nil
 	}
-
-	postRun := func(cmd *cobra.Command, args []string) {
-		for _, command := range commands {
-			if command.PostRun != nil {
-				command.PostRun(command, args)
-			}
-		}
-	}
-
-	postRunE := func(cmd *cobra.Command, args []string) error {
-		for _, command := range commands {
-			if command.PostRunE != nil {
-				err := command.PostRunE(command, args)
-				if err != nil {
-					return err
-				}
-			}
-		}
-		return nil
-	}
-
-	persistentPreRun := func(cmd *cobra.Command, args []string) {
-
-		for _, command := range commands {
-			for ; command.Parent() != nil && command.Parent().PersistentPreRun != nil; {
-				command = command.Parent()
-			}
-			if command.PersistentPreRun != nil {
-				command.PersistentPreRun(command, args)
-			}
-		}
+	preRun := func(cmd *cobra.Command, args []string) {
+		preRunE(cmd, args)
 	}
 
 	persistentPreRunE := func(cmd *cobra.Command, args []string) error {
+	outer:
 		for _, command := range commands {
-			for ; command.Parent() != nil && command.Parent().PersistentPreRunE != nil; {
-				command = command.Parent()
-			}
-			if command.PersistentPreRunE != nil {
-				err := command.PersistentPreRunE(command, args)
-				if err != nil {
-					return err
+			for p := command; p != nil; p = p.Parent() {
+				if p.PersistentPreRunE != nil {
+					if err := p.PersistentPreRunE(cmd, args); err != nil {
+						return err
+					}
+					break outer
+				} else if p.PersistentPreRun != nil {
+					p.PersistentPreRun(cmd, args)
+					break outer
 				}
 			}
 		}
 		return nil
 	}
+	persistentPreRun := func(cmd *cobra.Command, args []string) {
+		persistentPreRunE(cmd, args)
+	}
 
-	persistentPostRun := func(cmd *cobra.Command, args []string) {
 
-		for _, command := range commands {
-			for ; command.Root() != nil && command.Parent().PersistentPostRun != nil; {
-				command = command.Parent()
-			}
-			if command.PersistentPostRun != nil {
-				command.PersistentPostRun(command, args)
+	postRunE := func(cmd *cobra.Command, args []string) error {
+		for i := len(commands) ; i >= 0 ; i-- {
+			command := commands[i]
+			if command.PostRunE != nil {
+				err := command.PostRunE(cmd, args)
+				if err != nil {
+					return err
+				}
+			} else if command.PostRun != nil {
+				command.PostRun(cmd, args)
 			}
 		}
+		return nil
+	}
+	postRun := func(cmd *cobra.Command, args []string) {
+		postRunE(cmd, args)
 	}
 
 	persistentPostRunE := func(cmd *cobra.Command, args []string) error {
-		for _, command := range commands {
-			for ; command.Parent() != nil && command.Parent().PersistentPostRunE != nil; {
-				command = command.Root()
-			}
-			if command.PersistentPostRunE != nil {
-				err := command.PersistentPostRunE(command, args)
-				if err != nil {
-					return err
+	outer:
+		for i := len(commands) ; i >= 0 ; i-- {
+			command := commands[i]
+			for p := command; p != nil; p = p.Parent() {
+				if p.PersistentPreRunE != nil {
+					if err := p.PersistentPreRunE(cmd, args); err != nil {
+						return err
+					}
+					break outer
+				} else if p.PersistentPreRun != nil {
+					p.PersistentPreRun(cmd, args)
+					break outer
 				}
 			}
 		}
 		return nil
+	}
+	persistentPostRun := func(cmd *cobra.Command, args []string) {
+		persistentPostRunE(cmd, args)
 	}
 
 	var chain = &cobra.Command{
@@ -157,6 +134,10 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 		PersistentPostRunE: persistentPostRunE,
 	}
 
+	// Merge flags from all delegate commands
+	for _, c := range commands {
+		chain.Flags().AddFlagSet(c.Flags())
+	}
 	return chain
 }
 

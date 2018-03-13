@@ -78,14 +78,6 @@ type ApplyOptions struct {
 	DryRun    bool
 }
 
-type DeleteOptions struct {
-	FilePath     string
-	FunctionName string
-	Namespace    string
-	DryRun       bool
-	All          bool
-}
-
 type CreateOptions struct {
 	InitOptions
 	Namespace string
