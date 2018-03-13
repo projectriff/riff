@@ -26,8 +26,10 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 )
 
+//TODO: These tests should go away
 func TestValidateDefaultFunctionResources(t *testing.T) {
-	filePath,_ := initCmd.PersistentFlags().GetString("filepath")
+	_, initOptions := Init()
+	filePath := initOptions.FilePath
 	as := assert.New(t)
 	opts:= options.InitOptions{
 		FilePath:     filePath,

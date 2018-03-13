@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/projectriff/riff/riff-cli/cmd/utils"
 )
 
 // CreateAndWireRootCommand creates all riff commands and sub commands, as well as the top-level 'root' command,
@@ -27,12 +26,13 @@ func CreateAndWireRootCommand() *cobra.Command {
 
 	rootCmd := Root()
 
-	initCmd := Init()
-	initJavaCmd := InitJava()
-	initNodeCmd := InitNode()
-	initPythonCmd := InitPython()
-	initShellCmd := InitShell()
-	initGoCmd := InitGo()
+	initCmd, initOptions := Init()
+	initJavaCmd, _ := InitJava(initOptions)
+	initNodeCmd, _ := InitNode(initOptions)
+	initPythonCmd, _ := InitPython(initOptions)
+	initShellCmd, _ := InitShell(initOptions)
+	initGoCmd, _ := InitGo(initOptions)
+
 	initCmd.AddCommand(
 		initJavaCmd,
 		initGoCmd,
@@ -41,17 +41,25 @@ func CreateAndWireRootCommand() *cobra.Command {
 		initNodeCmd,
 	)
 
-	buildCmd := Build()
+	buildCmd, _ := Build()
 
-	applyCmd := Apply()
+	applyCmd, _ := Apply()
 
-	createCmd := Create(utils.CommandChain(initCmd, buildCmd, applyCmd))
+	createCmd := Create(initCmd, buildCmd, applyCmd)
+
+	createNodeCmd	:= CreateNode(initNodeCmd, buildCmd, applyCmd)
+	createJavaCmd 	:= CreateJava(initJavaCmd, buildCmd, applyCmd)
+	createPythonCmd	:= CreatePython(initPythonCmd, buildCmd, applyCmd)
+	createShellCmd	:= CreateShell(initShellCmd, buildCmd, applyCmd)
+	createGoCmd		:= CreateGo(initGoCmd, buildCmd, applyCmd)
+
+
 	createCmd.AddCommand(
-		CreateNode(utils.CommandChain(initNodeCmd, buildCmd, applyCmd)),
-		CreateJava(utils.CommandChain(initJavaCmd, buildCmd, applyCmd)),
-		CreatePython(utils.CommandChain(initPythonCmd, buildCmd, applyCmd)),
-		CreateShell(utils.CommandChain(initShellCmd, buildCmd, applyCmd)),
-		CreateGo(utils.CommandChain(initGoCmd, buildCmd, applyCmd)),
+		createNodeCmd,
+		createJavaCmd,
+		createPythonCmd,
+		createShellCmd,
+		createGoCmd,
 	)
 
 	deleteCmd, _ := Delete()
@@ -65,10 +73,9 @@ func CreateAndWireRootCommand() *cobra.Command {
 		List(),
 		Logs(),
 		Publish(),
-		Update(utils.CommandChain(buildCmd, applyCmd)),
+		Update(buildCmd, applyCmd),
 		Version(),
 	)
-
 
 	rootCmd.AddCommand(
 		Completion(rootCmd),

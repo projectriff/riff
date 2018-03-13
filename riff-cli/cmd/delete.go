@@ -208,7 +208,7 @@ func deleteFunction(function string, opts DeleteOptions) error {
 }
 
 func deleteResources(cmdArgs []string, message string, dryRun bool) error {
-	if (dryRun) {
+	if dryRun {
 		fmt.Printf("\nDelete Command: kubectl %s\n\n", strings.Trim(fmt.Sprint(cmdArgs), "[]"))
 	} else {
 		fmt.Print(message)

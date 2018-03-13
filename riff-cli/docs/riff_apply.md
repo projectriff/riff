@@ -24,7 +24,7 @@ riff apply [flags]
       --dry-run            print generated function artifacts content to stdout only
   -f, --filepath string    path or directory used for the function resources (defaults to the current directory)
   -h, --help               help for apply
-      --namespace string   the namespace used for the deployed resources
+      --namespace string   the namespace used for the deployed resources (defaults to kubectl's default)
 ```
 
 ### Options inherited from parent commands
