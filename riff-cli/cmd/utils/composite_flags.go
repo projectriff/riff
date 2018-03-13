@@ -27,21 +27,21 @@ import (
 )
 
 type Defaults struct {
-	riffVersion string
-	userAccount string
+	RiffVersion string
+	UserAccount string
 	force       bool
 	dryRun      bool
 	push        bool
-	version     string
+	Version     string
 }
 
-var defaults = Defaults{
-	riffVersion: global.RIFF_VERSION,
-	userAccount: "current OS user",
+var DefaultValues = Defaults{
+	RiffVersion: global.RIFF_VERSION,
+	UserAccount: "current OS user",
 	force:       false,
 	dryRun:      false,
 	push:        false,
-	version:     "0.0.1",
+	Version:     "0.0.1",
 }
 
 func CreateInitFlags(flagset *pflag.FlagSet) {
@@ -156,19 +156,19 @@ func GetHandler(cmd *cobra.Command) string {
 
 func setNameFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "name") {
-		flagset.StringP("name", "n", "", "the name of the function (defaults to the name of the current directory)")
+		flagset.StringP("name", "n", "", "the name of the function (DefaultValues to the name of the current directory)")
 	}
 }
 
 func setVersionFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "version") {
-		flagset.StringP("version", "v", defaults.version, "the version of the function image")
+		flagset.StringP("version", "v", DefaultValues.Version, "the version of the function image")
 	}
 }
 
 func setFilePathFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "filepath") {
-		flagset.StringP("filepath", "f", "", "path or directory used for the function resources (defaults to the current directory)")
+		flagset.StringP("filepath", "f", "", "path or directory used for the function resources (DefaultValues to the current directory)")
 	}
 }
 
@@ -180,19 +180,19 @@ func setNamespaceFlag(flagset *pflag.FlagSet) {
 
 func setDryRunFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "dry-run") {
-		flagset.Bool("dry-run", defaults.dryRun, "print generated function artifacts content to stdout only")
+		flagset.Bool("dry-run", DefaultValues.dryRun, "print generated function artifacts content to stdout only")
 	}
 }
 
 func setRiffVersionFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "riff-version") {
-		flagset.StringP("riff-version", "", defaults.riffVersion, "the version of riff to use when building containers")
+		flagset.StringP("riff-version", "", DefaultValues.RiffVersion, "the version of riff to use when building containers")
 	}
 }
 
 func setUserAccountFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "useraccount") {
-		flagset.StringP("useraccount", "u", defaults.userAccount, "the Docker user account to be used for the image repository")
+		flagset.StringP("useraccount", "u", DefaultValues.UserAccount, "the Docker user account to be used for the image repository")
 	}
 }
 
@@ -204,7 +204,7 @@ func setProtocolFlag(flagset *pflag.FlagSet) {
 
 func setInputFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "input") {
-		flagset.StringP("input", "i", "", "the name of the input topic (defaults to function name)")
+		flagset.StringP("input", "i", "", "the name of the input topic (DefaultValues to function name)")
 	}
 }
 func setOutputFlag(flagset *pflag.FlagSet) {
@@ -221,13 +221,13 @@ func setArtifactFlag(flagset *pflag.FlagSet) {
 
 func setForceFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "force") {
-		flagset.Bool("force", defaults.force, "overwrite existing functions artifacts")
+		flagset.Bool("force", DefaultValues.force, "overwrite existing functions artifacts")
 	}
 }
 
 func setPushFlag(flagset *pflag.FlagSet) {
 	if !flagDefined(flagset, "push") {
-		flagset.BoolP("push", "", defaults.push, "push the image to Docker registry")
+		flagset.BoolP("push", "", DefaultValues.push, "push the image to Docker registry")
 	}
 }
 
@@ -245,7 +245,7 @@ func getRiffVersionWithGlobalOverride(flagset pflag.FlagSet) string {
 
 func getUseraccountWithOverride(name string, flagset pflag.FlagSet) string {
 	userAcct := GetStringValueWithOverride("useraccount", flagset)
-	if userAcct == defaults.userAccount {
+	if userAcct == DefaultValues.UserAccount {
 		userAcct = osutils.GetCurrentUsername()
 	}
 	return userAcct

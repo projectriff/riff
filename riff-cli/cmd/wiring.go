@@ -41,7 +41,7 @@ func CreateAndWireRootCommand() *cobra.Command {
 		initNodeCmd,
 	)
 
-	buildCmd := Build()
+	buildCmd, _ := Build()
 
 	applyCmd := Apply()
 

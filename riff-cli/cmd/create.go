@@ -26,7 +26,6 @@ import (
 	"github.com/projectriff/riff/riff-cli/cmd/opts"
 )
 
-
 func Create(createChainCmd *cobra.Command) *cobra.Command {
 	var createCmd = &cobra.Command{
 		Use:   "create [language]",
@@ -36,36 +35,34 @@ func Create(createChainCmd *cobra.Command) *cobra.Command {
 		RunE:   createChainCmd.RunE,
 		PreRun: createChainCmd.PreRun,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			if !opts.CreateOptions.Initialized {
-				opts.CreateOptions = options.CreateOptions{}
-				var flagset pflag.FlagSet
-				if cmd.Parent() == cmd.Root() {
-					flagset = *cmd.PersistentFlags()
+			opts.CreateOptions = options.CreateOptions{}
+			var flagset pflag.FlagSet
+			if cmd.Parent() == cmd.Root() {
+				flagset = *cmd.PersistentFlags()
+			} else {
+				flagset = *cmd.Parent().PersistentFlags()
+			}
+
+			utils.MergeInitOptions(flagset, &opts.CreateOptions.InitOptions)
+			utils.MergeBuildOptions(flagset, &opts.CreateOptions)
+			utils.MergeApplyOptions(flagset, &opts.CreateOptions)
+
+			if len(args) > 0 {
+				if len(args) == 1 && opts.CreateOptions.FilePath == "" {
+					opts.CreateOptions.FilePath = args[0]
 				} else {
-					flagset = *cmd.Parent().PersistentFlags()
-				}
-
-				utils.MergeInitOptions(flagset, &opts.CreateOptions.InitOptions)
-				utils.MergeBuildOptions(flagset, &opts.CreateOptions)
-				utils.MergeApplyOptions(flagset, &opts.CreateOptions)
-
-				if len(args) > 0 {
-					if len(args) == 1 && opts.CreateOptions.FilePath == "" {
-						opts.CreateOptions.FilePath = args[0]
-					} else {
-						ioutils.Errorf("Invalid argument(s) %v\n", args)
-						cmd.Usage()
-						os.Exit(1)
-					}
-				}
-
-				err := options.ValidateAndCleanInitOptions(&opts.CreateOptions.InitOptions)
-				if err != nil {
-					ioutils.Error(err)
+					ioutils.Errorf("Invalid argument(s) %v\n", args)
+					cmd.Usage()
 					os.Exit(1)
 				}
-				opts.CreateOptions.Initialized = true
 			}
+
+			err := options.ValidateAndCleanInitOptions(&opts.CreateOptions.InitOptions)
+			if err != nil {
+				ioutils.Error(err)
+				os.Exit(1)
+			}
+			opts.CreateOptions.Initialized = true
 			createChainCmd.PersistentPreRun(cmd, args)
 		},
 	}

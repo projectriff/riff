@@ -45,33 +45,6 @@ func (this InitOptions) GetUserAccount() string {
 	return this.UserAccount
 }
 
-type BuildOptions struct {
-	FilePath     string
-	FunctionName string
-	Version      string
-	RiffVersion  string
-	UserAccount  string
-	Namespace    string
-	Push         bool
-	DryRun       bool
-}
-
-func (this BuildOptions) GetFunctionName() string {
-	return this.FunctionName
-}
-
-func (this BuildOptions) GetVersion() string {
-	return this.Version
-}
-
-func (this BuildOptions) GetUserAccount() string {
-	return this.UserAccount
-}
-
-func (this BuildOptions) GetNamespace() string {
-	return this.Namespace
-}
-
 type ApplyOptions struct {
 	FilePath  string
 	Namespace string
@@ -94,14 +67,3 @@ func GetApplyOptions(opts CreateOptions) ApplyOptions {
 	return ApplyOptions{FilePath: opts.FilePath, Namespace: opts.Namespace, DryRun: opts.DryRun}
 }
 
-func GetBuildOptions(opts CreateOptions) BuildOptions {
-	return BuildOptions{
-		FilePath:     opts.FilePath,
-		FunctionName: opts.FunctionName,
-		Version:      opts.Version,
-		RiffVersion:  opts.RiffVersion,
-		UserAccount:  opts.UserAccount,
-		Push:         opts.Push,
-		DryRun:       opts.DryRun,
-	}
-}

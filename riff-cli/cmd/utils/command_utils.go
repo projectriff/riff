@@ -22,9 +22,9 @@ import (
 )
 
 const (
-	initResult       = `generate the required Dockerfile and resource definitions using sensible defaults`
+	initResult       = `generate the required Dockerfile and resource definitions using sensible DefaultValues`
 	initDefinition   = `Generate`
-	createResult     = `create the required Dockerfile and resource definitions, and apply the resources, using sensible defaults`
+	createResult     = `create the required Dockerfile and resource definitions, and apply the resources, using sensible DefaultValues`
 	createDefinition = `Create`
 )
 
