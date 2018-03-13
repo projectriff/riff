@@ -26,7 +26,7 @@ helm init
 
 [NOTE]
 ====
-For a cluster that has RBAC enabled use (must connect with cluster admin rights):
+It gets a bit more complicated if the cluster has RBAC enabled. The Helm project describes the https://docs.helm.sh/using_helm/#best-practices-for-securing-helm-and-tiller[Best Practices for Securing Helm and Tiller] in their documentation. This can be fairly involved and for less critical development clusters it is easier to configure the Helm tiller server to run with cluster-admin privileges using a service account in the `kube-system` namespace. You should have cluster admin rights and run the following:
 
 [source, bash]
 ----
