@@ -121,7 +121,6 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 		persistentPostRunE(cmd, args)
 	}
 
-
 	var chain = &cobra.Command{
 		Run:                run,
 		RunE:               runE,
@@ -135,6 +134,10 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 		PersistentPostRunE: persistentPostRunE,
 	}
 
+	// Merge flags from all delegate commands
+	for _, c := range commands {
+		chain.Flags().AddFlagSet(c.Flags())
+	}
 	return chain
 }
 
