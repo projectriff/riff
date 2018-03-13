@@ -6,7 +6,7 @@ Run the following commands to add the repository:
 
 [source, bash]
 ----
-helm repo add riffrepo https://riff-charts.storage.googleapis.com
+helm repo add projectriff https://riff-charts.storage.googleapis.com
 helm repo update
 ----
 

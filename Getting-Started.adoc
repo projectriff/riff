@@ -13,7 +13,7 @@ This guide covers installing riff using https://helm.sh/[Helm], which is a commo
 
 == [[helm]]Install Helm
 
-Helm is comprised of 2 components: one is the client (helm) the other is the server component (tiller). The helm client runs on your local machine and can be installed using the instructions found https://github.com/kubernetes/helm/blob/master/README.md#install[here]
+Helm is comprised of two components: one is the client (helm) the other is the server component (tiller). The helm client runs on your local machine and can be installed using the instructions found https://github.com/kubernetes/helm/blob/master/README.md#install[here]
 
 Once you have the helm client installed you can install the server component.
 
@@ -48,7 +48,7 @@ Run the following commands to add the repository:
 
 [source, bash]
 ----
-helm repo add riffrepo https://riff-charts.storage.googleapis.com
+helm repo add projectriff https://riff-charts.storage.googleapis.com
 helm repo update
 ----
 
@@ -65,7 +65,7 @@ Starting with the 0.0.4 version we have separated the Kafka installation from th
 
 === Install Kafka chart
 
-We provide a lightweight single node Kafka installation in the `riffrepo/kafka` chart. This works well for development purposes.
+We provide a lightweight single node Kafka installation in the `projectriff/kafka` chart. This works well for development purposes.
 
 Create the `riff-system` namespace:
 
@@ -78,7 +78,7 @@ Install the kafka/zookeeper service provided by riff using:
 
 [source, bash]
 ----
-helm install --name transport --namespace riff-system riffrepo/kafka
+helm install --name transport --namespace riff-system projectriff/kafka
 ----
 
 [TIP]
@@ -101,7 +101,7 @@ For an install with default configuration and no RBAC enabled use:
 
 [source, bash]
 ----
-helm install riffrepo/riff --version 0.0.4 --name demo --namespace riff-system --set rbac.create=false
+helm install projectriff/riff --version 0.0.4 --name demo --namespace riff-system --set rbac.create=false
 ----
 
 [NOTE]
@@ -110,7 +110,7 @@ For a cluster that has RBAC enabled, use the following (since `rbac.create` is `
 
 [source, bash]
 ----
-helm install riffrepo/riff --version 0.0.4 --name demo --namespace riff-system
+helm install projectriff/riff --version 0.0.4 --name demo --namespace riff-system
 ----
 ====
 
@@ -120,7 +120,7 @@ For `NodePort` service types (e.g. running on Minikube) configure the httpGatewa
 
 [source, bash]
 ----
-helm install riffrepo/riff --version 0.0.4 --name demo --namespace riff-system --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --version 0.0.4 --name demo --namespace riff-system --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 [NOTE]
@@ -129,7 +129,7 @@ For a cluster that has RBAC enabled, use the following (since `rbac.create` is `
 
 [source, bash]
 ----
-helm install riffrepo/riff --version 0.0.4 --name demo --namespace riff-system --set httpGateway.service.type=NodePort
+helm install projectriff/riff --version 0.0.4 --name demo --namespace riff-system --set httpGateway.service.type=NodePort
 ----
 ====
 

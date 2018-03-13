@@ -8,15 +8,15 @@
 To install the chart with the release name `my-release`:
 
 ```bash
-$ helm repo add riffrepo https://riff-charts.storage.googleapis.com
+$ helm repo add projectriff https://riff-charts.storage.googleapis.com
 $ helm repo update
-$ helm install --name my-release riffrepo/riff
+$ helm install --name my-release projectriff/riff
 ```
 
 If you are using a cluster that does not have a load balancer (like Minikube) then you can install using a NodePort:
 
 ```bash
-$ helm install --name my-release --set httpGateway.service.type=NodePort riffrepo/riff
+$ helm install --name my-release --set httpGateway.service.type=NodePort projectriff/riff
 ```
 
 ## Configuration
