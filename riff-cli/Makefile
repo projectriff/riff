@@ -7,7 +7,7 @@ VERSION ?= $(shell cat ../VERSION)
 build: $(OUTPUT)
 
 test: build
-	go test -v ./...
+	go test ./...
 
 $(OUTPUT): $(GO_SOURCES) ../vendor
 	go build -ldflags "-X main.version=$(VERSION)" -o $(OUTPUT) ../cli.go

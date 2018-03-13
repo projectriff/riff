@@ -7,7 +7,7 @@ GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
 build: $(OUTPUT)
 
 test: ../vendor
-	go test -v ./...
+	go test ./...
 
 $(OUTPUT): $(GO_SOURCES) ../vendor
 	go build cmd/topic-controller.go
