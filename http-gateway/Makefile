@@ -7,7 +7,7 @@ TAG ?= $(shell cat ../VERSION)
 build: $(OUTPUT)
 
 test:
-	go test -v ./...
+	go test ./...
 
 $(OUTPUT): $(GO_SOURCES) ../vendor
 	go build cmd/http-gateway.go

@@ -12,7 +12,7 @@ clean:
 	rm -f $(OUTPUT)
 
 test: ../vendor
-	go test -v ./...
+	go test ./...
 
 dockerize: $(GO_SOURCES) ../vendor
 	docker build .. --build-arg COMPONENT=function-sidecar -t projectriff/function-sidecar:$(TAG)
