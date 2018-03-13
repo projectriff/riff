@@ -43,7 +43,7 @@ func CreateAndWireRootCommand() *cobra.Command {
 
 	buildCmd, _ := Build()
 
-	applyCmd := Apply()
+	applyCmd, _ := Apply()
 
 	createCmd := Create(utils.CommandChain(initCmd, buildCmd, applyCmd))
 	createCmd.AddCommand(
@@ -65,7 +65,7 @@ func CreateAndWireRootCommand() *cobra.Command {
 		List(),
 		Logs(),
 		Publish(),
-		Update(utils.CommandChain(buildCmd, applyCmd)),
+		Update(buildCmd, applyCmd),
 		Version(),
 	)
 

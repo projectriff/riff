@@ -18,62 +18,18 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/projectriff/riff/riff-cli/pkg/options"
-	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
-	"github.com/projectriff/riff/riff-cli/cmd/opts"
-	"github.com/spf13/pflag"
-	"os"
 )
 
+func Update(buildCmd *cobra.Command, applyCmd *cobra.Command) *cobra.Command {
 
-func Update(updateChainCmd *cobra.Command) *cobra.Command {
+	updateChainCmd := utils.CommandChain(buildCmd, applyCmd)
 
-	// updateCmd represents the update command
-	var updateCmd = &cobra.Command{
-		Use:   "update",
-		Short: "Update a function",
-		Long: `Build the function based on the code available in the path directory, using the name and version specified 
-  for the image that is built. Then Apply the resource definition[s] included in the path.`,
-		Example: `  riff update -n <name> -v <version> -f <path> [--push]`,
+	updateChainCmd.Use = "update"
+	updateChainCmd.Short = "Update a function"
+	updateChainCmd.Long = `Build the function based on the code available in the path directory, using the name and version specified 
+for the image that is built. Then Apply the resource definition[s] included in the path.`
+	updateChainCmd.Example = `  riff update -n <name> -v <version> -f <path> [--push]`
 
-		RunE:   updateChainCmd.RunE,
-		PreRun: updateChainCmd.PreRun,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			if !opts.CreateOptions.Initialized {
-				opts.CreateOptions = options.CreateOptions{}
-				var flagset pflag.FlagSet
-				if cmd.Parent() == cmd.Root()  {
-					flagset = *cmd.PersistentFlags()
-				} else {
-					flagset = *cmd.Parent().PersistentFlags()
-				}
-
-				utils.MergeInitOptions(flagset, &opts.CreateOptions.InitOptions)
-				utils.MergeBuildOptions(flagset, &opts.CreateOptions)
-				utils.MergeApplyOptions(flagset, &opts.CreateOptions)
-
-				if len(args) > 0 {
-					if len(args) == 1 && opts.CreateOptions.FilePath == "" {
-						opts.CreateOptions.FilePath = args[0]
-					} else {
-						ioutils.Errorf("Invalid argument(s) %v\n", args)
-						cmd.Usage()
-						os.Exit(1)
-					}
-				}
-
-				err := options.ValidateAndCleanInitOptions(&opts.CreateOptions.InitOptions)
-				if err != nil {
-					ioutils.Error(err)
-					os.Exit(1)
-				}
-				opts.CreateOptions.Initialized = true
-			}
-			updateChainCmd.PersistentPreRun(cmd, args)
-		},
-	}
-	utils.CreateBuildFlags(updateCmd.PersistentFlags())
-	utils.CreateApplyFlags(updateCmd.PersistentFlags())
-	return updateCmd
+	return updateChainCmd
 }

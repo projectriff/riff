@@ -28,11 +28,10 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/cobra"
-	"github.com/projectriff/riff/riff-cli/pkg/functions"
 )
 
 type BuildOptions struct {
-	FilePath     string
+	FilePath  string
 	FunctionName string
 	Version      string
 	RiffVersion  string
@@ -80,7 +79,7 @@ and version specified for the image that is built.`,
 				}
 			}
 
-			err := validateOptions(&buildOptions)
+			err := validateBuildOptions(&buildOptions)
 			if err != nil {
 				return err
 			}
@@ -136,20 +135,10 @@ func pushArgs(opts BuildOptions) []string {
 	return []string{"push", image}
 }
 
-func validateOptions(options *BuildOptions) error {
-	options.FilePath = filepath.Clean(options.FilePath)
-
-	if options.FilePath == "" {
-		path, _ := filepath.Abs(".")
-		options.FilePath = path
+func validateBuildOptions(options *BuildOptions) error {
+	if err := validateFilepath(&options.FilePath) ; err != nil {
+		return err
 	}
-
-	var err error
-	if options.FunctionName == "" {
-		options.FunctionName, err = functions.FunctionNameFromPath(options.FilePath)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	err := validateFunctionName(&options.FunctionName, options.FilePath)
+	return err
 }

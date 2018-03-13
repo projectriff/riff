@@ -18,20 +18,26 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
-	"github.com/projectriff/riff/riff-cli/cmd/opts"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/functions"
-	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
-	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/cobra"
+	"errors"
 )
 
-func Apply() *cobra.Command {
+type ApplyOptions struct {
+	FilePath  string
+	Namespace string
+	DryRun    bool
+}
+
+func Apply() (*cobra.Command, *ApplyOptions) {
+
+	applyOptions := ApplyOptions{}
+
 	var applyCmd = &cobra.Command{
 		Use:   "apply",
 		Short: "Apply function resource definitions",
@@ -40,38 +46,33 @@ func Apply() *cobra.Command {
   riff apply -f some/function/path/some.yaml`,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return apply(cmd, options.GetApplyOptions(opts.CreateOptions))
+			return apply(cmd, applyOptions)
 		},
-		PreRun: func(cmd *cobra.Command, args []string) {
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			applyOptions.Namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
 
-			if !opts.CreateOptions.Initialized {
-				utils.MergeApplyOptions(*cmd.Flags(), &opts.CreateOptions)
-				if len(args) > 0 {
-					if len(args) == 1 && opts.CreateOptions.FilePath == "" {
-						opts.CreateOptions.FilePath = args[0]
-					} else {
-						ioutils.Errorf("Invalid argument(s) %v\n", args)
-						cmd.Usage()
-						os.Exit(1)
-					}
-				}
-
-				err := options.ValidateAndCleanInitOptions(&opts.CreateOptions.InitOptions)
-				if err != nil {
-					ioutils.Error(err)
-					os.Exit(1)
+			//TODO: DRY
+			if len(args) > 0 {
+				if len(args) == 1 && applyOptions.FilePath == "" {
+					applyOptions.FilePath = args[0]
+				} else {
+					return errors.New(fmt.Sprintf("Invalid argument(s) %v\n", args))
 				}
 			}
-			opts.CreateOptions.Initialized = true
+
+			return validateApplyOptions(&applyOptions)
 		},
 	}
+
+	applyCmd.Flags().BoolVar(&applyOptions.DryRun, "dry-run", false, "print generated function artifacts content to stdout only")
+	applyCmd.Flags().StringVarP(&applyOptions.FilePath, "filepath", "f", "", "path or directory used for the function resources (defaults to the current directory)")
+	applyCmd.Flags().StringVar(&applyOptions.Namespace, "namespace", "", "the namespace used for the deployed resources (defaults to kubectl's default)")
+
 	utils.CreateApplyFlags(applyCmd.Flags())
-	return applyCmd
+	return applyCmd, &applyOptions
 }
 
-
-
-func apply(cmd *cobra.Command, opts options.ApplyOptions) error {
+func apply(cmd *cobra.Command, opts ApplyOptions) error {
 	abs, err := functions.AbsPath(opts.FilePath)
 	if err != nil {
 		cmd.SilenceUsage = true
@@ -111,4 +112,8 @@ func apply(cmd *cobra.Command, opts options.ApplyOptions) error {
 		fmt.Printf("%v\n", output)
 	}
 	return nil
+}
+
+func validateApplyOptions(options *ApplyOptions) error {
+	return validateFilepath(&options.FilePath)
 }

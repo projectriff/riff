@@ -25,6 +25,9 @@ import (
 // postRun variations are run in reversed order
 func CommandChain(commands ... *cobra.Command) *cobra.Command {
 
+	argCache := make(map[*cobra.Command][]string)
+
+
 	runE := func(cmd *cobra.Command, args []string) error {
 		for _, command := range commands {
 			if command.RunE != nil {
@@ -62,14 +65,18 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 	persistentPreRunE := func(cmd *cobra.Command, args []string) error {
 	outer:
 		for _, command := range commands {
+
+			command.ParseFlags(args)
+			argCache[command] = command.Flags().Args()
+
 			for p := command; p != nil; p = p.Parent() {
 				if p.PersistentPreRunE != nil {
-					if err := p.PersistentPreRunE(cmd, args); err != nil {
+					if err := p.PersistentPreRunE(cmd, argCache[command]); err != nil {
 						return err
 					}
 					break outer
 				} else if p.PersistentPreRun != nil {
-					p.PersistentPreRun(cmd, args)
+					p.PersistentPreRun(cmd, argCache[command])
 					break outer
 				}
 			}
@@ -80,17 +87,16 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 		persistentPreRunE(cmd, args)
 	}
 
-
-	postRunE := func(cmd *cobra.Command, args []string) error {
-		for i := len(commands) ; i >= 0 ; i-- {
+	postRunE := func(cmd *cobra.Command, _ []string) error {
+		for i := len(commands); i >= 0; i-- {
 			command := commands[i]
 			if command.PostRunE != nil {
-				err := command.PostRunE(cmd, args)
+				err := command.PostRunE(cmd, argCache[command])
 				if err != nil {
 					return err
 				}
 			} else if command.PostRun != nil {
-				command.PostRun(cmd, args)
+				command.PostRun(cmd, argCache[command])
 			}
 		}
 		return nil
@@ -99,18 +105,18 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 		postRunE(cmd, args)
 	}
 
-	persistentPostRunE := func(cmd *cobra.Command, args []string) error {
+	persistentPostRunE := func(cmd *cobra.Command, _ []string) error {
 	outer:
-		for i := len(commands) ; i >= 0 ; i-- {
+		for i := len(commands); i >= 0; i-- {
 			command := commands[i]
 			for p := command; p != nil; p = p.Parent() {
 				if p.PersistentPreRunE != nil {
-					if err := p.PersistentPreRunE(cmd, args); err != nil {
+					if err := p.PersistentPreRunE(cmd, argCache[command]); err != nil {
 						return err
 					}
 					break outer
 				} else if p.PersistentPreRun != nil {
-					p.PersistentPreRun(cmd, args)
+					p.PersistentPreRun(cmd, argCache[command])
 					break outer
 				}
 			}
@@ -132,6 +138,7 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 		PersistentPreRunE:  persistentPreRunE,
 		PersistentPostRun:  persistentPostRun,
 		PersistentPostRunE: persistentPostRunE,
+		DisableFlagParsing: true,
 	}
 
 	// Merge flags from all delegate commands
@@ -140,4 +147,3 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 	}
 	return chain
 }
-

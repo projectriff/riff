@@ -20,45 +20,55 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
-	"github.com/projectriff/riff/riff-cli/cmd/opts"
+	"github.com/spf13/cobra"
 )
 
 func TestApplyCommandImplicitPath(t *testing.T) {
-	clearAllOptions()
 	as := assert.New(t)
+	
+	rootCmd, _, applyOptions := setupApplyTest()
 	rootCmd.SetArgs([]string{"apply", "--dry-run", osutils.Path("../test_data/shell/echo")})
 
-	_, err := rootCmd.ExecuteC()
+	err := rootCmd.Execute()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.CreateOptions.FilePath)
+	as.Equal("../test_data/shell/echo", applyOptions.FilePath)
 }
 
 func TestApplyCommandExplicitPath(t *testing.T) {
-	clearAllOptions()
 	as := assert.New(t)
+
+	rootCmd, _, applyOptions := setupApplyTest()
 	rootCmd.SetArgs([]string{"apply", "--dry-run", "-f", osutils.Path("../test_data/shell/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.CreateOptions.FilePath)
+	as.Equal("../test_data/shell/echo", applyOptions.FilePath)
 }
 
 func TestApplyCommandDefaultNamespace(t *testing.T) {
-	clearAllOptions()
 	as := assert.New(t)
+	rootCmd, _, applyOptions := setupApplyTest()
 	rootCmd.SetArgs([]string{"apply", "--dry-run", "-f", osutils.Path("../test_data/shell/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("", opts.CreateOptions.Namespace)
+	as.Equal("", applyOptions.Namespace)
 }
 
 func TestApplyCommandWithNamespace(t *testing.T) {
-	clearAllOptions()
+
 	as := assert.New(t)
+	rootCmd, _, applyOptions := setupApplyTest()
 	rootCmd.SetArgs([]string{"apply", "--dry-run", "--namespace", "test-test", "-f", osutils.Path("../test_data/shell/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("test-test", opts.CreateOptions.Namespace)
+	as.Equal("test-test", applyOptions.Namespace)
+}
+
+func setupApplyTest() (*cobra.Command, *cobra.Command, *ApplyOptions, ){
+	root := Root()
+	apply, applyOptions := Apply()
+	root.AddCommand(apply)
+	return root, apply, applyOptions
 }

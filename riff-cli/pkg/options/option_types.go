@@ -45,12 +45,6 @@ func (this InitOptions) GetUserAccount() string {
 	return this.UserAccount
 }
 
-type ApplyOptions struct {
-	FilePath  string
-	Namespace string
-	DryRun    bool
-}
-
 type CreateOptions struct {
 	InitOptions
 	Namespace string
@@ -61,9 +55,5 @@ type ImageOptions interface {
 	GetFunctionName() string
 	GetVersion() string
 	GetUserAccount() string
-}
-
-func GetApplyOptions(opts CreateOptions) ApplyOptions {
-	return ApplyOptions{FilePath: opts.FilePath, Namespace: opts.Namespace, DryRun: opts.DryRun}
 }
 
