@@ -100,8 +100,8 @@ func TestDeleteCommandImplicitPath(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.DeleteAllOptions.FilePath)
-	as.Equal("", opts.DeleteAllOptions.Namespace)
+	as.Equal("../test_data/shell/echo", opts.DeleteOptions.FilePath)
+	as.Equal("", opts.DeleteOptions.Namespace)
 	as.Equal(0, getFunctionCount)
 	as.Equal(1, deleteFunctionCount)
 	as.Equal(0, deleteTopicCount)
@@ -114,8 +114,8 @@ func TestDeleteCommandExplicitPath(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.DeleteAllOptions.FilePath)
-	as.Equal("", opts.DeleteAllOptions.Namespace)
+	as.Equal("../test_data/shell/echo", opts.DeleteOptions.FilePath)
+	as.Equal("", opts.DeleteOptions.Namespace)
 	as.Equal(0, getFunctionCount)
 	as.Equal(1, deleteFunctionCount)
 	as.Equal(0, deleteTopicCount)
@@ -129,8 +129,8 @@ func TestDeleteCommandExplicitFile(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo/echo-topics.yaml", opts.DeleteAllOptions.FilePath)
-	as.Equal("", opts.DeleteAllOptions.Namespace)
+	as.Equal("../test_data/shell/echo/echo-topics.yaml", opts.DeleteOptions.FilePath)
+	as.Equal("", opts.DeleteOptions.Namespace)
 	as.Equal(0, getFunctionCount)
 	as.Equal(1, deleteResourceCount)
 	as.Equal(0, deleteTopicCount)
@@ -153,7 +153,7 @@ func TestDeleteCommandWithNameDoesNotExist(t *testing.T) {
 	rootCmd.SetArgs([]string{"delete", "--name", "square"})
 	_, err := rootCmd.ExecuteC()
 	as.Error(err)
-	as.Equal("square", opts.DeleteAllOptions.FunctionName)
+	as.Equal("square", opts.DeleteOptions.FunctionName)
 	as.Equal(1, getFunctionCount)
 	as.Equal(0, deleteFunctionCount)
 	as.Equal(0, deleteTopicCount)
@@ -168,9 +168,9 @@ func TestDeleteCommandAllFlag(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.DeleteAllOptions.FilePath)
-	as.Equal(true, opts.DeleteAllOptions.All)
-	as.Equal("", opts.DeleteAllOptions.Namespace)
+	as.Equal("../test_data/shell/echo", opts.DeleteOptions.FilePath)
+	as.Equal(true, opts.DeleteOptions.All)
+	as.Equal("", opts.DeleteOptions.Namespace)
 	as.Equal(0, getFunctionCount)
 	as.Equal(1, deleteResourceCount)
 	as.Equal(0, deleteTopicCount)
@@ -189,9 +189,9 @@ func TestDeleteCommandFromCwdAllFlag(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("", opts.DeleteAllOptions.FilePath)
-	as.Equal(true, opts.DeleteAllOptions.All)
-	as.Equal("", opts.DeleteAllOptions.Namespace)
+	as.Equal("", opts.DeleteOptions.FilePath)
+	as.Equal(true, opts.DeleteOptions.All)
+	as.Equal("", opts.DeleteOptions.Namespace)
 	as.Equal(0, getFunctionCount)
 	as.Equal(1, deleteResourceCount)
 	as.Equal(0, deleteTopicCount)
@@ -210,9 +210,9 @@ func TestDeleteCommandFromCwdAllFlagNoResources(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("", opts.DeleteAllOptions.FilePath)
-	as.Equal(true, opts.DeleteAllOptions.All)
-	as.Equal("", opts.DeleteAllOptions.Namespace)
+	as.Equal("", opts.DeleteOptions.FilePath)
+	as.Equal(true, opts.DeleteOptions.All)
+	as.Equal("", opts.DeleteOptions.Namespace)
 	as.Equal(0, getFunctionCount)
 	as.Equal(0, deleteResourceCount)
 	as.Equal(0, deleteTopicCount)
@@ -239,8 +239,8 @@ func TestDeleteCommandWithNamespace(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.DeleteAllOptions.FilePath)
-	as.Equal("test-test", opts.DeleteAllOptions.Namespace)
+	as.Equal("../test_data/shell/echo", opts.DeleteOptions.FilePath)
+	as.Equal("test-test", opts.DeleteOptions.Namespace)
 }
 
 func resetTestState() {
@@ -249,7 +249,7 @@ func resetTestState() {
 	deleteTopicCount = 0
 	deleteResourceCount = 0
 
-	opts.DeleteAllOptions = options.DeleteAllOptions{}
+	opts.DeleteOptions = options.DeleteOptions{}
 	deleteCmd.ResetFlags()
 	utils.CreateDeleteFlags(deleteCmd.Flags())
 }

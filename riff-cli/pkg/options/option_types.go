@@ -86,19 +86,6 @@ type DeleteOptions struct {
 	All          bool
 }
 
-type DeleteAllOptions struct {
-	FunctionName string
-	FilePath     string
-	Namespace    string
-	DryRun       bool
-	All          bool
-	Initialized  bool
-}
-
-func (this DeleteOptions) GetAll() bool {
-	return this.All
-}
-
 type CreateOptions struct {
 	InitOptions
 	Namespace string
@@ -113,16 +100,6 @@ type ImageOptions interface {
 
 func GetApplyOptions(opts CreateOptions) ApplyOptions {
 	return ApplyOptions{FilePath: opts.FilePath, Namespace: opts.Namespace, DryRun: opts.DryRun}
-}
-
-func GetDeleteOptions(opts DeleteAllOptions) DeleteOptions {
-	return DeleteOptions{
-		FilePath:     opts.FilePath,
-		FunctionName: opts.FunctionName,
-		Namespace:    opts.Namespace,
-		DryRun:       opts.DryRun,
-		All:          opts.All,
-	}
 }
 
 func GetBuildOptions(opts CreateOptions) BuildOptions {
