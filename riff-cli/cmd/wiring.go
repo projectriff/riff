@@ -54,11 +54,13 @@ func CreateAndWireRootCommand() *cobra.Command {
 		CreateGo(utils.CommandChain(initGoCmd, buildCmd, applyCmd)),
 	)
 
+	deleteCmd, _ := Delete()
+
 	rootCmd.AddCommand(
 		applyCmd,
 		buildCmd,
 		createCmd,
-		Delete(),
+		deleteCmd,
 		initCmd,
 		List(),
 		Logs(),
