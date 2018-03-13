@@ -23,7 +23,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/functions"
 	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
@@ -31,13 +30,21 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/projectriff/riff/riff-cli/pkg/jsonpath"
 	"github.com/spf13/cobra"
-	"github.com/projectriff/riff/riff-cli/cmd/opts"
+	"github.com/projectriff/riff/riff-cli/cmd/utils"
 )
 
+type DeleteOptions struct {
+	FilePath     string
+	FunctionName string
+	Namespace    string
+	DryRun       bool
+	All          bool
+}
 
-func Delete() *cobra.Command {
+func Delete() (*cobra.Command, *DeleteOptions) {
 
-	// deleteCmd represents the delete command
+	deleteOptions := DeleteOptions{}
+
 	var deleteCmd = &cobra.Command{
 		Use:   "delete",
 		Short: "Delete function resources",
@@ -47,28 +54,25 @@ func Delete() *cobra.Command {
   riff delete -f function/square`,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-
-			return doDelete(cmd, opts.DeleteOptions)
-
+			return doDelete(cmd, deleteOptions)
 		},
 		PreRun: func(cmd *cobra.Command, args []string) {
 
-			utils.MergeDeleteOptions(*cmd.Flags(), &opts.DeleteOptions)
+			deleteOptions.Namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
 
+			// Path can be given as -f or as arg
 			if len(args) > 0 {
-				if len(args) == 1 && opts.DeleteOptions.FilePath == "" {
-					opts.DeleteOptions.FilePath = args[0]
+				if len(args) == 1 && deleteOptions.FilePath == "" {
+					deleteOptions.FilePath = args[0]
 				} else {
 					ioutils.Errorf("Invalid argument(s) %v\n", args)
 					cmd.Usage()
 					os.Exit(1)
 				}
 			}
-			/*
-			 * If name and no file path given, skip this step
-			 */
-			if opts.DeleteOptions.FilePath != "" && opts.DeleteOptions.FunctionName == "" {
-				err := options.ValidateNamePathOptions(&opts.DeleteOptions.FunctionName, &opts.DeleteOptions.FilePath)
+			// If name and no file path given, skip this step
+			if deleteOptions.FilePath != "" && deleteOptions.FunctionName == "" {
+				err := options.ValidateNamePathOptions(&deleteOptions.FunctionName, &deleteOptions.FilePath)
 				if err != nil {
 					ioutils.Error(err)
 					os.Exit(1)
@@ -76,11 +80,19 @@ func Delete() *cobra.Command {
 			}
 		},
 	}
-	utils.CreateDeleteFlags(deleteCmd.Flags())
-	return deleteCmd
+
+	deleteCmd.Flags().BoolVar(&deleteOptions.All, "all", false, "delete all resources including topics, not just the function resource")
+	deleteCmd.Flags().BoolVar(&deleteOptions.DryRun, "dry-run", false, "print generated function artifacts content to stdout only")
+	deleteCmd.Flags().StringVarP(&deleteOptions.FilePath, "filepath", "f", "", "path or directory used for the function resources (defaults to the current directory)")
+	deleteCmd.Flags().StringVarP(&deleteOptions.FunctionName, "name", "n", "", "the name of the function (defaults to the name of the current directory)")
+	deleteCmd.Flags().StringVar(&deleteOptions.Namespace, "namespace", "", "the namespace used for the deployed resources (defaults to kubectl's default)")
+	// viper namespace
+
+
+	return deleteCmd, &deleteOptions
 }
 
-func doDelete(cmd *cobra.Command, opts options.DeleteOptions) error {
+func doDelete(cmd *cobra.Command, opts DeleteOptions) error {
 
 	var cmdArgs []string
 	var message string
@@ -149,7 +161,7 @@ func doDelete(cmd *cobra.Command, opts options.DeleteOptions) error {
 	return err
 }
 
-func deleteFunctionByName(opts options.DeleteOptions) error {
+func deleteFunctionByName(opts DeleteOptions) error {
 	getArgs := []string{"get"}
 	if opts.Namespace != "" {
 		getArgs = append(getArgs, "--namespace", opts.Namespace)
@@ -179,7 +191,7 @@ func deleteFunctionByName(opts options.DeleteOptions) error {
 	return err
 }
 
-func deleteTopic(topic string, opts options.DeleteOptions) error {
+func deleteTopic(topic string, opts DeleteOptions) error {
 	cmdArgs := []string{"delete"}
 	if opts.Namespace != "" {
 		cmdArgs = append(cmdArgs, "--namespace", opts.Namespace)
@@ -188,7 +200,7 @@ func deleteTopic(topic string, opts options.DeleteOptions) error {
 	return deleteResources(cmdArgs, fmt.Sprintf("Deleting topic %v\n\n", topic), opts.DryRun)
 }
 
-func deleteFunction(function string, opts options.DeleteOptions) error {
+func deleteFunction(function string, opts DeleteOptions) error {
 	cmdArgs := []string{"delete"}
 	if opts.Namespace != "" {
 		cmdArgs = append(cmdArgs, "--namespace", opts.Namespace)
