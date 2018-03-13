@@ -68,7 +68,6 @@ func Apply() (*cobra.Command, *ApplyOptions) {
 	applyCmd.Flags().StringVarP(&applyOptions.FilePath, "filepath", "f", "", "path or directory used for the function resources (defaults to the current directory)")
 	applyCmd.Flags().StringVar(&applyOptions.Namespace, "namespace", "", "the namespace used for the deployed resources (defaults to kubectl's default)")
 
-	utils.CreateApplyFlags(applyCmd.Flags())
 	return applyCmd, &applyOptions
 }
 

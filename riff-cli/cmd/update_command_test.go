@@ -20,25 +20,36 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
-	"github.com/projectriff/riff/riff-cli/cmd/opts"
+	"github.com/spf13/cobra"
 )
 
 func TestUpdateCommandImplicitPath(t *testing.T) {
-	clearAllOptions()
+	rootCmd, _ , applyOptions := setupUpdateTest()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"update", "--dry-run", osutils.Path("../test_data/shell/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.CreateOptions.FilePath)
+	as.Equal("../test_data/shell/echo", applyOptions.FilePath)
 }
 
 func TestUpdateCommandExplicitPath(t *testing.T) {
-	clearAllOptions()
+	rootCmd, _ , applyOptions := setupUpdateTest()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"update", "--dry-run", "-f", osutils.Path("../test_data/shell/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", opts.CreateOptions.FilePath)
+	as.Equal("../test_data/shell/echo", applyOptions.FilePath)
+}
+
+func setupUpdateTest() (*cobra.Command, *BuildOptions, *ApplyOptions) {
+	root := Root()
+	buildCmd, buildOptions := Build()
+
+	applyCmd, applyOptions := Apply()
+
+	update := Update(buildCmd, applyCmd)
+	root.AddCommand(update)
+	return rootCmd, buildOptions, applyOptions
 }

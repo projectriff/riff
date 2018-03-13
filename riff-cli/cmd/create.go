@@ -19,14 +19,16 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
-	"github.com/spf13/pflag"
-	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
-	"os"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
-	"github.com/projectriff/riff/riff-cli/cmd/opts"
+	"fmt"
+	"errors"
 )
 
-func Create(createChainCmd *cobra.Command) *cobra.Command {
+func Create(initCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command) (*cobra.Command, *options.CreateOptions) {
+	var createOptions = options.CreateOptions{}
+
+	createChainCmd := utils.CommandChain(initCmd, buildCmd, applyCmd)
+
 	var createCmd = &cobra.Command{
 		Use:   "create [language]",
 		Short: "Create a function",
@@ -34,47 +36,53 @@ func Create(createChainCmd *cobra.Command) *cobra.Command {
 
 		RunE:   createChainCmd.RunE,
 		PreRun: createChainCmd.PreRun,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			opts.CreateOptions = options.CreateOptions{}
-			var flagset pflag.FlagSet
-			if cmd.Parent() == cmd.Root() {
-				flagset = *cmd.PersistentFlags()
-			} else {
-				flagset = *cmd.Parent().PersistentFlags()
-			}
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
-			utils.MergeInitOptions(flagset, &opts.CreateOptions.InitOptions)
-			utils.MergeBuildOptions(flagset, &opts.CreateOptions)
-			utils.MergeApplyOptions(flagset, &opts.CreateOptions)
+			//var flagset pflag.FlagSet
+			//if cmd.Parent() == cmd.Root() {
+			//	flagset = *cmd.PersistentFlags()
+			//} else {
+			//	flagset = *cmd.Parent().PersistentFlags()
+			//}
+
+			//utils.MergecreateOptions(flagset, &opts.CreateOptions.createOptions)
+			//utils.MergeBuildOptions(flagset, &opts.CreateOptions)
+			//utils.MergeApplyOptions(flagset, &opts.CreateOptions)
 
 			if len(args) > 0 {
-				if len(args) == 1 && opts.CreateOptions.FilePath == "" {
-					opts.CreateOptions.FilePath = args[0]
+				if len(args) == 1 && createOptions.FilePath == "" {
+					createOptions.FilePath = args[0]
 				} else {
-					ioutils.Errorf("Invalid argument(s) %v\n", args)
-					cmd.Usage()
-					os.Exit(1)
+					return errors.New(fmt.Sprintf("Invalid argument(s) %v\n", args))
 				}
 			}
 
-			err := options.ValidateAndCleanInitOptions(&opts.CreateOptions.InitOptions)
+			err := validateInitOptions(&createOptions.InitOptions)
 			if err != nil {
-				ioutils.Error(err)
-				os.Exit(1)
+				return err
 			}
-			opts.CreateOptions.Initialized = true
-			createChainCmd.PersistentPreRun(cmd, args)
+			return nil
 		},
 	}
 
-	utils.CreateInitFlags(createCmd.PersistentFlags())
-	utils.CreateBuildFlags(createCmd.PersistentFlags())
-	utils.CreateApplyFlags(createCmd.PersistentFlags())
+	createCmd.PersistentFlags().BoolVar(&createOptions.DryRun, "dry-run", utils.DefaultValues.DryRun, "print generated function artifacts content to stdout only")
+	createCmd.PersistentFlags().StringVarP(&createOptions.FilePath, "filepath", "f", "", "path or directory used for the function resources (defaults to the current directory)")
+	createCmd.PersistentFlags().StringVarP(&createOptions.FunctionName, "name", "n", "", "the name of the function (defaults to the name of the current directory)")
+	createCmd.PersistentFlags().StringVar(&createOptions.RiffVersion, "riff-version", utils.DefaultValues.RiffVersion, "the version of riff to use when building containers")
+	createCmd.PersistentFlags().StringVarP(&createOptions.Version, "version", "v", utils.DefaultValues.Version, "the version of the function image")
+	createCmd.PersistentFlags().StringVarP(&createOptions.UserAccount, "useraccount", "u", utils.DefaultValues.UserAccount, "the Docker user account to be used for the image repository")
+	createCmd.PersistentFlags().StringVarP(&createOptions.Artifact, "artifact", "a", "", "path to the function artifact, source code or jar file")
+	createCmd.PersistentFlags().StringVarP(&createOptions.Input, "input", "i", "", "the name of the input topic (DefaultValues to function name)")
+	createCmd.PersistentFlags().StringVarP(&createOptions.Output, "output", "o", "", "the name of the output topic (optional)")
+	createCmd.PersistentFlags().BoolVar(&createOptions.Force, "force", utils.DefaultValues.Force, "overwrite existing functions artifacts")
+	createCmd.PersistentFlags().BoolVarP(&createOptions.Push, "push", "", utils.DefaultValues.Push, "push the image to Docker registry")
+	createCmd.PersistentFlags().StringVar(&createOptions.Namespace, "namespace", "", "the namespace used for the deployed resources (defaults to kubectl's default)")
 
-	return createCmd
+	return createCmd, &createOptions
 }
 
-func CreateJava(createJavaChainCmd *cobra.Command) *cobra.Command {
+func CreateJava(initJavaCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command, createOptions *options.CreateOptions) (*cobra.Command, *options.CreateOptions) {
+	createJavaChainCmd := utils.CommandChain(initJavaCmd, buildCmd, applyCmd)
 	var createJavaCmd = &cobra.Command{
 		Use:   "java",
 		Short: "Create a Java function",
@@ -82,16 +90,17 @@ func CreateJava(createJavaChainCmd *cobra.Command) *cobra.Command {
 
 		RunE: createJavaChainCmd.RunE,
 		PreRun: func(cmd *cobra.Command, args []string) {
-			opts.Handler = utils.GetHandler(cmd)
+			//createOptions.Handler,_ = cmd.Flags().GetString("handler");
 			createJavaChainCmd.PreRun(cmd, args)
 		},
 	}
 	createJavaCmd.Flags().String("handler", "", "the fully qualified class name of the function handler")
 	createJavaCmd.MarkFlagRequired("handler")
-	return createJavaCmd
+	return createJavaCmd, createOptions
 }
 
-func CreateShell(createShellChainCmd *cobra.Command) *cobra.Command {
+func CreateShell(initShellCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command, createOptions *options.CreateOptions) (*cobra.Command, *options.CreateOptions) {
+	createShellChainCmd := utils.CommandChain(initShellCmd, buildCmd, applyCmd)
 	var createShellCmd = &cobra.Command{
 		Use:    "shell",
 		Short:  "Create a shell script function",
@@ -99,10 +108,11 @@ func CreateShell(createShellChainCmd *cobra.Command) *cobra.Command {
 		PreRun: createShellChainCmd.PreRun,
 		RunE:   createShellChainCmd.RunE,
 	}
-	return createShellCmd
+	return createShellCmd, createOptions
 }
 
-func CreateNode(createNodeChainCmd *cobra.Command) *cobra.Command {
+func CreateNode(initNodeCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command, createOptions *options.CreateOptions) (*cobra.Command, *options.CreateOptions) {
+	createNodeChainCmd := utils.CommandChain(initNodeCmd, buildCmd, applyCmd)
 	var createNodeCmd = &cobra.Command{
 		Use:     "node",
 		Aliases: []string{"js"},
@@ -111,45 +121,47 @@ func CreateNode(createNodeChainCmd *cobra.Command) *cobra.Command {
 		PreRun:  createNodeChainCmd.PreRun,
 		RunE:    createNodeChainCmd.RunE,
 	}
-	return createNodeCmd
+	return createNodeCmd, createOptions
 }
 
-func CreatePython(createPythonChainCmd *cobra.Command) *cobra.Command {
+func CreatePython(initPythonCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command, createOptions *options.CreateOptions) (*cobra.Command, *options.CreateOptions) {
+	createPythonChainCmd := utils.CommandChain(initPythonCmd, buildCmd, applyCmd)
 	var createPythonCmd = &cobra.Command{
 		Use:   "python",
 		Short: "Create a Python function",
 		Long:  utils.InitPythonCmdLong(),
 
 		PreRun: func(cmd *cobra.Command, args []string) {
-			opts.Handler = utils.GetHandler(cmd)
-			if opts.Handler == "" {
-				opts.Handler = opts.CreateOptions.FunctionName
+			createOptions.Handler,_ = cmd.Flags().GetString("handler");
+			if createOptions.Handler == "" {
+				createOptions.Handler = createOptions.FunctionName
 			}
 			createPythonChainCmd.PreRun(cmd, args)
 		},
 		RunE: createPythonChainCmd.RunE,
 	}
 	createPythonCmd.Flags().String("handler", "", "the name of the function handler")
-	return createPythonCmd
+	return createPythonCmd, createOptions
 
 }
 
-func CreateGo(createGoChainCmd *cobra.Command) *cobra.Command {
+func CreateGo(initGoCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command, createOptions *options.CreateOptions) (*cobra.Command, *options.CreateOptions) {
+	createGoChainCmd := utils.CommandChain(initGoCmd, buildCmd, applyCmd)
 	var createGoCmd = &cobra.Command{
 		Use:   "go",
 		Short: "Create a Go function",
 		Long:  utils.InitGoCmdLong(),
 
 		PreRun: func(cmd *cobra.Command, args []string) {
-			opts.Handler = utils.GetHandler(cmd)
-			if opts.Handler == "" {
-				opts.Handler = opts.CreateOptions.FunctionName
+			createOptions.Handler,_ = cmd.Flags().GetString("handler");
+			if createOptions.Handler == "" {
+				createOptions.Handler = createOptions.FunctionName
 			}
 			createGoChainCmd.PreRun(cmd, args)
 		},
 		RunE: createGoChainCmd.RunE,
 	}
 	createGoCmd.Flags().String("handler", "", "the name of the function handler")
-	return createGoCmd
+	return createGoCmd, createOptions
 
 }

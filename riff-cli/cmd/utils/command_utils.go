@@ -19,7 +19,27 @@ package utils
 import (
 	"bytes"
 	"text/template"
+	"github.com/projectriff/riff/riff-cli/global"
 )
+
+type Defaults struct {
+	RiffVersion string
+	UserAccount string
+	Force       bool
+	DryRun      bool
+	Push        bool
+	Version     string
+}
+
+var DefaultValues = Defaults{
+	RiffVersion: global.RIFF_VERSION,
+	UserAccount: "current OS user",
+	Force:       false,
+	DryRun:      false,
+	Push:        false,
+	Version:     "0.0.1",
+}
+
 
 const (
 	initResult       = `generate the required Dockerfile and resource definitions using sensible DefaultValues`

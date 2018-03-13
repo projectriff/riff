@@ -27,7 +27,6 @@ type InitOptions struct {
 	Artifact     string
 	RiffVersion  string
 	UserAccount  string
-	Initialized  bool
 	DryRun       bool
 	Force        bool
 	Handler      string
