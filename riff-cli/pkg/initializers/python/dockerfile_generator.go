@@ -29,7 +29,7 @@ type PythonDockerFileTokens struct {
 }
 
 var pythonFunctionDockerfileTemplate = `
-FROM projectriff/python2-function-invoker:{{.RiffVersion}}
+FROM projectriff/python3-function-invoker:{{.RiffVersion}}
 ARG FUNCTION_MODULE={{.ArtifactBase}}
 ARG FUNCTION_HANDLER={{.Handler}}
 ADD ./{{.ArtifactBase}} /
