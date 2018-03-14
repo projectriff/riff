@@ -142,17 +142,42 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 	for _, c := range commands {
 		c.LocalFlags() // This forces correct initialization and inheritance of c.Flags() (which c.Flags() documentation
 		// advertises but actually doesn't do)
-		c.Flags().VisitAll(func(f *pflag.Flag) {
-			flag := chain.Flags().Lookup(f.Name)
-			if flag == nil {
-				chain.Flags().AddFlag(newBroadcastFlag(f))
-			} else {
-				checkFlagConsistency(flag, f)
-				flag.Value = append(flag.Value.(broadcastValue), f.Value)
-			}
-		})
+
+		copyFlagsToChain(*c.Flags(), chain.Flags())
+		copyFlagsToChain(*c.PersistentFlags(), chain.PersistentFlags())
+		//c.Flags().VisitAll(func(f *pflag.Flag) {
+		//	flag := chain.Flags().Lookup(f.Name)
+		//	if flag == nil {
+		//		chain.Flags().AddFlag(newBroadcastFlag(f))
+		//	} else {
+		//		checkFlagConsistency(flag, f)
+		//		flag.Value = append(flag.Value.(broadcastValue), f.Value)
+		//	}
+		//})
+		//c.PersistentFlags().VisitAll(func(f *pflag.Flag) {
+		//	flag := chain.PersistentFlags().Lookup(f.Name)
+		//	if flag == nil {
+		//		chain.PersistentFlags().AddFlag(newBroadcastFlag(f))
+		//	} else {
+		//		checkFlagConsistency(flag, f)
+		//		flag.Value = append(flag.Value.(broadcastValue), f.Value)
+		//	}
+		//})
 	}
 	return chain
+}
+
+func copyFlagsToChain(commandFlags pflag.FlagSet, chainFlags *pflag.FlagSet) {
+	commandFlags.VisitAll(func(f *pflag.Flag) {
+		flag := chainFlags.Lookup(f.Name)
+		if flag == nil {
+			chainFlags.AddFlag(newBroadcastFlag(f))
+		} else {
+			checkFlagConsistency(flag, f)
+			flag.Value = append(flag.Value.(broadcastValue), f.Value)
+		}
+	})
+
 }
 
 func checkFlagConsistency(a *pflag.Flag, b *pflag.Flag) {

@@ -34,6 +34,20 @@ func TestCreateCommandImplicitPath(t *testing.T) {
 	as.NoError(err)
 
 	as.NotEmpty(initOptions.FilePath)
+	as.NotEmpty(initOptions.UserAccount)
+	as.Equal("../test_data/shell/echo", initOptions.FilePath)
+}
+
+func TestCreateCommandWithUser(t *testing.T) {
+	rootCmd, initOptions, _, _:= setupCreateTest()
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"create", "--dry-run", "../test_data/shell/echo", "-u", "me"})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+
+	as.NotEmpty(initOptions.FilePath)
+	as.Equal("me", initOptions.UserAccount)
 	as.Equal("../test_data/shell/echo", initOptions.FilePath)
 }
 
