@@ -42,9 +42,9 @@ var DefaultValues = Defaults{
 
 
 const (
-	initResult       = `generate the required Dockerfile and resource definitions using sensible DefaultValues`
+	initResult       = `generate the required Dockerfile and resource definitions using sensible defaults`
 	initDefinition   = `Generate`
-	createResult     = `create the required Dockerfile and resource definitions, and apply the resources, using sensible DefaultValues`
+	createResult     = `create the required Dockerfile and resource definitions, and apply the resources, using sensible defaults`
 	createDefinition = `Create`
 )
 
