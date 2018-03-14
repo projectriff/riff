@@ -1,8 +1,6 @@
-= Function Sidecar image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-function-sidecar-container/badge[Function Sidecar Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-function-sidecar-container/builds/latest]
-
-== Purpose
-The *function sidecar* runs alongside the function container in the function pod(s) and takes care of consuming input
-events from the broker. It then forwards those events to the function (via the *invoker*) using gRPC (recommended)
+== Function Sidecar
+The *function sidecar* runs alongside the function container in every function pod, and takes care of consuming input
+events from the broker. It forwards those events to the function (via the *invoker*) using gRPC (recommended)
 or other "dispatcher" mechanisms such as `http` (legacy). Likewise, the sidecar marshalls function output back to the
 broker.
 

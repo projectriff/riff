@@ -1,9 +1,5 @@
-= HTTP Gateway image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-http-gateway-container/badge[HTTP Gateway Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-http-gateway-container/builds/latest]
-
-== Purpose
-The *http gateway* runs accepts http requests and trasforms those to messages emitted on the broker.
-Optionally (when posting to the `/requests/\{topic\}` endpoint) it waits for a reply on a dedicated internal topic
-and marshalls that message as an http response.
+== HTTP Gateway
+The *http gateway* accepts http requests posted to a `/messages/\{topic\}` endpoint, and trasforms those to messages emitted on the broker. Optionally, when posting to the `/requests/\{topic\}` endpoint, it waits for a reply correlated with the request on a dedicated internal topic, and marshalls that message as an http response.
 
 == Development
 === Prerequisites
