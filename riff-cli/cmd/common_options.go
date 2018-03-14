@@ -19,6 +19,10 @@ package cmd
 import (
 	"path/filepath"
 	"github.com/projectriff/riff/riff-cli/pkg/functions"
+	"fmt"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
+	"strings"
+	"errors"
 )
 
 func validateFilepath(path *string) error {
@@ -37,4 +41,71 @@ func validateFunctionName(name *string, path string) error {
 		*name, err = functions.FunctionNameFromPath(path)
 	}
 	return err
+}
+
+func validateAndCleanArtifact(artifact *string, path string) error {
+	if *artifact != "" {
+		*artifact = filepath.Clean(*artifact)
+	}
+
+	if *artifact != "" {
+
+		if filepath.IsAbs(*artifact) {
+			return errors.New(fmt.Sprintf("artifact %s must be relative to function path",*artifact))
+		}
+
+		absFilePath, err := filepath.Abs(path)
+		if err != nil {
+			return err
+		}
+
+		var absArtifactPath string
+
+		if osutils.IsDirectory(absFilePath) {
+			absArtifactPath = filepath.Join(absFilePath, *artifact)
+		} else {
+			absArtifactPath = filepath.Join(filepath.Dir(absFilePath), *artifact)
+		}
+
+		if osutils.IsDirectory(absArtifactPath) {
+			return errors.New(fmt.Sprintf("artifact %s must be a regular file", absArtifactPath))
+		}
+
+		absFilePathDir := absFilePath
+		if !osutils.IsDirectory(absFilePath) {
+			absFilePathDir = filepath.Dir(absFilePath)
+		}
+
+		if !strings.HasPrefix(filepath.Dir(absArtifactPath), absFilePathDir) {
+			return errors.New(fmt.Sprintf("artifact %s cannot be external to filepath %s", absArtifactPath, absFilePath))
+		}
+
+		if !osutils.FileExists(absArtifactPath) {
+			return errors.New(fmt.Sprintf("artifact %s does not exist", absArtifactPath))
+		}
+
+		if !osutils.IsDirectory(absFilePath) && absFilePath != absArtifactPath {
+			return errors.New(fmt.Sprintf("artifact %s conflicts with filepath %s", absArtifactPath, absFilePath))
+		}
+	}
+	return nil
+}
+
+func validateProtocol(protocol *string) error {
+	supportedProtocols := []string{"http", "grpc"}
+	if *protocol != "" {
+
+		supported := false
+		*protocol = strings.ToLower(*protocol)
+		for _, p := range supportedProtocols {
+			if *protocol == p {
+				supported = true
+			}
+		}
+		if (!supported) {
+			return errors.New(fmt.Sprintf("protocol %s is unsupported \n", *protocol))
+		}
+	}
+
+	return nil
 }

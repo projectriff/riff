@@ -18,10 +18,7 @@ package options
 
 import (
 	"path/filepath"
-	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"fmt"
-	"strings"
-	"errors"
 	"github.com/projectriff/riff/riff-cli/pkg/functions"
 )
 
@@ -46,90 +43,4 @@ func ValidateNamePathOptions(name *string, filePath *string) error {
 	}
 
 	return nil;
-}
-
-/*
- * Basic sanity check that given paths exist and valid protocol given.
- * Artifact must be a regular file.
- * If artifact is given, it must be relative to the function path.
- * If function path is given as a regular file, and artifact is also given, they must reference the same path (edge case).
- * TODO: Format (regex) check on function name, input, output, version, riff_version
- */
-func ValidateAndCleanInitOptions(options *InitOptions) error {
-
-	options.FilePath = filepath.Clean(options.FilePath)
-	if options.Artifact != "" {
-		options.Artifact = filepath.Clean(options.Artifact)
-	}
-
-	if options.FilePath == "" {
-		path, _ := filepath.Abs(".")
-		options.FilePath = path
-	}
-
-	var err error
-	if options.FunctionName == "" {
-		options.FunctionName, err = functions.FunctionNameFromPath(options.FilePath)
-		if err != nil {
-			return err
-		}
-	}
-
-	if options.Artifact != "" {
-
-		if filepath.IsAbs(options.Artifact) {
-			return errors.New(fmt.Sprintf("artifact %s must be relative to function path", options.Artifact))
-		}
-
-		absFilePath, err := filepath.Abs(options.FilePath)
-		if err != nil {
-			return err
-		}
-
-		var absArtifactPath string
-
-		if osutils.IsDirectory(absFilePath) {
-			absArtifactPath = filepath.Join(absFilePath, options.Artifact)
-		} else {
-			absArtifactPath = filepath.Join(filepath.Dir(absFilePath), options.Artifact)
-		}
-
-		if osutils.IsDirectory(absArtifactPath) {
-			return errors.New(fmt.Sprintf("artifact %s must be a regular file", absArtifactPath))
-		}
-
-		absFilePathDir := absFilePath
-		if !osutils.IsDirectory(absFilePath) {
-			absFilePathDir = filepath.Dir(absFilePath)
-		}
-
-		if !strings.HasPrefix(filepath.Dir(absArtifactPath), absFilePathDir) {
-			return errors.New(fmt.Sprintf("artifact %s cannot be external to filepath %s", absArtifactPath, absFilePath))
-		}
-
-		if !osutils.FileExists(absArtifactPath) {
-			return errors.New(fmt.Sprintf("artifact %s does not exist", absArtifactPath))
-		}
-
-		if !osutils.IsDirectory(absFilePath) && absFilePath != absArtifactPath {
-			return errors.New(fmt.Sprintf("artifact %s conflicts with filepath %s", absArtifactPath, absFilePath))
-		}
-	}
-
-
-	if options.Protocol != "" {
-
-		supported := false
-		options.Protocol = strings.ToLower(options.Protocol)
-		for _, p := range SupportedProtocols {
-			if options.Protocol == p {
-				supported = true
-			}
-		}
-		if (!supported) {
-			return errors.New(fmt.Sprintf("protocol %s is unsupported \n", options.Protocol))
-		}
-	}
-
-	return nil
 }
