@@ -68,7 +68,7 @@ func Init() (*cobra.Command, *options.InitOptions) {
 	initCmd.PersistentFlags().StringVarP(&initOptions.Version, "version", "v", utils.DefaultValues.Version, "the version of the function image")
 	initCmd.PersistentFlags().StringVarP(&initOptions.UserAccount, "useraccount", "u", utils.DefaultValues.UserAccount, "the Docker user account to be used for the image repository")
 	initCmd.PersistentFlags().StringVarP(&initOptions.Artifact, "artifact", "a", "", "path to the function artifact, source code or jar file")
-	initCmd.PersistentFlags().StringVarP(&initOptions.Input,"input", "i", "", "the name of the input topic (DefaultValues to function name)")
+	initCmd.PersistentFlags().StringVarP(&initOptions.Input,"input", "i", "", "the name of the input topic (defaults to function name)")
 	initCmd.PersistentFlags().StringVarP(&initOptions.Output, "output", "o", "", "the name of the output topic (optional)")
 	initCmd.PersistentFlags().BoolVar(&initOptions.Force,"force", utils.DefaultValues.Force, "overwrite existing functions artifacts")
 
