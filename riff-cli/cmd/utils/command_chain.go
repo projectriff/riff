@@ -28,9 +28,7 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 	argCache := make(map[*cobra.Command][]string)
 
 	persistentPreRunE := func(cmd *cobra.Command, args []string) error {
-	outer:
 		for _, command := range commands {
-
 			command.ParseFlags(args)
 			argCache[command] = command.Flags().Args()
 
@@ -39,10 +37,8 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 					if err := p.PersistentPreRunE(cmd, argCache[command]); err != nil {
 						return err
 					}
-					break outer
 				} else if p.PersistentPreRun != nil {
 					p.PersistentPreRun(cmd, argCache[command])
-					break outer
 				}
 			}
 		}
@@ -105,18 +101,15 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 	}
 
 	persistentPostRunE := func(cmd *cobra.Command, _ []string) error {
-	outer:
 		for i := len(commands) - 1; i >= 0; i-- {
 			command := commands[i]
 			for p := command; p != nil; p = p.Parent() {
-				if p.PersistentPreRunE != nil {
-					if err := p.PersistentPreRunE(cmd, argCache[command]); err != nil {
+				if p.PersistentPostRunE != nil {
+					if err := p.PersistentPostRunE(cmd, argCache[command]); err != nil {
 						return err
 					}
-					break outer
-				} else if p.PersistentPreRun != nil {
-					p.PersistentPreRun(cmd, argCache[command])
-					break outer
+				} else if p.PersistentPostRun != nil {
+					p.PersistentPostRun(cmd, argCache[command])
 				}
 			}
 		}

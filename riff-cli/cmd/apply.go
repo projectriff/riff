@@ -46,6 +46,7 @@ func Apply() (*cobra.Command, *ApplyOptions) {
   riff apply -f some/function/path/some.yaml`,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
 			return apply(cmd, applyOptions)
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {

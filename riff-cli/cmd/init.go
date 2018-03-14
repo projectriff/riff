@@ -37,6 +37,7 @@ func Init() (*cobra.Command, *options.InitOptions) {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := initializers.Initialize(initOptions)
 			if err != nil {
+				cmd.SilenceUsage = true
 				return err
 			}
 			return nil
