@@ -1,0 +1,31 @@
+= upper
+
+[horizontal]
+*Language*:: Python 3
+*Function*:: link:upper.py[upper.py]
+*Protocol*:: grpc
+*Input*:: uppper
+
+=== prerequisites
+
+1. riff is deployed
+2. the `riff` CLI is on your PATH
+3. the working directory is `samples/python/upper`
+
+=== create the function
+
+```
+riff create python
+```
+
+=== publish a message and wait for a reply
+
+```
+riff publish -i upper -d hello -r
+```
+
+=== delete the function and its input topic
+
+```
+riff delete --all
+```

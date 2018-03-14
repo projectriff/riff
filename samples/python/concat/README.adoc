@@ -1,0 +1,31 @@
+= concat
+
+[horizontal]
+*Language*:: Python 3
+*Function*:: link:concat.py[concat.py]
+*Protocol*:: grpc
+*Input*:: concat
+
+=== prerequisites
+
+1. riff is deployed
+2. the `riff` CLI is on your PATH
+3. the working directory is `samples/python/concat`
+
+=== create the function
+
+```
+riff create python
+```
+
+=== publish a message and wait for a reply
+
+```
+riff publish -i concat --content-type=application/json -d'{"He":"llo","Wor":"ld"}' -r
+```
+
+=== delete the function and its input topic
+
+```
+riff delete --all
+```
