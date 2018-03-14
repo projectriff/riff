@@ -82,7 +82,7 @@ func InitJava(initOptions *options.InitOptions) (*cobra.Command, *options.InitOp
 		Short: "Initialize a Java function",
 		Long:  utils.InitJavaCmdLong(),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			//initOptions.Handler,_ = cmd.Flags().GetString("handler")
+			initOptions.Handler,_ = cmd.Flags().GetString("handler")
 			err := initializers.Java().Initialize(*initOptions)
 			if err != nil {
 				return err
