@@ -18,6 +18,8 @@ package utils
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+	"fmt"
 )
 
 // CommandChain returns a composite command that runs the provided commands one after the other.
@@ -130,12 +132,73 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 		PersistentPreRunE:  persistentPreRunE,
 		PersistentPostRun:  persistentPostRun,
 		PersistentPostRunE: persistentPostRunE,
-		DisableFlagParsing: true,
 	}
 
-	// Merge flags from all delegate commands
+	// The flags for the chain command will look like the union of all the flags of delegate commands, with each
+	// flag, if it is repeated, broadcasting its Set() call to each delegate flag.
+	// So if `update = build + apply` and both 'build' and 'apply' have a --filepath flag, then setting that flag
+	// ends up calling both build's and apply's flag.Set(), each writing to their own pointed value.
+	// Duplicated flags are checked for meaning equality and the function panics if they differ
 	for _, c := range commands {
-		chain.Flags().AddFlagSet(c.Flags())
+		c.LocalFlags() // This forces correct initialization and inheritance of c.Flags() (which c.Flags() documentation
+		// advertises but actually doesn't do)
+		c.Flags().VisitAll(func(f *pflag.Flag) {
+			flag := chain.Flags().Lookup(f.Name)
+			if flag == nil {
+				chain.Flags().AddFlag(newBroadcastFlag(f))
+			} else {
+				checkFlagConsistency(flag, f)
+				flag.Value = append(flag.Value.(broadcastValue), f.Value)
+			}
+		})
 	}
 	return chain
+}
+
+func checkFlagConsistency(a *pflag.Flag, b *pflag.Flag) {
+	if a.Usage != b.Usage ||
+		a.Shorthand != b.Shorthand ||
+		a.DefValue != b.DefValue ||
+		a.NoOptDefVal != b.NoOptDefVal {
+		panic(fmt.Sprintf("Trying to chain together methods with different flags with the same name:\n%v\n%v", a, b))
+	}
+}
+
+func newBroadcastFlag(f *pflag.Flag) *pflag.Flag {
+	return &pflag.Flag{
+		Name:                f.Name,
+		Shorthand:           f.Shorthand,
+		Usage:               f.Usage,
+		Value:               newBroadcastValue(f.Value),
+		DefValue:            f.DefValue,
+		Changed:             f.Changed,
+		NoOptDefVal:         f.NoOptDefVal,
+		Deprecated:          f.Deprecated,
+		Hidden:              f.Hidden,
+		ShorthandDeprecated: f.ShorthandDeprecated,
+		Annotations:         f.Annotations,
+	}
+}
+
+type broadcastValue []pflag.Value
+
+func (bv broadcastValue) String() string {
+	return bv[0].String()
+}
+
+func (bv broadcastValue) Set(s string) error {
+	for _, v := range bv {
+		if err := v.Set(s); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (bv broadcastValue) Type() string {
+	return bv[0].Type()
+}
+
+func newBroadcastValue(val pflag.Value) pflag.Value {
+	return broadcastValue([]pflag.Value{val})
 }
