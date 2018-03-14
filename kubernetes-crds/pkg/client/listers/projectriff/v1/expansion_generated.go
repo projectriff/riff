@@ -26,6 +26,14 @@ type FunctionListerExpansion interface{}
 // FunctionNamespaceLister.
 type FunctionNamespaceListerExpansion interface{}
 
+// InvokerListerExpansion allows custom methods to be added to
+// InvokerLister.
+type InvokerListerExpansion interface{}
+
+// InvokerNamespaceListerExpansion allows custom methods to be added to
+// InvokerNamespaceLister.
+type InvokerNamespaceListerExpansion interface{}
+
 // TopicListerExpansion allows custom methods to be added to
 // TopicLister.
 type TopicListerExpansion interface{}

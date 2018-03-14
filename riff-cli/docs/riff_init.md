@@ -9,16 +9,16 @@ and version specified for the function image repository and tag.
 
 For example, from a directory named 'square' containing a function 'square.js', you can simply type :
 
-    riff init node -f square
+    riff init -f square
 
   or
 
-    riff init node
+    riff init
 
-to generate the required Dockerfile and resource definitions using sensible defaults.
+to generate the resource definitions using sensible defaults.
 
 ```
-riff init [language] [flags]
+riff init [flags]
 ```
 
 ### Options
@@ -30,7 +30,7 @@ riff init [language] [flags]
       --force                    overwrite existing functions artifacts
   -h, --help                     help for init
   -i, --input string             the name of the input topic (defaults to function name)
-      --invoker-version string   the version of the function invoker to use when building containers (default "latest")
+      --invoker-version string   the version of the invoker to use when building containers
   -n, --name string              the name of the function (defaults to the name of the current directory)
   -o, --output string            the name of the output topic (optional)
   -u, --useraccount string       the Docker user account to be used for the image repository (default "current OS user")
@@ -46,9 +46,4 @@ riff init [language] [flags]
 ### SEE ALSO
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
-* [riff init command](riff_init_command.md)	 - Initialize an executable command function
-* [riff init go](riff_init_go.md)	 - Initialize a go plugin function
-* [riff init java](riff_init_java.md)	 - Initialize a Java function
-* [riff init node](riff_init_node.md)	 - Initialize a node.js function
-* [riff init python](riff_init_python.md)	 - Initialize a Python function
 

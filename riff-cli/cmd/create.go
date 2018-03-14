@@ -17,59 +17,34 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"fmt"
+
+	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
+	"github.com/spf13/cobra"
 )
 
-func Create(initCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command) (*cobra.Command) {
-
+func Create(initCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command) *cobra.Command {
 	createChainCmd := utils.CommandChain(initCmd, buildCmd, applyCmd)
-	createChainCmd.Use =  "create [language]"
+	createChainCmd.Use = "create"
 	createChainCmd.Short = "Create a function"
-	createChainCmd.Long =  utils.CreateCmdLong()
+	createChainCmd.Long = utils.CreateCmdLong()
 	return createChainCmd
 }
 
-func CreateJava(initJavaCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command) (*cobra.Command) {
-	createJavaChainCmd := utils.CommandChain(initJavaCmd, buildCmd, applyCmd)
-	createJavaChainCmd.Use = "java"
-	createJavaChainCmd.Short = "Create a Java function"
-	createJavaChainCmd.Long =  utils.CreateJavaCmdLong()
-	return createJavaChainCmd
-}
+func CreateInvokers(invokers []projectriff_v1.Invoker, initInvokerCmds []*cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command) []*cobra.Command {
+	var createInvokerCmds []*cobra.Command
 
-func CreateCommand(initCommandCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command) (*cobra.Command) {
-	createShellChainCmd := utils.CommandChain(initCommandCmd, buildCmd, applyCmd)
-	createShellChainCmd.Use = "command"
-	createShellChainCmd.Short = "Create an executable command function"
-	createShellChainCmd.Long =  utils.CreateCommandCmdLong()
+	for i, invoker := range invokers {
+		invokerName := invoker.ObjectMeta.Name
+		initInvokerCmd := initInvokerCmds[i]
+		createInvokerCmd := utils.CommandChain(initInvokerCmd, buildCmd, applyCmd)
+		createInvokerCmd.Use = invokerName
+		createInvokerCmd.Short = fmt.Sprintf("Create a %s function", invokerName)
+		createInvokerCmd.Long = utils.CreateInvokerCmdLong(invoker)
 
-	return createShellChainCmd
-}
+		createInvokerCmds = append(createInvokerCmds, createInvokerCmd)
+	}
 
-func CreateNode(initNodeCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command) (*cobra.Command) {
-	createNodeChainCmd := utils.CommandChain(initNodeCmd, buildCmd, applyCmd)
-	createNodeChainCmd.Use = "node"
-	createNodeChainCmd.Aliases = []string{"js"}
-	createNodeChainCmd.Short =  "Create a node.js function"
-	createNodeChainCmd.Long = utils.CreateNodeCmdLong()
-	return createNodeChainCmd
-}
-
-func CreatePython(initPythonCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command) (*cobra.Command) {
-	createPythonChainCmd := utils.CommandChain(initPythonCmd, buildCmd, applyCmd)
-	createPythonChainCmd.Use = "python"
-	createPythonChainCmd.Short = "Create a Python function"
-	createPythonChainCmd.Long =  utils.CreatePythonCmdLong()
-	return createPythonChainCmd
-
-}
-
-func CreateGo(initGoCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command) (*cobra.Command) {
-	createGoChainCmd := utils.CommandChain(initGoCmd, buildCmd, applyCmd)
-	createGoChainCmd.Use = "go"
-	createGoChainCmd.Short = "Create a Go function"
-	createGoChainCmd.Long = utils.InitGoCmdLong()
-	return createGoChainCmd
-
+	return createInvokerCmds
 }

@@ -15,7 +15,6 @@
  */
 package options
 
-
 type InitOptions struct {
 	FunctionName   string
 	Version        string
@@ -28,6 +27,7 @@ type InitOptions struct {
 	UserAccount    string
 	DryRun         bool
 	Force          bool
+	InvokerName    string
 	Handler        string
 }
 
@@ -48,4 +48,3 @@ type ImageOptions interface {
 	GetVersion() string
 	GetUserAccount() string
 }
-

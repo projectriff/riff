@@ -17,5 +17,3 @@
 package global
 
 var CLI_VERSION string
-
-var INVOKER_VERSION = "latest"

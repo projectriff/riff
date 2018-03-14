@@ -17,25 +17,27 @@
 package cmd
 
 import (
+	"fmt"
+
+	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
-	"github.com/projectriff/riff/riff-cli/pkg/initializers"
+	"github.com/projectriff/riff/riff-cli/pkg/initializer"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
-func Init() (*cobra.Command, *options.InitOptions) {
+func Init(invokers []projectriff_v1.Invoker) (*cobra.Command, *options.InitOptions) {
 
 	var initOptions = options.InitOptions{}
 
 	var initCmd = &cobra.Command{
-		Use:   "init [language]",
+		Use:   "init",
 		Short: "Initialize a function",
 		Long:  utils.InitCmdLong(),
-		Args: utils.AliasFlagToSoleArg("filepath"),
+		Args:  utils.AliasFlagToSoleArg("filepath"),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := initializers.Initialize(initOptions)
+			err := initializer.Initialize(invokers, &initOptions)
 			if err != nil {
 				cmd.SilenceUsage = true
 			}
@@ -55,8 +57,8 @@ func Init() (*cobra.Command, *options.InitOptions) {
 	initCmd.PersistentFlags().BoolVar(&initOptions.DryRun, "dry-run", false, "print generated function artifacts content to stdout only")
 	initCmd.PersistentFlags().StringVarP(&initOptions.FilePath, "filepath", "f", "", "path or directory used for the function resources (defaults to the current directory)")
 	initCmd.PersistentFlags().StringVarP(&initOptions.FunctionName, "name", "n", "", "the name of the function (defaults to the name of the current directory)")
-	initCmd.PersistentFlags().StringVar(&initOptions.InvokerVersion, "invoker-version", utils.DefaultValues.InvokerVersion, "the version of the function invoker to use when building containers")
 	initCmd.PersistentFlags().StringVarP(&initOptions.Version, "version", "v", utils.DefaultValues.Version, "the version of the function image")
+	initCmd.Flags().StringVar(&initOptions.InvokerVersion, "invoker-version", "", "the version of the invoker to use when building containers")
 	initCmd.PersistentFlags().StringVarP(&initOptions.UserAccount, "useraccount", "u", utils.DefaultValues.UserAccount, "the Docker user account to be used for the image repository")
 	initCmd.PersistentFlags().StringVarP(&initOptions.Artifact, "artifact", "a", "", "path to the function artifact, source code or jar file")
 	initCmd.PersistentFlags().StringVarP(&initOptions.Input, "input", "i", "", "the name of the input topic (defaults to function name)")
@@ -66,97 +68,34 @@ func Init() (*cobra.Command, *options.InitOptions) {
 	return initCmd, &initOptions
 }
 
-func InitJava(initOptions *options.InitOptions) (*cobra.Command, *options.InitOptions) {
+func InitInvokers(invokers []projectriff_v1.Invoker, initOptions *options.InitOptions) ([]*cobra.Command, error) {
 
-	var initJavaCmd = &cobra.Command{
-		Use:   "java",
-		Short: "Initialize a Java function",
-		Long:  utils.InitJavaCmdLong(),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			err := initializers.Java().Initialize(*initOptions)
-			if err != nil {
-				return err
+	var initInvokerCmds []*cobra.Command
+	for _, invoker := range invokers {
+		invokerName := invoker.ObjectMeta.Name
+		var initInvokerCmd = &cobra.Command{
+			Use:   invokerName,
+			Short: fmt.Sprintf("Initialize a %s function", invokerName),
+			Long:  utils.InitInvokerCmdLong(invoker),
+			RunE: func(cmd *cobra.Command, args []string) error {
+				initOptions.InvokerName = invokerName
+				return initializer.Initialize(invokers, initOptions)
+			},
+		}
+
+		initInvokerCmd.Flags().StringVar(&initOptions.InvokerVersion, "invoker-version", invoker.Spec.Version, "the version of invoker to use when building containers")
+
+		handler := invoker.Spec.Properties.Handler
+		if handler.Default != "" || handler.Description != "" {
+			initInvokerCmd.Flags().StringVar(&initOptions.Handler, "handler", handler.Default, handler.Description)
+			if handler.Default == "" {
+				initInvokerCmd.MarkFlagRequired("handler")
 			}
-			return nil
-		},
+		}
+
+		initInvokerCmds = append(initInvokerCmds, initInvokerCmd)
 	}
-	initJavaCmd.Flags().StringVar(&initOptions.Handler, "handler", "", "the fully qualified class name of the function handler")
-	initJavaCmd.MarkFlagRequired("handler")
-
-	return initJavaCmd, initOptions
-}
-
-func InitCommand(initOptions *options.InitOptions) (*cobra.Command, *options.InitOptions) {
-	var initCommandCmd = &cobra.Command{
-		Use:   "command",
-		Short: "Initialize an executable command function",
-		Long:  utils.InitCommandCmdLong(),
-
-		RunE: func(cmd *cobra.Command, args []string) error {
-			err := initializers.Command().Initialize(*initOptions)
-			if err != nil {
-				return err
-			}
-			return nil
-		},
-	}
-	return initCommandCmd, initOptions
-}
-
-func InitNode(initOptions *options.InitOptions) (*cobra.Command, *options.InitOptions) {
-	var initNodeCmd = &cobra.Command{
-		Use:   "node",
-		Short: "Initialize a node.js function",
-		Long:  utils.InitNodeCmdLong(),
-
-		RunE: func(cmd *cobra.Command, args []string) error {
-			err := initializers.Node().Initialize(*initOptions)
-			if err != nil {
-				return err
-			}
-			return nil
-		},
-		Aliases: []string{"js"},
-	}
-	return initNodeCmd, initOptions
-}
-
-func InitPython(initOptions *options.InitOptions) (*cobra.Command, *options.InitOptions) {
-	var initPythonCmd = &cobra.Command{
-		Use:   "python",
-		Short: "Initialize a Python function",
-		Long:  utils.InitPythonCmdLong(),
-
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if initOptions.Handler == "" {
-				initOptions.Handler = initOptions.FunctionName
-			}
-			err := initializers.Python().Initialize(*initOptions)
-			if err != nil {
-				return err
-			}
-			return nil
-		},
-	}
-	initPythonCmd.Flags().StringVar(&initOptions.Handler, "handler", "", "the name of the function handler")
-	return initPythonCmd, initOptions
-}
-
-func InitGo(initOptions *options.InitOptions) (*cobra.Command, *options.InitOptions) {
-	var initGoCmd = &cobra.Command{
-		Use:   "go",
-		Short: "Initialize a go plugin function",
-		Long:  utils.InitGoCmdLong(),
-
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if initOptions.Handler == "" {
-				initOptions.Handler = strings.Title(initOptions.FunctionName)
-			}
-			return initializers.Go().Initialize(*initOptions)
-		},
-	}
-	initGoCmd.Flags().StringVar(&initOptions.Handler, "handler", "", "the name of the function handler (name of Exported go function)")
-	return initGoCmd, initOptions
+	return initInvokerCmds, nil
 }
 
 func validateInitOptions(options *options.InitOptions) error {

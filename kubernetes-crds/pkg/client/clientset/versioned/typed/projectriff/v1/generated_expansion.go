@@ -18,4 +18,6 @@ package v1
 
 type FunctionExpansion interface{}
 
+type InvokerExpansion interface{}
+
 type TopicExpansion interface{}

@@ -30,6 +30,10 @@ func (c *FakeProjectriffV1) Functions(namespace string) v1.FunctionInterface {
 	return &FakeFunctions{c, namespace}
 }
 
+func (c *FakeProjectriffV1) Invokers(namespace string) v1.InvokerInterface {
+	return &FakeInvokers{c, namespace}
+}
+
 func (c *FakeProjectriffV1) Topics(namespace string) v1.TopicInterface {
 	return &FakeTopics{c, namespace}
 }

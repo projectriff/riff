@@ -8,7 +8,7 @@ const (
 	TopicPlural      string = "topics"
 	TopicGroup       string = "projectriff.io"
 	TopicVersion     string = "v1"
-	FullTopicCRDName    string = TopicPlural + "." + TopicGroup
+	FullTopicCRDName string = TopicPlural + "." + TopicGroup
 )
 
 var defaultPartitions = int32(1)
@@ -22,8 +22,8 @@ var defaultPartitions = int32(1)
 type Topic struct {
 	meta_v1.TypeMeta   `json:",inline"`
 	meta_v1.ObjectMeta `json:"metadata"`
-	Spec               TopicSpec   `json:"spec"`
-	Status             TopicStatus `json:"status,omitempty"`
+	Spec               TopicSpec    `json:"spec"`
+	Status             *TopicStatus `json:"status,omitempty"`
 }
 
 // Spec (what the user wants) for a topic
