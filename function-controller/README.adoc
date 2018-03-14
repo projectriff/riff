@@ -1,9 +1,13 @@
-= Function Controller image:https://ci.projectriff.io/api/v1/teams/main/pipelines/riff/jobs/build-function-controller-container/badge[Function Controller Status, link=https://ci.projectriff.io/teams/main/pipelines/riff/jobs/build-function-controller-container/builds/latest]
+== Function Controller
+The *function controller* runs inside kubernetes, watching for changes to *function* and *topic* resources. It reacts by requesting the deployment of functions, and scales them according to events being detected on their input topics.
 
-== Purpose
-The *function controller* runs inside kubernetes and continuously monitors the *function* and *topic* custom resource
-definitions for changes. It then reacts by requesting the deployment of functions, and scales them according to new
-events being detected on their input topics.
+The following function config will limit the number of instance to 3 even if the number of topic partitions exceeds 3, and keep the last instance running for at least 60s.
+
+```yaml
+spec:
+  maxReplicas: 3
+  idleTimeoutMs: 60000
+```
 
 == Development
 === Prerequisites
