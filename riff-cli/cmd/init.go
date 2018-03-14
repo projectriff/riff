@@ -43,7 +43,7 @@ func Init() (*cobra.Command, *options.InitOptions) {
 			return nil
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			initOptions.UserAccount = utils.GetUseraccountWithOverride("useraccount",*cmd.PersistentFlags())
+			initOptions.UserAccount = utils.GetUseraccountWithOverride("useraccount",*cmd.Flags())
 			if len(args) > 0 {
 				if len(args) == 1 && initOptions.FilePath == "" {
 					initOptions.FilePath = args[0]
