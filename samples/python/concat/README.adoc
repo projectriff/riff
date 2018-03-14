@@ -21,7 +21,7 @@ riff create python
 === publish a message and wait for a reply
 
 ```
-riff publish -i concat --content-type=application/json -d'{"He":"llo","Wor","ld"}' -r
+riff publish -i concat --content-type=application/json -d'{"He":"llo","Wor":"ld"}' -r
 ```
 
 === delete the function and its input topic
