@@ -17,53 +17,38 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/projectriff/riff/riff-cli/pkg/docker"
+	"github.com/projectriff/riff/riff-cli/pkg/initializer"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
+	"github.com/spf13/cobra"
 )
 
 // CreateAndWireRootCommand creates all riff commands and sub commands, as well as the top-level 'root' command,
 // wires them together and returns the root command, ready to execute.
 func CreateAndWireRootCommand(realDocker docker.Docker, dryRunDocker docker.Docker,
-	realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) *cobra.Command {
+	realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) (*cobra.Command, error) {
+
+	invokers, err := initializer.LoadInvokers(realKubeCtl)
+	if err != nil {
+		return nil, err
+	}
 
 	rootCmd := Root()
 
-	initCmd, initOptions := Init()
-	initJavaCmd, _ := InitJava(initOptions)
-	initNodeCmd, _ := InitNode(initOptions)
-	initPythonCmd, _ := InitPython(initOptions)
-	initShellCmd, _ := InitCommand(initOptions)
-	initGoCmd, _ := InitGo(initOptions)
-
-	initCmd.AddCommand(
-		initJavaCmd,
-		initGoCmd,
-		initShellCmd,
-		initPythonCmd,
-		initNodeCmd,
-	)
+	initCmd, initOptions := Init(invokers)
+	initInvokerCmds, err := InitInvokers(invokers, initOptions)
+	if err != nil {
+		return nil, err
+	}
+	initCmd.AddCommand(initInvokerCmds...)
 
 	buildCmd, _ := Build(realDocker, dryRunDocker)
 
 	applyCmd, _ := Apply(realKubeCtl, dryRunKubeCtl)
 
 	createCmd := Create(initCmd, buildCmd, applyCmd)
-
-	createNodeCmd	:= CreateNode(initNodeCmd, buildCmd, applyCmd)
-	createJavaCmd 	:= CreateJava(initJavaCmd, buildCmd, applyCmd)
-	createPythonCmd	:= CreatePython(initPythonCmd, buildCmd, applyCmd)
-	createShellCmd	:= CreateCommand(initShellCmd, buildCmd, applyCmd)
-	createGoCmd		:= CreateGo(initGoCmd, buildCmd, applyCmd)
-
-
-	createCmd.AddCommand(
-		createNodeCmd,
-		createJavaCmd,
-		createPythonCmd,
-		createShellCmd,
-		createGoCmd,
-	)
+	createInvokerCmds := CreateInvokers(invokers, initInvokerCmds, buildCmd, applyCmd)
+	createCmd.AddCommand(createInvokerCmds...)
 
 	deleteCmd, _ := Delete()
 
@@ -85,5 +70,5 @@ func CreateAndWireRootCommand(realDocker docker.Docker, dryRunDocker docker.Dock
 		Docs(rootCmd),
 	)
 
-	return rootCmd
+	return rootCmd, nil
 }

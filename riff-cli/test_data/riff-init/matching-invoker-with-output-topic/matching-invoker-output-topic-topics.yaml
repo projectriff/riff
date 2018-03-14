@@ -1,0 +1,15 @@
+---
+apiVersion: projectriff.io/v1
+kind: Topic
+metadata:
+  name: matching-invoker-output-topic
+spec:
+  partitions: 1
+
+---
+apiVersion: projectriff.io/v1
+kind: Topic
+metadata:
+  name: soundReflection
+spec:
+  partitions: 1

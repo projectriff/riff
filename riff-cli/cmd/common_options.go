@@ -17,12 +17,13 @@
 package cmd
 
 import (
-	"path/filepath"
-	"github.com/projectriff/riff/riff-cli/pkg/functions"
-	"fmt"
-	"github.com/projectriff/riff/riff-cli/pkg/osutils"
-	"strings"
 	"errors"
+	"fmt"
+	"path/filepath"
+	"strings"
+
+	"github.com/projectriff/riff/riff-cli/pkg/functions"
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 )
 
 func validateFilepath(path *string) error {
@@ -102,7 +103,7 @@ func validateProtocol(protocol *string) error {
 				supported = true
 			}
 		}
-		if (!supported) {
+		if !supported {
 			return errors.New(fmt.Sprintf("protocol %s is unsupported \n", *protocol))
 		}
 	}

@@ -51,6 +51,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
 		&Function{},
 		&FunctionList{},
+		&Invoker{},
+		&InvokerList{},
 		&Topic{},
 		&TopicList{},
 	)

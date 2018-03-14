@@ -26,6 +26,7 @@ import (
 type ProjectriffV1Interface interface {
 	RESTClient() rest.Interface
 	FunctionsGetter
+	InvokersGetter
 	TopicsGetter
 }
 
@@ -36,6 +37,10 @@ type ProjectriffV1Client struct {
 
 func (c *ProjectriffV1Client) Functions(namespace string) FunctionInterface {
 	return newFunctions(c, namespace)
+}
+
+func (c *ProjectriffV1Client) Invokers(namespace string) InvokerInterface {
+	return newInvokers(c, namespace)
 }
 
 func (c *ProjectriffV1Client) Topics(namespace string) TopicInterface {

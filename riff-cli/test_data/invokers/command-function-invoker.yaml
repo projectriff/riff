@@ -1,0 +1,32 @@
+---
+apiVersion: projectriff.io/v1
+kind: Invoker
+metadata:
+  name: command
+spec:
+  version: 0.0.5-snapshot
+  matchers:
+  - "*"
+  properties:
+    function:
+      protocol: grpc
+  files:
+  - path: Dockerfile
+    template: |
+      FROM projectriff/command-function-invoker:{{.InvokerVersion}}
+      ARG FUNCTION_URI="/{{.ArtifactBase}}"
+      ADD {{.Artifact}} /
+      ENV FUNCTION_URI $FUNCTION_URI
+  doc: |
+    {{.Process}} the function based on the executable command specified as the filename, using the name
+    and version specified for the function image repository and tag.
+    
+    For example, from a directory named 'echo' containing a function 'echo.sh', you can simply type :
+    
+        riff {{.Command}} -f echo
+    
+      or
+    
+        riff {{.Command}}
+    
+    to {{.Result}}.

@@ -26,6 +26,8 @@ import (
 type Interface interface {
 	// Functions returns a FunctionInformer.
 	Functions() FunctionInformer
+	// Invokers returns a InvokerInformer.
+	Invokers() InvokerInformer
 	// Topics returns a TopicInformer.
 	Topics() TopicInformer
 }
@@ -42,6 +44,11 @@ func New(f internalinterfaces.SharedInformerFactory) Interface {
 // Functions returns a FunctionInformer.
 func (v *version) Functions() FunctionInformer {
 	return &functionInformer{factory: v.SharedInformerFactory}
+}
+
+// Invokers returns a InvokerInformer.
+func (v *version) Invokers() InvokerInformer {
+	return &invokerInformer{factory: v.SharedInformerFactory}
 }
 
 // Topics returns a TopicInformer.

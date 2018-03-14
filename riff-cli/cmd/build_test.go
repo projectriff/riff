@@ -17,13 +17,14 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/riff-cli/pkg/docker"
-	"github.com/spf13/cobra"
-	"os"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
-	"fmt"
+	"github.com/spf13/cobra"
 )
 
 var _ = Describe("The build command", func() {
@@ -110,7 +111,7 @@ var _ = Describe("The build command", func() {
 		buildCommand.SetArgs([]string{"-v", "123"})
 		osuser := osutils.GetCurrentUsername()
 
-		normalDocker.On("Exec", "build", "-t", osuser+ "/square:123", ".").Return(nil)
+		normalDocker.On("Exec", "build", "-t", osuser+"/square:123", ".").Return(nil)
 
 		err := buildCommand.Execute()
 		Expect(err).NotTo(HaveOccurred())
@@ -121,7 +122,7 @@ var _ = Describe("The build command", func() {
 		buildCommand.SetArgs([]string{})
 		osuser := osutils.GetCurrentUsername()
 
-		normalDocker.On("Exec", "build", "-t", osuser+ "/square:0.0.1", ".").Return(nil)
+		normalDocker.On("Exec", "build", "-t", osuser+"/square:0.0.1", ".").Return(nil)
 
 		err := buildCommand.Execute()
 		Expect(err).NotTo(HaveOccurred())

@@ -30,8 +30,8 @@ import (
 type Function struct {
 	meta_v1.TypeMeta   `json:",inline"`
 	meta_v1.ObjectMeta `json:"metadata"`
-	Spec               FunctionSpec   `json:"spec"`
-	Status             FunctionStatus `json:"status,omitempty"`
+	Spec               FunctionSpec    `json:"spec"`
+	Status             *FunctionStatus `json:"status,omitempty"`
 }
 
 // Spec (what the user wants) for a function.

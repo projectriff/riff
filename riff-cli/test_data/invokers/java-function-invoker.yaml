@@ -1,0 +1,32 @@
+---
+apiVersion: projectriff.io/v1
+kind: Invoker
+metadata:
+  name: java
+spec:
+  version: 0.0.5-snapshot
+  matchers:
+  - "*.jar"
+  - "target/*.jar"
+  properties:
+    handler:
+      description: the fully qualified class name of the function handler
+    function:
+      protocol: grpc
+  files:
+  - path: Dockerfile
+    template: |
+      FROM projectriff/java-function-invoker:{{.InvokerVersion}}
+      ARG FUNCTION_JAR=/functions/{{.ArtifactBase}}
+      ARG FUNCTION_CLASS={{.Handler}}
+      ADD {{.Artifact}} $FUNCTION_JAR
+      ENV FUNCTION_URI file://${FUNCTION_JAR}?handler=${FUNCTION_CLASS}
+  doc: |
+    {{.Process}} the function based on the function source code specified as the filename, using the artifact (jar file),
+    the function handler(classname), the name and version specified for the function image repository and tag.
+    
+    For example, from a maven project directory named 'greeter', type:
+    
+        riff {{.Command}} -i greetings -l java -a target/greeter-1.0.0.jar --handler=Greeter
+    
+    to {{.Result}}.

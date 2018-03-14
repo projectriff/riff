@@ -1,0 +1,5 @@
+---
+apiVersion: projectriff.io/v1
+kind: Topic
+metadata:
+  name: matching-invoker-with-handler

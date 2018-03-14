@@ -1,0 +1,7 @@
+---
+apiVersion: projectriff.io/v1
+kind: Topic
+metadata:
+  name: matching-invoker-version
+spec:
+  partitions: 1

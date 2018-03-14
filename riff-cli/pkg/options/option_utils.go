@@ -17,13 +17,14 @@
 package options
 
 import (
-	"path/filepath"
 	"fmt"
+	"path/filepath"
+
 	"github.com/projectriff/riff/riff-cli/pkg/functions"
 )
 
 func ImageName(opts ImageOptions) string {
-	return fmt.Sprintf("%s/%s:%s",opts.GetUserAccount(),opts.GetFunctionName(),opts.GetVersion())
+	return fmt.Sprintf("%s/%s:%s", opts.GetUserAccount(), opts.GetFunctionName(), opts.GetVersion())
 }
 
 func ValidateNamePathOptions(name *string, filePath *string) error {
@@ -42,5 +43,5 @@ func ValidateNamePathOptions(name *string, filePath *string) error {
 		}
 	}
 
-	return nil;
+	return nil
 }

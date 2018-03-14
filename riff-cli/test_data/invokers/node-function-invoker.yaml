@@ -1,0 +1,41 @@
+---
+apiVersion: projectriff.io/v1
+kind: Invoker
+metadata:
+  name: node
+spec:
+  version: 0.0.5-snapshot
+  matchers:
+  - package.json
+  - "*.js"
+  properties:
+    function:
+      protocol: grpc
+  files:
+  - path: Dockerfile
+    template: |
+      FROM projectriff/node-function-invoker:{{.InvokerVersion}}
+      {{ if .FileExists "package.json" -}}
+      ENV FUNCTION_URI /functions/
+      COPY . ${FUNCTION_URI}
+      RUN (cd ${FUNCTION_URI} && npm install --production)
+      {{- else -}}
+      ENV FUNCTION_URI /functions/{{.Artifact}}
+      ADD {{.ArtifactBase}} ${FUNCTION_URI}
+      {{- end }}
+  - path: .dockerignore
+    template: |
+      node_modules
+  doc: |
+    {{.Process}} the function based on the function source code specified as the filename, using the name
+    and version specified for the function image repository and tag.
+    
+    For example, from a directory  named 'square' containing a function 'square.js', you can simply type :
+    
+        riff {{.Command}} -f square
+    
+      or
+    
+        riff {{.Command}}
+    
+    to {{.Result}}.
