@@ -74,6 +74,20 @@ func TestCreateCommandExplicitPath(t *testing.T) {
 	as.NoError(err)
 
 	as.NotEmpty(initOptions.FilePath)
+	as.NotEmpty(initOptions.UserAccount)
+	as.Equal("../test_data/shell/echo", initOptions.FilePath)
+}
+
+func TestCreateCommandWithUser(t *testing.T) {
+	rootCmd, initOptions, _, _:= setupCreateTest()
+	as := assert.New(t)
+	rootCmd.SetArgs([]string{"create", "--dry-run", "../test_data/shell/echo", "-u", "me"})
+
+	_, err := rootCmd.ExecuteC()
+	as.NoError(err)
+
+	as.NotEmpty(initOptions.FilePath)
+	as.Equal("me", initOptions.UserAccount)
 	as.Equal("../test_data/shell/echo", initOptions.FilePath)
 }
 
@@ -106,6 +120,7 @@ func TestCreatePythonCommand(t *testing.T) {
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
+	as.NotEmpty(initOptions.UserAccount)
 	as.Equal("process", initOptions.Handler)
 }
 
@@ -120,7 +135,7 @@ func TestCreatePythonCommandWithDefaultHandler(t *testing.T) {
 }
 
 func TestCreateJavaWithVersion(t *testing.T) {
-	rootCmd, _, _, _:= setupCreateTest()
+	rootCmd, initOptions, _, _:= setupCreateTest()
 	currentdir := osutils.GetCWD()
 	path := osutils.Path("../test_data/java")
 	os.Chdir(path)
@@ -128,6 +143,7 @@ func TestCreateJavaWithVersion(t *testing.T) {
 	rootCmd.SetArgs([]string{"create", "java", "--dry-run", "-a", "target/upper-1.0.0.jar", "--handler", "function.Upper"})
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
+	as.NotEmpty(initOptions.UserAccount)
 	os.Chdir(currentdir)
 }
 
