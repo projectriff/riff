@@ -15,7 +15,6 @@
  */
 package options
 
-var SupportedProtocols = []string{"http", "grpc"}
 
 type InitOptions struct {
 	FunctionName string

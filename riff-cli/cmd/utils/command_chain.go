@@ -145,24 +145,6 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 
 		copyFlagsToChain(*c.Flags(), chain.Flags())
 		copyFlagsToChain(*c.PersistentFlags(), chain.PersistentFlags())
-		//c.Flags().VisitAll(func(f *pflag.Flag) {
-		//	flag := chain.Flags().Lookup(f.Name)
-		//	if flag == nil {
-		//		chain.Flags().AddFlag(newBroadcastFlag(f))
-		//	} else {
-		//		checkFlagConsistency(flag, f)
-		//		flag.Value = append(flag.Value.(broadcastValue), f.Value)
-		//	}
-		//})
-		//c.PersistentFlags().VisitAll(func(f *pflag.Flag) {
-		//	flag := chain.PersistentFlags().Lookup(f.Name)
-		//	if flag == nil {
-		//		chain.PersistentFlags().AddFlag(newBroadcastFlag(f))
-		//	} else {
-		//		checkFlagConsistency(flag, f)
-		//		flag.Value = append(flag.Value.(broadcastValue), f.Value)
-		//	}
-		//})
 	}
 	return chain
 }
