@@ -18,6 +18,8 @@ package utils
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+	"fmt"
 )
 
 // CommandChain returns a composite command that runs the provided commands one after the other.
@@ -25,52 +27,20 @@ import (
 // postRun variations are run in reversed order
 func CommandChain(commands ... *cobra.Command) *cobra.Command {
 
-	runE := func(cmd *cobra.Command, args []string) error {
-		for _, command := range commands {
-			if command.RunE != nil {
-				err := command.RunE(cmd, args)
-				if err != nil {
-					return err
-				}
-			} else {
-				command.Run(cmd, args)
-			}
-		}
-		return nil
-	}
-	run := func(cmd *cobra.Command, args []string) {
-		runE(cmd, args)
-	}
-
-	preRunE := func(cmd *cobra.Command, args []string) error {
-		for _, command := range commands {
-			if command.PreRunE != nil {
-				err := command.PreRunE(cmd, args)
-				if err != nil {
-					return err
-				}
-			} else if command.PreRun != nil {
-				command.PreRun(cmd, args)
-			}
-		}
-		return nil
-	}
-	preRun := func(cmd *cobra.Command, args []string) {
-		preRunE(cmd, args)
-	}
+	argCache := make(map[*cobra.Command][]string)
 
 	persistentPreRunE := func(cmd *cobra.Command, args []string) error {
-	outer:
 		for _, command := range commands {
+			command.ParseFlags(args)
+			argCache[command] = command.Flags().Args()
+
 			for p := command; p != nil; p = p.Parent() {
 				if p.PersistentPreRunE != nil {
-					if err := p.PersistentPreRunE(cmd, args); err != nil {
+					if err := p.PersistentPreRunE(cmd, argCache[command]); err != nil {
 						return err
 					}
-					break outer
 				} else if p.PersistentPreRun != nil {
-					p.PersistentPreRun(cmd, args)
-					break outer
+					p.PersistentPreRun(cmd, argCache[command])
 				}
 			}
 		}
@@ -80,17 +50,50 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 		persistentPreRunE(cmd, args)
 	}
 
+	preRunE := func(cmd *cobra.Command, _ []string) error {
+		for _, command := range commands {
+			if command.PreRunE != nil {
+				err := command.PreRunE(cmd, argCache[command])
+				if err != nil {
+					return err
+				}
+			} else if command.PreRun != nil {
+				command.PreRun(cmd, argCache[command])
+			}
+		}
+		return nil
+	}
+	preRun := func(cmd *cobra.Command, args []string) {
+		preRunE(cmd, args)
+	}
 
-	postRunE := func(cmd *cobra.Command, args []string) error {
-		for i := len(commands) ; i >= 0 ; i-- {
+	runE := func(cmd *cobra.Command, _ []string) error {
+		for _, command := range commands {
+			if command.RunE != nil {
+				err := command.RunE(cmd, argCache[command])
+				if err != nil {
+					return err
+				}
+			} else {
+				command.Run(cmd, argCache[command])
+			}
+		}
+		return nil
+	}
+	run := func(cmd *cobra.Command, args []string) {
+		runE(cmd, args)
+	}
+
+	postRunE := func(cmd *cobra.Command, _ []string) error {
+		for i := len(commands) - 1; i >= 0; i-- {
 			command := commands[i]
 			if command.PostRunE != nil {
-				err := command.PostRunE(cmd, args)
+				err := command.PostRunE(cmd, argCache[command])
 				if err != nil {
 					return err
 				}
 			} else if command.PostRun != nil {
-				command.PostRun(cmd, args)
+				command.PostRun(cmd, argCache[command])
 			}
 		}
 		return nil
@@ -99,19 +102,16 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 		postRunE(cmd, args)
 	}
 
-	persistentPostRunE := func(cmd *cobra.Command, args []string) error {
-	outer:
-		for i := len(commands) ; i >= 0 ; i-- {
+	persistentPostRunE := func(cmd *cobra.Command, _ []string) error {
+		for i := len(commands) - 1; i >= 0; i-- {
 			command := commands[i]
 			for p := command; p != nil; p = p.Parent() {
-				if p.PersistentPreRunE != nil {
-					if err := p.PersistentPreRunE(cmd, args); err != nil {
+				if p.PersistentPostRunE != nil {
+					if err := p.PersistentPostRunE(cmd, argCache[command]); err != nil {
 						return err
 					}
-					break outer
-				} else if p.PersistentPreRun != nil {
-					p.PersistentPreRun(cmd, args)
-					break outer
+				} else if p.PersistentPostRun != nil {
+					p.PersistentPostRun(cmd, argCache[command])
 				}
 			}
 		}
@@ -134,10 +134,71 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 		PersistentPostRunE: persistentPostRunE,
 	}
 
-	// Merge flags from all delegate commands
+	// The flags for the chain command will look like the union of all the flags of delegate commands, with each
+	// flag, if it is repeated, broadcasting its Set() call to each delegate flag.
+	// So if `update = build + apply` and both 'build' and 'apply' have a --filepath flag, then setting that flag
+	// ends up calling both build's and apply's flag.Set(), each writing to their own pointed value.
+	// Duplicated flags are checked for meaning equality and the function panics if they differ
 	for _, c := range commands {
-		chain.Flags().AddFlagSet(c.Flags())
+		c.LocalFlags() // This forces correct initialization and inheritance of c.Flags() (which c.Flags() documentation
+		// advertises but actually doesn't do)
+		c.Flags().VisitAll(func(f *pflag.Flag) {
+			flag := chain.Flags().Lookup(f.Name)
+			if flag == nil {
+				chain.Flags().AddFlag(newBroadcastFlag(f))
+			} else {
+				checkFlagConsistency(flag, f)
+				flag.Value = append(flag.Value.(broadcastValue), f.Value)
+			}
+		})
 	}
 	return chain
 }
 
+func checkFlagConsistency(a *pflag.Flag, b *pflag.Flag) {
+	if a.Usage != b.Usage ||
+		a.Shorthand != b.Shorthand ||
+		a.DefValue != b.DefValue ||
+		a.NoOptDefVal != b.NoOptDefVal {
+		panic(fmt.Sprintf("Trying to chain together methods with different flags with the same name:\n%v\n%v", a, b))
+	}
+}
+
+func newBroadcastFlag(f *pflag.Flag) *pflag.Flag {
+	return &pflag.Flag{
+		Name:                f.Name,
+		Shorthand:           f.Shorthand,
+		Usage:               f.Usage,
+		Value:               newBroadcastValue(f.Value),
+		DefValue:            f.DefValue,
+		Changed:             f.Changed,
+		NoOptDefVal:         f.NoOptDefVal,
+		Deprecated:          f.Deprecated,
+		Hidden:              f.Hidden,
+		ShorthandDeprecated: f.ShorthandDeprecated,
+		Annotations:         f.Annotations,
+	}
+}
+
+type broadcastValue []pflag.Value
+
+func (bv broadcastValue) String() string {
+	return bv[0].String()
+}
+
+func (bv broadcastValue) Set(s string) error {
+	for _, v := range bv {
+		if err := v.Set(s); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (bv broadcastValue) Type() string {
+	return bv[0].Type()
+}
+
+func newBroadcastValue(val pflag.Value) pflag.Value {
+	return broadcastValue([]pflag.Value{val})
+}

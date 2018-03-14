@@ -94,7 +94,7 @@ func TestDeleteCommandImplicitPath(t *testing.T) {
 	resetTestState()
 	as := assert.New(t)
 
-	rootCmd, _, deleteOptions := setup()
+	rootCmd, _, deleteOptions := setupDeleteTest()
 
 	rootCmd.SetArgs([]string{"delete", osutils.Path("../test_data/shell/echo")})
 	err := rootCmd.Execute()
@@ -111,7 +111,7 @@ func TestDeleteCommandExplicitPath(t *testing.T) {
 	resetTestState()
 	as := assert.New(t)
 
-	rootCmd, _, deleteOptions := setup()
+	rootCmd, _, deleteOptions := setupDeleteTest()
 
 	rootCmd.SetArgs([]string{"delete", "-f", osutils.Path("../test_data/shell/echo")})
 	err := rootCmd.Execute()
@@ -129,7 +129,7 @@ func TestDeleteCommandExplicitFile(t *testing.T) {
 	resetTestState()
 	as := assert.New(t)
 
-	rootCmd, _, deleteOptions := setup()
+	rootCmd, _, deleteOptions := setupDeleteTest()
 
 	rootCmd.SetArgs([]string{"delete", "-f", osutils.Path("../test_data/shell/echo/echo-topics.yaml")})
 	err := rootCmd.Execute()
@@ -157,7 +157,7 @@ func TestDeleteCommandWithNameDoesNotExist(t *testing.T) {
 		return ([]byte)("Mock: Error from server (NotFound): functions.projectriff.io square") , errors.New("Exit status1")
 	}
 
-	rootCmd, _, deleteOptions := setup()
+	rootCmd, _, deleteOptions := setupDeleteTest()
 
 	rootCmd.SetArgs([]string{"delete", "--name", "square"})
 	err := rootCmd.Execute()
@@ -175,7 +175,7 @@ func TestDeleteCommandAllFlag(t *testing.T) {
 	resetTestState()
 	as := assert.New(t)
 
-	rootCmd, _, deleteOptions := setup()
+	rootCmd, _, deleteOptions := setupDeleteTest()
 
 	rootCmd.SetArgs([]string{"delete", "-f", osutils.Path("../test_data/shell/echo"), "--all"})
 	_, err := rootCmd.ExecuteC()
@@ -200,7 +200,7 @@ func TestDeleteCommandFromCwdAllFlag(t *testing.T) {
 	path := osutils.Path("../test_data/shell/echo")
 	os.Chdir(path)
 
-	rootCmd, _, deleteOptions := setup()
+	rootCmd, _, deleteOptions := setupDeleteTest()
 
 	rootCmd.SetArgs([]string{"delete", "--all"})
 	err := rootCmd.Execute()
@@ -225,7 +225,7 @@ func TestDeleteCommandFromCwdAllFlagNoResources(t *testing.T) {
 	path := osutils.Path("../test_data/node/square")
 	os.Chdir(path)
 
-	rootCmd, _, deleteOptions := setup()
+	rootCmd, _, deleteOptions := setupDeleteTest()
 
 	rootCmd.SetArgs([]string{"delete", "--all"})
 	err := rootCmd.Execute()
@@ -244,7 +244,7 @@ func TestDeleteCommandWithFunctionName(t *testing.T) {
 	resetTestState()
 	as := assert.New(t)
 
-	rootCmd, _, _ := setup()
+	rootCmd, _, _ := setupDeleteTest()
 
 	rootCmd.SetArgs([]string{"delete", "--all", "--name", "echo"})
 	err := rootCmd.Execute()
@@ -260,7 +260,7 @@ func TestDeleteCommandWithNamespace(t *testing.T) {
 	resetTestState()
 	as := assert.New(t)
 
-	rootCmd, _, deleteOptions := setup()
+	rootCmd, _, deleteOptions := setupDeleteTest()
 	rootCmd.SetArgs([]string{"delete", "--dry-run", "--namespace", "test-test", "-f", osutils.Path("../test_data/shell/echo/")})
 	err := rootCmd.Execute()
 
@@ -269,7 +269,7 @@ func TestDeleteCommandWithNamespace(t *testing.T) {
 	as.Equal("test-test", deleteOptions.Namespace)
 }
 
-func setup() (*cobra.Command, *cobra.Command, *DeleteOptions) {
+func setupDeleteTest() (*cobra.Command, *cobra.Command, *DeleteOptions) {
 	root := Root()
 	del, deleteOptions := Delete()
 	root.AddCommand(del)

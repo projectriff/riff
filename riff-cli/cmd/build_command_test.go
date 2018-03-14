@@ -20,42 +20,53 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
-	"github.com/projectriff/riff/riff-cli/cmd/opts"
+	"github.com/spf13/cobra"
 )
 
 func TestBuildCommandImplicitPath(t *testing.T) {
-	clearAllOptions()
 	as := assert.New(t)
+
+	rootCmd, _, buildOptions := setupBuildTest()
+
 	rootCmd.SetArgs([]string{"build", "--dry-run", osutils.Path("../test_data/shell/echo"), "-v", "0.0.1-snapshot"})
-	_, err := rootCmd.ExecuteC()
-	as.Equal("echo", opts.CreateOptions.FunctionName)
-	as.Equal("0.0.1-snapshot", opts.CreateOptions.Version)
+	err := rootCmd.Execute()
+	
+	as.Equal("echo", buildOptions.FunctionName)
+	as.Equal("0.0.1-snapshot", buildOptions.Version)
 	as.NoError(err)
 
 }
 
 func TestBuildCommandExplicitPath(t *testing.T) {
-	clearAllOptions()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"build", "--dry-run", "--push", "-f", osutils.Path("../test_data/shell/echo"), "-v", "0.0.2-snapshot"})
+	rootCmd, _, buildOptions := setupBuildTest()
 
+	rootCmd.SetArgs([]string{"build", "--dry-run", "--push", "-f", osutils.Path("../test_data/shell/echo"), "-v", "0.0.2-snapshot"})
 	_, err := rootCmd.ExecuteC()
+
 	as.NoError(err)
-	as.Equal("echo", opts.CreateOptions.FunctionName)
-	as.Equal("0.0.2-snapshot", opts.CreateOptions.Version)
-	as.True(opts.CreateOptions.Push)
+	as.Equal("echo", buildOptions.FunctionName)
+	as.Equal("0.0.2-snapshot", buildOptions.Version)
+	as.True(buildOptions.Push)
 }
 
 func TestBuildCommandWithUserAccountAndVersion(t *testing.T) {
-	clearAllOptions()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"build", "--dry-run", "--push", "-f", osutils.Path("../test_data/shell/echo"), "-v", "0.0.1-snapshot","-u","projectriff"})
 
+	rootCmd, _, buildOptions := setupBuildTest()
+	rootCmd.SetArgs([]string{"build", "--dry-run", "--push", "-f", osutils.Path("../test_data/shell/echo"), "-v", "0.0.1-snapshot","-u","projectriff"})
 	_, err := rootCmd.ExecuteC()
+
 	as.NoError(err)
-	as.Equal("echo", opts.CreateOptions.FunctionName)
-	as.Equal("0.0.1-snapshot", opts.CreateOptions.Version)
-	as.Equal("projectriff", opts.CreateOptions.UserAccount)
-	as.True(opts.CreateOptions.Push)
+	as.Equal("echo", buildOptions.FunctionName)
+	as.Equal("0.0.1-snapshot", buildOptions.Version)
+	as.Equal("projectriff", buildOptions.UserAccount)
+	as.True(buildOptions.Push)
 }
 
+func setupBuildTest() (*cobra.Command, *cobra.Command, *BuildOptions) {
+	root := Root()
+	build, buildOptions := Build()
+	root.AddCommand(build)
+	return root, build, buildOptions
+}

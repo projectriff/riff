@@ -6,7 +6,7 @@ Update a function
 
 
 Build the function based on the code available in the path directory, using the name and version specified 
-  for the image that is built. Then Apply the resource definition[s] included in the path.
+for the image that is built. Then Apply the resource definition[s] included in the path.
 
 ```
 riff update [flags]
@@ -25,7 +25,7 @@ riff update [flags]
   -f, --filepath string       path or directory used for the function resources (defaults to the current directory)
   -h, --help                  help for update
   -n, --name string           the name of the function (defaults to the name of the current directory)
-      --namespace string      the namespace used for the deployed resources
+      --namespace string      the namespace used for the deployed resources (defaults to kubectl's default)
       --push                  push the image to Docker registry
       --riff-version string   the version of riff to use when building containers (default "latest")
   -u, --useraccount string    the Docker user account to be used for the image repository (default "current OS user")
