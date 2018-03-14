@@ -23,7 +23,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func getRiffVersionWithGlobalOverride(flagset pflag.FlagSet) string {
+func GetRiffVersionWithGlobalOverride(flagset pflag.FlagSet) string {
 	val, _ := flagset.GetString("riff-version")
 	if flagset.Changed("riff-version") {
 		return val
@@ -31,7 +31,7 @@ func getRiffVersionWithGlobalOverride(flagset pflag.FlagSet) string {
 	return global.RIFF_VERSION
 }
 
-func getUseraccountWithOverride(name string, flagset pflag.FlagSet) string {
+func GetUseraccountWithOverride(name string, flagset pflag.FlagSet) string {
 	userAcct := GetStringValueWithOverride("useraccount", flagset)
 	if userAcct == DefaultValues.UserAccount {
 		userAcct = osutils.GetCurrentUsername()

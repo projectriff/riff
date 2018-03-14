@@ -45,13 +45,13 @@ func CreateAndWireRootCommand() *cobra.Command {
 
 	applyCmd, _ := Apply()
 
-	createCmd, createOptions := Create(initCmd, buildCmd, applyCmd)
+	createCmd := Create(initCmd, buildCmd, applyCmd)
 
-	createNodeCmd, _	:= CreateNode(initNodeCmd, buildCmd, applyCmd, createOptions)
-	createJavaCmd, _ 	:= CreateJava(initJavaCmd, buildCmd, applyCmd, createOptions)
-	createPythonCmd, _	:= CreatePython(initPythonCmd, buildCmd, applyCmd, createOptions)
-	createShellCmd, _	:= CreateShell(initShellCmd, buildCmd, applyCmd, createOptions)
-	createGoCmd, _		:= CreateGo(initGoCmd, buildCmd, applyCmd, createOptions)
+	createNodeCmd	:= CreateNode(initNodeCmd, buildCmd, applyCmd)
+	createJavaCmd 	:= CreateJava(initJavaCmd, buildCmd, applyCmd)
+	createPythonCmd	:= CreatePython(initPythonCmd, buildCmd, applyCmd)
+	createShellCmd	:= CreateShell(initShellCmd, buildCmd, applyCmd)
+	createGoCmd		:= CreateGo(initGoCmd, buildCmd, applyCmd)
 
 
 	createCmd.AddCommand(

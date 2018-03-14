@@ -70,6 +70,7 @@ and version specified for the image that is built.`,
 			return err
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+			buildOptions.UserAccount = utils.GetUseraccountWithOverride("useraccount",*cmd.PersistentFlags())
 			//TODO: DRY
 			if len(args) > 0 {
 				if len(args) == 1 && buildOptions.FilePath == "" {
@@ -94,7 +95,6 @@ and version specified for the image that is built.`,
 	buildCmd.Flags().StringVar(&buildOptions.RiffVersion, "riff-version", utils.DefaultValues.RiffVersion, "the version of riff to use when building containers")
 	buildCmd.Flags().StringVarP(&buildOptions.Version, "version", "v", utils.DefaultValues.Version, "the version of the function image")
 	buildCmd.Flags().StringVarP(&buildOptions.UserAccount, "useraccount", "u", utils.DefaultValues.UserAccount, "the Docker user account to be used for the image repository")
-
 	return buildCmd, &buildOptions
 }
 

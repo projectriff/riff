@@ -59,7 +59,6 @@ func Apply() (*cobra.Command, *ApplyOptions) {
 					return errors.New(fmt.Sprintf("Invalid argument(s) %v\n", args))
 				}
 			}
-
 			return validateApplyOptions(&applyOptions)
 		},
 	}

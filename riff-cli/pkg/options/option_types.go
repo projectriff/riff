@@ -44,12 +44,6 @@ func (this InitOptions) GetUserAccount() string {
 	return this.UserAccount
 }
 
-type CreateOptions struct {
-	InitOptions
-	Namespace string
-	Push      bool
-}
-
 type ImageOptions interface {
 	GetFunctionName() string
 	GetVersion() string

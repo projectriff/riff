@@ -24,32 +24,36 @@ import (
 )
 
 func TestUpdateCommandImplicitPath(t *testing.T) {
-	rootCmd, _ , applyOptions := setupUpdateTest()
+	rootCmd, buildOptions, applyOptions := setupUpdateTest()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"update", "--dry-run", osutils.Path("../test_data/shell/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
+	as.Equal("../test_data/shell/echo", buildOptions.FilePath)
 	as.Equal("../test_data/shell/echo", applyOptions.FilePath)
 }
 
 func TestUpdateCommandExplicitPath(t *testing.T) {
-	rootCmd, _ , applyOptions := setupUpdateTest()
+	rootCmd, buildOptions, applyOptions := setupUpdateTest()
 	as := assert.New(t)
 	rootCmd.SetArgs([]string{"update", "--dry-run", "-f", osutils.Path("../test_data/shell/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
+	as.Equal("../test_data/shell/echo", buildOptions.FilePath)
 	as.Equal("../test_data/shell/echo", applyOptions.FilePath)
 }
 
 func setupUpdateTest() (*cobra.Command, *BuildOptions, *ApplyOptions) {
-	root := Root()
+	rootCmd := Root()
 	buildCmd, buildOptions := Build()
 
 	applyCmd, applyOptions := Apply()
 
 	update := Update(buildCmd, applyCmd)
-	root.AddCommand(update)
+
+	rootCmd.AddCommand(update,buildCmd,applyCmd)
+
 	return rootCmd, buildOptions, applyOptions
 }
