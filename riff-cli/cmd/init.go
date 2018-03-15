@@ -4,9 +4,9 @@
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
- *  
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *   Unless required by applicable law or agreed to in writing, software
  *   distributed under the License is distributed on an "AS IS" BASIS,
  *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,18 +17,18 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"errors"
+	"fmt"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/initializers"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
-	"fmt"
-	"errors"
+	"github.com/spf13/cobra"
 	"strings"
 )
 
 func Init() (*cobra.Command, *options.InitOptions) {
 
-	var initOptions= options.InitOptions{}
+	var initOptions = options.InitOptions{}
 
 	var initCmd = &cobra.Command{
 		Use:   "init [language]",
@@ -44,7 +44,7 @@ func Init() (*cobra.Command, *options.InitOptions) {
 			return nil
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			initOptions.UserAccount = utils.GetUseraccountWithOverride("useraccount",*cmd.Flags())
+			initOptions.UserAccount = utils.GetUseraccountWithOverride("useraccount", *cmd.Flags())
 			if len(args) > 0 {
 				if len(args) == 1 && initOptions.FilePath == "" {
 					initOptions.FilePath = args[0]
@@ -69,9 +69,9 @@ func Init() (*cobra.Command, *options.InitOptions) {
 	initCmd.PersistentFlags().StringVarP(&initOptions.Version, "version", "v", utils.DefaultValues.Version, "the version of the function image")
 	initCmd.PersistentFlags().StringVarP(&initOptions.UserAccount, "useraccount", "u", utils.DefaultValues.UserAccount, "the Docker user account to be used for the image repository")
 	initCmd.PersistentFlags().StringVarP(&initOptions.Artifact, "artifact", "a", "", "path to the function artifact, source code or jar file")
-	initCmd.PersistentFlags().StringVarP(&initOptions.Input,"input", "i", "", "the name of the input topic (defaults to function name)")
+	initCmd.PersistentFlags().StringVarP(&initOptions.Input, "input", "i", "", "the name of the input topic (defaults to function name)")
 	initCmd.PersistentFlags().StringVarP(&initOptions.Output, "output", "o", "", "the name of the output topic (optional)")
-	initCmd.PersistentFlags().BoolVar(&initOptions.Force,"force", utils.DefaultValues.Force, "overwrite existing functions artifacts")
+	initCmd.PersistentFlags().BoolVar(&initOptions.Force, "force", utils.DefaultValues.Force, "overwrite existing functions artifacts")
 
 	return initCmd, &initOptions
 }
@@ -165,7 +165,7 @@ func InitGo(initOptions *options.InitOptions) (*cobra.Command, *options.InitOpti
 			return initializers.Go().Initialize(*initOptions)
 		},
 	}
-	initGoCmd.Flags().StringVar(&initOptions.Handler, "handler", "", "the name of the function handler (Exported go symbol)")
+	initGoCmd.Flags().StringVar(&initOptions.Handler, "handler", "", "the name of the function handler (name of Exported go function)")
 	return initGoCmd, initOptions
 }
 

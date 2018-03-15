@@ -20,7 +20,7 @@ riff init go [flags]
 ### Options
 
 ```
-      --handler string   the name of the function handler (Exported go symbol)
+      --handler string   the name of the function handler (name of Exported go function)
   -h, --help             help for go
 ```
 
