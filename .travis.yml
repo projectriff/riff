@@ -46,7 +46,7 @@ matrix:
     - TASK=helm-publish
     script: ./.travis.helm-publish.sh
   - stage: fats
-    script: ./.travis.fats-trigger.sh
+    script: "curl -s -L https://github.com/projectriff/fats/raw/master/.travis.fats-trigger.sh | bash"
 stages:
 - test
 - name: publish
