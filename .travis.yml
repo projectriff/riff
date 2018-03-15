@@ -45,9 +45,13 @@ matrix:
     env:
     - TASK=helm-publish
     script: ./.travis.helm-publish.sh
+  - stage: fats
+    script: ./.travis.fats-trigger.sh
 stages:
 - test
 - name: publish
+  if: branch = master AND type = push
+- name: fats
   if: branch = master AND type = push
 notifications:
   slack:
