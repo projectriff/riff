@@ -23,6 +23,7 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"fmt"
 	"errors"
+	"strings"
 )
 
 func Init() (*cobra.Command, *options.InitOptions) {
@@ -82,7 +83,6 @@ func InitJava(initOptions *options.InitOptions) (*cobra.Command, *options.InitOp
 		Short: "Initialize a Java function",
 		Long:  utils.InitJavaCmdLong(),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			initOptions.Handler,_ = cmd.Flags().GetString("handler")
 			err := initializers.Java().Initialize(*initOptions)
 			if err != nil {
 				return err
@@ -90,7 +90,7 @@ func InitJava(initOptions *options.InitOptions) (*cobra.Command, *options.InitOp
 			return nil
 		},
 	}
-	initJavaCmd.Flags().String("handler", "", "the fully qualified class name of the function handler")
+	initJavaCmd.Flags().StringVar(&initOptions.Handler, "handler", "", "the fully qualified class name of the function handler")
 	initJavaCmd.MarkFlagRequired("handler")
 
 	return initJavaCmd, initOptions
@@ -138,7 +138,6 @@ func InitPython(initOptions *options.InitOptions) (*cobra.Command, *options.Init
 		Long:  utils.InitPythonCmdLong(),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			initOptions.Handler,_ = cmd.Flags().GetString("handler")
 			if initOptions.Handler == "" {
 				initOptions.Handler = initOptions.FunctionName
 			}
@@ -149,7 +148,7 @@ func InitPython(initOptions *options.InitOptions) (*cobra.Command, *options.Init
 			return nil
 		},
 	}
-	initPythonCmd.Flags().String("handler", "", "the name of the function handler")
+	initPythonCmd.Flags().StringVar(&initOptions.Handler, "handler", "", "the name of the function handler")
 	return initPythonCmd, initOptions
 }
 
@@ -160,18 +159,13 @@ func InitGo(initOptions *options.InitOptions) (*cobra.Command, *options.InitOpti
 		Long:  utils.InitGoCmdLong(),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			initOptions.Handler,_ = cmd.Flags().GetString("handler")
 			if initOptions.Handler == "" {
-				initOptions.Handler = initOptions.FunctionName
+				initOptions.Handler = strings.Title(initOptions.FunctionName)
 			}
-			err := initializers.Go().Initialize(*initOptions)
-			if err != nil {
-				return err
-			}
-			return nil
+			return initializers.Go().Initialize(*initOptions)
 		},
 	}
-	initGoCmd.Flags().String("handler", "", "the name of the function handler")
+	initGoCmd.Flags().StringVar(&initOptions.Handler, "handler", "", "the name of the function handler (Exported go symbol)")
 	return initGoCmd, initOptions
 }
 
