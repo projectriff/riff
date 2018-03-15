@@ -134,17 +134,22 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 		PersistentPostRunE: persistentPostRunE,
 	}
 
+
+
+
 	// The flags for the chain command will look like the union of all the flags of delegate commands, with each
 	// flag, if it is repeated, broadcasting its Set() call to each delegate flag.
 	// So if `update = build + apply` and both 'build' and 'apply' have a --filepath flag, then setting that flag
 	// ends up calling both build's and apply's flag.Set(), each writing to their own pointed value.
 	// Duplicated flags are checked for meaning equality and the function panics if they differ
 	for _, c := range commands {
-		c.LocalFlags() // This forces correct initialization and inheritance of c.Flags() (which c.Flags() documentation
+		// This forces correct initialization and inheritance of c.Flags() (which c.Flags() documentation
 		// advertises but actually doesn't do)
+		c.LocalNonPersistentFlags()
+		c.InheritedFlags()
 
-		copyFlagsToChain(*c.Flags(), chain.Flags())
 		copyFlagsToChain(*c.PersistentFlags(), chain.PersistentFlags())
+		copyFlagsToChain(*c.Flags(), chain.Flags())
 	}
 	return chain
 }
