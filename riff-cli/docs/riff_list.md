@@ -4,7 +4,6 @@ List function resources
 
 ### Synopsis
 
-
 List the currently defined function resources.
 
 ```
@@ -25,5 +24,6 @@ riff list [flags]
 ```
 
 ### SEE ALSO
+
 * [riff](riff.md)	 - Commands for creating and managing function resources
 

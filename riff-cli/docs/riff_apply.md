@@ -4,7 +4,6 @@ Apply function resource definitions
 
 ### Synopsis
 
-
 Apply the resource definition[s] included in the path. A resource will be created if it doesn't exist yet.
 
 ```
@@ -34,5 +33,6 @@ riff apply [flags]
 ```
 
 ### SEE ALSO
+
 * [riff](riff.md)	 - Commands for creating and managing function resources
 

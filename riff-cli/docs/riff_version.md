@@ -4,7 +4,6 @@ Display the riff version
 
 ### Synopsis
 
-
 Display the riff version
 
 ```
@@ -30,5 +29,6 @@ riff version [flags]
 ```
 
 ### SEE ALSO
+
 * [riff](riff.md)	 - Commands for creating and managing function resources
 

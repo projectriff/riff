@@ -4,7 +4,6 @@ Delete function resources
 
 ### Synopsis
 
-
 Delete the resource[s] for the function or path specified.
 
 ```
@@ -37,5 +36,6 @@ riff delete [flags]
 ```
 
 ### SEE ALSO
+
 * [riff](riff.md)	 - Commands for creating and managing function resources
 

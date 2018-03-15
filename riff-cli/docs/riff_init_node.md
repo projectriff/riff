@@ -4,7 +4,6 @@ Initialize a node.js function
 
 ### Synopsis
 
-
 Generate the function based on the function source code specified as the filename, using the name
   and version specified for the function image repository and tag.  
 
@@ -45,5 +44,6 @@ riff init node [flags]
 ```
 
 ### SEE ALSO
+
 * [riff init](riff_init.md)	 - Initialize a function
 

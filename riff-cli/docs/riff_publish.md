@@ -4,7 +4,6 @@ Publish data to a topic using the http-gateway
 
 ### Synopsis
 
-
 Publish data to a topic using the http-gateway. For example:
 
 	riff publish -i greetings -d hello -r
@@ -40,5 +39,6 @@ riff publish [flags]
 ```
 
 ### SEE ALSO
+
 * [riff](riff.md)	 - Commands for creating and managing function resources
 

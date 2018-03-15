@@ -4,7 +4,6 @@ Initialize a Python function
 
 ### Synopsis
 
-
 Generate the function based on the function source code specified as the filename, handler, 
   name, artifact and version specified for the function image repository and tag. 
 
@@ -42,5 +41,6 @@ riff init python [flags]
 ```
 
 ### SEE ALSO
+
 * [riff init](riff_init.md)	 - Initialize a function
 

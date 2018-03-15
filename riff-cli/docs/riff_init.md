@@ -4,7 +4,6 @@ Initialize a function
 
 ### Synopsis
 
-
 Generate the function based on the function source code specified as the filename, using the name
   and version specified for the function image repository and tag. 
 
@@ -45,6 +44,7 @@ riff init [language] [flags]
 ```
 
 ### SEE ALSO
+
 * [riff](riff.md)	 - Commands for creating and managing function resources
 * [riff init go](riff_init_go.md)	 - Initialize a go plugin function
 * [riff init java](riff_init_java.md)	 - Initialize a Java function

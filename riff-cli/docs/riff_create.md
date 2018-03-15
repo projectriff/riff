@@ -4,7 +4,6 @@ Create a function
 
 ### Synopsis
 
-
 Create the function based on the function source code specified as the filename, using the name
   and version specified for the function image repository and tag. 
 
@@ -47,6 +46,7 @@ riff create [language] [flags]
 ```
 
 ### SEE ALSO
+
 * [riff](riff.md)	 - Commands for creating and managing function resources
 * [riff create go](riff_create_go.md)	 - Create a Go function
 * [riff create java](riff_create_java.md)	 - Create a Java function

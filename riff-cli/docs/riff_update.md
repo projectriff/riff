@@ -4,7 +4,6 @@ Update a function
 
 ### Synopsis
 
-
 Build the function based on the code available in the path directory, using the name and version specified 
 for the image that is built. Then Apply the resource definition[s] included in the path.
 
@@ -39,5 +38,6 @@ riff update [flags]
 ```
 
 ### SEE ALSO
+
 * [riff](riff.md)	 - Commands for creating and managing function resources
 
