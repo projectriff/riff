@@ -96,11 +96,11 @@ func TestDeleteCommandImplicitPath(t *testing.T) {
 
 	rootCmd, _, deleteOptions := setupDeleteTest()
 
-	rootCmd.SetArgs([]string{"delete", osutils.Path("../test_data/shell/echo")})
+	rootCmd.SetArgs([]string{"delete", osutils.Path("../test_data/command/echo")})
 	err := rootCmd.Execute()
 
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", deleteOptions.FilePath)
+	as.Equal("../test_data/command/echo", deleteOptions.FilePath)
 	as.Equal("", deleteOptions.Namespace)
 	as.Equal(0, getFunctionCount)
 	as.Equal(1, deleteFunctionCount)
@@ -113,11 +113,11 @@ func TestDeleteCommandExplicitPath(t *testing.T) {
 
 	rootCmd, _, deleteOptions := setupDeleteTest()
 
-	rootCmd.SetArgs([]string{"delete", "-f", osutils.Path("../test_data/shell/echo")})
+	rootCmd.SetArgs([]string{"delete", "-f", osutils.Path("../test_data/command/echo")})
 	err := rootCmd.Execute()
 
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", deleteOptions.FilePath)
+	as.Equal("../test_data/command/echo", deleteOptions.FilePath)
 	as.Equal("", deleteOptions.Namespace)
 	as.Equal(0, getFunctionCount)
 	as.Equal(1, deleteFunctionCount)
@@ -131,11 +131,11 @@ func TestDeleteCommandExplicitFile(t *testing.T) {
 
 	rootCmd, _, deleteOptions := setupDeleteTest()
 
-	rootCmd.SetArgs([]string{"delete", "-f", osutils.Path("../test_data/shell/echo/echo-topics.yaml")})
+	rootCmd.SetArgs([]string{"delete", "-f", osutils.Path("../test_data/command/echo/echo-topics.yaml")})
 	err := rootCmd.Execute()
 
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo/echo-topics.yaml", deleteOptions.FilePath)
+	as.Equal("../test_data/command/echo/echo-topics.yaml", deleteOptions.FilePath)
 	as.Equal("", deleteOptions.Namespace)
 	as.Equal(0, getFunctionCount)
 	as.Equal(1, deleteResourceCount)
@@ -177,11 +177,11 @@ func TestDeleteCommandAllFlag(t *testing.T) {
 
 	rootCmd, _, deleteOptions := setupDeleteTest()
 
-	rootCmd.SetArgs([]string{"delete", "-f", osutils.Path("../test_data/shell/echo"), "--all"})
+	rootCmd.SetArgs([]string{"delete", "-f", osutils.Path("../test_data/command/echo"), "--all"})
 	_, err := rootCmd.ExecuteC()
 
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", deleteOptions.FilePath)
+	as.Equal("../test_data/command/echo", deleteOptions.FilePath)
 	as.Equal(true, deleteOptions.All)
 	as.Equal("", deleteOptions.Namespace)
 	as.Equal(0, getFunctionCount)
@@ -197,7 +197,7 @@ func TestDeleteCommandFromCwdAllFlag(t *testing.T) {
 	currentdir := osutils.GetCWD()
 	defer func() { os.Chdir(currentdir) }()
 
-	path := osutils.Path("../test_data/shell/echo")
+	path := osutils.Path("../test_data/command/echo")
 	os.Chdir(path)
 
 	rootCmd, _, deleteOptions := setupDeleteTest()
@@ -261,11 +261,11 @@ func TestDeleteCommandWithNamespace(t *testing.T) {
 	as := assert.New(t)
 
 	rootCmd, _, deleteOptions := setupDeleteTest()
-	rootCmd.SetArgs([]string{"delete", "--dry-run", "--namespace", "test-test", "-f", osutils.Path("../test_data/shell/echo/")})
+	rootCmd.SetArgs([]string{"delete", "--dry-run", "--namespace", "test-test", "-f", osutils.Path("../test_data/command/echo/")})
 	err := rootCmd.Execute()
 
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", deleteOptions.FilePath)
+	as.Equal("../test_data/command/echo", deleteOptions.FilePath)
 	as.Equal("test-test", deleteOptions.Namespace)
 }
 

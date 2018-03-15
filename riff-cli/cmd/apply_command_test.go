@@ -27,28 +27,28 @@ func TestApplyCommandImplicitPath(t *testing.T) {
 	as := assert.New(t)
 	
 	rootCmd, _, applyOptions := setupApplyTest()
-	rootCmd.SetArgs([]string{"apply", "--dry-run", osutils.Path("../test_data/shell/echo")})
+	rootCmd.SetArgs([]string{"apply", "--dry-run", osutils.Path("../test_data/command/echo")})
 
 	err := rootCmd.Execute()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", applyOptions.FilePath)
+	as.Equal("../test_data/command/echo", applyOptions.FilePath)
 }
 
 func TestApplyCommandExplicitPath(t *testing.T) {
 	as := assert.New(t)
 
 	rootCmd, _, applyOptions := setupApplyTest()
-	rootCmd.SetArgs([]string{"apply", "--dry-run", "-f", osutils.Path("../test_data/shell/echo")})
+	rootCmd.SetArgs([]string{"apply", "--dry-run", "-f", osutils.Path("../test_data/command/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", applyOptions.FilePath)
+	as.Equal("../test_data/command/echo", applyOptions.FilePath)
 }
 
 func TestApplyCommandDefaultNamespace(t *testing.T) {
 	as := assert.New(t)
 	rootCmd, _, applyOptions := setupApplyTest()
-	rootCmd.SetArgs([]string{"apply", "--dry-run", "-f", osutils.Path("../test_data/shell/echo")})
+	rootCmd.SetArgs([]string{"apply", "--dry-run", "-f", osutils.Path("../test_data/command/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
@@ -59,7 +59,7 @@ func TestApplyCommandWithNamespace(t *testing.T) {
 
 	as := assert.New(t)
 	rootCmd, _, applyOptions := setupApplyTest()
-	rootCmd.SetArgs([]string{"apply", "--dry-run", "--namespace", "test-test", "-f", osutils.Path("../test_data/shell/echo")})
+	rootCmd.SetArgs([]string{"apply", "--dry-run", "--namespace", "test-test", "-f", osutils.Path("../test_data/command/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)

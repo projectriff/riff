@@ -13,31 +13,31 @@ import (
 func TestInitCommandExplicitPathAndLang(t *testing.T) {
 	rootCmd, initOptions, _ := setupInitTest()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"init", "shell", "--dry-run", "-f", "../test_data/shell/echo", "-v", "0.0.1-snapshot"})
+	rootCmd.SetArgs([]string{"init", "command", "--dry-run", "-f", "../test_data/command/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", initOptions.FilePath)
+	as.Equal("../test_data/command/echo", initOptions.FilePath)
 }
 
 func TestInitCommandExplicitPath(t *testing.T) {
 	rootCmd, initOptions, _ := setupInitTest()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"init", "--dry-run", "-f", "../test_data/shell/echo", "-v", "0.0.1-snapshot"})
+	rootCmd.SetArgs([]string{"init", "--dry-run", "-f", "../test_data/command/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", initOptions.FilePath)
+	as.Equal("../test_data/command/echo", initOptions.FilePath)
 }
 
 func TestInitCommandImplicitPath(t *testing.T) {
 	rootCmd, initOptions, _ := setupInitTest()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"init", "--dry-run", "../test_data/shell/echo", "-v", "0.0.1-snapshot"})
+	rootCmd.SetArgs([]string{"init", "--dry-run", "../test_data/command/echo", "-v", "0.0.1-snapshot"})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", initOptions.FilePath)
+	as.Equal("../test_data/command/echo", initOptions.FilePath)
 }
 
 func TestInitJavaWithVersion(t *testing.T) {
@@ -75,7 +75,7 @@ func setupInitTest() (*cobra.Command, *options.InitOptions, map[string]*cobra.Co
 	initJavaCmd, _ := InitJava(initOptions)
 	initNodeCmd, _ := InitNode(initOptions)
 	initPythonCmd, _ := InitPython(initOptions)
-	initShellCmd, _ := InitShell(initOptions)
+	initShellCmd, _ := InitCommand(initOptions)
 	initGoCmd, _ := InitGo(initOptions)
 
 	initCmd.AddCommand(

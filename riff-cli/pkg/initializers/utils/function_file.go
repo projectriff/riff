@@ -28,7 +28,7 @@ import (
 var supportedExtensions = []string{"js", "json", "java", "py", "sh", "so"}
 
 var languageForFileExtensions = map[string]string{
-	"sh":   "shell",
+	"sh":   "command",
 	"jar":  "java",
 	"js":   "node",
 	"json": "node",

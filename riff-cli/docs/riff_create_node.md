@@ -5,7 +5,7 @@ Create a node.js function
 ### Synopsis
 
 Create the function based on the function source code specified as the filename, using the name
-  and version specified for the function image repository and tag.  
+and version specified for the function image repository and tag.  
 
 For example, from a directory  named 'square' containing a function 'square.js', you can simply type :
 

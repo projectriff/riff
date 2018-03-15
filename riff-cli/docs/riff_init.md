@@ -5,7 +5,7 @@ Initialize a function
 ### Synopsis
 
 Generate the function based on the function source code specified as the filename, using the name
-  and version specified for the function image repository and tag. 
+and version specified for the function image repository and tag. 
 
 For example, from a directory named 'square' containing a function 'square.js', you can simply type :
 
@@ -13,7 +13,7 @@ For example, from a directory named 'square' containing a function 'square.js', 
 
   or
 
-    riff  init node
+    riff init node
 
 to generate the required Dockerfile and resource definitions using sensible defaults.
 
@@ -46,9 +46,9 @@ riff init [language] [flags]
 ### SEE ALSO
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
+* [riff init command](riff_init_command.md)	 - Initialize an executable command function
 * [riff init go](riff_init_go.md)	 - Initialize a go plugin function
 * [riff init java](riff_init_java.md)	 - Initialize a Java function
 * [riff init node](riff_init_node.md)	 - Initialize a node.js function
 * [riff init python](riff_init_python.md)	 - Initialize a Python function
-* [riff init shell](riff_init_shell.md)	 - Initialize a shell script function
 

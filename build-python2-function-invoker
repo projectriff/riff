@@ -1,4 +1,0 @@
-#!/bin/bash
-pushd "$PWD/../python2-function-invoker/"
-    ./build.sh
-popd

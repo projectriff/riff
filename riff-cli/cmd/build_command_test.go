@@ -28,7 +28,7 @@ func TestBuildCommandImplicitPath(t *testing.T) {
 
 	rootCmd, _, buildOptions := setupBuildTest()
 
-	rootCmd.SetArgs([]string{"build", "--dry-run", osutils.Path("../test_data/shell/echo"), "-v", "0.0.1-snapshot"})
+	rootCmd.SetArgs([]string{"build", "--dry-run", osutils.Path("../test_data/command/echo"), "-v", "0.0.1-snapshot"})
 	err := rootCmd.Execute()
 	
 	as.Equal("echo", buildOptions.FunctionName)
@@ -41,7 +41,7 @@ func TestBuildCommandExplicitPath(t *testing.T) {
 	as := assert.New(t)
 	rootCmd, _, buildOptions := setupBuildTest()
 
-	rootCmd.SetArgs([]string{"build", "--dry-run", "--push", "-f", osutils.Path("../test_data/shell/echo"), "-v", "0.0.2-snapshot"})
+	rootCmd.SetArgs([]string{"build", "--dry-run", "--push", "-f", osutils.Path("../test_data/command/echo"), "-v", "0.0.2-snapshot"})
 	_, err := rootCmd.ExecuteC()
 
 	as.NoError(err)
@@ -54,7 +54,7 @@ func TestBuildCommandWithUserAccountAndVersion(t *testing.T) {
 	as := assert.New(t)
 
 	rootCmd, _, buildOptions := setupBuildTest()
-	rootCmd.SetArgs([]string{"build", "--dry-run", "--push", "-f", osutils.Path("../test_data/shell/echo"), "-v", "0.0.1-snapshot","-u","projectriff"})
+	rootCmd.SetArgs([]string{"build", "--dry-run", "--push", "-f", osutils.Path("../test_data/command/echo"), "-v", "0.0.1-snapshot","-u","projectriff"})
 	_, err := rootCmd.ExecuteC()
 
 	as.NoError(err)

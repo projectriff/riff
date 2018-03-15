@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: shell-function-invoker-debug
+  name: command-function-invoker-debug
   labels:
     app: riff
-    component: shell-function-invoker
+    component: command-function-invoker
 spec:
   type: NodePort
   ports:

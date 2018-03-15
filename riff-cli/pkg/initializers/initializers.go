@@ -24,10 +24,10 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/initializers/java"
 	"github.com/projectriff/riff/riff-cli/pkg/initializers/node"
 	"github.com/projectriff/riff/riff-cli/pkg/initializers/python"
-	"github.com/projectriff/riff/riff-cli/pkg/initializers/shell"
 	"github.com/projectriff/riff/riff-cli/pkg/initializers/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/projectriff/riff/riff-cli/pkg/initializers/golang"
+	"github.com/projectriff/riff/riff-cli/pkg/initializers/command"
 )
 
 var supportedExtensions = []string{"js", "json", "jar", "py", "sh", "so"}
@@ -37,7 +37,7 @@ type Initializer struct {
 }
 
 var languageForFileExtension = map[string]string{
-	"sh":   "shell",
+	"sh":   "command",
 	"jar":  "java",
 	"js":   "node",
 	"json": "node",
@@ -61,9 +61,9 @@ func Node() Initializer {
 		Initialize: node.Initialize,
 	}
 }
-func Shell() Initializer {
+func Command() Initializer {
 	return Initializer{
-		Initialize: shell.Initialize,
+		Initialize: command.Initialize,
 	}
 }
 func Go() Initializer {
@@ -81,8 +81,8 @@ func Initialize(opts options.InitOptions) error {
 	language := languageForFileExtension[filepath.Ext(filePath)[1:]]
 
 	switch language {
-	case "shell":
-		Shell().Initialize(opts)
+	case "command":
+		Command().Initialize(opts)
 	case "node":
 		Node().Initialize(opts)
 	case "go":

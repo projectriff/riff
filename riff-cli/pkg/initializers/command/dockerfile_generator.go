@@ -14,34 +14,26 @@
  *   limitations under the License.
  */
 
-package shell
+package command
 
 import (
 	"github.com/projectriff/riff/riff-cli/pkg/options"
-	"github.com/projectriff/riff/riff-cli/pkg/initializers/core"
 	"path/filepath"
-	"github.com/projectriff/riff/riff-cli/pkg/initializers/utils"
+	"github.com/projectriff/riff/riff-cli/pkg/initializers/core"
 )
 
-const (
-	language = "shell"
-	extension = "sh"
-)
+var commandFunctionDockerfileTemplate = `
+FROM projectriff/command-function-invoker:{{.RiffVersion}}
+ARG FUNCTION_URI="/{{.ArtifactBase}}"
+ADD {{.Artifact}} /
+ENV FUNCTION_URI $FUNCTION_URI
+`
 
-func Initialize(opts options.InitOptions) error {
-	functionfile, err := utils.ResolveFunctionFile(opts, language, extension)
-	if err != nil {
-		return err
+func generateCommandFunctionDockerFile(opts options.InitOptions) (string, error) {
+	dockerFileTokens := core.DockerFileTokens{
+		Artifact:     opts.Artifact,
+		ArtifactBase: filepath.Base(opts.Artifact),
+		RiffVersion:  opts.RiffVersion,
 	}
-	utils.ResolveOptions(functionfile, language, &opts)
-
-	workdir := filepath.Dir(functionfile)
-
-	generator := core.ArtifactsGenerator{
-		GenerateFunction:   core.DefaultGenerateFunction,
-		GenerateDockerFile: generateShellFunctionDockerFile,
-	}
-
-	return core.GenerateFunctionArtifacts(generator, workdir, opts)
+	return core.GenerateFunctionDockerFileContents(commandFunctionDockerfileTemplate, "docker-command", dockerFileTokens)
 }
-
