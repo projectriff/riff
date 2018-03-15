@@ -5,7 +5,7 @@ Create a Java function
 ### Synopsis
 
 Create the function based on the function source code specified as the filename, using the artifact (jar file),
-  the function handler(classname), the name and version specified for the function image repository and tag. 
+the function handler(classname), the name and version specified for the function image repository and tag. 
 
 For example, from a maven project directory named 'greeter', type:
 

@@ -48,8 +48,8 @@ const (
 	createDefinition = `Create`
 )
 
-const baseCommandDescription = `{{.Process}} the function based on the function source code specified as the filename, using the name
-  and version specified for the function image repository and tag. 
+const baseDescription = `{{.Process}} the function based on the function source code specified as the filename, using the name
+and version specified for the function image repository and tag. 
 
 For example, from a directory named 'square' containing a function 'square.js', you can simply type :
 
@@ -57,12 +57,12 @@ For example, from a directory named 'square' containing a function 'square.js', 
 
   or
 
-    riff  {{.Command}} node
+    riff {{.Command}} node
 
 to {{.Result}}.`
 
 const baseJavaDescription = `{{.Process}} the function based on the function source code specified as the filename, using the artifact (jar file),
-  the function handler(classname), the name and version specified for the function image repository and tag. 
+the function handler(classname), the name and version specified for the function image repository and tag. 
 
 For example, from a maven project directory named 'greeter', type:
 
@@ -70,8 +70,8 @@ For example, from a maven project directory named 'greeter', type:
 
 to {{.Result}}.`
 
-const baseShellDescription = `{{.Process}} the function based on the function script specified as the filename, using the name
-  and version specified for the function image repository and tag. 
+const baseCommandDescription = `{{.Process}} the function based on the executable command specified as the filename, using the name
+and version specified for the function image repository and tag. 
 
 For example, from a directory named 'echo' containing a function 'echo.sh', you can simply type :
 
@@ -84,7 +84,7 @@ For example, from a directory named 'echo' containing a function 'echo.sh', you 
 to {{.Result}}.`
 
 const baseNodeDescription = `{{.Process}} the function based on the function source code specified as the filename, using the name
-  and version specified for the function image repository and tag.  
+and version specified for the function image repository and tag.  
 
 For example, from a directory  named 'square' containing a function 'square.js', you can simply type :
 
@@ -97,7 +97,7 @@ For example, from a directory  named 'square' containing a function 'square.js',
 to {{.Result}}.`
 
 const basePythonDescription = `{{.Process}} the function based on the function source code specified as the filename, handler, 
-  name, artifact and version specified for the function image repository and tag. 
+name, artifact and version specified for the function image repository and tag. 
 
 For example, type:
 
@@ -121,15 +121,15 @@ type LongVals struct {
 }
 
 func InitCmdLong() string {
-	return createCmdLong(baseCommandDescription, LongVals{Process: initDefinition, Command: "init", Result: initResult})
+	return createCmdLong(baseDescription, LongVals{Process: initDefinition, Command: "init", Result: initResult})
 }
 
 func InitJavaCmdLong() string {
 	return createCmdLong(baseJavaDescription, LongVals{Process: initDefinition, Command: "init java", Result: initResult})
 }
 
-func InitShellCmdLong() string {
-	return createCmdLong(baseShellDescription, LongVals{Process: initDefinition, Command: "init shell", Result: initResult})
+func InitCommandCmdLong() string {
+	return createCmdLong(baseCommandDescription, LongVals{Process: initDefinition, Command: "init command", Result: initResult})
 }
 
 func InitNodeCmdLong() string {
@@ -145,15 +145,15 @@ func InitGoCmdLong() string {
 }
 
 func CreateCmdLong() string {
-	return createCmdLong(baseCommandDescription, LongVals{Process: createDefinition, Command: "create", Result: createResult})
+	return createCmdLong(baseDescription, LongVals{Process: createDefinition, Command: "create", Result: createResult})
 }
 
 func CreateJavaCmdLong() string {
 	return createCmdLong(baseJavaDescription, LongVals{Process: createDefinition, Command: "create java", Result: createResult})
 }
 
-func CreateShellCmdLong() string {
-	return createCmdLong(baseShellDescription, LongVals{Process: createDefinition, Command: "create shell", Result: createResult})
+func CreateCommandCmdLong() string {
+	return createCmdLong(baseCommandDescription, LongVals{Process: createDefinition, Command: "create command", Result: createResult})
 }
 
 func CreateNodeCmdLong() string {

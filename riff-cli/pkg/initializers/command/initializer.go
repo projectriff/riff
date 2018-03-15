@@ -14,27 +14,34 @@
  *   limitations under the License.
  */
 
-package shell
+package command
 
 import (
 	"github.com/projectriff/riff/riff-cli/pkg/options"
-	"fmt"
-	"testing"
-	"github.com/stretchr/testify/assert"
+	"github.com/projectriff/riff/riff-cli/pkg/initializers/core"
+	"path/filepath"
+	"github.com/projectriff/riff/riff-cli/pkg/initializers/utils"
 )
 
-func TestShellDockerfile(t *testing.T) {
-	as := assert.New(t)
+const (
+	language = "command"
+	extension = "sh"
+)
 
-	opts := options.InitOptions{
-		Artifact:    "echo.sh",
-		RiffVersion: "0.0.1-snapshot",
-		Handler:     "process",
+func Initialize(opts options.InitOptions) error {
+	functionfile, err := utils.ResolveFunctionFile(opts, language, extension)
+	if err != nil {
+		return err
+	}
+	utils.ResolveOptions(functionfile, language, &opts)
+
+	workdir := filepath.Dir(functionfile)
+
+	generator := core.ArtifactsGenerator{
+		GenerateFunction:   core.DefaultGenerateFunction,
+		GenerateDockerFile: generateCommandFunctionDockerFile,
 	}
 
-	docker, err := generateShellFunctionDockerFile(opts)
-	as.NoError(err)
-	as.Contains(docker, fmt.Sprintf("FROM projectriff/shell-function-invoker:%s", opts.RiffVersion))
-	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_URI=\"/%s\"", opts.Artifact))
-	as.Contains(docker, fmt.Sprintf("ADD %s /", opts.Artifact))
+	return core.GenerateFunctionArtifacts(generator, workdir, opts)
 }
+

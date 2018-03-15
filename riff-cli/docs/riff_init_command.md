@@ -1,32 +1,30 @@
-## riff create shell
+## riff init command
 
-Create a shell script function
+Initialize an executable command function
 
 ### Synopsis
 
-Create the function based on the function script specified as the filename, using the name
-  and version specified for the function image repository and tag. 
+Generate the function based on the executable command specified as the filename, using the name
+and version specified for the function image repository and tag. 
 
 For example, from a directory named 'echo' containing a function 'echo.sh', you can simply type :
 
-    riff create shell -f echo
+    riff init command -f echo
 
   or
 
-    riff create shell
+    riff init command
 
-to create the required Dockerfile and resource definitions, and apply the resources, using sensible defaults.
+to generate the required Dockerfile and resource definitions using sensible defaults.
 
 ```
-riff create shell [flags]
+riff init command [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help               help for shell
-      --namespace string   the namespace used for the deployed resources (defaults to kubectl's default)
-      --push               push the image to Docker registry
+  -h, --help   help for command
 ```
 
 ### Options inherited from parent commands
@@ -47,5 +45,5 @@ riff create shell [flags]
 
 ### SEE ALSO
 
-* [riff create](riff_create.md)	 - Create a function
+* [riff init](riff_init.md)	 - Initialize a function
 

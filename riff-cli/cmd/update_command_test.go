@@ -26,23 +26,23 @@ import (
 func TestUpdateCommandImplicitPath(t *testing.T) {
 	rootCmd, buildOptions, applyOptions := setupUpdateTest()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"update", "--dry-run", osutils.Path("../test_data/shell/echo")})
+	rootCmd.SetArgs([]string{"update", "--dry-run", osutils.Path("../test_data/command/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", buildOptions.FilePath)
-	as.Equal("../test_data/shell/echo", applyOptions.FilePath)
+	as.Equal("../test_data/command/echo", buildOptions.FilePath)
+	as.Equal("../test_data/command/echo", applyOptions.FilePath)
 }
 
 func TestUpdateCommandExplicitPath(t *testing.T) {
 	rootCmd, buildOptions, applyOptions := setupUpdateTest()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"update", "--dry-run", "-f", osutils.Path("../test_data/shell/echo")})
+	rootCmd.SetArgs([]string{"update", "--dry-run", "-f", osutils.Path("../test_data/command/echo")})
 
 	_, err := rootCmd.ExecuteC()
 	as.NoError(err)
-	as.Equal("../test_data/shell/echo", buildOptions.FilePath)
-	as.Equal("../test_data/shell/echo", applyOptions.FilePath)
+	as.Equal("../test_data/command/echo", buildOptions.FilePath)
+	as.Equal("../test_data/command/echo", applyOptions.FilePath)
 }
 
 func setupUpdateTest() (*cobra.Command, *BuildOptions, *ApplyOptions) {

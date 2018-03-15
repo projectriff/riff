@@ -96,21 +96,21 @@ func InitJava(initOptions *options.InitOptions) (*cobra.Command, *options.InitOp
 	return initJavaCmd, initOptions
 }
 
-func InitShell(initOptions *options.InitOptions) (*cobra.Command, *options.InitOptions) {
-	var initShellCmd = &cobra.Command{
-		Use:   "shell",
-		Short: "Initialize a shell script function",
-		Long:  utils.InitShellCmdLong(),
+func InitCommand(initOptions *options.InitOptions) (*cobra.Command, *options.InitOptions) {
+	var initCommandCmd = &cobra.Command{
+		Use:   "command",
+		Short: "Initialize an executable command function",
+		Long:  utils.InitCommandCmdLong(),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := initializers.Shell().Initialize(*initOptions)
+			err := initializers.Command().Initialize(*initOptions)
 			if err != nil {
 				return err
 			}
 			return nil
 		},
 	}
-	return initShellCmd, initOptions
+	return initCommandCmd, initOptions
 }
 
 func InitNode(initOptions *options.InitOptions) (*cobra.Command, *options.InitOptions) {

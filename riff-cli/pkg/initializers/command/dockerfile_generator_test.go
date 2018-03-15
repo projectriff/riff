@@ -14,26 +14,27 @@
  *   limitations under the License.
  */
 
-package shell
+package command
 
 import (
 	"github.com/projectriff/riff/riff-cli/pkg/options"
-	"path/filepath"
-	"github.com/projectriff/riff/riff-cli/pkg/initializers/core"
+	"fmt"
+	"testing"
+	"github.com/stretchr/testify/assert"
 )
 
-var shellFunctionDockerfileTemplate = `
-FROM projectriff/shell-function-invoker:{{.RiffVersion}}
-ARG FUNCTION_URI="/{{.ArtifactBase}}"
-ADD {{.Artifact}} /
-ENV FUNCTION_URI $FUNCTION_URI
-`
+func TestShellDockerfile(t *testing.T) {
+	as := assert.New(t)
 
-func generateShellFunctionDockerFile(opts options.InitOptions) (string, error) {
-	dockerFileTokens := core.DockerFileTokens{
-		Artifact:     opts.Artifact,
-		ArtifactBase: filepath.Base(opts.Artifact),
-		RiffVersion:  opts.RiffVersion,
+	opts := options.InitOptions{
+		Artifact:    "echo.sh",
+		RiffVersion: "0.0.1-snapshot",
+		Handler:     "process",
 	}
-	return core.GenerateFunctionDockerFileContents(shellFunctionDockerfileTemplate, "docker-shell", dockerFileTokens)
+
+	docker, err := generateCommandFunctionDockerFile(opts)
+	as.NoError(err)
+	as.Contains(docker, fmt.Sprintf("FROM projectriff/command-function-invoker:%s", opts.RiffVersion))
+	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_URI=\"/%s\"", opts.Artifact))
+	as.Contains(docker, fmt.Sprintf("ADD %s /", opts.Artifact))
 }

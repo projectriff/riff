@@ -38,11 +38,11 @@ func CreateJava(initJavaCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *c
 	return createJavaChainCmd
 }
 
-func CreateShell(initShellCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command) (*cobra.Command) {
-	createShellChainCmd := utils.CommandChain(initShellCmd, buildCmd, applyCmd)
-	createShellChainCmd.Use = "shell"
-	createShellChainCmd.Short = "Create a shell script function"
-	createShellChainCmd.Long =  utils.CreateShellCmdLong()
+func CreateCommand(initCommandCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command) (*cobra.Command) {
+	createShellChainCmd := utils.CommandChain(initCommandCmd, buildCmd, applyCmd)
+	createShellChainCmd.Use = "command"
+	createShellChainCmd.Short = "Create an executable command function"
+	createShellChainCmd.Long =  utils.CreateCommandCmdLong()
 
 	return createShellChainCmd
 }

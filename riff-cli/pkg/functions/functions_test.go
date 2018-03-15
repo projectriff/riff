@@ -27,7 +27,7 @@ import (
 
 func TestFunctionNameFromPathFromCurrentDirectory(t *testing.T) {
 	currentDir,_ := filepath.Abs(".")
-	os.Chdir(osutils.Path("../../test_data/shell/echo"))
+	os.Chdir(osutils.Path("../../test_data/command/echo"))
 
 	as := assert.New(t)
 
@@ -41,14 +41,14 @@ func TestFunctionNameFromPathFromCurrentDirectory(t *testing.T) {
 
 func TestFunctionNameFromRelativePath(t *testing.T) {
 	as := assert.New(t)
-	fname, err := FunctionNameFromPath(osutils.Path("../../test_data/shell/echo"))
+	fname, err := FunctionNameFromPath(osutils.Path("../../test_data/command/echo"))
 	as.NoError(err)
 	as.Equal("echo",fname)
 }
 
 func TestFunctionNameFromRegularFile(t *testing.T) {
 	as := assert.New(t)
-	fname, err := FunctionNameFromPath(osutils.Path("../../test_data/shell/echo/echo.sh"))
+	fname, err := FunctionNameFromPath(osutils.Path("../../test_data/command/echo/echo.sh"))
 	as.NoError(err)
 	as.Equal("echo",fname)
 }
@@ -62,17 +62,17 @@ func TestFunctionNameFromInvalidPathIsEmpty(t *testing.T) {
 
 func TestFunctionDirFromRelativePath(t *testing.T) {
 	as := assert.New(t)
-	fndir, err := FunctionDirFromPath(osutils.Path("../../test_data/shell/echo"))
+	fndir, err := FunctionDirFromPath(osutils.Path("../../test_data/command/echo"))
 	as.NoError(err)
-	absEcho, _ := AbsPath("../../test_data/shell/echo")
+	absEcho, _ := AbsPath("../../test_data/command/echo")
 	as.Equal(absEcho,fndir)
 }
 
 func TestFunctionDirFromRegularFile(t *testing.T) {
 	as := assert.New(t)
-	fndir, err := FunctionDirFromPath(osutils.Path("../../test_data/shell/echo/echo.sh"))
+	fndir, err := FunctionDirFromPath(osutils.Path("../../test_data/command/echo/echo.sh"))
 	as.NoError(err)
-	absEcho, _ := AbsPath("../../test_data/shell/echo")
+	absEcho, _ := AbsPath("../../test_data/command/echo")
 	as.Equal(absEcho,fndir)
 }
 
