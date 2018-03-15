@@ -7,7 +7,7 @@ set -o pipefail
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${RED}This task only schedules a FATS job, it does not indicate FATS was successful${NC}\n";
+echo -e "\n${RED}This task only schedules a FATS job, it does not indicate FATS was successful${NC}";
 
 body="{
     \"request\": {
