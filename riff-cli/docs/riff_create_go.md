@@ -21,7 +21,7 @@ riff create go [flags]
 ### Options
 
 ```
-      --handler string     the name of the function handler
+      --handler string     the name of the function handler (Exported go symbol)
   -h, --help               help for go
       --namespace string   the namespace used for the deployed resources (defaults to kubectl's default)
       --push               push the image to Docker registry
