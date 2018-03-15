@@ -4,7 +4,6 @@ Create a Go function
 
 ### Synopsis
 
-
 Generate the function based on a shared '.so' library file specified as the filename
 and exported symbol name specified as the handler.
 
@@ -44,5 +43,6 @@ riff create go [flags]
 ```
 
 ### SEE ALSO
+
 * [riff create](riff_create.md)	 - Create a function
 

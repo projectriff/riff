@@ -4,7 +4,6 @@ Commands for creating and managing function resources
 
 ### Synopsis
 
-
 riff is for functions
 
 the riff tool is used to create and manage function resources for the riff FaaS platform https://projectriff.io/
@@ -17,6 +16,7 @@ the riff tool is used to create and manage function resources for the riff FaaS 
 ```
 
 ### SEE ALSO
+
 * [riff apply](riff_apply.md)	 - Apply function resource definitions
 * [riff build](riff_build.md)	 - Build a function container
 * [riff create](riff_create.md)	 - Create a function

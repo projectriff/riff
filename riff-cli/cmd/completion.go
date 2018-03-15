@@ -23,17 +23,43 @@ import (
 
 func Completion(rootCmd *cobra.Command) *cobra.Command {
 
-	// completionCmd represents the completion command
 	var completionCmd = &cobra.Command{
-		Use:   "completion",
-		Short: "Generates bash completion scripts",
-		Long: `Generates bash completion scripts`,
-		Hidden: true,
+		Use:       "completion [bash|zsh]",
+		Short:     "Generate shell completion scripts",
+		Long:      "Generate shell completion scripts",
+		Example: 	`
+To install completion for bash, assuming you have bash-completion installed:
+
+    riff completion bash > /etc/bash_completion.d/riff     
+
+or wherever your bash_completion.d is, for example $(brew --prefix)/etc/bash_completion.d if using homebrew.
+
+    
+Completion for zsh is a work in progress`,
+		Hidden:    true,
+		Args:      and(cobra.ExactArgs(1), cobra.OnlyValidArgs),
+		ValidArgs: []string{"bash", "zsh"},
 		Run: func(cmd *cobra.Command, args []string) {
-			rootCmd.GenBashCompletion(os.Stdout)
+			switch args[0] {
+			case "bash":
+				rootCmd.GenBashCompletion(os.Stdout)
+			case "zsh":
+				rootCmd.GenZshCompletion(os.Stdout)
+			}
 		},
 	}
+
 	return completionCmd
 
 }
 
+func and(functions ... cobra.PositionalArgs) cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		for _, f := range functions {
+			if err := f(cmd, args); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+}

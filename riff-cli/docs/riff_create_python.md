@@ -4,7 +4,6 @@ Create a Python function
 
 ### Synopsis
 
-
 Create the function based on the function source code specified as the filename, handler, 
   name, artifact and version specified for the function image repository and tag. 
 
@@ -44,5 +43,6 @@ riff create python [flags]
 ```
 
 ### SEE ALSO
+
 * [riff create](riff_create.md)	 - Create a function
 

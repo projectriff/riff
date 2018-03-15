@@ -4,7 +4,6 @@ Create a shell script function
 
 ### Synopsis
 
-
 Create the function based on the function script specified as the filename, using the name
   and version specified for the function image repository and tag. 
 
@@ -47,5 +46,6 @@ riff create shell [flags]
 ```
 
 ### SEE ALSO
+
 * [riff create](riff_create.md)	 - Create a function
 

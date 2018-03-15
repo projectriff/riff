@@ -4,7 +4,6 @@ Create a Java function
 
 ### Synopsis
 
-
 Create the function based on the function source code specified as the filename, using the artifact (jar file),
   the function handler(classname), the name and version specified for the function image repository and tag. 
 
@@ -44,5 +43,6 @@ riff create java [flags]
 ```
 
 ### SEE ALSO
+
 * [riff create](riff_create.md)	 - Create a function
 

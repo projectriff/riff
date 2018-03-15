@@ -4,7 +4,6 @@ Build a function container
 
 ### Synopsis
 
-
 Build the function based on the code available in the path directory, using the name
 and version specified for the image that is built.
 
@@ -38,5 +37,6 @@ riff build [flags]
 ```
 
 ### SEE ALSO
+
 * [riff](riff.md)	 - Commands for creating and managing function resources
 

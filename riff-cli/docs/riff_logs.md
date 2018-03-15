@@ -4,7 +4,6 @@ Display the logs for a running function
 
 ### Synopsis
 
-
 Display the logs for a running function For example:
 
     riff logs -n myfunc -t
@@ -34,5 +33,6 @@ riff logs [flags]
 ```
 
 ### SEE ALSO
+
 * [riff](riff.md)	 - Commands for creating and managing function resources
 

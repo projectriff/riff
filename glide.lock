@@ -1,5 +1,5 @@
-hash: 8c9d5cfb375b4f1d56ed8ee61739a21bc5b27ecb36ac1a8322224783e6de3194
-updated: 2018-03-05T10:51:44.826512+01:00
+hash: ff370e280f5682f94029e2dd6f7d8eb106976123a7feff05f38036280cfc5e73
+updated: 2018-03-15T10:54:27.706669+01:00
 imports:
 - name: github.com/bsm/sarama-cluster
   version: 24016d206c730276dfb58f802999066f2f4bfeaa
@@ -150,7 +150,7 @@ imports:
 - name: github.com/spf13/cast
   version: 8965335b8c7107321228e3e3702cab9832751bac
 - name: github.com/spf13/cobra
-  version: 7b2c5ac9fc04fc5efafb60700713d4fa609b777b
+  version: c6c44e6fdcc30161c7f4480754da7230d01c06e3
   subpackages:
   - doc
 - name: github.com/spf13/jwalterweatherman

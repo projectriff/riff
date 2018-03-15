@@ -4,7 +4,6 @@ Initialize a go plugin function
 
 ### Synopsis
 
-
 Generate the function based on a shared '.so' library file specified as the filename
 and exported symbol name specified as the handler.
 
@@ -42,5 +41,6 @@ riff init go [flags]
 ```
 
 ### SEE ALSO
+
 * [riff init](riff_init.md)	 - Initialize a function
 
