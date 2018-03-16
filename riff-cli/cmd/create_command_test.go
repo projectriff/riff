@@ -23,6 +23,7 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
+	"github.com/projectriff/riff/riff-cli/pkg/docker"
 )
 
 func TestCreateCommandImplicitPath(t *testing.T) {
@@ -138,7 +139,7 @@ func TestCreateJavaWithVersion(t *testing.T) {
 func setupCreateTest() (*cobra.Command, *options.InitOptions, *BuildOptions, *ApplyOptions) {
 	rootCmd, initOptions, initCommands := setupInitTest()
 
-	buildCmd, buildOptions := Build()
+	buildCmd, buildOptions := Build(docker.RealDocker(), docker.DryRunDocker())
 
 	applyCmd, applyOptions := Apply()
 

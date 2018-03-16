@@ -21,8 +21,6 @@ import (
 
 	"errors"
 	"path/filepath"
-	"strings"
-
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/docker"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
@@ -31,7 +29,7 @@ import (
 )
 
 type BuildOptions struct {
-	FilePath  string
+	FilePath     string
 	FunctionName string
 	Version      string
 	RiffVersion  string
@@ -52,7 +50,7 @@ func (bo BuildOptions) GetUserAccount() string {
 	return bo.UserAccount
 }
 
-func Build() (*cobra.Command, *BuildOptions) {
+func Build(realDocker docker.Docker, dryRunDocker docker.Docker) (*cobra.Command, *BuildOptions) {
 
 	buildOptions := BuildOptions{}
 
@@ -63,14 +61,18 @@ func Build() (*cobra.Command, *BuildOptions) {
 and version specified for the image that is built.`,
 		Example: `  riff build -n <name> -v <version> -f <path> [--push]`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := build(buildOptions)
+			dockerClient := realDocker
+			if buildOptions.DryRun {
+				dockerClient = dryRunDocker
+			}
+			err := build(buildOptions, dockerClient)
 			if err != nil {
 				cmd.SilenceUsage = true
 			}
 			return err
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			buildOptions.UserAccount = utils.GetUseraccountWithOverride("useraccount",*cmd.Flags())
+			buildOptions.UserAccount = utils.GetUseraccountWithOverride("useraccount", *cmd.Flags())
 			//TODO: DRY
 			if len(args) > 0 {
 				if len(args) == 1 && buildOptions.FilePath == "" {
@@ -98,26 +100,17 @@ and version specified for the image that is built.`,
 	return buildCmd, &buildOptions
 }
 
-func build(opts BuildOptions) error {
+func build(opts BuildOptions, client docker.Docker) error {
 	buildArgs := buildArgs(opts)
 	pushArgs := pushArgs(opts)
-	if opts.DryRun {
-		fmt.Printf("\nBuild command: docker %s\n", strings.Join(buildArgs, " "))
-		if opts.Push {
-			fmt.Printf("\nPush command: docker %s\n", strings.Join(pushArgs, " "))
-		}
-		fmt.Println("")
-		return nil
-	}
-
 	fmt.Println("Building image ...")
-	docker.Exec(buildArgs)
-
+	if err := client.Exec("build", buildArgs[1:]...); err != nil {
+		return err
+	}
 	if opts.Push {
 		fmt.Println("Pushing image...")
-		docker.Exec(pushArgs)
+		return client.Exec("push", pushArgs[1:]...)
 	}
-
 	return nil
 }
 
@@ -136,7 +129,7 @@ func pushArgs(opts BuildOptions) []string {
 }
 
 func validateBuildOptions(options *BuildOptions) error {
-	if err := validateFilepath(&options.FilePath) ; err != nil {
+	if err := validateFilepath(&options.FilePath); err != nil {
 		return err
 	}
 	err := validateFunctionName(&options.FunctionName, options.FilePath)

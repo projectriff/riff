@@ -28,7 +28,6 @@ import (
 	"time"
 
 	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
-	"bufio"
 )
 
 func GetCWD() string {
@@ -86,27 +85,6 @@ func Path(filename string) string {
 		return path
 	}
 	return filepath.Join(strings.Split(path, "/")...)
-}
-
-func ExecWaitAndStreamOutput(cmdName string, cmdArgs []string) {
-
-	cmd := exec.Command(cmdName, cmdArgs...)
-	stdout, _ := cmd.StdoutPipe()
-	stderr, _ := cmd.StderrPipe()
-	cmd.Start()
-	print(bufio.NewScanner(stdout),"[STDOUT]")
-	print(bufio.NewScanner(stderr),"[STDERR]")
-	cmd.Wait()
-}
-
-
-// to print the processed information when stdout gets a new line
-func print(scanner *bufio.Scanner, prefix string) {
-	scanner.Split(bufio.ScanLines)
-	for scanner.Scan() {
-		line := scanner.Text()
-		fmt.Printf("%s %s\n",prefix, line)
-	}
 }
 
 func Exec(cmdName string, cmdArgs []string, timeout time.Duration) ([]byte, error) {

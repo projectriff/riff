@@ -21,6 +21,7 @@ import (
 	"github.com/projectriff/riff/riff-cli/global"
 	"fmt"
 	"os"
+	"github.com/projectriff/riff/riff-cli/pkg/docker"
 )
 
 var version = "Unknown"
@@ -28,7 +29,7 @@ var version = "Unknown"
 func main() {
 	global.CLI_VERSION = version
 
-	rootCmd := cmd.CreateAndWireRootCommand()
+	rootCmd := cmd.CreateAndWireRootCommand(docker.RealDocker(), docker.DryRunDocker())
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

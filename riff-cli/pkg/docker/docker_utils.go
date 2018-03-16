@@ -17,9 +17,56 @@
 package docker
 
 import (
-	"github.com/projectriff/riff/riff-cli/pkg/osutils"
+	"fmt"
+	"strings"
+	"bufio"
+	"os/exec"
 )
 
-func Exec(cmdArgs [] string) {
-	osutils.ExecWaitAndStreamOutput("docker", cmdArgs)
+// Docker abstracts away interaction via a docker client.
+type Docker interface {
+	// Exec requests that the given docker command be executed, possibly with additional args.
+	Exec(command string, cmdArgs ... string) error
+}
+
+// processDocker interacts with docker by spawning a process and using the 'docker' command line tool for real.
+type processDocker struct {
+}
+
+// dryRunDocker only prints out the docker commands that *would* run.
+type dryRunDocker struct {
+}
+
+func RealDocker() Docker {
+	return &processDocker{}
+}
+
+func DryRunDocker() Docker {
+	return &dryRunDocker{}
+}
+
+func (d *processDocker) Exec(command string, cmdArgs ... string) error {
+	commandAndArgs := append([]string{command}, cmdArgs...)
+
+	cmd := exec.Command("docker", commandAndArgs...)
+	stdout, _ := cmd.StdoutPipe()
+	stderr, _ := cmd.StderrPipe()
+	cmd.Start()
+	print(bufio.NewScanner(stdout), "[STDOUT]")
+	print(bufio.NewScanner(stderr), "[STDERR]")
+	return cmd.Wait()
+}
+
+// to print the processed information when stdout gets a new line
+func print(scanner *bufio.Scanner, prefix string) {
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		line := scanner.Text()
+		fmt.Printf("%s %s\n", prefix, line)
+	}
+}
+
+func (d *dryRunDocker) Exec(command string, cmdArgs ... string) error {
+	fmt.Printf("%s command: docker %s %s\n", strings.Title(command), command, strings.Join(cmdArgs, " "))
+	return nil
 }

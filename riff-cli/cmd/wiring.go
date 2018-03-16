@@ -18,11 +18,12 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/projectriff/riff/riff-cli/pkg/docker"
 )
 
 // CreateAndWireRootCommand creates all riff commands and sub commands, as well as the top-level 'root' command,
 // wires them together and returns the root command, ready to execute.
-func CreateAndWireRootCommand() *cobra.Command {
+func CreateAndWireRootCommand(readlDocker docker.Docker, dryRunDocker docker.Docker) *cobra.Command {
 
 	rootCmd := Root()
 
@@ -41,7 +42,7 @@ func CreateAndWireRootCommand() *cobra.Command {
 		initNodeCmd,
 	)
 
-	buildCmd, _ := Build()
+	buildCmd, _ := Build(readlDocker, dryRunDocker)
 
 	applyCmd, _ := Apply()
 

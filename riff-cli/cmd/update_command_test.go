@@ -21,6 +21,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/cobra"
+	"github.com/projectriff/riff/riff-cli/pkg/docker"
 )
 
 func TestUpdateCommandImplicitPath(t *testing.T) {
@@ -47,7 +48,7 @@ func TestUpdateCommandExplicitPath(t *testing.T) {
 
 func setupUpdateTest() (*cobra.Command, *BuildOptions, *ApplyOptions) {
 	rootCmd := Root()
-	buildCmd, buildOptions := Build()
+	buildCmd, buildOptions := Build(docker.RealDocker(), docker.DryRunDocker())
 
 	applyCmd, applyOptions := Apply()
 
