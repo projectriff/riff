@@ -11,11 +11,17 @@ test: ../vendor
 $(OUTPUT): $(GO_SOURCES) ../vendor
 	go build cmd/function-controller.go
 
-gen-mocks: ../vendor
+gen-mocks: $(GO_SOURCES) ../vendor
 	mockery -name 'TopicInformer|FunctionInformer' -dir ../kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1
 	mockery -name 'SharedIndexInformer' -dir ../vendor/k8s.io/client-go/tools/cache
 	mockery -name 'DeploymentInformer' -dir ../vendor/k8s.io/client-go/informers/extensions/v1beta1
-	mockery -name 'LagTracker|Deployer' -dir pkg/controller
+	mockery -name 'Deployer' -dir pkg/controller
+	go get -u github.com/vektra/mockery/.../
+	go generate ./...
+
+# verify generated mocks which are committed or staged are up to date
+verify-mocks: gen-mocks
+	git diff --exit-code $(GENERATED_SOURCES)
 
 clean:
 	rm -f $(OUTPUT)

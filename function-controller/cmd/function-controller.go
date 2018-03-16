@@ -36,6 +36,10 @@ import (
 	"k8s.io/client-go/informers/extensions/v1beta1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler"
+	"github.com/projectriff/riff/message-transport/pkg/transport/metrics/kafka_over_kafka"
+	"github.com/bsm/sarama-cluster"
+	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
 )
 
 func main() {
@@ -54,9 +58,19 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	ctrl := controller.New(topicsInformer, functionsInformer, deploymentInformer, deployer, controller.NewLagTracker(brokers), 8080)
 
-	controller.DecorateWithDelayAndSmoothing(ctrl)
+	metricsReceiver, err := kafka_over_kafka.NewMetricsReceiver(brokers, "autoscaler", makeConsumerConfig())
+	if err != nil {
+		panic(err)
+	}
+
+	transportInspector, err := kafka.NewInspector(brokers)
+	if err != nil {
+		panic(err)
+	}
+
+	autoScaler := autoscaler.NewAutoScaler(metricsReceiver, transportInspector)
+	ctrl := controller.New(topicsInformer, functionsInformer, deploymentInformer, deployer, autoScaler, 8080)
 
 	stopCh := make(chan struct{})
 	go ctrl.Run(stopCh)
@@ -84,4 +98,11 @@ func makeInformers(config *rest.Config) (riffInformersV1.TopicInformer, riffInfo
 	k8sClient, err := kubernetes.NewForConfig(config)
 	deploymentInformer := k8sInformers.NewSharedInformerFactory(k8sClient, 0).Extensions().V1beta1().Deployments()
 	return topicsInformer, functionsInformer, deploymentInformer
+}
+
+func makeConsumerConfig() *cluster.Config {
+	consumerConfig := cluster.NewConfig()
+	consumerConfig.Consumer.Return.Errors = true
+	consumerConfig.Group.Return.Notifications = true
+	return consumerConfig
 }
