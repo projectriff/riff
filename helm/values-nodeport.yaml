@@ -1,3 +1,0 @@
-httpGateway:
-  service:
-    type: NodePort

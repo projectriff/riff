@@ -145,12 +145,11 @@ eval $(minikube docker-env)
 
 Build the riff components following the link:README.adoc#manual[manual build and deploy] instructions.
 
-To install locally built Docker images with Helm on minikube, use the `values-snapshot.yaml` file,
-which overrides image tags with snapshot versions:
+To install locally built Docker images with Helm on minikube, use the `--devel` option which uses the chart version that has snapshot versions:
 
 [source, bash]
 ----
-helm install projectriff/riff --name control --namespace riff-system --values helm/values-snapshot.yaml  --devel --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name control --namespace riff-system --devel --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 === To tear it all down
