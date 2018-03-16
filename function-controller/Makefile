@@ -12,11 +12,11 @@ $(OUTPUT): $(GO_SOURCES) ../vendor
 	go build cmd/function-controller.go
 
 gen-mocks: $(GO_SOURCES) ../vendor
+	go get -u github.com/vektra/mockery/.../
 	mockery -name 'TopicInformer|FunctionInformer' -dir ../kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1
 	mockery -name 'SharedIndexInformer' -dir ../vendor/k8s.io/client-go/tools/cache
 	mockery -name 'DeploymentInformer' -dir ../vendor/k8s.io/client-go/informers/extensions/v1beta1
 	mockery -name 'Deployer' -dir pkg/controller
-	go get -u github.com/vektra/mockery/.../
 	go generate ./...
 
 # verify generated mocks which are committed or staged are up to date

@@ -3,8 +3,9 @@ The *function controller* runs inside kubernetes, watching for changes to *funct
 It reacts by requesting the deployment of functions, and scales them according to activity on
 their input topics.
 
-Scaling up is capped to the minimum of `maxReplicas` in the function configuration (if set) and, when Kafka
-is being used as a message broker, the number of partitions in the function's input topic.
+Instance scaling may be capped to `maxReplicas` when that specified in the function configuration.
+When Kafka is the message broker, scaling is capped to `maxReplicas` or the number of partitions in the input topic,
+whichever is lowest.
 
 The last replica of a function keeps running for at least `idleTimeoutMs` millseconds if this is specified
 in the function configuration and for at least 10 seconds otherwise.

@@ -23,9 +23,11 @@ import (
 	"github.com/projectriff/riff/message-transport/pkg/transport/metrics"
 )
 
-func NewMetricsEmittingConsumer(addrs []string, function string, pod string, topics []string, consumerConfig *cluster.Config, metricsTopic ... string) (transport.Consumer, error) {
-	// Create a Kafka consumer to delegate to using the function name to identify the consumer group.
-	delegate, err := kafka.NewConsumer(addrs, function, topics, consumerConfig)
+// NewMetricsEmittingConsumer creates a producer which will delegate to a Kafka consumer and emit metrics tagged with
+// the given pod id. The metrics are emitted to a metrics (Kakfa) topic which can left to default to the Riff-defined
+// metrics topic. Alternatively, at most one metrics topic may be specified to use a different value than the default.
+func NewMetricsEmittingConsumer(addrs []string, consumerGroup string, pod string, topics []string, consumerConfig *cluster.Config, metricsTopic ... string) (transport.Consumer, error) {
+	delegate, err := kafka.NewConsumer(addrs, consumerGroup, topics, consumerConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -33,5 +35,5 @@ func NewMetricsEmittingConsumer(addrs []string, function string, pod string, top
 	if err != nil {
 		return nil, err
 	}
-	return metrics.NewConsumer(delegate, function, pod, getMetricsTopic(metricsTopic...), metricsProducer), nil // TODO: pass in pod
+	return metrics.NewConsumer(delegate, consumerGroup, pod, getMetricsTopic(metricsTopic...), metricsProducer), nil // TODO: pass in pod
 }

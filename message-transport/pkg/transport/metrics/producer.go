@@ -22,6 +22,7 @@ import (
 	"log"
 	"encoding/json"
 	"time"
+	"io"
 )
 
 const producerSource = "producer"
@@ -59,6 +60,7 @@ func (p *producer) Send(topic string, msg message.Message) error {
 		metricsErr := p.metricsProducer.Send(p.metricsTopic, p.createProducerMetricMessage(topic))
 		if metricsErr != nil {
 			log.Printf("Failed to send producer metrics: %v", metricsErr)
+			return metricsErr
 		}
 	}
 	return err
@@ -83,10 +85,18 @@ func (p *producer) Errors() <-chan error {
 }
 
 func (p *producer) Close() error {
-	err := p.delegate.Close()
-	err2 := p.metricsProducer.Close()
+	var err error = nil
+	if delegate, ok := p.delegate.(io.Closer); ok {
+		err = delegate.Close()
+	}
+
+	var err2 error = nil
+	if metricsProducer, ok := p.metricsProducer.(io.Closer); ok {
+		err2 = metricsProducer.Close()
+	}
 	if err != nil {
 		return err
 	}
 	return err2
+
 }

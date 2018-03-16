@@ -19,15 +19,13 @@ package transport
 
 import (
 	"github.com/projectriff/riff/message-transport/pkg/message"
-	"io"
 )
 
 //go:generate mockery -name=Producer -output mocktransport -outpkg mocktransport
 
 // Producer is an interface for sending messages to arbitrary topics.
+// If io.Closer is implemented it will be called when the Producer is no longer needed.
 type Producer interface {
-	io.Closer
-
 	// Send sends a message to a topic.
 	Send(topic string, message message.Message) error
 
@@ -39,9 +37,8 @@ type Producer interface {
 
 // Consumer is an interface for receiving messages, along with their topics, from a fixed, implementation-defined set
 // of topics.
+// If io.Closer is implemented it will be called when the Consumer is no longer needed.
 type Consumer interface {
-	io.Closer
-
 	// Receive returns a message along with the topic from which the message was received.
 	Receive() (message.Message, string, error)
 }

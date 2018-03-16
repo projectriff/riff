@@ -38,15 +38,15 @@ var _ = Describe("Kafka Metrics Integration", func() {
 	)
 
 	var (
-		testTopic         string
-		producer          transport.Producer
-		consumer          transport.Consumer
-		testMessage       message.Message
-		brokers           []string
-		config            *cluster.Config
-		consumingFunction string
-		metricsTopic      string
-		metricsGroupId    string
+		testTopic      string
+		producer       transport.Producer
+		consumer       transport.Consumer
+		testMessage    message.Message
+		brokers        []string
+		config         *cluster.Config
+		consumerGroup  string
+		metricsTopic   string
+		metricsGroupId string
 	)
 
 	BeforeEach(func() {
@@ -69,15 +69,15 @@ var _ = Describe("Kafka Metrics Integration", func() {
 		// machinery and the producer writing the “new” message.
 		config.Consumer.Offsets.Initial = sarama.OffsetOldest
 
-		// Use a fresh function name, since that will determine the function's consumer group and then runs in close
-		// succession won't suffer from Kafka broker delays due to consumers coming and going in the same group.
-		consumingFunction = fmt.Sprintf("consuming-function-%d", time.Now().Nanosecond())
+		// Use a fresh consumer group name so that runs in close succession won't suffer from Kafka broker delays due
+		// to consumers coming and going in the same group.
+		consumerGroup = fmt.Sprintf("consumer-group-%d", time.Now().Nanosecond())
 
 		// Use a fresh group id so that runs in close succession won't suffer from Kafka broker delays
 		// due to consumers coming and going in the same group
 		metricsGroupId = fmt.Sprintf("metrics-group-%d", time.Now().Nanosecond())
 
-		consumer, err = kafka_over_kafka.NewMetricsEmittingConsumer(brokers, consumingFunction, testPod, []string{testTopic}, config, metricsTopic)
+		consumer, err = kafka_over_kafka.NewMetricsEmittingConsumer(brokers, consumerGroup, testPod, []string{testTopic}, config, metricsTopic)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -98,7 +98,7 @@ var _ = Describe("Kafka Metrics Integration", func() {
 		Expect(producerMetrics).To(BeEmpty())
 
 		consumerMetrics := metricsReceiver.ConsumerMetrics()
-		Expect(<-consumerMetrics).To(Equal(metrics.ConsumerAggregateMetric{Topic: testTopic, Function: consumingFunction, Pod: testPod, Count: 1}))
+		Expect(<-consumerMetrics).To(Equal(metrics.ConsumerAggregateMetric{Topic: testTopic, ConsumerGroup: consumerGroup, Pod: testPod, Count: 1}))
 		Expect(consumerMetrics).To(BeEmpty())
 	})
 })

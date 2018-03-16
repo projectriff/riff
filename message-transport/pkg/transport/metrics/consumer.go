@@ -22,25 +22,26 @@ import (
 	"encoding/json"
 	"log"
 	"time"
+	"io"
 )
 
 const consumerSource = "consumer"
 
-// ConsumerAggregateMetric represents the reception of a number of message from a topic by a function in a time interval.
+// ConsumerAggregateMetric represents the reception of a number of messages from a topic by a consumer group in a time interval.
 type ConsumerAggregateMetric struct {
-	Topic    string
-	Function string
-	Pod      string
-	Interval time.Duration
-	Count    int32
+	Topic         string
+	ConsumerGroup string
+	Pod           string
+	Interval      time.Duration
+	Count         int32
 }
 
-// NewConsumer decorates the given delegate to send consumer metrics for the given function and pod to the given topic
+// NewConsumer decorates the given delegate to send consumer metrics for the given consumer group and pod to the given topic
 // using the given metrics producer. The given pod can be any unique identifier for the pod which will use this consumer
 // and can be pod instance-specific (that is, it need not carry across when a pod is restarted).
-func NewConsumer(delegate transport.Consumer, function string, pod string, metricsTopic string, metricsProducer transport.Producer) *consumer {
+func NewConsumer(delegate transport.Consumer, consumerGroup string, pod string, metricsTopic string, metricsProducer transport.Producer) *consumer {
 	return &consumer{
-		function:        function,
+		consumerGroup:   consumerGroup,
 		pod:             pod,
 		delegate:        delegate,
 		metricsTopic:    metricsTopic,
@@ -50,12 +51,12 @@ func NewConsumer(delegate transport.Consumer, function string, pod string, metri
 
 func (c *consumer) createConsumerMetricMessage(topic string) message.Message {
 	metric, err := json.Marshal(ConsumerAggregateMetric{
-		Topic:    topic,
-		Function: c.function,
-		Pod:      c.pod,
+		Topic:         topic,
+		ConsumerGroup: c.consumerGroup,
+		Pod:           c.pod,
 		// TODO: aggregate metrics into suitable intervals
 		Interval: time.Duration(0),
-		Count: 1,
+		Count:    1,
 	})
 	if err != nil { // should never happen
 		panic(err)
@@ -64,7 +65,7 @@ func (c *consumer) createConsumerMetricMessage(topic string) message.Message {
 }
 
 type consumer struct {
-	function        string
+	consumerGroup   string
 	pod             string
 	delegate        transport.Consumer
 	metricsTopic    string
@@ -72,7 +73,7 @@ type consumer struct {
 }
 
 func (c *consumer) Receive() (message.Message, string, error) {
-	// TODO: emit "ready to receive" metric function/consumer/timestamp
+	// TODO: emit "ready to receive" metric consumer group/consumer/timestamp
 	m, t, err := c.delegate.Receive()
 	if err != nil {
 		return nil, "", err
@@ -81,14 +82,22 @@ func (c *consumer) Receive() (message.Message, string, error) {
 	metricsErr := c.metricsProducer.Send(c.metricsTopic, c.createConsumerMetricMessage(t))
 	if metricsErr != nil {
 		log.Printf("Failed to send consumer metrics: %v", metricsErr)
+		return nil, "", metricsErr
 	}
 
 	return m, t, nil
 }
 
 func (c *consumer) Close() error {
-	err := c.delegate.Close()
-	err2 := c.metricsProducer.Close()
+	var err error = nil
+	if delegate, ok := c.delegate.(io.Closer); ok {
+		err = delegate.Close()
+	}
+
+	var err2 error = nil
+	if metricsProducer, ok := c.metricsProducer.(io.Closer); ok {
+		err2 = metricsProducer.Close()
+	}
 	if err != nil {
 		return err
 	}

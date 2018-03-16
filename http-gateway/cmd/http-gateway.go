@@ -29,6 +29,7 @@ import (
 	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
 	"github.com/projectriff/riff/message-transport/pkg/transport/metrics/kafka_over_kafka"
 	"github.com/satori/go.uuid"
+	"io"
 )
 
 func main() {
@@ -39,7 +40,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer producer.Close()
+	defer func(){
+		if producer, ok := producer.(io.Closer); ok {
+			producer.Close()
+		}
+	}()
+
 
 	consumer, err := kafka.NewConsumer(brokers, "gateway", []string{"replies"}, cluster.NewConfig())
 	if err != nil {

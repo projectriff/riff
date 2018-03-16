@@ -111,9 +111,9 @@ var _ = Describe("Autoscaler", func() {
 				})
 
 				auto.receiveConsumerMetric(metrics.ConsumerAggregateMetric{
-					Topic:    testTopic,
-					Function: testFuncId.Function,
-					Count:    1,
+					Topic:         testTopic,
+					ConsumerGroup: testFuncId.Function,
+					Count:         1,
 				})
 			})
 
@@ -156,9 +156,9 @@ var _ = Describe("Autoscaler", func() {
 					})
 
 					auto.receiveConsumerMetric(metrics.ConsumerAggregateMetric{
-						Topic:    testTopic,
-						Function: testFuncId.Function,
-						Count:    10,
+						Topic:         testTopic,
+						ConsumerGroup: testFuncId.Function,
+						Count:         10,
 					})
 				})
 
@@ -177,9 +177,9 @@ var _ = Describe("Autoscaler", func() {
 						})
 
 						auto.receiveConsumerMetric(metrics.ConsumerAggregateMetric{
-							Topic:    testTopic,
-							Function: testFuncId.Function,
-							Count:    100,
+							Topic:         testTopic,
+							ConsumerGroup: testFuncId.Function,
+							Count:         100,
 						})
 
 						auto.Propose()
@@ -190,6 +190,27 @@ var _ = Describe("Autoscaler", func() {
 						Expect(proposal).To(Propose(testFuncId, 3))
 					})
 				})
+			})
+		})
+
+		Context("when messages are produced slightly slower than they are consumed by 1 pod", func() {
+			BeforeEach(func() {
+				auto.InformFunctionReplicas(testFuncId, 1)
+
+				auto.receiveProducerMetric(metrics.ProducerAggregateMetric{
+					Topic: testTopic,
+					Count: 999,
+				})
+
+				auto.receiveConsumerMetric(metrics.ConsumerAggregateMetric{
+					Topic:         testTopic,
+					ConsumerGroup: testFuncId.Function,
+					Count:         1000,
+				})
+			})
+
+			It("should continue to propose 1 pod (and not round down)", func() {
+				Expect(proposal).To(Propose(testFuncId, 1))
 			})
 		})
 	})
@@ -213,9 +234,9 @@ var _ = Describe("Autoscaler", func() {
 				})
 
 				auto.receiveConsumerMetric(metrics.ConsumerAggregateMetric{
-					Topic:    testTopic,
-					Function: testFuncId.Function,
-					Count:    1,
+					Topic:         testTopic,
+					ConsumerGroup: testFuncId.Function,
+					Count:         1,
 				})
 			})
 

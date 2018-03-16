@@ -56,7 +56,8 @@ type AutoScaler interface {
 	Propose() map[FunctionId]int
 }
 
-// FunctionId identifies a function in the default namespace.
+// FunctionId identifies a function
+// TODO: support namespaces.
 type FunctionId struct {
 	Function string
 }
@@ -228,7 +229,7 @@ func (a *autoScaler) receiveConsumerMetric(cm metrics.ConsumerAggregateMetric) {
 
 	funcTotals, ok := a.totals[cm.Topic]
 	if ok {
-		mt, ok := funcTotals[FunctionId{cm.Function}]
+		mt, ok := funcTotals[FunctionId{cm.ConsumerGroup}]
 		if ok {
 			mt.receiveCount += cm.Count
 		}
@@ -258,7 +259,7 @@ func (a *autoScaler) calculateProposal() {
 					proposedReplicas = 1 // arbitrary value
 				}
 			} else {
-				proposedReplicas = int(math.Floor(float64(a.replicas[fn]) * float64(mt.transmitCount) / float64(mt.receiveCount)))
+				proposedReplicas = int(math.Ceil(float64(a.replicas[fn]) * float64(mt.transmitCount) / float64(mt.receiveCount)))
 			}
 			maxReplicas := a.maxReplicas(topic, fn.Function)
 			possibleChange := proposedReplicas != a.replicas[fn]

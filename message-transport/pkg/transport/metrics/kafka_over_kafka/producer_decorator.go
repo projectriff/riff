@@ -24,6 +24,9 @@ import (
 
 const DefaultMetricsTopic = "io.projectriff.message-transport.metrics"
 
+// NewMetricsEmittingProducer creates a producer which will delegate to a Kafka producer and emit metrics tagged with
+// the given producer id. The metrics are emitted to a metrics (Kafka) topic which can left to default to the Riff-defined
+// metrics topic. Alternatively, at most one metrics topic may be specified to use a different value than the default.
 func NewMetricsEmittingProducer(brokerAddrs []string, producerId string, metricsTopic ... string) (transport.Producer, error) {
 	delegate, err := kafka.NewProducer(brokerAddrs)
 	if err != nil {

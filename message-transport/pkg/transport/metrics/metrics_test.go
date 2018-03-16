@@ -26,6 +26,7 @@ import (
 	"errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/projectriff/riff/message-transport/pkg/transport/stubtransport"
+	"io"
 )
 
 var _ bool = Describe("Metrics", func() {
@@ -131,8 +132,9 @@ var _ bool = Describe("Metrics", func() {
 						}).Return(testError)
 					})
 
-					It("should delegate, ignore the metrics producer error, and return normally", func() {
-						Expect(err).NotTo(HaveOccurred())
+					It("should return the metrics producer error", func() {
+						// We should revisit this behaviour if transient errors turn out to be a common occurrence.
+						Expect(err).To(Equal(testError))
 					})
 				})
 			})
@@ -170,8 +172,9 @@ var _ bool = Describe("Metrics", func() {
 				})
 
 				It("should delegate and return successfully", func() {
-					err := producer.Close()
-					Expect(err).NotTo(HaveOccurred())
+					producer, ok := producer.(io.Closer)
+					Expect(ok).To(BeTrue())
+					Expect(producer.Close()).To(Succeed())
 				})
 			})
 
@@ -182,8 +185,9 @@ var _ bool = Describe("Metrics", func() {
 				})
 
 				It("should delegate and return the error", func() {
-					err := producer.Close()
-					Expect(err).To(Equal(testError))
+					producer, ok := producer.(io.Closer)
+					Expect(ok).To(BeTrue())
+					Expect(producer.Close()).To(Equal(testError))
 				})
 			})
 
@@ -194,8 +198,9 @@ var _ bool = Describe("Metrics", func() {
 				})
 
 				It("should delegate and return the error", func() {
-					err := producer.Close()
-					Expect(err).To(Equal(testError))
+					producer, ok := producer.(io.Closer)
+					Expect(ok).To(BeTrue())
+					Expect(producer.Close()).To(Equal(testError))
 				})
 			})
 
@@ -206,8 +211,9 @@ var _ bool = Describe("Metrics", func() {
 				})
 
 				It("should delegate and return the error from the delegate producer", func() {
-					err := producer.Close()
-					Expect(err).To(Equal(testError))
+					producer, ok := producer.(io.Closer)
+					Expect(ok).To(BeTrue())
+					Expect(producer.Close()).To(Equal(testError))
 				})
 			})
 		})
@@ -215,8 +221,8 @@ var _ bool = Describe("Metrics", func() {
 
 	Describe("Consumer metrics", func() {
 		const (
-			testFunction = "test-function"
-			testPod      = "test-pod"
+			testConsumerGroup = "test-consumer-group"
+			testPod           = "test-pod"
 		)
 
 		var (
@@ -229,7 +235,7 @@ var _ bool = Describe("Metrics", func() {
 
 		BeforeEach(func() {
 			mockDelegate = &mocktransport.Consumer{}
-			consumer = metrics.NewConsumer(mockDelegate, testFunction, testPod, testMetricsTopic, mockMetricsProducer)
+			consumer = metrics.NewConsumer(mockDelegate, testConsumerGroup, testPod, testMetricsTopic, mockMetricsProducer)
 		})
 
 		AfterEach(func() {
@@ -260,7 +266,7 @@ var _ bool = Describe("Metrics", func() {
 							cm, ok := <-metricsReceiver.ConsumerMetrics()
 							Expect(ok).To(BeTrue())
 							Expect(cm.Topic).To(Equal(testTopic))
-							Expect(cm.Function).To(Equal(testFunction))
+							Expect(cm.ConsumerGroup).To(Equal(testConsumerGroup))
 							Expect(cm.Pod).To(Equal(testPod))
 							Expect(metricsReceiver.ProducerMetrics()).To(BeEmpty())
 						}).Return(nil)
@@ -288,17 +294,18 @@ var _ bool = Describe("Metrics", func() {
 							cm, ok := <-metricsReceiver.ConsumerMetrics()
 							Expect(ok).To(BeTrue())
 							Expect(cm.Topic).To(Equal(testTopic))
-							Expect(cm.Function).To(Equal(testFunction))
+							Expect(cm.ConsumerGroup).To(Equal(testConsumerGroup))
 							Expect(cm.Pod).To(Equal(testPod))
 							Expect(metricsReceiver.ProducerMetrics()).To(BeEmpty())
 						}).Return(testError)
 					})
 
-					It("should delegate and ignore the metrics producer error", func() {
+					It("should delegate and return the metrics producer error", func() {
 						// metric emission is tested in the BeforeEach
-						Expect(receivedMsg).To(Equal(testMessage))
-						Expect(receivedTopic).To(Equal(testTopic))
-						Expect(receivedErr).NotTo(HaveOccurred())
+					    // We should revisit this behaviour if transient errors turn out to be a common occurrence.
+						Expect(receivedMsg).To(BeNil())
+						Expect(receivedTopic).To(Equal(""))
+						Expect(receivedErr).To(Equal(testError))
 					})
 				})
 			})
@@ -323,8 +330,9 @@ var _ bool = Describe("Metrics", func() {
 				})
 
 				It("should delegate and return successfully", func() {
-					err := consumer.Close()
-					Expect(err).NotTo(HaveOccurred())
+					consumer, ok := consumer.(io.Closer)
+					Expect(ok).To(BeTrue())
+					Expect(consumer.Close()).To(Succeed())
 				})
 			})
 
@@ -335,8 +343,9 @@ var _ bool = Describe("Metrics", func() {
 				})
 
 				It("should delegate and return the error", func() {
-					err := consumer.Close()
-					Expect(err).To(Equal(testError))
+					consumer, ok := consumer.(io.Closer)
+					Expect(ok).To(BeTrue())
+					Expect(consumer.Close()).To(Equal(testError))
 				})
 			})
 
@@ -347,7 +356,10 @@ var _ bool = Describe("Metrics", func() {
 				})
 
 				It("should delegate and return the error", func() {
-					err := consumer.Close()
+					var err error = nil
+					if consumer, ok := consumer.(io.Closer); ok {
+						err = consumer.Close()
+					}
 					Expect(err).To(Equal(testError))
 				})
 			})
@@ -359,8 +371,9 @@ var _ bool = Describe("Metrics", func() {
 				})
 
 				It("should delegate and return the error from the delegate producer", func() {
-					err := consumer.Close()
-					Expect(err).To(Equal(testError))
+					consumer, ok := consumer.(io.Closer)
+					Expect(ok).To(BeTrue())
+					Expect(consumer.Close()).To(Equal(testError))
 				})
 			})
 		})

@@ -103,7 +103,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer consumer.Close()
+
+	defer func(){
+		if consumer, ok := consumer.(io.Closer); ok {
+			consumer.Close()
+		}
+	}()
 
 	dispatcher, err := createDispatcher(protocol)
 	if err != nil {
