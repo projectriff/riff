@@ -37,6 +37,8 @@ var _ = Describe("Kafka Integration", func() {
 		topic       string
 		producer    transport.Producer
 		consumer    transport.Consumer
+		groupId     string
+		inspector   transport.Inspector
 		testMessage message.Message
 	)
 
@@ -60,9 +62,12 @@ var _ = Describe("Kafka Integration", func() {
 
 		// Use a fresh group id so that runs in close succession won't suffer from Kafka broker delays
 		// due to consumers coming and going in the same group
-		groupId := fmt.Sprintf("group-%d", time.Now().Nanosecond())
+		groupId = fmt.Sprintf("group-%d", time.Now().Nanosecond())
 
 		consumer, err = kafka.NewConsumer(brokers, groupId, []string{topic}, config)
+		Expect(err).NotTo(HaveOccurred())
+
+		inspector, err = kafka.NewInspector(brokers)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -70,10 +75,24 @@ var _ = Describe("Kafka Integration", func() {
 		err := producer.Send(topic, testMessage)
 		Expect(err).NotTo(HaveOccurred())
 
+		// It takes a while for the production to affect the queue length.
+		Eventually(func() int64{
+			queueLength, err := inspector.QueueLength(topic, groupId)
+			Expect(err).NotTo(HaveOccurred())
+			return queueLength
+		}, time.Second*10).Should(Equal(int64(1)))
+
 		msg, topic, err := consumer.Receive()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(msg).To(Equal(testMessage))
 		Expect(topic).To(Equal(topic))
+
+		// It takes a while for the consumption to affect the queue length.
+		Eventually(func() int64{
+			queueLength, err := inspector.QueueLength(topic, groupId)
+			Expect(err).NotTo(HaveOccurred())
+			return queueLength
+		}, time.Second*10).Should(Equal(int64(0)))
 	})
 
 })

@@ -45,3 +45,11 @@ type Consumer interface {
 	// Receive returns a message along with the topic from which the message was received.
 	Receive() (message.Message, string, error)
 }
+
+//go:generate mockery -name=Inspector -output mocktransport -outpkg mocktransport
+
+// Inspector is an interface for inspecting the transport.
+type Inspector interface {
+	// QueueLength returns the queue length of the given topic from the perspective of the given function.
+	QueueLength(topic string, function string) (int64, error)
+}
