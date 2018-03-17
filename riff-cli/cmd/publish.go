@@ -60,6 +60,10 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 
 `,
 		Run: func(cmd *cobra.Command, args []string) {
+			namespace, _ := cmd.Flags().GetString("namespace")
+			if namespace != "" {
+				fmt.Println("NOTE: the 'namespace' option is deprecated and will be removed in future releases.")
+			}
 
 			cmdArgs := []string{"get", "svc", "--all-namespaces", "-l", "app=riff,component=http-gateway", "-o", "json"}
 			output, err := kubectl.ExecForBytes(cmdArgs)
@@ -116,8 +120,10 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 	publishCmd.Flags().IntVarP(&publishOptions.count, "count", "c", 1, "the number of times to post the data")
 	publishCmd.Flags().IntVarP(&publishOptions.pause, "pause", "p", 0, "the number of seconds to wait between postings")
 	publishCmd.Flags().StringVarP(&publishOptions.contentType, "content-type", "", "text/plain", "the content type")
+	publishCmd.Flags().String("namespace", "", "DEPRECATED")
 
 	publishCmd.MarkFlagRequired("data")
+	publishCmd.Flags().MarkHidden("namespace")
 
 	return publishCmd
 }
