@@ -14,7 +14,7 @@ build: $(GO_SOURCES) ../vendor
 test: $(GO_SOURCES) ../vendor
 	go test ./...
 
-gen-mocks $(GENERATED_SOURCE): $(GO_SOURCES) ../vendor
+gen-mocks $(GENERATED_SOURCES): $(GO_SOURCES) ../vendor
 	go get -u github.com/vektra/mockery/.../
 	go generate ./...
 

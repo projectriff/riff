@@ -32,7 +32,6 @@ type BuildOptions struct {
 	FilePath     string
 	FunctionName string
 	Version      string
-	RiffVersion  string
 	UserAccount  string
 	Push         bool
 	DryRun       bool
@@ -94,7 +93,6 @@ and version specified for the image that is built.`,
 	buildCmd.Flags().StringVarP(&buildOptions.FilePath, "filepath", "f", "", "path or directory used for the function resources (defaults to the current directory)")
 	buildCmd.Flags().StringVarP(&buildOptions.FunctionName, "name", "n", "", "the name of the function (defaults to the name of the current directory)")
 	buildCmd.Flags().BoolVar(&buildOptions.Push, "push", false, "push the image to Docker registry")
-	buildCmd.Flags().StringVar(&buildOptions.RiffVersion, "riff-version", utils.DefaultValues.RiffVersion, "the version of riff to use when building containers")
 	buildCmd.Flags().StringVarP(&buildOptions.Version, "version", "v", utils.DefaultValues.Version, "the version of the function image")
 	buildCmd.Flags().StringVarP(&buildOptions.UserAccount, "useraccount", "u", utils.DefaultValues.UserAccount, "the Docker user account to be used for the image repository")
 	return buildCmd, &buildOptions

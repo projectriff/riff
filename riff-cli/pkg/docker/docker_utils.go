@@ -23,6 +23,8 @@ import (
 	"os/exec"
 )
 
+//go:generate mockery -name=Docker -inpkg
+
 // Docker abstracts away interaction via a docker client.
 type Docker interface {
 	// Exec requests that the given docker command be executed, possibly with additional args.

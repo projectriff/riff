@@ -1,8 +1,9 @@
-.PHONY: build clean test release verify-docs all
+.PHONY: build clean test release verify-docs all gen-mocks
 OUTPUT = riff
 OUTPUT_WINDOWS = $(OUTPUT).exe
-GO_SOURCES = $(shell find cmd pkg -type f -name '*.go')
+GO_SOURCES = $(shell find cmd pkg -type f -name '*.go' -not -name 'mock_*.go')
 VERSION ?= $(shell cat ../VERSION)
+GENERATED_SOURCES = $(shell find pkg -type f -name 'mock_*.go')
 
 
 all: build docs test
@@ -22,6 +23,14 @@ release: $(GO_SOURCES) ../vendor
 
 docs: $(OUTPUT)
 	rm -fR docs && ./$(OUTPUT) docs
+
+gen-mocks $(GENERATED_SOURCES): $(GO_SOURCES) ../vendor
+	go get -u github.com/vektra/mockery/.../
+	go generate ./...
+
+# verify generated mocks which are committed or staged are up to date
+verify-mocks: gen-mocks
+	git diff --exit-code $(GENERATED_SOURCES)
 
 verify-docs: docs
 	git diff --exit-code docs
