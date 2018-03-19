@@ -13,7 +13,8 @@ To riff link:../README.adoc[README]
 * Node
   - link:node/square/README.adoc[square]
 * Python
-  - link:python/sentiments/README.adoc[sentiments]
+  - link:python/concat/README.adoc[concat]
+  - link:python/upper/README.adoc[upper]
 * Shell
   - link:shell/echo/README.adoc[echo]
   - link:shell/hello/README.adoc[hello]
