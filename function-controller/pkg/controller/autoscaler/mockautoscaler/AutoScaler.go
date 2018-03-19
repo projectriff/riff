@@ -51,12 +51,12 @@ func (_m *AutoScaler) Run() {
 }
 
 // SetDelayScaleDownPolicy provides a mock function with given fields: _a0
-func (_m *AutoScaler) SetDelayScaleDownPolicy(_a0 func(string) time.Duration) {
+func (_m *AutoScaler) SetDelayScaleDownPolicy(_a0 func(autoscaler.FunctionId) time.Duration) {
 	_m.Called(_a0)
 }
 
 // SetMaxReplicasPolicy provides a mock function with given fields: _a0
-func (_m *AutoScaler) SetMaxReplicasPolicy(_a0 func(string, string) int) {
+func (_m *AutoScaler) SetMaxReplicasPolicy(_a0 func(autoscaler.FunctionId) int) {
 	_m.Called(_a0)
 }
 

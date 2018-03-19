@@ -40,8 +40,8 @@ var _ = Describe("Controller", func() {
 		functionHandlers    cache.ResourceEventHandlerFuncs
 		topicHandlers       cache.ResourceEventHandlerFuncs
 		closeCh             chan struct{}
-		maxReplicasPolicy   func(string, string) int
-		delayScaleDownPolicy func(function string) time.Duration
+		maxReplicasPolicy   func(id autoscaler.FunctionId) int
+		delayScaleDownPolicy func(function autoscaler.FunctionId) time.Duration
 	)
 
 	BeforeEach(func() {
@@ -73,11 +73,11 @@ var _ = Describe("Controller", func() {
 		siiDeployments.On("Run", mock.Anything)
 
 		autoScaler = new(mockautoscaler.AutoScaler)
-		autoScaler.On("SetMaxReplicasPolicy", mock.AnythingOfType("func(string, string) int")).Run(func(args mock.Arguments) {
-			maxReplicasPolicy = args.Get(0).(func(string, string) int)
+		autoScaler.On("SetMaxReplicasPolicy", mock.AnythingOfType("func(autoscaler.FunctionId) int")).Run(func(args mock.Arguments) {
+			maxReplicasPolicy = args.Get(0).(func(id autoscaler.FunctionId) int)
 		})
-		autoScaler.On("SetDelayScaleDownPolicy", mock.AnythingOfType("func(string) time.Duration")).Run(func(args mock.Arguments) {
-			delayScaleDownPolicy = args.Get(0).(func(function string) time.Duration)
+		autoScaler.On("SetDelayScaleDownPolicy", mock.AnythingOfType("func(autoscaler.FunctionId) time.Duration")).Run(func(args mock.Arguments) {
+			delayScaleDownPolicy = args.Get(0).(func(function autoscaler.FunctionId) time.Duration)
 		})
 		autoScaler.On("Run")
 		autoScaler.On("Close").Return(nil)
@@ -237,7 +237,7 @@ var _ = Describe("Controller", func() {
 
 				It("should eventually return 10", func() {
 					// The controller takes a little while to set up the topic and function.
-					Eventually(func() int { return maxReplicasPolicy("input", "fn"); }).Should(Equal(10))
+					Eventually(func() int { return maxReplicasPolicy(autoscaler.FunctionId{"fn"}); }).Should(Equal(10))
 					closeCh <- struct{}{}
 				})
 			})
@@ -253,7 +253,7 @@ var _ = Describe("Controller", func() {
 
 				It("should eventually return 5", func() {
 					// The controller takes a little while to update the function.
-					Eventually(func() int { return maxReplicasPolicy("input", "fn"); }).Should(Equal(5))
+					Eventually(func() int { return maxReplicasPolicy(autoscaler.FunctionId{"fn"}); }).Should(Equal(5))
 					closeCh <- struct{}{}
 				})
 			})
@@ -276,7 +276,7 @@ var _ = Describe("Controller", func() {
 
 			It("should consistently return the default scale down delay", func() {
 				// The controller takes a little while to set up the topic and function.
-				Consistently(func() time.Duration { return delayScaleDownPolicy("fn"); }).Should(Equal(time.Second*10))
+				Consistently(func() time.Duration { return delayScaleDownPolicy(autoscaler.FunctionId{"fn"}); }).Should(Equal(time.Second*10))
 				closeCh <- struct{}{}
 			})
 		})
@@ -298,7 +298,7 @@ var _ = Describe("Controller", func() {
 
 			It("should eventually return the specified scale down delay", func() {
 				// The controller takes a little while to set up the function.
-				Eventually(func() time.Duration { return delayScaleDownPolicy("fn"); }).Should(Equal(time.Millisecond*time.Duration(idleTimeoutMs)))
+				Eventually(func() time.Duration { return delayScaleDownPolicy(autoscaler.FunctionId{"fn"}); }).Should(Equal(time.Millisecond*time.Duration(idleTimeoutMs)))
 				closeCh <- struct{}{}
 			})
 		})

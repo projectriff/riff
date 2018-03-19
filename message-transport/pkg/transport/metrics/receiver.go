@@ -21,6 +21,7 @@ import (
 	"github.com/projectriff/riff/message-transport/pkg/message"
 	"log"
 	"encoding/json"
+	"io"
 )
 
 func NewReceiver(consumer transport.Consumer) (*metricsReceiver) {
@@ -48,12 +49,14 @@ func NewReceiver(consumer transport.Consumer) (*metricsReceiver) {
 	return &metricsReceiver{
 		producerMetricsChan: producerMetricsChan,
 		consumerMetricsChan: consumerMetricsChan,
+		consumer: consumer,
 	}
 }
 
 type metricsReceiver struct {
 	producerMetricsChan chan ProducerAggregateMetric
 	consumerMetricsChan chan ConsumerAggregateMetric
+	consumer transport.Consumer
 }
 
 func (mr *metricsReceiver) ProducerMetrics() <-chan ProducerAggregateMetric {
@@ -102,4 +105,11 @@ func unmarshallMetricMessage(msg message.Message) (*ProducerAggregateMetric, *Co
 		}
 	}
 	return producerMetric, consumerMetric
+}
+
+func (mr *metricsReceiver) Close() error {
+	if consumer, ok := mr.consumer.(io.Closer); ok {
+		return consumer.Close()
+	}
+	return nil
 }

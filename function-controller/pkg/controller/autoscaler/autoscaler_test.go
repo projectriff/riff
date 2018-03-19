@@ -69,7 +69,7 @@ var _ = Describe("Autoscaler", func() {
 	Describe("autoscaling", func() {
 		BeforeEach(func() {
 			Expect(auto.StartMonitoring(testTopic, testFuncId)).To(Succeed())
-			auto.SetDelayScaleDownPolicy(func(function string) time.Duration {
+			auto.SetDelayScaleDownPolicy(func(function FunctionId) time.Duration {
 				return time.Millisecond * 20
 			})
 			mockTransportInspector.On("QueueLength", testTopic, mock.Anything).Return(int64(0), nil)
@@ -219,11 +219,11 @@ var _ = Describe("Autoscaler", func() {
 		Context("when the maximum replicas policy returns 2 but messages are produced 3 times faster than they are consumed by 1 pod", func() {
 			BeforeEach(func() {
 				Expect(auto.StartMonitoring(testTopic, testFuncId)).To(Succeed())
-				auto.SetDelayScaleDownPolicy(func(function string) time.Duration {
+				auto.SetDelayScaleDownPolicy(func(function FunctionId) time.Duration {
 					return time.Millisecond * 20
 				})
 
-				auto.SetMaxReplicasPolicy(func(topic string, function string) int {
+				auto.SetMaxReplicasPolicy(func(function FunctionId) int {
 					return 2;
 				})
 				auto.InformFunctionReplicas(testFuncId, 1)
@@ -249,22 +249,22 @@ var _ = Describe("Autoscaler", func() {
 	Describe("Queue length behaviour", func() {
 		BeforeEach(func() {
 			Expect(auto.StartMonitoring(testTopic, testFuncId)).To(Succeed())
-			auto.SetDelayScaleDownPolicy(func(function string) time.Duration {
+			auto.SetDelayScaleDownPolicy(func(function FunctionId) time.Duration {
 				return time.Millisecond * 20
 			})
 			auto.receiveProducerMetric(metrics.ProducerAggregateMetric{
 				Topic: testTopic,
 				Count: 1,
 			})
-			auto.Propose()
-			auto.InformFunctionReplicas(testFuncId, 1)
-			auto.Propose()
-			time.Sleep(time.Millisecond * 30)
 		})
 
 		Context("when queue length is positive", func() {
 			BeforeEach(func() {
 				mockTransportInspector.On("QueueLength", testTopic, mock.Anything).Return(int64(1), nil)
+				auto.Propose()
+				auto.InformFunctionReplicas(testFuncId, 1)
+				auto.Propose()
+				time.Sleep(time.Millisecond * 30)
 			})
 
 			It("should not scale down", func() {
@@ -275,6 +275,10 @@ var _ = Describe("Autoscaler", func() {
 		Context("when queue length cannot be determined", func() {
 			BeforeEach(func() {
 				mockTransportInspector.On("QueueLength", testTopic, mock.Anything).Return(int64(0), errors.New("beats me guv"))
+				auto.Propose()
+				auto.InformFunctionReplicas(testFuncId, 1)
+				auto.Propose()
+				time.Sleep(time.Millisecond * 30)
 			})
 
 			It("should not scale down, to be on the safe side", func() {
@@ -407,7 +411,7 @@ var _ = Describe("Autoscaler", func() {
 			mockMetricsReceiver.On("ConsumerMetrics").Return(cm)
 
 			auto = NewAutoScaler(mockMetricsReceiver, mockTransportInspector)
-			auto.SetDelayScaleDownPolicy(func(function string) time.Duration {
+			auto.SetDelayScaleDownPolicy(func(function FunctionId) time.Duration {
 				return time.Millisecond * 20
 			})
 

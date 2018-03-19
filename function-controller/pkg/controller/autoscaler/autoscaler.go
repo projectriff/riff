@@ -31,10 +31,10 @@ import (
 
 type AutoScaler interface {
 	// Set maximum replica count policy.
-	SetMaxReplicasPolicy(func(topic string, function string) int)
+	SetMaxReplicasPolicy(func(function FunctionId) int)
 
 	// Set delay scale down policy.
-	SetDelayScaleDownPolicy(func(function string) time.Duration)
+	SetDelayScaleDownPolicy(func(function FunctionId) time.Duration)
 
 	// Run starts the autoscaler receiving and sampling metrics.
 	Run()
@@ -73,37 +73,39 @@ func NewAutoScaler(metricsReceiver metrics.MetricsReceiver, transportInspector t
 		metricsReceiver:     metricsReceiver,
 		transportInspector:  transportInspector,
 		totals:              make(map[string]map[FunctionId]*metricsTotals),
-		proposals:           make(map[FunctionId]*Proposal),
+		scalers:             make(map[FunctionId]scaler),
 		replicas:            make(map[FunctionId]int),
-		maxReplicas:         func(topic string, function string) int { return MaxInt },
-		delayScaleDown:      func(function string) time.Duration { return time.Duration(0) },
+		maxReplicas:         func(function FunctionId) int { return MaxInt },
+		delayScaleDown:      func(function FunctionId) time.Duration { return time.Duration(0) },
 		stop:                make(chan struct{}),
 		accumulatingStopped: make(chan struct{}),
 	}
 }
 
-func (a *autoScaler) SetMaxReplicasPolicy(maxReplicas func(topic string, function string) int) {
+func (a *autoScaler) SetMaxReplicasPolicy(maxReplicas func(function FunctionId) int) {
 	a.maxReplicas = maxReplicas
 }
 
-func (a *autoScaler) SetDelayScaleDownPolicy(delayScaleDown func(function string) time.Duration) {
+func (a *autoScaler) SetDelayScaleDownPolicy(delayScaleDown func(function FunctionId) time.Duration) {
 	a.delayScaleDown = delayScaleDown
 }
 
 func (a *autoScaler) Run() {
+	a.mutex.Lock() // fail Run if a.mutex is nil
+	defer a.mutex.Unlock()
+
 	go a.receiveLoop()
 }
 
 type autoScaler struct {
-	mutex                      *sync.Mutex
+	mutex                      *sync.Mutex // nil when autoScaler is closed
 	metricsReceiver            metrics.MetricsReceiver
 	transportInspector         transport.Inspector
 	totals                     map[string]map[FunctionId]*metricsTotals
-	requiredScaleDownProposals int
-	proposals                  map[FunctionId]*Proposal
+	scalers                    map[FunctionId]scaler
 	replicas                   map[FunctionId]int // tracks all functions, including those which are not being monitored
-	maxReplicas                func(topic string, function string) int
-	delayScaleDown             func(function string) time.Duration
+	maxReplicas                func(function FunctionId) int
+	delayScaleDown             func(function FunctionId) time.Duration
 	stop                       chan struct{}
 	accumulatingStopped        chan struct{}
 }
@@ -118,23 +120,20 @@ func (a *autoScaler) Propose() map[FunctionId]int {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
 
-	a.calculateProposal()
-
 	proposals := make(map[FunctionId]int)
-	for funcId, proposal := range a.proposals {
-		replicas := proposal.Get()
-		// If zero replicas are proposed *and* there is already at least one replica, check the queue of work to the function.
-		// The queue length is not allowed to initiate scaling up from 0 to 1 as that would be confused with rate-based autoscaling.
-		if replicas == 0 && a.replicas[funcId] != 0 {
-			empty, length := a.emptyQueue(funcId)
-			if !empty {
-				// There may be work to do, so propose 1 replica instead.
-				log.Printf("Ignoring proposal to scale %v to 0 replicas since queue length is %d", funcId.Function, length)
-				replicas = 1
+	for _, funcTotals := range a.totals {
+		for fn, mt := range funcTotals {
+			if _, ok := proposals[fn]; ok {
+				panic("Functions with multiple input topics are not supported")
 			}
+			proposals[fn] = a.scalers[fn](mt)
+			// proposals[fn] = max(proposals[fn], a.scalers[fn](mt)) might help multiple input topics
+
+			// Zero the sampled metrics for the next interval
+			funcTotals[fn] = &metricsTotals{}
 		}
-		proposals[funcId] = replicas
 	}
+
 	return proposals
 }
 
@@ -154,7 +153,7 @@ func (a *autoScaler) emptyQueue(funcId FunctionId) (bool, int64) {
 	return true, 0
 }
 
-func (a *autoScaler) StartMonitoring(topic string, function FunctionId) error {
+func (a *autoScaler) StartMonitoring(topic string, fn FunctionId) error {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
 	funcTotals, ok := a.totals[topic]
@@ -163,18 +162,26 @@ func (a *autoScaler) StartMonitoring(topic string, function FunctionId) error {
 		a.totals[topic] = funcTotals
 	}
 
-	_, ok = funcTotals[function]
+	_, ok = funcTotals[fn]
 	if ok {
-		return fmt.Errorf("Already monitoring topic %s and function %s", topic, function)
+		return fmt.Errorf("Already monitoring topic %s and function %s", topic, fn)
 	}
 
-	funcTotals[function] = &metricsTotals{}
+	funcTotals[fn] = &metricsTotals{}
 
-	a.proposals[function] = NewProposal(func() time.Duration {
-		return a.delayScaleDown(function.Function);
-	})
+	a.scalers[fn] = decorate(a.metricsScaler(fn), a.limitScalingUp(fn), a.limitScalingDown(fn), a.delay(fn))
 
 	return nil
+}
+
+func (a *autoScaler) delay(fn FunctionId) adjuster {
+	p := NewDelayer(func() time.Duration {
+		return a.delayScaleDown(fn);
+	})
+
+	return func(proposal int) int {
+		return p.Delay(proposal).Get()
+	}
 }
 
 func (a *autoScaler) StopMonitoring(topic string, function FunctionId) error {
@@ -196,7 +203,7 @@ func (a *autoScaler) StopMonitoring(topic string, function FunctionId) error {
 	if len(funcTotals) == 0 {
 		delete(a.totals, topic)
 	}
-	delete(a.proposals, function)
+	delete(a.scalers, function)
 
 	return nil
 }
@@ -207,16 +214,22 @@ func (a *autoScaler) receiveLoop() {
 	for {
 		select {
 		case pm, ok := <-producerMetrics:
-			if ok {
+			if ok { // ok should always be true
 				a.receiveProducerMetric(pm)
 			}
 
 		case cm, ok := <-consumerMetrics:
-			if ok {
+			if ok { // ok should always be true
 				a.receiveConsumerMetric(cm)
 			}
 
 		case <-a.stop:
+			if receiver, ok := a.metricsReceiver.(io.Closer); ok {
+				err := receiver.Close()
+				if err != nil {
+					log.Printf("Error closing metrics receiver: %v", err)
+				}
+			}
 			close(a.accumulatingStopped)
 			return
 		}
@@ -248,32 +261,66 @@ func (a *autoScaler) receiveProducerMetric(pm metrics.ProducerAggregateMetric) {
 	}
 }
 
-func (a *autoScaler) calculateProposal() {
-	for topic, funcTotals := range a.totals {
-		for fn, mt := range funcTotals {
-			var proposedReplicas int
-			if mt.receiveCount == 0 {
-				if mt.transmitCount == 0 {
-					proposedReplicas = 0
-				} else {
-					proposedReplicas = 1 // arbitrary value
-				}
-			} else {
-				proposedReplicas = int(math.Ceil(float64(a.replicas[fn]) * float64(mt.transmitCount) / float64(mt.receiveCount)))
-			}
-			maxReplicas := a.maxReplicas(topic, fn.Function)
-			possibleChange := proposedReplicas != a.replicas[fn]
-			if proposedReplicas > maxReplicas {
-				if possibleChange {
-					log.Printf("Proposing %v should have maxReplicas (%d) instead of %d replicas", fn, maxReplicas, proposedReplicas)
-				}
-				proposedReplicas = maxReplicas
-			}
+type scaler func(*metricsTotals) int
+type adjuster func(int) int
 
-			a.proposals[fn].Propose(proposedReplicas)
-			// Zero the sampled metrics for the next interval
-			funcTotals[fn] = &metricsTotals{}
+func decorate(s scaler, adjusters ...adjuster) scaler {
+	for _, a := range adjusters {
+		s = compose(a, s)
+	}
+
+	return s
+}
+
+func compose(a adjuster, s scaler) scaler {
+	return func(mt *metricsTotals) int {
+		return a(s(mt))
+	}
+}
+
+func (a *autoScaler) metricsScaler(fn FunctionId) scaler {
+	return func(mt *metricsTotals) int {
+		var proposedReplicas int
+		if mt.receiveCount == 0 {
+			if mt.transmitCount == 0 {
+				proposedReplicas = 0
+			} else {
+				proposedReplicas = 1 // arbitrary value
+			}
+		} else {
+			proposedReplicas = int(math.Ceil(float64(a.replicas[fn]) * float64(mt.transmitCount) / float64(mt.receiveCount)))
 		}
+		return proposedReplicas
+	}
+}
+
+func (a *autoScaler) limitScalingUp(fn FunctionId) adjuster {
+	return func(proposedReplicas int) int {
+		maxReplicas := a.maxReplicas(fn)
+		possibleChange := proposedReplicas != a.replicas[fn]
+		if proposedReplicas > maxReplicas {
+			if possibleChange {
+				log.Printf("Proposing %v should have maxReplicas (%d) instead of %d replicas", fn, maxReplicas, proposedReplicas)
+			}
+			proposedReplicas = maxReplicas
+		}
+		return proposedReplicas
+	}
+}
+
+func (a *autoScaler) limitScalingDown(fn FunctionId) adjuster {
+	return func(proposedReplicas int) int {
+		// If zero replicas are proposed *and* there is already at least one replica, check the queue of work to the function.
+		// The queue length is not allowed to initiate scaling up from 0 to 1 as that would confuse rate-based autoscaling.
+		if proposedReplicas == 0 && a.replicas[fn] != 0 {
+			empty, length := a.emptyQueue(fn)
+			if !empty {
+				// There may be work to do, so propose 1 replica instead.
+				log.Printf("Ignoring proposal to scale %v to 0 replicas since queue length is %d", fn.Function, length)
+				proposedReplicas = 1
+			}
+		}
+		return proposedReplicas
 	}
 }
 
@@ -285,7 +332,9 @@ func (a *autoScaler) InformFunctionReplicas(function FunctionId, replicas int) {
 }
 
 func (a *autoScaler) Close() error {
+	a.mutex.Lock()
 	close(a.stop)
 	<-a.accumulatingStopped
+	a.mutex = nil // ensure autoScaler can no longer be used
 	return nil
 }

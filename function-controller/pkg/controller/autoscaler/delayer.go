@@ -18,21 +18,21 @@ package autoscaler
 
 import "time"
 
-type Proposal struct {
-	delayPolicy   func() time.Duration
+type Delayer struct {
+	policy        func() time.Duration
 	value         int
 	previousValue int
-	delayDeadline time.Time
+	deadline      time.Time
 }
 
-// NewProposal creates a proposal for which scaling down only takes effect after the delay returned by the given policy.
-func NewProposal(delayPolicy func() time.Duration) *Proposal {
-	return &Proposal{
-		delayPolicy: delayPolicy,
+// NewDelayer creates a delayer which delays scaling down to zero until the delay returned by the given policy has elapsed.
+func NewDelayer(delayPolicy func() time.Duration) *Delayer {
+	return &Delayer{
+		policy: delayPolicy,
 	}
 }
 
-func (b *Proposal) Propose(proposal int) {
+func (b *Delayer) Delay(proposal int) *Delayer {
 	if proposal < 0 {
 		panic("Proposed numbers of replicas must be non-negative")
 	}
@@ -41,21 +41,23 @@ func (b *Proposal) Propose(proposal int) {
 	if proposal > 0 {
 		b.value = proposal
 		b.previousValue = proposal
-		b.delayDeadline = now
-	} else if proposal < b.value {
+		b.deadline = now
+	} else if b.value > 0 {
 		// Defer scaling to 0
-		if now.After(b.delayDeadline) {
-			b.delayDeadline = now.Add(b.delayPolicy())
+		if now.After(b.deadline) {
+			b.deadline = now.Add(b.policy())
 			b.previousValue = b.value
 		} else {
 			// Include this scaling down in the previous delay
 		}
 		b.value = proposal
 	}
+
+	return b
 }
 
-func (b *Proposal) Get() int {
-	if time.Now().Before(b.delayDeadline) {
+func (b *Delayer) Get() int {
+	if time.Now().Before(b.deadline) {
 		return b.previousValue
 	}
 	return b.value

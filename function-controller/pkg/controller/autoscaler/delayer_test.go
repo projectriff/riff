@@ -23,78 +23,78 @@ import (
 	"time"
 )
 
-var _ = Describe("Proposal", func() {
+var _ = Describe("Delayer", func() {
 
 	var (
-		proposal *autoscaler.Proposal
+		delayer *autoscaler.Delayer
 	)
 
 	BeforeEach(func() {
-		proposal = autoscaler.NewProposal(func() time.Duration {
+		delayer = autoscaler.NewDelayer(func() time.Duration {
 			return time.Millisecond * 100
 		})
 	})
 
 	It("should initially propose zero", func() {
-		Expect(proposal.Get()).To(Equal(0))
+		Expect(delayer.Get()).To(Equal(0))
 	})
 
 	Context("when scaled up", func() {
 		BeforeEach(func() {
-			proposal.Propose(1)
+			delayer.Delay(1)
 		})
 
-		It("should immediately propose the scaled up value", func() {
-			Expect(proposal.Get()).To(Equal(1))
+		It("should immediately return the scaled up value", func() {
+			Expect(delayer.Get()).To(Equal(1))
 		})
 
 		Context("when scaled down to 0", func() {
 			BeforeEach(func() {
-				proposal.Propose(0)
+				delayer.Delay(0)
 			})
 
-			It("should continue to propose the scaled up value", func() {
-				Consistently(func() int { return proposal.Get(); }, time.Millisecond*50).Should(Equal(1))
+			It("should continue to return the scaled up value", func() {
+				Consistently(func() int { return delayer.Get(); }, time.Millisecond*50).Should(Equal(1))
 			})
 
-			It("should eventually propose the scaled down value", func() {
-				Eventually(func() int { return proposal.Get(); }, time.Millisecond*150).Should(Equal(0))
+			It("should eventually return the scaled down value", func() {
+				Eventually(func() int { return delayer.Get(); }, time.Millisecond*150).Should(Equal(0))
 			})
 		})
 	})
 
 	Context("when scaled up", func() {
 		BeforeEach(func() {
-			proposal.Propose(10)
+			delayer.Delay(10)
 		})
 
-		It("should immediately propose the scaled up value", func() {
-			Expect(proposal.Get()).To(Equal(10))
+		It("should immediately return the scaled up value", func() {
+			Expect(delayer.Get()).To(Equal(10))
 
 		})
 
 		Context("when scaled down in stages but not to 0", func() {
 			BeforeEach(func() {
-				proposal.Propose(8)
-				proposal.Propose(4)
+				delayer.Delay(8)
+				delayer.Delay(4)
 			})
 
-			It("should immediately propose the scaled down value", func() {
-				Expect(proposal.Get()).To(Equal(4))
+			It("should immediately return the scaled down value", func() {
+				Expect(delayer.Get()).To(Equal(4))
 			})
 		})
 
 		Context("when scaled down to 0 but with a 'blip'", func() {
 			BeforeEach(func() {
-				proposal.Propose(0)
+				delayer.Delay(0)
 				time.Sleep(time.Millisecond * 10)
-				proposal.Propose(9)
+				delayer.Delay(9)
 				time.Sleep(time.Millisecond * 10)
-				proposal.Propose(0)
+				delayer.Delay(0)
 			})
 
-			It("should continue to propose the blip value", func() {
-				Consistently(func() int { return proposal.Get(); }, time.Millisecond*50).Should(Equal(9))
+			It("should continue to return the blip value", func() {
+				Consistently(func() int { return delayer.Get(); }, time.Millisecond*50).Should(Equal(9))
 			})
 		})
 	})

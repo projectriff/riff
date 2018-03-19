@@ -351,23 +351,25 @@ func New(topicInformer informersV1.TopicInformer,
 		}()
 	}
 
-	auto.SetMaxReplicasPolicy(func(topic string, function string) int {
-		partitionCount := 1
-		if topic, ok := pctrl.topics[topicKey{topic}]; ok {
-			partitionCount = int(*topic.Spec.Partitions)
-		}
-		maxReplicas := partitionCount
-		if fn, ok := pctrl.functions[fnKey{function}]; ok {
+	auto.SetMaxReplicasPolicy(func(function autoscaler.FunctionId) int {
+		replicas := 1
+		if fn, ok := pctrl.functions[fnKey{function.Function}]; ok {
+			if fn.Spec.Input != "" {
+				if topic, ok := pctrl.topics[topicKey{fn.Spec.Input}]; ok {
+					replicas = int(*topic.Spec.Partitions)
+				}
+			}
+
 			if fn.Spec.MaxReplicas != nil {
-				maxReplicas = int(*fn.Spec.MaxReplicas)
+				replicas = min(int(*fn.Spec.MaxReplicas), replicas)
 			}
 		}
-		return clamp(maxReplicas, 0, partitionCount)
+		return replicas
 	})
 
-	auto.SetDelayScaleDownPolicy(func(function string) time.Duration {
+	auto.SetDelayScaleDownPolicy(func(function autoscaler.FunctionId) time.Duration {
 		delay := defaultScaleDownDelay
-		if fn, ok := pctrl.functions[fnKey{function}]; ok {
+		if fn, ok := pctrl.functions[fnKey{function.Function}]; ok {
 			if fn.Spec.IdleTimeoutMs != nil {
 				delay = time.Millisecond * time.Duration(*fn.Spec.IdleTimeoutMs)
 			}
@@ -379,11 +381,9 @@ func New(topicInformer informersV1.TopicInformer,
 	return pctrl
 }
 
-func clamp(value int, min int, max int) int {
-	if value < min {
-		value = min
-	} else if value > max {
-		value = max
+func min(a int, b int) int {
+	if a > b {
+		return b
 	}
-	return value
+	return a
 }
