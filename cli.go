@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 	"github.com/projectriff/riff/riff-cli/pkg/docker"
+	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 )
 
 var version = "Unknown"
@@ -29,7 +30,10 @@ var version = "Unknown"
 func main() {
 	global.CLI_VERSION = version
 
-	rootCmd := cmd.CreateAndWireRootCommand(docker.RealDocker(), docker.DryRunDocker())
+	rootCmd := cmd.CreateAndWireRootCommand(
+		docker.RealDocker(), docker.DryRunDocker(),
+		kubectl.RealKubeCtl(), kubectl.DryRunKubeCtl(),
+	)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

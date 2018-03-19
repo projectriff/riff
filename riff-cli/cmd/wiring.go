@@ -19,11 +19,13 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff/riff-cli/pkg/docker"
+	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 )
 
 // CreateAndWireRootCommand creates all riff commands and sub commands, as well as the top-level 'root' command,
 // wires them together and returns the root command, ready to execute.
-func CreateAndWireRootCommand(readlDocker docker.Docker, dryRunDocker docker.Docker) *cobra.Command {
+func CreateAndWireRootCommand(realDocker docker.Docker, dryRunDocker docker.Docker,
+	realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) *cobra.Command {
 
 	rootCmd := Root()
 
@@ -42,9 +44,9 @@ func CreateAndWireRootCommand(readlDocker docker.Docker, dryRunDocker docker.Doc
 		initNodeCmd,
 	)
 
-	buildCmd, _ := Build(readlDocker, dryRunDocker)
+	buildCmd, _ := Build(realDocker, dryRunDocker)
 
-	applyCmd, _ := Apply()
+	applyCmd, _ := Apply(realKubeCtl, dryRunKubeCtl)
 
 	createCmd := Create(initCmd, buildCmd, applyCmd)
 
