@@ -8,31 +8,8 @@ type MockKubeCtl struct {
 	mock.Mock
 }
 
-// ExecForBytes provides a mock function with given fields: cmdArgs
-func (_m *MockKubeCtl) ExecForBytes(cmdArgs []string) ([]byte, error) {
-	ret := _m.Called(cmdArgs)
-
-	var r0 []byte
-	if rf, ok := ret.Get(0).(func([]string) []byte); ok {
-		r0 = rf(cmdArgs)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]byte)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func([]string) error); ok {
-		r1 = rf(cmdArgs)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // Exec provides a mock function with given fields: cmdArgs
-func (_m *MockKubeCtl) ExecForString(cmdArgs []string) (string, error) {
+func (_m *MockKubeCtl) Exec(cmdArgs []string) (string, error) {
 	ret := _m.Called(cmdArgs)
 
 	var r0 string

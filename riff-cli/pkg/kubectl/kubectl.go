@@ -26,8 +26,7 @@ import (
 var EXEC_FOR_STRING = ExecForString
 var EXEC_FOR_BYTES = ExecForBytes
 
-// go:generate mockery -name=KubeCtl -inpkg
-
+//go:generate mockery -name=KubeCtl -inpkg
 type KubeCtl interface {
 	Exec(cmdArgs []string) (string, error)
 }
