@@ -19,10 +19,45 @@ package kubectl
 import (
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"time"
+	"fmt"
+	"strings"
 )
 
 var EXEC_FOR_STRING = ExecForString
 var EXEC_FOR_BYTES = ExecForBytes
+
+// go:generate mockery -name=KubeCtl -inpkg
+
+type KubeCtl interface {
+	Exec(cmdArgs []string) (string, error)
+}
+
+// processKubeCtl interacts with kubernetes by spawning a process and running the kubectl
+// command line tool.
+type processKubeCtl struct {
+}
+
+func (kc *processKubeCtl) Exec(cmdArgs []string) (string, error) {
+	out, err := osutils.Exec("kubectl", cmdArgs, 20*time.Second)
+	return string(out), err
+}
+
+// dryRunKubeCtl only prints out the kubectl commands that *would* run.
+type dryRunKubeCtl struct {
+}
+
+func (kc *dryRunKubeCtl) Exec(cmdArgs []string) (string, error) {
+	fmt.Printf("%s command: kubectl %s\n", strings.Title(cmdArgs[0]), strings.Join(cmdArgs, " "))
+	return "", nil
+}
+
+func RealKubeCtl() KubeCtl {
+	return &processKubeCtl{}
+}
+
+func DryRunKubeCtl() KubeCtl {
+	return &dryRunKubeCtl{}
+}
 
 func ExecForString(cmdArgs []string) (string, error) {
 	out, err := EXEC_FOR_BYTES(cmdArgs)

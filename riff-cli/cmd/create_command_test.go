@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/projectriff/riff/riff-cli/pkg/docker"
+	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 )
 
 func TestCreateCommandImplicitPath(t *testing.T) {
@@ -141,7 +142,7 @@ func setupCreateTest() (*cobra.Command, *options.InitOptions, *BuildOptions, *Ap
 
 	buildCmd, buildOptions := Build(docker.RealDocker(), docker.DryRunDocker())
 
-	applyCmd, applyOptions := Apply()
+	applyCmd, applyOptions := Apply(kubectl.RealKubeCtl(), kubectl.DryRunKubeCtl())
 
 	createCmd := Create(initCommands["init"], buildCmd, applyCmd)
 

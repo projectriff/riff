@@ -22,6 +22,7 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff/riff-cli/pkg/docker"
+	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 )
 
 func TestUpdateCommandImplicitPath(t *testing.T) {
@@ -50,7 +51,7 @@ func setupUpdateTest() (*cobra.Command, *BuildOptions, *ApplyOptions) {
 	rootCmd := Root()
 	buildCmd, buildOptions := Build(docker.RealDocker(), docker.DryRunDocker())
 
-	applyCmd, applyOptions := Apply()
+	applyCmd, applyOptions := Apply(kubectl.RealKubeCtl(), kubectl.DryRunKubeCtl())
 
 	update := Update(buildCmd, applyCmd)
 

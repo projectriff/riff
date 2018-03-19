@@ -18,8 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/functions"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
@@ -34,7 +32,7 @@ type ApplyOptions struct {
 	DryRun    bool
 }
 
-func Apply() (*cobra.Command, *ApplyOptions) {
+func Apply(realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) (*cobra.Command, *ApplyOptions) {
 
 	applyOptions := ApplyOptions{}
 
@@ -47,7 +45,11 @@ func Apply() (*cobra.Command, *ApplyOptions) {
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
-			return apply(cmd, applyOptions)
+			kubectlClient := realKubeCtl
+			if applyOptions.DryRun {
+				kubectlClient = dryRunKubeCtl
+			}
+			return apply(cmd, applyOptions, kubectlClient)
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			applyOptions.Namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
@@ -71,7 +73,7 @@ func Apply() (*cobra.Command, *ApplyOptions) {
 	return applyCmd, &applyOptions
 }
 
-func apply(cmd *cobra.Command, opts ApplyOptions) error {
+func apply(cmd *cobra.Command, opts ApplyOptions, kubectlClient kubectl.KubeCtl) error {
 	abs, err := functions.AbsPath(opts.FilePath)
 	if err != nil {
 		cmd.SilenceUsage = true
@@ -99,17 +101,13 @@ func apply(cmd *cobra.Command, opts ApplyOptions) error {
 		cmdArgs = append(cmdArgs, "-f", abs)
 	}
 
-	if opts.DryRun {
-		fmt.Printf("\nApply Command: kubectl %s\n\n", strings.Trim(fmt.Sprint(cmdArgs), "[]"))
-	} else {
-		fmt.Print(message)
-		output, err := kubectl.ExecForString(cmdArgs)
-		if err != nil {
-			cmd.SilenceUsage = true
-			return err
-		}
-		fmt.Printf("%v\n", output)
+	fmt.Print(message)
+	output, err := kubectlClient.Exec(cmdArgs)
+	if err != nil {
+		cmd.SilenceUsage = true
+		return err
 	}
+	fmt.Printf("%v\n", output)
 	return nil
 }
 

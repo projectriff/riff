@@ -21,6 +21,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/cobra"
+	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 )
 
 func TestApplyCommandImplicitPath(t *testing.T) {
@@ -68,7 +69,7 @@ func TestApplyCommandWithNamespace(t *testing.T) {
 
 func setupApplyTest() (*cobra.Command, *cobra.Command, *ApplyOptions, ){
 	root := Root()
-	apply, applyOptions := Apply()
+	apply, applyOptions := Apply(kubectl.RealKubeCtl(), kubectl.DryRunKubeCtl())
 	root.AddCommand(apply)
 	return root, apply, applyOptions
 }
