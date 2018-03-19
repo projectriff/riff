@@ -26,6 +26,13 @@ message Message {
 	map<string, HeaderValue> headers = 2;
 }
 
+message Trigger {
+}
+
 service MessageFunction {
   rpc Call(stream Message) returns (stream Message) {}
+}
+
+service MessageSource {
+  rpc Call(Trigger) returns (stream Message) {}
 }
