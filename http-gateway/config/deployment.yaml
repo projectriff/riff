@@ -28,3 +28,5 @@ spec:
         env:
         - name: KAFKA_BROKERS
           value: kafka.riff-system:9092
+        - name: RIFF_HTTP_HEADERS_WHITELIST
+          value: # Add,A-Comma-Separated,List-Of,Headers,To-Whitelist,Here
