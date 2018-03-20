@@ -28,15 +28,15 @@ func TestNodeDockerfile(t *testing.T) {
 	as := assert.New(t)
 
 	opts := options.InitOptions{
-		Artifact:    "square.js",
-		RiffVersion: "0.0.3",
-		FilePath:    "../../../test_data/node/square/square.js",
-		Handler:     "process",
+		Artifact:       "square.js",
+		InvokerVersion: "0.0.3",
+		FilePath:       "../../../test_data/node/square/square.js",
+		Handler:        "process",
 	}
 
 	docker, err := generateNodeFunctionDockerFile(opts)
 	as.NoError(err)
-	as.Contains(docker, fmt.Sprintf("FROM projectriff/node-function-invoker:%s\n", opts.RiffVersion))
+	as.Contains(docker, fmt.Sprintf("FROM projectriff/node-function-invoker:%s\n", opts.InvokerVersion))
 	as.Contains(docker, fmt.Sprintf("ENV FUNCTION_URI /functions/%s\n", opts.Artifact))
 	as.Contains(docker, fmt.Sprintf("ADD %s ${FUNCTION_URI}\n", opts.Artifact))
 
@@ -49,15 +49,15 @@ func TestNodePackageDockerfile(t *testing.T) {
 	as := assert.New(t)
 
 	opts := options.InitOptions{
-		Artifact:    "square.js",
-		RiffVersion: "0.0.3",
-		FilePath:    "../../../test_data/node/square-package/square.js",
-		Handler:     "process",
+		Artifact:       "square.js",
+		InvokerVersion: "0.0.3",
+		FilePath:       "../../../test_data/node/square-package/square.js",
+		Handler:        "process",
 	}
 
 	docker, err := generateNodeFunctionDockerFile(opts)
 	as.NoError(err)
-	as.Contains(docker, fmt.Sprintf("FROM projectriff/node-function-invoker:%s\n", opts.RiffVersion))
+	as.Contains(docker, fmt.Sprintf("FROM projectriff/node-function-invoker:%s\n", opts.InvokerVersion))
 	as.Contains(docker, "ENV FUNCTION_URI /functions/\n")
 	as.Contains(docker, "COPY . ${FUNCTION_URI}\n")
 	as.Contains(docker, "RUN (cd ${FUNCTION_URI} && npm install --production)\n")

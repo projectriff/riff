@@ -23,7 +23,7 @@ import (
 )
 
 var dockerfileTemplate = `
-FROM projectriff/java-function-invoker:{{.RiffVersion}}
+FROM projectriff/java-function-invoker:{{.InvokerVersion}}
 ARG FUNCTION_JAR=/functions/{{.ArtifactBase}}
 ARG FUNCTION_CLASS={{.Handler}}
 ADD {{.Artifact}} $FUNCTION_JAR
@@ -32,10 +32,10 @@ ENV FUNCTION_URI file://${FUNCTION_JAR}?handler=${FUNCTION_CLASS}
 
 func generateJavaFunctionDockerFile(opts options.InitOptions) (string, error) {
 	dockerFileTokens := core.DockerFileTokens{
-		Artifact:     opts.Artifact,
-		ArtifactBase: filepath.Base(opts.Artifact),
-		RiffVersion:  opts.RiffVersion,
-		Handler:      opts.Handler,
+		Artifact:       opts.Artifact,
+		ArtifactBase:   filepath.Base(opts.Artifact),
+		InvokerVersion: opts.InvokerVersion,
+		Handler:        opts.Handler,
 	}
 	return core.GenerateFunctionDockerFileContents(dockerfileTemplate, "docker-java", dockerFileTokens)
 }

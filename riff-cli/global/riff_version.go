@@ -18,4 +18,4 @@ package global
 
 var CLI_VERSION string
 
-var RIFF_VERSION = "latest"
+var INVOKER_VERSION = "latest"

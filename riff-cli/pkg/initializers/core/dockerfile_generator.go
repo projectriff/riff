@@ -22,10 +22,10 @@ import (
 )
 
 type DockerFileTokens struct {
-	Artifact     string
-	ArtifactBase string
-	RiffVersion  string
-	Handler      string
+	Artifact       string
+	ArtifactBase   string
+	InvokerVersion string
+	Handler        string
 }
 
 func GenerateFunctionDockerFileContents(tmpl string, name string, tokens interface{}) (string, error) {

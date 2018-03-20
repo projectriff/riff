@@ -23,21 +23,21 @@ import (
 )
 
 type Defaults struct {
-	RiffVersion string
-	UserAccount string
-	Force       bool
-	DryRun      bool
-	Push        bool
-	Version     string
+	InvokerVersion string
+	UserAccount    string
+	Force          bool
+	DryRun         bool
+	Push           bool
+	Version        string
 }
 
 var DefaultValues = Defaults{
-	RiffVersion: global.RIFF_VERSION,
-	UserAccount: "current OS user",
-	Force:       false,
-	DryRun:      false,
-	Push:        false,
-	Version:     "0.0.1",
+	InvokerVersion: global.INVOKER_VERSION,
+	UserAccount:    "current OS user",
+	Force:          false,
+	DryRun:         false,
+	Push:           false,
+	Version:        "0.0.1",
 }
 
 

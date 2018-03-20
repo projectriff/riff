@@ -30,7 +30,7 @@ type NodeDockerFileTokens struct {
 }
 
 var nodeFunctionDockerfileTemplate = `
-FROM projectriff/node-function-invoker:{{.RiffVersion}}
+FROM projectriff/node-function-invoker:{{.InvokerVersion}}
 {{ if .PackageJSONExists -}}
 ENV FUNCTION_URI /functions/
 COPY . ${FUNCTION_URI}
@@ -61,7 +61,7 @@ func generateDockerFileTokens(opts options.InitOptions) NodeDockerFileTokens {
 	dockerFileTokens := NodeDockerFileTokens{}
 	dockerFileTokens.Artifact = opts.Artifact
 	dockerFileTokens.ArtifactBase = filepath.Base(opts.Artifact)
-	dockerFileTokens.RiffVersion = opts.RiffVersion
+	dockerFileTokens.InvokerVersion = opts.InvokerVersion
 	dockerFileTokens.PackageJSONExists = packageJSONExists(opts.FilePath)
 	return dockerFileTokens
 }

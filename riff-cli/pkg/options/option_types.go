@@ -17,18 +17,18 @@ package options
 
 
 type InitOptions struct {
-	FunctionName string
-	Version      string
-	FilePath     string
-	Protocol     string
-	Input        string
-	Output       string
-	Artifact     string
-	RiffVersion  string
-	UserAccount  string
-	DryRun       bool
-	Force        bool
-	Handler      string
+	FunctionName   string
+	Version        string
+	FilePath       string
+	Protocol       string
+	Input          string
+	Output         string
+	Artifact       string
+	InvokerVersion string
+	UserAccount    string
+	DryRun         bool
+	Force          bool
+	Handler        string
 }
 
 func (this InitOptions) GetFunctionName() string {
