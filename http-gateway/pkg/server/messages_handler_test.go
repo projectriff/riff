@@ -128,20 +128,46 @@ var _ = Describe("MessagesHandler", func() {
 				})
 
 				Context("when there is an HTTP header whitelist", func() {
-					BeforeEach(func() {
-						req.Header.Add("First-Header-In-Whitelist", "FirstPassedThrough")
-						req.Header.Add("Second-Header-In-Whitelist", "SecondPassedThrough")
-						os.Setenv("RIFF_HTTP_HEADERS_WHITELIST", "First-Header-In-Whitelist,Second-Header-In-Whitelist")
-					})
-
-					It("should allow non-default headers found in a whitelist", func() {
-						headers := sentMessage(mockProducer).Headers()
-						Expect(headers).To(HaveKeyWithValue("First-Header-In-Whitelist", ConsistOf("FirstPassedThrough")))
-						Expect(headers).To(HaveKeyWithValue("Second-Header-In-Whitelist", ConsistOf("SecondPassedThrough")))
-					})
-
 					AfterEach(func() {
 						os.Unsetenv("RIFF_HTTP_HEADERS_WHITELIST")
+					})
+
+					Context("when the whitelist has one entry", func() {
+						BeforeEach(func() {
+							req.Header.Add("Only-Header-In-Whitelist", "PassedThrough")
+							os.Setenv("RIFF_HTTP_HEADERS_WHITELIST", "Only-Header-In-Whitelist")
+						})
+
+						It("should allow non-default headers found in a whitelist", func() {
+							headers := sentMessage(mockProducer).Headers()
+							Expect(headers).To(HaveKeyWithValue("Only-Header-In-Whitelist", ConsistOf("PassedThrough")))
+						})
+					})
+
+					Context("when the whitelist has multiple entries", func() {
+						BeforeEach(func() {
+							req.Header.Add("First-Header-In-Whitelist", "FirstPassedThrough")
+							req.Header.Add("Second-Header-In-Whitelist", "SecondPassedThrough")
+							os.Setenv("RIFF_HTTP_HEADERS_WHITELIST", "First-Header-In-Whitelist,Second-Header-In-Whitelist")
+						})
+
+						It("should allow non-default headers found in a whitelist", func() {
+							headers := sentMessage(mockProducer).Headers()
+							Expect(headers).To(HaveKeyWithValue("First-Header-In-Whitelist", ConsistOf("FirstPassedThrough")))
+							Expect(headers).To(HaveKeyWithValue("Second-Header-In-Whitelist", ConsistOf("SecondPassedThrough")))
+						})
+					})
+
+					Context("when the whitelist is blank", func() {
+						BeforeEach(func() {
+							req.Header.Add("This-Header-Wont-Get-Through", "")
+							os.Setenv("RIFF_HTTP_HEADERS_WHITELIST", "")
+						})
+
+						It("only allows the default headers", func() {
+							headers := sentMessage(mockProducer).Headers()
+							Expect(headers).NotTo(HaveKey("This-Header-Wont-Get-Through"))
+						})
 					})
 				})
 			})
