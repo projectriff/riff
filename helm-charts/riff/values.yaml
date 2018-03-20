@@ -25,6 +25,7 @@ functionController:
     pullPolicy: IfNotPresent
   sidecar:
     image:
+      repository: projectriff/function-sidecar
       tag: latest
 
 topicController:

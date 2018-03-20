@@ -38,6 +38,8 @@ spec:
           env:
           - name: KAFKA_BROKERS
             value: {{ .Values.kafka.broker.nodes }}
+          - name: RIFF_FUNCTION_SIDECAR_IMAGE
+            value: {{ .Values.functionController.sidecar.image.repository }}
           - name: RIFF_FUNCTION_SIDECAR_TAG
             value: {{ .Values.functionController.sidecar.image.tag }}
       serviceAccountName: {{ template "serviceAccountName" . }}
