@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"time"
 
@@ -119,9 +120,55 @@ var _ = Describe("MessagesHandler", func() {
 
 				It("should send a message containing the correct headers", func() {
 					headers := sentMessage(mockProducer).Headers()
+
 					Expect(headers).To(HaveKeyWithValue("Content-Type", ConsistOf("text/plain")))
 					Expect(headers).To(HaveKeyWithValue("Accept", ConsistOf("application/json", "text/plain")))
+
 					Expect(headers).NotTo(HaveKey("Accept-Charset"))
+				})
+
+				Context("when there is an HTTP header whitelist", func() {
+					AfterEach(func() {
+						os.Unsetenv("RIFF_HTTP_HEADERS_WHITELIST")
+					})
+
+					Context("when the whitelist has one entry", func() {
+						BeforeEach(func() {
+							req.Header.Add("Only-Header-In-Whitelist", "PassedThrough")
+							os.Setenv("RIFF_HTTP_HEADERS_WHITELIST", "Only-Header-In-Whitelist")
+						})
+
+						It("should allow non-default headers found in a whitelist", func() {
+							headers := sentMessage(mockProducer).Headers()
+							Expect(headers).To(HaveKeyWithValue("Only-Header-In-Whitelist", ConsistOf("PassedThrough")))
+						})
+					})
+
+					Context("when the whitelist has multiple entries", func() {
+						BeforeEach(func() {
+							req.Header.Add("First-hEader-In-Whitelist", "FirstPassedThrough") // Note non canonical case here
+							req.Header.Add("Second-Header-In-Whitelist", "SecondPassedThrough")
+							os.Setenv("RIFF_HTTP_HEADERS_WHITELIST", "First-Header-In-whiteList,Second-Header-In-Whitelist") // and here
+						})
+
+						It("should allow non-default headers found in a whitelist", func() {
+							headers := sentMessage(mockProducer).Headers()
+							Expect(headers).To(HaveKeyWithValue("First-Header-In-Whitelist", ConsistOf("FirstPassedThrough")))
+							Expect(headers).To(HaveKeyWithValue("Second-Header-In-Whitelist", ConsistOf("SecondPassedThrough")))
+						})
+					})
+
+					Context("when the whitelist is blank", func() {
+						BeforeEach(func() {
+							req.Header.Add("This-Header-Wont-Get-Through", "")
+							os.Setenv("RIFF_HTTP_HEADERS_WHITELIST", "")
+						})
+
+						It("only allows the default headers", func() {
+							headers := sentMessage(mockProducer).Headers()
+							Expect(headers).NotTo(HaveKey("This-Header-Wont-Get-Through"))
+						})
+					})
 				})
 			})
 
