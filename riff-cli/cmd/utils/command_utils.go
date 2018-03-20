@@ -32,7 +32,7 @@ type Defaults struct {
 }
 
 var DefaultValues = Defaults{
-	RiffVersion: global.RIFF_VERSION,
+	RiffVersion: global.INVOKER_VERSION,
 	UserAccount: "current OS user",
 	Force:       false,
 	DryRun:      false,
