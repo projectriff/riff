@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/projectriff/riff/message-transport/pkg/message"
 )
@@ -29,8 +31,6 @@ const (
 	ContentType = "Content-Type"
 	Accept      = "Accept"
 )
-
-var incomingHeadersToPropagate = [...]string{ContentType, Accept}
 
 // Function messageHandler is an http handler that sends the http body to the producer, replying
 // immediately with a successful http response.
@@ -57,6 +57,10 @@ func (g *gateway) messagesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func propagateIncomingHeaders(request *http.Request) message.Headers {
+	var defaultHeaders = []string{ContentType, Accept}
+	var whitelistedHeaders = strings.Split(os.Getenv("RIFF_HTTP_HEADERS_WHITELIST"), ",")
+	incomingHeadersToPropagate := append(defaultHeaders, whitelistedHeaders...)
+
 	header := make(message.Headers)
 	for _, h := range incomingHeadersToPropagate {
 		if vs, ok := request.Header[h]; ok {

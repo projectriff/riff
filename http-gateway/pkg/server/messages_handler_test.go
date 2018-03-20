@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"time"
 
@@ -119,9 +120,29 @@ var _ = Describe("MessagesHandler", func() {
 
 				It("should send a message containing the correct headers", func() {
 					headers := sentMessage(mockProducer).Headers()
+
 					Expect(headers).To(HaveKeyWithValue("Content-Type", ConsistOf("text/plain")))
 					Expect(headers).To(HaveKeyWithValue("Accept", ConsistOf("application/json", "text/plain")))
+
 					Expect(headers).NotTo(HaveKey("Accept-Charset"))
+				})
+
+				Context("when there is an HTTP header whitelist", func() {
+					BeforeEach(func() {
+						req.Header.Add("First-Header-In-Whitelist", "FirstPassedThrough")
+						req.Header.Add("Second-Header-In-Whitelist", "SecondPassedThrough")
+						os.Setenv("RIFF_HTTP_HEADERS_WHITELIST", "First-Header-In-Whitelist,Second-Header-In-Whitelist")
+					})
+
+					It("should allow non-default headers found in a whitelist", func() {
+						headers := sentMessage(mockProducer).Headers()
+						Expect(headers).To(HaveKeyWithValue("First-Header-In-Whitelist", ConsistOf("FirstPassedThrough")))
+						Expect(headers).To(HaveKeyWithValue("Second-Header-In-Whitelist", ConsistOf("SecondPassedThrough")))
+					})
+
+					AfterEach(func() {
+						os.Unsetenv("RIFF_HTTP_HEADERS_WHITELIST")
+					})
 				})
 			})
 
