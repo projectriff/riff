@@ -93,7 +93,11 @@ func (d *deployer) buildMainContainer(function *v1.Function) corev1.Container {
 
 func (d *deployer) buildSidecarContainer(function *v1.Function) corev1.Container {
 	c := corev1.Container{Name: "sidecar"}
-	c.Image = sidecarImage + ":" + os.Getenv("RIFF_FUNCTION_SIDECAR_TAG")
+	imageName := os.Getenv("RIFF_FUNCTION_SIDECAR_REPOSITORY")
+	if imageName == "" {
+		imageName = sidecarImage
+	}
+	c.Image = imageName + ":" + os.Getenv("RIFF_FUNCTION_SIDECAR_TAG")
 	outputDestination := function.Spec.Output
 	if outputDestination == "" {
 		outputDestination = "replies"
