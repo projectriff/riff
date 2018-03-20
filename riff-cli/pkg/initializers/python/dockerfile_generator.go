@@ -29,7 +29,7 @@ type PythonDockerFileTokens struct {
 }
 
 var pythonFunctionDockerfileTemplate = `
-FROM projectriff/python3-function-invoker:{{.RiffVersion}}
+FROM projectriff/python3-function-invoker:{{.InvokerVersion}}
 ARG FUNCTION_MODULE={{.ArtifactBase}}
 ARG FUNCTION_HANDLER={{.Handler}}
 ADD ./{{.ArtifactBase}} /
@@ -44,7 +44,7 @@ func generatePythonFunctionDockerFile(opts options.InitOptions) (string, error) 
 	dockerFileTokens := PythonDockerFileTokens{}
 	dockerFileTokens.Artifact = opts.Artifact
 	dockerFileTokens.ArtifactBase = filepath.Base(opts.Artifact)
-	dockerFileTokens.RiffVersion = opts.RiffVersion
+	dockerFileTokens.InvokerVersion = opts.InvokerVersion
 	dockerFileTokens.Handler = opts.Handler
 	dockerFileTokens.RequirementsTextExists = requirementTextExists(opts.FilePath)
 

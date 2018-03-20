@@ -27,14 +27,14 @@ func TestShellDockerfile(t *testing.T) {
 	as := assert.New(t)
 
 	opts := options.InitOptions{
-		Artifact:    "echo.sh",
-		RiffVersion: "0.0.1-snapshot",
-		Handler:     "process",
+		Artifact:       "echo.sh",
+		InvokerVersion: "0.0.1-snapshot",
+		Handler:        "process",
 	}
 
 	docker, err := generateCommandFunctionDockerFile(opts)
 	as.NoError(err)
-	as.Contains(docker, fmt.Sprintf("FROM projectriff/command-function-invoker:%s", opts.RiffVersion))
+	as.Contains(docker, fmt.Sprintf("FROM projectriff/command-function-invoker:%s", opts.InvokerVersion))
 	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_URI=\"/%s\"", opts.Artifact))
 	as.Contains(docker, fmt.Sprintf("ADD %s /", opts.Artifact))
 }

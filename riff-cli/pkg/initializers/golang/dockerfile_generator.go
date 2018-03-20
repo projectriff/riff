@@ -23,17 +23,17 @@ import (
 )
 
 const goFunctionDockerfileTemplate = `
-FROM projectriff/go-function-invoker:{{.RiffVersion}}
+FROM projectriff/go-function-invoker:{{.InvokerVersion}}
 ADD {{.Artifact}} /
 ENV FUNCTION_URI file:///{{.ArtifactBase}}?handler={{.Handler}}
 `
 
 func generateGoFunctionDockerFile(opts options.InitOptions) (string, error) {
 	dockerFileTokens := core.DockerFileTokens{
-		Artifact:     opts.Artifact,
-		ArtifactBase: filepath.Base(opts.Artifact),
-		RiffVersion:  opts.RiffVersion,
-		Handler:      opts.Handler,
+		Artifact:       opts.Artifact,
+		ArtifactBase:   filepath.Base(opts.Artifact),
+		InvokerVersion: opts.InvokerVersion,
+		Handler:        opts.Handler,
 	}
 	return core.GenerateFunctionDockerFileContents(goFunctionDockerfileTemplate, "docker-go", dockerFileTokens)
 }

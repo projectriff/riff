@@ -23,7 +23,7 @@ import (
 )
 
 var commandFunctionDockerfileTemplate = `
-FROM projectriff/command-function-invoker:{{.RiffVersion}}
+FROM projectriff/command-function-invoker:{{.InvokerVersion}}
 ARG FUNCTION_URI="/{{.ArtifactBase}}"
 ADD {{.Artifact}} /
 ENV FUNCTION_URI $FUNCTION_URI
@@ -31,9 +31,9 @@ ENV FUNCTION_URI $FUNCTION_URI
 
 func generateCommandFunctionDockerFile(opts options.InitOptions) (string, error) {
 	dockerFileTokens := core.DockerFileTokens{
-		Artifact:     opts.Artifact,
-		ArtifactBase: filepath.Base(opts.Artifact),
-		RiffVersion:  opts.RiffVersion,
+		Artifact:       opts.Artifact,
+		ArtifactBase:   filepath.Base(opts.Artifact),
+		InvokerVersion: opts.InvokerVersion,
 	}
 	return core.GenerateFunctionDockerFileContents(commandFunctionDockerfileTemplate, "docker-command", dockerFileTokens)
 }

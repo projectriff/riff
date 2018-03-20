@@ -29,7 +29,7 @@ func TestPythonDockerfile(t *testing.T) {
 
 	opts := options.InitOptions{
 		Artifact:    "demo.py",
-		RiffVersion: "0.0.3",
+		InvokerVersion: "0.0.3",
 		FilePath:    "test_dir/python/demo",
 		Handler:     "process",
 	}
@@ -38,7 +38,7 @@ func TestPythonDockerfile(t *testing.T) {
 	as.NoError(err)
 	lines := strings.Split(strings.TrimSpace(docker),"\n")
 	as.Equal(5, len(lines))
-	as.Contains(lines, fmt.Sprintf("FROM projectriff/python3-function-invoker:%s", opts.RiffVersion))
+	as.Contains(lines, fmt.Sprintf("FROM projectriff/python3-function-invoker:%s", opts.InvokerVersion))
 	as.Contains(lines, fmt.Sprintf("ARG FUNCTION_MODULE=%s", opts.Artifact))
 	as.Contains(lines, fmt.Sprintf("ARG FUNCTION_HANDLER=%s", opts.Handler))
 	as.Contains(lines, fmt.Sprintf("ADD ./%s /", opts.Artifact))
@@ -54,7 +54,7 @@ func TestPythonWithRequirementsDockerfile(t *testing.T) {
 
 	opts := options.InitOptions{
 		Artifact:    "demo.py",
-		RiffVersion: "0.0.3",
+		InvokerVersion: "0.0.3",
 		FilePath:    "../../../test_data/python/demo_with_deps",
 		Handler:     "process",
 	}
@@ -63,7 +63,7 @@ func TestPythonWithRequirementsDockerfile(t *testing.T) {
 	as.NoError(err)
 	lines := strings.Split(strings.TrimSpace(docker),"\n")
 	as.Equal(7, len(lines))
-	as.Contains(lines, fmt.Sprintf("FROM projectriff/python3-function-invoker:%s", opts.RiffVersion))
+	as.Contains(lines, fmt.Sprintf("FROM projectriff/python3-function-invoker:%s", opts.InvokerVersion))
 	as.Contains(lines, fmt.Sprintf("ARG FUNCTION_MODULE=%s", opts.Artifact))
 	as.Contains(lines, fmt.Sprintf("ARG FUNCTION_HANDLER=%s", opts.Handler))
 	as.Contains(lines, fmt.Sprintf("ADD ./%s /", opts.Artifact))

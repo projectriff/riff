@@ -78,14 +78,14 @@ func (c config) initConfig() {
 
 func initGlobal() {
 
-	if os.Getenv("RIFF_VERSION") != "" {
-		global.RIFF_VERSION = os.Getenv("RIFF_VERSION")
+	if os.Getenv("RIFF_INVOKER_VERSION") != "" {
+		global.INVOKER_VERSION = os.Getenv("RIFF_INVOKER_VERSION")
 	} else {
-		if viper.GetString("riffVersion") != "" {
-			global.RIFF_VERSION = viper.GetString("riffVersion")
+		if viper.GetString("invokerVersion") != "" {
+			global.INVOKER_VERSION = viper.GetString("invokerVersion")
 		} else {
-			if viper.GetString("riff-version") != "" {
-				global.RIFF_VERSION = viper.GetString("riff-version")
+			if viper.GetString("invoker-version") != "" {
+				global.INVOKER_VERSION = viper.GetString("invoker-version")
 			}
 		}
 	}

@@ -27,14 +27,14 @@ func TestJavaDockerfile(t *testing.T) {
 	as := assert.New(t)
 
 	opts := options.InitOptions{
-		Artifact:    "target/greeter-1.0.0.jar",
-		RiffVersion: "0.0.2",
-		Handler:     "functions.Greeter",
+		Artifact:       "target/greeter-1.0.0.jar",
+		InvokerVersion: "0.0.2",
+		Handler:        "functions.Greeter",
 	}
 
 	docker, err := generateJavaFunctionDockerFile(opts)
 	as.NoError(err)
-	as.Contains(docker, fmt.Sprintf("FROM projectriff/java-function-invoker:%s", opts.RiffVersion))
+	as.Contains(docker, fmt.Sprintf("FROM projectriff/java-function-invoker:%s", opts.InvokerVersion))
 	as.Contains(docker, "ARG FUNCTION_JAR=/functions/greeter-1.0.0.jar")
 	as.Contains(docker, fmt.Sprintf("ARG FUNCTION_CLASS=%s", opts.Handler))
 	as.Contains(docker, fmt.Sprintf("ADD %s $FUNCTION_JAR", opts.Artifact))
