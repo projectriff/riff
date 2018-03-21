@@ -172,7 +172,7 @@ The config file to be used can be set using `--config` option and it defaults to
 Environment variables are prefixed with `RIFF_` and the variables from the following example are supported:
 
 ```
-RIFF_VERSION=0.0.5
+RIFF_VERSION=0.0.6-snapshot
 RIFF_USERACCOUNT=myaccount
 RIFF_NAMESPACE=test
 ```
@@ -180,7 +180,7 @@ RIFF_NAMESPACE=test
 For the config file, you can create a `~/.riff.yaml` file with something like the following content:
 
 ```
-riffVersion: 0.0.5
+riffVersion: 0.0.6-snapshot
 useraccount: myaccount
 namespace: test
 publishNamespace: riff-system

@@ -12,7 +12,7 @@ spec:
         component: topic-controller
     spec:
       containers:
-      - image: projectriff/topic-controller:0.0.5
+      - image: projectriff/topic-controller:0.0.6-snapshot
         name: topic-controller
         imagePullPolicy: IfNotPresent
         livenessProbe:
