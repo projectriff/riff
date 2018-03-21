@@ -38,5 +38,7 @@ spec:
           env:
           - name: KAFKA_BROKERS
             value: {{ .Values.kafka.broker.nodes }}
+          - name: RIFF_HTTP_HEADERS_WHITELIST
+            value: {{ .Values.httpGateway.httpHeadersWhitelist }}
       serviceAccountName: {{ template "serviceAccountName" . }}
 {{- end -}}

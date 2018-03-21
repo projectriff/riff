@@ -34,6 +34,7 @@ The following lists the configurable parameters and their default values.
 | `httpGateway.image.tag`|The image tag for the http-gateway|latest|
 | `httpGateway.image.pullPolicy`|The imagePullPolicy for the http-gateway|IfNotPresent|
 | `httpGateway.service.type`|The service type used for the http-gateway|LoadBalancer|
+| `httpGateway.httpHeadersWhitelist`|A comma separated list of HTTP request headers to whitelist|(none)|
 
 ## Uninstalling the Release
 

@@ -45,6 +45,7 @@ httpGateway:
     name: http
     type: LoadBalancer
     externalPort: 80
+  httpHeadersWhitelist: ''
 
 kafka:
   broker:
