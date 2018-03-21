@@ -19,6 +19,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"os"
+	"github.com/projectriff/riff/riff-cli/cmd/utils"
 )
 
 func Completion(rootCmd *cobra.Command) *cobra.Command {
@@ -37,7 +38,7 @@ or wherever your bash_completion.d is, for example $(brew --prefix)/etc/bash_com
     
 Completion for zsh is a work in progress`,
 		Hidden:    true,
-		Args:      and(cobra.ExactArgs(1), cobra.OnlyValidArgs),
+		Args:      utils.And(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 		ValidArgs: []string{"bash", "zsh"},
 		Run: func(cmd *cobra.Command, args []string) {
 			switch args[0] {
@@ -53,13 +54,3 @@ Completion for zsh is a work in progress`,
 
 }
 
-func and(functions ... cobra.PositionalArgs) cobra.PositionalArgs {
-	return func(cmd *cobra.Command, args []string) error {
-		for _, f := range functions {
-			if err := f(cmd, args); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-}

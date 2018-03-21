@@ -17,8 +17,6 @@
 package cmd
 
 import (
-	"errors"
-	"fmt"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/initializers"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
@@ -34,25 +32,17 @@ func Init() (*cobra.Command, *options.InitOptions) {
 		Use:   "init [language]",
 		Short: "Initialize a function",
 		Long:  utils.InitCmdLong(),
+		Args: utils.AliasFlagToSoleArg("filepath"),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := initializers.Initialize(initOptions)
 			if err != nil {
 				cmd.SilenceUsage = true
-				return err
 			}
-			return nil
+			return err
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			initOptions.UserAccount = utils.GetUseraccountWithOverride("useraccount", *cmd.Flags())
-			if len(args) > 0 {
-				if len(args) == 1 && initOptions.FilePath == "" {
-					initOptions.FilePath = args[0]
-				} else {
-					return errors.New(fmt.Sprintf("Invalid argument(s) %v\n", args))
-				}
-			}
-
 			err := validateInitOptions(&initOptions)
 			if err != nil {
 				return err

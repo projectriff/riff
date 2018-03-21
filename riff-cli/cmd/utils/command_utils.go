@@ -20,6 +20,8 @@ import (
 	"bytes"
 	"text/template"
 	"github.com/projectriff/riff/riff-cli/global"
+	"github.com/spf13/cobra"
+	"fmt"
 )
 
 type Defaults struct {
@@ -177,4 +179,40 @@ func createCmdLong(longDescr string, vals LongVals) string {
 	}
 
 	return tpl.String()
+}
+
+
+// AliasFlagToSoleArg returns a cobra.PositionalArgs args validator that populates the given flag if it hasn't been yet,
+// from an arg that must be set and be the only one. No args must be present if the flag has already been set.
+func AliasFlagToSoleArg(flag string) cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		f := cmd.Flag(flag)
+		if len(args) > 0 {
+			if len(args) == 1 {
+				if !f.Changed {
+					f.Value.Set(args[0])
+				} else {
+					return fmt.Errorf("value for %v has already been set via the --%v flag to '%v'. " +
+						"Can't set it via an argument (to '%v') as well", flag, flag, f.Value.String(), args[0])
+				}
+			} else {
+				return fmt.Errorf("command %v expects exactly one argument", cmd.Name())
+			}
+		}
+		return nil
+	}
+}
+
+func And(functions ... cobra.PositionalArgs) cobra.PositionalArgs {
+	if len(functions) == 0 {
+		return nil
+	}
+	return func(cmd *cobra.Command, args []string) error {
+		for _, f := range functions {
+			if err := f(cmd, args); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
 }

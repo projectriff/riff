@@ -121,6 +121,13 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 		persistentPostRunE(cmd, args)
 	}
 
+	var validators []cobra.PositionalArgs
+	for _, command := range commands {
+		if command.Args != nil {
+			validators = append(validators, command.Args)
+		}
+	}
+
 	var chain = &cobra.Command{
 		Run:                run,
 		RunE:               runE,
@@ -132,10 +139,8 @@ func CommandChain(commands ... *cobra.Command) *cobra.Command {
 		PersistentPreRunE:  persistentPreRunE,
 		PersistentPostRun:  persistentPostRun,
 		PersistentPostRunE: persistentPostRunE,
+		Args:               And(validators...),
 	}
-
-
-
 
 	// The flags for the chain command will look like the union of all the flags of delegate commands, with each
 	// flag, if it is repeated, broadcasting its Set() call to each delegate flag.

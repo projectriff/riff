@@ -51,7 +51,7 @@ func validateAndCleanArtifact(artifact *string, path string) error {
 	if *artifact != "" {
 
 		if filepath.IsAbs(*artifact) {
-			return errors.New(fmt.Sprintf("artifact %s must be relative to function path",*artifact))
+			return errors.New(fmt.Sprintf("artifact %s must be relative to function path", *artifact))
 		}
 
 		absFilePath, err := filepath.Abs(path)

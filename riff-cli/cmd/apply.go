@@ -23,7 +23,6 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/cobra"
-	"errors"
 )
 
 type ApplyOptions struct {
@@ -42,26 +41,20 @@ func Apply(realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) (*cobra.C
 		Long:  `Apply the resource definition[s] included in the path. A resource will be created if it doesn't exist yet.`,
 		Example: `  riff apply -f some/function/path
   riff apply -f some/function/path/some.yaml`,
+		Args: utils.AliasFlagToSoleArg("filepath"),
+
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cmd.SilenceUsage = true
 			kubectlClient := realKubeCtl
 			if applyOptions.DryRun {
 				kubectlClient = dryRunKubeCtl
 			}
+			cmd.SilenceUsage = true
 			return apply(cmd, applyOptions, kubectlClient)
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			applyOptions.Namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
 
-			//TODO: DRY
-			if len(args) > 0 {
-				if len(args) == 1 && applyOptions.FilePath == "" {
-					applyOptions.FilePath = args[0]
-				} else {
-					return errors.New(fmt.Sprintf("Invalid argument(s) %v\n", args))
-				}
-			}
 			return validateApplyOptions(&applyOptions)
 		},
 	}

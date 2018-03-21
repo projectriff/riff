@@ -27,10 +27,10 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 )
 
-func TestCreateCommandImplicitPath(t *testing.T) {
+func TestCreateCommandPathFromArg(t *testing.T) {
 	rootCmd, initOptions, _, _:= setupCreateTest()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"create", "--dry-run", "../test_data/command/echo", "-v", "0.0.1-snapshot"})
+	rootCmd.SetArgs([]string{"create", "--dry-run", "-v", "0.0.1-snapshot", "../test_data/command/echo"})
 
 	err := rootCmd.Execute()
 	as.NoError(err)
@@ -71,7 +71,7 @@ func TestCreateCommandExplicitPath(t *testing.T) {
 func TestCreateCommandWithUser(t *testing.T) {
 	rootCmd, initOptions, _, _:= setupCreateTest()
 	as := assert.New(t)
-	rootCmd.SetArgs([]string{"create", "--dry-run", "../test_data/command/echo", "-u", "me"})
+	rootCmd.SetArgs([]string{"create", "--dry-run", "-f", "../test_data/command/echo", "-u", "me"})
 
 	err := rootCmd.Execute()
 	as.NoError(err)

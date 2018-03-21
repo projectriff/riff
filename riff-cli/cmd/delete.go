@@ -52,6 +52,7 @@ func Delete() (*cobra.Command, *DeleteOptions) {
 		Example: `  riff delete -n square
     or
   riff delete -f function/square`,
+		Args: utils.AliasFlagToSoleArg("filepath"),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return doDelete(cmd, deleteOptions)
@@ -60,16 +61,6 @@ func Delete() (*cobra.Command, *DeleteOptions) {
 
 			deleteOptions.Namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
 
-			// Path can be given as -f or as arg
-			if len(args) > 0 {
-				if len(args) == 1 && deleteOptions.FilePath == "" {
-					deleteOptions.FilePath = args[0]
-				} else {
-					ioutils.Errorf("Invalid argument(s) %v\n", args)
-					cmd.Usage()
-					os.Exit(1)
-				}
-			}
 			// If name and no file path given, skip this step
 			if deleteOptions.FilePath != "" && deleteOptions.FunctionName == "" {
 				err := options.ValidateNamePathOptions(&deleteOptions.FunctionName, &deleteOptions.FilePath)

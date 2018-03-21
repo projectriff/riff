@@ -19,7 +19,6 @@ package cmd
 import (
 	"fmt"
 
-	"errors"
 	"path/filepath"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/docker"
@@ -59,6 +58,7 @@ func Build(realDocker docker.Docker, dryRunDocker docker.Docker) (*cobra.Command
 		Long: `Build the function based on the code available in the path directory, using the name
 and version specified for the image that is built.`,
 		Example: `  riff build -n <name> -v <version> -f <path> [--push]`,
+		Args: utils.AliasFlagToSoleArg("filepath"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dockerClient := realDocker
 			if buildOptions.DryRun {
@@ -72,15 +72,6 @@ and version specified for the image that is built.`,
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			buildOptions.UserAccount = utils.GetUseraccountWithOverride("useraccount", *cmd.Flags())
-			//TODO: DRY
-			if len(args) > 0 {
-				if len(args) == 1 && buildOptions.FilePath == "" {
-					buildOptions.FilePath = args[0]
-				} else {
-					return errors.New(fmt.Sprintf("Invalid argument(s) %v\n", args))
-				}
-			}
-
 			err := validateBuildOptions(&buildOptions)
 			if err != nil {
 				return err
