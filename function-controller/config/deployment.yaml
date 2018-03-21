@@ -32,7 +32,7 @@ spec:
         env:
         - name: KAFKA_BROKERS
           value: kafka.riff-system:9092
-        - name: RIFF_FUNCTION_SIDECAR_IMAGE
+        - name: RIFF_FUNCTION_SIDECAR_REPOSITORY
           value: projectriff/function-sidecar
         - name: RIFF_FUNCTION_SIDECAR_TAG
           value: 0.0.5-snapshot

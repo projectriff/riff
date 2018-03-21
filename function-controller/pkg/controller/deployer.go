@@ -93,7 +93,7 @@ func (d *deployer) buildMainContainer(function *v1.Function) corev1.Container {
 
 func (d *deployer) buildSidecarContainer(function *v1.Function) corev1.Container {
 	c := corev1.Container{Name: "sidecar"}
-	imageName := os.Getenv("RIFF_FUNCTION_SIDECAR_IMAGE")
+	imageName := os.Getenv("RIFF_FUNCTION_SIDECAR_REPOSITORY")
 	if imageName == "" {
 		imageName = sidecarImage
 	}
