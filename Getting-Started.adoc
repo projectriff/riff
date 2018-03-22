@@ -160,7 +160,7 @@ TIP: Older instructions used `demo` for the release name, so just substitute `co
 
 [source, bash]
 ----
-helm upgrade control riffrepo/riff
+helm upgrade control projectriff/riff
 ----
 
 === To tear it all down
