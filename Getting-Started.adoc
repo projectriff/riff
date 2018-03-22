@@ -160,6 +160,7 @@ TIP: Older instructions used `demo` for the release name and `riffrepo` as the n
 
 [source, bash]
 ----
+helm repo update
 helm upgrade control projectriff/riff
 ----
 
