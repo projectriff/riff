@@ -9,7 +9,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
-	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/spf13/cobra"
 )
@@ -51,7 +50,7 @@ var _ = Describe("The init command", func() {
 			err = rootCommand.Execute()
 			Expect(err).To(HaveOccurred())
 
-			Expect(".").NotTo(utils.HaveUnstagedChanges())
+			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
 		It("should fail if no matching invoker is defined", func() {
@@ -67,7 +66,7 @@ var _ = Describe("The init command", func() {
 			err = rootCommand.Execute()
 			Expect(err).To(HaveOccurred())
 
-			Expect(".").NotTo(utils.HaveUnstagedChanges())
+			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
 		It("should find an invoker based on an artifact", func() {
@@ -83,7 +82,7 @@ var _ = Describe("The init command", func() {
 			err = rootCommand.Execute()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(".").NotTo(utils.HaveUnstagedChanges())
+			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
 		It("should fail when multiple invokers match", func() {
@@ -99,7 +98,7 @@ var _ = Describe("The init command", func() {
 			err = rootCommand.Execute()
 			Expect(err).To(HaveOccurred())
 
-			Expect(".").NotTo(utils.HaveUnstagedChanges())
+			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
 	})
@@ -119,7 +118,7 @@ var _ = Describe("The init command", func() {
 			err = rootCommand.Execute()
 			Expect(err).To(HaveOccurred())
 
-			Expect(".").NotTo(utils.HaveUnstagedChanges())
+			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
 		It("should detect the artifact for the specified invoker", func() {
@@ -135,7 +134,7 @@ var _ = Describe("The init command", func() {
 			err = rootCommand.Execute()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(".").NotTo(utils.HaveUnstagedChanges())
+			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
 		It("should ignore other matching invokers when explit invoker is selected", func() {
@@ -151,7 +150,7 @@ var _ = Describe("The init command", func() {
 			err = rootCommand.Execute()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(".").NotTo(utils.HaveUnstagedChanges())
+			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
 	})
@@ -169,7 +168,7 @@ var _ = Describe("The init command", func() {
 		err = rootCommand.Execute()
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(".").NotTo(utils.HaveUnstagedChanges())
+		Expect(".").NotTo(HaveUnstagedChanges())
 	})
 
 	It("should allow for an output topic", func() {
@@ -185,7 +184,7 @@ var _ = Describe("The init command", func() {
 		err = rootCommand.Execute()
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(".").NotTo(utils.HaveUnstagedChanges())
+		Expect(".").NotTo(HaveUnstagedChanges())
 	})
 
 	It("should allow for a custom version", func() {
@@ -201,7 +200,7 @@ var _ = Describe("The init command", func() {
 		err = rootCommand.Execute()
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(".").NotTo(utils.HaveUnstagedChanges())
+		Expect(".").NotTo(HaveUnstagedChanges())
 	})
 
 	It("should allow for a custom invoker version", func() {
@@ -217,7 +216,7 @@ var _ = Describe("The init command", func() {
 		err = rootCommand.Execute()
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(".").NotTo(utils.HaveUnstagedChanges())
+		Expect(".").NotTo(HaveUnstagedChanges())
 	})
 
 })

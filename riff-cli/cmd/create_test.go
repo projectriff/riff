@@ -23,7 +23,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
-	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/docker"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
@@ -31,7 +30,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var _ = Describe("The init command", func() {
+var _ = Describe("The create command", func() {
 	var (
 		normalDocker *docker.MockDocker
 		dryRunDocker *docker.MockDocker
@@ -84,7 +83,7 @@ var _ = Describe("The init command", func() {
 			err = rootCommand.Execute()
 			Expect(err).To(HaveOccurred())
 
-			Expect(".").NotTo(utils.HaveUnstagedChanges())
+			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
 		It("fails to creates a function with an unknown invoker", func() {
@@ -100,7 +99,7 @@ var _ = Describe("The init command", func() {
 			err = rootCommand.Execute()
 			Expect(err).To(HaveOccurred())
 
-			Expect(".").NotTo(utils.HaveUnstagedChanges())
+			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
 		It("creates a function with a matched invoker", func() {
@@ -125,7 +124,7 @@ var _ = Describe("The init command", func() {
 			err = rootCommand.Execute()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(".").NotTo(utils.HaveUnstagedChanges())
+			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
 		It("creates a function with an explicit invoker", func() {
@@ -150,7 +149,7 @@ var _ = Describe("The init command", func() {
 			err = rootCommand.Execute()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(".").NotTo(utils.HaveUnstagedChanges())
+			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
 	})
