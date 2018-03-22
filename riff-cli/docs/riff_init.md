@@ -9,7 +9,7 @@ and version specified for the function image repository and tag.
 
 For example, from a directory named 'square' containing a function 'square.js', you can simply type :
 
-    riff init -f square
+    riff init -f .
 
   or
 
