@@ -20,7 +20,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/cobra/doc"
-	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
 	"os"
 )
 
@@ -33,17 +32,15 @@ func Docs(rootCmd *cobra.Command) *cobra.Command {
 		Short:  "generate riff-cli command documentation",
 		Long:   `Generate riff-cli command documentation`,
 		Hidden: true,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 
 			if !osutils.IsDirectory(directory) {
-				os.Mkdir(directory, 0744)
+				if err := os.Mkdir(directory, 0744); err != nil {
+					return err
+				}
 			}
 
-			err := doc.GenMarkdownTree(rootCmd, directory)
-			if err != nil {
-				ioutils.Errorf("Doc generation failed %v\n", err)
-				os.Exit(1)
-			}
+			return doc.GenMarkdownTree(rootCmd, directory)
 		},
 	}
 	docsCmd.Flags().StringVarP(&directory, "dir", "d", osutils.Path(osutils.GetCWD()+"/docs"), "the output directory for the docs.")

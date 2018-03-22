@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"strings"
-	"errors"
 )
 
 func validateFilepath(path *string) error {
@@ -46,12 +45,9 @@ func validateFunctionName(name *string, path string) error {
 func validateAndCleanArtifact(artifact *string, path string) error {
 	if *artifact != "" {
 		*artifact = filepath.Clean(*artifact)
-	}
-
-	if *artifact != "" {
 
 		if filepath.IsAbs(*artifact) {
-			return errors.New(fmt.Sprintf("artifact %s must be relative to function path", *artifact))
+			return fmt.Errorf("artifact %s must be relative to function path", *artifact)
 		}
 
 		absFilePath, err := filepath.Abs(path)
@@ -68,7 +64,7 @@ func validateAndCleanArtifact(artifact *string, path string) error {
 		}
 
 		if osutils.IsDirectory(absArtifactPath) {
-			return errors.New(fmt.Sprintf("artifact %s must be a regular file", absArtifactPath))
+			return fmt.Errorf("artifact %s must be a regular file", absArtifactPath)
 		}
 
 		absFilePathDir := absFilePath
@@ -77,15 +73,15 @@ func validateAndCleanArtifact(artifact *string, path string) error {
 		}
 
 		if !strings.HasPrefix(filepath.Dir(absArtifactPath), absFilePathDir) {
-			return errors.New(fmt.Sprintf("artifact %s cannot be external to filepath %s", absArtifactPath, absFilePath))
+			return fmt.Errorf("artifact %s cannot be external to filepath %s", absArtifactPath, absFilePath)
 		}
 
 		if !osutils.FileExists(absArtifactPath) {
-			return errors.New(fmt.Sprintf("artifact %s does not exist", absArtifactPath))
+			return fmt.Errorf("artifact %s does not exist", absArtifactPath)
 		}
 
 		if !osutils.IsDirectory(absFilePath) && absFilePath != absArtifactPath {
-			return errors.New(fmt.Sprintf("artifact %s conflicts with filepath %s", absArtifactPath, absFilePath))
+			return fmt.Errorf("artifact %s conflicts with filepath %s", absArtifactPath, absFilePath)
 		}
 	}
 	return nil
@@ -103,7 +99,7 @@ func validateProtocol(protocol *string) error {
 			}
 		}
 		if (!supported) {
-			return errors.New(fmt.Sprintf("protocol %s is unsupported \n", *protocol))
+			return fmt.Errorf("protocol %s is unsupported \n", *protocol)
 		}
 	}
 
