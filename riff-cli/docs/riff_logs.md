@@ -4,16 +4,21 @@ Display the logs for a running function
 
 ### Synopsis
 
-Display the logs for a running function For example:
+Display the logs for a running function
+
+```
+riff logs [flags]
+```
+
+### Examples
+
+```
 
     riff logs -n myfunc -t
 
 will tail the logs from the 'sidecar' container for the function 'myfunc'
 
 
-
-```
-riff logs [flags]
 ```
 
 ### Options

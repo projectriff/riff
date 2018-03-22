@@ -25,10 +25,10 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
-	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
 	"github.com/projectriff/riff/riff-cli/pkg/minikube"
 	"github.com/projectriff/riff/riff-cli/pkg/jsonpath"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
+	"github.com/juju/errgo/errors"
 )
 
 type publishOptions struct {
@@ -48,8 +48,8 @@ func Publish() *cobra.Command {
 	var publishCmd = &cobra.Command{
 		Use:   "publish",
 		Short: "Publish data to a topic using the http-gateway",
-		Long: `Publish data to a topic using the http-gateway. For example:
-
+		Long:  `Publish data to a topic using the http-gateway`,
+		Example: `
 	riff publish -i greetings -d hello -r
 	
 will post 'hello' to the 'greetings' topic and wait for a reply.
@@ -59,13 +59,12 @@ will post 'hello' to the 'greetings' topic and wait for a reply.
 will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply.
 
 `,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			cmdArgs := []string{"get", "svc", "--all-namespaces", "-l", "app=riff,component=http-gateway", "-o", "json"}
 			output, err := kubectl.ExecForBytes(cmdArgs)
 
 			if err != nil {
-				ioutils.Errorf("Error querying http-gateway %v\n %v\n", err, output)
-				return
+				return fmt.Errorf("Error querying http-gateway %v\n %v", err, output)
 			}
 
 			parser := jsonpath.NewParser(output)
@@ -73,8 +72,7 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 			portType := parser.Value(`$.items[0].spec.type+`)
 
 			if portType == "" {
-				ioutils.Errorf("Unable to locate http-gateway\n")
-				return
+				return errors.New("Unable to locate http-gateway")
 			}
 
 			var ipAddress string
@@ -90,22 +88,19 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 			case "LoadBalancer":
 				ipAddress = parser.Value(`$.items[0].status.loadBalancer.ingress[0].ip+`)
 				if ipAddress == "" {
-					ioutils.Error("unable to determine http-gateway ip address")
-					return
+					return errors.New("unable to determine http-gateway ip address")
 				}
 				port = parser.Value(`$.items[0].spec.ports[*]?(@.name == "http").port+`)
 
 			default:
-				ioutils.Errorf("Unkown port type %s", portType)
-				return
+				return fmt.Errorf("Unkown port type %s", portType)
 			}
 
 			if port == "" {
-				ioutils.Error("Unable to determine gateway port")
-				return
+				return errors.New("Unable to determine gateway port")
 			}
 
-			publish(ipAddress, port, publishOptions)
+			return publish(ipAddress, port, publishOptions)
 
 		},
 	}
@@ -123,7 +118,7 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 	return publishCmd
 }
 
-func publish(ipAddress string, port string, publishOptions publishOptions) {
+func publish(ipAddress string, port string, publishOptions publishOptions) error {
 	resource := "messages"
 	if publishOptions.reply {
 		resource = "requests"
@@ -137,13 +132,13 @@ func publish(ipAddress string, port string, publishOptions publishOptions) {
 
 		resp, err := http.Post(url, publishOptions.contentType, strings.NewReader(publishOptions.data))
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		fmt.Println(string(body))
 
@@ -151,4 +146,5 @@ func publish(ipAddress string, port string, publishOptions publishOptions) {
 			time.Sleep(time.Duration(publishOptions.pause) * time.Second)
 		}
 	}
+	return nil
 }

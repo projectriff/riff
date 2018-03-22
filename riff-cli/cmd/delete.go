@@ -19,12 +19,10 @@ package cmd
 import (
 	"fmt"
 
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/projectriff/riff/riff-cli/pkg/functions"
-	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
@@ -57,18 +55,15 @@ func Delete() (*cobra.Command, *DeleteOptions) {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return doDelete(cmd, deleteOptions)
 		},
-		PreRun: func(cmd *cobra.Command, args []string) {
+		PreRunE: func(cmd *cobra.Command, args []string) error {
 
 			deleteOptions.Namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
 
 			// If name and no file path given, skip this step
 			if deleteOptions.FilePath != "" && deleteOptions.FunctionName == "" {
-				err := options.ValidateNamePathOptions(&deleteOptions.FunctionName, &deleteOptions.FilePath)
-				if err != nil {
-					ioutils.Error(err)
-					os.Exit(1)
-				}
+				return  options.ValidateNamePathOptions(&deleteOptions.FunctionName, &deleteOptions.FilePath)
 			}
+			return nil
 		},
 	}
 

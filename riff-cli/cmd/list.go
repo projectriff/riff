@@ -21,7 +21,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
-	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
 )
 
@@ -37,7 +36,7 @@ func List() *cobra.Command {
 		Use:   "list",
 		Short: "List function resources",
 		Long:  `List the currently defined function resources.`,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 
 			// get the viper value from env var, config file or flag option
 			listOptions.namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
@@ -58,11 +57,11 @@ func List() *cobra.Command {
 			output, err := kubectl.ExecForString(cmdArgs)
 
 			if err != nil {
-				ioutils.Errorf("Error: %v\n", err)
-				return
+				return err
 			}
 
 			fmt.Printf("%v\n", output)
+			return nil
 
 		},
 	}

@@ -4,7 +4,15 @@ Publish data to a topic using the http-gateway
 
 ### Synopsis
 
-Publish data to a topic using the http-gateway. For example:
+Publish data to a topic using the http-gateway
+
+```
+riff publish [flags]
+```
+
+### Examples
+
+```
 
 	riff publish -i greetings -d hello -r
 	
@@ -15,9 +23,6 @@ will post 'hello' to the 'greetings' topic and wait for a reply.
 will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply.
 
 
-
-```
-riff publish [flags]
 ```
 
 ### Options
