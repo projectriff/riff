@@ -22,8 +22,8 @@ func Encode(in string) (string, error) { // functions that don't return error ar
 		switch {
 		case 'a' <= c && c <= 'z':
 			result[i] = 'z' - (c - 'a')
-		case 'A' <= c && c <= 'A':
-			result[i] = 'A' - (c - 'A')
+		case 'A' <= c && c <= 'Z':
+			result[i] = 'Z' - (c - 'A')
 		}
 	}
 	return string(result), nil
