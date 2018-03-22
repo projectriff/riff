@@ -1,6 +1,6 @@
 ## riff create
 
-Create a function
+Create a function (equivalent to init, build, apply)
 
 ### Synopsis
 

@@ -27,8 +27,8 @@ import (
 func Create(initCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Command) *cobra.Command {
 	createChainCmd := utils.CommandChain(initCmd, buildCmd, applyCmd)
 	createChainCmd.Use = "create"
-	createChainCmd.Short = "Create a function"
-	createChainCmd.Long = utils.CreateCmdLong()
+	createChainCmd.Short = "Create a function (equivalent to init, build, apply)"
+	createChainCmd.Long =  utils.CreateCmdLong()
 	return createChainCmd
 }
 

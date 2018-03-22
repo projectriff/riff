@@ -1,6 +1,6 @@
 ## riff apply
 
-Apply function resource definitions
+Apply function resource definitions to the cluster
 
 ### Synopsis
 

@@ -1,6 +1,6 @@
 ## riff build
 
-Build a function container
+Build a function container image
 
 ### Synopsis
 

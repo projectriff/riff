@@ -1,6 +1,6 @@
 ## riff delete
 
-Delete function resources
+Delete function resources in the cluster
 
 ### Synopsis
 

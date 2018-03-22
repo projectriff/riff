@@ -1,6 +1,6 @@
 ## riff update
 
-Update a function
+Update a function (equivalent to build, apply)
 
 ### Synopsis
 

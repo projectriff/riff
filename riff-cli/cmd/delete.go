@@ -45,7 +45,7 @@ func Delete() (*cobra.Command, *DeleteOptions) {
 
 	var deleteCmd = &cobra.Command{
 		Use:   "delete",
-		Short: "Delete function resources",
+		Short: "Delete function resources in the cluster",
 		Long:  `Delete the resource[s] for the function or path specified.`,
 		Example: `  riff delete -n square
     or
