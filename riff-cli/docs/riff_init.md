@@ -9,10 +9,6 @@ and version specified for the function image repository and tag.
 
 For example, from a directory named 'square' containing a function 'square.js', you can simply type :
 
-    riff init -f .
-
-  or
-
     riff init
 
 to generate the resource definitions using sensible defaults.
