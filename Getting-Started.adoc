@@ -152,6 +152,13 @@ The provided Helm chart installs the following components:
 
 * HTTP Gateway - the external facing gateway that listens for data posted to the various topics and forwards the data as a message for the corresponding Kafka topic
 
+=== To upgrade to a new version
+
+[source, bash]
+----
+helm upgade demo riffrepo/riff
+----
+
 === To tear it all down
 
 [source, bash]
