@@ -40,13 +40,14 @@ Completion for zsh is a work in progress`,
 		Hidden:    true,
 		Args:      utils.And(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 		ValidArgs: []string{"bash", "zsh"},
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			switch args[0] {
 			case "bash":
-				rootCmd.GenBashCompletion(os.Stdout)
+				return rootCmd.GenBashCompletion(os.Stdout)
 			case "zsh":
-				rootCmd.GenZshCompletion(os.Stdout)
+				return rootCmd.GenZshCompletion(os.Stdout)
 			}
+			panic("Can't be reached")
 		},
 	}
 

@@ -17,15 +17,12 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
 	"fmt"
 	"os/exec"
-	"os"
 	"bufio"
-
-	"github.com/spf13/cobra"
-	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
-	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 )
 
 type LogsOptions struct {
@@ -43,14 +40,14 @@ func Logs() *cobra.Command {
 	var logsCmd = &cobra.Command{
 		Use:   "logs",
 		Short: "Display the logs for a running function",
-		Long: `Display the logs for a running function For example:
-
+		Long: `Display the logs for a running function`,
+		Example:`
     riff logs -n myfunc -t
 
 will tail the logs from the 'sidecar' container for the function 'myfunc'
 
 `,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 
 			// get the viper value from env var, config file or flag option
 			logsOptions.namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
@@ -66,8 +63,7 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 			output, err := kubectl.ExecForString(cmdArgs)
 
 			if err != nil {
-				ioutils.Errorf("Error %v - Function %v may not be currently active\n\n", err, logsOptions.function)
-				return
+				return fmt.Errorf("Error %v - Function %v may not be currently active", err, logsOptions.function)
 			}
 
 			pod := output
@@ -83,8 +79,7 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 				kubectlCmd := exec.Command("kubectl", cmdArgs...)
 				cmdReader, err := kubectlCmd.StdoutPipe()
 				if err != nil {
-					fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for kubectlCmd", err)
-					return
+					return fmt.Errorf("Error creating StdoutPipe for kubectlCmd: %v", err)
 				}
 
 				scanner := bufio.NewScanner(cmdReader)
@@ -96,14 +91,12 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 
 				err = kubectlCmd.Start()
 				if err != nil {
-					fmt.Fprintln(os.Stderr, "Error starting kubectlCmd", err)
-					return
+					return fmt.Errorf("Error starting kubectl command: %v", err)
 				}
 
 				err = kubectlCmd.Wait()
 				if err != nil {
-					fmt.Fprintln(os.Stderr, "Error waiting for kubectlCmd", err)
-					return
+					return fmt.Errorf("Error waiting for kubectl: %v", err)
 				}
 
 			} else {
@@ -111,21 +104,21 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 				output, err := kubectl.ExecForString(cmdArgs)
 
 				if err != nil {
-					ioutils.Errorf("Error: %v\n", err)
-					return
+					return err
 				}
 
 				fmt.Printf("%v\n", output)
 			}
+			return nil
 
 		},
 	}
 	logsCmd.Flags().StringVarP(&logsOptions.function, "name", "n", "", "the name of the function")
+	logsCmd.MarkFlagRequired("name")
 	logsCmd.Flags().StringVarP(&logsOptions.container, "container", "c", "sidecar", "the name of the function container (sidecar or main)")
 	logsCmd.Flags().BoolVarP(&logsOptions.tail, "tail", "t", false, "tail the logs")
 
 	logsCmd.Flags().StringP("namespace", "", "", "the namespace used for the deployed resources")
 
-	logsCmd.MarkFlagRequired("name")
 	return logsCmd
 }

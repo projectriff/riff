@@ -73,11 +73,7 @@ and version specified for the image that is built.`,
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			buildOptions.UserAccount = utils.GetUseraccountWithOverride("useraccount", *cmd.Flags())
-			err := validateBuildOptions(&buildOptions)
-			if err != nil {
-				return err
-			}
-			return nil
+			return validateBuildOptions(&buildOptions)
 		},
 	}
 
