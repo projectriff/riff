@@ -52,15 +52,17 @@ Create the `riff-system` namespace:
 
 [source, bash]
 ----
-kubectl create namespace riff-system
+make namespace
 ----
 
 Install the kafka/zookeeper deployments and services:
 
 [source, bash]
 ----
-kubectl apply -n riff-system -f config/kafka
+make development-kafka
 ----
+
+As the name implies, this Kafka is intended for development usage.
 
 === Deploy the riff Custom Resource Definitions and deploy the riff core components
 
@@ -84,7 +86,7 @@ Once you're done playing with riff (see samples below), you can destroy everythi
 
 [source, bash]
 ----
-./teardown
+make teardown
 ----
 
 == [[samples]]Try Some Samples
