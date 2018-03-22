@@ -100,7 +100,11 @@ func resolveInvoker(invokers []projectriff_v1.Invoker, opts *options.InitOptions
 		}
 
 		if len(artifacts) == 0 {
-			return projectriff_v1.Invoker{}, fmt.Errorf("No matching artifact found")
+			var registeredInvokers []string
+			for _, element := range invokers {
+				registeredInvokers = append(registeredInvokers, element.Name)
+			}
+			return projectriff_v1.Invoker{}, fmt.Errorf("No matching artifact found (using registered invokers: %v)", registeredInvokers)
 		}
 		if len(artifacts) > 1 {
 			// TODO MAYBE attempt to find the "best" artifact
