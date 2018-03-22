@@ -25,7 +25,7 @@ func Create(initCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Com
 
 	createChainCmd := utils.CommandChain(initCmd, buildCmd, applyCmd)
 	createChainCmd.Use =  "create [language]"
-	createChainCmd.Short = "Create a function"
+	createChainCmd.Short = "Create a function (equivalent to init, build, apply)"
 	createChainCmd.Long =  utils.CreateCmdLong()
 	return createChainCmd
 }

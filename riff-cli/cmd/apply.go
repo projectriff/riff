@@ -37,7 +37,7 @@ func Apply(realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) (*cobra.C
 
 	var applyCmd = &cobra.Command{
 		Use:   "apply",
-		Short: "Apply function resource definitions",
+		Short: "Apply function resource definitions to the cluster",
 		Long:  `Apply the resource definition[s] included in the path. A resource will be created if it doesn't exist yet.`,
 		Example: `  riff apply -f some/function/path
   riff apply -f some/function/path/some.yaml`,
