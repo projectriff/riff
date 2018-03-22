@@ -39,7 +39,7 @@ helm init --service-account=tiller
 
 TIP: To verify that the tiller pod has started execute the following command: `kubectl get pod --namespace kube-system -l app=helm` and you should see the `tiller` pod running.
 
-== Add the riff repository to your helm configuration
+== [[riff-repo]]Add the riff repository to your helm configuration
 
 Riff offers helm charts for deploying the FaaS and its required services to a Kubernetes Cluster.
 The following instructions cover how to configure helm to be able to install the riff charts.
@@ -156,7 +156,7 @@ The provided Helm chart installs the following components:
 
 Assuming that you named your release `control` you can run the following command to upgrade to the latest released version:
 
-TIP: Older instructions used `demo` for the release name, so just substitute `control` with `demo` if you have an older riff install.
+TIP: Older instructions used `demo` for the release name and `riffrepo` as the name for riff's Helm repository. You should substitute `control` with `demo` and `projectriff/riff` with `riffrepo/riff` if you have an older riff install. Another option is to remove the old install using `helm delete --purge demo` and then follow the instructions link:Getting-Started.adoc#riff-repo[above] for installing the new version.
 
 [source, bash]
 ----
