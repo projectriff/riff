@@ -54,7 +54,7 @@ func Build(realDocker docker.Docker, dryRunDocker docker.Docker) (*cobra.Command
 
 	var buildCmd = &cobra.Command{
 		Use:   "build",
-		Short: "Build a function container",
+		Short: "Build a function container image",
 		Long: `Build the function based on the code available in the path directory, using the name
 and version specified for the image that is built.`,
 		Example: `  riff build -n <name> -v <version> -f <path> [--push]`,
