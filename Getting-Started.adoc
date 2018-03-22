@@ -61,7 +61,7 @@ helm search riff -l
 
 == [[current]]Install the current riff release
 
-Starting with the 0.0.4 version we have separated the Kafka installation from the riff chart. This requires an extra step of installing Kafka in order to use riff. You can use the single-node Kafka chart provided by riff or the three-node kafka/zookeeper service provided by Kubeapps.
+We have separated the Kafka installation from the riff chart. This requires an extra step of installing Kafka in order to use riff. You can use the single-node Kafka chart provided by riff or the three-node kafka/zookeeper service provided by Kubeapps.
 
 === Install Kafka chart
 
@@ -101,7 +101,7 @@ For an install with default configuration and no RBAC enabled use:
 
 [source, bash]
 ----
-helm install projectriff/riff --version 0.0.4 --name demo --namespace riff-system --set rbac.create=false
+helm install projectriff/riff --name control --namespace riff-system --set rbac.create=false
 ----
 
 [NOTE]
@@ -110,7 +110,7 @@ For a cluster that has RBAC enabled, use the following (since `rbac.create` is `
 
 [source, bash]
 ----
-helm install projectriff/riff --version 0.0.4 --name demo --namespace riff-system
+helm install projectriff/riff --name control --namespace riff-system
 ----
 ====
 
@@ -120,7 +120,7 @@ For `NodePort` service types (e.g. running on Minikube) configure the httpGatewa
 
 [source, bash]
 ----
-helm install projectriff/riff --version 0.0.4 --name demo --namespace riff-system --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name control --namespace riff-system --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 [NOTE]
@@ -129,7 +129,7 @@ For a cluster that has RBAC enabled, use the following (since `rbac.create` is `
 
 [source, bash]
 ----
-helm install projectriff/riff --version 0.0.4 --name demo --namespace riff-system --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name control --namespace riff-system --set httpGateway.service.type=NodePort
 ----
 ====
 
@@ -154,9 +154,13 @@ The provided Helm chart installs the following components:
 
 === To upgrade to a new version
 
+Assuming that you named your release `control` you can run the following command to upgrade to the latest released version:
+
+TIP: Older instructions used `demo` for the release name, so just substitute `control` with `demo` if you have an older riff install.
+
 [source, bash]
 ----
-helm upgade demo riffrepo/riff
+helm upgrade control riffrepo/riff
 ----
 
 === To tear it all down
@@ -168,7 +172,7 @@ helm delete --purge demo
 
 == [[CLI]]Install the current riff CLI tool
 
-Starting with the 0.0.4 version we provide a CLI tool written in Go that makes it easy to create and deploy functions.
+We provide a CLI tool written in Go that makes it easy to create and deploy functions.
 Install the CLI by following the instructions on the https://github.com/projectriff/riff/releases[riff release page].
 
 === [[cli-config]]riff CLI configuration
