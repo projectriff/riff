@@ -22,6 +22,7 @@ the riff tool is used to create and manage function resources for the riff FaaS 
 * [riff create](riff_create.md)	 - Create a function (equivalent to init, build, apply)
 * [riff delete](riff_delete.md)	 - Delete function resources in the cluster
 * [riff init](riff_init.md)	 - Initialize a function
+* [riff invokers](riff_invokers.md)	 - Manage invokers in the cluster
 * [riff list](riff_list.md)	 - List function resources
 * [riff logs](riff_logs.md)	 - Display the logs for a running function
 * [riff publish](riff_publish.md)	 - Publish data to a topic using the http-gateway
