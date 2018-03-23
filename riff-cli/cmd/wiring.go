@@ -50,7 +50,7 @@ func CreateAndWireRootCommand(realDocker docker.Docker, dryRunDocker docker.Dock
 	createInvokerCmds := CreateInvokers(invokers, initInvokerCmds, buildCmd, applyCmd)
 	createCmd.AddCommand(createInvokerCmds...)
 
-	deleteCmd, _ := Delete()
+	deleteCmd, _ := Delete(realKubeCtl, dryRunKubeCtl)
 
 	rootCmd.AddCommand(
 		applyCmd,
