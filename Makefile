@@ -1,5 +1,5 @@
 
-.PHONY: clean build dockerize kubectl-apply
+.PHONY: clean build dockerize
 
 build:
 	$(MAKE) -C message-transport	build
@@ -30,14 +30,10 @@ debug-dockerize:
 	$(MAKE) -C http-gateway			debug-dockerize
 	$(MAKE) -C topic-controller		debug-dockerize
 
-namespace:
+dev-setup: clean dockerize
 	kubectl create namespace riff-system
-
-development-kafka:
-	kubectl apply -n riff-system -f config/kafka
-
-kubectl-apply:
 	kubectl apply -f config/
+	kubectl apply -n riff-system -f config/kafka
 	$(MAKE) -C kubernetes-crds		kubectl-apply
 	$(MAKE) -C function-controller	kubectl-apply
 	$(MAKE) -C http-gateway			kubectl-apply
@@ -65,5 +61,3 @@ clean:
 	$(MAKE) -C http-gateway			clean
 	$(MAKE) -C topic-controller		clean
 	$(MAKE) -C riff-cli				clean
-
-dev-setup: namespace development-kafka clean build dockerize kubectl-apply

@@ -46,32 +46,22 @@ cd $(go env GOPATH)/src/github.com/projectriff/riff
 make dockerize
 ----
 
-=== Deploy Kafka
+=== Setup for development
 
-Create the `riff-system` namespace:
-
-[source, bash]
-----
-make namespace
-----
-
-Install the kafka/zookeeper deployments and services:
+If you want to quickly standup a development copy of Riff:
 
 [source, bash]
 ----
-make development-kafka
+make dev-setup
 ----
 
-As the name implies, this Kafka is intended for development usage.
+Which will:
 
-=== Deploy the riff Custom Resource Definitions and deploy the riff core components
+* Create a `riff-system` namespace
+* Deploy a non-replicated Kafka broker
+* Install Riff CRDs and system components
 
-This creates the the _topic_ and _function_ link:kubernetes-crds[CRDS], then deploys the HTTP Gateway, Topic Controller, and Function Controller:
-
-[source, bash]
-----
-make kubectl-apply
-----
+=== Deploying with RBAC
 
 If your cluster has RBAC enabled, then you also need to create a Role and a RoleBinding:
 
