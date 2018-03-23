@@ -73,7 +73,7 @@ func Delete(realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) (*cobra.
 	}
 
 	deleteCmd.Flags().BoolVar(&deleteOptions.All, "all", false, "delete all resources including topics, not just the function resource")
-	deleteCmd.Flags().BoolVar(&deleteOptions.DryRun, "dry-run", false, "print generated function artifacts content to stdout only")
+	deleteCmd.Flags().BoolVar(&deleteOptions.DryRun, "dry-run", false, "print generated commands to stdout only")
 	deleteCmd.Flags().StringVarP(&deleteOptions.FunctionName, "name", "n", "", "the name of the function (defaults to the name of the current directory)")
 	deleteCmd.Flags().StringVar(&deleteOptions.Namespace, "namespace", "", "the namespace used for the deployed resources (defaults to kubectl's default)")
 
@@ -81,45 +81,38 @@ func Delete(realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) (*cobra.
 }
 
 func deleteFunctionByName(opts DeleteOptions, actingClient kubectl.KubeCtl, queryClient kubectl.KubeCtl) error {
-	cmdArgs := []string{"delete"}
-	cmdArgs = append(cmdArgs, "function", opts.FunctionName)
+	if opts.All {
+
+		if inputTopic, outputTopic, err := lookupTopicNames(opts, queryClient); err != nil {
+			return err
+		} else {
+			cmdArgs := []string{"delete", "topic", "<placeholder>"}
+			if opts.Namespace != "" {
+				cmdArgs = append(cmdArgs, "--namespace", opts.Namespace)
+			}
+			if inputTopic != "" {
+				cmdArgs[2] = inputTopic
+				if err := deleteResources(cmdArgs, actingClient); err != nil {
+					return nil
+				}
+			}
+			if outputTopic != "" {
+				cmdArgs[2] = outputTopic
+				if err := deleteResources(cmdArgs, actingClient); err != nil {
+					return nil
+				}
+			}
+		}
+	}
+
+	cmdArgs := []string{"delete", "function", opts.FunctionName}
 	if opts.Namespace != "" {
 		cmdArgs = append(cmdArgs, "--namespace", opts.Namespace)
 	}
-
 	if err := deleteResources(cmdArgs, actingClient); err != nil {
 		return err
 	}
 
-	if opts.All {
-		getArgs := []string{"get"}
-		if opts.Namespace != "" {
-			getArgs = append(getArgs, "--namespace", opts.Namespace)
-		}
-		getArgs = append(getArgs, "function", opts.FunctionName, "-o", "json")
-		json, err := queryClient.Exec(getArgs)
-		if err != nil {
-			return err
-		}
-		parser := jsonpath.NewParser([]byte(json))
-
-		inputTopic := parser.Value(`$.spec.input+`)
-		outputTopic := parser.Value(`$.spec.output+`)
-		// re-use cmdArgs above
-		cmdArgs[1] = "topic"
-		if inputTopic != "" {
-			cmdArgs[2] = inputTopic
-			if err := deleteResources(cmdArgs, actingClient); err != nil {
-				return nil
-			}
-		}
-		if outputTopic != "" {
-			cmdArgs[2] = outputTopic
-			if err := deleteResources(cmdArgs, actingClient); err != nil {
-				return nil
-			}
-		}
-	}
 	return nil
 }
 
@@ -128,4 +121,22 @@ func deleteResources(cmdArgs []string, actingClient kubectl.KubeCtl) error {
 	output, err := actingClient.Exec(cmdArgs)
 	fmt.Println(output)
 	return err
+}
+
+func lookupTopicNames(opts DeleteOptions, queryClient kubectl.KubeCtl) (string, string, error) {
+	getArgs := []string{"get"}
+	if opts.Namespace != "" {
+		getArgs = append(getArgs, "--namespace", opts.Namespace)
+	}
+	getArgs = append(getArgs, "function", opts.FunctionName, "-o", "json")
+	json, err := queryClient.Exec(getArgs)
+	if err != nil {
+		return "", "", err
+	}
+	parser := jsonpath.NewParser([]byte(json))
+
+	inputTopic := parser.Value(`$.spec.input+`)
+	outputTopic := parser.Value(`$.spec.output+`)
+	return inputTopic, outputTopic, err
+
 }
