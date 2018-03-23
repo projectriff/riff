@@ -42,4 +42,9 @@ debug-dockerize: $(GO_SOURCES) ../vendor
 	cd .. && glide up -v --force
 
 kubectl-apply:
-	kubectl apply -n riff-system  -f config/deployment.yaml
+	kubectl apply -n riff-system -f config/deployment.yaml
+
+simulation:
+	go build pkg/controller/autoscaler/simulator/simulator.go
+	./simulator
+	gnuplot -c pkg/controller/autoscaler/simulator/simulator.plt > simulation-results.png

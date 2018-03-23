@@ -23,3 +23,7 @@ samples/**/*.yaml
 
 .DS_Store
 
+## Simulator artefacts ###
+*.dat
+*-results.png
+simulator

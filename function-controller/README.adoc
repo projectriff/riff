@@ -35,6 +35,10 @@ If you would like to run tests using the `ginkgo` command, install:
 
 - http://onsi.github.io/ginkgo/[Ginkgo]
 
+If you intend to run the autoscaler with a simulated workload:
+
+- http://www.gnuplot.info/
+
 === Get the source
 [source, bash]
 ----
@@ -94,3 +98,11 @@ You can verify that generated mocks which are committed or staged are up to date
 ----
 make verify-mocks
 ----
+
+=== Running the Autoscaler with a Simulated Workload
+
+[source, bash]
+----
+make simulation
+----
+
