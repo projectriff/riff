@@ -17,18 +17,19 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"os"
+
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
+	"github.com/spf13/cobra"
 )
 
 func Completion(rootCmd *cobra.Command) *cobra.Command {
 
 	var completionCmd = &cobra.Command{
-		Use:       "completion [bash|zsh]",
-		Short:     "Generate shell completion scripts",
-		Long:      "Generate shell completion scripts",
-		Example: 	`
+		Use:   "completion [bash|zsh]",
+		Short: "Generate shell completion scripts",
+		Long:  "Generate shell completion scripts",
+		Example: `
 To install completion for bash, assuming you have bash-completion installed:
 
     riff completion bash > /etc/bash_completion.d/riff     
@@ -54,4 +55,3 @@ Completion for zsh is a work in progress`,
 	return completionCmd
 
 }
-

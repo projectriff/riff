@@ -88,6 +88,10 @@ func Path(filename string) string {
 }
 
 func Exec(cmdName string, cmdArgs []string, timeout time.Duration) ([]byte, error) {
+	return ExecStdin(cmdName, cmdArgs, nil, timeout)
+}
+
+func ExecStdin(cmdName string, cmdArgs []string, stdin *[]byte, timeout time.Duration) ([]byte, error) {
 	// Create a new context and add a timeout to it
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel() // The cancel should be deferred so resources are cleaned up
@@ -97,6 +101,9 @@ func Exec(cmdName string, cmdArgs []string, timeout time.Duration) ([]byte, erro
 
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
+	if stdin != nil {
+		cmd.Stdin = bytes.NewBuffer(*stdin)
+	}
 	// This time we can simply use Output() to get the result.
 	out, err := cmd.Output()
 	if err != nil {
