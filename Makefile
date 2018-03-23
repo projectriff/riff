@@ -1,5 +1,5 @@
 
-.PHONY: clean build dockerize
+.PHONY: clean build dockerize dev-setup teardown
 
 build:
 	$(MAKE) -C message-transport	build
@@ -30,7 +30,7 @@ debug-dockerize:
 	$(MAKE) -C http-gateway			debug-dockerize
 	$(MAKE) -C topic-controller		debug-dockerize
 
-dev-setup: clean dockerize
+dev-setup:
 	kubectl create namespace riff-system
 	kubectl apply -f config/
 	kubectl apply -n riff-system -f config/kafka
