@@ -32,7 +32,7 @@ debug-dockerize:
 
 dev-setup:
 	kubectl create namespace riff-system
-	kubectl apply -f config/
+	kubectl apply -n riff-system -f config/
 	kubectl apply -n riff-system -f config/kafka
 	$(MAKE) -C kubernetes-crds		kubectl-apply
 	$(MAKE) -C function-controller	kubectl-apply
@@ -43,9 +43,10 @@ teardown:
 	kubectl delete all -l function
 	kubectl delete functions --all
 	kubectl delete topics --all
-	kubectl delete all,svc -l app=riff
+	kubectl delete all,svc -n riff-system -l app=riff
 	kubectl delete crd/functions.projectriff.io
 	kubectl delete crd/topics.projectriff.io
+	kubectl delete crd/invokers.projectriff.io
 	kubectl delete all,svc -n riff-system -l app=kafka
 	kubectl delete namespace riff-system
 
