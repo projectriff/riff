@@ -67,7 +67,7 @@ If your cluster has RBAC enabled, then you also need to create a Role and a Role
 
 [source, bash]
 ----
-kubectl apply -f config/rbac
+kubectl apply -n riff-system -f config/rbac
 ----
 
 === To tear it all down
