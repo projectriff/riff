@@ -47,13 +47,13 @@ riff publish --input secrets --data "Hello World" --reply
 you get
 [source, bash]
 ----
-Hvool Wliow
+Svool Dliow
 ----
 
 Pass that to the function again and you get `Hello World` back.
 [source, bash]
 ----
-riff publish --input secrets --data "Hvool Wliow" --reply
+riff publish --input secrets --data "Svool Dliow" --reply
 ----
 
 
