@@ -1,0 +1,5 @@
+---
+apiVersion: projectriff.io/v1
+kind: Topic
+metadata:
+  name: multiple-matching-invokers-with-one-selected-no-artifact

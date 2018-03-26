@@ -79,6 +79,9 @@ func resolveInvoker(invokers []projectriff_v1.Invoker, opts *options.InitOptions
 		if resolvedInvoker.ObjectMeta.Name == "" {
 			return projectriff_v1.Invoker{}, fmt.Errorf("Invoker %s not found", opts.InvokerName)
 		}
+
+		// restrict future searches to the resolved invoker
+		invokers = []projectriff_v1.Invoker{resolvedInvoker}
 	}
 
 	if opts.Artifact == "" {

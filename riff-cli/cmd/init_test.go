@@ -85,6 +85,22 @@ var _ = Describe("The init command", func() {
 			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
+		It("should find an artifact based on an invoker", func() {
+			os.Chdir("../test_data/riff-init/multiple-matching-invokers-with-one-selected-no-artifact")
+
+			invokers, err := stubInvokers("invokers/*.yaml")
+			Expect(err).NotTo(HaveOccurred())
+			rootCommand, _, _, _, err := setupInitTest(invokers)
+			Expect(err).NotTo(HaveOccurred())
+
+			rootCommand.SetArgs(append([]string{"init", "python3"}, commonRiffArgs...))
+
+			err = rootCommand.Execute()
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(".").NotTo(HaveUnstagedChanges())
+		})
+
 		It("should fail when multiple invokers match", func() {
 			os.Chdir("../test_data/riff-init/multiple-matching-invokers")
 
