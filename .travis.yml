@@ -1,8 +1,6 @@
 language: go
 go:
 - '1.9'
-install:
-- go get github.com/Masterminds/glide
 script: cd $COMPONENT && make test
 matrix:
   include:
