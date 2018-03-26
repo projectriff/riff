@@ -24,12 +24,14 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/initializer"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/spf13/cobra"
+	"github.com/projectriff/riff/riff-cli/pkg/minikube"
 )
 
 // CreateAndWireRootCommand creates all riff commands and sub commands, as well as the top-level 'root' command,
 // wires them together and returns the root command, ready to execute.
 func CreateAndWireRootCommand(realDocker docker.Docker, dryRunDocker docker.Docker,
-	realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) (*cobra.Command, error) {
+	realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl,
+		minik minikube.Minikube) (*cobra.Command, error) {
 
 	invokers, err := initializer.LoadInvokers(realKubeCtl)
 	if err != nil {
@@ -69,7 +71,7 @@ func CreateAndWireRootCommand(realDocker docker.Docker, dryRunDocker docker.Dock
 		initCmd,
 		List(),
 		Logs(),
-		Publish(),
+		Publish(realKubeCtl, minik),
 		Update(buildCmd, applyCmd),
 		invokersCmd,
 		Version(),

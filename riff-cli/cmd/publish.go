@@ -40,7 +40,7 @@ type publishOptions struct {
 	pause       int
 }
 
-func Publish() *cobra.Command {
+func Publish(kube kubectl.KubeCtl, minik minikube.Minikube) *cobra.Command {
 
 	var publishOptions publishOptions
 
@@ -60,46 +60,10 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cmdArgs := []string{"get", "svc", "--all-namespaces", "-l", "app=riff,component=http-gateway", "-o", "json"}
-			output, err := kubectl.ExecForBytes(cmdArgs)
-
+			ipAddress, port, err := lookupAddress(kube, minik)
 			if err != nil {
-				return fmt.Errorf("Error querying http-gateway %v\n %v", err, output)
+				return err
 			}
-
-			parser := jsonpath.NewParser(output)
-
-			portType := parser.Value(`$.items[0].spec.type+`)
-
-			if portType == "" {
-				return errors.New("Unable to locate http-gateway")
-			}
-
-			var ipAddress string
-			var port string
-
-			switch portType {
-			case "NodePort":
-				ipAddress, err = minikube.QueryIp()
-				if err != nil || strings.Contains(ipAddress, "Error getting IP") {
-					ipAddress = "127.0.0.1"
-				}
-				port = parser.Value(`$.items[0].spec.ports[*]?(@.name == "http").nodePort+`)
-			case "LoadBalancer":
-				ipAddress = parser.Value(`$.items[0].status.loadBalancer.ingress[0].ip+`)
-				if ipAddress == "" {
-					return errors.New("unable to determine http-gateway ip address")
-				}
-				port = parser.Value(`$.items[0].spec.ports[*]?(@.name == "http").port+`)
-
-			default:
-				return fmt.Errorf("Unkown port type %s", portType)
-			}
-
-			if port == "" {
-				return errors.New("Unable to determine gateway port")
-			}
-
 			return publish(ipAddress, port, publishOptions)
 
 		},
@@ -116,6 +80,49 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 	publishCmd.Flags().MarkDeprecated("namespace", "it will be removed in future releases")
 
 	return publishCmd
+}
+
+func lookupAddress(kube kubectl.KubeCtl, minik minikube.Minikube) (string, string, error) {
+	cmdArgs := []string{"get", "svc", "--all-namespaces", "-l", "app=riff,component=http-gateway", "-o", "json"}
+	output, err := kube.Exec(cmdArgs)
+
+	if err != nil {
+		return "", "", fmt.Errorf("Error querying http-gateway %v\n %v", err, output)
+	}
+
+	parser := jsonpath.NewParser([]byte(output))
+
+	portType := parser.Value(`$.items[0].spec.type+`)
+
+	if portType == "" {
+		return "", "", errors.New("Unable to locate http-gateway")
+	}
+
+	var ipAddress string
+	var port string
+
+	switch portType {
+	case "NodePort":
+		ipAddress, err = minik.QueryIp()
+		if err != nil || strings.Contains(ipAddress, "Error getting IP") {
+			ipAddress = "127.0.0.1"
+		}
+		port = parser.Value(`$.items[0].spec.ports[*]?(@.name == "http").nodePort+`)
+	case "LoadBalancer":
+		ipAddress = parser.Value(`$.items[0].status.loadBalancer.ingress[0].ip+`)
+		if ipAddress == "" {
+			return "", "", errors.New("unable to determine http-gateway ip address")
+		}
+		port = parser.Value(`$.items[0].spec.ports[*]?(@.name == "http").port+`)
+
+	default:
+		return "", "", fmt.Errorf("Unkown port type %s", portType)
+	}
+
+	if port == "" {
+		return "", "", errors.New("Unable to determine gateway port")
+	}
+	return ipAddress, port, nil
 }
 
 func publish(ipAddress string, port string, publishOptions publishOptions) error {
