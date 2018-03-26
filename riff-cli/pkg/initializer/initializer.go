@@ -65,7 +65,6 @@ func loadInvokersFromDisk(invokerPaths []string) ([]projectriff_v1.Invoker, erro
 			continue
 		}
 		invokerBytes, err := ioutil.ReadFile(invokerPath)
-		fmt.Println(string(invokerBytes))
 		if err != nil {
 			return nil, err
 		}
@@ -74,7 +73,6 @@ func loadInvokersFromDisk(invokerPaths []string) ([]projectriff_v1.Invoker, erro
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println(invoker.ObjectMeta.Name)
 		invokers = append(invokers, invoker)
 	}
 	return invokers, nil

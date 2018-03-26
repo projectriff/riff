@@ -1,5 +1,5 @@
 .PHONY: build clean test release verify-docs all gen-mocks
-OUTPUT = riff
+OUTPUT = ./riff
 OUTPUT_WINDOWS = $(OUTPUT).exe
 GO_SOURCES = $(shell find cmd pkg -type f -name '*.go' -not -name 'mock_*.go')
 VERSION ?= $(shell cat ../VERSION)
@@ -12,6 +12,11 @@ build: $(OUTPUT)
 
 test: build
 	go test ./...
+
+	rm -rf test_data/docs/*.md
+	RIFF_INVOKER_PATHS="test_data/invokers/command-function-invoker.yaml" $(OUTPUT) docs -d test_data/docs --command "init command"
+	RIFF_INVOKER_PATHS="test_data/invokers/command-function-invoker.yaml" $(OUTPUT) docs -d test_data/docs --command "create command"
+	git diff --exit-code test_data/docs
 
 $(OUTPUT): $(GO_SOURCES) ../vendor
 	go build -ldflags "-X main.version=$(VERSION)" -o $(OUTPUT) ../cli.go

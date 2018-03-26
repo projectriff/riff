@@ -17,15 +17,35 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/projectriff/riff/riff-cli/pkg/osutils"
-	"github.com/spf13/cobra/doc"
+	"fmt"
 	"os"
+	"strings"
+
+	"github.com/projectriff/riff/riff-cli/pkg/osutils"
+	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 )
 
-var directory string
+const (
+	riffDocsBase = "https://github.com/projectriff/riff/blob/master/riff-cli/docs"
+)
+
+func emptyString(_ string) string {
+	return ""
+}
+
+func urlPrefixer(base string, command string) func(string) string {
+	return func(path string) string {
+		if !strings.HasPrefix(path, fmt.Sprintf("riff_%s", command)) {
+			path = fmt.Sprintf("%s/%s", base, path)
+		}
+		return path
+	}
+}
 
 func Docs(rootCmd *cobra.Command) *cobra.Command {
+	var directory string
+	var command string
 
 	var docsCmd = &cobra.Command{
 		Use:    "docs",
@@ -40,9 +60,21 @@ func Docs(rootCmd *cobra.Command) *cobra.Command {
 				}
 			}
 
-			return doc.GenMarkdownTree(rootCmd, directory)
+			if command == "" {
+				return doc.GenMarkdownTree(rootCmd, directory)
+			}
+
+			commands := strings.Split(command, " ")
+			targetCmd, _, err := rootCmd.Find(commands)
+			if err != nil {
+				return err
+			}
+
+			prefixer := urlPrefixer(riffDocsBase, strings.Join(commands, "_"))
+			return doc.GenMarkdownTreeCustom(targetCmd, directory, emptyString, prefixer)
 		},
 	}
+	docsCmd.Flags().StringVarP(&command, "command", "c", "", "the command to generate docs for (defaults to all commands)")
 	docsCmd.Flags().StringVarP(&directory, "dir", "d", osutils.Path(osutils.GetCWD()+"/docs"), "the output directory for the docs.")
 	return docsCmd
 }
