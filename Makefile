@@ -31,7 +31,7 @@ debug-dockerize:
 	$(MAKE) -C topic-controller		debug-dockerize
 
 dev-setup:
-	kubectl create namespace riff-system
+	-kubectl create namespace riff-system
 	kubectl apply -n riff-system -f config/
 	kubectl apply -n riff-system -f config/kafka
 	$(MAKE) -C kubernetes-crds		kubectl-apply
