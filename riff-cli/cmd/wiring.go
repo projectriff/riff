@@ -17,6 +17,9 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/projectriff/riff/riff-cli/pkg/docker"
 	"github.com/projectriff/riff/riff-cli/pkg/initializer"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
@@ -30,7 +33,7 @@ func CreateAndWireRootCommand(realDocker docker.Docker, dryRunDocker docker.Dock
 
 	invokers, err := initializer.LoadInvokers(realKubeCtl)
 	if err != nil {
-		return nil, err
+		fmt.Fprintln(os.Stderr, "Unable to load invokers via kubectl")
 	}
 
 	rootCmd := Root()
