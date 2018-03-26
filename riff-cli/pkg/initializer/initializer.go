@@ -19,9 +19,12 @@ package initializer
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/ghodss/yaml"
 	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
@@ -48,6 +51,36 @@ func Initialize(invokers []projectriff_v1.Invoker, opts *options.InitOptions) er
 }
 
 func LoadInvokers(kubeCtl kubectl.KubeCtl) ([]projectriff_v1.Invoker, error) {
+	if invokerPaths, invokerPathsSet := os.LookupEnv("RIFF_INVOKER_PATHS"); invokerPathsSet {
+		return loadInvokersFromDisk(strings.Split(invokerPaths, ","))
+	}
+	return loadInvokersFromKubeCtl(kubeCtl)
+}
+
+func loadInvokersFromDisk(invokerPaths []string) ([]projectriff_v1.Invoker, error) {
+	invokers := []projectriff_v1.Invoker{}
+	for _, invokerPath := range invokerPaths {
+		invokerPath = strings.TrimSpace(invokerPath)
+		if invokerPath == "" {
+			continue
+		}
+		invokerBytes, err := ioutil.ReadFile(invokerPath)
+		fmt.Println(string(invokerBytes))
+		if err != nil {
+			return nil, err
+		}
+		invoker := projectriff_v1.Invoker{}
+		err = yaml.Unmarshal(invokerBytes, &invoker)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println(invoker.ObjectMeta.Name)
+		invokers = append(invokers, invoker)
+	}
+	return invokers, nil
+}
+
+func loadInvokersFromKubeCtl(kubeCtl kubectl.KubeCtl) ([]projectriff_v1.Invoker, error) {
 	str, err := kubeCtl.Exec([]string{"get", "Invokers", "-o", "json"})
 	if err != nil {
 		return nil, err
