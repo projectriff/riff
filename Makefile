@@ -50,8 +50,12 @@ teardown:
 	kubectl delete all,svc -n riff-system -l app=kafka
 	kubectl delete namespace riff-system
 
+ifdef CI
+vendor:
+else
 vendor: glide.lock
 	glide install -v --force
+endif
 
 glide.lock: glide.yaml
 	glide up -v --force
