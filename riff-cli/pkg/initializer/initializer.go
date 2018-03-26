@@ -19,7 +19,6 @@ package initializer
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -49,11 +48,6 @@ func Initialize(invokers []projectriff_v1.Invoker, opts *options.InitOptions) er
 }
 
 func LoadInvokers(kubeCtl kubectl.KubeCtl) ([]projectriff_v1.Invoker, error) {
-	if _, disableKubeCtl := os.LookupEnv("RIFF_DISABLE_KUBECTL"); disableKubeCtl {
-		fmt.Println("No invoker lookup due to RIFF_DISABLE_KUBECTL")
-		return []projectriff_v1.Invoker{}, nil
-	}
-
 	str, err := kubeCtl.Exec([]string{"get", "Invokers", "-o", "json"})
 	if err != nil {
 		return nil, err
