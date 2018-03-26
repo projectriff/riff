@@ -22,7 +22,7 @@ release: $(GO_SOURCES) ../vendor
 	GOOS=windows  GOARCH=amd64 go build -ldflags "-X main.version=$(VERSION)" -o $(OUTPUT_WINDOWS) ../cli.go && zip -mq riff-windows-amd64.zip $(OUTPUT_WINDOWS)
 
 docs: $(OUTPUT)
-	rm -fR docs && ./$(OUTPUT) docs
+	rm -fR docs && RIFF_INVOKER_PATHS="" ./$(OUTPUT) docs
 
 gen-mocks $(GENERATED_SOURCES): $(GO_SOURCES) ../vendor
 	go get -u github.com/vektra/mockery/.../
