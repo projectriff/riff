@@ -9,7 +9,7 @@ spec:
   - "*.py"
   properties:
     handler:
-      default: "{{ .FunctionName }}"
+      default: "{{ .TitleCase .FunctionName }}"
       description: the name of the function handler
     function:
       protocol: grpc

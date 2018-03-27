@@ -349,7 +349,7 @@ var _ = Describe("The create command", func() {
 
 		Expect(initOptions.FilePath).To(Equal(path))
 		Expect(initOptions.Artifact).To(Equal("demo.py"))
-		Expect(initOptions.Handler).To(Equal("demo"))
+		Expect(initOptions.Handler).To(Equal("Demo"))
 		Expect(initOptions.UserAccount).To(Equal("rifftest"))
 	})
 
