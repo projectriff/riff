@@ -202,6 +202,14 @@ func resolveArtifacts(workdir string, invokers []projectriff_v1.Invoker) ([]stri
 	return keys, nil
 }
 
+type handlerOptions struct {
+	FunctionName string
+}
+
+func (h handlerOptions) TitleCase(s string) string {
+	return strings.Title(s)
+}
+
 func resolveOptions(opts *options.InitOptions, invoker projectriff_v1.Invoker) error {
 	if opts.Input == "" {
 		opts.Input = opts.FunctionName
@@ -216,7 +224,7 @@ func resolveOptions(opts *options.InitOptions, invoker projectriff_v1.Invoker) e
 	// }
 
 	if opts.Handler != "" {
-		handler, err := templateutils.Apply(opts.Handler, "opts.Handler", opts)
+		handler, err := templateutils.Apply(opts.Handler, "opts.Handler", handlerOptions{FunctionName: opts.FunctionName})
 		if err != nil {
 			return err
 		}
