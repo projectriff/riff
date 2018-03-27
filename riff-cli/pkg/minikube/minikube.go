@@ -21,7 +21,17 @@ import (
 	"strings"
 )
 
-func QueryIp() (string, error) {
+// Type Minikube abtracts away interaction with the minikube command line tool (may be used in development mode,
+// in which case the address for the http gateway using a NodePort is not localhost, but rather `minikube ip`)
+type Minikube interface {
+	QueryIp() (string, error)
+}
+
+// realMinikube spawns a new process and runs the `minikube` command for real when asked to do so.
+type realMinikube struct {
+}
+
+func (*realMinikube) QueryIp() (string, error) {
 	cmdName := "minikube"
 
 	cmd := exec.Command(cmdName, "ip")
@@ -29,4 +39,8 @@ func QueryIp() (string, error) {
 	output, err := cmd.CombinedOutput()
 
 	return strings.TrimRight(string(output),"\n"), err
+}
+
+func RealMinikube() Minikube {
+	return &realMinikube{}
 }

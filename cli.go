@@ -24,6 +24,7 @@ import (
 	"github.com/projectriff/riff/riff-cli/global"
 	"github.com/projectriff/riff/riff-cli/pkg/docker"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
+	"github.com/projectriff/riff/riff-cli/pkg/minikube"
 )
 
 var version = "Unknown"
@@ -34,6 +35,7 @@ func main() {
 	rootCmd, err := cmd.CreateAndWireRootCommand(
 		docker.RealDocker(), docker.DryRunDocker(),
 		kubectl.RealKubeCtl(), kubectl.DryRunKubeCtl(),
+		minikube.RealMinikube(),
 	)
 	if err != nil {
 		fmt.Println(err)
