@@ -24,6 +24,7 @@ import (
 	"github.com/projectriff/riff/message-transport/pkg/transport"
 	"io"
 	"context"
+	"github.com/projectriff/riff/message-transport/pkg/message"
 )
 
 type Gateway interface {
@@ -31,27 +32,38 @@ type Gateway interface {
 }
 
 type gateway struct {
-	httpServer *http.Server
-	consumer   transport.Consumer
-	producer   transport.Producer
-	replies    *repliesMap
-	timeout    time.Duration
+	httpServer       *http.Server
+	consumer         transport.Consumer
+	consumerMessages chan message.Message
+	producer         transport.Producer
+	replies          *repliesMap
+	timeout          time.Duration
 }
 
 func (g *gateway) Run(stop <-chan struct{}) {
 	go func() {
 		log.Printf("Listening on %v", g.httpServer.Addr)
-		if err := g.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed{
+		if err := g.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			panic(err)
 		}
 	}()
 
 	go g.repliesLoop(stop)
+}
 
+func (g *gateway) consumeRepliesLoop() {
+	for {
+		msg, _, err := g.consumer.Receive()
+		if err != nil {
+			break
+		}
+		g.consumerMessages <- msg
+	}
 }
 
 func (g *gateway) repliesLoop(stop <-chan struct{}) {
-	consumerMessages := g.consumer.Messages()
+	go g.consumeRepliesLoop()
+	consumerMessages := g.consumerMessages
 	producerErrors := g.producer.Errors()
 	for {
 		select {
@@ -72,7 +84,7 @@ func (g *gateway) repliesLoop(stop <-chan struct{}) {
 			}
 		case err := <-producerErrors:
 			log.Println("Failed to send message ", err)
-		case <- stop:
+		case <-stop:
 			if pCloseable, ok := g.producer.(io.Closer); ok {
 				pCloseable.Close()
 			}
@@ -94,9 +106,11 @@ func New(port int, producer transport.Producer, consumer transport.Consumer, tim
 	httpServer := &http.Server{Addr: fmt.Sprintf(":%v", port),
 		Handler: mux,
 	}
+	consumerMessages := make(chan message.Message)
 	g := gateway{httpServer: httpServer,
 		producer: producer,
 		consumer: consumer,
+		consumerMessages: consumerMessages,
 		replies: newRepliesMap(),
 		timeout: timeout,
 	}

@@ -30,6 +30,7 @@ import (
 	"github.com/projectriff/riff/message-transport/pkg/message"
 	"github.com/projectriff/riff/message-transport/pkg/transport/mocktransport"
 	"github.com/stretchr/testify/mock"
+	"github.com/projectriff/riff/message-transport/pkg/transport/stubtransport"
 )
 
 var _ = Describe("RequestsHandler", func() {
@@ -38,11 +39,10 @@ var _ = Describe("RequestsHandler", func() {
 
 	var (
 		mockProducer       *mocktransport.Producer
-		mockConsumer       *mocktransport.Consumer
+		stubConsumer       stubtransport.ConsumerStub
 		mockResponseWriter *httptest.ResponseRecorder
 		req                *http.Request
 		testError          error
-		consumerMessages   chan message.Message
 		producerErrors     chan error
 		timeout            time.Duration
 		gateway            *gateway
@@ -51,27 +51,25 @@ var _ = Describe("RequestsHandler", func() {
 
 	BeforeEach(func() {
 		mockProducer = new(mocktransport.Producer)
-		mockConsumer = new(mocktransport.Consumer)
 		req = httptest.NewRequest("GET", "http://example.com", nil)
 		req.URL.Path = "/requests/testtopic"
 		mockResponseWriter = httptest.NewRecorder()
 		testError = errors.New(errorMessage)
 		timeout = time.Second * 60
 
-		consumerMessages = make(chan message.Message, 1)
-		var cMsg <-chan message.Message = consumerMessages
-		mockConsumer.On("Messages").Return(cMsg)
+		stubConsumer = stubtransport.NewConsumerStub()
 
 		producerErrors = make(chan error, 0)
 		var pErr <-chan error = producerErrors
 		mockProducer.On("Errors").Return(pErr)
 
-		done = make(chan struct{})
+		mockProducer.On("Close").Return(nil)
 
+		done = make(chan struct{})
 	})
 
 	JustBeforeEach(func() {
-		gateway = New(8080, mockProducer, mockConsumer, timeout)
+		gateway = New(8080, mockProducer, stubConsumer, timeout)
 		go gateway.repliesLoop(done)
 		gateway.requestsHandler(mockResponseWriter, req)
 	})
@@ -115,7 +113,7 @@ var _ = Describe("RequestsHandler", func() {
 				mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Run(func(args mock.Arguments) {
 					msg, ok := args[1].(message.Message)
 					Expect(ok).To(BeTrue())
-					consumerMessages <- message.NewMessage([]byte(""), msg.Headers())
+					stubConsumer.Send(msg, "topic")
 				}).Return(nil)
 			})
 
@@ -191,7 +189,7 @@ var _ = Describe("RequestsHandler", func() {
 
 					producerErrors <- testError
 
-					consumerMessages <- message.NewMessage([]byte(""), msg.Headers())
+					stubConsumer.Send(msg, "topic")
 				}).Return(nil)
 			})
 
@@ -207,7 +205,7 @@ var _ = Describe("RequestsHandler", func() {
 				mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Run(func(args mock.Arguments) {
 					headers := make(message.Headers)
 					headers["correlationId"] = []string{""}
-					consumerMessages <- message.NewMessage([]byte(""), headers)
+					stubConsumer.Send(message.NewMessage([]byte(""), headers), "banana")
 				}).Return(nil)
 			})
 
@@ -224,7 +222,7 @@ var _ = Describe("RequestsHandler", func() {
 					Expect(ok).To(BeTrue())
 					headers := msg.Headers()
 					headers["error"] = []string{"error-server-function-invocation"}
-					consumerMessages <- message.NewMessage([]byte(""), headers)
+					stubConsumer.Send(message.NewMessage([]byte(""), headers), "banana")
 				}).Return(nil)
 			})
 

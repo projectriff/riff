@@ -9,18 +9,46 @@ type Consumer struct {
 	mock.Mock
 }
 
-// Messages provides a mock function with given fields:
-func (_m *Consumer) Messages() <-chan message.Message {
+// Close provides a mock function with given fields:
+func (_m *Consumer) Close() error {
 	ret := _m.Called()
 
-	var r0 <-chan message.Message
-	if rf, ok := ret.Get(0).(func() <-chan message.Message); ok {
+	var r0 error
+	if rf, ok := ret.Get(0).(func() error); ok {
 		r0 = rf()
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(<-chan message.Message)
-		}
+		r0 = ret.Error(0)
 	}
 
 	return r0
+}
+
+// Receive provides a mock function with given fields:
+func (_m *Consumer) Receive() (message.Message, string, error) {
+	ret := _m.Called()
+
+	var r0 message.Message
+	if rf, ok := ret.Get(0).(func() message.Message); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(message.Message)
+		}
+	}
+
+	var r1 string
+	if rf, ok := ret.Get(1).(func() string); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Get(1).(string)
+	}
+
+	var r2 error
+	if rf, ok := ret.Get(2).(func() error); ok {
+		r2 = rf()
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }

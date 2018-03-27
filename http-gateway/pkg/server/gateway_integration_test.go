@@ -30,31 +30,30 @@ import (
 	"github.com/projectriff/riff/message-transport/pkg/message"
 	"github.com/projectriff/riff/message-transport/pkg/transport/mocktransport"
 	"github.com/stretchr/testify/mock"
+	"github.com/projectriff/riff/message-transport/pkg/transport/stubtransport"
 )
 
 var _ = Describe("HTTP Gateway", func() {
 	var (
 		gw               server.Gateway
 		mockProducer     *mocktransport.Producer
-		mockConsumer     *mocktransport.Consumer
+		stubConsumer     stubtransport.ConsumerStub
 		port             int
 		timeout          time.Duration
 		done             chan struct{}
-		consumerMessages chan message.Message
 		producerErrors   chan error
 	)
 
 	BeforeEach(func() {
 		mockProducer = new(mocktransport.Producer)
-		mockConsumer = new(mocktransport.Consumer)
 
-		consumerMessages = make(chan message.Message, 1)
-		var cMsg <-chan message.Message = consumerMessages
-		mockConsumer.On("Messages").Return(cMsg)
+		stubConsumer = stubtransport.NewConsumerStub()
 
 		producerErrors = make(chan error, 0)
 		var pErr <-chan error = producerErrors
 		mockProducer.On("Errors").Return(pErr)
+
+		mockProducer.On("Close").Return(nil)
 
 		timeout = 6 * time.Second
 		done = make(chan struct{})
@@ -62,7 +61,7 @@ var _ = Describe("HTTP Gateway", func() {
 
 	JustBeforeEach(func() {
 		port = 1024 + rand.Intn(32768-1024)
-		gw = server.New(port, mockProducer, mockConsumer, timeout)
+		gw = server.New(port, mockProducer, stubConsumer, timeout)
 
 		gw.Run(done)
 
@@ -78,10 +77,10 @@ var _ = Describe("HTTP Gateway", func() {
 		mockProducer.On("Send", "foo", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			defer GinkgoRecover()
 			msg := args[1].(message.Message)
-			consumerMessages <- message.NewMessage([]byte("hello "+string(msg.Payload())),
+			stubConsumer.Send(message.NewMessage([]byte("hello "+string(msg.Payload())),
 				message.Headers{server.CorrelationId: msg.Headers()[server.CorrelationId],
 					"Content-Type": []string{"bag/plastic"},
-				})
+				}), "topic")
 			Expect(msg.Headers()["Content-Type"]).To(Equal([]string{"text/solid"}))
 			Expect(msg.Headers()["Not-Propagated-Header"]).To(BeNil())
 		})

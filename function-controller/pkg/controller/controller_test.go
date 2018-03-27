@@ -27,22 +27,24 @@ import (
 	"k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"
+	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler/mockautoscaler"
+	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler"
 )
 
 var _ = Describe("Controller", func() {
 	var (
 		ctrl                controller.Controller
-		tracker             *mocks.LagTracker
 		deployer            *mocks.Deployer
+		autoScaler          *mockautoscaler.AutoScaler
 		deploymentsHandlers cache.ResourceEventHandlerFuncs
 		functionHandlers    cache.ResourceEventHandlerFuncs
 		topicHandlers       cache.ResourceEventHandlerFuncs
 		closeCh             chan struct{}
+		maxReplicasPolicy   func(id autoscaler.FunctionId) int
+		delayScaleDownPolicy func(function autoscaler.FunctionId) time.Duration
 	)
 
 	BeforeEach(func() {
-		tracker = new(mocks.LagTracker)
-
 		deployer = new(mocks.Deployer)
 
 		topicInformer := new(mocks.TopicInformer)
@@ -70,30 +72,44 @@ var _ = Describe("Controller", func() {
 		})
 		siiDeployments.On("Run", mock.Anything)
 
-		ctrl = controller.New(topicInformer, functionInformer, deploymentInformer, deployer, tracker, -1)
+		autoScaler = new(mockautoscaler.AutoScaler)
+		autoScaler.On("SetMaxReplicasPolicy", mock.AnythingOfType("func(autoscaler.FunctionId) int")).Run(func(args mock.Arguments) {
+			maxReplicasPolicy = args.Get(0).(func(id autoscaler.FunctionId) int)
+		})
+		autoScaler.On("SetDelayScaleDownPolicy", mock.AnythingOfType("func(autoscaler.FunctionId) time.Duration")).Run(func(args mock.Arguments) {
+			delayScaleDownPolicy = args.Get(0).(func(function autoscaler.FunctionId) time.Duration)
+		})
+		autoScaler.On("Run")
+		autoScaler.On("Close").Return(nil)
+		autoScaler.On("StartMonitoring", mock.AnythingOfType("string"), mock.AnythingOfType("autoscaler.FunctionId")).Return(nil)
+		autoScaler.On("StopMonitoring", mock.AnythingOfType("string"), mock.AnythingOfType("autoscaler.FunctionId")).Return(nil)
+		autoScaler.On("InformFunctionReplicas", mock.AnythingOfType("autoscaler.FunctionId"), mock.AnythingOfType("int"))
+
+		ctrl = controller.New(topicInformer, functionInformer, deploymentInformer, deployer, autoScaler, -1)
 		closeCh = make(chan struct{}, 2) // 2 allows to easily send in a .Runt() func() on stubs w/o blocking
 	})
 
 	AfterEach(func() {
-		tracker.AssertExpectations(GinkgoT())
 		deployer.AssertExpectations(GinkgoT())
 	})
 
 	It("should shut down properly", func() {
-		tracker.On("Compute").Return(nil).Run(func(args mock.Arguments) {
+		proposal := make(map[autoscaler.FunctionId]int)
+		autoScaler.On("Propose").Run(func(args mock.Arguments) {
 			closeCh <- struct{}{}
-		})
+		}).Return(proposal)
 		ctrl.Run(closeCh)
 	})
 
 	It("should handle functions coming and going", func() {
 		ctrl.SetScalingInterval(10 * time.Millisecond)
 
-		tracker.On("BeginTracking", controller.Subscription{Topic: "input", Group: "fn"}).Return(nil)
-		tracker.On("StopTracking", controller.Subscription{Topic: "input", Group: "fn"}).Return(nil)
 		fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input"}}
 		deployer.On("Deploy", fn).Return(nil)
-		tracker.On("Compute").Return(lag(fn, 1))
+		proposal := make(map[autoscaler.FunctionId]int)
+		proposal[autoscaler.FunctionId{"fn"}] = 1
+		autoScaler.On("Propose").Return(proposal)
+
 		deployer.On("Scale", fn, 1).Return(nil).Run(func(args mock.Arguments) {
 			functionHandlers.DeleteFunc(fn)
 		})
@@ -109,11 +125,9 @@ var _ = Describe("Controller", func() {
 		fn1 := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input"}}
 		fn2 := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input2"}}
 
-		tracker.On("StopTracking", controller.Subscription{Topic: "input", Group: "fn"}).Return(nil)
 		deployer.On("Update", fn2, 0).Return(nil).Run(func(args mock.Arguments) {
 			closeCh <- struct{}{}
 		})
-		tracker.On("BeginTracking", controller.Subscription{Topic: "input2", Group: "fn"}).Return(nil)
 
 		functionHandlers.UpdateFunc(fn1, fn2)
 
@@ -123,7 +137,6 @@ var _ = Describe("Controller", func() {
 	It("should handle a non-trivial input topic", func() {
 		ctrl.SetScalingInterval(10 * time.Millisecond)
 
-		tracker.On("BeginTracking", controller.Subscription{Topic: "input", Group: "fn"}).Return(nil)
 		fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input"}}
 		deployer.On("Deploy", fn).Return(nil)
 
@@ -131,9 +144,18 @@ var _ = Describe("Controller", func() {
 		topic := &v1.Topic{ObjectMeta: metav1.ObjectMeta{Name: "input"}, Spec: v1.TopicSpec{Partitions: &three}}
 		deployer.On("Deploy", fn).Return(nil)
 
-		tracker.On("Compute").Return(lag(fn, 1, 0, 0)).Once()
-		tracker.On("Compute").Return(lag(fn, 6, 0, 1)).Once()
-		tracker.On("Compute").Return(lag(fn, 2, 3, 10)).Once()
+		proposal := make(map[autoscaler.FunctionId]int)
+		proposal[autoscaler.FunctionId{"fn"}] = 1
+		autoScaler.On("Propose").Return(proposal).Once()
+
+		proposal = make(map[autoscaler.FunctionId]int)
+		proposal[autoscaler.FunctionId{"fn"}] = 2
+		autoScaler.On("Propose").Return(proposal).Once()
+
+		proposal = make(map[autoscaler.FunctionId]int)
+		proposal[autoscaler.FunctionId{"fn"}] = 3
+		autoScaler.On("Propose").Return(proposal).Once()
+
 		deployer.On("Scale", fn, 1).Return(nil)
 		deployer.On("Scale", fn, 2).Return(nil)
 		deployer.On("Scale", fn, 3).Return(nil).Run(func(args mock.Arguments) {
@@ -150,7 +172,6 @@ var _ = Describe("Controller", func() {
 	It("should reconcile replicas on disruption", func() {
 		ctrl.SetScalingInterval(10 * time.Millisecond)
 
-		tracker.On("BeginTracking", controller.Subscription{Topic: "input", Group: "fn"}).Return(nil)
 		fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input"}}
 		deployer.On("Deploy", fn).Return(nil)
 
@@ -159,10 +180,13 @@ var _ = Describe("Controller", func() {
 		topic := &v1.Topic{ObjectMeta: metav1.ObjectMeta{Name: "input"}, Spec: v1.TopicSpec{Partitions: &three}}
 		deployer.On("Deploy", fn).Return(nil)
 
-		tracker.On("Compute").Return(lag(fn, 2, 6, 0)).Run(func(args mock.Arguments) {
+		proposal := make(map[autoscaler.FunctionId]int)
+		proposal[autoscaler.FunctionId{"fn"}] = 2
+		autoScaler.On("Propose").Return(proposal).Times(5).Run(func(args mock.Arguments) {
 			computes++
-		}).Times(5)
-		tracker.On("Compute").Return(lag(fn, 2, 6, 0)).Once().Run(func(args mock.Arguments) {
+		})
+
+		autoScaler.On("Propose").Return(proposal).Once().Run(func(args mock.Arguments) {
 			computes++
 			// Disrupt actual replicas on 6th computation
 			deployment := v1beta1.Deployment{
@@ -174,9 +198,11 @@ var _ = Describe("Controller", func() {
 			}
 			deploymentsHandlers.UpdateFunc(&deployment, &deployment)
 		})
-		tracker.On("Compute").Return(lag(fn, 2, 6, 0)).Run(func(args mock.Arguments) {
+
+		autoScaler.On("Propose").Return(proposal).Once().Run(func(args mock.Arguments) {
 			computes++
-		}).Once()
+		})
+
 		deployer.On("Scale", fn, 2).Return(nil).Once()
 		deployer.On("Scale", fn, 2).Return(nil).Run(func(args mock.Arguments) {
 			Expect(computes).To(Equal(7))
@@ -187,14 +213,94 @@ var _ = Describe("Controller", func() {
 
 		ctrl.Run(closeCh)
 	})
-})
 
-func lag(fn *v1.Function, lag ...int) map[controller.Subscription]controller.PartitionedOffsets {
-	result := make(map[controller.Subscription]controller.PartitionedOffsets)
-	offsets := make(controller.PartitionedOffsets, len(lag))
-	for i, l := range lag {
-		offsets[int32(i)] = controller.Offsets{End: int64(l)}
-	}
-	result[controller.Subscription{Group: fn.Name, Topic: fn.Spec.Input}] = offsets
-	return result
-}
+	Describe("maxReplicasScalingPolicy", func() {
+		Context("when the input topic has 10 partitions", func() {
+			BeforeEach(func() {
+				ten := int32(10)
+				topic := &v1.Topic{ObjectMeta: metav1.ObjectMeta{Name: "input"}, Spec: v1.TopicSpec{Partitions: &ten}}
+				topicHandlers.AddFunc(topic)
+
+				proposal := make(map[autoscaler.FunctionId]int)
+				proposal[autoscaler.FunctionId{"fn"}] = 0
+				autoScaler.On("Propose").Return(proposal)
+
+				go ctrl.Run(closeCh)
+			})
+
+			Context("when the function does not specify maxReplicas", func() {
+			    BeforeEach(func() {
+					fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input"}}
+					deployer.On("Deploy", fn).Return(nil)
+					functionHandlers.AddFunc(fn)
+				})
+
+				It("should eventually return 10", func() {
+					// The controller takes a little while to set up the topic and function.
+					Eventually(func() int { return maxReplicasPolicy(autoscaler.FunctionId{"fn"}); }).Should(Equal(10))
+					closeCh <- struct{}{}
+				})
+			})
+
+
+			Context("when the function specifies maxReplicas as 5", func() {
+				BeforeEach(func() {
+					five := int32(5)
+					fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input", MaxReplicas: &five}}
+					deployer.On("Deploy", fn).Return(nil)
+					functionHandlers.AddFunc(fn)
+				})
+
+				It("should eventually return 5", func() {
+					// The controller takes a little while to update the function.
+					Eventually(func() int { return maxReplicasPolicy(autoscaler.FunctionId{"fn"}); }).Should(Equal(5))
+					closeCh <- struct{}{}
+				})
+			})
+		})
+	})
+
+	Describe("delayScaleDownPolicy", func() {
+		Context("when the function does not specify idleTimeoutMs", func() {
+		    BeforeEach(func() {
+				fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input"}}
+				deployer.On("Deploy", fn).Return(nil)
+				functionHandlers.AddFunc(fn)
+
+				proposal := make(map[autoscaler.FunctionId]int)
+				proposal[autoscaler.FunctionId{"fn"}] = 0
+				autoScaler.On("Propose").Return(proposal)
+
+				go ctrl.Run(closeCh)
+			})
+
+			It("should consistently return the default scale down delay", func() {
+				// The controller takes a little while to set up the topic and function.
+				Consistently(func() time.Duration { return delayScaleDownPolicy(autoscaler.FunctionId{"fn"}); }).Should(Equal(time.Second*10))
+				closeCh <- struct{}{}
+			})
+		})
+
+		Context("when the function specifies idleTimeoutMs", func() {
+			var idleTimeoutMs int32
+		    BeforeEach(func() {
+				idleTimeoutMs = 300
+				fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input", IdleTimeoutMs: &idleTimeoutMs}}
+				deployer.On("Deploy", fn).Return(nil)
+				functionHandlers.AddFunc(fn)
+
+				proposal := make(map[autoscaler.FunctionId]int)
+				proposal[autoscaler.FunctionId{"fn"}] = 0
+				autoScaler.On("Propose").Return(proposal)
+
+				go ctrl.Run(closeCh)
+			})
+
+			It("should eventually return the specified scale down delay", func() {
+				// The controller takes a little while to set up the function.
+				Eventually(func() time.Duration { return delayScaleDownPolicy(autoscaler.FunctionId{"fn"}); }).Should(Equal(time.Millisecond*time.Duration(idleTimeoutMs)))
+				closeCh <- struct{}{}
+			})
+		})
+	})
+})
