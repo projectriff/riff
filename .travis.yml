@@ -2,7 +2,7 @@ language: go
 go:
 - '1.9'
 install:
-- go get github.com/Masterminds/glide
+- stat vendor glide.* && make -n --debug=v vendor
 script: cd $COMPONENT && make test
 matrix:
   include:
