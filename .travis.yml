@@ -2,7 +2,8 @@ language: go
 go:
 - '1.9'
 install:
-- go get github.com/Masterminds/glide
+- cd - && pwd && ls -dlrt vendor glide.* && stat vendor glide.* && make -n --debug=v vendor && cd ${TRAVIS_BUILD_DIR}
+-  pwd && ls -dlrt vendor glide.* && stat vendor glide.* && make -n --debug=v vendor
 script: cd $COMPONENT && make test
 matrix:
   include:
