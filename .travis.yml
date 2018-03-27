@@ -2,7 +2,7 @@ language: go
 go:
 - '1.9'
 install:
-- cd - && stat vendor glide.* && make -n --debug=v vendor && cd -
+- cd - && stat vendor glide.* && make -n --debug=v vendor && cd ${TRAVIS_BUILD_DIR}
 - stat vendor glide.* && make -n --debug=v vendor
 script: cd $COMPONENT && make test
 matrix:
