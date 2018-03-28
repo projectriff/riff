@@ -2,9 +2,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-http-gateway
+  name: {{ template "riff.fullname" . }}-http-gateway
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "riff.name" . }}
     component: http-gateway
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
@@ -14,7 +14,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "name" . }}
+        app: {{ template "riff.name" . }}
         component: http-gateway
         release: {{ .Release.Name }}
     spec:
@@ -40,5 +40,5 @@ spec:
             value: {{ .Values.kafka.broker.nodes }}
           - name: RIFF_HTTP_HEADERS_WHITELIST
             value: {{ .Values.httpGateway.httpHeadersWhitelist }}
-      serviceAccountName: {{ template "serviceAccountName" . }}
+      serviceAccountName: {{ template "riff.serviceAccountName" . }}
 {{- end -}}

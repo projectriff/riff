@@ -2,9 +2,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-function-controller
+  name: {{ template "riff.fullname" . }}-function-controller
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "riff.name" . }}
     component: function-controller
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
@@ -14,7 +14,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "name" . }}
+        app: {{ template "riff.name" . }}
         component: function-controller
         release: {{ .Release.Name }}
     spec:
@@ -42,5 +42,5 @@ spec:
             value: {{ .Values.functionController.sidecar.image.repository }}
           - name: RIFF_FUNCTION_SIDECAR_TAG
             value: {{ .Values.functionController.sidecar.image.tag }}
-      serviceAccountName: {{ template "serviceAccountName" . }}
+      serviceAccountName: {{ template "riff.serviceAccountName" . }}
 {{- end -}}

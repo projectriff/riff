@@ -3,9 +3,9 @@
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/{{ required "A valid .Values.rbac.apiVersion entry required!" .Values.rbac.apiVersion }}
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "riff.fullname" . }}
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "riff.name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
@@ -23,9 +23,9 @@ rules:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/{{ required "A valid .Values.rbac.apiVersion entry required!" .Values.rbac.apiVersion }}
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "riff.fullname" . }}
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "riff.name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
@@ -43,36 +43,36 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/{{ required "A valid .Values.rbac.apiVersion entry required!" .Values.rbac.apiVersion }}
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "riff.fullname" . }}
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "riff.name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 roleRef:
   kind: ClusterRole
-  name: {{ template "fullname" . }}
+  name: {{ template "riff.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
 subjects:
 - kind: ServiceAccount
-  name: {{ template "serviceAccountName" . }}
+  name: {{ template "riff.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/{{ required "A valid .Values.rbac.apiVersion entry required!" .Values.rbac.apiVersion }}
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "riff.fullname" . }}
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "riff.name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 roleRef:
   kind: Role
-  name: {{ template "fullname" . }}
+  name: {{ template "riff.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
 subjects:
 - kind: ServiceAccount
-  name: {{ template "serviceAccountName" . }}
+  name: {{ template "riff.serviceAccountName" . }}
 {{- end -}}
 {{- end -}}

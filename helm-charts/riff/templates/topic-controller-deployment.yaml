@@ -2,9 +2,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-topic-controller
+  name: {{ template "riff.fullname" . }}-topic-controller
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "riff.name" . }}
     component: topic-controller
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
@@ -14,7 +14,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "name" . }}
+        app: {{ template "riff.name" . }}
         component: topic-controller
         release: {{ .Release.Name }}
     spec:
@@ -38,5 +38,5 @@ spec:
           env:
           - name: KAFKA_ZK_NODES
             value: {{ .Values.kafka.zookeeper.nodes }}
-      serviceAccountName: {{ template "serviceAccountName" . }}
+      serviceAccountName: {{ template "riff.serviceAccountName" . }}
 {{- end -}}
