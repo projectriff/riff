@@ -1,9 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "zkname" . }}
+  name: {{ template "kafka.zkname" . }}
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "kafka.name" . }}
     component: zookeeper
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
@@ -13,7 +13,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "name" . }}
+        app: {{ template "kafka.name" . }}
         component: zookeeper
         release: {{ .Release.Name }}
     spec:
@@ -27,4 +27,4 @@ spec:
           - name: ZOOKEEPER_ID
             value: "1"
           - name: ZOOKEEPER_SERVER_1
-            value: {{ template "fullname" . }}-zookeeper
+            value: {{ template "kafka.fullname" . }}-zookeeper
