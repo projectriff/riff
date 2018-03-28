@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: topic-controller-debug
+  name: projectriff-riff-topic-controller-debug
   labels:
     app: riff
     component: topic-controller

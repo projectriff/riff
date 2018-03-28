@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: http-gateway
+  name: projectriff-riff-http-gateway
 spec:
   replicas: 1
   template:
@@ -27,6 +27,6 @@ spec:
           periodSeconds: 5
         env:
         - name: KAFKA_BROKERS
-          value: kafka.riff-system:9092
+          value: projectriff-kafka.riff-system:9092
         - name: RIFF_HTTP_HEADERS_WHITELIST
           value: # Add,A-Comma-Separated,List-Of,Headers,To-Whitelist,Here
