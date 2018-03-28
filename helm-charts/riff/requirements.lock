@@ -1,0 +1,6 @@
+dependencies:
+- name: kafka
+  repository: https://riff-charts.storage.googleapis.com/
+  version: 0.0.2
+digest: sha256:297fc2285ddd154c324ab7faa4f75047d5d0cd7a2e485127df1b111f59e8bc85
+generated: 2018-03-29T11:05:17.727193-04:00
