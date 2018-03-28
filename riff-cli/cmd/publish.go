@@ -29,6 +29,7 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/minikube"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/cobra"
+	"strconv"
 )
 
 type publishOptions struct {
@@ -92,14 +93,14 @@ func lookupAddress(kube kubectl.KubeCtl, minik minikube.Minikube) (string, strin
 
 	parser := jsonpath.NewParser([]byte(output))
 
-	portType := parser.Value(`$.items[0].spec.type+`)
+	portType, err := parser.StringValue(`$.items[0].spec.type`)
 
-	if portType == "" {
-		return "", "", errors.New("Unable to locate http-gateway")
+	if err != nil {
+		return "", "", errors.New("Unable to locate http-gateway: " + err.Error())
 	}
 
 	var ipAddress string
-	var port string
+	var pFloat interface{}
 
 	switch portType {
 	case "NodePort":
@@ -107,21 +108,22 @@ func lookupAddress(kube kubectl.KubeCtl, minik minikube.Minikube) (string, strin
 		if err != nil || strings.Contains(ipAddress, "Error getting IP") {
 			ipAddress = "127.0.0.1"
 		}
-		port = parser.Value(`$.items[0].spec.ports[*]?(@.name == "http").nodePort+`)
+		pFloat, err = parser.Value(`$.items[0].spec.ports[?(@.name == http)].nodePort[0]`)
 	case "LoadBalancer":
-		ipAddress = parser.Value(`$.items[0].status.loadBalancer.ingress[0].ip+`)
+		ipAddress, err = parser.StringValue(`$.items[0].status.loadBalancer.ingress[0].ip`)
 		if ipAddress == "" {
 			return "", "", errors.New("unable to determine http-gateway ip address")
 		}
-		port = parser.Value(`$.items[0].spec.ports[*]?(@.name == "http").port+`)
+		pFloat, err = parser.Value(`$.items[0].spec.ports[?(@.name == http)].port[0]`)
 
 	default:
 		return "", "", fmt.Errorf("Unkown port type %s", portType)
 	}
 
-	if port == "" {
-		return "", "", errors.New("Unable to determine gateway port")
+	if err != nil {
+		return "", "", errors.New("Unable to determine gateway port: " + err.Error())
 	}
+	port := strconv.FormatFloat(pFloat.(float64), 'f', 0, 64)
 	return ipAddress, port, nil
 }
 
