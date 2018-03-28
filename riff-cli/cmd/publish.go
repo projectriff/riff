@@ -4,9 +4,9 @@
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
- *  
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *   Unless required by applicable law or agreed to in writing, software
  *   distributed under the License is distributed on an "AS IS" BASIS,
  *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,18 +17,18 @@
 package cmd
 
 import (
-	"strings"
 	"fmt"
-	"net/http"
 	"io/ioutil"
+	"net/http"
+	"strings"
 	"time"
 
-	"github.com/spf13/cobra"
+	"github.com/juju/errgo/errors"
+	"github.com/projectriff/riff/riff-cli/pkg/jsonpath"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/pkg/minikube"
-	"github.com/projectriff/riff/riff-cli/pkg/jsonpath"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
-	"github.com/juju/errgo/errors"
+	"github.com/spf13/cobra"
 )
 
 type publishOptions struct {
@@ -137,21 +137,29 @@ func publish(ipAddress string, port string, publishOptions publishOptions) error
 
 	for i := 0; i < publishOptions.count; i++ {
 
-		resp, err := http.Post(url, publishOptions.contentType, strings.NewReader(publishOptions.data))
-		if err != nil {
+		if result, err := doPost(url, publishOptions); err != nil {
 			return err
+		} else {
+			fmt.Println(result)
 		}
 
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-		fmt.Println(string(body))
-
-		if (publishOptions.pause > 0) {
+		if publishOptions.pause > 0 {
 			time.Sleep(time.Duration(publishOptions.pause) * time.Second)
 		}
 	}
 	return nil
+}
+
+func doPost(url string, publishOptions publishOptions) (string, error) {
+	resp, err := http.Post(url, publishOptions.contentType, strings.NewReader(publishOptions.data))
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(body), nil
 }

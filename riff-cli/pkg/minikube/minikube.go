@@ -21,6 +21,8 @@ import (
 	"strings"
 )
 
+//go:generate mockery -name=Minikube -inpkg
+
 // Type Minikube abtracts away interaction with the minikube command line tool (may be used in development mode,
 // in which case the address for the http gateway using a NodePort is not localhost, but rather `minikube ip`)
 type Minikube interface {
@@ -38,7 +40,7 @@ func (*realMinikube) QueryIp() (string, error) {
 
 	output, err := cmd.CombinedOutput()
 
-	return strings.TrimRight(string(output),"\n"), err
+	return strings.TrimRight(string(output), "\n"), err
 }
 
 func RealMinikube() Minikube {
