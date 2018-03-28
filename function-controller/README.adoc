@@ -1,7 +1,17 @@
 == Function Controller
-The *function controller* runs inside kubernetes, watching for changes to *function* and *topic* resources. It reacts by requesting the deployment of functions, and scales them according to events being detected on their input topics.
+The *function controller* runs inside kubernetes, watching for changes to *function* and *topic* resources.
+It reacts by requesting the deployment of functions, and scales them according to activity on
+their input topics.
 
-The following function config will limit the number of instance to 3 even if the number of topic partitions exceeds 3, and keep the last instance running for at least 60s.
+Instance scaling may be capped to `maxReplicas` when that specified in the function configuration.
+When Kafka is the message broker, scaling is capped to `maxReplicas` or the number of partitions in the input topic,
+whichever is lowest.
+
+The last replica of a function keeps running for at least `idleTimeoutMs` millseconds if this is specified
+in the function configuration and for at least 10 seconds otherwise.
+
+For example, the following function configuration limits the number of replicas to 3 even if the number of
+topic partitions exceeds 3, and keeps the last replica running for at least 60 seconds.
 
 ```yaml
 spec:
@@ -70,3 +80,17 @@ Then expose the `2345` port as a service, using `riff/config/delve/function-cont
 kubectl apply -f config/debug-service.yaml
 ----
 After restarting the `function-controller-...` pod, you can connect the debugger through `localhost:30102` (or `$(minikube ip):30102`).
+
+=== Generating Mocks
+
+Mocks can be regenerated as follows _and should then be checked in_:
+[source, bash]
+----
+make gen-mocks
+----
+
+You can verify that generated mocks which are committed or staged are up to date using:
+[source, bash]
+----
+make verify-mocks
+----
