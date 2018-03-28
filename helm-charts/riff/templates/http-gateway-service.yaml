@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "fullname" . }}-http-gateway
+  name: {{ template "riff.fullname" . }}-http-gateway
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "riff.name" . }}
     component: http-gateway
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
@@ -17,7 +17,7 @@ spec:
       protocol: TCP
       name: {{ .Values.httpGateway.service.name }}
   selector:
-    app: {{ template "name" . }}
+    app: {{ template "riff.name" . }}
     component: http-gateway
     release: {{ .Release.Name }}
 {{- end -}}
