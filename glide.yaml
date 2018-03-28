@@ -61,8 +61,8 @@ import:
 - package: github.com/wvanbergen/kazoo-go
 
 ################ RIFF CLI ##################
-- package: github.com/NodePrime/jsonpath
-  version: v0.3.1
+- package: github.com/oliveagle/jsonpath
+  version: 46faf33da13527c9ef82205c0ee188f6fc98b13e
 - package: github.com/spf13/cobra
   version: c6c44e6fdcc30161c7f4480754da7230d01c06e3
   subpackages:
