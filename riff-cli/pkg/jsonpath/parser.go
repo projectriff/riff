@@ -17,34 +17,29 @@
 package jsonpath
 
 import (
-	nodeprime "github.com/NodePrime/jsonpath"
-	"strings"
+	"github.com/oliveagle/jsonpath"
+	"encoding/json"
 )
 
 type Parser struct {
-	Json []byte
+	data interface{}
 }
 
-func NewParser(json []byte) *Parser {
-	return &Parser{Json: json}
+func NewParser(b []byte) *Parser {
+	p := Parser{}
+	json.Unmarshal(b, &p.data)
+	return &p
 }
 
-func (p Parser) Value(path string) string {
-	paths, err := nodeprime.ParsePaths(path)
+func (p Parser) Value(path string) (interface{}, error) {
+	comp, err := jsonpath.Compile(path)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	eval, err := nodeprime.EvalPathsInBytes(p.Json, paths)
-	if err != nil {
-		panic(err)
-	}
-	if r, ok := eval.Next(); ok {
-		if (r.Type == nodeprime.JsonString) {
-			return strings.Replace(string(r.Value),"\"","",-1)
-		} else {
-			return string(r.Value)
-		}
-	} else {
-		return ""
-	}
+	return comp.Lookup(p.data)
+}
+
+func (p Parser) StringValue(path string) (string, error) {
+	res, err := p.Value(path)
+	return res.(string), err
 }

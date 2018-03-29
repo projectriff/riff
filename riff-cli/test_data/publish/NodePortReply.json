@@ -6,33 +6,33 @@
             "kind": "Service",
             "metadata": {
                 "annotations": {
-                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Service\",\"metadata\":{\"annotations\":{},\"labels\":{\"app\":\"riff\",\"component\":\"http-gateway\"},\"name\":\"http-gateway\",\"namespace\":\"default\"},\"spec\":{\"ports\":[{\"name\":\"http\",\"port\":80,\"targetPort\":8080},{\"name\":\"https\",\"port\":443,\"targetPort\":8443}],\"selector\":{\"component\":\"http-gateway\"},\"type\":\"NodePort\"}}\n"
+                    "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Service\",\"metadata\":{\"annotations\":{},\"labels\":{\"app\":\"riff\",\"component\":\"http-gateway\"},\"name\":\"http-gateway\",\"namespace\":\"riff-system\"},\"spec\":{\"ports\":[{\"name\":\"http\",\"port\":80,\"targetPort\":8080},{\"name\":\"https\",\"port\":443,\"targetPort\":8443}],\"selector\":{\"component\":\"http-gateway\"},\"type\":\"NodePort\"}}\n"
                 },
-                "creationTimestamp": "2018-01-14T13:11:32Z",
+                "creationTimestamp": "2018-03-26T15:52:51Z",
                 "labels": {
                     "app": "riff",
                     "component": "http-gateway"
                 },
                 "name": "http-gateway",
-                "namespace": "default",
-                "resourceVersion": "569442",
-                "selfLink": "/api/v1/namespaces/default/services/http-gateway",
-                "uid": "71208bd2-f92c-11e7-91a5-08002714d519"
+                "namespace": "riff-system",
+                "resourceVersion": "684338",
+                "selfLink": "/api/v1/namespaces/riff-system/services/http-gateway",
+                "uid": "bd9081df-310d-11e8-b046-0800271a11fa"
             },
             "spec": {
-                "clusterIP": "10.105.15.133",
+                "clusterIP": "10.103.170.113",
                 "externalTrafficPolicy": "Cluster",
                 "ports": [
                     {
                         "name": "http",
-                        "nodePort": 31861,
+                        "nodePort": <port>,
                         "port": 80,
                         "protocol": "TCP",
                         "targetPort": 8080
                     },
                     {
                         "name": "https",
-                        "nodePort": 31034,
+                        "nodePort": 31967,
                         "port": 443,
                         "protocol": "TCP",
                         "targetPort": 8443

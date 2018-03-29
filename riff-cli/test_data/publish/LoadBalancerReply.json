@@ -26,7 +26,7 @@
                     {
                         "name": "http",
                         "nodePort": 32627,
-                        "port": 80,
+                        "port": <port>,
                         "protocol": "TCP",
                         "targetPort": 8080
                     }
@@ -43,7 +43,7 @@
                 "loadBalancer": {
                     "ingress": [
                         {
-                            "ip": "35.196.105.42"
+                            "ip": "<ip-address>"
                         }
                     ]
                 }

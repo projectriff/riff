@@ -135,8 +135,8 @@ func lookupTopicNames(opts DeleteOptions, queryClient kubectl.KubeCtl) (string, 
 	}
 	parser := jsonpath.NewParser([]byte(json))
 
-	inputTopic := parser.Value(`$.spec.input+`)
-	outputTopic := parser.Value(`$.spec.output+`)
+	inputTopic, _ := parser.StringValue(`$.spec.input`)
+	outputTopic, _ := parser.StringValue(`$.spec.output`)
 	return inputTopic, outputTopic, err
 
 }
