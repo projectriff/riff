@@ -7,8 +7,8 @@ spec:
   version: 0.0.5-snapshot
   matchers:
   - "*"
-  properties:
-    function:
+  functionTemplate:
+    spec: 
       protocol: grpc
   files:
   - path: Dockerfile
