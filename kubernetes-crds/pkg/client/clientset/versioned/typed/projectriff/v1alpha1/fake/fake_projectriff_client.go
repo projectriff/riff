@@ -17,30 +17,30 @@
 package fake
 
 import (
-	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned/typed/projectriff/v1"
+	v1alpha1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned/typed/projectriff/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )
 
-type FakeProjectriffV1 struct {
+type FakeProjectriffV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeProjectriffV1) Functions(namespace string) v1.FunctionInterface {
+func (c *FakeProjectriffV1alpha1) Functions(namespace string) v1alpha1.FunctionInterface {
 	return &FakeFunctions{c, namespace}
 }
 
-func (c *FakeProjectriffV1) Invokers(namespace string) v1.InvokerInterface {
+func (c *FakeProjectriffV1alpha1) Invokers(namespace string) v1alpha1.InvokerInterface {
 	return &FakeInvokers{c, namespace}
 }
 
-func (c *FakeProjectriffV1) Topics(namespace string) v1.TopicInterface {
+func (c *FakeProjectriffV1alpha1) Topics(namespace string) v1alpha1.TopicInterface {
 	return &FakeTopics{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *FakeProjectriffV1) RESTClient() rest.Interface {
+func (c *FakeProjectriffV1alpha1) RESTClient() rest.Interface {
 	var ret *rest.RESTClient
 	return ret
 }

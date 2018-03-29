@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package v1
+package v1alpha1
 
 import (
-	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	v1alpha1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	scheme "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned/scheme"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	rest "k8s.io/client-go/rest"
@@ -33,14 +33,14 @@ type TopicsGetter interface {
 
 // TopicInterface has methods to work with Topic resources.
 type TopicInterface interface {
-	Create(*v1.Topic) (*v1.Topic, error)
-	Update(*v1.Topic) (*v1.Topic, error)
-	Delete(name string, options *meta_v1.DeleteOptions) error
-	DeleteCollection(options *meta_v1.DeleteOptions, listOptions meta_v1.ListOptions) error
-	Get(name string, options meta_v1.GetOptions) (*v1.Topic, error)
-	List(opts meta_v1.ListOptions) (*v1.TopicList, error)
-	Watch(opts meta_v1.ListOptions) (watch.Interface, error)
-	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1.Topic, err error)
+	Create(*v1alpha1.Topic) (*v1alpha1.Topic, error)
+	Update(*v1alpha1.Topic) (*v1alpha1.Topic, error)
+	Delete(name string, options *v1.DeleteOptions) error
+	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
+	Get(name string, options v1.GetOptions) (*v1alpha1.Topic, error)
+	List(opts v1.ListOptions) (*v1alpha1.TopicList, error)
+	Watch(opts v1.ListOptions) (watch.Interface, error)
+	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Topic, err error)
 	TopicExpansion
 }
 
@@ -51,7 +51,7 @@ type topics struct {
 }
 
 // newTopics returns a Topics
-func newTopics(c *ProjectriffV1Client, namespace string) *topics {
+func newTopics(c *ProjectriffV1alpha1Client, namespace string) *topics {
 	return &topics{
 		client: c.RESTClient(),
 		ns:     namespace,
@@ -59,8 +59,8 @@ func newTopics(c *ProjectriffV1Client, namespace string) *topics {
 }
 
 // Get takes name of the topic, and returns the corresponding topic object, and an error if there is any.
-func (c *topics) Get(name string, options meta_v1.GetOptions) (result *v1.Topic, err error) {
-	result = &v1.Topic{}
+func (c *topics) Get(name string, options v1.GetOptions) (result *v1alpha1.Topic, err error) {
+	result = &v1alpha1.Topic{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("topics").
@@ -72,8 +72,8 @@ func (c *topics) Get(name string, options meta_v1.GetOptions) (result *v1.Topic,
 }
 
 // List takes label and field selectors, and returns the list of Topics that match those selectors.
-func (c *topics) List(opts meta_v1.ListOptions) (result *v1.TopicList, err error) {
-	result = &v1.TopicList{}
+func (c *topics) List(opts v1.ListOptions) (result *v1alpha1.TopicList, err error) {
+	result = &v1alpha1.TopicList{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("topics").
@@ -84,7 +84,7 @@ func (c *topics) List(opts meta_v1.ListOptions) (result *v1.TopicList, err error
 }
 
 // Watch returns a watch.Interface that watches the requested topics.
-func (c *topics) Watch(opts meta_v1.ListOptions) (watch.Interface, error) {
+func (c *topics) Watch(opts v1.ListOptions) (watch.Interface, error) {
 	opts.Watch = true
 	return c.client.Get().
 		Namespace(c.ns).
@@ -94,8 +94,8 @@ func (c *topics) Watch(opts meta_v1.ListOptions) (watch.Interface, error) {
 }
 
 // Create takes the representation of a topic and creates it.  Returns the server's representation of the topic, and an error, if there is any.
-func (c *topics) Create(topic *v1.Topic) (result *v1.Topic, err error) {
-	result = &v1.Topic{}
+func (c *topics) Create(topic *v1alpha1.Topic) (result *v1alpha1.Topic, err error) {
+	result = &v1alpha1.Topic{}
 	err = c.client.Post().
 		Namespace(c.ns).
 		Resource("topics").
@@ -106,8 +106,8 @@ func (c *topics) Create(topic *v1.Topic) (result *v1.Topic, err error) {
 }
 
 // Update takes the representation of a topic and updates it. Returns the server's representation of the topic, and an error, if there is any.
-func (c *topics) Update(topic *v1.Topic) (result *v1.Topic, err error) {
-	result = &v1.Topic{}
+func (c *topics) Update(topic *v1alpha1.Topic) (result *v1alpha1.Topic, err error) {
+	result = &v1alpha1.Topic{}
 	err = c.client.Put().
 		Namespace(c.ns).
 		Resource("topics").
@@ -119,7 +119,7 @@ func (c *topics) Update(topic *v1.Topic) (result *v1.Topic, err error) {
 }
 
 // Delete takes name of the topic and deletes it. Returns an error if one occurs.
-func (c *topics) Delete(name string, options *meta_v1.DeleteOptions) error {
+func (c *topics) Delete(name string, options *v1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("topics").
@@ -130,7 +130,7 @@ func (c *topics) Delete(name string, options *meta_v1.DeleteOptions) error {
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *topics) DeleteCollection(options *meta_v1.DeleteOptions, listOptions meta_v1.ListOptions) error {
+func (c *topics) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("topics").
@@ -141,8 +141,8 @@ func (c *topics) DeleteCollection(options *meta_v1.DeleteOptions, listOptions me
 }
 
 // Patch applies the patch and returns the patched topic.
-func (c *topics) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1.Topic, err error) {
-	result = &v1.Topic{}
+func (c *topics) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Topic, err error) {
+	result = &v1alpha1.Topic{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
 		Resource("topics").

@@ -18,7 +18,7 @@ package versioned
 
 import (
 	glog "github.com/golang/glog"
-	projectriffv1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned/typed/projectriff/v1"
+	projectriffv1alpha1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned/typed/projectriff/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
@@ -26,27 +26,27 @@ import (
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
-	ProjectriffV1() projectriffv1.ProjectriffV1Interface
+	ProjectriffV1alpha1() projectriffv1alpha1.ProjectriffV1alpha1Interface
 	// Deprecated: please explicitly pick a version if possible.
-	Projectriff() projectriffv1.ProjectriffV1Interface
+	Projectriff() projectriffv1alpha1.ProjectriffV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	projectriffV1 *projectriffv1.ProjectriffV1Client
+	projectriffV1alpha1 *projectriffv1alpha1.ProjectriffV1alpha1Client
 }
 
-// ProjectriffV1 retrieves the ProjectriffV1Client
-func (c *Clientset) ProjectriffV1() projectriffv1.ProjectriffV1Interface {
-	return c.projectriffV1
+// ProjectriffV1alpha1 retrieves the ProjectriffV1alpha1Client
+func (c *Clientset) ProjectriffV1alpha1() projectriffv1alpha1.ProjectriffV1alpha1Interface {
+	return c.projectriffV1alpha1
 }
 
 // Deprecated: Projectriff retrieves the default version of ProjectriffClient.
 // Please explicitly pick a version.
-func (c *Clientset) Projectriff() projectriffv1.ProjectriffV1Interface {
-	return c.projectriffV1
+func (c *Clientset) Projectriff() projectriffv1alpha1.ProjectriffV1alpha1Interface {
+	return c.projectriffV1alpha1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -65,7 +65,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	}
 	var cs Clientset
 	var err error
-	cs.projectriffV1, err = projectriffv1.NewForConfig(&configShallowCopy)
+	cs.projectriffV1alpha1, err = projectriffv1alpha1.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 // panics if there is an error in the config.
 func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
-	cs.projectriffV1 = projectriffv1.NewForConfigOrDie(c)
+	cs.projectriffV1alpha1 = projectriffv1alpha1.NewForConfigOrDie(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClientForConfigOrDie(c)
 	return &cs
@@ -91,7 +91,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
-	cs.projectriffV1 = projectriffv1.New(c)
+	cs.projectriffV1alpha1 = projectriffv1alpha1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs

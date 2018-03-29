@@ -1,5 +1,5 @@
 ---
-apiVersion: projectriff.io/v1
+apiVersion: projectriff.io/v1alpha1
 kind: Function
 metadata:
   name: multiple-matching-invokers-with-one-selected-no-artifact

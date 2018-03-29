@@ -14,41 +14,41 @@
  * limitations under the License.
  */
 
-package v1
+package v1alpha1
 
 import (
-	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	v1alpha1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	"github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned/scheme"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"
 )
 
-type ProjectriffV1Interface interface {
+type ProjectriffV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	FunctionsGetter
 	InvokersGetter
 	TopicsGetter
 }
 
-// ProjectriffV1Client is used to interact with features provided by the projectriff.io group.
-type ProjectriffV1Client struct {
+// ProjectriffV1alpha1Client is used to interact with features provided by the projectriff.io group.
+type ProjectriffV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *ProjectriffV1Client) Functions(namespace string) FunctionInterface {
+func (c *ProjectriffV1alpha1Client) Functions(namespace string) FunctionInterface {
 	return newFunctions(c, namespace)
 }
 
-func (c *ProjectriffV1Client) Invokers(namespace string) InvokerInterface {
+func (c *ProjectriffV1alpha1Client) Invokers(namespace string) InvokerInterface {
 	return newInvokers(c, namespace)
 }
 
-func (c *ProjectriffV1Client) Topics(namespace string) TopicInterface {
+func (c *ProjectriffV1alpha1Client) Topics(namespace string) TopicInterface {
 	return newTopics(c, namespace)
 }
 
-// NewForConfig creates a new ProjectriffV1Client for the given config.
-func NewForConfig(c *rest.Config) (*ProjectriffV1Client, error) {
+// NewForConfig creates a new ProjectriffV1alpha1Client for the given config.
+func NewForConfig(c *rest.Config) (*ProjectriffV1alpha1Client, error) {
 	config := *c
 	if err := setConfigDefaults(&config); err != nil {
 		return nil, err
@@ -57,12 +57,12 @@ func NewForConfig(c *rest.Config) (*ProjectriffV1Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ProjectriffV1Client{client}, nil
+	return &ProjectriffV1alpha1Client{client}, nil
 }
 
-// NewForConfigOrDie creates a new ProjectriffV1Client for the given config and
+// NewForConfigOrDie creates a new ProjectriffV1alpha1Client for the given config and
 // panics if there is an error in the config.
-func NewForConfigOrDie(c *rest.Config) *ProjectriffV1Client {
+func NewForConfigOrDie(c *rest.Config) *ProjectriffV1alpha1Client {
 	client, err := NewForConfig(c)
 	if err != nil {
 		panic(err)
@@ -70,13 +70,13 @@ func NewForConfigOrDie(c *rest.Config) *ProjectriffV1Client {
 	return client
 }
 
-// New creates a new ProjectriffV1Client for the given RESTClient.
-func New(c rest.Interface) *ProjectriffV1Client {
-	return &ProjectriffV1Client{c}
+// New creates a new ProjectriffV1alpha1Client for the given RESTClient.
+func New(c rest.Interface) *ProjectriffV1alpha1Client {
+	return &ProjectriffV1alpha1Client{c}
 }
 
 func setConfigDefaults(config *rest.Config) error {
-	gv := v1.SchemeGroupVersion
+	gv := v1alpha1.SchemeGroupVersion
 	config.GroupVersion = &gv
 	config.APIPath = "/apis"
 	config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
@@ -90,7 +90,7 @@ func setConfigDefaults(config *rest.Config) error {
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *ProjectriffV1Client) RESTClient() rest.Interface {
+func (c *ProjectriffV1alpha1Client) RESTClient() rest.Interface {
 	if c == nil {
 		return nil
 	}

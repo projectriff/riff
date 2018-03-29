@@ -19,7 +19,7 @@ package cmd
 import (
 	"fmt"
 
-	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/spf13/cobra"
 )
@@ -28,7 +28,7 @@ func Create(initCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Com
 	createChainCmd := utils.CommandChain(initCmd, buildCmd, applyCmd)
 	createChainCmd.Use = "create"
 	createChainCmd.Short = "Create a function (equivalent to init, build, apply)"
-	createChainCmd.Long =  utils.CreateCmdLong()
+	createChainCmd.Long = utils.CreateCmdLong()
 	return createChainCmd
 }
 

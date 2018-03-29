@@ -23,7 +23,7 @@ import (
 
 	"strings"
 
-	"github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

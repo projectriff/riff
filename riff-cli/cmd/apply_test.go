@@ -1,19 +1,20 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/spf13/cobra"
-	"fmt"
-	"path/filepath"
 )
 
 var _ = Describe("The apply command", func() {
 
 	const canned_kubectl_get_response = `{
-				"apiVersion": "projectriff.io/v1",
+				"apiVersion": "projectriff.io/v1alpha1",
 				"kind": "Function",
 				"metadata": {},
 				"spec": {

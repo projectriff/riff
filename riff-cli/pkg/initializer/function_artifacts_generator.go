@@ -22,13 +22,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 )
 
 const (
-	apiVersion   = "projectriff.io/v1"
+	apiVersion   = "projectriff.io/v1alpha1"
 	functionKind = "Function"
 	topicKind    = "Topic"
 )

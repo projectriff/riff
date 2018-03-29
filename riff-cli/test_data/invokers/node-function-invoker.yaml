@@ -1,5 +1,5 @@
 ---
-apiVersion: projectriff.io/v1
+apiVersion: projectriff.io/v1alpha1
 kind: Invoker
 metadata:
   name: node

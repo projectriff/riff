@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package v1
+package v1alpha1
 
 type FunctionExpansion interface{}
 

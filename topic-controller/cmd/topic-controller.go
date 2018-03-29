@@ -28,12 +28,13 @@ import (
 	"os/signal"
 	"syscall"
 
+	"log"
+
 	"github.com/golang/glog"
-	informersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1"
+	informersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1"
 	"github.com/projectriff/riff/topic-controller/pkg/topic"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"log"
 )
 
 // return rest config, if path not specified assume in cluster config
@@ -77,6 +78,6 @@ func makeTopicsInformer(kubeconf *string) informersV1.TopicInformer {
 		glog.Fatalf("Error building riff clientset: %s", err.Error())
 	}
 	riffInformerFactory := informers.NewSharedInformerFactory(riffClient, time.Second*30)
-	topicsInformer := riffInformerFactory.Projectriff().V1().Topics()
+	topicsInformer := riffInformerFactory.Projectriff().V1alpha1().Topics()
 	return topicsInformer
 }

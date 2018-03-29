@@ -13,7 +13,7 @@ import (
 var _ = Describe("The delete command", func() {
 
 	const canned_kubectl_get_response = `{
-				"apiVersion": "projectriff.io/v1",
+				"apiVersion": "projectriff.io/v1alpha1",
 				"kind": "Function",
 				"metadata": {},
 				"spec": {

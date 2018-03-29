@@ -24,8 +24,8 @@ import (
 
 	"time"
 
-	"github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
-	informersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1"
+	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
+	informersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1"
 	"k8s.io/api/extensions/v1beta1"
 	informersV1Beta1 "k8s.io/client-go/informers/extensions/v1beta1"
 	"k8s.io/client-go/tools/cache"

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package v1
+package v1alpha1
 
 import (
-	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	v1alpha1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	scheme "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned/scheme"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	rest "k8s.io/client-go/rest"
@@ -33,14 +33,14 @@ type FunctionsGetter interface {
 
 // FunctionInterface has methods to work with Function resources.
 type FunctionInterface interface {
-	Create(*v1.Function) (*v1.Function, error)
-	Update(*v1.Function) (*v1.Function, error)
-	Delete(name string, options *meta_v1.DeleteOptions) error
-	DeleteCollection(options *meta_v1.DeleteOptions, listOptions meta_v1.ListOptions) error
-	Get(name string, options meta_v1.GetOptions) (*v1.Function, error)
-	List(opts meta_v1.ListOptions) (*v1.FunctionList, error)
-	Watch(opts meta_v1.ListOptions) (watch.Interface, error)
-	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1.Function, err error)
+	Create(*v1alpha1.Function) (*v1alpha1.Function, error)
+	Update(*v1alpha1.Function) (*v1alpha1.Function, error)
+	Delete(name string, options *v1.DeleteOptions) error
+	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
+	Get(name string, options v1.GetOptions) (*v1alpha1.Function, error)
+	List(opts v1.ListOptions) (*v1alpha1.FunctionList, error)
+	Watch(opts v1.ListOptions) (watch.Interface, error)
+	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Function, err error)
 	FunctionExpansion
 }
 
@@ -51,7 +51,7 @@ type functions struct {
 }
 
 // newFunctions returns a Functions
-func newFunctions(c *ProjectriffV1Client, namespace string) *functions {
+func newFunctions(c *ProjectriffV1alpha1Client, namespace string) *functions {
 	return &functions{
 		client: c.RESTClient(),
 		ns:     namespace,
@@ -59,8 +59,8 @@ func newFunctions(c *ProjectriffV1Client, namespace string) *functions {
 }
 
 // Get takes name of the function, and returns the corresponding function object, and an error if there is any.
-func (c *functions) Get(name string, options meta_v1.GetOptions) (result *v1.Function, err error) {
-	result = &v1.Function{}
+func (c *functions) Get(name string, options v1.GetOptions) (result *v1alpha1.Function, err error) {
+	result = &v1alpha1.Function{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("functions").
@@ -72,8 +72,8 @@ func (c *functions) Get(name string, options meta_v1.GetOptions) (result *v1.Fun
 }
 
 // List takes label and field selectors, and returns the list of Functions that match those selectors.
-func (c *functions) List(opts meta_v1.ListOptions) (result *v1.FunctionList, err error) {
-	result = &v1.FunctionList{}
+func (c *functions) List(opts v1.ListOptions) (result *v1alpha1.FunctionList, err error) {
+	result = &v1alpha1.FunctionList{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("functions").
@@ -84,7 +84,7 @@ func (c *functions) List(opts meta_v1.ListOptions) (result *v1.FunctionList, err
 }
 
 // Watch returns a watch.Interface that watches the requested functions.
-func (c *functions) Watch(opts meta_v1.ListOptions) (watch.Interface, error) {
+func (c *functions) Watch(opts v1.ListOptions) (watch.Interface, error) {
 	opts.Watch = true
 	return c.client.Get().
 		Namespace(c.ns).
@@ -94,8 +94,8 @@ func (c *functions) Watch(opts meta_v1.ListOptions) (watch.Interface, error) {
 }
 
 // Create takes the representation of a function and creates it.  Returns the server's representation of the function, and an error, if there is any.
-func (c *functions) Create(function *v1.Function) (result *v1.Function, err error) {
-	result = &v1.Function{}
+func (c *functions) Create(function *v1alpha1.Function) (result *v1alpha1.Function, err error) {
+	result = &v1alpha1.Function{}
 	err = c.client.Post().
 		Namespace(c.ns).
 		Resource("functions").
@@ -106,8 +106,8 @@ func (c *functions) Create(function *v1.Function) (result *v1.Function, err erro
 }
 
 // Update takes the representation of a function and updates it. Returns the server's representation of the function, and an error, if there is any.
-func (c *functions) Update(function *v1.Function) (result *v1.Function, err error) {
-	result = &v1.Function{}
+func (c *functions) Update(function *v1alpha1.Function) (result *v1alpha1.Function, err error) {
+	result = &v1alpha1.Function{}
 	err = c.client.Put().
 		Namespace(c.ns).
 		Resource("functions").
@@ -119,7 +119,7 @@ func (c *functions) Update(function *v1.Function) (result *v1.Function, err erro
 }
 
 // Delete takes name of the function and deletes it. Returns an error if one occurs.
-func (c *functions) Delete(name string, options *meta_v1.DeleteOptions) error {
+func (c *functions) Delete(name string, options *v1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("functions").
@@ -130,7 +130,7 @@ func (c *functions) Delete(name string, options *meta_v1.DeleteOptions) error {
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *functions) DeleteCollection(options *meta_v1.DeleteOptions, listOptions meta_v1.ListOptions) error {
+func (c *functions) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("functions").
@@ -141,8 +141,8 @@ func (c *functions) DeleteCollection(options *meta_v1.DeleteOptions, listOptions
 }
 
 // Patch applies the patch and returns the patched function.
-func (c *functions) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1.Function, err error) {
-	result = &v1.Function{}
+func (c *functions) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Function, err error) {
+	result = &v1alpha1.Function{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
 		Resource("functions").

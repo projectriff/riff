@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package v1
+package v1alpha1
 
 import (
-	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	v1alpha1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	scheme "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned/scheme"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	rest "k8s.io/client-go/rest"
@@ -33,14 +33,14 @@ type InvokersGetter interface {
 
 // InvokerInterface has methods to work with Invoker resources.
 type InvokerInterface interface {
-	Create(*v1.Invoker) (*v1.Invoker, error)
-	Update(*v1.Invoker) (*v1.Invoker, error)
-	Delete(name string, options *meta_v1.DeleteOptions) error
-	DeleteCollection(options *meta_v1.DeleteOptions, listOptions meta_v1.ListOptions) error
-	Get(name string, options meta_v1.GetOptions) (*v1.Invoker, error)
-	List(opts meta_v1.ListOptions) (*v1.InvokerList, error)
-	Watch(opts meta_v1.ListOptions) (watch.Interface, error)
-	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1.Invoker, err error)
+	Create(*v1alpha1.Invoker) (*v1alpha1.Invoker, error)
+	Update(*v1alpha1.Invoker) (*v1alpha1.Invoker, error)
+	Delete(name string, options *v1.DeleteOptions) error
+	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
+	Get(name string, options v1.GetOptions) (*v1alpha1.Invoker, error)
+	List(opts v1.ListOptions) (*v1alpha1.InvokerList, error)
+	Watch(opts v1.ListOptions) (watch.Interface, error)
+	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Invoker, err error)
 	InvokerExpansion
 }
 
@@ -51,7 +51,7 @@ type invokers struct {
 }
 
 // newInvokers returns a Invokers
-func newInvokers(c *ProjectriffV1Client, namespace string) *invokers {
+func newInvokers(c *ProjectriffV1alpha1Client, namespace string) *invokers {
 	return &invokers{
 		client: c.RESTClient(),
 		ns:     namespace,
@@ -59,8 +59,8 @@ func newInvokers(c *ProjectriffV1Client, namespace string) *invokers {
 }
 
 // Get takes name of the invoker, and returns the corresponding invoker object, and an error if there is any.
-func (c *invokers) Get(name string, options meta_v1.GetOptions) (result *v1.Invoker, err error) {
-	result = &v1.Invoker{}
+func (c *invokers) Get(name string, options v1.GetOptions) (result *v1alpha1.Invoker, err error) {
+	result = &v1alpha1.Invoker{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("invokers").
@@ -72,8 +72,8 @@ func (c *invokers) Get(name string, options meta_v1.GetOptions) (result *v1.Invo
 }
 
 // List takes label and field selectors, and returns the list of Invokers that match those selectors.
-func (c *invokers) List(opts meta_v1.ListOptions) (result *v1.InvokerList, err error) {
-	result = &v1.InvokerList{}
+func (c *invokers) List(opts v1.ListOptions) (result *v1alpha1.InvokerList, err error) {
+	result = &v1alpha1.InvokerList{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("invokers").
@@ -84,7 +84,7 @@ func (c *invokers) List(opts meta_v1.ListOptions) (result *v1.InvokerList, err e
 }
 
 // Watch returns a watch.Interface that watches the requested invokers.
-func (c *invokers) Watch(opts meta_v1.ListOptions) (watch.Interface, error) {
+func (c *invokers) Watch(opts v1.ListOptions) (watch.Interface, error) {
 	opts.Watch = true
 	return c.client.Get().
 		Namespace(c.ns).
@@ -94,8 +94,8 @@ func (c *invokers) Watch(opts meta_v1.ListOptions) (watch.Interface, error) {
 }
 
 // Create takes the representation of a invoker and creates it.  Returns the server's representation of the invoker, and an error, if there is any.
-func (c *invokers) Create(invoker *v1.Invoker) (result *v1.Invoker, err error) {
-	result = &v1.Invoker{}
+func (c *invokers) Create(invoker *v1alpha1.Invoker) (result *v1alpha1.Invoker, err error) {
+	result = &v1alpha1.Invoker{}
 	err = c.client.Post().
 		Namespace(c.ns).
 		Resource("invokers").
@@ -106,8 +106,8 @@ func (c *invokers) Create(invoker *v1.Invoker) (result *v1.Invoker, err error) {
 }
 
 // Update takes the representation of a invoker and updates it. Returns the server's representation of the invoker, and an error, if there is any.
-func (c *invokers) Update(invoker *v1.Invoker) (result *v1.Invoker, err error) {
-	result = &v1.Invoker{}
+func (c *invokers) Update(invoker *v1alpha1.Invoker) (result *v1alpha1.Invoker, err error) {
+	result = &v1alpha1.Invoker{}
 	err = c.client.Put().
 		Namespace(c.ns).
 		Resource("invokers").
@@ -119,7 +119,7 @@ func (c *invokers) Update(invoker *v1.Invoker) (result *v1.Invoker, err error) {
 }
 
 // Delete takes name of the invoker and deletes it. Returns an error if one occurs.
-func (c *invokers) Delete(name string, options *meta_v1.DeleteOptions) error {
+func (c *invokers) Delete(name string, options *v1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("invokers").
@@ -130,7 +130,7 @@ func (c *invokers) Delete(name string, options *meta_v1.DeleteOptions) error {
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *invokers) DeleteCollection(options *meta_v1.DeleteOptions, listOptions meta_v1.ListOptions) error {
+func (c *invokers) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("invokers").
@@ -141,8 +141,8 @@ func (c *invokers) DeleteCollection(options *meta_v1.DeleteOptions, listOptions 
 }
 
 // Patch applies the patch and returns the patched invoker.
-func (c *invokers) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1.Invoker, err error) {
-	result = &v1.Invoker{}
+func (c *invokers) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Invoker, err error) {
+	result = &v1alpha1.Invoker{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
 		Resource("invokers").

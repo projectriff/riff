@@ -31,7 +31,7 @@ import (
 	"syscall"
 
 	"github.com/projectriff/riff/function-controller/pkg/controller"
-	riffInformersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1"
+	riffInformersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1"
 	k8sInformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/informers/extensions/v1beta1"
 	"k8s.io/client-go/kubernetes"
@@ -78,8 +78,8 @@ func makeInformers(config *rest.Config) (riffInformersV1.TopicInformer, riffInfo
 		log.Fatalf("Error building riff clientset: %s", err.Error())
 	}
 	riffInformerFactory := informers.NewSharedInformerFactory(riffClient, 0)
-	topicsInformer := riffInformerFactory.Projectriff().V1().Topics()
-	functionsInformer := riffInformerFactory.Projectriff().V1().Functions()
+	topicsInformer := riffInformerFactory.Projectriff().V1alpha1().Topics()
+	functionsInformer := riffInformerFactory.Projectriff().V1alpha1().Functions()
 
 	k8sClient, err := kubernetes.NewForConfig(config)
 	deploymentInformer := k8sInformers.NewSharedInformerFactory(k8sClient, 0).Extensions().V1beta1().Deployments()
