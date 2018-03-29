@@ -109,7 +109,7 @@ func InvokersList(kubeCtl kubectl.KubeCtl) *cobra.Command {
 		Short: "List invokers in the cluster",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			kubeCtlArgs := append([]string{
-				"get", "invokers",
+				"get", "invokers.projectriff.io",
 				"--sort-by=metadata.name",
 				"-o=custom-columns=NAME:.metadata.name,VERSION:.spec.version",
 			}, args...)
@@ -139,7 +139,7 @@ func InvokersDelete(kubeCtl kubectl.KubeCtl) (*cobra.Command, *InvokersDeleteOpt
 		Short: "Remove an invoker from the cluster",
 		Args:  utils.AliasFlagToSoleArg("name"),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var kubeCtlArgs = []string{"delete", "invokers"}
+			var kubeCtlArgs = []string{"delete", "invokers.projectriff.io"}
 			if invokersDeleteOptions.All {
 				kubeCtlArgs = append(kubeCtlArgs, "--all")
 			} else if invokersDeleteOptions.Name == "" {

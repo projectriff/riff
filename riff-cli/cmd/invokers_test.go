@@ -206,7 +206,7 @@ var _ = Describe("The invokers commands", func() {
 			normalKubeCtl.On(
 				"Exec",
 				[]string{
-					"get", "invokers",
+					"get", "invokers.projectriff.io",
 					"--sort-by=metadata.name",
 					"-o=custom-columns=NAME:.metadata.name,VERSION:.spec.version",
 				},
@@ -223,7 +223,7 @@ var _ = Describe("The invokers commands", func() {
 		It("removes the specified invoker", func() {
 			rootCommand.SetArgs([]string{"invokers", "delete", "command"})
 
-			normalKubeCtl.On("Exec", []string{"delete", "invokers", "command"}).Return("", nil).Once()
+			normalKubeCtl.On("Exec", []string{"delete", "invokers.projectriff.io", "command"}).Return("", nil).Once()
 
 			err := rootCommand.Execute()
 			Expect(err).NotTo(HaveOccurred())
@@ -235,7 +235,7 @@ var _ = Describe("The invokers commands", func() {
 		It("removes all invokers", func() {
 			rootCommand.SetArgs([]string{"invokers", "delete", "--all"})
 
-			normalKubeCtl.On("Exec", []string{"delete", "invokers", "--all"}).Return("", nil).Once()
+			normalKubeCtl.On("Exec", []string{"delete", "invokers.projectriff.io", "--all"}).Return("", nil).Once()
 
 			err := rootCommand.Execute()
 			Expect(err).NotTo(HaveOccurred())

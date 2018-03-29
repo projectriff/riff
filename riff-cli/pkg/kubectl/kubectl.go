@@ -24,9 +24,6 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 )
 
-var EXEC_FOR_STRING = ExecForString
-var EXEC_FOR_BYTES = ExecForBytes
-
 //go:generate mockery -name=KubeCtl -inpkg
 type KubeCtl interface {
 	Exec(cmdArgs []string) (string, error)
@@ -68,13 +65,4 @@ func RealKubeCtl() KubeCtl {
 
 func DryRunKubeCtl() KubeCtl {
 	return &dryRunKubeCtl{}
-}
-
-func ExecForString(cmdArgs []string) (string, error) {
-	out, err := EXEC_FOR_BYTES(cmdArgs)
-	return string(out), err
-}
-
-func ExecForBytes(cmdArgs []string) ([]byte, error) {
-	return osutils.Exec("kubectl", cmdArgs, 20*time.Second)
 }

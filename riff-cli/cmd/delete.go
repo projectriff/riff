@@ -86,7 +86,7 @@ func deleteFunctionByName(opts DeleteOptions, actingClient kubectl.KubeCtl, quer
 		if inputTopic, outputTopic, err := lookupTopicNames(opts, queryClient); err != nil {
 			return err
 		} else {
-			cmdArgs := []string{"delete", "topic", "<placeholder>"}
+			cmdArgs := []string{"delete", "topics.projectriff.io", "<placeholder>"}
 			if opts.Namespace != "" {
 				cmdArgs = append(cmdArgs, "--namespace", opts.Namespace)
 			}
@@ -105,7 +105,7 @@ func deleteFunctionByName(opts DeleteOptions, actingClient kubectl.KubeCtl, quer
 		}
 	}
 
-	cmdArgs := []string{"delete", "function", opts.FunctionName}
+	cmdArgs := []string{"delete", "functions.projectriff.io", opts.FunctionName}
 	if opts.Namespace != "" {
 		cmdArgs = append(cmdArgs, "--namespace", opts.Namespace)
 	}
@@ -128,7 +128,7 @@ func lookupTopicNames(opts DeleteOptions, queryClient kubectl.KubeCtl) (string, 
 	if opts.Namespace != "" {
 		getArgs = append(getArgs, "--namespace", opts.Namespace)
 	}
-	getArgs = append(getArgs, "function", opts.FunctionName, "-o", "json")
+	getArgs = append(getArgs, "functions.projectriff.io", opts.FunctionName, "-o", "json")
 	json, err := queryClient.Exec(getArgs)
 	if err != nil {
 		return "", "", err

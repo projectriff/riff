@@ -4,9 +4,9 @@
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
- *  
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *   Unless required by applicable law or agreed to in writing, software
  *   distributed under the License is distributed on an "AS IS" BASIS,
  *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,13 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"bufio"
 	"fmt"
 	"os/exec"
-	"bufio"
+
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
+	"github.com/spf13/cobra"
 )
 
 type LogsOptions struct {
@@ -32,7 +33,7 @@ type LogsOptions struct {
 	tail      bool
 }
 
-func Logs() *cobra.Command {
+func Logs(kubeCtl kubectl.KubeCtl) *cobra.Command {
 
 	var logsOptions LogsOptions
 
@@ -40,8 +41,8 @@ func Logs() *cobra.Command {
 	var logsCmd = &cobra.Command{
 		Use:   "logs",
 		Short: "Display the logs for a running function",
-		Long: `Display the logs for a running function`,
-		Example:`
+		Long:  `Display the logs for a running function`,
+		Example: `
     riff logs -n myfunc -t
 
 will tail the logs from the 'sidecar' container for the function 'myfunc'
@@ -58,9 +59,9 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 			if logsOptions.namespace != "" {
 				cmdArgs = append(cmdArgs, "--namespace", logsOptions.namespace)
 			}
-			cmdArgs = append(cmdArgs, "pod", "-l", "function=" + logsOptions.function, "-o", "jsonpath={.items[0].metadata.name}")
+			cmdArgs = append(cmdArgs, "pod", "-l", "function="+logsOptions.function, "-o", "jsonpath={.items[0].metadata.name}")
 
-			output, err := kubectl.ExecForString(cmdArgs)
+			output, err := kubeCtl.Exec(cmdArgs)
 
 			if err != nil {
 				return fmt.Errorf("Error %v - Function %v may not be currently active", err, logsOptions.function)
@@ -101,7 +102,7 @@ will tail the logs from the 'sidecar' container for the function 'myfunc'
 
 			} else {
 
-				output, err := kubectl.ExecForString(cmdArgs)
+				output, err := kubeCtl.Exec(cmdArgs)
 
 				if err != nil {
 					return err

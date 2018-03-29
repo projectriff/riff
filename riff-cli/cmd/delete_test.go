@@ -1,12 +1,13 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/spf13/cobra"
-	"fmt"
 )
 
 var _ = Describe("The delete command", func() {
@@ -58,7 +59,7 @@ var _ = Describe("The delete command", func() {
 
 		It("should delete the function based on dirname", func() {
 
-			realKubeCtl.On("Exec", []string{"delete", "function", "echo"}).Return("", nil)
+			realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "echo"}).Return("", nil)
 
 			err := deleteCmd.Execute()
 			Expect(err).NotTo(HaveOccurred())
@@ -68,17 +69,16 @@ var _ = Describe("The delete command", func() {
 		It("should delete the function and topic when run with --all", func() {
 
 			deleteCmd.SetArgs([]string{"--all"})
-			realKubeCtl.On("Exec", []string{"delete", "function", "echo"}).Return("", nil)
+			realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "echo"}).Return("", nil)
 
-			realKubeCtl.On("Exec", []string{"get", "function", "echo", "-o", "json"}).Return(canned_kubectl_get_response, nil)
-			realKubeCtl.On("Exec", []string{"delete", "topic", "myInputTopic"}).Return("", nil)
-			realKubeCtl.On("Exec", []string{"delete", "topic", "myOutputTopic"}).Return("", nil)
+			realKubeCtl.On("Exec", []string{"get", "functions.projectriff.io", "echo", "-o", "json"}).Return(canned_kubectl_get_response, nil)
+			realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myInputTopic"}).Return("", nil)
+			realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myOutputTopic"}).Return("", nil)
 
 			err := deleteCmd.Execute()
 			Expect(err).NotTo(HaveOccurred())
 
 		})
-
 
 		Context("when --namespace is set", func() {
 			BeforeEach(func() {
@@ -87,7 +87,7 @@ var _ = Describe("The delete command", func() {
 			It("should delete the function based on dirname", func() {
 
 				deleteCmd.SetArgs(args)
-				realKubeCtl.On("Exec", []string{"delete", "function", "echo", "--namespace", "my-ns"}).Return("", nil)
+				realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "echo", "--namespace", "my-ns"}).Return("", nil)
 
 				err := deleteCmd.Execute()
 				Expect(err).NotTo(HaveOccurred())
@@ -98,11 +98,11 @@ var _ = Describe("The delete command", func() {
 
 				args = append(args, "--all")
 				deleteCmd.SetArgs(args)
-				realKubeCtl.On("Exec", []string{"delete", "function", "echo", "--namespace", "my-ns"}).Return("", nil)
+				realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "echo", "--namespace", "my-ns"}).Return("", nil)
 
-				realKubeCtl.On("Exec", []string{"get", "--namespace", "my-ns", "function", "echo", "-o", "json"}).Return(canned_kubectl_get_response, nil)
-				realKubeCtl.On("Exec", []string{"delete", "topic", "myInputTopic", "--namespace", "my-ns"}).Return("", nil)
-				realKubeCtl.On("Exec", []string{"delete", "topic", "myOutputTopic", "--namespace", "my-ns"}).Return("", nil)
+				realKubeCtl.On("Exec", []string{"get", "--namespace", "my-ns", "functions.projectriff.io", "echo", "-o", "json"}).Return(canned_kubectl_get_response, nil)
+				realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myInputTopic", "--namespace", "my-ns"}).Return("", nil)
+				realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myOutputTopic", "--namespace", "my-ns"}).Return("", nil)
 
 				err := deleteCmd.Execute()
 				Expect(err).NotTo(HaveOccurred())
@@ -120,7 +120,7 @@ var _ = Describe("The delete command", func() {
 		It("should delete the function based on name", func() {
 			deleteCmd.SetArgs(args)
 
-			realKubeCtl.On("Exec", []string{"delete", "function", "my-function"}).Return("", nil)
+			realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "my-function"}).Return("", nil)
 
 			err := deleteCmd.Execute()
 			Expect(err).NotTo(HaveOccurred())
@@ -132,17 +132,16 @@ var _ = Describe("The delete command", func() {
 			args = append(args, "--all")
 			deleteCmd.SetArgs(args)
 
-			realKubeCtl.On("Exec", []string{"delete", "function", "my-function"}).Return("", nil)
+			realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "my-function"}).Return("", nil)
 
-			realKubeCtl.On("Exec", []string{"get", "function", "my-function", "-o", "json"}).Return(canned_kubectl_get_response, nil)
-			realKubeCtl.On("Exec", []string{"delete", "topic", "myInputTopic"}).Return("", nil)
-			realKubeCtl.On("Exec", []string{"delete", "topic", "myOutputTopic"}).Return("", nil)
+			realKubeCtl.On("Exec", []string{"get", "functions.projectriff.io", "my-function", "-o", "json"}).Return(canned_kubectl_get_response, nil)
+			realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myInputTopic"}).Return("", nil)
+			realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myOutputTopic"}).Return("", nil)
 
 			err := deleteCmd.Execute()
 			Expect(err).NotTo(HaveOccurred())
 
 		})
-
 
 		Context("when --namespace is set", func() {
 			BeforeEach(func() {
@@ -151,7 +150,7 @@ var _ = Describe("The delete command", func() {
 			It("should delete the function based on name", func() {
 
 				deleteCmd.SetArgs(args)
-				realKubeCtl.On("Exec", []string{"delete", "function", "my-function", "--namespace", "my-ns"}).Return("", nil)
+				realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "my-function", "--namespace", "my-ns"}).Return("", nil)
 
 				err := deleteCmd.Execute()
 				Expect(err).NotTo(HaveOccurred())
@@ -162,11 +161,11 @@ var _ = Describe("The delete command", func() {
 
 				args = append(args, "--all")
 				deleteCmd.SetArgs(args)
-				realKubeCtl.On("Exec", []string{"delete", "function", "my-function", "--namespace", "my-ns"}).Return("", nil)
+				realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "my-function", "--namespace", "my-ns"}).Return("", nil)
 
-				realKubeCtl.On("Exec", []string{"get", "--namespace", "my-ns", "function", "my-function", "-o", "json"}).Return(canned_kubectl_get_response, nil)
-				realKubeCtl.On("Exec", []string{"delete", "topic", "myInputTopic", "--namespace", "my-ns"}).Return("", nil)
-				realKubeCtl.On("Exec", []string{"delete", "topic", "myOutputTopic", "--namespace", "my-ns"}).Return("", nil)
+				realKubeCtl.On("Exec", []string{"get", "--namespace", "my-ns", "functions.projectriff.io", "my-function", "-o", "json"}).Return(canned_kubectl_get_response, nil)
+				realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myInputTopic", "--namespace", "my-ns"}).Return("", nil)
+				realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myOutputTopic", "--namespace", "my-ns"}).Return("", nil)
 
 				err := deleteCmd.Execute()
 				Expect(err).NotTo(HaveOccurred())
@@ -179,7 +178,7 @@ var _ = Describe("The delete command", func() {
 	It("should report kubectl errors", func() {
 		deleteCmd.SetArgs([]string{"--name", "whatever"})
 
-		realKubeCtl.On("Exec", []string{"delete", "function", "whatever"}).Return("", fmt.Errorf("Whoops"))
+		realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "whatever"}).Return("", fmt.Errorf("Whoops"))
 
 		err := deleteCmd.Execute()
 		Expect(err).To(MatchError("Whoops"))
@@ -189,7 +188,7 @@ var _ = Describe("The delete command", func() {
 	It("should not use the real kubectl client when using --dry-run", func() {
 		deleteCmd.SetArgs([]string{"--name", "whatever", "--dry-run"})
 
-		dryRunKubeCtl.On("Exec", []string{"delete", "function", "whatever"}).Return("", nil)
+		dryRunKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "whatever"}).Return("", nil)
 
 		err := deleteCmd.Execute()
 		Expect(err).NotTo(HaveOccurred())

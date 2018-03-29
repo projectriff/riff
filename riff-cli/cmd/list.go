@@ -4,9 +4,9 @@
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
  *   You may obtain a copy of the License at
- *  
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *   Unless required by applicable law or agreed to in writing, software
  *   distributed under the License is distributed on an "AS IS" BASIS,
  *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,16 +19,16 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
+	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
+	"github.com/spf13/cobra"
 )
 
 type ListOptions struct {
 	namespace string
 }
 
-func List() *cobra.Command {
+func List(kubeCtl kubectl.KubeCtl) *cobra.Command {
 
 	var listOptions ListOptions
 	// listCmd represents the list command
@@ -52,9 +52,9 @@ func List() *cobra.Command {
 			if listOptions.namespace != "" {
 				cmdArgs = append(cmdArgs, "--namespace", listOptions.namespace)
 			}
-			cmdArgs = append(cmdArgs, "functions")
+			cmdArgs = append(cmdArgs, "functions.projectriff.io")
 
-			output, err := kubectl.ExecForString(cmdArgs)
+			output, err := kubeCtl.Exec(cmdArgs)
 
 			if err != nil {
 				return err
