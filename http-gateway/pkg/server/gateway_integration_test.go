@@ -29,19 +29,19 @@ import (
 	"github.com/projectriff/riff/http-gateway/pkg/server"
 	"github.com/projectriff/riff/message-transport/pkg/message"
 	"github.com/projectriff/riff/message-transport/pkg/transport/mocktransport"
-	"github.com/stretchr/testify/mock"
 	"github.com/projectriff/riff/message-transport/pkg/transport/stubtransport"
+	"github.com/stretchr/testify/mock"
 )
 
 var _ = Describe("HTTP Gateway", func() {
 	var (
-		gw               server.Gateway
-		mockProducer     *mocktransport.Producer
-		stubConsumer     stubtransport.ConsumerStub
-		port             int
-		timeout          time.Duration
-		done             chan struct{}
-		producerErrors   chan error
+		gw             server.Gateway
+		mockProducer   *mocktransport.Producer
+		stubConsumer   stubtransport.ConsumerStub
+		port           int
+		timeout        time.Duration
+		done           chan struct{}
+		producerErrors chan error
 	)
 
 	BeforeEach(func() {
@@ -61,7 +61,8 @@ var _ = Describe("HTTP Gateway", func() {
 
 	JustBeforeEach(func() {
 		port = 1024 + rand.Intn(32768-1024)
-		gw = server.New(port, mockProducer, stubConsumer, timeout)
+
+		gw = server.New(port, mockProducer, stubConsumer, timeout, &stubTopicHelper{testName: "bar"})
 
 		gw.Run(done)
 
@@ -147,4 +148,12 @@ func waitForHttpGatewayToBeReady(port int) {
 		_, err := http.Get(url)
 		return err
 	}, timeoutDuration, pollingInterval).Should(Succeed())
+}
+
+type stubTopicHelper struct {
+	testName string
+}
+
+func (sth *stubTopicHelper) TopicExists(topicName string) bool {
+	return topicName == sth.testName
 }

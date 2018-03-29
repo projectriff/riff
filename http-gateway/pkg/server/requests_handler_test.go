@@ -29,8 +29,8 @@ import (
 
 	"github.com/projectriff/riff/message-transport/pkg/message"
 	"github.com/projectriff/riff/message-transport/pkg/transport/mocktransport"
-	"github.com/stretchr/testify/mock"
 	"github.com/projectriff/riff/message-transport/pkg/transport/stubtransport"
+	"github.com/stretchr/testify/mock"
 )
 
 var _ = Describe("RequestsHandler", func() {
@@ -69,7 +69,8 @@ var _ = Describe("RequestsHandler", func() {
 	})
 
 	JustBeforeEach(func() {
-		gateway = New(8080, mockProducer, stubConsumer, timeout)
+		gateway = New(8080, mockProducer, stubConsumer, timeout, &stubTopicHelper{})
+
 		go gateway.repliesLoop(done)
 		gateway.requestsHandler(mockResponseWriter, req)
 	})

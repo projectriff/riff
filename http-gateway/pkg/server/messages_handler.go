@@ -19,6 +19,7 @@ package server
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -35,9 +36,16 @@ const (
 // Function messageHandler is an http handler that sends the http body to the producer, replying
 // immediately with a successful http response.
 func (g *gateway) messagesHandler(w http.ResponseWriter, r *http.Request) {
-	topic, err := parseTopic(r, messagePath)
+	topicName, err := parseTopic(r, messagePath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	if !g.topicHelper.TopicExists(topicName) {
+		errMsg := fmt.Sprintf("could not find topic '%s'", topicName)
+		log.Printf(errMsg)
+		http.Error(w, errMsg, http.StatusNotFound)
 		return
 	}
 
@@ -47,13 +55,13 @@ func (g *gateway) messagesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = g.producer.Send(topic, message.NewMessage(b, propagateIncomingHeaders(r)))
+	err = g.producer.Send(topicName, message.NewMessage(b, propagateIncomingHeaders(r)))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Fprintf(w, "Message published to topic: %s\n", topic)
+	fmt.Fprintf(w, "Message published to topic: %s\n", topicName)
 }
 
 func propagateIncomingHeaders(request *http.Request) message.Headers {
