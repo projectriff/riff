@@ -53,7 +53,12 @@ func main() {
 	}
 	defer consumer.Close()
 
-	gw := server.New(8080, producer, consumer, 60*time.Second)
+	topicHelper, err := server.NewTopicHelper()
+	if err != nil {
+		panic(err)
+	}
+
+	gw := server.New(8080, producer, consumer, 60*time.Second, topicHelper)
 
 	done := make(chan struct{})
 	gw.Run(done)

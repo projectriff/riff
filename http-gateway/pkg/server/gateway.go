@@ -17,14 +17,15 @@
 package server
 
 import (
-	"time"
+	"context"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
-	"fmt"
-	"github.com/projectriff/riff/message-transport/pkg/transport"
-	"io"
-	"context"
+	"time"
+
 	"github.com/projectriff/riff/message-transport/pkg/message"
+	"github.com/projectriff/riff/message-transport/pkg/transport"
 )
 
 type Gateway interface {
@@ -38,6 +39,7 @@ type gateway struct {
 	producer         transport.Producer
 	replies          *repliesMap
 	timeout          time.Duration
+	topicHelper      TopicHelper
 }
 
 func (g *gateway) Run(stop <-chan struct{}) {
@@ -101,18 +103,19 @@ func (g *gateway) repliesLoop(stop <-chan struct{}) {
 	}
 }
 
-func New(port int, producer transport.Producer, consumer transport.Consumer, timeout time.Duration) *gateway {
+func New(port int, producer transport.Producer, consumer transport.Consumer, timeout time.Duration, topicHelper TopicHelper) *gateway {
 	mux := http.NewServeMux()
 	httpServer := &http.Server{Addr: fmt.Sprintf(":%v", port),
 		Handler: mux,
 	}
 	consumerMessages := make(chan message.Message)
 	g := gateway{httpServer: httpServer,
-		producer: producer,
-		consumer: consumer,
+		producer:         producer,
+		consumer:         consumer,
 		consumerMessages: consumerMessages,
-		replies: newRepliesMap(),
-		timeout: timeout,
+		replies:          newRepliesMap(),
+		timeout:          timeout,
+		topicHelper:      topicHelper,
 	}
 	mux.HandleFunc(messagePath, g.messagesHandler)
 	mux.HandleFunc(requestPath, g.requestsHandler)

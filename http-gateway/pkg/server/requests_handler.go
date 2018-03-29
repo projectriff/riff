@@ -17,11 +17,14 @@
 package server
 
 import (
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/projectriff/riff/message-transport/pkg/message"
+
 	"github.com/satori/go.uuid"
 )
 
@@ -36,9 +39,16 @@ var outgoingHeadersToPropagate = [...]string{ContentType}
 // Function requestHandler is an http handler that sends the http body to the producer, then waits
 // for a message on a go channel it creates for a reply and sends that as an http response.
 func (g *gateway) requestsHandler(w http.ResponseWriter, r *http.Request) {
-	topic, err := parseTopic(r, requestPath)
+	topicName, err := parseTopic(r, requestPath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	if !g.topicHelper.TopicExists(topicName) {
+		errMsg := fmt.Sprintf("could not find topic '%s'", topicName)
+		log.Printf(errMsg)
+		http.Error(w, errMsg, http.StatusNotFound)
 		return
 	}
 
@@ -56,7 +66,7 @@ func (g *gateway) requestsHandler(w http.ResponseWriter, r *http.Request) {
 	headers := propagateIncomingHeaders(r)
 	headers[CorrelationId] = []string{correlationId}
 
-	err = g.producer.Send(topic, message.NewMessage(b, headers))
+	err = g.producer.Send(topicName, message.NewMessage(b, headers))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

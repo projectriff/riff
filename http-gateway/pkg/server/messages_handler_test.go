@@ -51,7 +51,8 @@ var _ = Describe("MessagesHandler", func() {
 		req.URL.Path = "/messages/testtopic"
 		mockResponseWriter = httptest.NewRecorder()
 		testError = errors.New(errorMessage)
-		gateway = New(8080, mockProducer, mockConsumer, 60*time.Second)
+
+		gateway = New(8080, mockProducer, mockConsumer, 60*time.Second, &stubTopicHelper{testName: "testtopic"})
 	})
 
 	JustBeforeEach(func() {
@@ -61,6 +62,17 @@ var _ = Describe("MessagesHandler", func() {
 	Context("when the request URL is unexpected", func() {
 		BeforeEach(func() {
 			req.URL.Path = "/short"
+		})
+
+		It("should return a 404", func() {
+			resp := mockResponseWriter.Result()
+			Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
+		})
+	})
+
+	Context("when the request refers to a non-existent Riff Topic", func() {
+		BeforeEach(func() {
+			req.URL.Path = "/messages/nosuchtopicexists"
 		})
 
 		It("should return a 404", func() {
@@ -210,4 +222,12 @@ func (br *badReader) Read(p []byte) (n int, err error) {
 
 func (*badReader) Close() error {
 	return nil
+}
+
+type stubTopicHelper struct {
+	testName string
+}
+
+func (sth *stubTopicHelper) TopicExists(topicName string) bool {
+	return topicName == sth.testName
 }
