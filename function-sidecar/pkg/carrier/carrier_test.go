@@ -27,6 +27,7 @@ import (
 	"sync/atomic"
 	"errors"
 	"github.com/projectriff/riff/message-transport/pkg/message"
+	"github.com/projectriff/riff/message-transport/pkg/transport/stubtransport"
 )
 
 var _ = Describe("Carrier", func() {
@@ -34,11 +35,10 @@ var _ = Describe("Carrier", func() {
 	const testTopic = "testtopic"
 
 	var (
-		mockConsumer     *mocktransport.Consumer
+		stubConsumer     stubtransport.ConsumerStub
 		mockProducer     *mocktransport.Producer
 		numProducerSends uint32
 		mockDispatcher   *mockdispatcher.Dispatcher
-		consumerMessages chan message.Message
 		dispatcherInput  chan message.Message
 		dispatcherOutput chan message.Message
 
@@ -49,9 +49,7 @@ var _ = Describe("Carrier", func() {
 	)
 
 	BeforeEach(func() {
-		mockConsumer = &mocktransport.Consumer{}
-		consumerMessages = make(chan message.Message, 1)
-		mockConsumer.On("Messages").Return(receiveChan((consumerMessages)))
+		stubConsumer = stubtransport.NewConsumerStub()
 
 		mockProducer = &mocktransport.Producer{}
 		numProducerSends = 0
@@ -68,11 +66,11 @@ var _ = Describe("Carrier", func() {
 	})
 
 	JustBeforeEach(func() {
-		carrier.Run(mockConsumer, mockProducer, mockDispatcher, replyTopic)
+		carrier.Run(stubConsumer, mockProducer, mockDispatcher, replyTopic)
 	})
 
 	It("should pass a consumed message to the dispatcher", func() {
-		consumerMessages <- testMessage
+		stubConsumer.Send(testMessage, "topic")
 		Expect(<-dispatcherInput).To(Equal(testMessage))
 	})
 

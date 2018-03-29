@@ -9,6 +9,20 @@ type Producer struct {
 	mock.Mock
 }
 
+// Close provides a mock function with given fields:
+func (_m *Producer) Close() error {
+	ret := _m.Called()
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func() error); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Errors provides a mock function with given fields:
 func (_m *Producer) Errors() <-chan error {
 	ret := _m.Called()
