@@ -42,7 +42,7 @@ func generateFunctionArtifacts(invoker projectriff_v1.Invoker, opts *options.Ini
 	var functionResources []functionResource
 
 	// {FunctionName}-topics.yaml
-	content, err := createTopicsYaml(invoker.Spec.Properties.Topics, *opts)
+	content, err := createTopicsYaml(invoker.Spec.TopicTemplate, *opts)
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func generateFunctionArtifacts(invoker projectriff_v1.Invoker, opts *options.Ini
 	})
 
 	// {FunctionName}-function.yaml
-	content, err = createFunctionYaml(invoker.Spec.Properties.Function, *opts)
+	content, err = createFunctionYaml(invoker.Spec.FunctionTemplate, *opts)
 	if err != nil {
 		return err
 	}

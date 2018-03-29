@@ -27,8 +27,10 @@ import (
 func TestFunctionYaml(t *testing.T) {
 	as := assert.New(t)
 
-	functionSpec := projectriff_v1.FunctionSpec{
-		Protocol: "grpc",
+	functionTemplate := projectriff_v1.Function{
+		Spec: projectriff_v1.FunctionSpec{
+			Protocol: "grpc",
+		},
 	}
 	opts := options.InitOptions{
 		FunctionName: "myfunc",
@@ -36,7 +38,7 @@ func TestFunctionYaml(t *testing.T) {
 		UserAccount:  "me",
 		Version:      "0.0.1",
 	}
-	yaml, err := createFunctionYaml(functionSpec, opts)
+	yaml, err := createFunctionYaml(functionTemplate, opts)
 
 	t.Log(yaml)
 
@@ -57,8 +59,10 @@ spec:
 func TestFunctionYaml_WithOutput(t *testing.T) {
 	as := assert.New(t)
 
-	functionSpec := projectriff_v1.FunctionSpec{
-		Protocol: "grpc",
+	functionTemplate := projectriff_v1.Function{
+		Spec: projectriff_v1.FunctionSpec{
+			Protocol: "grpc",
+		},
 	}
 	opts := options.InitOptions{
 		FunctionName: "myfunc",
@@ -68,7 +72,7 @@ func TestFunctionYaml_WithOutput(t *testing.T) {
 		Version:      "0.0.1",
 		Protocol:     "http",
 	}
-	yaml, err := createFunctionYaml(functionSpec, opts)
+	yaml, err := createFunctionYaml(functionTemplate, opts)
 
 	t.Log(yaml)
 
@@ -90,8 +94,10 @@ spec:
 func TestFunctionYaml_WithProtocolOverride(t *testing.T) {
 	as := assert.New(t)
 
-	functionSpec := projectriff_v1.FunctionSpec{
-		Protocol: "grpc",
+	functionTemplate := projectriff_v1.Function{
+		Spec: projectriff_v1.FunctionSpec{
+			Protocol: "grpc",
+		},
 	}
 	opts := options.InitOptions{
 		FunctionName: "myfunc",
@@ -100,7 +106,7 @@ func TestFunctionYaml_WithProtocolOverride(t *testing.T) {
 		Version:      "0.0.1",
 		Protocol:     "http",
 	}
-	yaml, err := createFunctionYaml(functionSpec, opts)
+	yaml, err := createFunctionYaml(functionTemplate, opts)
 
 	t.Log(yaml)
 

@@ -23,20 +23,13 @@ import (
 	"github.com/ghodss/yaml"
 	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func createTopic(name string, topicSpec projectriff_v1.TopicSpec) ([]byte, error) {
-	topic := projectriff_v1.Topic{
-		TypeMeta: meta_v1.TypeMeta{
-			APIVersion: apiVersion,
-			Kind:       topicKind,
-		},
-		ObjectMeta: meta_v1.ObjectMeta{
-			Name: name,
-		},
-		Spec: *topicSpec.DeepCopy(),
-	}
+func createTopic(name string, topicTemplate projectriff_v1.Topic) ([]byte, error) {
+	topic := topicTemplate.DeepCopy()
+	topic.TypeMeta.APIVersion = apiVersion
+	topic.TypeMeta.Kind = topicKind
+	topic.ObjectMeta.Name = name
 
 	bytes, err := json.Marshal(topic)
 	if err != nil {
@@ -58,10 +51,10 @@ func createTopic(name string, topicSpec projectriff_v1.TopicSpec) ([]byte, error
 	return yaml.Marshal(topicMap)
 }
 
-func createTopicsYaml(topicSpec projectriff_v1.TopicSpec, opts options.InitOptions) (string, error) {
+func createTopicsYaml(topicTemplate projectriff_v1.Topic, opts options.InitOptions) (string, error) {
 	var buffer bytes.Buffer
 
-	inputTopic, err := createTopic(opts.Input, topicSpec)
+	inputTopic, err := createTopic(opts.Input, topicTemplate)
 	if err != nil {
 		return "", err
 	}
@@ -73,7 +66,7 @@ func createTopicsYaml(topicSpec projectriff_v1.TopicSpec, opts options.InitOptio
 		return buffer.String(), nil
 	}
 
-	outputTopic, err := createTopic(opts.Output, topicSpec)
+	outputTopic, err := createTopic(opts.Output, topicTemplate)
 	if err != nil {
 		return "", err
 	}

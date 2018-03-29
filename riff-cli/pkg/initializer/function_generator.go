@@ -23,20 +23,13 @@ import (
 	"github.com/ghodss/yaml"
 	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func createFunction(opts options.InitOptions, functionSpec projectriff_v1.FunctionSpec) ([]byte, error) {
-	function := projectriff_v1.Function{
-		TypeMeta: meta_v1.TypeMeta{
-			APIVersion: apiVersion,
-			Kind:       functionKind,
-		},
-		ObjectMeta: meta_v1.ObjectMeta{
-			Name: opts.FunctionName,
-		},
-		Spec: *functionSpec.DeepCopy(),
-	}
+func createFunction(opts options.InitOptions, functionTemplate projectriff_v1.Function) ([]byte, error) {
+	function := functionTemplate.DeepCopy()
+	function.TypeMeta.APIVersion = apiVersion
+	function.TypeMeta.Kind = functionKind
+	function.ObjectMeta.Name = opts.FunctionName
 	function.Spec.Input = opts.Input
 	function.Spec.Output = opts.Output
 	function.Spec.Container.Image = options.ImageName(opts)
@@ -69,10 +62,10 @@ func createFunction(opts options.InitOptions, functionSpec projectriff_v1.Functi
 	return yaml.Marshal(functionMap)
 }
 
-func createFunctionYaml(functionSpec projectriff_v1.FunctionSpec, opts options.InitOptions) (string, error) {
+func createFunctionYaml(functionTemplate projectriff_v1.Function, opts options.InitOptions) (string, error) {
 	var buffer bytes.Buffer
 
-	function, err := createFunction(opts, functionSpec)
+	function, err := createFunction(opts, functionTemplate)
 	if err != nil {
 		return "", err
 	}

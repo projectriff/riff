@@ -42,27 +42,20 @@ type InvokerSpec struct {
 	// File patterns to match this invoker with for an artifact
 	Matchers []string `json:"matchers"`
 
-	// Properties for the invoker
-	Properties InvokerProperties `json:"properties,omitempty"`
+	// Default function properties
+	FunctionTemplate Function `json:"functionTemplate,omitempty"`
+
+	// Default topic properties
+	TopicTemplate Topic `json:"topicTemplate,omitempty"`
+
+	// Handler function, if needed
+	Handler InvokerHandler `json:"handler,omitempty"`
 
 	// Files to generate for this invoker
 	Files []InvokerFile `json:"files"`
 
 	// Longform documentation for the `riff init` and `riff create` commands
 	Doc string `json:"doc,omitempty"`
-}
-
-// Properties (invoker properties) for an invoker
-type InvokerProperties struct {
-
-	// Handler function, if needed
-	Handler InvokerHandler `json:"handler,omitempty"`
-
-	// Default function properties
-	Function FunctionSpec `json:"function,omitempty"`
-
-	// Default topic properties
-	Topics TopicSpec `json:"topics,omitempty"`
 }
 
 // Handler (handler function) for an invoker

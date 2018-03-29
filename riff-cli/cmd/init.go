@@ -85,7 +85,7 @@ func InitInvokers(invokers []projectriff_v1.Invoker, initOptions *options.InitOp
 
 		initInvokerCmd.Flags().StringVar(&initOptions.InvokerVersion, "invoker-version", invoker.Spec.Version, "the version of invoker to use when building containers")
 
-		handler := invoker.Spec.Properties.Handler
+		handler := invoker.Spec.Handler
 		if handler.Default != "" || handler.Description != "" {
 			initInvokerCmd.Flags().StringVar(&initOptions.Handler, "handler", handler.Default, handler.Description)
 			if handler.Default == "" {

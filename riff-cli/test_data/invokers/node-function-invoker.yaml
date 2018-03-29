@@ -8,8 +8,8 @@ spec:
   matchers:
   - package.json
   - "*.js"
-  properties:
-    function:
+  functionTemplate:
+    spec:
       protocol: grpc
   files:
   - path: Dockerfile

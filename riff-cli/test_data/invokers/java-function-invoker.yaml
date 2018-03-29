@@ -8,10 +8,10 @@ spec:
   matchers:
   - "*.jar"
   - "target/*.jar"
-  properties:
-    handler:
-      description: the fully qualified class name of the function handler
-    function:
+  handler:
+    description: the fully qualified class name of the function handler
+  functionTemplate:
+    spec:
       protocol: grpc
   files:
   - path: Dockerfile

@@ -12,3 +12,4 @@ spec:
     kind: Invoker
     plural: invokers
     singular: invoker
+ 

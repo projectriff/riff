@@ -27,12 +27,12 @@ import (
 func TestTopicsYaml(t *testing.T) {
 	as := assert.New(t)
 
-	topicSpec := projectriff_v1.TopicSpec{}
+	topicTemplate := projectriff_v1.Topic{}
 	opts := options.InitOptions{
 		FunctionName: "myfunc",
 		Input:        "in",
 	}
-	yaml, err := createTopicsYaml(topicSpec, opts)
+	yaml, err := createTopicsYaml(topicTemplate, opts)
 
 	t.Log(yaml)
 
@@ -48,14 +48,16 @@ func TestTopicsYaml_WithPartitions(t *testing.T) {
 	as := assert.New(t)
 
 	var partitions = int32(5)
-	topicSpec := projectriff_v1.TopicSpec{
-		Partitions: &partitions,
+	topicTemplate := projectriff_v1.Topic{
+		Spec: projectriff_v1.TopicSpec{
+			Partitions: &partitions,
+		},
 	}
 	opts := options.InitOptions{
 		FunctionName: "myfunc",
 		Input:        "in",
 	}
-	yaml, err := createTopicsYaml(topicSpec, opts)
+	yaml, err := createTopicsYaml(topicTemplate, opts)
 
 	t.Log(yaml)
 
@@ -73,13 +75,13 @@ spec:
 func TestTopicsYaml_WithOutput(t *testing.T) {
 	as := assert.New(t)
 
-	topicSpec := projectriff_v1.TopicSpec{}
+	topicTemplate := projectriff_v1.Topic{}
 	opts := options.InitOptions{
 		FunctionName: "myfunc",
 		Input:        "in",
 		Output:       "out",
 	}
-	yaml, err := createTopicsYaml(topicSpec, opts)
+	yaml, err := createTopicsYaml(topicTemplate, opts)
 
 	t.Log(yaml)
 
