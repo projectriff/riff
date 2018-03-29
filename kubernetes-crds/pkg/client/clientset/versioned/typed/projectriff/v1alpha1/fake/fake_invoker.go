@@ -17,7 +17,7 @@
 package fake
 
 import (
-	projectriff_io_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	v1alpha1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -28,29 +28,29 @@ import (
 
 // FakeInvokers implements InvokerInterface
 type FakeInvokers struct {
-	Fake *FakeProjectriffV1
+	Fake *FakeProjectriffV1alpha1
 	ns   string
 }
 
-var invokersResource = schema.GroupVersionResource{Group: "projectriff.io", Version: "v1", Resource: "invokers"}
+var invokersResource = schema.GroupVersionResource{Group: "projectriff.io", Version: "v1alpha1", Resource: "invokers"}
 
-var invokersKind = schema.GroupVersionKind{Group: "projectriff.io", Version: "v1", Kind: "Invoker"}
+var invokersKind = schema.GroupVersionKind{Group: "projectriff.io", Version: "v1alpha1", Kind: "Invoker"}
 
 // Get takes name of the invoker, and returns the corresponding invoker object, and an error if there is any.
-func (c *FakeInvokers) Get(name string, options v1.GetOptions) (result *projectriff_io_v1.Invoker, err error) {
+func (c *FakeInvokers) Get(name string, options v1.GetOptions) (result *v1alpha1.Invoker, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(invokersResource, c.ns, name), &projectriff_io_v1.Invoker{})
+		Invokes(testing.NewGetAction(invokersResource, c.ns, name), &v1alpha1.Invoker{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*projectriff_io_v1.Invoker), err
+	return obj.(*v1alpha1.Invoker), err
 }
 
 // List takes label and field selectors, and returns the list of Invokers that match those selectors.
-func (c *FakeInvokers) List(opts v1.ListOptions) (result *projectriff_io_v1.InvokerList, err error) {
+func (c *FakeInvokers) List(opts v1.ListOptions) (result *v1alpha1.InvokerList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(invokersResource, invokersKind, c.ns, opts), &projectriff_io_v1.InvokerList{})
+		Invokes(testing.NewListAction(invokersResource, invokersKind, c.ns, opts), &v1alpha1.InvokerList{})
 
 	if obj == nil {
 		return nil, err
@@ -60,8 +60,8 @@ func (c *FakeInvokers) List(opts v1.ListOptions) (result *projectriff_io_v1.Invo
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &projectriff_io_v1.InvokerList{}
-	for _, item := range obj.(*projectriff_io_v1.InvokerList).Items {
+	list := &v1alpha1.InvokerList{}
+	for _, item := range obj.(*v1alpha1.InvokerList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
 		}
@@ -77,31 +77,31 @@ func (c *FakeInvokers) Watch(opts v1.ListOptions) (watch.Interface, error) {
 }
 
 // Create takes the representation of a invoker and creates it.  Returns the server's representation of the invoker, and an error, if there is any.
-func (c *FakeInvokers) Create(invoker *projectriff_io_v1.Invoker) (result *projectriff_io_v1.Invoker, err error) {
+func (c *FakeInvokers) Create(invoker *v1alpha1.Invoker) (result *v1alpha1.Invoker, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(invokersResource, c.ns, invoker), &projectriff_io_v1.Invoker{})
+		Invokes(testing.NewCreateAction(invokersResource, c.ns, invoker), &v1alpha1.Invoker{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*projectriff_io_v1.Invoker), err
+	return obj.(*v1alpha1.Invoker), err
 }
 
 // Update takes the representation of a invoker and updates it. Returns the server's representation of the invoker, and an error, if there is any.
-func (c *FakeInvokers) Update(invoker *projectriff_io_v1.Invoker) (result *projectriff_io_v1.Invoker, err error) {
+func (c *FakeInvokers) Update(invoker *v1alpha1.Invoker) (result *v1alpha1.Invoker, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(invokersResource, c.ns, invoker), &projectriff_io_v1.Invoker{})
+		Invokes(testing.NewUpdateAction(invokersResource, c.ns, invoker), &v1alpha1.Invoker{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*projectriff_io_v1.Invoker), err
+	return obj.(*v1alpha1.Invoker), err
 }
 
 // Delete takes name of the invoker and deletes it. Returns an error if one occurs.
 func (c *FakeInvokers) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(invokersResource, c.ns, name), &projectriff_io_v1.Invoker{})
+		Invokes(testing.NewDeleteAction(invokersResource, c.ns, name), &v1alpha1.Invoker{})
 
 	return err
 }
@@ -110,17 +110,17 @@ func (c *FakeInvokers) Delete(name string, options *v1.DeleteOptions) error {
 func (c *FakeInvokers) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
 	action := testing.NewDeleteCollectionAction(invokersResource, c.ns, listOptions)
 
-	_, err := c.Fake.Invokes(action, &projectriff_io_v1.InvokerList{})
+	_, err := c.Fake.Invokes(action, &v1alpha1.InvokerList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched invoker.
-func (c *FakeInvokers) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *projectriff_io_v1.Invoker, err error) {
+func (c *FakeInvokers) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Invoker, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(invokersResource, c.ns, name, data, subresources...), &projectriff_io_v1.Invoker{})
+		Invokes(testing.NewPatchSubresourceAction(invokersResource, c.ns, name, data, subresources...), &v1alpha1.Invoker{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*projectriff_io_v1.Invoker), err
+	return obj.(*v1alpha1.Invoker), err
 }

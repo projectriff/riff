@@ -21,12 +21,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
-	informersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1"
+	"context"
+	"time"
+
+	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
+	informersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1"
 	"github.com/projectriff/riff/topic-controller/pkg/topic/provisioner"
 	"k8s.io/client-go/tools/cache"
-	"time"
-	"context"
 )
 
 type Controller interface {

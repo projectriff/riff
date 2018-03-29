@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package v1
+package v1alpha1
 
 import (
 	kapi "k8s.io/api/core/v1"

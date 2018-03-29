@@ -25,7 +25,7 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
-	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/projectriff/riff/riff-cli/pkg/templateutils"

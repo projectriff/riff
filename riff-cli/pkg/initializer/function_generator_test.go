@@ -19,7 +19,7 @@ package initializer
 import (
 	"testing"
 
-	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/stretchr/testify/assert"
 )
@@ -44,7 +44,7 @@ func TestFunctionYaml(t *testing.T) {
 
 	as.NoError(err)
 	as.Equal(yaml, `---
-apiVersion: projectriff.io/v1
+apiVersion: projectriff.io/v1alpha1
 kind: Function
 metadata:
   name: myfunc
@@ -78,7 +78,7 @@ func TestFunctionYaml_WithOutput(t *testing.T) {
 
 	as.NoError(err)
 	as.Equal(yaml, `---
-apiVersion: projectriff.io/v1
+apiVersion: projectriff.io/v1alpha1
 kind: Function
 metadata:
   name: myfunc
@@ -112,7 +112,7 @@ func TestFunctionYaml_WithProtocolOverride(t *testing.T) {
 
 	as.NoError(err)
 	as.Equal(yaml, `---
-apiVersion: projectriff.io/v1
+apiVersion: projectriff.io/v1alpha1
 kind: Function
 metadata:
   name: myfunc

@@ -19,7 +19,7 @@ package initializer
 import (
 	"testing"
 
-	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1"
+	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/stretchr/testify/assert"
 )
@@ -38,7 +38,7 @@ func TestTopicsYaml(t *testing.T) {
 
 	as.NoError(err)
 	as.Equal(yaml, `---
-apiVersion: projectriff.io/v1
+apiVersion: projectriff.io/v1alpha1
 kind: Topic
 metadata:
   name: in
@@ -63,7 +63,7 @@ func TestTopicsYaml_WithPartitions(t *testing.T) {
 
 	as.NoError(err)
 	as.Equal(yaml, `---
-apiVersion: projectriff.io/v1
+apiVersion: projectriff.io/v1alpha1
 kind: Topic
 metadata:
   name: in
@@ -87,13 +87,13 @@ func TestTopicsYaml_WithOutput(t *testing.T) {
 
 	as.NoError(err)
 	as.Equal(yaml, `---
-apiVersion: projectriff.io/v1
+apiVersion: projectriff.io/v1alpha1
 kind: Topic
 metadata:
   name: in
 
 ---
-apiVersion: projectriff.io/v1
+apiVersion: projectriff.io/v1alpha1
 kind: Topic
 metadata:
   name: out
