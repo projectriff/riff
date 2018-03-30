@@ -41,5 +41,8 @@ func (p Parser) Value(path string) (interface{}, error) {
 
 func (p Parser) StringValue(path string) (string, error) {
 	res, err := p.Value(path)
+	if res == nil {
+		return "", err
+	}
 	return res.(string), err
 }
