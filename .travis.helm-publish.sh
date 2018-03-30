@@ -34,6 +34,7 @@ pushd helm-charts
 
   perl -pi -e "s/tag:\s*latest/tag: $riff_version/g"  riff/values.yaml
   perl -pi -e "s/\|\s*latest\s*\|/|$riff_version|/g" riff/README.md
+  helm dependency update riff
   helm package riff --version "$riff_version" --app-version "$riff_version" --destination $work_dir
   helm repo index $work_dir --url "$helm_charts_url" --merge $work_dir/index.yaml
 
