@@ -10,10 +10,6 @@ rbac:
   create: true
   apiVersion: v1beta1
 
-kafka:
-  # Specifies whether the single-node development Kafka chart should be installed
-  create: false
-
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -52,6 +48,8 @@ httpGateway:
   httpHeadersWhitelist: ''
 
 kafka:
+  # Specifies whether the single-node development Kafka chart should be installed
+  create: false
   broker:
     nodes: projectriff-kafka.riff-system:9092
   zookeeper:
