@@ -176,7 +176,7 @@ helm upgrade projectriff projectriff/riff
 
 [source, bash]
 ----
-helm delete --purge demo
+helm delete --purge projectriff
 ----
 
 == [[CLI]]Install the current riff CLI tool
