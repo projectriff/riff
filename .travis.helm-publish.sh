@@ -8,13 +8,6 @@ helm_charts_bucket='riff-charts'
 helm_charts_url="https://${helm_charts_bucket}.storage.googleapis.com/"
 work_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/helm-charts/.work"
 
-if [[ `which helm` == "" ]]; then
-  curl https://storage.googleapis.com/kubernetes-helm/helm-v2.8.1-linux-amd64.tar.gz | tar xz
-  chmod +x linux-amd64/helm
-  sudo mv linux-amd64/helm /usr/local/bin/
-  rm -rf linux-amd64
-fi
-
 if [[ "$GCLOUD_CLIENT_SECRET" != "" ]]; then
   echo $GCLOUD_CLIENT_SECRET | base64 --decode > client-secret.json
   gcloud auth activate-service-account --key-file client-secret.json
