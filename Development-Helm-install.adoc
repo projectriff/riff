@@ -32,33 +32,26 @@ Run the following command to see that the `riff` chart is available and also wha
 helm search riff -l
 ----
 
-== [[devel]]Install a riff development version on Minikube
+== [[devel]]Install a riff development version
 
-Starting with the 0.0.4 version we have separated the Kafka installation from the riff chart.
-This requires an extra step of installing Kafka in order yo use riff.
-You can use the single-node Kafka chart provided by riff or the three-node kafka/zookeeper service provided by the Kubeapps.
+We provide a lightweight single node Kafka installation with the `projectriff/kafka` chart. 
+This works well for development purposes and it can be installed together with the riff chart by providing `--set kafka.create=true` when installing the riff chart.
 
-=== Install Kafka chart
+=== Create riff-system namespace
 
-We provide a lightweight single node Kafka installation in the `projectriff/kafka` chart. This works well for development purposes.
+All riff components willbe deployed into a `riff-system` namespace. 
+Any functions that are developed can be deployed into any other namespace including the `default` namespace.
 
-Create the `riff-system` namespace:
+To create the `riff-system` namespace run:
 
 [source, bash]
 ----
 kubectl create namespace riff-system
 ----
 
-Install the kafka/zookeeper service provided by riff using:
-
-[source, bash]
-----
-helm install --name transport --namespace riff-system projectriff/kafka
-----
-
 [TIP]
 ====
-Alternatively, install the three-node kafka/zookeeper service provided by the Kubeapps `incubator/kafka` chart using:
+If you want to install Kafka using the three-node kafka/zookeeper service provided by the Kubeapps `incubator/kafka` chart, then you should use:
 
 [source, bash]
 ----
@@ -66,23 +59,61 @@ helm install --name transport --namespace riff-system incubator/kafka
 ----
 
 Just be aware that this chart requires significantly more resources to run.
+
+When you install the riff chart during the next step, you need to add some config settings so that the riff components can find the Kafka service.
+Add the following config settings instead of `--set kafka.create=true` to the `helm install` command that you use:
+
+[source, bash]
+----
+--set kafka.broker.nodes=transport-kafka.riff-system:9092 --set kafka.zookeeper.nodes=transport-zookeeper.riff-system:2181
+----
+
 ====
 
 === Install "devel" version of riff chart
 
+Choose one of the following installations options:
+
+- *Install "devel" version of riff chart with published snapshot builds of the components*
++
 Install the development version of the riff chart in the `riff-system` namespace.
 When using Minikube configure the httpGateway to use `NodePort` with:
-
++
 [source, bash]
 ----
-helm install --name control --namespace riff-system projectriff/riff --devel --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install --name projectriff --namespace riff-system projectriff/riff --devel --set rbac.create=false --set kafka.create=true --set httpGateway.service.type=NodePort
 ----
-
++
 [NOTE]
 ====
 For a cluster that supports `LoadBalancer` leave out the `--set httpGateway.service.type=NodePort` option.
 For a cluster that uses RBAC leave out the `--set rbac.create=false` option.
 ====
+
+- *Install "devel" version of riff chart with locally built snapshot components with Minikube*
++
+Clone the https://github.com/projectriff/riff[riff] repository.
+The `helm install` commands in this section assume you are in the root directory of that project.
++
+[TIP]
+====
+
+Configure Docker to use the Docker environment running in minikube:
+
+[source, bash]
+----
+eval $(minikube docker-env)
+----
+====
++
+Build the riff components following the link:README.adoc#manual[manual build and deploy] instructions.
++
+To install locally built Docker images with Helm on minikube, use the `--devel` option which uses the chart version that has snapshot versions:
++
+[source, bash]
+----
+helm install projectriff/riff --name projectriff --namespace riff-system --devel --set rbac.create=false --set kafka.create=true --set httpGateway.service.type=NodePort
+----
 
 === Customizing the Installation
 
@@ -96,65 +127,40 @@ https://github.com/projectriff/riff/blob/master/helm-charts/riff/README.md#confi
 
 The following are some scenarios for customizing your installation:
 
-NOTE: The same commands work for all of the riff components: `functionController`, `topicController`, and `httpGateway`
+NOTE: The same customizations work for all of the riff components: `functionController`, `topicController`, and `httpGateway`
 
-* Overriding the version of a riff component:
+- *Overriding the version of a riff component:*
 +
 To set the version tag for the `functionController` to `0.0.5-build.1` use something like the following:
 +
 [source, bash]
 ----
-helm install projectriff/riff --name control --namespace riff-system --set functionController.image.tag=0.0.5-build.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.image.tag=0.0.5-build.1 --devel --set rbac.create=false --set kafka.create=true --set httpGateway.service.type=NodePort
 ----
 
-* Overriding the image repository and version tag of a riff component with a custom built component image:
+- *Overriding the image repository and version tag of a riff component with a custom built component image:*
 +
 To set the image repository to `mycustom/function-controller` and the version tag to `0.0.5-test.1` for
 the `functionController`, use something like the following:
 +
 [source, bash]
 ----
-helm install projectriff/riff --name control --namespace riff-system --set functionController.image.repository=mycustom/function-controller --set functionController.image.tag=0.0.5-test.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.image.repository=mycustom/function-controller --set functionController.image.tag=0.0.5-test.1 --devel --set rbac.create=false --set kafka.create=true --set httpGateway.service.type=NodePort
 ----
 
-* Overriding the version of the `sidecar` component:
+- *Overriding the version of the `sidecar` component:*
 +
 The `sidecar` component is only used by the `functionController`, so to set the version for
 the `sidecar` to `0.0.5-build.1` use something like the following:
 +
 [source, bash]
 ----
-helm install projectriff/riff --name control --namespace riff-system --set functionController.sidecar.image.tag=0.0.5-build.1 --devel --set rbac.create=false --set httpGateway.service.type=NodePort
-----
-
-==== Installing locally built snapshot components with Minikube
-
-Clone the https://github.com/projectriff/riff[riff] repository.
-The `helm install` commands in this section assume you are in the root directory of that project.
-
-[TIP]
-====
-
-Configure Docker to use the Docker environment running in minikube:
-
-[source, bash]
-----
-eval $(minikube docker-env)
-----
-====
-
-Build the riff components following the link:README.adoc#manual[manual build and deploy] instructions.
-
-To install locally built Docker images with Helm on minikube, use the `--devel` option which uses the chart version that has snapshot versions:
-
-[source, bash]
-----
-helm install projectriff/riff --name control --namespace riff-system --devel --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.sidecar.image.tag=0.0.5-build.1 --devel --set rbac.create=false --set kafka.create=true --set httpGateway.service.type=NodePort
 ----
 
 === To tear it all down
 
 [source, bash]
 ----
-helm delete --purge control
+helm delete --purge projectriff
 ----

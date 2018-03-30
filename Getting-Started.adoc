@@ -61,29 +61,24 @@ helm search riff -l
 
 == [[current]]Install the current riff release
 
-We have separated the Kafka installation from the riff chart. This requires an extra step of installing Kafka in order to use riff. You can use the single-node Kafka chart provided by riff or the three-node kafka/zookeeper service provided by Kubeapps.
+We provide a lightweight single node Kafka installation with the `projectriff/kafka` chart. 
+This works well for development purposes and it can be installed together with the riff chart by providing `--set kafka.create=true` when installing the riff chart.
 
-=== Install Kafka chart
+=== Create riff-system namespace
 
-We provide a lightweight single node Kafka installation in the `projectriff/kafka` chart. This works well for development purposes.
+All riff components willbe deployed into a `riff-system` namespace. 
+Any functions that are developed can be deployed into any other namespace including the `default` namespace.
 
-Create the `riff-system` namespace:
+To create the `riff-system` namespace run:
 
 [source, bash]
 ----
 kubectl create namespace riff-system
 ----
 
-Install the kafka/zookeeper service provided by riff using:
-
-[source, bash]
-----
-helm install --name transport --namespace riff-system projectriff/kafka
-----
-
 [TIP]
 ====
-Alternatively, install the three-node kafka/zookeeper service provided by the Kubeapps `incubator/kafka` chart using:
+If you want to install Kafka using the three-node kafka/zookeeper service provided by the Kubeapps `incubator/kafka` chart, then you should use:
 
 [source, bash]
 ----
@@ -91,6 +86,15 @@ helm install --name transport --namespace riff-system incubator/kafka
 ----
 
 Just be aware that this chart requires significantly more resources to run.
+
+When you install the riff chart during the next step, you need to add some config settings so that the riff components can find the Kafka service.
+Add the following config settings instead of `--set kafka.create=true` to the `helm install` command that you use:
+
+[source, bash]
+----
+--set kafka.broker.nodes=transport-kafka.riff-system:9092 --set kafka.zookeeper.nodes=transport-zookeeper.riff-system:2181
+----
+
 ====
 
 === Install riff using a Kubernetes cluster supporting LoadBalancer
@@ -101,7 +105,7 @@ For an install with default configuration and no RBAC enabled use:
 
 [source, bash]
 ----
-helm install projectriff/riff --name control --namespace riff-system --set rbac.create=false
+helm install projectriff/riff --name projectriff --namespace riff-system --set kafka.create=true --set rbac.create=false
 ----
 
 [NOTE]
@@ -110,7 +114,7 @@ For a cluster that has RBAC enabled, use the following (since `rbac.create` is `
 
 [source, bash]
 ----
-helm install projectriff/riff --name control --namespace riff-system
+helm install projectriff/riff --name projectriff --namespace riff-system --set kafka.create=true
 ----
 ====
 
@@ -120,7 +124,7 @@ For `NodePort` service types (e.g. running on Minikube) configure the httpGatewa
 
 [source, bash]
 ----
-helm install projectriff/riff --name control --namespace riff-system --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name projectriff --namespace riff-system --set kafka.create=true --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 [NOTE]
@@ -129,7 +133,7 @@ For a cluster that has RBAC enabled, use the following (since `rbac.create` is `
 
 [source, bash]
 ----
-helm install projectriff/riff --name control --namespace riff-system --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name projectriff --namespace riff-system --set kafka.create=true --set httpGateway.service.type=NodePort
 ----
 ====
 
@@ -139,12 +143,16 @@ You should see a number of resources get created in your cluster. You can see th
 
 [source, bash]
 ----
-kubectl get svc,deployments,pods,functions,topics
+kubectl get -n riff-system crd,svc,deploy,pod
 ----
 
 === Components installed by the chart
 
 The provided Helm chart installs the following components:
+
+* CustomResourceDefinitions for invokers, functions and topics
+
+* Optional Kafka single-node development cluster with Zookeeper (can be substituted for external Kafka service)
 
 * Topic Controller - the controller that watches the Topic resources and creates new topics in Kafka
 
@@ -154,14 +162,14 @@ The provided Helm chart installs the following components:
 
 === To upgrade to a new version
 
-Assuming that you named your release `control` you can run the following command to upgrade to the latest released version:
+Assuming that you named your release `projectriff` you can run the following command to upgrade to the latest released version:
 
-TIP: Older instructions used `demo` for the release name and `riffrepo` as the name for riff's Helm repository. You should substitute `control` with `demo` and `projectriff/riff` with `riffrepo/riff` if you have an older riff install. Another option is to remove the old install using `helm delete --purge demo` and then follow the instructions link:Getting-Started.adoc#riff-repo[above] for installing the new version.
+TIP: Older instructions used `demo` for the release name and `riffrepo` as the name for riff's Helm repository. You should substitute `projectriff` with `demo` and `projectriff/riff` with `riffrepo/riff` if you have an older riff install. Another option is to remove the old install using `helm delete --purge demo` and then follow the instructions link:Getting-Started.adoc#riff-repo[above] for installing the new version.
 
 [source, bash]
 ----
 helm repo update
-helm upgrade control projectriff/riff
+helm upgrade projectriff projectriff/riff
 ----
 
 === To tear it all down
@@ -195,7 +203,6 @@ For the config file, you can create a `~/.riff.yaml` file with something like th
 riffVersion: 0.0.6-snapshot
 useraccount: myaccount
 namespace: test
-publishNamespace: riff-system
 ```
 
 === [[cli-completion]]riff CLI bash completion

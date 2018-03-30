@@ -5,18 +5,19 @@
 
 ## Installing the Chart
 
-To install the chart with the release name `my-release`:
+To install the chart with the release name `projectriff` in the `riff-system` namespace:
 
 ```bash
 $ helm repo add projectriff https://riff-charts.storage.googleapis.com
 $ helm repo update
-$ helm install --name my-release projectriff/riff
+$ kubectl create namespace riff-system
+$ helm install --name projectriff --namespace riff-system projectriff/riff
 ```
 
 If you are using a cluster that does not have a load balancer (like Minikube) then you can install using a NodePort:
 
 ```bash
-$ helm install --name my-release --set httpGateway.service.type=NodePort projectriff/riff
+$ helm install --name projectriff --namespace riff-system --set httpGateway.service.type=NodePort projectriff/riff
 ```
 
 ## Configuration
@@ -25,6 +26,8 @@ The following lists the configurable parameters and their default values.
 
 | Parameter               | Description                            | Default                   |
 | ----------------------- | -------------------------------------- | ------------------------- |
+| `rbac.create`|Specifies whether RBAC resources should be created|true|
+| `kafka.create`|Specifies whether the single-node development Kafka chart should be installed|false|
 | `functionController.image.tag`|The image tag for the function-controller|latest|
 | `functionController.image.pullPolicy`|The imagePullPolicy for the function-controller|IfNotPresent|
 | `functionController.sidecar.image.tag`|The image tag for the sidecar used|latest|
@@ -38,7 +41,7 @@ The following lists the configurable parameters and their default values.
 
 ## Uninstalling the Release
 
-To remove the chart release with the name `my-release` and purge all the release info use:
+To remove the chart release with the name `projectriff` and purge all the release info use:
 
 ```bash
 $ helm delete --purge my-release
