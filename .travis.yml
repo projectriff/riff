@@ -19,6 +19,7 @@ matrix:
     env:
     - COMPONENT=http-gateway
   - stage: test
+    sudo: required
     env:
     - COMPONENT=helm-charts
     install: ./.travis.helm-install.sh
