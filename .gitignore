@@ -26,4 +26,4 @@ samples/**/*.yaml
 ## Simulator artefacts ###
 *.dat
 *-results.png
-simulator
+function-controller/simulator

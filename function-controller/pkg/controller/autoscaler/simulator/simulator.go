@@ -25,7 +25,10 @@ import (
 	"time"
 )
 
-const simulationSteps = 1000
+const (
+	simulationSteps = 1000
+	replicaInitialisationDelaySteps = 15 // delayed initialisation (termination is immediate)
+)
 
 func main() {
 	fmt.Println("starting to drive autoscaler with simulated workload")
@@ -55,23 +58,26 @@ func main() {
 	scaler.Run()
 	scaler.StartMonitoring("topic", stubFunctionID)
 
-	replicas := 0
+	actualReplicas := 0
 
+	rm := &replicaModel{}
 
 	for i := 0; i < simulationSteps; i++ {
 		simUpdater.UpdateProducerFor(i, &queueLen)
-		simUpdater.UpdatedConsumerFor(i, replicas, &queueLen)
+		simUpdater.UpdatedConsumerFor(i, actualReplicas, &queueLen)
 
 		scalerOutput := scaler.Propose()
 
 		scalerOutputForStubFunction := scalerOutput[stubFunctionID]
-		//step := fmt.Sprintf("%d %d\n", i, scalerOutputForStubFunction)
-		step := fmt.Sprintf("%d %d %d\n", i, scalerOutputForStubFunction, queueLen)
+
+		rm.desireReplicas(scalerOutputForStubFunction)
+		rm.tick()
+		actualReplicas = rm.actualReplicas()
+		// Scale number of replicas
+		step := fmt.Sprintf("%d %d %d\n", i, actualReplicas, queueLen)
 		dataFile.WriteString(step)
 
-		// Scale number of replicas with no delay
-		replicas = scalerOutputForStubFunction
-		scaler.InformFunctionReplicas(stubFunctionID, scalerOutputForStubFunction)
+		scaler.InformFunctionReplicas(stubFunctionID, actualReplicas)
 	}
 
 	fmt.Println("simulation completed")
@@ -148,4 +154,62 @@ func newStubInspector(queueLen *int64) *stubInspector {
 
 func (i *stubInspector) QueueLength(topic string, function string) (int64, error) {
 	return *i.queueLen, nil
+}
+
+// A replicaModel models the way new replicas take a while to start.
+// An increase of N in the desired number of replicas results in N items being added to `scheduled`. Each item in
+// `scheduled` represents a time (in "ticks") at which the corresponding replica will count towards the actual number of
+// replicas. This isn't quite the same behaviour as k8s, which knows about, and will inform the function controller of,
+// replicas which are still completing their initialisation, but at least it makes the model more realistic than if
+// replicas initialise instantaneously.
+// A decrease in the desired number of replicas is acted upon immediately by removing items from `scheduled` and, if
+// that isn't sufficient, reducing the actual number of replicas.
+type replicaModel struct {
+	currentTime int // in "ticks"
+	actual int
+	lastDesired int
+	scheduled []int
+}
+
+func (rm *replicaModel) desireReplicas(desired int) {
+	if desired == rm.lastDesired {
+		return
+	}
+	if desired > rm.lastDesired {
+		// schedule some new replicas with a delay
+		initTime := rm.currentTime + replicaInitialisationDelaySteps
+		for i := desired-rm.lastDesired; i > 0; i-- {
+			rm.scheduled = append(rm.scheduled, initTime)
+		}
+	} else {
+		rm.trim(rm.lastDesired - desired)
+	}
+	rm.lastDesired = desired
+}
+
+func (rm *replicaModel) trim(deschedule int) {
+	if deschedule >= len(rm.scheduled) {
+		trimmed := len(rm.scheduled)
+		rm.scheduled = []int{}	
+		rm.actual -= deschedule - trimmed
+	} else {
+		rm.scheduled = rm.scheduled[0:len(rm.scheduled) - deschedule]
+	}
+}
+
+func (rm *replicaModel) actualReplicas() int {
+	return rm.actual
+}
+
+func (rm *replicaModel) tick() {
+	rm.currentTime++
+	remaining := []int{}
+	for _, s := range rm.scheduled {
+		if s <= rm.currentTime {
+			rm.actual++
+		} else {
+			remaining = append(remaining, s)
+		}
+	}
+	rm.scheduled = remaining
 }
