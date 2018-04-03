@@ -22,7 +22,7 @@ Create the list of kafka broker nodes to use
 {{- if .Values.kafka.create -}}
     {{ default ( printf "%s-%s.%s:9092" .Release.Name "kafka" .Release.Namespace ) .Values.kafka.broker.nodes }}
 {{- else -}}
-    {{ .Values.kafka.broker.nodes }}
+    {{ required "A valid .Values.kafka.broker.nodes entry required!" .Values.kafka.broker.nodes }}
 {{- end -}}
 {{- end -}}
 
@@ -33,7 +33,7 @@ Create the list of kafka zookeeper nodes to use
 {{- if .Values.kafka.create -}}
     {{ default ( printf "%s-%s.%s:2181" .Release.Name "zookeeper" .Release.Namespace ) .Values.kafka.zookeeper.nodes }}
 {{- else -}}
-    {{ .Values.kafka.zookeeper.nodes }}
+    {{ required "A valid .Values.kafka.zookeeper.nodes entry required!" .Values.kafka.zookeeper.nodes }}
 {{- end -}}
 {{- end -}}
 
