@@ -1,4 +1,4 @@
-apiVersion : projectriff.io/v1
+apiVersion : projectriff.io/v1alpha1
 kind: Topic
 metadata:	
   name: words
