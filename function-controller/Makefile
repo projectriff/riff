@@ -12,7 +12,7 @@ $(OUTPUT): $(GO_SOURCES) ../vendor
 	go build cmd/function-controller.go
 
 gen-mocks: ../vendor
-	mockery -name 'TopicInformer|FunctionInformer' -dir ../kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1
+	mockery -name 'TopicInformer|FunctionInformer' -dir ../kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1
 	mockery -name 'SharedIndexInformer' -dir ../vendor/k8s.io/client-go/tools/cache
 	mockery -name 'DeploymentInformer' -dir ../vendor/k8s.io/client-go/informers/extensions/v1beta1
 	mockery -name 'LagTracker|Deployer' -dir pkg/controller
