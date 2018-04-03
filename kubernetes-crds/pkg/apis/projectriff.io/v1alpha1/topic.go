@@ -4,13 +4,6 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const (
-	TopicPlural      string = "topics"
-	TopicGroup       string = "projectriff.io"
-	TopicVersion     string = "v1"
-	FullTopicCRDName string = TopicPlural + "." + TopicGroup
-)
-
 var defaultPartitions = int32(1)
 
 // +genclient

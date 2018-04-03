@@ -31,7 +31,7 @@ codegen-verify: hack/vendor ../vendor
 	hack/vendor/k8s.io/code-generator/generate-groups.sh all \
       github.com/projectriff/riff/kubernetes-crds/pkg/client \
       github.com/projectriff/riff/kubernetes-crds/pkg/apis \
-      projectriff.io:v1 \
+      projectriff.io:v1alpha1 \
       --go-header-file  hack/boilerplate.go.txt \
       --verify-only
 
