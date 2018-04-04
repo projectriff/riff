@@ -61,6 +61,7 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
 			ipAddress, port, err := lookupAddress(kube, minik)
 			if err != nil {
 				return err
@@ -157,11 +158,16 @@ func doPost(url string, publishOptions publishOptions) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
-	return string(body), nil
+	if 200 <= resp.StatusCode && resp.StatusCode < 400 {
+		return string(body), nil
+	} else {
+		return "", fmt.Errorf("HTTP Gateway responded with code %v: %v", resp.StatusCode, string(body))
+	}
+
 }
