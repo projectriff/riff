@@ -19,6 +19,8 @@ package minikube
 import (
 	"os/exec"
 	"strings"
+	"fmt"
+	"regexp"
 )
 
 //go:generate mockery -name=Minikube -inpkg
@@ -38,9 +40,22 @@ func (*realMinikube) QueryIp() (string, error) {
 
 	cmd := exec.Command(cmdName, "ip")
 
-	output, err := cmd.CombinedOutput()
-
-	return strings.TrimRight(string(output), "\n"), err
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	// minikube can print status messages as part of other commands (eg "There is a newer version available").
+	// Look for ip on the last line only
+	lines := strings.Split(string(output), "\n")
+	// Last line is carriage return alone
+	if len(lines) < 2 {
+		return "", fmt.Errorf("Unable to parse minikube ip in command output:\n%s", output)
+	}
+	line := lines[len(lines)-2]
+	if match, err := regexp.MatchString("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$", line) ; !match || err != nil {
+		return "", fmt.Errorf("Unable to parse minikube ip in command output:\n%s", output)
+	}
+	return line, nil
 }
 
 func RealMinikube() Minikube {
