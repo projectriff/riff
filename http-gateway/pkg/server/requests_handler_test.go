@@ -69,7 +69,7 @@ var _ = Describe("RequestsHandler", func() {
 	})
 
 	JustBeforeEach(func() {
-		gateway = New(8080, mockProducer, stubConsumer, timeout, &stubTopicHelper{})
+		gateway = New(8080, mockProducer, stubConsumer, timeout, &stubTopicHelper{testName: "testtopic"})
 
 		go gateway.repliesLoop(done)
 		gateway.requestsHandler(mockResponseWriter, req)
@@ -82,6 +82,17 @@ var _ = Describe("RequestsHandler", func() {
 	Context("when the request URL is unexpected", func() {
 		BeforeEach(func() {
 			req.URL.Path = "/short"
+		})
+
+		It("should return a 404", func() {
+			resp := mockResponseWriter.Result()
+			Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
+		})
+	})
+
+	Context("when the request refers to a non-existent Riff Topic", func() {
+		BeforeEach(func() {
+			req.URL.Path = "/requests/nosuchtopicexists"
 		})
 
 		It("should return a 404", func() {

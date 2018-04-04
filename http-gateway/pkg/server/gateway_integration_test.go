@@ -62,7 +62,7 @@ var _ = Describe("HTTP Gateway", func() {
 	JustBeforeEach(func() {
 		port = 1024 + rand.Intn(32768-1024)
 
-		gw = server.New(port, mockProducer, stubConsumer, timeout, &stubTopicHelper{testName: "bar"})
+		gw = server.New(port, mockProducer, stubConsumer, timeout, &stubTopicHelper{testName: "testtopic"})
 
 		gw.Run(done)
 
@@ -75,7 +75,7 @@ var _ = Describe("HTTP Gateway", func() {
 
 	It("should request/reply OK", func() {
 
-		mockProducer.On("Send", "foo", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		mockProducer.On("Send", "testtopic", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			defer GinkgoRecover()
 			msg := args[1].(message.Message)
 			stubConsumer.Send(message.NewMessage([]byte("hello "+string(msg.Payload())),
@@ -86,7 +86,7 @@ var _ = Describe("HTTP Gateway", func() {
 			Expect(msg.Headers()["Not-Propagated-Header"]).To(BeNil())
 		})
 
-		resp := doRequest(port, "foo", bytes.NewBufferString("world"), "Content-Type", "text/solid", "Not-Propagated-Header", "secret")
+		resp := doRequest(port, "testtopic", bytes.NewBufferString("world"), "Content-Type", "text/solid", "Not-Propagated-Header", "secret")
 
 		b := make([]byte, 11)
 		resp.Body.Read(b)
@@ -100,7 +100,7 @@ var _ = Describe("HTTP Gateway", func() {
 
 	It("should accept messages and fire&forget", func() {
 
-		mockProducer.On("Send", "bar", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+		mockProducer.On("Send", "testtopic", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 			defer GinkgoRecover()
 			msg := args[1].(message.Message)
 			Expect(msg.Payload()).To(Equal([]byte("world")))
@@ -108,7 +108,7 @@ var _ = Describe("HTTP Gateway", func() {
 			Expect(msg.Headers()["Not-Propagated-Header"]).To(BeNil())
 		})
 
-		resp := doMessage(port, "bar", bytes.NewBufferString("world"), "Content-Type", "text/solid", "Not-Propagated-Header", "secret")
+		resp := doMessage(port, "testtopic", bytes.NewBufferString("world"), "Content-Type", "text/solid", "Not-Propagated-Header", "secret")
 
 		Expect(resp.StatusCode).To(Equal(200))
 

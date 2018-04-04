@@ -17,7 +17,9 @@
 package server
 
 import (
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
@@ -40,6 +42,13 @@ func (g *gateway) requestsHandler(w http.ResponseWriter, r *http.Request) {
 	topicName, err := parseTopic(r, requestPath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	if !g.topicHelper.TopicExists(topicName) {
+		errMsg := fmt.Sprintf("could not find topic '%s'", topicName)
+		log.Printf(errMsg)
+		http.Error(w, errMsg, http.StatusNotFound)
 		return
 	}
 
