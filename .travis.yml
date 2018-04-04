@@ -24,7 +24,7 @@ matrix:
     - COMPONENT=helm-charts
     install: ./.travis.helm-install.sh
     script:
-      - helm lint helm-charts/riff
+      - helm lint --set kafka.create=true helm-charts/riff
       - helm lint helm-charts/kafka
   - stage: test
     sudo: required
