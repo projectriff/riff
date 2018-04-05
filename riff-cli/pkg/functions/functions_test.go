@@ -17,64 +17,32 @@
 package functions
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"path/filepath"
-	"os"
-	"github.com/projectriff/riff/riff-cli/pkg/osutils"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
+var _ = Describe("Working with file paths", func() {
+	It("Should return current directory name when given '.'", func() {
+		fname, err := FunctionNameFromPath(".")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(fname).To(Equal("functions"))
+	})
 
-func TestFunctionNameFromPathFromCurrentDirectory(t *testing.T) {
-	currentDir,_ := filepath.Abs(".")
-	os.Chdir(osutils.Path("../../test_data/command/echo"))
+	It("Should cope with relative dir paths", func() {
+		fname, err := FunctionNameFromPath("../../test_data/command/echo")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(fname).To(Equal("echo"))
+	})
 
-	as := assert.New(t)
+	It("Should cope with relative file paths", func() {
+		fname, err := FunctionNameFromPath("../../test_data/command/echo/echo.sh")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(fname).To(Equal("echo"))
+	})
 
-	fname, err := FunctionNameFromPath(".")
-	as.NoError(err)
-
-	as.Equal("echo",fname)
-
-	os.Chdir(currentDir)
-}
-
-func TestFunctionNameFromRelativePath(t *testing.T) {
-	as := assert.New(t)
-	fname, err := FunctionNameFromPath(osutils.Path("../../test_data/command/echo"))
-	as.NoError(err)
-	as.Equal("echo",fname)
-}
-
-func TestFunctionNameFromRegularFile(t *testing.T) {
-	as := assert.New(t)
-	fname, err := FunctionNameFromPath(osutils.Path("../../test_data/command/echo/echo.sh"))
-	as.NoError(err)
-	as.Equal("echo",fname)
-}
-
-func TestFunctionNameFromInvalidPathIsEmpty(t *testing.T) {
-	as := assert.New(t)
-	fname, err := FunctionNameFromPath("a/b/c/d")
-	as.Error(err)
-	as.Empty(fname)
-}
-
-func TestFunctionDirFromRelativePath(t *testing.T) {
-	as := assert.New(t)
-	fndir, err := FunctionDirFromPath(osutils.Path("../../test_data/command/echo"))
-	as.NoError(err)
-	absEcho, _ := AbsPath("../../test_data/command/echo")
-	as.Equal(absEcho,fndir)
-}
-
-func TestFunctionDirFromRegularFile(t *testing.T) {
-	as := assert.New(t)
-	fndir, err := FunctionDirFromPath(osutils.Path("../../test_data/command/echo/echo.sh"))
-	as.NoError(err)
-	absEcho, _ := AbsPath("../../test_data/command/echo")
-	as.Equal(absEcho,fndir)
-}
-
-
-
+	It("Should error on invalid path", func() {
+		fname, err := FunctionNameFromPath("a/b/c/d")
+		Expect(err).To(MatchError("path 'a/b/c/d' does not exist"))
+		Expect(fname).To(Equal(""))
+	})
+})

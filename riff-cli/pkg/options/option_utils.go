@@ -18,30 +18,8 @@ package options
 
 import (
 	"fmt"
-	"path/filepath"
-
-	"github.com/projectriff/riff/riff-cli/pkg/functions"
 )
 
 func ImageName(opts ImageOptions) string {
 	return fmt.Sprintf("%s/%s:%s", opts.GetUserAccount(), opts.GetFunctionName(), opts.GetVersion())
-}
-
-func ValidateNamePathOptions(name *string, filePath *string) error {
-	*filePath = filepath.Clean(*filePath)
-
-	if *filePath == "" {
-		path, _ := filepath.Abs(".")
-		*filePath = path
-	}
-
-	var err error
-	if *name == "" {
-		*name, err = functions.FunctionNameFromPath(*filePath)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
+	"errors"
 )
 
 func GetCWD() string {
@@ -57,6 +57,21 @@ func FileExists(path string) bool {
 		}
 	}
 	return true
+}
+
+// AbsPath makes sure the given path exists and returns an absolute representation of it.
+func AbsPath(path string) (string, error) {
+	if path == "" {
+		path = "."
+	}
+	if !FileExists(path) {
+		return "", errors.New(fmt.Sprintf("path '%s' does not exist",path));
+	}
+	abs,err := filepath.Abs(path)
+	if err != nil {
+		return "", err
+	}
+	return abs, nil
 }
 
 func FindRiffResourceDefinitionPaths(path string) ([]string, error) {
@@ -106,15 +121,11 @@ func ExecStdin(cmdName string, cmdArgs []string, stdin *[]byte, timeout time.Dur
 	}
 	// This time we can simply use Output() to get the result.
 	out, err := cmd.Output()
-	if err != nil {
-		ioutils.Error(fmt.Sprint(err) + ": " + stderr.String())
-	}
 
 	// We want to check the context error to see if the timeout was executed.
 	// The error returned by cmd.Output() will be OS specific based on what
 	// happens when a process is killed.
 	if ctx.Err() == context.DeadlineExceeded {
-		ioutils.Error("Command timed out")
 		return nil, ctx.Err()
 	}
 

@@ -115,9 +115,7 @@ func pushArgs(opts BuildOptions) []string {
 }
 
 func validateBuildOptions(options *BuildOptions) error {
-	if err := validateFilepath(&options.FilePath); err != nil {
-		return err
-	}
+	options.FilePath = filepath.Clean(options.FilePath)
 	err := validateFunctionName(&options.FunctionName, options.FilePath)
 	return err
 }

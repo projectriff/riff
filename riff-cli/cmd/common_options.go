@@ -25,16 +25,6 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 )
 
-func validateFilepath(path *string) error {
-	*path = filepath.Clean(*path)
-
-	if *path == "" {
-		*path, _ = filepath.Abs(".")
-	}
-
-	return nil
-}
-
 func validateFunctionName(name *string, path string) error {
 	var err error
 	if *name == "" {

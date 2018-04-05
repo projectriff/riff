@@ -18,12 +18,13 @@ package functions
 import (
 	"path/filepath"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
-	"errors"
-	"fmt"
 )
 
+// FunctionNameFromPath returns a name for a function derived from the owning directory of the provided path.
+// That is, if path is a directory, its last element is returned. If path denotes a file, the name of its parent directory
+// is returned.
 func FunctionNameFromPath(path string) (string, error) {
-	abs,err := AbsPath(path)
+	abs,err := osutils.AbsPath(path)
 	if err != nil {
 		return "", err
 	}
@@ -33,27 +34,3 @@ func FunctionNameFromPath(path string) (string, error) {
 	return filepath.Base(filepath.Dir(abs)), nil
 }
 
-func FunctionDirFromPath(path string) (string, error) {
-	abs,err := AbsPath(path)
-	if err != nil {
-		return "", err
-	}
-	if osutils.IsDirectory(abs) {
-		return abs, nil
-	}
-	return filepath.Dir(abs), nil
-}
-
-func AbsPath(path string) (string, error) {
-	if path == "" {
-		path = "."
-	}
-	if !osutils.FileExists(path) {
-		return "", errors.New(fmt.Sprintf("path '%s' does not exist",path));
-	}
-	abs,err := filepath.Abs(path)
-	if err != nil {
-		return "", err
-	}
-	return abs, nil
-}

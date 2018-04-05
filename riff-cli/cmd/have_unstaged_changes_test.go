@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/onsi/gomega/types"
-	"github.com/projectriff/riff/riff-cli/pkg/ioutils"
-
 	"fmt"
 )
 
@@ -31,7 +29,6 @@ func (matcher *unstagedChangesMatcher) Match(actual interface{}) (success bool, 
 	// The error returned by cmd.Output() will be OS specific based on what
 	// happens when a process is killed.
 	if ctx.Err() == context.DeadlineExceeded {
-		ioutils.Error("Command timed out")
 		return false, ctx.Err()
 	}
 

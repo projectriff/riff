@@ -24,6 +24,7 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/initializer"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/spf13/cobra"
+	"path/filepath"
 )
 
 func Init(invokers []projectriff_v1.Invoker) (*cobra.Command, *options.InitOptions) {
@@ -99,9 +100,7 @@ func InitInvokers(invokers []projectriff_v1.Invoker, initOptions *options.InitOp
 }
 
 func validateInitOptions(options *options.InitOptions) error {
-	if err := validateFilepath(&options.FilePath); err != nil {
-		return err
-	}
+	options.FilePath = filepath.Clean(options.FilePath)
 	if err := validateFunctionName(&options.FunctionName, options.FilePath); err != nil {
 		return err
 	}

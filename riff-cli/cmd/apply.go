@@ -19,10 +19,10 @@ package cmd
 import (
 	"fmt"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
-	"github.com/projectriff/riff/riff-cli/pkg/functions"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/cobra"
+	"path/filepath"
 )
 
 type ApplyOptions struct {
@@ -45,17 +45,17 @@ func Apply(realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) (*cobra.C
 
 
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
 			kubectlClient := realKubeCtl
 			if applyOptions.DryRun {
 				kubectlClient = dryRunKubeCtl
 			}
-			cmd.SilenceUsage = true
-			return apply(cmd, applyOptions, kubectlClient)
+			return apply(applyOptions, kubectlClient)
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			applyOptions.Namespace = utils.GetStringValueWithOverride("namespace", *cmd.Flags())
-
-			return validateApplyOptions(&applyOptions)
+			applyOptions.FilePath = filepath.Clean(applyOptions.FilePath)
+			return nil
 		},
 	}
 
@@ -66,10 +66,9 @@ func Apply(realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) (*cobra.C
 	return applyCmd, &applyOptions
 }
 
-func apply(cmd *cobra.Command, opts ApplyOptions, kubectlClient kubectl.KubeCtl) error {
-	abs, err := functions.AbsPath(opts.FilePath)
+func apply(opts ApplyOptions, kubectlClient kubectl.KubeCtl) error {
+	abs, err := osutils.AbsPath(opts.FilePath)
 	if err != nil {
-		cmd.SilenceUsage = true
 		return err
 	}
 
@@ -97,13 +96,8 @@ func apply(cmd *cobra.Command, opts ApplyOptions, kubectlClient kubectl.KubeCtl)
 	fmt.Print(message)
 	output, err := kubectlClient.Exec(cmdArgs)
 	if err != nil {
-		cmd.SilenceUsage = true
 		return err
 	}
 	fmt.Printf("%v\n", output)
 	return nil
-}
-
-func validateApplyOptions(options *ApplyOptions) error {
-	return validateFilepath(&options.FilePath)
 }
