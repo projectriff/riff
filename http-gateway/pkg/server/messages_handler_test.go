@@ -52,7 +52,7 @@ var _ = Describe("MessagesHandler", func() {
 		mockResponseWriter = httptest.NewRecorder()
 		testError = errors.New(errorMessage)
 
-		gateway = New(8080, mockProducer, mockConsumer, 60*time.Second, &happyTopicHelper{testName: "testtopic"})
+		gateway = New(8080, mockProducer, mockConsumer, 60*time.Second, &happyRiffTopicExistenceChecker{testName: "testtopic"})
 	})
 
 	JustBeforeEach(func() {
@@ -83,11 +83,11 @@ var _ = Describe("MessagesHandler", func() {
 
 	Context("When an unexpected error occurs while looking up a Riff topic", func() {
 		BeforeEach(func() {
-			gateway.topicHelper = &errorTopicHelper{}
+			gateway.riffTopicExistenceChecker = &errorRiffTopicExistenceChecker{}
 		})
 
 		AfterEach(func() {
-			gateway.topicHelper = &happyTopicHelper{}
+			gateway.riffTopicExistenceChecker = &happyRiffTopicExistenceChecker{}
 		})
 
 		It("should return a 500", func() {
@@ -239,16 +239,16 @@ func (*badReader) Close() error {
 	return nil
 }
 
-type happyTopicHelper struct {
+type happyRiffTopicExistenceChecker struct {
 	testName string
 }
 
-func (th *happyTopicHelper) TopicExists(topicName string) (bool, error) {
+func (th *happyRiffTopicExistenceChecker) TopicExists(topicName string) (bool, error) {
 	return topicName == th.testName, nil
 }
 
-type errorTopicHelper struct{}
+type errorRiffTopicExistenceChecker struct{}
 
-func (th *errorTopicHelper) TopicExists(topicName string) (bool, error) {
+func (th *errorRiffTopicExistenceChecker) TopicExists(topicName string) (bool, error) {
 	return false, errors.New("test error")
 }

@@ -71,7 +71,7 @@ var _ = Describe("RequestsHandler", func() {
 	Context("when Riff Topic lookup is working", func() {
 
 		JustBeforeEach(func() {
-			gateway = New(8080, mockProducer, stubConsumer, timeout, &happyTopicHelper{testName: "testtopic"})
+			gateway = New(8080, mockProducer, stubConsumer, timeout, &happyRiffTopicExistenceChecker{testName: "testtopic"})
 
 			go gateway.repliesLoop(done)
 			gateway.requestsHandler(mockResponseWriter, req)
@@ -252,7 +252,7 @@ var _ = Describe("RequestsHandler", func() {
 	// so we need another Describe() block to create separate cases.
 	Context("when Riff Topic lookup fails unexpectedly", func() {
 		JustBeforeEach(func() {
-			gateway = New(8080, mockProducer, stubConsumer, timeout, &errorTopicHelper{})
+			gateway = New(8080, mockProducer, stubConsumer, timeout, &errorRiffTopicExistenceChecker{})
 
 			go gateway.repliesLoop(done)
 			gateway.requestsHandler(mockResponseWriter, req)

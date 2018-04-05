@@ -24,12 +24,13 @@ import (
 	"syscall"
 	"time"
 
+	"io"
+
 	"github.com/bsm/sarama-cluster"
 	"github.com/projectriff/riff/http-gateway/pkg/server"
 	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
 	"github.com/projectriff/riff/message-transport/pkg/transport/metrics/kafka_over_kafka"
 	"github.com/satori/go.uuid"
-	"io"
 )
 
 func main() {
@@ -40,12 +41,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer func(){
+	defer func() {
 		if producer, ok := producer.(io.Closer); ok {
 			producer.Close()
 		}
 	}()
-
 
 	consumer, err := kafka.NewConsumer(brokers, "gateway", []string{"replies"}, cluster.NewConfig())
 	if err != nil {
@@ -53,12 +53,12 @@ func main() {
 	}
 	defer consumer.Close()
 
-	topicHelper, err := server.NewTopicHelper()
+	riffTopicExistenceChecker, err := server.NewRiffTopicExistenceChecker()
 	if err != nil {
 		panic(err)
 	}
 
-	gw := server.New(8080, producer, consumer, 60*time.Second, topicHelper)
+	gw := server.New(8080, producer, consumer, 60*time.Second, riffTopicExistenceChecker)
 
 	done := make(chan struct{})
 	gw.Run(done)

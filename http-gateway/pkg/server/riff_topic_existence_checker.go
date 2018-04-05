@@ -10,15 +10,15 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-type TopicHelper interface {
+type RiffTopicExistenceChecker interface {
 	TopicExists(topicName string) (bool, error)
 }
 
-type topicHelper struct {
+type riffTopicExistenceChecker struct {
 	client *riffcs.Clientset
 }
 
-func NewTopicHelper() (*topicHelper, error) {
+func NewRiffTopicExistenceChecker() (*riffTopicExistenceChecker, error) {
 	restConf, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
@@ -29,11 +29,11 @@ func NewTopicHelper() (*topicHelper, error) {
 		return nil, err
 	}
 
-	return &topicHelper{client: riffClient}, nil
+	return &riffTopicExistenceChecker{client: riffClient}, nil
 }
 
-func (tw *topicHelper) TopicExists(topicName string) (bool, error) {
-	_, err := tw.client.ProjectriffV1alpha1().Topics("default").Get(topicName, v1.GetOptions{})
+func (tec *riffTopicExistenceChecker) TopicExists(topicName string) (bool, error) {
+	_, err := tec.client.ProjectriffV1alpha1().Topics("default").Get(topicName, v1.GetOptions{})
 
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
