@@ -10,6 +10,8 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+// RiffTopicExistenceChecker allows the http-gateway to check for the existence of
+// a Riff Topic before attempting to send a message to that topic.
 type RiffTopicExistenceChecker interface {
 	TopicExists(topicName string) (bool, error)
 }
@@ -32,6 +34,11 @@ func NewRiffTopicExistenceChecker() (*riffTopicExistenceChecker, error) {
 	return &riffTopicExistenceChecker{client: riffClient}, nil
 }
 
+// TopicExists checks to see if Kubernetes is aware of a Riff Topic.
+// If the topic exists, it returns (true, nil)
+// If the topic does not exist, it returns (false, nil)
+// If there is an unexpected error, it returns (false, err), where 'err' is the unexpected
+// error that was encountered.
 func (tec *riffTopicExistenceChecker) TopicExists(topicName string) (bool, error) {
 	_, err := tec.client.ProjectriffV1alpha1().Topics("default").Get(topicName, v1.GetOptions{})
 
