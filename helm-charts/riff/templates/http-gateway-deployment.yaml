@@ -37,7 +37,7 @@ spec:
             - containerPort: 8080
           env:
           - name: KAFKA_BROKERS
-            value: {{ .Values.kafka.broker.nodes }}
+            value: {{ template "riff.kafkaBrokers" . }}
           - name: RIFF_HTTP_HEADERS_WHITELIST
             value: {{ .Values.httpGateway.httpHeadersWhitelist }}
       serviceAccountName: {{ template "riff.serviceAccountName" . }}

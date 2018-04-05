@@ -51,6 +51,6 @@ kafka:
   # Specifies whether the single-node development Kafka chart should be installed
   create: false
   broker:
-    nodes: projectriff-kafka.riff-system:9092
+    nodes: null
   zookeeper:
-    nodes: projectriff-zookeeper.riff-system:2181
+    nodes: null

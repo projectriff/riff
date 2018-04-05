@@ -37,7 +37,7 @@ spec:
             - containerPort: 8080
           env:
           - name: KAFKA_BROKERS
-            value: {{ .Values.kafka.broker.nodes }}
+            value: {{ template "riff.kafkaBrokers" . }}
           - name: RIFF_FUNCTION_SIDECAR_REPOSITORY
             value: {{ .Values.functionController.sidecar.image.repository }}
           - name: RIFF_FUNCTION_SIDECAR_TAG

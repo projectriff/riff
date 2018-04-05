@@ -37,6 +37,6 @@ spec:
             - containerPort: 8080
           env:
           - name: KAFKA_ZK_NODES
-            value: {{ .Values.kafka.zookeeper.nodes }}
+            value: {{ template "riff.kafkaZkNodes" . }}
       serviceAccountName: {{ template "riff.serviceAccountName" . }}
 {{- end -}}
