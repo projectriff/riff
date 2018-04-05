@@ -1,7 +1,7 @@
 language: go
 go:
 - '1.9'
-install: touch vendor
+install: touch glide.lock vendor
 script: cd $COMPONENT && make test
 matrix:
   include:
