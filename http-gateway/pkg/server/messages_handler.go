@@ -19,7 +19,6 @@ package server
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -42,9 +41,14 @@ func (g *gateway) messagesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !g.topicHelper.TopicExists(topicName) {
-		errMsg := fmt.Sprintf("could not find topic '%s'", topicName)
-		log.Printf(errMsg)
+	topicExists, err := g.topicHelper.TopicExists(topicName)
+	if err != nil {
+		errMsg := fmt.Sprintf("while checking to see if there was a Riff topic '%s', an unexpected error occurred: %+v", topicName, err)
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
+	if !topicExists {
+		errMsg := fmt.Sprintf("could not find Riff topic '%s'", topicName)
 		http.Error(w, errMsg, http.StatusNotFound)
 		return
 	}

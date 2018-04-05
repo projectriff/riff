@@ -1,17 +1,17 @@
 package server
 
 import (
-	"log"
-
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	riffcs "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/client-go/rest"
 )
 
 type TopicHelper interface {
-	TopicExists(topicName string) bool
+	TopicExists(topicName string) (bool, error)
 }
 
 type topicHelper struct {
@@ -30,16 +30,18 @@ func NewTopicHelper() (*topicHelper, error) {
 	}
 
 	return &topicHelper{client: riffClient}, nil
-
 }
 
-func (tw *topicHelper) TopicExists(topicName string) bool {
+func (tw *topicHelper) TopicExists(topicName string) (bool, error) {
 	_, err := tw.client.ProjectriffV1alpha1().Topics("default").Get(topicName, v1.GetOptions{})
 
 	if err != nil {
-		log.Printf("%s\n", err)
-		return false
+		if k8serrors.IsNotFound(err) {
+			return false, nil
+		}
+
+		return false, err
 	}
 
-	return true
+	return true, nil
 }
