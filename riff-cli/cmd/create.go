@@ -29,6 +29,8 @@ func Create(initCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Com
 	createChainCmd.Use = "create"
 	createChainCmd.Short = "Create a function (equivalent to init, build, apply)"
 	createChainCmd.Long = utils.CreateCmdLong()
+	createChainCmd.SetUsageTemplate(utils.CustomInvokerUsageTemplate)
+
 	return createChainCmd
 }
 
