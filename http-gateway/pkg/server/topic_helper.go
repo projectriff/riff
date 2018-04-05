@@ -5,7 +5,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/golang/glog"
 	riffcs "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
 
 	"k8s.io/client-go/rest"
@@ -27,7 +26,7 @@ func NewTopicHelper() (*topicHelper, error) {
 
 	riffClient, err := riffcs.NewForConfig(restConf)
 	if err != nil {
-		glog.Fatalf("Error building riff clientset: %s", err.Error())
+		return nil, err
 	}
 
 	return &topicHelper{client: riffClient}, nil
