@@ -33,13 +33,13 @@ type Gateway interface {
 }
 
 type gateway struct {
-	httpServer       *http.Server
-	consumer         transport.Consumer
-	consumerMessages chan message.Message
-	producer         transport.Producer
-	replies          *repliesMap
-	timeout          time.Duration
-	topicHelper      TopicHelper
+	httpServer                *http.Server
+	consumer                  transport.Consumer
+	consumerMessages          chan message.Message
+	producer                  transport.Producer
+	replies                   *repliesMap
+	timeout                   time.Duration
+	riffTopicExistenceChecker RiffTopicExistenceChecker
 }
 
 func (g *gateway) Run(stop <-chan struct{}) {
@@ -103,19 +103,19 @@ func (g *gateway) repliesLoop(stop <-chan struct{}) {
 	}
 }
 
-func New(port int, producer transport.Producer, consumer transport.Consumer, timeout time.Duration, topicHelper TopicHelper) *gateway {
+func New(port int, producer transport.Producer, consumer transport.Consumer, timeout time.Duration, riffTopicExistenceChecker RiffTopicExistenceChecker) *gateway {
 	mux := http.NewServeMux()
 	httpServer := &http.Server{Addr: fmt.Sprintf(":%v", port),
 		Handler: mux,
 	}
 	consumerMessages := make(chan message.Message)
 	g := gateway{httpServer: httpServer,
-		producer:         producer,
-		consumer:         consumer,
-		consumerMessages: consumerMessages,
-		replies:          newRepliesMap(),
-		timeout:          timeout,
-		topicHelper:      topicHelper,
+		producer:                  producer,
+		consumer:                  consumer,
+		consumerMessages:          consumerMessages,
+		replies:                   newRepliesMap(),
+		timeout:                   timeout,
+		riffTopicExistenceChecker: riffTopicExistenceChecker,
 	}
 	mux.HandleFunc(messagePath, g.messagesHandler)
 	mux.HandleFunc(requestPath, g.requestsHandler)

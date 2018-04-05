@@ -62,7 +62,7 @@ var _ = Describe("HTTP Gateway", func() {
 	JustBeforeEach(func() {
 		port = 1024 + rand.Intn(32768-1024)
 
-		gw = server.New(port, mockProducer, stubConsumer, timeout, &stubTopicHelper{testName: "testtopic"})
+		gw = server.New(port, mockProducer, stubConsumer, timeout, &happyRiffTopicExistenceChecker{testName: "testtopic"})
 
 		gw.Run(done)
 
@@ -150,10 +150,10 @@ func waitForHttpGatewayToBeReady(port int) {
 	}, timeoutDuration, pollingInterval).Should(Succeed())
 }
 
-type stubTopicHelper struct {
+type happyRiffTopicExistenceChecker struct {
 	testName string
 }
 
-func (sth *stubTopicHelper) TopicExists(topicName string) bool {
-	return topicName == sth.testName
+func (th *happyRiffTopicExistenceChecker) TopicExists(namespace string, topicName string) (bool, error) {
+	return topicName == th.testName, nil
 }

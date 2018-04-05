@@ -68,108 +68,44 @@ var _ = Describe("RequestsHandler", func() {
 		done = make(chan struct{})
 	})
 
-	JustBeforeEach(func() {
-		gateway = New(8080, mockProducer, stubConsumer, timeout, &stubTopicHelper{testName: "testtopic"})
+	Context("when Riff Topic lookup is working", func() {
 
-		go gateway.repliesLoop(done)
-		gateway.requestsHandler(mockResponseWriter, req)
-	})
+		JustBeforeEach(func() {
+			gateway = New(8080, mockProducer, stubConsumer, timeout, &happyRiffTopicExistenceChecker{testName: "testtopic"})
 
-	AfterEach(func() {
-		done <- struct{}{}
-	})
-
-	Context("when the request URL is unexpected", func() {
-		BeforeEach(func() {
-			req.URL.Path = "/short"
+			go gateway.repliesLoop(done)
+			gateway.requestsHandler(mockResponseWriter, req)
 		})
 
-		It("should return a 404", func() {
-			resp := mockResponseWriter.Result()
-			Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
-		})
-	})
-
-	Context("when the request refers to a non-existent Riff Topic", func() {
-		BeforeEach(func() {
-			req.URL.Path = "/requests/nosuchtopicexists"
+		AfterEach(func() {
+			done <- struct{}{}
 		})
 
-		It("should return a 404", func() {
-			resp := mockResponseWriter.Result()
-			Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
-		})
-	})
-
-	Context("when the request body cannot be read", func() {
-		BeforeEach(func() {
-			req.Body = &badReader{testError}
-		})
-
-		It("should reply with a suitable error response", func() {
-			resp := mockResponseWriter.Result()
-			body, _ := ioutil.ReadAll(resp.Body)
-
-			Expect(resp.StatusCode).To(Equal(http.StatusInternalServerError))
-			Expect(string(body)).To(HavePrefix(errorMessage))
-		})
-	})
-
-	Context("when the request body can be read", func() {
-		BeforeEach(func() {
-			req.Body = ioutil.NopCloser(strings.NewReader("body"))
-		})
-
-		Context("when sending succeeds", func() {
+		Context("when the request URL is unexpected", func() {
 			BeforeEach(func() {
-				mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Run(func(args mock.Arguments) {
-					msg, ok := args[1].(message.Message)
-					Expect(ok).To(BeTrue())
-					stubConsumer.Send(msg, "topic")
-				}).Return(nil)
+				req.URL.Path = "/short"
 			})
 
-			It("should send one message to the producer", func() {
-				Expect(sendIndex(mockProducer)).To(BeNumerically(">", -1))
-			})
-
-			It("should send to the correct topic", func() {
-				Expect(mockProducer.Calls[sendIndex(mockProducer)].Arguments[0]).To(Equal("testtopic"))
-			})
-
-			It("should send a message containing the correct body", func() {
-				Expect(string(sentMessage(mockProducer).Payload())).To(Equal("body"))
-			})
-
-			It("should send a message with a correlation id header", func() {
-				Expect(sentMessage(mockProducer).Headers()).To(HaveKey("correlationId"))
-			})
-
-			Context("when the request contains some headers that should be propagated and some that should not", func() {
-				BeforeEach(func() {
-					req.Header.Add("Content-Type", "text/plain")
-					req.Header.Add("Accept", "application/json")
-					req.Header.Add("Accept", "text/plain")
-					req.Header.Add("Accept-Charset", "utf-8")
-				})
-
-				It("should send a message containing the correct headers", func() {
-					headers := sentMessage(mockProducer).Headers()
-					Expect(headers).To(HaveKeyWithValue("Content-Type", ConsistOf("text/plain")))
-					Expect(headers).To(HaveKeyWithValue("Accept", ConsistOf("application/json", "text/plain")))
-					Expect(headers).NotTo(HaveKey("Accept-Charset"))
-				})
-			})
-
-			It("should reply with an OK response", func() {
+			It("should return a 404", func() {
 				resp := mockResponseWriter.Result()
-				Expect(resp.StatusCode).To(Equal(http.StatusOK))
+				Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
 			})
 		})
 
-		Context("when sending fails", func() {
+		Context("when the request refers to a non-existent Riff Topic", func() {
 			BeforeEach(func() {
-				mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Return(testError)
+				req.URL.Path = "/requests/nosuchtopicexists"
+			})
+
+			It("should return a 404", func() {
+				resp := mockResponseWriter.Result()
+				Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
+			})
+		})
+
+		Context("when the request body cannot be read", func() {
+			BeforeEach(func() {
+				req.Body = &badReader{testError}
 			})
 
 			It("should reply with a suitable error response", func() {
@@ -181,64 +117,153 @@ var _ = Describe("RequestsHandler", func() {
 			})
 		})
 
-		Context("when sending succeeds but the reply takes too long", func() {
+		Context("when the request body can be read", func() {
 			BeforeEach(func() {
-				timeout = time.Nanosecond
-				mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Return(nil)
+				req.Body = ioutil.NopCloser(strings.NewReader("body"))
 			})
 
-			It("should time out with a 404", func() {
-				resp := mockResponseWriter.Result()
-				Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
+			Context("when sending succeeds", func() {
+				BeforeEach(func() {
+					mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Run(func(args mock.Arguments) {
+						msg, ok := args[1].(message.Message)
+						Expect(ok).To(BeTrue())
+						stubConsumer.Send(msg, "topic")
+					}).Return(nil)
+				})
+
+				It("should send one message to the producer", func() {
+					Expect(sendIndex(mockProducer)).To(BeNumerically(">", -1))
+				})
+
+				It("should send to the correct topic", func() {
+					Expect(mockProducer.Calls[sendIndex(mockProducer)].Arguments[0]).To(Equal("testtopic"))
+				})
+
+				It("should send a message containing the correct body", func() {
+					Expect(string(sentMessage(mockProducer).Payload())).To(Equal("body"))
+				})
+
+				It("should send a message with a correlation id header", func() {
+					Expect(sentMessage(mockProducer).Headers()).To(HaveKey("correlationId"))
+				})
+
+				Context("when the request contains some headers that should be propagated and some that should not", func() {
+					BeforeEach(func() {
+						req.Header.Add("Content-Type", "text/plain")
+						req.Header.Add("Accept", "application/json")
+						req.Header.Add("Accept", "text/plain")
+						req.Header.Add("Accept-Charset", "utf-8")
+					})
+
+					It("should send a message containing the correct headers", func() {
+						headers := sentMessage(mockProducer).Headers()
+						Expect(headers).To(HaveKeyWithValue("Content-Type", ConsistOf("text/plain")))
+						Expect(headers).To(HaveKeyWithValue("Accept", ConsistOf("application/json", "text/plain")))
+						Expect(headers).NotTo(HaveKey("Accept-Charset"))
+					})
+				})
+
+				It("should reply with an OK response", func() {
+					resp := mockResponseWriter.Result()
+					Expect(resp.StatusCode).To(Equal(http.StatusOK))
+				})
+			})
+
+			Context("when sending fails", func() {
+				BeforeEach(func() {
+					mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Return(testError)
+				})
+
+				It("should reply with a suitable error response", func() {
+					resp := mockResponseWriter.Result()
+					body, _ := ioutil.ReadAll(resp.Body)
+
+					Expect(resp.StatusCode).To(Equal(http.StatusInternalServerError))
+					Expect(string(body)).To(HavePrefix(errorMessage))
+				})
+			})
+
+			Context("when sending succeeds but the reply takes too long", func() {
+				BeforeEach(func() {
+					timeout = time.Nanosecond
+					mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Return(nil)
+				})
+
+				It("should time out with a 404", func() {
+					resp := mockResponseWriter.Result()
+					Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
+				})
+			})
+
+			Context("when sending succeeds but the producer reports an error before the reply comes back", func() {
+				BeforeEach(func() {
+					mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Run(func(args mock.Arguments) {
+						msg, ok := args[1].(message.Message)
+						Expect(ok).To(BeTrue())
+
+						producerErrors <- testError
+
+						stubConsumer.Send(msg, "topic")
+					}).Return(nil)
+				})
+
+				It("should reply with OK", func() {
+					resp := mockResponseWriter.Result()
+					Expect(resp.StatusCode).To(Equal(http.StatusOK))
+				})
+			})
+
+			Context("when sending succeeds but a reply comes back with the wrong correlation id", func() {
+				BeforeEach(func() {
+					timeout = 10 * time.Millisecond
+					mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Run(func(args mock.Arguments) {
+						headers := make(message.Headers)
+						headers["correlationId"] = []string{""}
+						stubConsumer.Send(message.NewMessage([]byte(""), headers), "banana")
+					}).Return(nil)
+				})
+
+				It("should time out with a 404", func() {
+					resp := mockResponseWriter.Result()
+					Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
+				})
+			})
+
+			Context("when sending succeeds but the reply is an error", func() {
+				BeforeEach(func() {
+					mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Run(func(args mock.Arguments) {
+						msg, ok := args[1].(message.Message)
+						Expect(ok).To(BeTrue())
+						headers := msg.Headers()
+						headers["error"] = []string{"error-server-function-invocation"}
+						stubConsumer.Send(message.NewMessage([]byte(""), headers), "banana")
+					}).Return(nil)
+				})
+
+				It("should reply with a 500", func() {
+					resp := mockResponseWriter.Result()
+					Expect(resp.StatusCode).To(Equal(http.StatusInternalServerError))
+				})
 			})
 		})
+	})
 
-		Context("when sending succeeds but the producer reports an error before the reply comes back", func() {
-			BeforeEach(func() {
-				mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Run(func(args mock.Arguments) {
-					msg, ok := args[1].(message.Message)
-					Expect(ok).To(BeTrue())
+	// the way the tests are set up for this mess with the 500-status/Riff topic lookup test
+	// so we need another Describe() block to create separate cases.
+	Context("when Riff Topic lookup fails unexpectedly", func() {
+		JustBeforeEach(func() {
+			gateway = New(8080, mockProducer, stubConsumer, timeout, &errorRiffTopicExistenceChecker{})
 
-					producerErrors <- testError
-
-					stubConsumer.Send(msg, "topic")
-				}).Return(nil)
-			})
-
-			It("should reply with OK", func() {
-				resp := mockResponseWriter.Result()
-				Expect(resp.StatusCode).To(Equal(http.StatusOK))
-			})
+			go gateway.repliesLoop(done)
+			gateway.requestsHandler(mockResponseWriter, req)
 		})
 
-		Context("when sending succeeds but a reply comes back with the wrong correlation id", func() {
-			BeforeEach(func() {
-				timeout = 10 * time.Millisecond
-				mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Run(func(args mock.Arguments) {
-					headers := make(message.Headers)
-					headers["correlationId"] = []string{""}
-					stubConsumer.Send(message.NewMessage([]byte(""), headers), "banana")
-				}).Return(nil)
-			})
-
-			It("should time out with a 404", func() {
-				resp := mockResponseWriter.Result()
-				Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
-			})
+		AfterEach(func() {
+			done <- struct{}{}
 		})
 
-		Context("when sending succeeds but the reply is an error", func() {
-			BeforeEach(func() {
-				mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Run(func(args mock.Arguments) {
-					msg, ok := args[1].(message.Message)
-					Expect(ok).To(BeTrue())
-					headers := msg.Headers()
-					headers["error"] = []string{"error-server-function-invocation"}
-					stubConsumer.Send(message.NewMessage([]byte(""), headers), "banana")
-				}).Return(nil)
-			})
-
-			It("should reply with a 500", func() {
+		Context("When an unexpected error occurs while looking up a Riff topic", func() {
+			It("should return a 500", func() {
 				resp := mockResponseWriter.Result()
 				Expect(resp.StatusCode).To(Equal(http.StatusInternalServerError))
 			})

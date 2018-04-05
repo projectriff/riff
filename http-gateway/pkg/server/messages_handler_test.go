@@ -52,7 +52,7 @@ var _ = Describe("MessagesHandler", func() {
 		mockResponseWriter = httptest.NewRecorder()
 		testError = errors.New(errorMessage)
 
-		gateway = New(8080, mockProducer, mockConsumer, 60*time.Second, &stubTopicHelper{testName: "testtopic"})
+		gateway = New(8080, mockProducer, mockConsumer, 60*time.Second, &happyRiffTopicExistenceChecker{testName: "testtopic"})
 	})
 
 	JustBeforeEach(func() {
@@ -78,6 +78,21 @@ var _ = Describe("MessagesHandler", func() {
 		It("should return a 404", func() {
 			resp := mockResponseWriter.Result()
 			Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
+		})
+	})
+
+	Context("When an unexpected error occurs while looking up a Riff topic", func() {
+		BeforeEach(func() {
+			gateway.riffTopicExistenceChecker = &errorRiffTopicExistenceChecker{}
+		})
+
+		AfterEach(func() {
+			gateway.riffTopicExistenceChecker = &happyRiffTopicExistenceChecker{}
+		})
+
+		It("should return a 500", func() {
+			resp := mockResponseWriter.Result()
+			Expect(resp.StatusCode).To(Equal(http.StatusInternalServerError))
 		})
 	})
 
@@ -224,10 +239,16 @@ func (*badReader) Close() error {
 	return nil
 }
 
-type stubTopicHelper struct {
+type happyRiffTopicExistenceChecker struct {
 	testName string
 }
 
-func (sth *stubTopicHelper) TopicExists(topicName string) bool {
-	return topicName == sth.testName
+func (th *happyRiffTopicExistenceChecker) TopicExists(namespace string, topicName string) (bool, error) {
+	return topicName == th.testName, nil
+}
+
+type errorRiffTopicExistenceChecker struct{}
+
+func (th *errorRiffTopicExistenceChecker) TopicExists(namespace string, topicName string) (bool, error) {
+	return false, errors.New("test error")
 }

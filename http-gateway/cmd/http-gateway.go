@@ -24,12 +24,15 @@ import (
 	"syscall"
 	"time"
 
+	"io"
+
 	"github.com/bsm/sarama-cluster"
 	"github.com/projectriff/riff/http-gateway/pkg/server"
+	"github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
 	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
 	"github.com/projectriff/riff/message-transport/pkg/transport/metrics/kafka_over_kafka"
 	"github.com/satori/go.uuid"
-	"io"
+	"k8s.io/client-go/rest"
 )
 
 func main() {
@@ -40,12 +43,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer func(){
+	defer func() {
 		if producer, ok := producer.(io.Closer); ok {
 			producer.Close()
 		}
 	}()
-
 
 	consumer, err := kafka.NewConsumer(brokers, "gateway", []string{"replies"}, cluster.NewConfig())
 	if err != nil {
@@ -53,12 +55,19 @@ func main() {
 	}
 	defer consumer.Close()
 
-	topicHelper, err := server.NewTopicHelper()
+	restConf, err := rest.InClusterConfig()
 	if err != nil {
 		panic(err)
 	}
 
-	gw := server.New(8080, producer, consumer, 60*time.Second, topicHelper)
+	riffClient, err := versioned.NewForConfig(restConf)
+	if err != nil {
+		panic(err)
+	}
+
+	riffTopicExistenceChecker := server.NewRiffTopicExistenceChecker(riffClient)
+
+	gw := server.New(8080, producer, consumer, 60*time.Second, riffTopicExistenceChecker)
 
 	done := make(chan struct{})
 	gw.Run(done)
