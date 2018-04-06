@@ -1,4 +1,3 @@
-{{- if .Values.create.faas -}}
 {{- if .Values.rbac.create -}}
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/{{ required "A valid .Values.rbac.apiVersion entry required!" .Values.rbac.apiVersion }}
@@ -74,5 +73,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ template "riff.serviceAccountName" . }}
-{{- end -}}
 {{- end -}}

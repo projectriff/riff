@@ -1,4 +1,3 @@
-{{- if .Values.create.faas -}}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -39,4 +38,3 @@ spec:
           - name: KAFKA_ZK_NODES
             value: {{ template "riff.kafkaZkNodes" . }}
       serviceAccountName: {{ template "riff.serviceAccountName" . }}
-{{- end -}}

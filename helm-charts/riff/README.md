@@ -44,5 +44,5 @@ The following lists the configurable parameters and their default values.
 To remove the chart release with the name `projectriff` and purge all the release info use:
 
 ```bash
-$ helm delete --purge my-release
+$ helm delete --purge projectriff
 ```
