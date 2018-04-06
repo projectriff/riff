@@ -22,12 +22,16 @@ import (
 
 	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler"
 	"github.com/projectriff/riff/message-transport/pkg/transport/metrics"
+	"math"
 	"time"
 )
 
 const (
-	simulationSteps = 1000
-	replicaInitialisationDelaySteps = 15 // delayed initialisation (termination is immediate)
+	simulationSteps                 = 10000
+	replicaInitialisationDelaySteps = 15 // 1.5 s delayed initialisation (termination is immediate)
+	containerPullDelaySteps         = 0 // 50 // 5.0 s extra delay in starting the first replica
+	maxWritesPerTick                = 40
+	maxReplicas                     = 1000000 // avoid setting this too high to avoid int overflow during scaling calculation. 1000000 is a reasonable high value.
 )
 
 func main() {
@@ -49,7 +53,7 @@ func main() {
 	defer scaler.Close()
 
 	scaler.SetMaxReplicasPolicy(func(function autoscaler.FunctionId) int {
-		return 1000000 // avoid int overflow during scaling calculation
+		return maxReplicas
 	})
 
 	var simUpdater SimulationUpdater
@@ -60,10 +64,12 @@ func main() {
 
 	actualReplicas := 0
 
-	rm := &replicaModel{}
+	rm := &replicaModel{initialDelay: containerPullDelaySteps}
+
+	writes := 0
 
 	for i := 0; i < simulationSteps; i++ {
-		simUpdater.UpdateProducerFor(i, &queueLen)
+		simUpdater.UpdateProducerFor(i, &queueLen, &writes)
 		simUpdater.UpdatedConsumerFor(i, actualReplicas, &queueLen)
 
 		scalerOutput := scaler.Propose()
@@ -74,7 +80,7 @@ func main() {
 		rm.tick()
 		actualReplicas = rm.actualReplicas()
 		// Scale number of replicas
-		step := fmt.Sprintf("%d %d %d\n", i, actualReplicas, queueLen)
+		step := fmt.Sprintf("%d %d %d %d\n", i, actualReplicas, queueLen, writes)
 		dataFile.WriteString(step)
 
 		scaler.InformFunctionReplicas(stubFunctionID, actualReplicas)
@@ -84,7 +90,7 @@ func main() {
 }
 
 type SimulationUpdater interface {
-	UpdateProducerFor(simulationRound int, queueLen *int64)
+	UpdateProducerFor(simulationRound int, queueLen *int64, writes *int)
 	UpdatedConsumerFor(simulationRound int, replicas int, queueLen *int64)
 }
 
@@ -103,17 +109,39 @@ func (rec *stubReceiver) ConsumerMetrics() <-chan metrics.ConsumerAggregateMetri
 	return rec.consumerMetricsChan
 }
 
-func (rec *stubReceiver) UpdateProducerFor(simulationRound int, queueLen *int64) {
+func (rec *stubReceiver) UpdateProducerFor(simulationRound int, queueLen *int64, writes *int) {
 	numToWrite := 0
 	if simulationRound < 100 {
-		numToWrite = 20
-	} else if simulationRound < 500 {
-		numToWrite = 40
-	} else if simulationRound < 750 {
+		// initial quiet interval
 		numToWrite = 0
-	} else {
-		numToWrite = 20
+	} else if simulationRound < 1000 {
+		// step up
+		numToWrite = maxWritesPerTick / 2
+	} else if simulationRound < 2000 {
+		// further step up
+		numToWrite = maxWritesPerTick
+	} else if simulationRound < 3000 {
+		// step down
+		numToWrite = maxWritesPerTick / 2
+	} else if simulationRound < 4000 {
+		// step down to quiet interval
+		numToWrite = 0
+	} else if simulationRound < 6000 {
+		// sinusoidal interval
+		numToWrite = maxWritesPerTick/2 + int(maxWritesPerTick*math.Sin(float64((simulationRound-4000)/167))/2)
+	} else if simulationRound < 7000 {
+		// step down to quiet interval
+		numToWrite = 0
+	} else if simulationRound < 8000 {
+		// ramp up
+		numToWrite = maxWritesPerTick * (simulationRound - 7000) / 1000
+	} else if simulationRound < 9000 {
+		// ramp down
+		numToWrite = maxWritesPerTick * (9000 - simulationRound) / 1000
 	}
+
+	*writes = numToWrite
+
 	for i := numToWrite; i > 0; i-- {
 		rec.producerMetricsChan <- metrics.ProducerAggregateMetric{Topic: "topic", Count: 1}
 		(*queueLen)++
@@ -135,7 +163,8 @@ func (rec *stubReceiver) UpdatedConsumerFor(simulationRound int, replicas int, q
 	}
 }
 
-func newStubReceiver() *stubReceiver {
+func
+newStubReceiver() *stubReceiver {
 	return &stubReceiver{
 		producerMetricsChan: make(chan metrics.ProducerAggregateMetric),
 		consumerMetricsChan: make(chan metrics.ConsumerAggregateMetric),
@@ -165,10 +194,11 @@ func (i *stubInspector) QueueLength(topic string, function string) (int64, error
 // A decrease in the desired number of replicas is acted upon immediately by removing items from `scheduled` and, if
 // that isn't sufficient, reducing the actual number of replicas.
 type replicaModel struct {
-	currentTime int // in "ticks"
-	actual int
-	lastDesired int
-	scheduled []int
+	currentTime  int // in "ticks"
+	actual       int
+	lastDesired  int
+	scheduled    []int
+	initialDelay int
 }
 
 func (rm *replicaModel) desireReplicas(desired int) {
@@ -177,8 +207,9 @@ func (rm *replicaModel) desireReplicas(desired int) {
 	}
 	if desired > rm.lastDesired {
 		// schedule some new replicas with a delay
-		initTime := rm.currentTime + replicaInitialisationDelaySteps
-		for i := desired-rm.lastDesired; i > 0; i-- {
+		initTime := rm.currentTime + replicaInitialisationDelaySteps + rm.initialDelay
+		rm.initialDelay = 0
+		for i := desired - rm.lastDesired; i > 0; i-- {
 			rm.scheduled = append(rm.scheduled, initTime)
 		}
 	} else {
@@ -190,10 +221,10 @@ func (rm *replicaModel) desireReplicas(desired int) {
 func (rm *replicaModel) trim(deschedule int) {
 	if deschedule >= len(rm.scheduled) {
 		trimmed := len(rm.scheduled)
-		rm.scheduled = []int{}	
+		rm.scheduled = []int{}
 		rm.actual -= deschedule - trimmed
 	} else {
-		rm.scheduled = rm.scheduled[0:len(rm.scheduled) - deschedule]
+		rm.scheduled = rm.scheduled[0 : len(rm.scheduled)-deschedule]
 	}
 }
 
