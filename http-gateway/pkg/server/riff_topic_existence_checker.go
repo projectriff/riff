@@ -10,6 +10,10 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+const (
+	defaultNamespace = "default" // expected to be used by consumers of TopicExists
+)
+
 // RiffTopicExistenceChecker allows the http-gateway to check for the existence of
 // a Riff Topic before attempting to send a message to that topic.
 type RiffTopicExistenceChecker interface {
