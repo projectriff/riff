@@ -3,11 +3,9 @@ package server
 import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	riffcs "github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
+	"github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-
-	"k8s.io/client-go/rest"
 )
 
 const (
@@ -21,21 +19,11 @@ type RiffTopicExistenceChecker interface {
 }
 
 type riffTopicExistenceChecker struct {
-	client *riffcs.Clientset
+	client *versioned.Clientset
 }
 
-func NewRiffTopicExistenceChecker() (*riffTopicExistenceChecker, error) {
-	restConf, err := rest.InClusterConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	riffClient, err := riffcs.NewForConfig(restConf)
-	if err != nil {
-		return nil, err
-	}
-
-	return &riffTopicExistenceChecker{client: riffClient}, nil
+func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) *riffTopicExistenceChecker {
+	return &riffTopicExistenceChecker{client: clientSet}
 }
 
 // TopicExists checks to see if Kubernetes is aware of a Riff Topic in a namespace.
