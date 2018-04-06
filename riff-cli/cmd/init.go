@@ -19,12 +19,13 @@ package cmd
 import (
 	"fmt"
 
+	"path/filepath"
+
 	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/initializer"
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 	"github.com/spf13/cobra"
-	"path/filepath"
 )
 
 func Init(invokers []projectriff_v1.Invoker) (*cobra.Command, *options.InitOptions) {
@@ -59,7 +60,7 @@ func Init(invokers []projectriff_v1.Invoker) (*cobra.Command, *options.InitOptio
 	initCmd.PersistentFlags().StringVarP(&initOptions.FilePath, "filepath", "f", "", "path or directory used for the function resources (defaults to the current directory)")
 	initCmd.PersistentFlags().StringVarP(&initOptions.FunctionName, "name", "n", "", "the name of the function (defaults to the name of the current directory)")
 	initCmd.PersistentFlags().StringVarP(&initOptions.Version, "version", "v", utils.DefaultValues.Version, "the version of the function image")
-	initCmd.Flags().StringVar(&initOptions.InvokerVersion, "invoker-version", "", "the version of the invoker to use when building containers")
+	initCmd.PersistentFlags().StringVar(&initOptions.InvokerVersion, "invoker-version", "", "the version of the invoker to use when building containers")
 	initCmd.PersistentFlags().StringVarP(&initOptions.UserAccount, "useraccount", "u", utils.DefaultValues.UserAccount, "the Docker user account to be used for the image repository")
 	initCmd.PersistentFlags().StringVarP(&initOptions.Artifact, "artifact", "a", "", "path to the function artifact, source code or jar file")
 	initCmd.PersistentFlags().StringVarP(&initOptions.Input, "input", "i", "", "the name of the input topic (defaults to function name)")
@@ -83,8 +84,6 @@ func InitInvokers(invokers []projectriff_v1.Invoker, initOptions *options.InitOp
 				return initializer.Initialize(invokers, initOptions)
 			},
 		}
-
-		initInvokerCmd.Flags().StringVar(&initOptions.InvokerVersion, "invoker-version", invoker.Spec.Version, "the version of invoker to use when building containers")
 
 		handler := invoker.Spec.Handler
 		if handler.Default != "" || handler.Description != "" {
