@@ -81,7 +81,7 @@ make teardown
 
 == [[samples]]Try Some Samples
 
-With riff running try some of the link:samples/README.adoc[samples].
+Sample functions have moved into their respective invoker repositories.
 
 == Running the tests
 
