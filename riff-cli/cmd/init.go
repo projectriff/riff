@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"path/filepath"
 
@@ -36,14 +37,14 @@ func Init(invokers []projectriff_v1.Invoker) (*cobra.Command, *options.InitOptio
 		Use:   "init",
 		Short: "Initialize a function",
 		Long:  utils.InitCmdLong(),
-		Args:  utils.AliasFlagToSoleArg("filepath"),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := initializer.Initialize(invokers, &initOptions)
-			if err != nil {
-				cmd.SilenceUsage = true
+			cmd.SilenceUsage = true
+			if len(invokers) == 0 {
+				return fmt.Errorf("Invokers must be installed, run `riff invokers apply --help` for help")
 			}
-			return err
+			names := invokerNames(invokers)
+			return fmt.Errorf("The invoker must be specified. Pick one of: %s", strings.Join(names, ", "))
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			initOptions.UserAccount = utils.GetUseraccountWithOverride("useraccount", *cmd.Flags())
@@ -82,8 +83,11 @@ func InitInvokers(invokers []projectriff_v1.Invoker, initOptions *options.InitOp
 			Short: fmt.Sprintf("Initialize a %s function", invokerName),
 			Long:  utils.InitInvokerCmdLong(invoker),
 			RunE: func(cmd *cobra.Command, args []string) error {
-				initOptions.InvokerName = invokerName
-				return initializer.Initialize(invokers, initOptions)
+				invoker, err := invokerForName(invokerName, invokers)
+				if err != nil {
+					return err
+				}
+				return initializer.Initialize(invoker, initOptions)
 			},
 		}
 
@@ -116,3 +120,19 @@ func validateInitOptions(options *options.InitOptions) error {
 	return nil
 }
 
+func invokerForName(name string, invokers []projectriff_v1.Invoker) (projectriff_v1.Invoker, error) {
+	for _, invoker := range invokers {
+		if invoker.ObjectMeta.Name == name {
+			return invoker, nil
+		}
+	}
+	return projectriff_v1.Invoker{}, fmt.Errorf("No invoker found for %s", name)
+}
+
+func invokerNames(invokers []projectriff_v1.Invoker) []string {
+	names := []string{}
+	for _, invoker := range invokers {
+		names = append(names, invoker.ObjectMeta.Name)
+	}
+	return names
+}
