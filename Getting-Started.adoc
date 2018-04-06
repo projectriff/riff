@@ -76,27 +76,6 @@ To create the `riff-system` namespace run:
 kubectl create namespace riff-system
 ----
 
-[TIP]
-====
-If you want to install Kafka using the three-node kafka/zookeeper service provided by the Kubeapps `incubator/kafka` chart, then you should use:
-
-[source, bash]
-----
-helm install --name transport --namespace riff-system incubator/kafka
-----
-
-Just be aware that this chart requires significantly more resources to run.
-
-When you install the riff chart during the next step, you need to add some config settings so that the riff components can find the Kafka service.
-Add the following config settings instead of `--set kafka.create=true` to the `helm install` command that you use:
-
-[source, bash]
-----
---set kafka.broker.nodes=transport-kafka.riff-system:9092 --set kafka.zookeeper.nodes=transport-zookeeper.riff-system:2181
-----
-
-====
-
 === Install riff using a Kubernetes cluster supporting LoadBalancer
 
 Install the riff helm chart as follows:
@@ -136,6 +115,25 @@ For a cluster that has RBAC enabled, use the following (since `rbac.create` is `
 helm install projectriff/riff --name projectriff --namespace riff-system --set kafka.create=true --set httpGateway.service.type=NodePort
 ----
 ====
+
+==== An option to use a multi-node Kafka cluster
+
+If you want to install Kafka using the three-node kafka/zookeeper service provided by the Kubeapps `incubator/kafka` chart, then you could use:
+
+[source, bash]
+----
+helm install --name transport --namespace riff-system incubator/kafka
+----
+
+Just be aware that this chart requires significantly more resources to run.
+
+When you install the riff chart, you need to add some config settings so that the riff components can find the Kafka service.
+Add the following config settings instead of `--set kafka.create=true` to the `helm install` command that you use:
+
+[source, bash]
+----
+--set kafka.broker.nodes=transport-kafka.riff-system:9092 --set kafka.zookeeper.nodes=transport-zookeeper.riff-system:2181
+----
 
 === Verify the installation
 
