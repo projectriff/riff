@@ -31,13 +31,8 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/templateutils"
 )
 
-func Initialize(invokers []projectriff_v1.Invoker, opts *options.InitOptions) error {
-	invoker, err := resolveInvoker(invokers, opts)
-	if err != nil {
-		return err
-	}
-
-	err = resolveOptions(opts, invoker)
+func Initialize(invoker projectriff_v1.Invoker, opts *options.InitOptions) error {
+	err := resolveOptions(opts, invoker)
 	if err != nil {
 		return err
 	}
@@ -91,117 +86,6 @@ func loadInvokersFromKubeCtl(kubeCtl kubectl.KubeCtl) ([]projectriff_v1.Invoker,
 	return invokerList.Items, nil
 }
 
-func resolveInvoker(invokers []projectriff_v1.Invoker, opts *options.InitOptions) (projectriff_v1.Invoker, error) {
-	var resolvedInvoker projectriff_v1.Invoker
-
-	// look for an exact invoker
-	if opts.InvokerName != "" {
-		for _, invoker := range invokers {
-			if opts.InvokerName == invoker.ObjectMeta.Name {
-				resolvedInvoker = invoker
-			}
-		}
-		if resolvedInvoker.ObjectMeta.Name == "" {
-			return projectriff_v1.Invoker{}, fmt.Errorf("Invoker %s not found", opts.InvokerName)
-		}
-
-		// restrict future searches to the resolved invoker
-		invokers = []projectriff_v1.Invoker{resolvedInvoker}
-	}
-
-	if opts.Artifact == "" {
-		// look for a matching artifact
-
-		// This will get slower as more invokers are introduced, more complex
-		// matching patterns are used and run in directory with more files.
-		// Considering the search is non-deterministic between calls if the
-		// invokers are updated, it may not be worth the effort. Forcing the
-		// user to specify the artifact will produce stable results
-
-		workdir, err := filepath.Abs(opts.FilePath)
-		if err != nil {
-			return projectriff_v1.Invoker{}, err
-		}
-		artifacts, err := resolveArtifacts(workdir, invokers)
-		if err != nil {
-			return projectriff_v1.Invoker{}, err
-		}
-
-		if len(artifacts) == 0 {
-			var registeredInvokers []string
-			for _, element := range invokers {
-				registeredInvokers = append(registeredInvokers, element.Name)
-			}
-			return projectriff_v1.Invoker{}, fmt.Errorf("No matching artifact found (using registered invokers: %v)", registeredInvokers)
-		}
-		if len(artifacts) > 1 {
-			// TODO MAYBE attempt to find the "best" artifact
-			return projectriff_v1.Invoker{}, fmt.Errorf("Artifact must be specified")
-		}
-
-		relativePath, err := filepath.Rel(workdir, artifacts[0])
-		if err != nil {
-			return projectriff_v1.Invoker{}, err
-		}
-		opts.Artifact = relativePath
-	}
-
-	if resolvedInvoker.ObjectMeta.Name != "" {
-		return resolvedInvoker, nil
-	}
-
-	// look for a matching invoker
-	var matchingInvokers []projectriff_v1.Invoker
-	for _, invoker := range invokers {
-		matched := false
-		for _, matcher := range invoker.Spec.Matchers {
-			if matched {
-				continue
-			}
-			match, err := filepath.Match(matcher, opts.Artifact)
-			if err != nil {
-				return projectriff_v1.Invoker{}, err
-			}
-			if match {
-				matchingInvokers = append(matchingInvokers, invoker)
-				matched = true
-			}
-		}
-	}
-	if len(matchingInvokers) > 1 {
-		// TODO MAYBE attempt to find a clear "best" match
-		var names []string
-		for _, matchingInvoker := range matchingInvokers {
-			names = append(names, matchingInvoker.ObjectMeta.Name)
-		}
-		return projectriff_v1.Invoker{}, fmt.Errorf("Multiple matching invokers found, pick one of: %s: ", strings.Join(names, ", "))
-	}
-	if len(matchingInvokers) == 0 {
-		return projectriff_v1.Invoker{}, fmt.Errorf("No invoker found matching %s", opts.Artifact)
-	}
-	return matchingInvokers[0], nil
-}
-
-func resolveArtifacts(workdir string, invokers []projectriff_v1.Invoker) ([]string, error) {
-	artifacts := make(map[string]bool)
-	for _, invoker := range invokers {
-		for _, matcher := range invoker.Spec.Matchers {
-			matches, err := filepath.Glob(filepath.Join(workdir, matcher))
-			if err != nil {
-				return []string{}, nil
-			}
-			for _, match := range matches {
-				artifacts[match] = true
-			}
-		}
-	}
-	keys := make([]string, 0, len(artifacts))
-	for k := range artifacts {
-		keys = append(keys, k)
-	}
-	return keys, nil
-}
-
 type handlerOptions struct {
 	FunctionName string
 }
@@ -219,9 +103,30 @@ func resolveOptions(opts *options.InitOptions, invoker projectriff_v1.Invoker) e
 		opts.InvokerVersion = invoker.Spec.Version
 	}
 
-	// if opts.Artifact == "" {
-	// 	opts.Artifact = filepath.Base(functionArtifact)
-	// }
+	if opts.Artifact == "" {
+		workdir, err := filepath.Abs(opts.FilePath)
+		if err != nil {
+			return err
+		}
+		artifacts, err := resolveArtifacts(workdir, invoker)
+		if err != nil {
+			return err
+		}
+
+		if len(artifacts) == 0 {
+			return fmt.Errorf("No matching artifact found")
+		}
+		if len(artifacts) > 1 {
+			// TODO attempt to find the "best" artifact
+			return fmt.Errorf("Artifact must be specified")
+		}
+
+		relativePath, err := filepath.Rel(workdir, artifacts[0])
+		if err != nil {
+			return err
+		}
+		opts.Artifact = relativePath
+	}
 
 	if opts.Handler != "" {
 		handler, err := templateutils.Apply(opts.Handler, "opts.Handler", handlerOptions{FunctionName: opts.FunctionName})
@@ -232,4 +137,22 @@ func resolveOptions(opts *options.InitOptions, invoker projectriff_v1.Invoker) e
 	}
 
 	return nil
+}
+
+func resolveArtifacts(workdir string, invoker projectriff_v1.Invoker) ([]string, error) {
+	artifacts := make(map[string]bool)
+	for _, matcher := range invoker.Spec.Matchers {
+		matches, err := filepath.Glob(filepath.Join(workdir, matcher))
+		if err != nil {
+			return []string{}, nil
+		}
+		for _, match := range matches {
+			artifacts[match] = true
+		}
+	}
+	keys := make([]string, 0, len(artifacts))
+	for k := range artifacts {
+		keys = append(keys, k)
+	}
+	return keys, nil
 }

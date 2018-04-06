@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -82,6 +83,7 @@ var _ = Describe("The create command", func() {
 
 			err = rootCommand.Execute()
 			Expect(err).To(HaveOccurred())
+			Expect(err).To(Equal(fmt.Errorf("Invokers must be installed, run `riff invokers apply --help` for help")))
 
 			Expect(".").NotTo(HaveUnstagedChanges())
 		})
@@ -112,19 +114,9 @@ var _ = Describe("The create command", func() {
 
 			rootCommand.SetArgs(append([]string{"create"}, commonRiffArgs...))
 
-			normalDocker.On("Exec", "build", "-t", "rifftest/matching-invoker:0.0.1", ".").
-				Return(nil).
-				Once()
-			functionYamlPath, _ := filepath.Abs("matching-invoker-function.yaml")
-			topicsYamlPath, _ := filepath.Abs("matching-invoker-topics.yaml")
-			normalKubeCtl.On("Exec", []string{"apply", "-f", functionYamlPath, "-f", topicsYamlPath}).
-				Return("function \"matching-invoker\" created\ntopic \"matching-invoker\" created", nil).
-				Once()
-
 			err = rootCommand.Execute()
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(".").NotTo(HaveUnstagedChanges())
+			Expect(err).To(HaveOccurred())
+			Expect(err).To(Equal(fmt.Errorf("The invoker must be specified. Pick one of: node")))
 		})
 
 		It("creates a function with an explicit invoker", func() {
@@ -160,7 +152,7 @@ var _ = Describe("The create command", func() {
 		rootCommand, initOptions, _, _, err := setupCreateTest(invokers, normalDocker, dryRunDocker, normalKubeCtl, dryRunKubeCtl)
 		Expect(err).NotTo(HaveOccurred())
 
-		rootCommand.SetArgs(append([]string{"create", "--dry-run", "../test_data/command/echo", "-a", "echo.sh", "-v", "0.0.1-snapshot"}, commonRiffArgs...))
+		rootCommand.SetArgs(append([]string{"create", "command", "--dry-run", "../test_data/command/echo", "-a", "echo.sh", "-v", "0.0.1-snapshot"}, commonRiffArgs...))
 
 		dryRunDocker.On("Exec", "build", "-t", "rifftest/echo:0.0.1-snapshot", "../test_data/command/echo").
 			Return(nil).
@@ -186,7 +178,7 @@ var _ = Describe("The create command", func() {
 		rootCommand, _, _, _, err := setupCreateTest(invokers, normalDocker, dryRunDocker, normalKubeCtl, dryRunKubeCtl)
 		Expect(err).NotTo(HaveOccurred())
 
-		rootCommand.SetArgs(append([]string{"create", "--dry-run", "-a", "echo.sh"}, commonRiffArgs...))
+		rootCommand.SetArgs(append([]string{"create", "command", "--dry-run", "-a", "echo.sh"}, commonRiffArgs...))
 
 		dryRunDocker.On("Exec", "build", "-t", "rifftest/echo:0.0.1", ".").
 			Return(nil).
@@ -208,7 +200,7 @@ var _ = Describe("The create command", func() {
 
 		path, _ := filepath.Abs("../test_data/command/echo")
 
-		rootCommand.SetArgs(append([]string{"create", "--dry-run", "-f", path, "-v", "0.0.1-snapshot", "-a", "echo.sh"}, commonRiffArgs...))
+		rootCommand.SetArgs(append([]string{"create", "command", "--dry-run", "-f", path, "-v", "0.0.1-snapshot", "-a", "echo.sh"}, commonRiffArgs...))
 
 		dryRunDocker.On("Exec", "build", "-t", "rifftest/echo:0.0.1-snapshot", path).
 			Return(nil).
@@ -232,7 +224,7 @@ var _ = Describe("The create command", func() {
 		rootCommand, initOptions, _, _, err := setupCreateTest(invokers, normalDocker, dryRunDocker, normalKubeCtl, dryRunKubeCtl)
 		Expect(err).NotTo(HaveOccurred())
 
-		rootCommand.SetArgs([]string{"create", "--dry-run", "../test_data/command/echo", "-u", "me", "-a", "echo.sh"})
+		rootCommand.SetArgs([]string{"create", "command", "--dry-run", "../test_data/command/echo", "-u", "me", "-a", "echo.sh"})
 
 		dryRunDocker.On("Exec", "build", "-t", "me/echo:0.0.1", "../test_data/command/echo").
 			Return(nil).

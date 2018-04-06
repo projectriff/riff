@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -49,11 +50,12 @@ var _ = Describe("The init command", func() {
 
 			err = rootCommand.Execute()
 			Expect(err).To(HaveOccurred())
+			Expect(err).To(Equal(fmt.Errorf("Invokers must be installed, run `riff invokers apply --help` for help")))
 
 			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
-		It("should fail if no matching invoker is defined", func() {
+		It("should fail if no invoker is specified", func() {
 			os.Chdir("../test_data/riff-init/no-matching-invoker")
 
 			invokers, err := stubInvokers("invokers/*.yaml")
@@ -65,54 +67,7 @@ var _ = Describe("The init command", func() {
 
 			err = rootCommand.Execute()
 			Expect(err).To(HaveOccurred())
-
-			Expect(".").NotTo(HaveUnstagedChanges())
-		})
-
-		It("should find an invoker based on an artifact", func() {
-			os.Chdir("../test_data/riff-init/matching-invoker")
-
-			invokers, err := stubInvokers("invokers/*.yaml")
-			Expect(err).NotTo(HaveOccurred())
-			rootCommand, _, _, _, err := setupInitTest(invokers)
-			Expect(err).NotTo(HaveOccurred())
-
-			rootCommand.SetArgs(append([]string{"init", "--artifact", "echo.js"}, commonRiffArgs...))
-
-			err = rootCommand.Execute()
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(".").NotTo(HaveUnstagedChanges())
-		})
-
-		It("should find an artifact based on an invoker", func() {
-			os.Chdir("../test_data/riff-init/multiple-matching-invokers-with-one-selected-no-artifact")
-
-			invokers, err := stubInvokers("invokers/*.yaml")
-			Expect(err).NotTo(HaveOccurred())
-			rootCommand, _, _, _, err := setupInitTest(invokers)
-			Expect(err).NotTo(HaveOccurred())
-
-			rootCommand.SetArgs(append([]string{"init", "python3"}, commonRiffArgs...))
-
-			err = rootCommand.Execute()
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(".").NotTo(HaveUnstagedChanges())
-		})
-
-		It("should fail when multiple invokers match", func() {
-			os.Chdir("../test_data/riff-init/multiple-matching-invokers")
-
-			invokers, err := stubInvokers("invokers/*.yaml")
-			Expect(err).NotTo(HaveOccurred())
-			rootCommand, _, _, _, err := setupInitTest(invokers)
-			Expect(err).NotTo(HaveOccurred())
-
-			rootCommand.SetArgs(append([]string{"init", "--artifact", "echo.py"}, commonRiffArgs...))
-
-			err = rootCommand.Execute()
-			Expect(err).To(HaveOccurred())
+			Expect(err).To(Equal(fmt.Errorf("The invoker must be specified. Pick one of: node")))
 
 			Expect(".").NotTo(HaveUnstagedChanges())
 		})
