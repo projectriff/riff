@@ -243,12 +243,12 @@ type happyRiffTopicExistenceChecker struct {
 	testName string
 }
 
-func (th *happyRiffTopicExistenceChecker) TopicExists(topicName string) (bool, error) {
+func (th *happyRiffTopicExistenceChecker) TopicExists(namespace string, topicName string) (bool, error) {
 	return topicName == th.testName, nil
 }
 
 type errorRiffTopicExistenceChecker struct{}
 
-func (th *errorRiffTopicExistenceChecker) TopicExists(topicName string) (bool, error) {
+func (th *errorRiffTopicExistenceChecker) TopicExists(namespace string, topicName string) (bool, error) {
 	return false, errors.New("test error")
 }
