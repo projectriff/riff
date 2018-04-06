@@ -22,6 +22,8 @@ type riffTopicExistenceChecker struct {
 	client *versioned.Clientset
 }
 
+// NewRiffTopicExistenceChecker configures a RiffTopicExistenceChecker using the
+// provided Clientset.
 func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) *riffTopicExistenceChecker {
 	return &riffTopicExistenceChecker{client: clientSet}
 }
