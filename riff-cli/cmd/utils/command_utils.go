@@ -25,12 +25,11 @@ import (
 )
 
 type Defaults struct {
-	InvokerVersion string
-	UserAccount    string
-	Force          bool
-	DryRun         bool
-	Push           bool
-	Version        string
+	UserAccount string
+	Force       bool
+	DryRun      bool
+	Push        bool
+	Version     string
 }
 
 var DefaultValues = Defaults{
