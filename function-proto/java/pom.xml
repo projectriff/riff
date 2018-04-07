@@ -5,7 +5,7 @@
 
 	<groupId>io.projectriff</groupId>
 	<artifactId>riff-function-proto</artifactId>
-	<version>0.0.6</version>
+	<version>0.0.7-SNAPSHOT</version>
 	<name>Riff Function Protobufs</name>
 	<description>Protobuffer and gRPC declarations for projectriff</description>
 	<url>https://projectriff.io</url>
