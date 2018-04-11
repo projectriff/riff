@@ -82,6 +82,7 @@ func InitInvokers(invokers []projectriff_v1.Invoker, initOptions *options.InitOp
 			Use:   invokerName,
 			Short: fmt.Sprintf("Initialize a %s function", invokerName),
 			Long:  utils.InitInvokerCmdLong(invoker),
+			Args:  utils.AliasFlagToSoleArg("filepath"),
 			RunE: func(cmd *cobra.Command, args []string) error {
 				invoker, err := invokerForName(invokerName, invokers)
 				if err != nil {
