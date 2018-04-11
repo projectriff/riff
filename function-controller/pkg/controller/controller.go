@@ -33,7 +33,9 @@ import (
 )
 
 // DefaultScalerInterval controls how often to run the scaling strategy.
-const DefaultScalerInterval = 100 * time.Millisecond
+// 97ms is chosen to avoid accidental locksteps with other systems such
+// as OS schedulers or garbage collection.
+const DefaultScalerInterval = 97 * time.Millisecond
 
 const defaultScaleDownDelay = time.Second * 10
 
