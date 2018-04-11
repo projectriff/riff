@@ -189,9 +189,9 @@ var _ = Describe("RequestsHandler", func() {
 					mockProducer.On("Send", mock.AnythingOfType("string"), mock.Anything).Return(nil)
 				})
 
-				It("should time out with a 404", func() {
+				It("should time out with a 504", func() {
 					resp := mockResponseWriter.Result()
-					Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
+					Expect(resp.StatusCode).To(Equal(http.StatusGatewayTimeout))
 				})
 			})
 
@@ -223,9 +223,9 @@ var _ = Describe("RequestsHandler", func() {
 					}).Return(nil)
 				})
 
-				It("should time out with a 404", func() {
+				It("should time out with a 504", func() {
 					resp := mockResponseWriter.Result()
-					Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
+					Expect(resp.StatusCode).To(Equal(http.StatusGatewayTimeout))
 				})
 			})
 
