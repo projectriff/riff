@@ -87,7 +87,7 @@ func (g *gateway) requestsHandler(w http.ResponseWriter, r *http.Request) {
 		propagateOutgoingHeaders(reply, w)
 		w.Write(reply.Payload())
 	case <-time.After(g.timeout):
-		w.WriteHeader(404)
+		w.WriteHeader(504)
 	}
 }
 

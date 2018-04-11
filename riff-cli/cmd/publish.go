@@ -167,7 +167,11 @@ func doPost(url string, publishOptions publishOptions) (string, error) {
 	if 200 <= resp.StatusCode && resp.StatusCode < 400 {
 		return string(body), nil
 	} else {
-		return "", fmt.Errorf("HTTP Gateway responded with code %v: %v", resp.StatusCode, string(body))
+		message := string(body)
+		if resp.StatusCode == 504 {
+			message = "Gateway Timeout"
+		}
+		return "", fmt.Errorf("HTTP Gateway responded with code %v: %v", resp.StatusCode, message)
 	}
 
 }
