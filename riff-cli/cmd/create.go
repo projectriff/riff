@@ -31,6 +31,16 @@ func Create(initCmd *cobra.Command, buildCmd *cobra.Command, applyCmd *cobra.Com
 	createChainCmd.Long = utils.CreateCmdLong()
 	createChainCmd.SetUsageTemplate(utils.CustomInvokerUsageTemplate)
 
+	// ignore all validation
+	//
+	// This command will fail since no invoker is specified. The init command
+	// is able to provide a more meaningful error message. We still want to
+	// use a chained command to establish persistent flags
+	createChainCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error { return nil }
+	createChainCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {}
+	createChainCmd.PreRunE = func(cmd *cobra.Command, args []string) error { return nil }
+	createChainCmd.PreRun = func(cmd *cobra.Command, args []string) {}
+
 	return createChainCmd
 }
 
