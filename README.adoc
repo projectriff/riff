@@ -5,7 +5,8 @@ A FaaS for Kubernetes
 
 == Installation of the latest release
 
-See link:Getting-Started.adoc[Getting Started] for how to install riff with a Helm Chart,
+See link:https://projectriff.io/docs/getting-started-on-minikube/[Getting started on Minikube] or 
+link:https://projectriff.io/docs/getting-started-on-gke/[Getting started on GKE] for how to install riff with a Helm Chart,
 and how to install the riff CLI.
 
 == Developer installation
