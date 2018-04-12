@@ -69,6 +69,6 @@ cp riff-cli/riff /usr/local/bin/riff
 
 == Running tests
 ```
-cd $(go env GOPATH)/src/github.com/projectriff/riff-cli
+cd $(go env GOPATH)/src/github.com/projectriff/riff
 make -C riff-cli/ test
 ```
