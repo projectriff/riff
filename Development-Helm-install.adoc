@@ -72,6 +72,9 @@ Add the following config settings instead of `--set kafka.create=true` to the `h
 
 === Install "devel" version of riff chart
 
+WARNING: Beginning with Minikube v0.26.0 the default bootstrapper has changed to kubeadm which enables RBAC.
+To create a Minikube cluster without RBAC enabled you should use the localkube bootstrapper. You can do that with the following command `minikube start --memory=4096 --bootstrapper=localkube`.
+
 Choose one of the following installations options:
 
 - *Install "devel" version of riff chart with published snapshot builds of the components*
