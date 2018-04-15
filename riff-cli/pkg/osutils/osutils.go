@@ -65,9 +65,9 @@ func AbsPath(path string) (string, error) {
 		path = "."
 	}
 	if !FileExists(path) {
-		return "", errors.New(fmt.Sprintf("path '%s' does not exist",path));
+		return "", errors.New(fmt.Sprintf("path '%s' does not exist", path))
 	}
-	abs,err := filepath.Abs(path)
+	abs, err := filepath.Abs(path)
 	if err != nil {
 		return "", err
 	}
@@ -114,8 +114,6 @@ func ExecStdin(cmdName string, cmdArgs []string, stdin *[]byte, timeout time.Dur
 	// Create the command with our context
 	cmd := exec.CommandContext(ctx, cmdName, cmdArgs...)
 
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
 	if stdin != nil {
 		cmd.Stdin = bytes.NewBuffer(*stdin)
 	}
@@ -127,6 +125,10 @@ func ExecStdin(cmdName string, cmdArgs []string, stdin *[]byte, timeout time.Dur
 	// happens when a process is killed.
 	if ctx.Err() == context.DeadlineExceeded {
 		return nil, ctx.Err()
+	}
+
+	if exitError, ok := err.(*exec.ExitError); ok {
+		return exitError.Stderr, err
 	}
 
 	return out, err
