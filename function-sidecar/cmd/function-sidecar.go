@@ -123,8 +123,12 @@ func main() {
 	// trap SIGINT and SIGTERM to trigger a shutdown.
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
-	<-signals
-	log.Println(("Shutting Down..."))
+	select {
+	case <-signals:
+		log.Println("Shutting Down...")
+	case <-dispatcher.Closed():
+		log.Println("End of Stream...")
+	}
 }
 
 func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
