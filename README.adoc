@@ -82,7 +82,8 @@ make teardown
 
 == [[samples]]Try Some Samples
 
-Sample functions have moved into their respective invoker repositories.
+Sample functions are typically found in the corresponding invoker repositories.
+See the link:https://github.com/projectriff?q=-invoker[projectriff invoker repositories] for example.
 
 == Running the tests
 
