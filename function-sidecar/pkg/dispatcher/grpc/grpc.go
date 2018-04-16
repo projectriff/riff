@@ -23,19 +23,21 @@ import (
 	"log"
 	"time"
 
+	"io"
+
 	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher"
 	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher/grpc/function"
 	"github.com/projectriff/riff/message-transport/pkg/message"
 	"golang.org/x/net/context"
-	"io"
-	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type grpcDispatcher struct {
 	stream function.MessageFunction_CallClient
 	input  chan message.Message
 	output chan message.Message
+	closed chan bool
 }
 
 func (this *grpcDispatcher) Input() chan<- message.Message {
@@ -44,6 +46,10 @@ func (this *grpcDispatcher) Input() chan<- message.Message {
 
 func (this *grpcDispatcher) Output() <-chan message.Message {
 	return this.output
+}
+
+func (this *grpcDispatcher) Closed() <-chan bool {
+	return this.closed
 }
 
 func (this *grpcDispatcher) handleIncoming() {
@@ -74,6 +80,7 @@ func (this *grpcDispatcher) handleOutgoing() {
 		reply, err := this.stream.Recv()
 		if err != nil {
 			if streamClosureDiagnosed(err) {
+				this.closed <- true
 				return
 			}
 
@@ -112,7 +119,7 @@ func NewGrpcDispatcher(port int) (dispatcher.Dispatcher, error) {
 		return nil, err
 	}
 
-	result := &grpcDispatcher{fnStream, make(chan message.Message, 100), make(chan message.Message, 100)}
+	result := &grpcDispatcher{fnStream, make(chan message.Message, 100), make(chan message.Message, 100), make(chan bool, 10)}
 	go result.handleIncoming()
 	go result.handleOutgoing()
 
