@@ -34,14 +34,19 @@ func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) *riffTopicExis
 // If there is an unexpected error, it returns (false, err), where 'err' is the unexpected
 // error that was encountered.
 func (tec *riffTopicExistenceChecker) TopicExists(namespace string, topicName string) (bool, error) {
-	_, err := tec.client.ProjectriffV1alpha1().Topics(namespace).Get(topicName, v1.GetOptions{})
 
-	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			return false, nil
+	if tec.client != nil {
+
+		_, err := tec.client.ProjectriffV1alpha1().Topics(namespace).Get(topicName, v1.GetOptions{})
+
+		if err != nil {
+			if k8serrors.IsNotFound(err) {
+				return false, nil
+			}
+
+			return false, err
 		}
 
-		return false, err
 	}
 
 	return true, nil

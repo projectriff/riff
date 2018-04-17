@@ -56,15 +56,15 @@ func main() {
 	defer consumer.Close()
 
 	restConf, err := rest.InClusterConfig()
-	if err != nil {
-		panic(err)
+	var riffClient *versioned.Clientset
+	if err == nil {
+		riffClient, err = versioned.NewForConfig(restConf)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		riffClient = nil
 	}
-
-	riffClient, err := versioned.NewForConfig(restConf)
-	if err != nil {
-		panic(err)
-	}
-
 	riffTopicExistenceChecker := server.NewRiffTopicExistenceChecker(riffClient)
 
 	gw := server.New(8080, producer, consumer, 60*time.Second, riffTopicExistenceChecker)
