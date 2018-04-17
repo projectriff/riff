@@ -61,6 +61,7 @@ func (this *grpcDispatcher) handleIncoming() {
 				err := this.stream.Send(grpcMessage)
 				if err != nil {
 					if streamClosureDiagnosed(err) {
+						this.closed <- true
 						return
 					}
 
@@ -94,7 +95,6 @@ func (this *grpcDispatcher) handleOutgoing() {
 
 func streamClosureDiagnosed(err error) bool {
 	if err == io.EOF {
-		log.Println("Stream to function has closed")
 		return true
 	}
 
@@ -108,7 +108,7 @@ func streamClosureDiagnosed(err error) bool {
 }
 
 func NewGrpcDispatcher(port int) (dispatcher.Dispatcher, error) {
-	ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	conn, err := grpc.DialContext(ctx, fmt.Sprintf("localhost:%v", port), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, err
