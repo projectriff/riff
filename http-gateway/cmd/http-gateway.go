@@ -55,19 +55,19 @@ func main() {
 	}
 	defer consumer.Close()
 
+	var topicExistenceChecker server.TopicExistenceChecker
 	restConf, err := rest.InClusterConfig()
-	var riffClient *versioned.Clientset
 	if err == nil {
-		riffClient, err = versioned.NewForConfig(restConf)
+		riffClient, err := versioned.NewForConfig(restConf)
 		if err != nil {
 			panic(err)
 		}
+		topicExistenceChecker = server.NewRiffTopicExistenceChecker(riffClient)
 	} else {
-		riffClient = nil
+		topicExistenceChecker = server.NewAlwaysTrueTopicExistenceChecker()
 	}
-	riffTopicExistenceChecker := server.NewRiffTopicExistenceChecker(riffClient)
 
-	gw := server.New(8080, producer, consumer, 60*time.Second, riffTopicExistenceChecker)
+	gw := server.New(8080, producer, consumer, 60*time.Second, topicExistenceChecker)
 
 	done := make(chan struct{})
 	gw.Run(done)

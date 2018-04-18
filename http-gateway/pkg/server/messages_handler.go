@@ -41,7 +41,7 @@ func (g *gateway) messagesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	topicExists, err := g.riffTopicExistenceChecker.TopicExists(defaultNamespace, topicName)
+	topicExists, err := g.topicExistenceChecker.TopicExists(defaultNamespace, topicName)
 	if err != nil {
 		errMsg := fmt.Sprintf("while checking to see if there was a Riff topic '%s', an unexpected error occurred: %+v", topicName, err)
 		http.Error(w, errMsg, http.StatusInternalServerError)
