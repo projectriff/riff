@@ -83,11 +83,11 @@ var _ = Describe("MessagesHandler", func() {
 
 	Context("When an unexpected error occurs while looking up a Riff topic", func() {
 		BeforeEach(func() {
-			gateway.riffTopicExistenceChecker = &errorRiffTopicExistenceChecker{}
+			gateway.topicExistenceChecker = &errorRiffTopicExistenceChecker{}
 		})
 
 		AfterEach(func() {
-			gateway.riffTopicExistenceChecker = &happyRiffTopicExistenceChecker{}
+			gateway.topicExistenceChecker = &happyRiffTopicExistenceChecker{}
 		})
 
 		It("should return a 500", func() {
