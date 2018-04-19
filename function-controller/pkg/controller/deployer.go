@@ -60,8 +60,16 @@ type deployer struct {
 }
 
 func (d *deployer) Deploy(function *v1.Function) error {
+	deployment := d.buildDeployment(function)
+	_, err := d.clientset.ExtensionsV1beta1().Deployments(function.Namespace).Create(&deployment)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-	deployment := v1beta1.Deployment{
+func (d *deployer) buildDeployment(function *v1.Function) v1beta1.Deployment {
+	return v1beta1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{Name: function.Name, Namespace: function.Namespace},
 		Spec: v1beta1.DeploymentSpec{
 			Replicas: &zero,
@@ -71,11 +79,6 @@ func (d *deployer) Deploy(function *v1.Function) error {
 			},
 		},
 	}
-	_, err := d.clientset.ExtensionsV1beta1().Deployments(function.Namespace).Create(&deployment)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (d *deployer) buildPodSpec(function *v1.Function) corev1.PodSpec {
@@ -88,6 +91,10 @@ func (d *deployer) buildPodSpec(function *v1.Function) corev1.PodSpec {
 func (d *deployer) buildMainContainer(function *v1.Function) corev1.Container {
 	c := function.Spec.Container
 	c.Name = "main"
+	c.Env = append(c.Env, corev1.EnvVar{
+		Name:  "RIFF_FUNCTION_INVOKER_PROTOCOL",
+		Value: function.Spec.Protocol,
+	})
 	return c
 }
 
@@ -121,16 +128,8 @@ func (d *deployer) Undeploy(function *v1.Function) error {
 
 func (d *deployer) Update(function *v1.Function, replicas int) error {
 	r := int32(replicas)
-	deployment := v1beta1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{Name: function.Name, Namespace: function.Namespace},
-		Spec: v1beta1.DeploymentSpec{
-			Replicas: &r,
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{Name: function.Name, Labels: map[string]string{"function": function.Name}},
-				Spec:       d.buildPodSpec(function),
-			},
-		},
-	}
+	deployment := d.buildDeployment(function)
+	deployment.Spec.Replicas = &r
 
 	_, err := d.clientset.ExtensionsV1beta1().Deployments(function.Namespace).Update(&deployment)
 	if err != nil {
