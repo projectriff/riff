@@ -43,11 +43,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer func() {
-		if producer, ok := producer.(io.Closer); ok {
-			producer.Close()
-		}
-	}()
+	if producer, ok := producer.(io.Closer); ok {
+		defer producer.Close()
+	}
 
 	consumer, err := kafka.NewConsumer(brokers, "gateway", []string{"replies"}, cluster.NewConfig())
 	if err != nil {
