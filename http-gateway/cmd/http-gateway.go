@@ -28,11 +28,9 @@ import (
 
 	"github.com/bsm/sarama-cluster"
 	"github.com/projectriff/riff/http-gateway/pkg/server"
-	"github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
 	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
 	"github.com/projectriff/riff/message-transport/pkg/transport/metrics/kafka_over_kafka"
 	"github.com/satori/go.uuid"
-	"k8s.io/client-go/rest"
 )
 
 func main() {
@@ -54,7 +52,9 @@ func main() {
 	defer consumer.Close()
 
 	var topicExistenceChecker server.TopicExistenceChecker
-	restConf, err := rest.InClusterConfig()
+	topicExistenceChecker = server.NewAlwaysTrueTopicExistenceChecker()
+
+	/* restConf, err := rest.InClusterConfig()
 	if err == nil {
 		riffClient, err := versioned.NewForConfig(restConf)
 		if err != nil {
@@ -64,6 +64,7 @@ func main() {
 	} else {
 		topicExistenceChecker = server.NewAlwaysTrueTopicExistenceChecker()
 	}
+	*/
 
 	gw := server.New(8080, producer, consumer, 60*time.Second, topicExistenceChecker)
 
