@@ -68,6 +68,7 @@ func Init(invokers []projectriff_v1.Invoker) (*cobra.Command, *options.InitOptio
 	initCmd.PersistentFlags().StringVarP(&initOptions.Output, "output", "o", "", "the name of the output topic (optional)")
 	initCmd.PersistentFlags().BoolVar(&initOptions.Force, "force", utils.DefaultValues.Force, "overwrite existing functions artifacts")
 
+	initCmd.Flags().ParseErrorsWhitelist.UnknownFlags = true
 	initCmd.SetUsageTemplate(utils.CustomInvokerUsageTemplate)
 
 	return initCmd, &initOptions

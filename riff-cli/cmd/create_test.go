@@ -104,6 +104,23 @@ var _ = Describe("The create command", func() {
 			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
+		It("ignores unknown flags", func() {
+			os.Chdir("../test_data/riff-init/no-invokers")
+
+			invokers, err := stubInvokers("invokers/*.yaml")
+			Expect(err).NotTo(HaveOccurred())
+			rootCommand, _, _, _, err := setupCreateTest(invokers, normalDocker, dryRunDocker, normalKubeCtl, dryRunKubeCtl)
+			Expect(err).NotTo(HaveOccurred())
+
+			rootCommand.SetArgs(append([]string{"create", "java", "--handler", "functions.FooFunc"}, commonRiffArgs...))
+
+			err = rootCommand.Execute()
+			Expect(err).To(HaveOccurred())
+			Expect(err).To(Equal(fmt.Errorf("Invokers must be installed, run `riff invokers apply --help` for help")))
+
+			Expect(".").NotTo(HaveUnstagedChanges())
+		})
+
 		It("creates a function with a matched invoker", func() {
 			os.Chdir("../test_data/riff-init/matching-invoker")
 
