@@ -32,4 +32,4 @@ spec:
         env:
         - name: KAFKA_ZK_NODES
           value: projectriff-zookeeper.riff-system:2181
-      serviceAccountName: riff-sa
+      serviceAccountName: projectriff-riff

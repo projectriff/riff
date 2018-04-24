@@ -31,13 +31,16 @@ debug-dockerize:
 	$(MAKE) -C topic-controller		debug-dockerize
 
 dev-setup:
-	-kubectl create namespace riff-system
+	kubectl apply -n riff-system -f config/namespace
 	kubectl apply -n riff-system -f config/
 	kubectl apply -n riff-system -f config/kafka
 	$(MAKE) -C kubernetes-crds		kubectl-apply
 	$(MAKE) -C function-controller	kubectl-apply
 	$(MAKE) -C http-gateway			kubectl-apply
 	$(MAKE) -C topic-controller		kubectl-apply
+
+rbac:
+	kubectl apply -n riff-system -f config/rbac
 
 teardown:
 	kubectl delete all -l function
@@ -48,7 +51,6 @@ teardown:
 	kubectl delete crd/topics.projectriff.io
 	kubectl delete crd/invokers.projectriff.io
 	kubectl delete all,svc -n riff-system -l app=kafka
-	kubectl delete namespace riff-system
 
 vendor: glide.lock
 	glide install -v --force
