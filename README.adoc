@@ -51,9 +51,11 @@ make dockerize
 
 If you want to quickly standup a development copy of riff:
 
+NOTE: Starting with with Minikube v0.26.0 the default for Minikube is to use the kubeadm bootstrapper which enables RBAC. The older localkube bootstrapper is now deprecated. The following instructions assume that your cluster is running with RBAC enabled. It is still possible to install riff without RBAC roles by omitting the `rbac` target from the make command.
+
 [source, bash]
 ----
-make dev-setup
+make dev-setup rbac
 ----
 
 Which will:
@@ -61,15 +63,8 @@ Which will:
 * Create a `riff-system` namespace
 * Deploy a non-replicated Kafka broker
 * Install riff CRDs and system components
-
-=== Deploying with RBAC
-
-If your cluster has RBAC enabled, then you also need to create a Role and a RoleBinding:
-
-[source, bash]
-----
-kubectl apply -n riff-system -f config/rbac
-----
+* Create a riff service account
+* Install riff roles and rolebindings
 
 === To tear it all down
 

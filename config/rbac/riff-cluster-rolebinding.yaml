@@ -1,12 +1,12 @@
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: riff-cluster-rb
+  name: projectriff-riff
 subjects:
 - kind: ServiceAccount
-  name: riff-sa
-  namespace: default
+  name: projectriff-riff
+  namespace: riff-system
 roleRef:
   kind: ClusterRole
-  name: riff-cluster-role
+  name: projectriff-riff
   apiGroup: rbac.authorization.k8s.io
