@@ -1,5 +1,5 @@
-hash: 6f1b2d9f5f26e05a2a8832adbabb64249525a730d8577be87119a9e54e36f891
-updated: 2018-03-28T12:46:28.084984+02:00
+hash: bf0d50b03fa7df61385ccfd15d096d1b21e3149f71dbcad49b233b0f4a4cb152
+updated: 2018-04-24T08:50:52.736913-04:00
 imports:
 - name: github.com/bsm/sarama-cluster
   version: 24016d206c730276dfb58f802999066f2f4bfeaa
@@ -158,7 +158,7 @@ imports:
 - name: github.com/spf13/jwalterweatherman
   version: 7c0cea34c8ece3fbeb2b27ab9b59511d360fb394
 - name: github.com/spf13/pflag
-  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
+  version: 583c0c0531f06d5278b7d917446061adc344b5cd
 - name: github.com/spf13/viper
   version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: github.com/stretchr/objx

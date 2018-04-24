@@ -68,7 +68,7 @@ import:
   subpackages:
   - doc
 - package: github.com/spf13/pflag
-  version: v1.0.0
+  version: v1.0.1
 - package: github.com/spf13/viper
   version: v1.0.0
 - package: github.com/mitchellh/go-homedir
