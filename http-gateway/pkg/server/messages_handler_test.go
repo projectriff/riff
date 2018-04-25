@@ -81,21 +81,6 @@ var _ = Describe("MessagesHandler", func() {
 		})
 	})
 
-	Context("When an unexpected error occurs while looking up a Riff topic", func() {
-		BeforeEach(func() {
-			gateway.topicExistenceChecker = &errorRiffTopicExistenceChecker{}
-		})
-
-		AfterEach(func() {
-			gateway.topicExistenceChecker = &happyRiffTopicExistenceChecker{}
-		})
-
-		It("should return a 500", func() {
-			resp := mockResponseWriter.Result()
-			Expect(resp.StatusCode).To(Equal(http.StatusInternalServerError))
-		})
-	})
-
 	Context("when the request body cannot be read", func() {
 		BeforeEach(func() {
 			req.Body = &badReader{testError}
@@ -243,12 +228,12 @@ type happyRiffTopicExistenceChecker struct {
 	testName string
 }
 
-func (th *happyRiffTopicExistenceChecker) TopicExists(namespace string, topicName string) (bool, error) {
-	return topicName == th.testName, nil
+func (th *happyRiffTopicExistenceChecker) TopicExists(namespace string, topicName string) bool {
+	return topicName == th.testName
 }
 
 type errorRiffTopicExistenceChecker struct{}
 
-func (th *errorRiffTopicExistenceChecker) TopicExists(namespace string, topicName string) (bool, error) {
-	return false, errors.New("test error")
+func (th *errorRiffTopicExistenceChecker) TopicExists(namespace string, topicName string) bool {
+	return false
 }

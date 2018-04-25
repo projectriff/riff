@@ -19,7 +19,7 @@ const (
 // TopicExistenceChecker allows the http-gateway to check for the existence of
 // a Topic before attempting to send a message to that topic.
 type TopicExistenceChecker interface {
-	TopicExists(namespace string, topicName string) (bool, error)
+	TopicExists(namespace string, topicName string) bool
 }
 
 type riffTopicExistenceChecker struct {
@@ -71,21 +71,15 @@ func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) TopicExistence
 	return &riffTopicExistenceChecker{topicInformer: topicInformer, knownTopics: knownTopics}
 }
 
-func (tec *alwaysTrueTopicExistenceChecker) TopicExists(namespace string, topicName string) (bool, error) {
-	return true, nil
+func (tec *alwaysTrueTopicExistenceChecker) TopicExists(namespace string, topicName string) bool {
+	return true
 }
 
-// TopicExists checks to see if Kubernetes is aware of a Riff Topic in a namespace.
-// If the topic exists, it returns (true, nil)
-// If the topic does not exist, it returns (false, nil)
-// If there is an unexpected error, it returns (false, err), where 'err' is the unexpected
-// error that was encountered.
-func (tec *riffTopicExistenceChecker) TopicExists(namespace string, topicName string) (bool, error) {
+// TopicExists checks to see if Kubernetes is aware of a riff Topic in a namespace.
+func (tec *riffTopicExistenceChecker) TopicExists(namespace string, topicName string) bool {
 	topicKey := fmt.Sprintf("%s/%s", namespace, topicName)
 
-	if _, exists := tec.knownTopics[topicKey]; exists {
-		return true, nil
-	} else {
-		return false, nil
-	}
+	 _, exists := tec.knownTopics[topicKey];
+
+	return exists
 }
