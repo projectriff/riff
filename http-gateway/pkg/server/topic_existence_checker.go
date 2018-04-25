@@ -12,6 +12,7 @@ import (
 
 	informers "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions"
 	"github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1"
+	"sync"
 )
 
 const (
@@ -27,6 +28,7 @@ type TopicExistenceChecker interface {
 type riffTopicExistenceChecker struct {
 	topicInformer v1alpha1.TopicInformer
 	knownTopics   map[string]ignoredValue
+	mutex *sync.Mutex
 }
 
 type ignoredValue struct {
@@ -45,11 +47,14 @@ func NewAlwaysTrueTopicExistenceChecker() TopicExistenceChecker {
 func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) TopicExistenceChecker {
 	riffInformerFactory := informers.NewSharedInformerFactory(clientSet, time.Second*30)
 	topicInformer := riffInformerFactory.Projectriff().V1alpha1().Topics()
-
 	knownTopics := make(map[string]ignoredValue)
+	mutex := &sync.Mutex{}
 
 	topicInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
+			mutex.Lock()
+			defer mutex.Unlock()
+
 			key, err := cache.MetaNamespaceKeyFunc(obj)
 			if err != nil {
 				log.Printf("AddFunc had an error for key '%s': %+v", err)
@@ -60,6 +65,9 @@ func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) TopicExistence
 		},
 
 		DeleteFunc: func(obj interface{}) {
+			mutex.Lock()
+			defer mutex.Unlock()
+
 			key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 			if err != nil {
 				log.Printf("DeleteFunc had an error for key '%s': %+v", err)
@@ -73,7 +81,7 @@ func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) TopicExistence
 	done := make(chan struct{}) //TODO: ideally, this would be the same channel used by the gateway itself
 	go topicInformer.Informer().Run(done)
 
-	return &riffTopicExistenceChecker{topicInformer: topicInformer, knownTopics: knownTopics}
+	return &riffTopicExistenceChecker{topicInformer: topicInformer, knownTopics: knownTopics, mutex: mutex}
 }
 
 func (tec *alwaysTrueTopicExistenceChecker) TopicExists(namespace string, topicName string) bool {
@@ -82,6 +90,9 @@ func (tec *alwaysTrueTopicExistenceChecker) TopicExists(namespace string, topicN
 
 // TopicExists checks to see if Kubernetes is aware of a riff Topic in a namespace.
 func (tec *riffTopicExistenceChecker) TopicExists(namespace string, topicName string) bool {
+	tec.mutex.Lock()
+	defer tec.mutex.Unlock()
+
 	topicKey := fmt.Sprintf("%s/%s", namespace, topicName)
 
 	_, exists := tec.knownTopics[topicKey]
