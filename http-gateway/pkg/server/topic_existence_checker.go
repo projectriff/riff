@@ -3,13 +3,15 @@ package server
 import (
 	"github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
 
-	"k8s.io/client-go/tools/cache"
 	"log"
 
-	informers "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions"
-	"time"
-	"github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1"
+	"k8s.io/client-go/tools/cache"
+
 	"fmt"
+	"time"
+
+	informers "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions"
+	"github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1"
 )
 
 const (
@@ -24,7 +26,7 @@ type TopicExistenceChecker interface {
 
 type riffTopicExistenceChecker struct {
 	topicInformer v1alpha1.TopicInformer
-	knownTopics map[string]ignoredValue
+	knownTopics   map[string]ignoredValue
 }
 
 type ignoredValue struct {
@@ -49,19 +51,22 @@ func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) TopicExistence
 	topicInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			key, err := cache.MetaNamespaceKeyFunc(obj)
-			if err == nil {
-				knownTopics[key] = ignoredValue{}
-				log.Printf("Added topic to internal map: %+v", key)
+			if err != nil {
+				log.Printf("AddFunc had an error for key '%s': %+v", err)
 			}
 
-
+			knownTopics[key] = ignoredValue{}
+			log.Printf("Added topic to internal map: %+v", key)
 		},
+
 		DeleteFunc: func(obj interface{}) {
 			key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
-			if err == nil {
-				delete(knownTopics, key)
-				log.Printf("Removed topic from internal map: %+v", key)
+			if err != nil {
+				log.Printf("DeleteFunc had an error for key '%s': %+v", err)
 			}
+
+			delete(knownTopics, key)
+			log.Printf("Removed topic from internal map: %+v", key)
 		},
 	})
 
@@ -79,7 +84,7 @@ func (tec *alwaysTrueTopicExistenceChecker) TopicExists(namespace string, topicN
 func (tec *riffTopicExistenceChecker) TopicExists(namespace string, topicName string) bool {
 	topicKey := fmt.Sprintf("%s/%s", namespace, topicName)
 
-	 _, exists := tec.knownTopics[topicKey];
+	_, exists := tec.knownTopics[topicKey]
 
 	return exists
 }
