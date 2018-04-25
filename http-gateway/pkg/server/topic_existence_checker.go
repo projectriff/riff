@@ -1,11 +1,15 @@
 package server
 
 import (
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/tools/cache"
+	"log"
+
+	informers "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions"
+	"time"
+	"github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1"
+	"fmt"
 )
 
 const (
@@ -19,7 +23,11 @@ type TopicExistenceChecker interface {
 }
 
 type riffTopicExistenceChecker struct {
-	client *versioned.Clientset
+	topicInformer v1alpha1.TopicInformer
+	knownTopics map[string]ignoredValue
+}
+
+type ignoredValue struct {
 }
 
 type alwaysTrueTopicExistenceChecker struct {
@@ -33,7 +41,34 @@ func NewAlwaysTrueTopicExistenceChecker() TopicExistenceChecker {
 // NewRiffTopicExistenceChecker configures a TopicExistenceChecker using the
 // provided Clientset.
 func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) TopicExistenceChecker {
-	return &riffTopicExistenceChecker{client: clientSet}
+	riffInformerFactory := informers.NewSharedInformerFactory(clientSet, time.Second*30)
+	topicInformer := riffInformerFactory.Projectriff().V1alpha1().Topics()
+
+	knownTopics := make(map[string]ignoredValue)
+
+	topicInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			key, err := cache.MetaNamespaceKeyFunc(obj)
+			if err == nil {
+				knownTopics[key] = ignoredValue{}
+				log.Printf("Added topic to internal map: %+v", key)
+			}
+
+
+		},
+		DeleteFunc: func(obj interface{}) {
+			key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
+			if err == nil {
+				delete(knownTopics, key)
+				log.Printf("Removed topic from internal map: %+v", key)
+			}
+		},
+	})
+
+	done := make(chan struct{}) //TODO: ideally, this would be the same channel used by the gateway itself
+	go topicInformer.Informer().Run(done)
+
+	return &riffTopicExistenceChecker{topicInformer: topicInformer, knownTopics: knownTopics}
 }
 
 func (tec *alwaysTrueTopicExistenceChecker) TopicExists(namespace string, topicName string) (bool, error) {
@@ -46,16 +81,11 @@ func (tec *alwaysTrueTopicExistenceChecker) TopicExists(namespace string, topicN
 // If there is an unexpected error, it returns (false, err), where 'err' is the unexpected
 // error that was encountered.
 func (tec *riffTopicExistenceChecker) TopicExists(namespace string, topicName string) (bool, error) {
+	topicKey := fmt.Sprintf("%s/%s", namespace, topicName)
 
-	_, err := tec.client.ProjectriffV1alpha1().Topics(namespace).Get(topicName, v1.GetOptions{})
-
-	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			return false, nil
-		}
-
-		return false, err
+	if _, exists := tec.knownTopics[topicKey]; exists {
+		return true, nil
+	} else {
+		return false, nil
 	}
-
-	return true, nil
 }
