@@ -26,9 +26,9 @@ type TopicExistenceChecker interface {
 }
 
 type riffTopicExistenceChecker struct {
+	mutex         *sync.Mutex
 	topicInformer v1alpha1.TopicInformer
 	knownTopics   map[string]ignoredValue
-	mutex *sync.Mutex
 }
 
 type ignoredValue struct{}
@@ -43,10 +43,12 @@ func NewAlwaysTrueTopicExistenceChecker() TopicExistenceChecker {
 // NewRiffTopicExistenceChecker configures a TopicExistenceChecker using the
 // provided Clientset.
 func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) TopicExistenceChecker {
+	mutex := &sync.Mutex{}
+
 	riffInformerFactory := informers.NewSharedInformerFactory(clientSet, time.Second*30)
 	topicInformer := riffInformerFactory.Projectriff().V1alpha1().Topics()
+
 	knownTopics := make(map[string]ignoredValue)
-	mutex := &sync.Mutex{}
 
 	topicInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
