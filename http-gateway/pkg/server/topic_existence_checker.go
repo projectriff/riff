@@ -43,7 +43,7 @@ func NewAlwaysTrueTopicExistenceChecker() TopicExistenceChecker {
 
 // NewRiffTopicExistenceChecker configures a TopicExistenceChecker using the
 // provided Clientset.
-func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) TopicExistenceChecker {
+func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset, stop <-chan struct{}) TopicExistenceChecker {
 	riffInformerFactory := informers.NewSharedInformerFactory(clientSet, time.Second*30)
 	topicInformer := riffInformerFactory.Projectriff().V1alpha1().Topics()
 
@@ -86,8 +86,7 @@ func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) TopicExistence
 		},
 	})
 
-	done := make(chan struct{}) //TODO: ideally, this would be the same channel used by the gateway itself
-	go topicInformer.Informer().Run(done)
+	go topicInformer.Informer().Run(stop)
 
 	return &riffTopicExistenceChecker{topicInformer: topicInformer, mutex: mutex, knownTopics: knownTopics}
 }
