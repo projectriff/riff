@@ -59,12 +59,12 @@ func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) TopicExistence
 			if err != nil {
 				// It is likely that the key is faulty, but we cannot signal an error.
 				// To prevent errors for processing a bad key, we return after logging.
-				log.Printf("AddFunc had an error for key '%s': %+v", err)
+				log.Printf("AddFunc failed during a topic lookup: %#v", err)
 				return
 			}
 
 			knownTopics[key] = ignoredValue{}
-			log.Printf("Added topic to internal map: %+v", key)
+			log.Printf("New topic has been added: %s", key)
 		},
 
 		DeleteFunc: func(obj interface{}) {
@@ -75,12 +75,12 @@ func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) TopicExistence
 			if err != nil {
 				// It is likely that the key is faulty, but we cannot signal an error.
 				// To prevent errors for processing a bad key, we return after logging.
-				log.Printf("DeleteFunc had an error for key '%s': %+v", err)
+				log.Printf("DeleteFunc failed during a topic lookup: %#v", err)
 				return
 			}
 
 			delete(knownTopics, key)
-			log.Printf("Removed topic from internal map: %+v", key)
+			log.Printf("A topic was removed: %s", key)
 		},
 	})
 
