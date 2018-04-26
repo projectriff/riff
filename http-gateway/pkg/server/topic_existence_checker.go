@@ -31,11 +31,9 @@ type riffTopicExistenceChecker struct {
 	mutex *sync.Mutex
 }
 
-type ignoredValue struct {
-}
+type ignoredValue struct{}
 
-type alwaysTrueTopicExistenceChecker struct {
-}
+type alwaysTrueTopicExistenceChecker struct{}
 
 // NewAlwaysTrueTopicExistenceChecker configures a TopicExistenceChecker that always returns true.
 func NewAlwaysTrueTopicExistenceChecker() TopicExistenceChecker {
