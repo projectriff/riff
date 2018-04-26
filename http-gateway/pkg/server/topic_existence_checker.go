@@ -26,8 +26,9 @@ type TopicExistenceChecker interface {
 }
 
 type riffTopicExistenceChecker struct {
-	mutex         *sync.Mutex
 	topicInformer v1alpha1.TopicInformer
+
+	mutex         *sync.Mutex
 	knownTopics   map[string]ignoredValue
 }
 
@@ -43,11 +44,10 @@ func NewAlwaysTrueTopicExistenceChecker() TopicExistenceChecker {
 // NewRiffTopicExistenceChecker configures a TopicExistenceChecker using the
 // provided Clientset.
 func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) TopicExistenceChecker {
-	mutex := &sync.Mutex{}
-
 	riffInformerFactory := informers.NewSharedInformerFactory(clientSet, time.Second*30)
 	topicInformer := riffInformerFactory.Projectriff().V1alpha1().Topics()
 
+	mutex := &sync.Mutex{}
 	knownTopics := make(map[string]ignoredValue)
 
 	topicInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -89,7 +89,7 @@ func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) TopicExistence
 	done := make(chan struct{}) //TODO: ideally, this would be the same channel used by the gateway itself
 	go topicInformer.Informer().Run(done)
 
-	return &riffTopicExistenceChecker{topicInformer: topicInformer, knownTopics: knownTopics, mutex: mutex}
+	return &riffTopicExistenceChecker{topicInformer: topicInformer, mutex: mutex, knownTopics: knownTopics}
 }
 
 func (tec *alwaysTrueTopicExistenceChecker) TopicExists(namespace string, topicName string) bool {
