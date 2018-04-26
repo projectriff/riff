@@ -53,35 +53,30 @@ func main() {
 	}
 	defer consumer.Close()
 
+	done := make(chan struct{})
+
 	var topicExistenceChecker server.TopicExistenceChecker
-	var informerDone chan struct{}
 	restConf, err := rest.InClusterConfig()
 	if err == nil {
 		riffClient, err := versioned.NewForConfig(restConf)
 		if err != nil {
 			panic(err)
 		}
-		informerDone = make(chan struct{})
-		topicExistenceChecker = server.NewRiffTopicExistenceChecker(riffClient, informerDone)
+		topicExistenceChecker = server.NewRiffTopicExistenceChecker(riffClient, done)
 	} else {
 		topicExistenceChecker = server.NewAlwaysTrueTopicExistenceChecker()
 	}
 
 	gw := server.New(8080, producer, consumer, 60*time.Second, topicExistenceChecker)
 
-	serverDone := make(chan struct{})
-
-	gw.Run(serverDone)
+	gw.Run(done)
 
 	// Wait for shutdown
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, os.Kill)
 	<-signals
 	log.Println("Shutting Down...")
-	close(serverDone)
-	if informerDone != nil {
-		close(informerDone)
-	}
+	close(done)
 }
 
 func brokers() []string {
