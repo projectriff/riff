@@ -54,6 +54,7 @@ func main() {
 	defer consumer.Close()
 
 	done := make(chan struct{})
+	defer close(done)
 
 	var topicExistenceChecker server.TopicExistenceChecker
 	restConf, err := rest.InClusterConfig()
@@ -76,7 +77,6 @@ func main() {
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, os.Kill)
 	<-signals
 	log.Println("Shutting Down...")
-	close(done)
 }
 
 func brokers() []string {
