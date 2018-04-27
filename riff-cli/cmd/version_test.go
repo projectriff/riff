@@ -60,14 +60,16 @@ var _ = Describe("The version command", func() {
 	})
 
 	It("should list the cli, component, and invoker versions", func() {
+		kubeClient.On("Exec", []string{"config", "current-context"}).Return("minikube\n", nil).Once()
 		kubeClient.On("Exec", listComponetsKubeArgs).Return("<Component Table>\n", nil).Once()
 		kubeClient.On("Exec", listInvokersKubeArgs).Return("<Invokers Table>\n", nil).Once()
 
 		err := versionCommand.Execute()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(writer.String()).To(Equal(
-			fmt.Sprintf("riff CLI version: %s\n\n%s\n\n%s\n",
+			fmt.Sprintf("riff CLI version: %s\nkubectl context: %s\n\n%s\n\n%s\n",
 				"0.0.1-testing",
+				"minikube",
 				"<Component Table>",
 				"<Invokers Table>",
 			),
@@ -75,14 +77,16 @@ var _ = Describe("The version command", func() {
 	})
 
 	It("should list the cli version even when kubectl fails", func() {
+		kubeClient.On("Exec", []string{"config", "current-context"}).Return("", fmt.Errorf("kubectl fault")).Once()
 		kubeClient.On("Exec", listComponetsKubeArgs).Return("", fmt.Errorf("kubectl fault")).Once()
 		kubeClient.On("Exec", listInvokersKubeArgs).Return("", fmt.Errorf("kubectl fault")).Once()
 
 		err := versionCommand.Execute()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(writer.String()).To(Equal(
-			fmt.Sprintf("riff CLI version: %s\n\n%s\n\n%s\n",
+			fmt.Sprintf("riff CLI version: %s\nkubectl context: %s\n\n%s\n\n%s\n",
 				"0.0.1-testing",
+				"<unknown>",
 				"Unable to list components",
 				"Unable to list invokers",
 			),

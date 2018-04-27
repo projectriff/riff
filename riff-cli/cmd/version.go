@@ -39,6 +39,11 @@ func Version(w io.Writer, kubeCtl kubectl.KubeCtl) *cobra.Command {
 
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Fprintf(w, "riff CLI version: %v\n", global.CLI_VERSION)
+			context, err := kubeCtl.Exec([]string{"config", "current-context"})
+			if err != nil {
+				context = "<unknown>"
+			}
+			fmt.Fprintf(w, "kubectl context: %v\n", strings.Trim(context, "\n"))
 			fmt.Fprintln(w)
 			components, err := kubeCtl.Exec([]string{
 				"get", "deployments",
