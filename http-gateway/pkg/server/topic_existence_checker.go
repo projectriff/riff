@@ -1,11 +1,18 @@
 package server
 
 import (
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/projectriff/riff/kubernetes-crds/pkg/client/clientset/versioned"
 
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"log"
+
+	"k8s.io/client-go/tools/cache"
+
+	"fmt"
+	"time"
+
+	informers "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions"
+	"github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1"
+	"sync"
 )
 
 const (
@@ -15,15 +22,19 @@ const (
 // TopicExistenceChecker allows the http-gateway to check for the existence of
 // a Topic before attempting to send a message to that topic.
 type TopicExistenceChecker interface {
-	TopicExists(namespace string, topicName string) (bool, error)
+	TopicExists(namespace string, topicName string) bool
 }
 
 type riffTopicExistenceChecker struct {
-	client *versioned.Clientset
+	topicInformer v1alpha1.TopicInformer
+
+	mutex         *sync.Mutex
+	knownTopics   map[string]ignoredValue
 }
 
-type alwaysTrueTopicExistenceChecker struct {
-}
+type ignoredValue struct{}
+
+type alwaysTrueTopicExistenceChecker struct{}
 
 // NewAlwaysTrueTopicExistenceChecker configures a TopicExistenceChecker that always returns true.
 func NewAlwaysTrueTopicExistenceChecker() TopicExistenceChecker {
@@ -32,30 +43,66 @@ func NewAlwaysTrueTopicExistenceChecker() TopicExistenceChecker {
 
 // NewRiffTopicExistenceChecker configures a TopicExistenceChecker using the
 // provided Clientset.
-func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset) TopicExistenceChecker {
-	return &riffTopicExistenceChecker{client: clientSet}
+func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset, stop <-chan struct{}) TopicExistenceChecker {
+	riffInformerFactory := informers.NewSharedInformerFactory(clientSet, time.Second*30)
+	topicInformer := riffInformerFactory.Projectriff().V1alpha1().Topics()
+
+	mutex := &sync.Mutex{}
+	knownTopics := make(map[string]ignoredValue)
+
+	topicInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			//TODO: implement riff-specific KeyFunc https://github.com/projectriff/riff/pull/558#discussion_r184437224
+			key, err := cache.MetaNamespaceKeyFunc(obj)
+			if err != nil {
+				// It is likely that the key is faulty, but we cannot signal an error.
+				// To prevent errors for processing a bad key, we return after logging.
+				log.Printf("AddFunc failed during a topic lookup: %#v", err)
+				return
+			}
+
+			knownTopics[key] = ignoredValue{}
+			log.Printf("New topic has been added: %s", key)
+		},
+
+		DeleteFunc: func(obj interface{}) {
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			//TODO: implement riff-specific KeyFunc https://github.com/projectriff/riff/pull/558#discussion_r184437224
+			key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
+			if err != nil {
+				// It is likely that the key is faulty, but we cannot signal an error.
+				// To prevent errors for processing a bad key, we return after logging.
+				log.Printf("DeleteFunc failed during a topic lookup: %#v", err)
+				return
+			}
+
+			delete(knownTopics, key)
+			log.Printf("A topic was removed: %s", key)
+		},
+	})
+
+	go topicInformer.Informer().Run(stop)
+
+	return &riffTopicExistenceChecker{topicInformer: topicInformer, mutex: mutex, knownTopics: knownTopics}
 }
 
-func (tec *alwaysTrueTopicExistenceChecker) TopicExists(namespace string, topicName string) (bool, error) {
-	return true, nil
+func (tec *alwaysTrueTopicExistenceChecker) TopicExists(namespace string, topicName string) bool {
+	return true
 }
 
-// TopicExists checks to see if Kubernetes is aware of a Riff Topic in a namespace.
-// If the topic exists, it returns (true, nil)
-// If the topic does not exist, it returns (false, nil)
-// If there is an unexpected error, it returns (false, err), where 'err' is the unexpected
-// error that was encountered.
-func (tec *riffTopicExistenceChecker) TopicExists(namespace string, topicName string) (bool, error) {
+// TopicExists checks to see if Kubernetes is aware of a riff Topic in a namespace.
+func (tec *riffTopicExistenceChecker) TopicExists(namespace string, topicName string) bool {
+	tec.mutex.Lock()
+	defer tec.mutex.Unlock()
 
-	_, err := tec.client.ProjectriffV1alpha1().Topics(namespace).Get(topicName, v1.GetOptions{})
+	topicKey := fmt.Sprintf("%s/%s", namespace, topicName)
 
-	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			return false, nil
-		}
+	_, exists := tec.knownTopics[topicKey]
 
-		return false, err
-	}
-
-	return true, nil
+	return exists
 }
