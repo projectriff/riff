@@ -173,7 +173,13 @@ func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
 	case "http":
 		return dispatch.NewWrapper(http.NewHttpDispatcher())
 	case "grpc":
-		return grpc.NewGrpcDispatcher(10382)
+		var timeout time.Duration
+		if exitOnComplete {
+			timeout = 60 * time.Second
+		} else {
+			timeout = 100 * time.Millisecond
+		}
+		return grpc.NewGrpcDispatcher(10382, timeout)
 	default:
 		panic("Unsupported Dispatcher " + protocol)
 	}
