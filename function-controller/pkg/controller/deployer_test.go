@@ -20,6 +20,7 @@ import (
 	. "github.com/onsi/gomega"
 	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var _ = Describe("Deployer", func() {
@@ -34,10 +35,50 @@ var _ = Describe("Deployer", func() {
 	Describe("buildDeployment", func() {
 		var (
 			function v1.Function
+			binding  v1.Binding
 		)
 
 		BeforeEach(func() {
-			function = v1.Function{}
+			function = v1.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "square",
+					Namespace: "default",
+				},
+			}
+			binding = v1.Binding{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "square-binding",
+					Namespace: "default",
+				},
+			}
+		})
+
+		It("should set the HTTP_PORT var", func() {
+			deployment := d.buildDeployment(&binding, &function)
+			mainContainer := deployment.Spec.Template.Spec.Containers[0]
+			Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
+				Name:  "HTTP_PORT",
+				Value: "8080",
+			}))
+		})
+
+		It("should set the GRPC_PORT var", func() {
+			deployment := d.buildDeployment(&binding, &function)
+			mainContainer := deployment.Spec.Template.Spec.Containers[0]
+			Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
+				Name:  "GRPC_PORT",
+				Value: "10382",
+			}))
+		})
+
+		It("creates an owner reference to the binding", func() {
+			deployment := d.buildDeployment(&binding, &function)
+			ownerReferences := deployment.OwnerReferences
+			Expect(len(ownerReferences)).To(Equal(1))
+			Expect(ownerReferences[0].Kind).To(Equal("Binding"))
+			Expect(ownerReferences[0].Name).To(Equal("square-binding"))
+			Expect(*ownerReferences[0].Controller).To(BeTrue())
+			Expect(*ownerReferences[0].BlockOwnerDeletion).To(BeTrue())
 		})
 
 		Context("when the protocol is grpc", func() {
@@ -47,38 +88,22 @@ var _ = Describe("Deployer", func() {
 			})
 
 			It("should set the RIFF_FUNCTION_INVOKER_PROTOCOL var to grpc", func() {
-				deployment := d.buildDeployment(&function)
+				deployment := d.buildDeployment(&binding, &function)
 				mainContainer := deployment.Spec.Template.Spec.Containers[0]
 				Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
 					Name:  "RIFF_FUNCTION_INVOKER_PROTOCOL",
 					Value: "grpc",
 				}))
 			})
+
 			It("should set the sidecar --protocol and --port arg", func() {
-				deployment := d.buildDeployment(&function)
+				deployment := d.buildDeployment(&binding, &function)
 				sidecarContainer := deployment.Spec.Template.Spec.Containers[1]
 				args := sidecarContainer.Args
 				Expect(args[indexOf(args, "--protocol")+1]).To(Equal("grpc"))
 				Expect(args[indexOf(args, "--port")+1]).To(Equal("10382"))
 			})
 
-			It("should set the HTTP_PORT var", func() {
-				deployment := d.buildDeployment(&function)
-				mainContainer := deployment.Spec.Template.Spec.Containers[0]
-				Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
-					Name:  "HTTP_PORT",
-					Value: "8080",
-				}))
-			})
-
-			It("should set the GRPC_PORT var", func() {
-				deployment := d.buildDeployment(&function)
-				mainContainer := deployment.Spec.Template.Spec.Containers[0]
-				Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
-					Name:  "GRPC_PORT",
-					Value: "10382",
-				}))
-			})
 		})
 
 		Context("when the protocol is http", func() {
@@ -88,7 +113,7 @@ var _ = Describe("Deployer", func() {
 			})
 
 			It("should set the RIFF_FUNCTION_INVOKER_PROTOCOL var to http", func() {
-				deployment := d.buildDeployment(&function)
+				deployment := d.buildDeployment(&binding, &function)
 				mainContainer := deployment.Spec.Template.Spec.Containers[0]
 				Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
 					Name:  "RIFF_FUNCTION_INVOKER_PROTOCOL",
@@ -97,30 +122,13 @@ var _ = Describe("Deployer", func() {
 			})
 
 			It("should set the sidecar --protocol and --port arg", func() {
-				deployment := d.buildDeployment(&function)
+				deployment := d.buildDeployment(&binding, &function)
 				sidecarContainer := deployment.Spec.Template.Spec.Containers[1]
 				args := sidecarContainer.Args
 				Expect(args[indexOf(args, "--protocol")+1]).To(Equal("http"))
 				Expect(args[indexOf(args, "--port")+1]).To(Equal("8080"))
 			})
 
-			It("should set the HTTP_PORT var", func() {
-				deployment := d.buildDeployment(&function)
-				mainContainer := deployment.Spec.Template.Spec.Containers[0]
-				Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
-					Name:  "HTTP_PORT",
-					Value: "8080",
-				}))
-			})
-
-			It("should set the GRPC_PORT var", func() {
-				deployment := d.buildDeployment(&function)
-				mainContainer := deployment.Spec.Template.Spec.Containers[0]
-				Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
-					Name:  "GRPC_PORT",
-					Value: "10382",
-				}))
-			})
 		})
 	})
 

@@ -151,8 +151,9 @@ var _ = Describe("The create command", func() {
 				Once()
 			functionYamlPath, _ := filepath.Abs("matching-invoker-function.yaml")
 			topicsYamlPath, _ := filepath.Abs("matching-invoker-topics.yaml")
-			normalKubeCtl.On("Exec", []string{"apply", "-f", functionYamlPath, "-f", topicsYamlPath}).
-				Return("function \"matching-invoker\" created\ntopic \"matching-invoker\" created", nil).
+			bindingYamlPath, _ := filepath.Abs("matching-invoker-binding.yaml")
+			normalKubeCtl.On("Exec", []string{"apply", "-f", functionYamlPath, "-f", topicsYamlPath, "-f", bindingYamlPath}).
+				Return("function \"matching-invoker\" created\ntopic \"matching-invoker\" created\binding \"matching-invoker\" created", nil).
 				Once()
 
 			err = rootCommand.Execute()

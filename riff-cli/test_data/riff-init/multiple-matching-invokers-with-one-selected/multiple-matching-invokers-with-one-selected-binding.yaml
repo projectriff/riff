@@ -1,0 +1,8 @@
+---
+apiVersion: projectriff.io/v1alpha1
+kind: Binding
+metadata:
+  name: multiple-matching-invokers-with-one-selected
+spec:
+  handler: multiple-matching-invokers-with-one-selected
+  input: multiple-matching-invokers-with-one-selected

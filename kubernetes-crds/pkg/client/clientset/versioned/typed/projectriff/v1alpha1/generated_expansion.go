@@ -16,6 +16,8 @@
 
 package v1alpha1
 
+type BindingExpansion interface{}
+
 type FunctionExpansion interface{}
 
 type InvokerExpansion interface{}

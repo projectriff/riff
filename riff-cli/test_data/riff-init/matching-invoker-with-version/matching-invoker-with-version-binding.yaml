@@ -1,0 +1,8 @@
+---
+apiVersion: projectriff.io/v1alpha1
+kind: Binding
+metadata:
+  name: matching-invoker-with-version
+spec:
+  handler: matching-invoker-with-version
+  input: matching-invoker-with-version

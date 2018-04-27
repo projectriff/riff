@@ -30,16 +30,16 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/bsm/sarama-cluster"
 	"github.com/projectriff/riff/function-controller/pkg/controller"
+	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler"
 	riffInformersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1"
+	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
+	"github.com/projectriff/riff/message-transport/pkg/transport/metrics/kafka_over_kafka"
 	k8sInformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/informers/extensions/v1beta1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler"
-	"github.com/projectriff/riff/message-transport/pkg/transport/metrics/kafka_over_kafka"
-	"github.com/bsm/sarama-cluster"
-	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
 )
 
 func main() {
@@ -53,7 +53,7 @@ func main() {
 		log.Fatalf("Error getting client config: %s", err.Error())
 	}
 
-	topicsInformer, functionsInformer, deploymentInformer := makeInformers(config)
+	topicsInformer, functionsInformer, bindingsInformer, deploymentInformer := makeInformers(config)
 	deployer, err := controller.NewDeployer(config, brokers)
 	if err != nil {
 		panic(err)
@@ -70,7 +70,7 @@ func main() {
 	}
 
 	autoScaler := autoscaler.NewAutoScaler(metricsReceiver, transportInspector)
-	ctrl := controller.New(topicsInformer, functionsInformer, deploymentInformer, deployer, autoScaler, 8080)
+	ctrl := controller.New(topicsInformer, functionsInformer, bindingsInformer, deploymentInformer, deployer, autoScaler, 8080)
 
 	stopCh := make(chan struct{})
 	go ctrl.Run(stopCh)
@@ -86,7 +86,7 @@ func main() {
 
 }
 
-func makeInformers(config *rest.Config) (riffInformersV1.TopicInformer, riffInformersV1.FunctionInformer, v1beta1.DeploymentInformer) {
+func makeInformers(config *rest.Config) (riffInformersV1.TopicInformer, riffInformersV1.FunctionInformer, riffInformersV1.BindingInformer, v1beta1.DeploymentInformer) {
 	riffClient, err := riffcs.NewForConfig(config)
 	if err != nil {
 		log.Fatalf("Error building riff clientset: %s", err.Error())
@@ -94,10 +94,11 @@ func makeInformers(config *rest.Config) (riffInformersV1.TopicInformer, riffInfo
 	riffInformerFactory := informers.NewSharedInformerFactory(riffClient, 0)
 	topicsInformer := riffInformerFactory.Projectriff().V1alpha1().Topics()
 	functionsInformer := riffInformerFactory.Projectriff().V1alpha1().Functions()
+	bindingsInformer := riffInformerFactory.Projectriff().V1alpha1().Bindings()
 
 	k8sClient, err := kubernetes.NewForConfig(config)
 	deploymentInformer := k8sInformers.NewSharedInformerFactory(k8sClient, 0).Extensions().V1beta1().Deployments()
-	return topicsInformer, functionsInformer, deploymentInformer
+	return topicsInformer, functionsInformer, bindingsInformer, deploymentInformer
 }
 
 func makeConsumerConfig() *cluster.Config {

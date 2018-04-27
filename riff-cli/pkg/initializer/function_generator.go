@@ -30,8 +30,6 @@ func createFunction(opts options.InitOptions, functionTemplate projectriff_v1.Fu
 	function.TypeMeta.APIVersion = apiVersion
 	function.TypeMeta.Kind = functionKind
 	function.ObjectMeta.Name = opts.FunctionName
-	function.Spec.Input = opts.Input
-	function.Spec.Output = opts.Output
 	function.Spec.Container.Image = options.ImageName(opts)
 	if opts.Protocol != "" {
 		function.Spec.Protocol = opts.Protocol

@@ -6,8 +6,6 @@ metadata:
 spec:
   container:
     image: rifftest/matching-invoker-with-output-topic:0.0.1
-  input: matching-invoker-with-output-topic
-  output: soundReflection
   protocol: grpc
   windowing:
     size: 1

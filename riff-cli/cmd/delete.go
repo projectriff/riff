@@ -81,34 +81,40 @@ func Delete(realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) (*cobra.
 }
 
 func deleteFunctionByName(opts DeleteOptions, actingClient kubectl.KubeCtl, queryClient kubectl.KubeCtl) error {
-	if opts.All {
+	if handler, inputTopic, outputTopic, err := lookupByBindingName(opts, queryClient); err != nil {
+		return err
+	} else {
+		cmdArgs := []string{"delete", "<placeholder>", "<placeholder>"}
+		if opts.Namespace != "" {
+			cmdArgs = append(cmdArgs, "--namespace", opts.Namespace)
+		}
 
-		if inputTopic, outputTopic, err := lookupTopicNames(opts, queryClient); err != nil {
+		cmdArgs[1] = "bindings.projectriff.io"
+		cmdArgs[2] = opts.FunctionName
+		if err := deleteResources(cmdArgs, actingClient); err != nil {
 			return err
-		} else {
-			cmdArgs := []string{"delete", "topics.projectriff.io", "<placeholder>"}
-			if opts.Namespace != "" {
-				cmdArgs = append(cmdArgs, "--namespace", opts.Namespace)
+		}
+
+		if handler != "" {
+			cmdArgs[1] = "functions.projectriff.io"
+			cmdArgs[2] = handler
+			if err := deleteResources(cmdArgs, actingClient); err != nil {
+				return nil
 			}
+		}
+		if opts.All {
 			if inputTopic != "" {
+				cmdArgs[1] = "topics.projectriff.io"
 				cmdArgs[2] = inputTopic
 				deleteResources(cmdArgs, actingClient)
 			}
 			if outputTopic != "" {
+				cmdArgs[1] = "topics.projectriff.io"
 				cmdArgs[2] = outputTopic
 				deleteResources(cmdArgs, actingClient)
 			}
 		}
 	}
-
-	cmdArgs := []string{"delete", "functions.projectriff.io", opts.FunctionName}
-	if opts.Namespace != "" {
-		cmdArgs = append(cmdArgs, "--namespace", opts.Namespace)
-	}
-	if err := deleteResources(cmdArgs, actingClient); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -119,21 +125,21 @@ func deleteResources(cmdArgs []string, actingClient kubectl.KubeCtl) error {
 	return err
 }
 
-func lookupTopicNames(opts DeleteOptions, queryClient kubectl.KubeCtl) (string, string, error) {
+func lookupByBindingName(opts DeleteOptions, queryClient kubectl.KubeCtl) (string, string, string, error) {
 	getArgs := []string{"get"}
 	if opts.Namespace != "" {
 		getArgs = append(getArgs, "--namespace", opts.Namespace)
 	}
-	getArgs = append(getArgs, "functions.projectriff.io", opts.FunctionName, "-o", "json")
+	getArgs = append(getArgs, "bindings.projectriff.io", opts.FunctionName, "-o", "json")
 	output, err := queryClient.Exec(getArgs)
 	if err != nil {
 		fmt.Println(output)
-		return "", "", err
+		return "", "", "", err
 	}
 	parser := jsonpath.NewParser([]byte(output))
 
+	handler, _ := parser.StringValue(`$.spec.handler`)
 	inputTopic, _ := parser.StringValue(`$.spec.input`)
 	outputTopic, _ := parser.StringValue(`$.spec.output`)
-	return inputTopic, outputTopic, err
-
+	return handler, inputTopic, outputTopic, err
 }

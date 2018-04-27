@@ -6,7 +6,6 @@ metadata:
 spec:
   container:
     image: rifftest/matching-invoker-with-handler:0.0.1
-  input: matching-invoker-with-handler
   protocol: grpc
   windowing:
     size: 1

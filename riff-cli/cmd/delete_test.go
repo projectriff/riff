@@ -15,15 +15,12 @@ var _ = Describe("The delete command", func() {
 
 	const canned_kubectl_get_response = `{
 				"apiVersion": "projectriff.io/v1alpha1",
-				"kind": "Function",
+				"kind": "Binding",
 				"metadata": {},
 				"spec": {
-					"container": {
-					"image": "test/echo:0.0.1"
-					},
+					"handler": "%s",
 					"input": "myInputTopic",
-					"output": "myOutputTopic",
-					"protocol": "grpc"
+					"output": "myOutputTopic"
 				}
 			}`
 
@@ -46,10 +43,12 @@ var _ = Describe("The delete command", func() {
 
 		deleteCmd, _ = Delete(realKubeCtl, dryRunKubeCtl)
 		args = []string{}
-
 	})
 
 	AfterEach(func() {
+		realKubeCtl.AssertExpectations(GinkgoT())
+		dryRunKubeCtl.AssertExpectations(GinkgoT())
+
 		os.Chdir(oldCWD)
 	})
 
@@ -58,27 +57,30 @@ var _ = Describe("The delete command", func() {
 			os.Chdir("../test_data/command/echo")
 		})
 
-		It("should delete the function based on dirname", func() {
+		It("should delete the function and binding based on dirname", func() {
+			binding := fmt.Sprintf(canned_kubectl_get_response, "echo")
+			realKubeCtl.On("Exec", []string{"get", "bindings.projectriff.io", "echo", "-o", "json"}).Return(binding, nil)
 
+			realKubeCtl.On("Exec", []string{"delete", "bindings.projectriff.io", "echo"}).Return("", nil)
 			realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "echo"}).Return("", nil)
 
 			err := deleteCmd.Execute()
 			Expect(err).NotTo(HaveOccurred())
-
 		})
 
-		It("should delete the function and topic when run with --all", func() {
-
+		It("should delete the function, topic, and binding when run with --all", func() {
 			deleteCmd.SetArgs([]string{"--all"})
-			realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "echo"}).Return("", nil)
 
-			realKubeCtl.On("Exec", []string{"get", "functions.projectriff.io", "echo", "-o", "json"}).Return(canned_kubectl_get_response, nil)
+			binding := fmt.Sprintf(canned_kubectl_get_response, "echo")
+			realKubeCtl.On("Exec", []string{"get", "bindings.projectriff.io", "echo", "-o", "json"}).Return(binding, nil)
+
+			realKubeCtl.On("Exec", []string{"delete", "bindings.projectriff.io", "echo"}).Return("", nil)
+			realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "echo"}).Return("", nil)
 			realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myInputTopic"}).Return("", nil)
 			realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myOutputTopic"}).Return("", nil)
 
 			err := deleteCmd.Execute()
 			Expect(err).NotTo(HaveOccurred())
-
 		})
 
 		It("should delete the function when run with --all and the topics do not exist", func() {
@@ -112,29 +114,34 @@ var _ = Describe("The delete command", func() {
 			BeforeEach(func() {
 				args = append(args, "--namespace", "my-ns")
 			})
-			It("should delete the function based on dirname", func() {
-
+			It("should delete the function and binding based on dirname", func() {
 				deleteCmd.SetArgs(args)
+
+				binding := fmt.Sprintf(canned_kubectl_get_response, "echo")
+				realKubeCtl.On("Exec", []string{"get", "--namespace", "my-ns", "bindings.projectriff.io", "echo", "-o", "json"}).Return(binding, nil)
+
+				realKubeCtl.On("Exec", []string{"delete", "bindings.projectriff.io", "echo", "--namespace", "my-ns"}).Return("", nil)
 				realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "echo", "--namespace", "my-ns"}).Return("", nil)
 
 				err := deleteCmd.Execute()
 				Expect(err).NotTo(HaveOccurred())
-
 			})
 
-			It("should delete the function and topic when run with --all", func() {
+			It("should delete the function, topic, and binding when run with --all", func() {
 
 				args = append(args, "--all")
 				deleteCmd.SetArgs(args)
-				realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "echo", "--namespace", "my-ns"}).Return("", nil)
 
-				realKubeCtl.On("Exec", []string{"get", "--namespace", "my-ns", "functions.projectriff.io", "echo", "-o", "json"}).Return(canned_kubectl_get_response, nil)
+				binding := fmt.Sprintf(canned_kubectl_get_response, "echo")
+				realKubeCtl.On("Exec", []string{"get", "--namespace", "my-ns", "bindings.projectriff.io", "echo", "-o", "json"}).Return(binding, nil)
+
+				realKubeCtl.On("Exec", []string{"delete", "bindings.projectriff.io", "echo", "--namespace", "my-ns"}).Return("", nil)
+				realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "echo", "--namespace", "my-ns"}).Return("", nil)
 				realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myInputTopic", "--namespace", "my-ns"}).Return("", nil)
 				realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myOutputTopic", "--namespace", "my-ns"}).Return("", nil)
 
 				err := deleteCmd.Execute()
 				Expect(err).NotTo(HaveOccurred())
-
 			})
 
 		})
@@ -145,59 +152,67 @@ var _ = Describe("The delete command", func() {
 			args = append(args, "--name", "my-function")
 		})
 
-		It("should delete the function based on name", func() {
+		It("should delete the function and binding based on name", func() {
 			deleteCmd.SetArgs(args)
 
+			binding := fmt.Sprintf(canned_kubectl_get_response, "my-function")
+			realKubeCtl.On("Exec", []string{"get", "bindings.projectriff.io", "my-function", "-o", "json"}).Return(binding, nil)
+
+			realKubeCtl.On("Exec", []string{"delete", "bindings.projectriff.io", "my-function"}).Return("", nil)
 			realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "my-function"}).Return("", nil)
 
 			err := deleteCmd.Execute()
 			Expect(err).NotTo(HaveOccurred())
-
 		})
 
-		It("should delete the function and topic when run with --all", func() {
-
+		It("should delete the function, topic, and binding when run with --all", func() {
 			args = append(args, "--all")
 			deleteCmd.SetArgs(args)
 
-			realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "my-function"}).Return("", nil)
+			binding := fmt.Sprintf(canned_kubectl_get_response, "my-function")
+			realKubeCtl.On("Exec", []string{"get", "bindings.projectriff.io", "my-function", "-o", "json"}).Return(binding, nil)
 
-			realKubeCtl.On("Exec", []string{"get", "functions.projectriff.io", "my-function", "-o", "json"}).Return(canned_kubectl_get_response, nil)
+			realKubeCtl.On("Exec", []string{"delete", "bindings.projectriff.io", "my-function"}).Return("", nil)
+			realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "my-function"}).Return("", nil)
 			realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myInputTopic"}).Return("", nil)
 			realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myOutputTopic"}).Return("", nil)
 
 			err := deleteCmd.Execute()
 			Expect(err).NotTo(HaveOccurred())
-
 		})
 
 		Context("when --namespace is set", func() {
 			BeforeEach(func() {
 				args = append(args, "--namespace", "my-ns")
 			})
-			It("should delete the function based on name", func() {
 
+			It("should delete the function and binding based on name", func() {
 				deleteCmd.SetArgs(args)
+
+				binding := fmt.Sprintf(canned_kubectl_get_response, "my-function")
+				realKubeCtl.On("Exec", []string{"get", "--namespace", "my-ns", "bindings.projectriff.io", "my-function", "-o", "json"}).Return(binding, nil)
+
+				realKubeCtl.On("Exec", []string{"delete", "bindings.projectriff.io", "my-function", "--namespace", "my-ns"}).Return("", nil)
 				realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "my-function", "--namespace", "my-ns"}).Return("", nil)
 
 				err := deleteCmd.Execute()
 				Expect(err).NotTo(HaveOccurred())
-
 			})
 
-			It("should delete the function and topic when run with --all", func() {
-
+			It("should delete the function, topic, and binding when run with --all", func() {
 				args = append(args, "--all")
 				deleteCmd.SetArgs(args)
-				realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "my-function", "--namespace", "my-ns"}).Return("", nil)
 
-				realKubeCtl.On("Exec", []string{"get", "--namespace", "my-ns", "functions.projectriff.io", "my-function", "-o", "json"}).Return(canned_kubectl_get_response, nil)
+				binding := fmt.Sprintf(canned_kubectl_get_response, "my-function")
+				realKubeCtl.On("Exec", []string{"get", "--namespace", "my-ns", "bindings.projectriff.io", "my-function", "-o", "json"}).Return(binding, nil)
+
+				realKubeCtl.On("Exec", []string{"delete", "bindings.projectriff.io", "my-function", "--namespace", "my-ns"}).Return("", nil)
+				realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "my-function", "--namespace", "my-ns"}).Return("", nil)
 				realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myInputTopic", "--namespace", "my-ns"}).Return("", nil)
 				realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myOutputTopic", "--namespace", "my-ns"}).Return("", nil)
 
 				err := deleteCmd.Execute()
 				Expect(err).NotTo(HaveOccurred())
-
 			})
 
 		})
@@ -206,21 +221,28 @@ var _ = Describe("The delete command", func() {
 	It("should report kubectl errors", func() {
 		deleteCmd.SetArgs([]string{"--name", "whatever"})
 
-		realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "whatever"}).Return("", fmt.Errorf("Whoops"))
+		binding := fmt.Sprintf(canned_kubectl_get_response, "whatever")
+		realKubeCtl.On("Exec", []string{"get", "bindings.projectriff.io", "whatever", "-o", "json"}).Return(binding, nil)
+
+		realKubeCtl.On("Exec", []string{"delete", "bindings.projectriff.io", "whatever"}).Return("", fmt.Errorf("Whoops"))
 
 		err := deleteCmd.Execute()
 		Expect(err).To(MatchError("Whoops"))
-
 	})
 
 	It("should not use the real kubectl client when using --dry-run", func() {
-		deleteCmd.SetArgs([]string{"--name", "whatever", "--dry-run"})
+		deleteCmd.SetArgs([]string{"--all", "--name", "whatever", "--dry-run"})
 
+		binding := fmt.Sprintf(canned_kubectl_get_response, "whatever")
+		realKubeCtl.On("Exec", []string{"get", "bindings.projectriff.io", "whatever", "-o", "json"}).Return(binding, nil)
+
+		dryRunKubeCtl.On("Exec", []string{"delete", "bindings.projectriff.io", "whatever"}).Return("", nil)
 		dryRunKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "whatever"}).Return("", nil)
+		dryRunKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myInputTopic"}).Return("", nil)
+		dryRunKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myOutputTopic"}).Return("", nil)
 
 		err := deleteCmd.Execute()
 		Expect(err).NotTo(HaveOccurred())
-
 	})
 
 })

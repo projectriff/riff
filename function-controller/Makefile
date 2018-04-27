@@ -13,7 +13,7 @@ $(OUTPUT): $(GO_SOURCES) ../vendor
 
 gen-mocks: ../vendor
 	go get -u github.com/vektra/mockery/.../
-	mockery -name 'TopicInformer|FunctionInformer' -dir ../kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1
+	mockery -name 'TopicInformer|FunctionInformer|BindingInformer' -dir ../kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1
 	mockery -name 'SharedIndexInformer' -dir ../vendor/k8s.io/client-go/tools/cache
 	mockery -name 'DeploymentInformer' -dir ../vendor/k8s.io/client-go/informers/extensions/v1beta1
 	mockery -name 'Deployer' -dir pkg/controller

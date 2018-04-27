@@ -26,6 +26,10 @@ type FakeProjectriffV1alpha1 struct {
 	*testing.Fake
 }
 
+func (c *FakeProjectriffV1alpha1) Bindings(namespace string) v1alpha1.BindingInterface {
+	return &FakeBindings{c, namespace}
+}
+
 func (c *FakeProjectriffV1alpha1) Functions(namespace string) v1alpha1.FunctionInterface {
 	return &FakeFunctions{c, namespace}
 }
