@@ -18,13 +18,19 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"strings"
 
 	"github.com/projectriff/riff/riff-cli/global"
+	invoker "github.com/projectriff/riff/riff-cli/pkg/invoker"
+	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/spf13/cobra"
 )
 
-func Version() *cobra.Command {
-	// versionCmd represents the version command
+func Version(w io.Writer, kubeCtl kubectl.KubeCtl) *cobra.Command {
+
+	invokerOperations := invoker.Operations(kubeCtl)
+
 	var versionCmd = &cobra.Command{
 		Use:     "version",
 		Short:   "Display the riff version",
@@ -32,7 +38,28 @@ func Version() *cobra.Command {
 		Example: `  riff version`,
 
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("riff CLI version: %v\n", global.CLI_VERSION)
+			fmt.Fprintf(w, "riff CLI version: %v\n", global.CLI_VERSION)
+			fmt.Fprintln(w)
+			components, err := kubeCtl.Exec([]string{
+				"get", "deployments",
+				"--all-namespaces",
+				"-l", "app=riff",
+				"--sort-by=metadata.labels.component",
+				"-o=custom-columns=COMPONENT:.metadata.labels.component,IMAGE:.spec.template.spec.containers[0].image",
+			})
+			if err != nil {
+				fmt.Fprint(w, "Unable to list components")
+			} else {
+				fmt.Fprintf(w, "%s", strings.Trim(components, "\n"))
+			}
+			fmt.Fprint(w, "\n\n")
+			invokers, err := invokerOperations.Table()
+			if err != nil {
+				fmt.Fprint(w, "Unable to list invokers")
+			} else {
+				fmt.Fprintf(w, "%s", strings.Trim(invokers, "\n"))
+			}
+			fmt.Fprint(w, "\n")
 		},
 	}
 	return versionCmd

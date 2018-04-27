@@ -21,7 +21,7 @@ import (
 	"os"
 
 	"github.com/projectriff/riff/riff-cli/pkg/docker"
-	"github.com/projectriff/riff/riff-cli/pkg/initializer"
+	invoker "github.com/projectriff/riff/riff-cli/pkg/invoker"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/pkg/minikube"
 	"github.com/spf13/cobra"
@@ -33,7 +33,8 @@ func CreateAndWireRootCommand(realDocker docker.Docker, dryRunDocker docker.Dock
 	realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl,
 	minik minikube.Minikube) (*cobra.Command, error) {
 
-	invokers, err := initializer.LoadInvokers(realKubeCtl)
+	invokerOperations := invoker.Operations(realKubeCtl)
+	invokers, err := invokerOperations.List()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Unable to load invokers via kubectl")
 	}
@@ -74,7 +75,7 @@ func CreateAndWireRootCommand(realDocker docker.Docker, dryRunDocker docker.Dock
 		Publish(realKubeCtl, minik),
 		Update(buildCmd, applyCmd),
 		invokersCmd,
-		Version(),
+		Version(os.Stdout, realKubeCtl),
 	)
 
 	rootCmd.AddCommand(
