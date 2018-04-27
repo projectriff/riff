@@ -107,8 +107,8 @@ func streamClosureDiagnosed(err error) bool {
 	return false
 }
 
-func NewGrpcDispatcher(port int) (dispatcher.Dispatcher, error) {
-	ctx, _ := context.WithTimeout(context.Background(), 100*time.Millisecond)
+func NewGrpcDispatcher(port int, timeout time.Duration) (dispatcher.Dispatcher, error) {
+	ctx, _ := context.WithTimeout(context.Background(), timeout)
 	conn, err := grpc.DialContext(ctx, fmt.Sprintf("localhost:%v", port), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, err
