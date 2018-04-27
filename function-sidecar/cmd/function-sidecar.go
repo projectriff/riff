@@ -30,6 +30,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/bsm/sarama-cluster"
+	"github.com/projectriff/riff/function-sidecar/pkg/backoff"
 	"github.com/projectriff/riff/function-sidecar/pkg/carrier"
 	dispatch "github.com/projectriff/riff/function-sidecar/pkg/dispatcher"
 	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher/grpc"
@@ -54,6 +55,7 @@ var brokers stringSlice = []string{"localhost:9092"}
 var inputs, outputs stringSlice
 var group, protocol string
 var exitOnComplete = false
+var backoffDurationMs, backoffMultiplier, backoffMaxRetries int
 
 func init() {
 	flag.Var(&brokers, "brokers", "location of the Kafka server(s) to connect to")
@@ -62,6 +64,10 @@ func init() {
 	flag.StringVar(&group, "group", "", "kafka consumer group to act as")
 	flag.StringVar(&protocol, "protocol", "", "dispatcher protocol to use. One of [http, grpc]")
 	flag.BoolVar(&exitOnComplete, "exitOnComplete", false, "flag to signal that the sidecar should exit when the output stream is closed")
+	flag.IntVar(&backoffMaxRetries, "maxBackoffRetries", 3, "maximum number of times to retry connecting to the invoker")
+	flag.IntVar(&backoffMultiplier, "backoffMultiplier", 2, "wait time increase for each retry")
+	flag.IntVar(&backoffDurationMs, "backoffDuration", 1000, "base wait time (ms) to wait before retry")
+
 }
 
 func main() {
@@ -72,6 +78,11 @@ func main() {
 		log.Fatalf("Only 1 input supported for now. See https://github.com/projectriff/riff/issues/184. Provided %v\n", inputs)
 	} else if len(outputs) > 1 {
 		log.Fatalf("Only 1 output supported for now. See https://github.com/projectriff/riff/issues/184. Provided %v\n", outputs)
+	}
+
+	backoffPtr, err := backoff.NewBackoff(time.Duration(backoffDurationMs)*time.Millisecond, backoffMaxRetries, backoffMultiplier)
+	if err != nil {
+		log.Fatalf("Error initializing backoff: %v\n", err)
 	}
 
 	input := inputs[0]
@@ -85,7 +96,7 @@ func main() {
 	log.Printf("Sidecar for function '%v' (%v->%v) using %v dispatcher starting\n", group, input, output, protocol)
 
 	var producer transport.Producer
-	var err error
+
 	if output != "" {
 		producer, err = kafka_over_kafka.NewMetricsEmittingProducer(brokers, uuid.NewV4().String())
 		if err != nil {
@@ -128,15 +139,15 @@ LOOP:
 		log.Print("Creating dispatcher")
 		dispatcher, err := createDispatcher(protocol)
 		if err != nil {
-			if !backoff() {
+			if !backoffOrExit(backoffPtr) {
 				panic(err)
 			} else {
+				log.Printf("Error %v attempting to create dispatcher\n", err)
 				continue LOOP
 			}
 		}
-		switch d := dispatcher.(type) {
-		case io.Closer:
-			log.Print("Requesting close()")
+		if d, ok := dispatcher.(io.Closer); ok {
+			log.Print("Deferring close()")
 			defer d.Close()
 		}
 
@@ -145,27 +156,20 @@ LOOP:
 		select {
 		case <-signals:
 			log.Println("Shutting Down...")
-			break LOOP
 		case <-dispatcher.Closed():
-			log.Println("End of Stream...")
-			if !backoff() {
-				break LOOP
-			}
+			log.Println("End of Stream ...")
 		}
-
+		break LOOP
 	}
 
 }
 
-func backoff() bool {
+func backoffOrExit(backoff *backoff.Backoff) bool {
 	if exitOnComplete {
 		return false
-	} else {
-		// Back off a bit to give the invoker time to come back
-		// (if we support windowing or polling this logic will be more complex)
-		time.Sleep(1000 * time.Millisecond)
-		return true
 	}
+	// Back off a bit to give the invoker time to come back
+	return backoff.Backoff()
 }
 
 func createDispatcher(protocol string) (dispatch.Dispatcher, error) {

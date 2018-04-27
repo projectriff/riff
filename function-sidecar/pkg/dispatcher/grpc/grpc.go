@@ -37,7 +37,7 @@ type grpcDispatcher struct {
 	stream function.MessageFunction_CallClient
 	input  chan message.Message
 	output chan message.Message
-	closed chan bool
+	closed chan struct{}
 }
 
 func (this *grpcDispatcher) Input() chan<- message.Message {
@@ -48,7 +48,7 @@ func (this *grpcDispatcher) Output() <-chan message.Message {
 	return this.output
 }
 
-func (this *grpcDispatcher) Closed() <-chan bool {
+func (this *grpcDispatcher) Closed() <-chan struct{} {
 	return this.closed
 }
 
@@ -61,7 +61,7 @@ func (this *grpcDispatcher) handleIncoming() {
 				err := this.stream.Send(grpcMessage)
 				if err != nil {
 					if streamClosureDiagnosed(err) {
-						this.closed <- true
+						close(this.closed)
 						return
 					}
 
@@ -81,7 +81,7 @@ func (this *grpcDispatcher) handleOutgoing() {
 		reply, err := this.stream.Recv()
 		if err != nil {
 			if streamClosureDiagnosed(err) {
-				this.closed <- true
+				close(this.closed)
 				return
 			}
 
@@ -119,7 +119,7 @@ func NewGrpcDispatcher(port int, timeout time.Duration) (dispatcher.Dispatcher, 
 		return nil, err
 	}
 
-	result := &grpcDispatcher{fnStream, make(chan message.Message, 100), make(chan message.Message, 100), make(chan bool, 10)}
+	result := &grpcDispatcher{fnStream, make(chan message.Message, 100), make(chan message.Message, 100), make(chan struct{})}
 	go result.handleIncoming()
 	go result.handleOutgoing()
 

@@ -29,7 +29,6 @@ func Run(consumer transport.Consumer, producer transport.Producer, dispatcher di
 		for {
 			// Incoming message
 			msg, _, err := consumer.Receive()
-			log.Printf(">>> %s\n", msg)
 			if err == nil {
 				dispatcher.Input() <- msg
 			} else {

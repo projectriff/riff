@@ -18,14 +18,15 @@ package http
 
 import (
 	"bytes"
-	"github.com/giantswarm/retry-go"
-	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher"
-	"github.com/projectriff/riff/message-transport/pkg/message"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/giantswarm/retry-go"
+	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher"
+	"github.com/projectriff/riff/message-transport/pkg/message"
 )
 
 const UseTimeout = 10000000 // "Infinite" number of retries to override default and use the Timeout approach instead
