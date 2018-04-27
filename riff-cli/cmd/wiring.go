@@ -74,7 +74,7 @@ func CreateAndWireRootCommand(realDocker docker.Docker, dryRunDocker docker.Dock
 		Publish(realKubeCtl, minik),
 		Update(buildCmd, applyCmd),
 		invokersCmd,
-		Version(),
+		Version(os.Stdout, realKubeCtl),
 	)
 
 	rootCmd.AddCommand(

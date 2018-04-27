@@ -18,12 +18,14 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/projectriff/riff/riff-cli/global"
+	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/spf13/cobra"
 )
 
-func Version() *cobra.Command {
+func Version(w io.Writer, kubeCtl kubectl.KubeCtl) *cobra.Command {
 	// versionCmd represents the version command
 	var versionCmd = &cobra.Command{
 		Use:     "version",
@@ -32,7 +34,19 @@ func Version() *cobra.Command {
 		Example: `  riff version`,
 
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("riff CLI version: %v\n", global.CLI_VERSION)
+			fmt.Fprintf(w, "riff CLI version: %v\n", global.CLI_VERSION)
+			fmt.Fprintln(w)
+			listing, err := kubeCtl.Exec([]string{
+				"get", "deployments",
+				"--all-namespaces",
+				"-l", "app=riff",
+				"-o=custom-columns=COMPONENT:.metadata.labels.component,IMAGE:.spec.template.spec.containers[0].image",
+			})
+			if err != nil {
+				fmt.Fprint(w, "Unable to list component versions")
+			} else {
+				fmt.Fprintf(w, "%s", listing)
+			}
 		},
 	}
 	return versionCmd
