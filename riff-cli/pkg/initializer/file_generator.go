@@ -26,6 +26,7 @@ import (
 )
 
 type fileTokens struct {
+	FunctionName   string
 	Artifact       string
 	ArtifactBase   string
 	InvokerVersion string
@@ -48,6 +49,7 @@ func generateFileContents(tmpl string, name string, opts options.InitOptions) (s
 
 func generateFileTokens(opts options.InitOptions) fileTokens {
 	tokens := fileTokens{}
+	tokens.FunctionName = opts.FunctionName
 	tokens.Artifact = opts.Artifact
 	tokens.ArtifactBase = filepath.Base(opts.Artifact)
 	tokens.InvokerVersion = opts.InvokerVersion

@@ -15,6 +15,7 @@ spec:
   - path: Dockerfile
     template: |
       FROM projectriff/node-function-invoker:{{.InvokerVersion}}
+      ENV FUNCTION_NAME {{.FunctionName}}
       {{ if .FileExists "package.json" -}}
       ENV FUNCTION_URI /functions/
       COPY . ${FUNCTION_URI}
