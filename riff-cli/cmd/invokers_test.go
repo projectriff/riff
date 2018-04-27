@@ -26,6 +26,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
+	invoker "github.com/projectriff/riff/riff-cli/pkg/invoker"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 )
 
@@ -39,7 +40,7 @@ var _ = Describe("The invokers commands", func() {
 		invokersListCommand   *cobra.Command
 		invokersDeleteCommand *cobra.Command
 
-		invokersApplyOptions  *InvokersApplyOptions
+		invokersApplyOptions  *invoker.ApplyOptions
 		invokersDeleteOptions *InvokersDeleteOptions
 
 		oldCWD string
@@ -208,9 +209,9 @@ var _ = Describe("The invokers commands", func() {
 				[]string{
 					"get", "invokers.projectriff.io",
 					"--sort-by=metadata.name",
-					"-o=custom-columns=NAME:.metadata.name,VERSION:.spec.version",
+					"-o=custom-columns=INVOKER:.metadata.name,VERSION:.spec.version",
 				},
-			).Return("NAME      VERSION\n", nil).Once()
+			).Return("INVOKER      VERSION\n", nil).Once()
 
 			err := rootCommand.Execute()
 			Expect(err).NotTo(HaveOccurred())

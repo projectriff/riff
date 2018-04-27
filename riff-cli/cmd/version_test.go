@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,20 +29,27 @@ import (
 
 var _ = Describe("The version command", func() {
 	var (
-		kubeClient     *kubectl.MockKubeCtl
-		kubeArgs       []string
-		writer         bytes.Buffer
-		versionCommand *cobra.Command
+		kubeClient            *kubectl.MockKubeCtl
+		listComponetsKubeArgs []string
+		listInvokersKubeArgs  []string
+		writer                bytes.Buffer
+		versionCommand        *cobra.Command
 	)
 
 	BeforeEach(func() {
 		global.CLI_VERSION = "0.0.1-testing"
 		kubeClient = new(kubectl.MockKubeCtl)
-		kubeArgs = []string{
+		listComponetsKubeArgs = []string{
 			"get", "deployments",
 			"--all-namespaces",
 			"-l", "app=riff",
+			"--sort-by=metadata.labels.component",
 			"-o=custom-columns=COMPONENT:.metadata.labels.component,IMAGE:.spec.template.spec.containers[0].image",
+		}
+		listInvokersKubeArgs = []string{
+			"get", "invokers.projectriff.io",
+			"--sort-by=metadata.name",
+			"-o=custom-columns=INVOKER:.metadata.name,VERSION:.spec.version",
 		}
 		writer = bytes.Buffer{}
 		versionCommand = Version(&writer, kubeClient)
@@ -52,20 +59,34 @@ var _ = Describe("The version command", func() {
 		kubeClient.AssertExpectations(GinkgoT())
 	})
 
-	It("should list the cli and component versions", func() {
-		kubeClient.On("Exec", kubeArgs).Return("<Component Table>", nil)
+	It("should list the cli, component, and invoker versions", func() {
+		kubeClient.On("Exec", listComponetsKubeArgs).Return("<Component Table>\n", nil).Once()
+		kubeClient.On("Exec", listInvokersKubeArgs).Return("<Invokers Table>\n", nil).Once()
 
 		err := versionCommand.Execute()
 		Expect(err).NotTo(HaveOccurred())
-		Expect(writer.String()).To(Equal(fmt.Sprintf("riff CLI version: %s\n\n%s", "0.0.1-testing", "<Component Table>")))
+		Expect(writer.String()).To(Equal(
+			fmt.Sprintf("riff CLI version: %s\n\n%s\n\n%s\n",
+				"0.0.1-testing",
+				"<Component Table>",
+				"<Invokers Table>",
+			),
+		))
 	})
 
 	It("should list the cli version even when kubectl fails", func() {
-		kubeClient.On("Exec", kubeArgs).Return("", fmt.Errorf("kubectl fault"))
+		kubeClient.On("Exec", listComponetsKubeArgs).Return("", fmt.Errorf("kubectl fault")).Once()
+		kubeClient.On("Exec", listInvokersKubeArgs).Return("", fmt.Errorf("kubectl fault")).Once()
 
 		err := versionCommand.Execute()
 		Expect(err).NotTo(HaveOccurred())
-		Expect(writer.String()).To(Equal(fmt.Sprintf("riff CLI version: %s\n\n%s", "0.0.1-testing", "Unable to list component versions")))
+		Expect(writer.String()).To(Equal(
+			fmt.Sprintf("riff CLI version: %s\n\n%s\n\n%s\n",
+				"0.0.1-testing",
+				"Unable to list components",
+				"Unable to list invokers",
+			),
+		))
 	})
 
 })
