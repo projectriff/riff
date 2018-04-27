@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"flag"
 	"io"
@@ -52,6 +53,7 @@ func (sl *stringSlice) Set(value string) error {
 var brokers stringSlice = []string{"localhost:9092"}
 var inputs, outputs stringSlice
 var group, protocol string
+var exitOnComplete = false
 
 func init() {
 	flag.Var(&brokers, "brokers", "location of the Kafka server(s) to connect to")
@@ -59,6 +61,7 @@ func init() {
 	flag.Var(&outputs, "outputs", "kafka topic(s) to write to with results from the function")
 	flag.StringVar(&group, "group", "", "kafka consumer group to act as")
 	flag.StringVar(&protocol, "protocol", "", "dispatcher protocol to use. One of [http, grpc]")
+	flag.BoolVar(&exitOnComplete, "exitOnComplete", false, "flag to signal that the sidecar should exit when the output stream is closed")
 }
 
 func main() {
@@ -108,23 +111,61 @@ func main() {
 		defer consumer.Close()
 	}
 
-	dispatcher, err := createDispatcher(protocol)
-	if err != nil {
-		panic(err)
-	}
-	switch d := dispatcher.(type) {
-	case io.Closer:
-		log.Print("Requesting close()")
-		defer d.Close()
-	}
-
-	carrier.Run(consumer, producer, dispatcher, output)
-
 	// trap SIGINT and SIGTERM to trigger a shutdown.
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
-	<-signals
-	log.Println(("Shutting Down..."))
+
+LOOP:
+	for {
+
+		select {
+		case <-signals:
+			log.Println("Shutting Down...")
+			break LOOP
+		default:
+		}
+
+		log.Print("Creating dispatcher")
+		dispatcher, err := createDispatcher(protocol)
+		if err != nil {
+			if !backoff() {
+				panic(err)
+			} else {
+				continue LOOP
+			}
+		}
+		switch d := dispatcher.(type) {
+		case io.Closer:
+			log.Print("Requesting close()")
+			defer d.Close()
+		}
+
+		carrier.Run(consumer, producer, dispatcher, output)
+
+		select {
+		case <-signals:
+			log.Println("Shutting Down...")
+			break LOOP
+		case <-dispatcher.Closed():
+			log.Println("End of Stream...")
+			if !backoff() {
+				break LOOP
+			}
+		}
+
+	}
+
+}
+
+func backoff() bool {
+	if exitOnComplete {
+		return false
+	} else {
+		// Back off a bit to give the invoker time to come back
+		// (if we support windowing or polling this logic will be more complex)
+		time.Sleep(1000 * time.Millisecond)
+		return true
+	}
 }
 
 func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
@@ -132,7 +173,13 @@ func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
 	case "http":
 		return dispatch.NewWrapper(http.NewHttpDispatcher())
 	case "grpc":
-		return grpc.NewGrpcDispatcher(10382)
+		var timeout time.Duration
+		if exitOnComplete {
+			timeout = 60 * time.Second
+		} else {
+			timeout = 100 * time.Millisecond
+		}
+		return grpc.NewGrpcDispatcher(10382, timeout)
 	default:
 		panic("Unsupported Dispatcher " + protocol)
 	}

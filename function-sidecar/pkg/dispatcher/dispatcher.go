@@ -27,8 +27,9 @@ type SynchDispatcher interface {
 //go:generate mockery -name=Dispatcher -output mockdispatcher -outpkg mockdispatcher
 
 type Dispatcher interface {
-
 	Input() chan<- message.Message
 
 	Output() <-chan message.Message
+
+	Closed() <-chan bool
 }
