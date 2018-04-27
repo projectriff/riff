@@ -30,10 +30,10 @@ import (
 
 type AutoScaler interface {
 	// Set maximum replica count policy.
-	SetMaxReplicasPolicy(func(function FunctionId) int)
+	SetMaxReplicasPolicy(func(function LinkId) int)
 
 	// Set delay scale down policy.
-	SetDelayScaleDownPolicy(func(function FunctionId) time.Duration)
+	SetDelayScaleDownPolicy(func(function LinkId) time.Duration)
 
 	// Run starts the autoscaler receiving and sampling metrics.
 	Run()
@@ -43,22 +43,22 @@ type AutoScaler interface {
 
 	// InformFunctionReplicas is used to tell the autoscaler the actual number of replicas there are for a given
 	// function. The function is not necessarily being monitored by the autoscaler.
-	InformFunctionReplicas(function FunctionId, replicas int)
+	InformFunctionReplicas(function LinkId, replicas int)
 
 	// StartMonitoring starts monitoring metrics for the given topic and function.
-	StartMonitoring(topic string, function FunctionId) error
+	StartMonitoring(topic string, function LinkId) error
 
 	// StopMonitoring stops monitoring metrics for the given topic and function.
-	StopMonitoring(topic string, function FunctionId) error
+	StopMonitoring(topic string, function LinkId) error
 
 	// Propose proposes the number of replicas for functions that are being monitored.
-	Propose() map[FunctionId]int
+	Propose() map[LinkId]int
 }
 
-// FunctionId identifies a function
+// LinkId identifies a link
 // TODO: support namespaces.
-type FunctionId struct {
-	Function string
+type LinkId struct {
+	Link string
 }
 
 // Go does not provide a MaxInt, so we have to calculate it.
@@ -71,21 +71,21 @@ func NewAutoScaler(metricsReceiver metrics.MetricsReceiver, transportInspector t
 		mutex:               &sync.Mutex{},
 		metricsReceiver:     metricsReceiver,
 		transportInspector:  transportInspector,
-		totals:              make(map[string]map[FunctionId]*metricsTotals),
-		scalers:             make(map[FunctionId]scaler),
-		replicas:            make(map[FunctionId]int),
-		maxReplicas:         func(function FunctionId) int { return MaxInt },
-		delayScaleDown:      func(function FunctionId) time.Duration { return time.Duration(0) },
+		totals:              make(map[string]map[LinkId]*metricsTotals),
+		scalers:             make(map[LinkId]scaler),
+		replicas:            make(map[LinkId]int),
+		maxReplicas:         func(function LinkId) int { return MaxInt },
+		delayScaleDown:      func(function LinkId) time.Duration { return time.Duration(0) },
 		stop:                make(chan struct{}),
 		accumulatingStopped: make(chan struct{}),
 	}
 }
 
-func (a *autoScaler) SetMaxReplicasPolicy(maxReplicas func(function FunctionId) int) {
+func (a *autoScaler) SetMaxReplicasPolicy(maxReplicas func(function LinkId) int) {
 	a.maxReplicas = maxReplicas
 }
 
-func (a *autoScaler) SetDelayScaleDownPolicy(delayScaleDown func(function FunctionId) time.Duration) {
+func (a *autoScaler) SetDelayScaleDownPolicy(delayScaleDown func(function LinkId) time.Duration) {
 	a.delayScaleDown = delayScaleDown
 }
 
@@ -100,11 +100,11 @@ type autoScaler struct {
 	mutex               *sync.Mutex // nil when autoScaler is closed
 	metricsReceiver     metrics.MetricsReceiver
 	transportInspector  transport.Inspector
-	totals              map[string]map[FunctionId]*metricsTotals
-	scalers             map[FunctionId]scaler
-	replicas            map[FunctionId]int // tracks all functions, including those which are not being monitored
-	maxReplicas         func(function FunctionId) int
-	delayScaleDown      func(function FunctionId) time.Duration
+	totals              map[string]map[LinkId]*metricsTotals
+	scalers             map[LinkId]scaler
+	replicas            map[LinkId]int // tracks all functions, including those which are not being monitored
+	maxReplicas         func(function LinkId) int
+	delayScaleDown      func(function LinkId) time.Duration
 	stop                chan struct{}
 	accumulatingStopped chan struct{}
 }
@@ -115,11 +115,11 @@ type metricsTotals struct {
 	receiveCount  int32
 }
 
-func (a *autoScaler) Propose() map[FunctionId]int {
+func (a *autoScaler) Propose() map[LinkId]int {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
 
-	proposals := make(map[FunctionId]int)
+	proposals := make(map[LinkId]int)
 	for _, funcTotals := range a.totals {
 		for fn, mt := range funcTotals {
 			if _, ok := proposals[fn]; ok {
@@ -136,10 +136,10 @@ func (a *autoScaler) Propose() map[FunctionId]int {
 	return proposals
 }
 
-func (a *autoScaler) emptyQueue(funcId FunctionId) (bool, int64) {
+func (a *autoScaler) emptyQueue(funcId LinkId) (bool, int64) {
 	for topic, funcTotals := range a.totals {
 		if _, ok := funcTotals[funcId]; ok {
-			queueLen, err := a.transportInspector.QueueLength(topic, funcId.Function)
+			queueLen, err := a.transportInspector.QueueLength(topic, funcId.Link)
 			if err != nil {
 				log.Printf("Failed to obtain queue length (and will assume it is positive): %v", err)
 				return false, -1
@@ -152,11 +152,11 @@ func (a *autoScaler) emptyQueue(funcId FunctionId) (bool, int64) {
 	return true, 0
 }
 
-func (a *autoScaler) queueLength(funcId FunctionId) int64 {
+func (a *autoScaler) queueLength(funcId LinkId) int64 {
 	ql := int64(0)
 	for topic, funcTotals := range a.totals {
 		if _, ok := funcTotals[funcId]; ok {
-			queueLen, err := a.transportInspector.QueueLength(topic, funcId.Function)
+			queueLen, err := a.transportInspector.QueueLength(topic, funcId.Link)
 			if err != nil {
 				log.Printf("Failed to obtain queue length (and will assume it is positive): %v", err)
 				ql++
@@ -168,12 +168,12 @@ func (a *autoScaler) queueLength(funcId FunctionId) int64 {
 	return ql
 }
 
-func (a *autoScaler) StartMonitoring(topic string, fn FunctionId) error {
+func (a *autoScaler) StartMonitoring(topic string, fn LinkId) error {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
 	funcTotals, ok := a.totals[topic]
 	if !ok {
-		funcTotals = make(map[FunctionId]*metricsTotals)
+		funcTotals = make(map[LinkId]*metricsTotals)
 		a.totals[topic] = funcTotals
 	}
 
@@ -189,7 +189,7 @@ func (a *autoScaler) StartMonitoring(topic string, fn FunctionId) error {
 	return nil
 }
 
-func (a *autoScaler) delay(fn FunctionId) adjuster {
+func (a *autoScaler) delay(fn LinkId) adjuster {
 	p := NewDelayer(func() time.Duration {
 		return a.delayScaleDown(fn);
 	})
@@ -200,7 +200,7 @@ func (a *autoScaler) delay(fn FunctionId) adjuster {
 	}
 }
 
-func (a *autoScaler) StopMonitoring(topic string, function FunctionId) error {
+func (a *autoScaler) StopMonitoring(topic string, function LinkId) error {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
 	funcTotals, ok := a.totals[topic]
@@ -258,7 +258,7 @@ func (a *autoScaler) receiveConsumerMetric(cm metrics.ConsumerAggregateMetric) {
 
 	funcTotals, ok := a.totals[cm.Topic]
 	if ok {
-		mt, ok := funcTotals[FunctionId{cm.ConsumerGroup}]
+		mt, ok := funcTotals[LinkId{cm.ConsumerGroup}]
 		if ok {
 			mt.receiveCount += cm.Count
 		}
@@ -294,7 +294,7 @@ func compose(a adjuster, s scaler) scaler {
 	}
 }
 
-func (a *autoScaler) metricsScaler(fn FunctionId) scaler {
+func (a *autoScaler) metricsScaler(fn LinkId) scaler {
 	return func(mt *metricsTotals) int {
 		//var proposedReplicas int
 		//if mt.receiveCount == 0 {
@@ -317,7 +317,7 @@ func (a *autoScaler) metricsScaler(fn FunctionId) scaler {
 	}
 }
 
-func (a *autoScaler) queueLengthScaling(fn FunctionId) adjuster {
+func (a *autoScaler) queueLengthScaling(fn LinkId) adjuster {
 	return func(proposedReplicas int) int {
 		qLen := a.queueLength(fn)
 
@@ -330,7 +330,7 @@ func (a *autoScaler) queueLengthScaling(fn FunctionId) adjuster {
 	}
 }
 
-func (a *autoScaler) limitScalingUp(fn FunctionId) adjuster {
+func (a *autoScaler) limitScalingUp(fn LinkId) adjuster {
 	return func(proposedReplicas int) int {
 		maxReplicas := a.maxReplicas(fn)
 		possibleChange := proposedReplicas != a.replicas[fn]
@@ -345,7 +345,7 @@ func (a *autoScaler) limitScalingUp(fn FunctionId) adjuster {
 }
 
 // smooth adds interpolation to replica count calculation, so that there are no sudden jumps.
-func (a *autoScaler) smooth(id FunctionId) adjuster {
+func (a *autoScaler) smooth(id LinkId) adjuster {
 	memory := float32(0)
 	return func(proposedReplicas int) int {
 		newMemory := interpolate(memory, proposedReplicas, 0.05)
@@ -364,7 +364,7 @@ func interpolate(current float32, target int, greed float32) float32 {
 	return current + (float32(target)-current)*greed
 }
 
-func (a *autoScaler) limitScalingDown(fn FunctionId) adjuster {
+func (a *autoScaler) limitScalingDown(fn LinkId) adjuster {
 	return func(proposedReplicas int) int {
 		// If zero replicas are proposed *and* there is already at least one replica, check the queue of work to the function.
 		// The queue length is not allowed to initiate scaling up from 0 to 1 as that would confuse rate-based autoscaling.
@@ -372,7 +372,7 @@ func (a *autoScaler) limitScalingDown(fn FunctionId) adjuster {
 			empty, length := a.emptyQueue(fn)
 			if !empty {
 				// There may be work to do, so propose 1 replica instead.
-				log.Printf("Ignoring proposal to scale %v to 0 replicas since queue length is %d", fn.Function, length)
+				log.Printf("Ignoring proposal to scale %v to 0 replicas since queue length is %d", fn.Link, length)
 				proposedReplicas = 1
 			}
 		}
@@ -380,7 +380,7 @@ func (a *autoScaler) limitScalingDown(fn FunctionId) adjuster {
 	}
 }
 
-func (a *autoScaler) InformFunctionReplicas(function FunctionId, replicas int) {
+func (a *autoScaler) InformFunctionReplicas(function LinkId, replicas int) {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
 

@@ -43,16 +43,16 @@ var _ = Describe("Autoscaler", func() {
 
 	var (
 		auto       AutoScalerInterfaces
-		testFuncId FunctionId
+		testFuncId LinkId
 
 		mockMetricsReceiver    *mockmetrics.MetricsReceiver
 		mockTransportInspector *mocktransport.Inspector
 
-		proposal map[FunctionId]int
+		proposal map[LinkId]int
 	)
 
 	BeforeEach(func() {
-		testFuncId = FunctionId{"test-function"}
+		testFuncId = LinkId{"test-function"}
 
 		mockMetricsReceiver = &mockmetrics.MetricsReceiver{}
 
@@ -69,7 +69,7 @@ var _ = Describe("Autoscaler", func() {
 	Describe("autoscaling", func() {
 		BeforeEach(func() {
 			Expect(auto.StartMonitoring(testTopic, testFuncId)).To(Succeed())
-			auto.SetDelayScaleDownPolicy(func(function FunctionId) time.Duration {
+			auto.SetDelayScaleDownPolicy(func(function LinkId) time.Duration {
 				return time.Millisecond * 20
 			})
 		})
@@ -116,7 +116,7 @@ var _ = Describe("Autoscaler", func() {
 
 				auto.receiveConsumerMetric(metrics.ConsumerAggregateMetric{
 					Topic:         testTopic,
-					ConsumerGroup: testFuncId.Function,
+					ConsumerGroup: testFuncId.Link,
 					Count:         1,
 				})
 
@@ -192,7 +192,7 @@ var _ = Describe("Autoscaler", func() {
 
 					auto.receiveConsumerMetric(metrics.ConsumerAggregateMetric{
 						Topic:         testTopic,
-						ConsumerGroup: testFuncId.Function,
+						ConsumerGroup: testFuncId.Link,
 						Count:         10,
 					})
 
@@ -218,7 +218,7 @@ var _ = Describe("Autoscaler", func() {
 
 						auto.receiveConsumerMetric(metrics.ConsumerAggregateMetric{
 							Topic:         testTopic,
-							ConsumerGroup: testFuncId.Function,
+							ConsumerGroup: testFuncId.Link,
 							Count:         100,
 						})
 
@@ -249,7 +249,7 @@ var _ = Describe("Autoscaler", func() {
 
 				auto.receiveConsumerMetric(metrics.ConsumerAggregateMetric{
 					Topic:         testTopic,
-					ConsumerGroup: testFuncId.Function,
+					ConsumerGroup: testFuncId.Link,
 					Count:         1000,
 				})
 
@@ -267,11 +267,11 @@ var _ = Describe("Autoscaler", func() {
 		Context("when the maximum replicas policy returns 2 but messages are produced 3 times faster than they are consumed by 1 pod", func() {
 			BeforeEach(func() {
 				Expect(auto.StartMonitoring(testTopic, testFuncId)).To(Succeed())
-				auto.SetDelayScaleDownPolicy(func(function FunctionId) time.Duration {
+				auto.SetDelayScaleDownPolicy(func(function LinkId) time.Duration {
 					return time.Millisecond * 20
 				})
 
-				auto.SetMaxReplicasPolicy(func(function FunctionId) int {
+				auto.SetMaxReplicasPolicy(func(function LinkId) int {
 					return 2;
 				})
 				auto.InformFunctionReplicas(testFuncId, 1)
@@ -283,7 +283,7 @@ var _ = Describe("Autoscaler", func() {
 
 				auto.receiveConsumerMetric(metrics.ConsumerAggregateMetric{
 					Topic:         testTopic,
-					ConsumerGroup: testFuncId.Function,
+					ConsumerGroup: testFuncId.Link,
 					Count:         1,
 				})
 
@@ -302,7 +302,7 @@ var _ = Describe("Autoscaler", func() {
 	Describe("Queue length behaviour", func() {
 		BeforeEach(func() {
 			Expect(auto.StartMonitoring(testTopic, testFuncId)).To(Succeed())
-			auto.SetDelayScaleDownPolicy(func(function FunctionId) time.Duration {
+			auto.SetDelayScaleDownPolicy(func(function LinkId) time.Duration {
 				return time.Millisecond * 20
 			})
 			auto.receiveProducerMetric(metrics.ProducerAggregateMetric{
@@ -419,10 +419,10 @@ var _ = Describe("Autoscaler", func() {
 		})
 
 		Context("when already monitoring a given function", func() {
-			var anotherFuncId FunctionId
+			var anotherFuncId LinkId
 
 			BeforeEach(func() {
-				anotherFuncId = FunctionId{"another-function"}
+				anotherFuncId = LinkId{"another-function"}
 				Expect(auto.StartMonitoring(testTopic, testFuncId)).To(Succeed())
 			})
 
@@ -464,7 +464,7 @@ var _ = Describe("Autoscaler", func() {
 			mockMetricsReceiver.On("ConsumerMetrics").Return(cm)
 
 			auto = NewAutoScaler(mockMetricsReceiver, mockTransportInspector)
-			auto.SetDelayScaleDownPolicy(func(function FunctionId) time.Duration {
+			auto.SetDelayScaleDownPolicy(func(function LinkId) time.Duration {
 				return time.Millisecond * 20
 			})
 
@@ -501,7 +501,7 @@ var _ = Describe("Autoscaler", func() {
 	})
 })
 
-func Propose(funcId FunctionId, replicas int) types.GomegaMatcher {
+func Propose(funcId LinkId, replicas int) types.GomegaMatcher {
 	return &proposeFunctionReplicasMatcher{
 		funcId:   funcId,
 		replicas: replicas,
@@ -509,14 +509,14 @@ func Propose(funcId FunctionId, replicas int) types.GomegaMatcher {
 }
 
 type proposeFunctionReplicasMatcher struct {
-	funcId   FunctionId
+	funcId   LinkId
 	replicas int
 }
 
 func (matcher *proposeFunctionReplicasMatcher) Match(actual interface{}) (success bool, err error) {
-	proposal, ok := actual.(map[FunctionId]int)
+	proposal, ok := actual.(map[LinkId]int)
 	if !ok {
-		return false, fmt.Errorf("Propose matcher expects a map[FunctionId]int")
+		return false, fmt.Errorf("Propose matcher expects a map[LinkId]int")
 	}
 
 	replicas, ok := proposal[matcher.funcId]
@@ -528,9 +528,9 @@ func (matcher *proposeFunctionReplicasMatcher) Match(actual interface{}) (succes
 }
 
 func (matcher *proposeFunctionReplicasMatcher) FailureMessage(actual interface{}) (message string) {
-	proposal, ok := actual.(map[FunctionId]int)
+	proposal, ok := actual.(map[LinkId]int)
 	if !ok {
-		return fmt.Sprintf("Expected proposal\n\t%#v\nto be of type map[FunctionId]int", actual)
+		return fmt.Sprintf("Expected proposal\n\t%#v\nto be of type map[LinkId]int", actual)
 	}
 
 	replicas, ok := proposal[matcher.funcId]
@@ -542,9 +542,9 @@ func (matcher *proposeFunctionReplicasMatcher) FailureMessage(actual interface{}
 }
 
 func (matcher *proposeFunctionReplicasMatcher) NegatedFailureMessage(actual interface{}) (message string) {
-	proposal, ok := actual.(map[FunctionId]int)
+	proposal, ok := actual.(map[LinkId]int)
 	if !ok {
-		return fmt.Sprintf("Expected proposal\n\t%#v\nto be of type map[FunctionId]int", actual)
+		return fmt.Sprintf("Expected proposal\n\t%#v\nto be of type map[LinkId]int", actual)
 	}
 
 	replicas, ok := proposal[matcher.funcId]
@@ -555,20 +555,20 @@ func (matcher *proposeFunctionReplicasMatcher) NegatedFailureMessage(actual inte
 	return fmt.Sprintf("Expected proposal for function %#v of\n\t%d replicas\nnot to be\n\t%d replicas", matcher.funcId, replicas, matcher.replicas)
 }
 
-func ProposeFunction(funcId FunctionId) types.GomegaMatcher {
+func ProposeFunction(funcId LinkId) types.GomegaMatcher {
 	return &proposeFunctionMatcher{
 		funcId: funcId,
 	}
 }
 
 type proposeFunctionMatcher struct {
-	funcId FunctionId
+	funcId LinkId
 }
 
 func (matcher *proposeFunctionMatcher) Match(actual interface{}) (success bool, err error) {
-	proposal, ok := actual.(map[FunctionId]int)
+	proposal, ok := actual.(map[LinkId]int)
 	if !ok {
-		return true, fmt.Errorf("ProposeFunction matcher expects a map[FunctionId]int")
+		return true, fmt.Errorf("ProposeFunction matcher expects a map[LinkId]int")
 	}
 
 	_, ok = proposal[matcher.funcId]

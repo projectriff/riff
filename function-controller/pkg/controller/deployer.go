@@ -23,13 +23,14 @@ import (
 
 	"strings"
 
+	"encoding/json"
+
 	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"encoding/json"
 )
 
 const (
@@ -44,19 +45,19 @@ var (
 	}
 )
 
-// Deployer allows the realisation of a function on k8s and its subsequent scaling to accommodate more/less load.
+// Deployer allows the realisation of a link on k8s and its subsequent scaling to accommodate more/less load.
 type Deployer interface {
-	// Deploy requests that a function be initially deployed on k8s.
-	Deploy(function *v1.Function) error
+	// Deploy requests that a link be initially deployed on k8s.
+	Deploy(link *v1.Link, function *v1.Function) error
 
-	// Undeploy is called when a function is unregistered.
-	Undeploy(function *v1.Function) error
+	// Undeploy is called when a link is unregistered.
+	Undeploy(link *v1.Link) error
 
-	// Update is called when a function is updated. The desired number of replicas of the function is provided.
-	Update(function *v1.Function, replicas int) error
+	// Update is called when a link or function is updated. The desired number of replicas of the function is provided.
+	Update(link *v1.Link, function *v1.Function, replicas int) error
 
-	// Scale is used to vary the number of replicas dedicated to a function, including going to zero.
-	Scale(function *v1.Function, replicas int) error
+	// Scale is used to vary the number of replicas dedicated to a link, including going to zero.
+	Scale(link *v1.Link, replicas int) error
 }
 
 type deployer struct {
@@ -64,31 +65,37 @@ type deployer struct {
 	brokers   []string
 }
 
-func (d *deployer) Deploy(function *v1.Function) error {
-	deployment := d.buildDeployment(function)
-	_, err := d.clientset.ExtensionsV1beta1().Deployments(function.Namespace).Create(&deployment)
+func (d *deployer) Deploy(link *v1.Link, function *v1.Function) error {
+	deployment := d.buildDeployment(link, function)
+	_, err := d.clientset.ExtensionsV1beta1().Deployments(link.Namespace).Create(&deployment)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (d *deployer) buildDeployment(function *v1.Function) v1beta1.Deployment {
+func (d *deployer) buildDeployment(link *v1.Link, function *v1.Function) v1beta1.Deployment {
 	return v1beta1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{Name: function.Name, Namespace: function.Namespace},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      link.Name,
+			Namespace: link.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				*metav1.NewControllerRef(link, v1.SchemeGroupVersion.WithKind("Link")),
+			},
+		},
 		Spec: v1beta1.DeploymentSpec{
 			Replicas: &zero,
 			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{Name: function.Name, Labels: map[string]string{"function": function.Name}},
-				Spec:       d.buildPodSpec(function),
+				ObjectMeta: metav1.ObjectMeta{Name: link.Name, Labels: map[string]string{"function": function.Name, "link": link.Name}},
+				Spec:       d.buildPodSpec(link, function),
 			},
 		},
 	}
 }
 
-func (d *deployer) buildPodSpec(function *v1.Function) corev1.PodSpec {
+func (d *deployer) buildPodSpec(link *v1.Link, function *v1.Function) corev1.PodSpec {
 	spec := corev1.PodSpec{
-		Containers: []corev1.Container{d.buildMainContainer(function), d.buildSidecarContainer(function)},
+		Containers: []corev1.Container{d.buildMainContainer(function), d.buildSidecarContainer(link, function.Spec.Protocol)},
 	}
 	return spec
 }
@@ -111,61 +118,61 @@ func (d *deployer) buildMainContainer(function *v1.Function) corev1.Container {
 	return c
 }
 
-func (d *deployer) buildSidecarContainer(function *v1.Function) corev1.Container {
+func (d *deployer) buildSidecarContainer(link *v1.Link, protocol string) corev1.Container {
 	c := corev1.Container{Name: "sidecar"}
 	imageName := os.Getenv("RIFF_FUNCTION_SIDECAR_REPOSITORY")
 	if imageName == "" {
 		imageName = sidecarImage
 	}
 	c.Image = imageName + ":" + os.Getenv("RIFF_FUNCTION_SIDECAR_TAG")
-	outputDestination := function.Spec.Output
+	outputDestination := link.Spec.Output
 	if outputDestination == "" {
 		outputDestination = "replies"
 	}
 	c.Args = []string{
-		"--inputs", function.Spec.Input,
+		"--inputs", link.Spec.Input,
 		"--outputs", outputDestination,
-		"--group", function.Name,
-		"--protocol", function.Spec.Protocol,
-		"--port", ports[function.Spec.Protocol],
+		"--group", link.Name,
+		"--protocol", protocol,
+		"--port", ports[protocol],
 		"--brokers", strings.Join(d.brokers, ","),
 	}
 
-	bs, _ := json.Marshal(function.Spec.Windowing)
-	c.Env = []corev1.EnvVar{corev1.EnvVar{Name: "WINDOWING_STRATEGY", Value: string(bs)}}
+	ws, _ := json.Marshal(link.Spec.Windowing)
+	c.Env = []corev1.EnvVar{corev1.EnvVar{Name: "WINDOWING_STRATEGY", Value: string(ws)}}
 	return c
 }
 
-func (d *deployer) Undeploy(function *v1.Function) error {
+func (d *deployer) Undeploy(link *v1.Link) error {
 	propagation := metav1.DeletePropagationForeground
-	return d.clientset.ExtensionsV1beta1().Deployments(function.Namespace).Delete(
-		function.Name,
+	return d.clientset.ExtensionsV1beta1().Deployments(link.Namespace).Delete(
+		link.Name,
 		&metav1.DeleteOptions{PropagationPolicy: &propagation})
 }
 
-func (d *deployer) Update(function *v1.Function, replicas int) error {
+func (d *deployer) Update(link *v1.Link, function *v1.Function, replicas int) error {
 	r := int32(replicas)
-	deployment := d.buildDeployment(function)
+	deployment := d.buildDeployment(link, function)
 	deployment.Spec.Replicas = &r
 
-	_, err := d.clientset.ExtensionsV1beta1().Deployments(function.Namespace).Update(&deployment)
+	_, err := d.clientset.ExtensionsV1beta1().Deployments(link.Namespace).Update(&deployment)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (d *deployer) Scale(function *v1.Function, replicas int) error {
-	log.Printf("Scaling %v to %v", function.Name, replicas)
+func (d *deployer) Scale(link *v1.Link, replicas int) error {
+	log.Printf("Scaling %v to %v", link.Name, replicas)
 
-	deployment, err := d.clientset.ExtensionsV1beta1().Deployments(function.Namespace).Get(function.Name, metav1.GetOptions{})
+	deployment, err := d.clientset.ExtensionsV1beta1().Deployments(link.Namespace).Get(link.Name, metav1.GetOptions{})
 	r := int32(replicas)
 	deployment.Spec.Replicas = &r
 	if err != nil {
-		log.Printf("Could not scale %v: %v", function.Name, err)
+		log.Printf("Could not scale %v: %v", link.Name, err)
 		return err
 	}
-	_, err = d.clientset.ExtensionsV1beta1().Deployments(function.Namespace).Update(deployment)
+	_, err = d.clientset.ExtensionsV1beta1().Deployments(link.Namespace).Update(deployment)
 	return err
 }
 

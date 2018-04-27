@@ -25,51 +25,45 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 )
 
-func createFunction(opts options.InitOptions, functionTemplate projectriff_v1.Function) ([]byte, error) {
-	function := functionTemplate.DeepCopy()
-	function.TypeMeta.APIVersion = apiVersion
-	function.TypeMeta.Kind = functionKind
-	function.ObjectMeta.Name = opts.FunctionName
-	function.Spec.Container.Image = options.ImageName(opts)
-	if opts.Protocol != "" {
-		function.Spec.Protocol = opts.Protocol
+func createLink(opts options.InitOptions, linkTemplate projectriff_v1.Link) ([]byte, error) {
+	link := linkTemplate.DeepCopy()
+	link.TypeMeta.APIVersion = apiVersion
+	link.TypeMeta.Kind = linkKind
+	link.ObjectMeta.Name = opts.FunctionName
+	link.Spec.Function = opts.FunctionName
+	link.Spec.Input = opts.Input
+	link.Spec.Output = opts.Output
+	if link.Spec.Windowing.IsUnbounded() {
+		link.Spec.Windowing.Size = 1
 	}
 
-	bytes, err := json.Marshal(function)
+	bytes, err := json.Marshal(link)
 	if err != nil {
 		return nil, err
 	}
-	functionMap := map[string]interface{}{}
-	err = json.Unmarshal(bytes, &functionMap)
+	linkMap := map[string]interface{}{}
+	err = json.Unmarshal(bytes, &linkMap)
 	if err != nil {
 		return nil, err
 	}
 
 	// cleanup properties we don't want to marshal
-	metadata := functionMap["metadata"].(map[string]interface{})
+	metadata := linkMap["metadata"].(map[string]interface{})
 	delete(metadata, "creationTimestamp")
-	spec := functionMap["spec"].(map[string]interface{})
-	container := spec["container"].(map[string]interface{})
-	if container["name"] == "" {
-		delete(container, "name")
-	}
-	if len(container["resources"].(map[string]interface{})) == 0 {
-		delete(container, "resources")
-	}
 
-	return yaml.Marshal(functionMap)
+	return yaml.Marshal(linkMap)
 }
 
-func createFunctionYaml(functionTemplate projectriff_v1.Function, opts options.InitOptions) (string, error) {
+func createLinkYaml(linkTemplate projectriff_v1.Link, opts options.InitOptions) (string, error) {
 	var buffer bytes.Buffer
 
-	function, err := createFunction(opts, functionTemplate)
+	link, err := createLink(opts, linkTemplate)
 	if err != nil {
 		return "", err
 	}
 
 	buffer.WriteString("---\n")
-	buffer.Write(function)
+	buffer.Write(link)
 
 	return buffer.String(), nil
 }

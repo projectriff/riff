@@ -34,6 +34,14 @@ type InvokerListerExpansion interface{}
 // InvokerNamespaceLister.
 type InvokerNamespaceListerExpansion interface{}
 
+// LinkListerExpansion allows custom methods to be added to
+// LinkLister.
+type LinkListerExpansion interface{}
+
+// LinkNamespaceListerExpansion allows custom methods to be added to
+// LinkNamespaceLister.
+type LinkNamespaceListerExpansion interface{}
+
 // TopicListerExpansion allows custom methods to be added to
 // TopicLister.
 type TopicListerExpansion interface{}

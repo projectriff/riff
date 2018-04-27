@@ -38,7 +38,7 @@ func main() {
 	}
 	defer dataFile.Close()
 
-	stubFunctionID := autoscaler.FunctionId{Function: "stub function"}
+	stubFunctionID := autoscaler.LinkId{Link: "stub function"}
 
 	scenario := scenarios.CombinedScenario{}
 	receiver, simUpdater, rm := scenario.MakeNewSimulation()
@@ -48,7 +48,7 @@ func main() {
 	scaler := autoscaler.NewAutoScaler(receiver, inspector)
 	defer scaler.Close()
 
-	scaler.SetMaxReplicasPolicy(func(function autoscaler.FunctionId) int {
+	scaler.SetMaxReplicasPolicy(func(function autoscaler.LinkId) int {
 		return maxReplicas
 	})
 
