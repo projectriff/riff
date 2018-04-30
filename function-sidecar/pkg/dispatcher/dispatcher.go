@@ -31,5 +31,5 @@ type Dispatcher interface {
 
 	Output() <-chan message.Message
 
-	Closed() <-chan bool
+	Closed() <-chan struct{}
 }

@@ -26,7 +26,7 @@ type wrapper struct {
 	old    SynchDispatcher
 	input  chan<- message.Message
 	output <-chan message.Message
-	closed <-chan bool
+	closed <-chan struct{}
 }
 
 func (w *wrapper) Input() chan<- message.Message {
@@ -37,7 +37,7 @@ func (w *wrapper) Output() <-chan message.Message {
 	return w.output
 }
 
-func (w *wrapper) Closed() <-chan bool {
+func (w *wrapper) Closed() <-chan struct{} {
 	return w.closed
 }
 
