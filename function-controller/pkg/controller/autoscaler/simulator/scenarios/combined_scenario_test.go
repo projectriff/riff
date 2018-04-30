@@ -1,4 +1,4 @@
-package main
+package scenarios
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -16,37 +16,37 @@ var _ = Describe("Simulator", func() {
 		})
 
 		It("should delay increasing the actual number of replicas", func() {
-			rm.desireReplicas(9)
+			rm.DesireReplicas(9)
 			for i := 0; i < replicaInitialisationDelaySteps-1; i++ {
-				rm.tick()
+				rm.Tick()
 				Expect(rm.actual).To(Equal(0))
 			}
-			rm.tick()
+			rm.Tick()
 			Expect(rm.actual).To(Equal(9))
 		})
 
 		It("should delay new increases", func() {
-			rm.desireReplicas(9)
+			rm.DesireReplicas(9)
 			for i := 0; i < replicaInitialisationDelaySteps-1; i++ {
-				rm.tick()
+				rm.Tick()
 				Expect(rm.actual).To(Equal(0))
-				rm.desireReplicas(12)
+				rm.DesireReplicas(12)
 			}
-			rm.tick()
+			rm.Tick()
 			Expect(rm.actual).To(Equal(9))
-			rm.tick()
+			rm.Tick()
 			Expect(rm.actual).To(Equal(12))
 		})
 
 		It("should expedite decreases", func() {
-			rm.desireReplicas(9)
-			rm.desireReplicas(5)
+			rm.DesireReplicas(9)
+			rm.DesireReplicas(5)
 
 			for i := 0; i < replicaInitialisationDelaySteps-1; i++ {
-				rm.tick()
+				rm.Tick()
 				Expect(rm.actual).To(Equal(0))
 			}
-			rm.tick()
+			rm.Tick()
 			Expect(rm.actual).To(Equal(5))
 		})
 
