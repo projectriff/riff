@@ -44,7 +44,7 @@ func (g *gateway) requestsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	topicExists := g.topicExistenceChecker.TopicExists(defaultNamespace, topicName)
+	topicExists := g.topicExistenceChecker.TopicExists(topicName)
 
 	if !topicExists {
 		errMsg := fmt.Sprintf("could not find Riff topic '%s'", topicName)
