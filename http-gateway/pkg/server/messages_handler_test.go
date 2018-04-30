@@ -228,6 +228,6 @@ type happyRiffTopicExistenceChecker struct {
 	testName string
 }
 
-func (th *happyRiffTopicExistenceChecker) TopicExists(namespace string, topicName string) bool {
+func (th *happyRiffTopicExistenceChecker) TopicExists(topicName string) bool {
 	return topicName == th.testName
 }
