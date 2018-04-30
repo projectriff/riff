@@ -68,7 +68,7 @@ func init() {
 	flag.StringVar(&protocol, "protocol", "", "dispatcher protocol to use. One of [http, grpc]")
 	flag.BoolVar(&exitOnComplete, "exitOnComplete", false, "flag to signal that the sidecar should exit when the output stream is closed")
 	flag.IntVar(&maxBackoffRetries, "maxBackoffRetries", 3, "maximum number of times to retry connecting to the invoker")
-	flag.IntVar(&backoffMultiplier, "backoffMultiplier", 1, "wait time increase for each retry")
+	flag.IntVar(&backoffMultiplier, "backoffMultiplier", 2, "wait time increase for each retry")
 	flag.DurationVar(&backoffDuration, "backoffDuration", 1000, "base wait time (ms) to wait retry")
 }
 
@@ -139,6 +139,7 @@ LOOP:
 			if !backoff() {
 				panic(err)
 			} else {
+				log.Printf("Error %v attempting to create dispatcher\n", err)
 				continue LOOP
 			}
 		}
@@ -152,12 +153,10 @@ LOOP:
 		select {
 		case <-signals:
 			log.Println("Shutting Down...")
-			break LOOP
 		case <-dispatcher.Closed():
 			log.Println("End of Stream...")
-			break LOOP
 		}
-
+		break LOOP
 	}
 
 }
