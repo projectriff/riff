@@ -43,7 +43,7 @@ func Version(w io.Writer, kubeCtl kubectl.KubeCtl) *cobra.Command {
 			if err != nil {
 				context = "<unknown>"
 			}
-			fmt.Fprintf(w, "kubectl context: %v\n", strings.Trim(context, "\n"))
+			fmt.Fprintf(w, "kubeconfig current-context: %v\n", strings.Trim(context, "\n"))
 			fmt.Fprintln(w)
 			components, err := kubeCtl.Exec([]string{
 				"get", "deployments",

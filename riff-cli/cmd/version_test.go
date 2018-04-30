@@ -67,7 +67,7 @@ var _ = Describe("The version command", func() {
 		err := versionCommand.Execute()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(writer.String()).To(Equal(
-			fmt.Sprintf("riff CLI version: %s\nkubectl context: %s\n\n%s\n\n%s\n",
+			fmt.Sprintf("riff CLI version: %s\nkubeconfig current-context: %s\n\n%s\n\n%s\n",
 				"0.0.1-testing",
 				"minikube",
 				"<Component Table>",
@@ -84,7 +84,7 @@ var _ = Describe("The version command", func() {
 		err := versionCommand.Execute()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(writer.String()).To(Equal(
-			fmt.Sprintf("riff CLI version: %s\nkubectl context: %s\n\n%s\n\n%s\n",
+			fmt.Sprintf("riff CLI version: %s\nkubeconfig current-context: %s\n\n%s\n\n%s\n",
 				"0.0.1-testing",
 				"<unknown>",
 				"Unable to list components",
