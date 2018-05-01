@@ -1,16 +1,49 @@
 = Installing the riff development version using Helm
 
-== Prerequisites
+== [[pre-req]]Prerequisites
 
 * A running 1.7+ Kubernetes cluster
 
 * Kubernetes CLI `kubectl` installed and on the local system PATH.
 We recommend using the same version or later as the Kubernetes cluster you are using.
 
-* Helm, you need helm installed, see instructions link:Getting-Started.adoc#helm[here]. 
+* Helm, you need helm installed, see instructions link:https://github.com/kubernetes/helm/blob/master/README.md#install[here]. 
 
 * Docker, you only need Docker when building custom versions of riff components or the samples.
 We have used Docker version 17.x or later.
+
+== Install Helm server component
+
+You need to already have the Helm client installed, see link:#pre-req[Prerequisites].
+
+For a cluster that does not have RBAC enabled use:
+
+[source, bash]
+----
+helm init
+----
+
+It gets a bit more complicated if the cluster has RBAC enabled. The Helm project describes the https://docs.helm.sh/using_helm/#best-practices-for-securing-helm-and-tiller[Best Practices for Securing Helm and Tiller] in their documentation. This can be fairly involved and for less critical development clusters it is easier to configure the Helm tiller server to run with cluster-admin privileges using a service account in the `kube-system` namespace.
+
+If you are using a GKE cluster and don't have cluster admin rights you can run the following to grant yourself the admin role, as long as you know the admin password. You can look up the password using the `Show credentials` link on the cluster details page.
+
+```
+export GKE_ADMIN_PASSWD=<the admin password>
+export GKE_USER=$(gcloud config get-value core/account)
+export GKE_PREFIX=$(echo $GKE_USER | awk -F'@' '{print $1}')
+kubectl --username=admin --password=$GKE_ADMIN_PASSWD create clusterrolebinding ${GKE_PREFIX}-cluster-admin-binding --clusterrole=cluster-admin --user=${GKE_USER}
+```
+
+You should now have cluster admin rights and can run the following to install Helm's server component:
+
+[source, bash]
+----
+kubectl -n kube-system create serviceaccount tiller
+kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+helm init --service-account=tiller
+----
+
+TIP: To verify that the tiller pod has started execute the following command: `kubectl get pod --namespace kube-system -l app=helm` and you should see the `tiller` pod running.
 
 == Add the riff repository to your helm configuration
 
@@ -34,27 +67,11 @@ helm search riff -l
 
 == [[devel]]Install a riff development version
 
-We provide a lightweight single node Kafka installation with the `projectriff/kafka` chart. 
-This works well for development purposes and it can be installed together with the riff chart by providing `--set kafka.create=true` when installing the riff chart.
-
-=== Create riff-system namespace
-
-All riff components willbe deployed into a `riff-system` namespace. 
+All riff components will be deployed into a `riff-system` namespace. 
 Any functions that are developed can be deployed into any other namespace including the `default` namespace.
 
-On GKE you probably need to create an admin role:
-
-[source, bash]
-----
-kubectl create clusterrolebinding admin --clusterrole cluster-admin --serviceaccount=kube-system:default
-----
-
-To create the `riff-system` namespace run:
-
-[source, bash]
-----
-kubectl create namespace riff-system
-----
+We provide a lightweight single node Kafka installation with the `projectriff/kafka` chart. 
+This works well for development purposes and it can be installed together with the riff chart by providing `--set kafka.create=true` when installing the riff chart.
 
 [TIP]
 ====
@@ -77,10 +94,10 @@ Add the following config settings instead of `--set kafka.create=true` to the `h
 
 ====
 
-=== Install "devel" version of riff chart
-
 WARNING: Beginning with Minikube v0.26.0 the default bootstrapper has changed to kubeadm which enables RBAC.
 To create a Minikube cluster without RBAC enabled you should use the localkube bootstrapper. You can do that with the following command `minikube start --memory=4096 --bootstrapper=localkube`.
+
+=== Install "devel" version of riff chart
 
 Choose one of the following installations options:
 
@@ -91,7 +108,7 @@ When using Minikube configure the httpGateway to use `NodePort` with:
 +
 [source, bash]
 ----
-helm install --name projectriff --namespace riff-system projectriff/riff --devel --set rbac.create=false --set kafka.create=true --set httpGateway.service.type=NodePort
+helm install --name projectriff --namespace riff-system projectriff/riff --devel --set kafka.create=true --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 +
 [NOTE]
@@ -122,7 +139,7 @@ To install locally built Docker images with Helm on minikube, use the `--devel` 
 +
 [source, bash]
 ----
-helm install projectriff/riff --name projectriff --namespace riff-system --devel --set rbac.create=false --set kafka.create=true --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name projectriff --namespace riff-system --devel --set kafka.create=true --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 === Customizing the Installation
@@ -145,7 +162,7 @@ To set the version tag for the `functionController` to `0.0.5-build.1` use somet
 +
 [source, bash]
 ----
-helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.image.tag=0.0.5-build.1 --devel --set rbac.create=false --set kafka.create=true --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.image.tag=0.0.5-build.1 --devel --set kafka.create=true --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 - *Overriding the image repository and version tag of a riff component with a custom built component image:*
@@ -155,7 +172,7 @@ the `functionController`, use something like the following:
 +
 [source, bash]
 ----
-helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.image.repository=mycustom/function-controller --set functionController.image.tag=0.0.5-test.1 --devel --set rbac.create=false --set kafka.create=true --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.image.repository=mycustom/function-controller --set functionController.image.tag=0.0.5-test.1 --devel --set kafka.create=true --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 - *Overriding the version of the `sidecar` component:*
@@ -165,7 +182,7 @@ the `sidecar` to `0.0.5-build.1` use something like the following:
 +
 [source, bash]
 ----
-helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.sidecar.image.tag=0.0.5-build.1 --devel --set rbac.create=false --set kafka.create=true --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.sidecar.image.tag=0.0.5-build.1 --devel --set kafka.create=true --set rbac.create=false --set httpGateway.service.type=NodePort
 ----
 
 === To tear it all down
