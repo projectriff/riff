@@ -12,7 +12,6 @@ import (
 
 	informers "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions"
 	"github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1"
-	"strings"
 	"sync"
 )
 
@@ -26,7 +25,7 @@ type riffTopicExistenceChecker struct {
 	topicInformer v1alpha1.TopicInformer
 
 	mutex       *sync.Mutex
-	knownTopics map[string]ignoredValue
+	knownTopics map[string]map[string]ignoredValue
 }
 
 type ignoredValue struct{}
@@ -38,14 +37,13 @@ func NewAlwaysTrueTopicExistenceChecker() TopicExistenceChecker {
 	return &alwaysTrueTopicExistenceChecker{}
 }
 
-// NewRiffTopicExistenceChecker configures a TopicExistenceChecker using the
-// provided Clientset.
+// NewRiffTopicExistenceChecker configures a TopicExistenceChecker using the provided Clientset.
 func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset, stop <-chan struct{}) TopicExistenceChecker {
 	riffInformerFactory := informers.NewSharedInformerFactory(clientSet, time.Second*30)
 	topicInformer := riffInformerFactory.Projectriff().V1alpha1().Topics()
 
 	mutex := &sync.Mutex{}
-	knownTopics := make(map[string]ignoredValue)
+	knownTopics := make(map[string]map[string]ignoredValue)
 
 	topicInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
@@ -61,8 +59,16 @@ func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset, stop <-chan st
 				return
 			}
 
-			knownTopics[topicName(key)] = ignoredValue{}
-			log.Printf("Topic has been added: %s", key)
+			namespace, topic := splitTopicNamespace(key)
+			knownNamespaces := knownTopics[topic]
+			if knownNamespaces == nil {
+				knownNamespaces = make(map[string]ignoredValue)
+				log.Printf("Topic has been added: %s", topic)
+			} else {
+				log.Printf("Warning, a duplicate topic has been added: %s in namespace %s", topic, namespace)
+			}
+			knownNamespaces[namespace] = ignoredValue{}
+			knownTopics[topic] = knownNamespaces
 		},
 
 		DeleteFunc: func(obj interface{}) {
@@ -70,7 +76,7 @@ func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset, stop <-chan st
 			defer mutex.Unlock()
 
 			//TODO: implement riff-specific KeyFunc https://github.com/projectriff/riff/pull/558#discussion_r184437224
-			key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
+			key, err := cache.MetaNamespaceKeyFunc(obj)
 			if err != nil {
 				// It is likely that the key is faulty, but we cannot signal an error.
 				// To prevent errors for processing a bad key, we return after logging.
@@ -78,8 +84,17 @@ func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset, stop <-chan st
 				return
 			}
 
-			delete(knownTopics, topicName(key))
-			log.Printf("A topic was removed: %s", key)
+			namespace, topic := splitTopicNamespace(key)
+			knownNamespaces := knownTopics[topic]
+			if knownNamespaces != nil {
+				delete(knownNamespaces, namespace)
+			}
+			if len(knownNamespaces) == 0 {
+				delete(knownTopics, topic)
+				log.Printf("Topic has been removed: %s", topic)
+			} else {
+				log.Printf("Duplicate topic has been removed: %s in namespace %s", topic, namespace)
+			}
 		},
 	})
 
@@ -88,13 +103,13 @@ func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset, stop <-chan st
 	return &riffTopicExistenceChecker{topicInformer: topicInformer, mutex: mutex, knownTopics: knownTopics}
 }
 
-func topicName(key string) string {
-	//TODO: we aren't supporting using multiple namespaces yet, see: https://github.com/projectriff/riff/issues/485
-	i := strings.Index(key, "/")
-	if i > -1 {
-		return key[i+1:]
+func splitTopicNamespace(key string) (string, string) {
+	namespace, topic, err := cache.SplitMetaNamespaceKey(key)
+	if err != nil {
+		log.Printf("SplitMetaNamespaceKey failed during a topic lookup: %#v", err)
+		return "", key
 	}
-	return key
+	return namespace, topic
 }
 
 func (tec *alwaysTrueTopicExistenceChecker) TopicExists(topicName string) bool {
