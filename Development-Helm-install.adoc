@@ -42,6 +42,13 @@ This works well for development purposes and it can be installed together with t
 All riff components willbe deployed into a `riff-system` namespace. 
 Any functions that are developed can be deployed into any other namespace including the `default` namespace.
 
+On GKE you probably need to create an admin role:
+
+[source, bash]
+----
+kubectl create clusterrolebinding admin --clusterrole cluster-admin --serviceaccount=kube-system:default
+----
+
 To create the `riff-system` namespace run:
 
 [source, bash]
