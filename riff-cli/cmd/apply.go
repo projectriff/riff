@@ -96,6 +96,7 @@ func apply(opts ApplyOptions, kubectlClient kubectl.KubeCtl) error {
 	fmt.Print(message)
 	output, err := kubectlClient.Exec(cmdArgs)
 	if err != nil {
+		fmt.Printf("%v\n", output)
 		return err
 	}
 	fmt.Printf("%v\n", output)
