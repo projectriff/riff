@@ -7,9 +7,9 @@ Currently the topic resource is namespaced while the messaging broker is per clu
 functions with topics created in different namespaces using the same input topic name. Both functions will process messages
 for this shared topic.
 
-The behavior for duplicate input topics is undefined when it comes to request/reply invocations. It seems that the last created
-function is the one that responds to the request using the correlationId. You will see error message from the other function's
-reply where the communication channel for the correlationId isn't found.
+The behavior for duplicate input topics is undefined when it comes to request/reply invocations. One of the functions will 
+respond to the request using the correlationId. You will see error message from the other function's reply where the 
+communication channel for the correlationId isn't found.
 
 == Development
 === Prerequisites
