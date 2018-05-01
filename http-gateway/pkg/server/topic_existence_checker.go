@@ -76,7 +76,7 @@ func NewRiffTopicExistenceChecker(clientSet *versioned.Clientset, stop <-chan st
 			defer mutex.Unlock()
 
 			//TODO: implement riff-specific KeyFunc https://github.com/projectriff/riff/pull/558#discussion_r184437224
-			key, err := cache.MetaNamespaceKeyFunc(obj)
+			key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 			if err != nil {
 				// It is likely that the key is faulty, but we cannot signal an error.
 				// To prevent errors for processing a bad key, we return after logging.
