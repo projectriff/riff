@@ -17,46 +17,41 @@ package backoff
 
 import (
 	"errors"
-	"strings"
 	"time"
 )
 
 type Backoff struct {
-	MaxRetries, retries, Multiplier, Duration int
-	duration                                  time.Duration
+	maxRetries, retries, multiplier int
+	duration                        time.Duration
 }
 
-func (b Backoff) IsValid() error {
-	msgs := []string{}
+func NewBackoff(duration time.Duration, maxRetries int, multiplier int) (*Backoff, error) {
+	if maxRetries <= 0 {
+		return nil, errors.New("'maxRetries' must be > 0")
+	}
+	if multiplier <= 0 {
+		return nil, errors.New("'multiplier' must be > 0")
+	}
+	if duration <= 0 {
+		return nil, errors.New("'duration' must be > 0")
+	}
 
-	if b.MaxRetries <= 0 {
-		msgs = append(msgs, "'MaxRetries' must be > 0")
-	}
-	if b.Multiplier <= 0 {
-		msgs = append(msgs, "'Multiplier' must be > 0")
-	}
-	if b.Duration <= 0 {
-		msgs = append(msgs, "'Duration' must be > 0")
-	}
-	if len(msgs) == 0 {
-		return nil
-	}
-	return errors.New(strings.Join(msgs, ", "))
-
+	return &Backoff{
+		maxRetries: maxRetries,
+		multiplier: multiplier,
+		duration:   duration,
+	}, nil
 }
 
 func (b *Backoff) Backoff() bool {
 	// Back off a bit to give the invoker time to come back
 	// (if we support windowing or polling this logic will be more complex)
-
 	if b.retries > 0 {
-		b.duration = b.duration * time.Duration(b.Multiplier)
-	} else {
-		b.duration = time.Duration(b.Duration) * time.Millisecond
+		b.duration = b.duration * time.Duration(b.multiplier)
 	}
 
 	b.retries++
-	if b.retries <= b.MaxRetries {
+	if b.retries <= b.maxRetries {
 		time.Sleep(b.duration)
 		return true
 	}

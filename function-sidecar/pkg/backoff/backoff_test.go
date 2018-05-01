@@ -1,3 +1,5 @@
+package backoff
+
 /*
  * Copyright 2018 the original author or authors.
  *
@@ -13,44 +15,81 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package backoff
-
 import (
 	"math"
-	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-func TestBackoff(t *testing.T) {
-	as := assert.New(t)
-	b := &Backoff{
-		Duration:   1,
-		Multiplier: 2,
-		MaxRetries: 3,
-	}
-	for i := 0; i < b.MaxRetries; i++ {
-		as.True(b.Backoff())
-		as.Equal(i+1, b.retries)
-		as.Equal(time.Duration(math.Pow(float64(b.Multiplier),
-			float64(i)))*time.Millisecond, b.duration)
-	}
-	as.False(b.Backoff())
-}
+var _ = Describe("Backoff", func() {
+	Describe("A valid Backoff configuration", func() {
+		var b *Backoff
+		BeforeEach(func() {
+			b, _ = NewBackoff(1*time.Millisecond, 3, 2)
+		})
+		Context("With maxRetries set", func() {
+			It("should backoff maxRetries times", func() {
+				for i := 0; i < b.maxRetries; i++ {
+					Expect(b.Backoff()).To(BeTrue())
+				}
+				Expect(b.Backoff()).To(BeFalse())
+			})
+		})
+		Context("With multiplier set", func() {
+			It("should exponentially increase duration", func() {
+				for i := 0; i < b.maxRetries; i++ {
+					b.Backoff()
+					Expect(b.duration).To(Equal(time.Duration(math.Pow(float64(b.multiplier),
+						float64(i))) * time.Millisecond))
+				}
+			})
+		})
+		Describe("a NewBackoff", func() {
+			Context("With duration = 0 ", func() {
+				It("should return a duration error", func() {
+					b, err := NewBackoff(0*time.Millisecond, 3, 2)
+					Expect(b).To(BeNil())
+					Expect(err.Error()).To(Equal("'duration' must be > 0"))
+				})
+			})
+			Context("With duration < 0 ", func() {
+				It("should return a duration error", func() {
+					b, err := NewBackoff(-1*time.Millisecond, 3, 2)
+					Expect(b).To(BeNil())
+					Expect(err.Error()).To(Equal("'duration' must be > 0"))
+				})
+			})
+			Context("With maxRetries = 0 ", func() {
+				It("should return a maxRetries error", func() {
+					b, err := NewBackoff(1*time.Millisecond, 0, 2)
+					Expect(b).To(BeNil())
+					Expect(err.Error()).To(Equal("'maxRetries' must be > 0"))
+				})
+			})
+			Context("With maxRetries < 0 ", func() {
+				It("should return a maxRetries error", func() {
+					b, err := NewBackoff(1*time.Millisecond, -1, 2)
+					Expect(b).To(BeNil())
+					Expect(err.Error()).To(Equal("'maxRetries' must be > 0"))
+				})
+			})
+			Context("With multiplier = 0 ", func() {
+				It("should return a multiplier error", func() {
+					b, err := NewBackoff(1*time.Millisecond, 1, 0)
+					Expect(b).To(BeNil())
+					Expect(err.Error()).To(Equal("'multiplier' must be > 0"))
+				})
+			})
+			Context("With multiplier < 0 ", func() {
+				It("should return a multiplier error", func() {
+					b, err := NewBackoff(1*time.Millisecond, 1, -1)
+					Expect(b).To(BeNil())
+					Expect(err.Error()).To(Equal("'multiplier' must be > 0"))
+				})
+			})
 
-func TestBackoffValidation(t *testing.T) {
-	as := assert.New(t)
-	b := new(Backoff)
-	err := b.IsValid()
-	as.Error(err)
-
-	b = &Backoff{
-		Duration:   1,
-		Multiplier: 0,
-		MaxRetries: 3,
-	}
-	err = b.IsValid()
-	as.Error(err)
-
-}
+		})
+	})
+})

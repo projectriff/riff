@@ -61,7 +61,7 @@ func (this *grpcDispatcher) handleIncoming() {
 				err := this.stream.Send(grpcMessage)
 				if err != nil {
 					if streamClosureDiagnosed(err) {
-						this.closed <- *new(struct{})
+						close(this.closed)
 						return
 					}
 
@@ -81,7 +81,7 @@ func (this *grpcDispatcher) handleOutgoing() {
 		reply, err := this.stream.Recv()
 		if err != nil {
 			if streamClosureDiagnosed(err) {
-				this.closed <- *new(struct{})
+				close(this.closed)
 				return
 			}
 
@@ -119,7 +119,7 @@ func NewGrpcDispatcher(port int, timeout time.Duration) (dispatcher.Dispatcher, 
 		return nil, err
 	}
 
-	result := &grpcDispatcher{fnStream, make(chan message.Message, 100), make(chan message.Message, 100), make(chan struct{}, 10)}
+	result := &grpcDispatcher{fnStream, make(chan message.Message, 100), make(chan message.Message, 100), make(chan struct{})}
 	go result.handleIncoming()
 	go result.handleOutgoing()
 

@@ -80,13 +80,7 @@ func main() {
 		log.Fatalf("Only 1 output supported for now. See https://github.com/projectriff/riff/issues/184. Provided %v\n", outputs)
 	}
 
-	var err error
-	var backoffPtr = &backoff.Backoff{
-		Duration:   backoffDurationMs,
-		MaxRetries: backoffMaxRetries,
-		Multiplier: backoffMultiplier,
-	}
-	err = backoffPtr.IsValid()
+	backoffPtr, err := backoff.NewBackoff(time.Duration(backoffDurationMs)*time.Millisecond, backoffMaxRetries, backoffMultiplier)
 	if err != nil {
 		log.Fatalf("Error initializing backoff: %v\n", err)
 	}
