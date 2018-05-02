@@ -18,6 +18,7 @@ package dispatcher
 
 import (
 	"log"
+
 	"github.com/projectriff/riff/message-transport/pkg/message"
 )
 
@@ -25,6 +26,7 @@ type wrapper struct {
 	old    SynchDispatcher
 	input  chan<- message.Message
 	output <-chan message.Message
+	closed <-chan struct{}
 }
 
 func (w *wrapper) Input() chan<- message.Message {
@@ -33,6 +35,10 @@ func (w *wrapper) Input() chan<- message.Message {
 
 func (w *wrapper) Output() <-chan message.Message {
 	return w.output
+}
+
+func (w *wrapper) Closed() <-chan struct{} {
+	return w.closed
 }
 
 // PropagatedHeaders is the set of header names that will be copied from the incoming message

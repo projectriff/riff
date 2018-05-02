@@ -74,7 +74,7 @@ func Test(t *testing.T) {
 	go server.Serve(l)
 	defer server.Stop()
 
-	d, err := gdispatcher.NewGrpcDispatcher(port)
+	d, err := gdispatcher.NewGrpcDispatcher(port, 30 * time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}

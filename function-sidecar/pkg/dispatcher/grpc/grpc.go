@@ -23,19 +23,21 @@ import (
 	"log"
 	"time"
 
+	"io"
+
 	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher"
 	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher/grpc/function"
 	"github.com/projectriff/riff/message-transport/pkg/message"
 	"golang.org/x/net/context"
-	"io"
-	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type grpcDispatcher struct {
 	stream function.MessageFunction_CallClient
 	input  chan message.Message
 	output chan message.Message
+	closed chan struct{}
 }
 
 func (this *grpcDispatcher) Input() chan<- message.Message {
@@ -44,6 +46,10 @@ func (this *grpcDispatcher) Input() chan<- message.Message {
 
 func (this *grpcDispatcher) Output() <-chan message.Message {
 	return this.output
+}
+
+func (this *grpcDispatcher) Closed() <-chan struct{} {
+	return this.closed
 }
 
 func (this *grpcDispatcher) handleIncoming() {
@@ -55,6 +61,7 @@ func (this *grpcDispatcher) handleIncoming() {
 				err := this.stream.Send(grpcMessage)
 				if err != nil {
 					if streamClosureDiagnosed(err) {
+						close(this.closed)
 						return
 					}
 
@@ -74,6 +81,7 @@ func (this *grpcDispatcher) handleOutgoing() {
 		reply, err := this.stream.Recv()
 		if err != nil {
 			if streamClosureDiagnosed(err) {
+				close(this.closed)
 				return
 			}
 
@@ -87,7 +95,6 @@ func (this *grpcDispatcher) handleOutgoing() {
 
 func streamClosureDiagnosed(err error) bool {
 	if err == io.EOF {
-		log.Println("Stream to function has closed")
 		return true
 	}
 
@@ -100,8 +107,8 @@ func streamClosureDiagnosed(err error) bool {
 	return false
 }
 
-func NewGrpcDispatcher(port int) (dispatcher.Dispatcher, error) {
-	ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
+func NewGrpcDispatcher(port int, timeout time.Duration) (dispatcher.Dispatcher, error) {
+	ctx, _ := context.WithTimeout(context.Background(), timeout)
 	conn, err := grpc.DialContext(ctx, fmt.Sprintf("localhost:%v", port), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, err
@@ -112,7 +119,7 @@ func NewGrpcDispatcher(port int) (dispatcher.Dispatcher, error) {
 		return nil, err
 	}
 
-	result := &grpcDispatcher{fnStream, make(chan message.Message, 100), make(chan message.Message, 100)}
+	result := &grpcDispatcher{fnStream, make(chan message.Message, 100), make(chan message.Message, 100), make(chan struct{})}
 	go result.handleIncoming()
 	go result.handleOutgoing()
 
