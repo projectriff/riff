@@ -18,6 +18,7 @@ package http
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -34,22 +35,24 @@ const ConnectionAttemptTimeout = 1 * time.Minute
 const ConnectionAttemptInterval = 100 * time.Millisecond
 
 type httpDispatcher struct {
+	port int
 }
 
-func (httpDispatcher) Dispatch(in message.Message) (message.Message, error) {
+func (hd httpDispatcher) Dispatch(in message.Message) (message.Message, error) {
 	client := http.Client{
 		Timeout: time.Duration(60 * time.Second),
 	}
-	req, err := http.NewRequest("POST", "http://localhost:8080", bytes.NewReader(in.Payload()))
+	url := fmt.Sprintf("http://localhost:%d", hd.port)
+	req, err := http.NewRequest("POST", url, bytes.NewReader(in.Payload()))
 	if err != nil {
-		log.Printf("Error creating POST request to http://localhost:8080: %v", err)
+		log.Printf("Error creating POST request to %s: %v", url, err)
 		return nil, err
 	}
 	propagateIncomingHeaders(in, req)
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("Error invoking http://localhost:8080: %v", err)
+		log.Printf("Error invoking %s: %v", url, err)
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -79,10 +82,10 @@ func propagateOutgoingHeaders(resp *http.Response, message message.Message) {
 	}
 }
 
-func NewHttpDispatcher() dispatcher.SynchDispatcher {
+func NewHttpDispatcher(port int) dispatcher.SynchDispatcher {
 	attemptDial := func() error {
-		log.Println("Waiting for function to accept connection on localhost:8080")
-		_, err := net.Dial("tcp", "localhost:8080")
+		log.Printf("Waiting for function to accept connection on localhost:%d\n", port)
+		_, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", port))
 		return err
 	}
 
@@ -93,5 +96,7 @@ func NewHttpDispatcher() dispatcher.SynchDispatcher {
 	if err != nil {
 		panic(err)
 	}
-	return httpDispatcher{}
+	return httpDispatcher{
+		port,
+	}
 }
