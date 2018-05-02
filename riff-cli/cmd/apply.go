@@ -94,7 +94,7 @@ func apply(opts ApplyOptions, kubectlClient kubectl.KubeCtl) error {
 		cmdArgs = append(cmdArgs, "-f", abs)
 	}
 	if len(resourceDefinitionPaths) == 0 {
-		fmt.Printf("No function resources found in %v\n", opts.FilePath)
+		fmt.Printf("No riff resources found in %v\n", opts.FilePath)
 		return nil
 	}
 	fmt.Print(message)
