@@ -298,9 +298,6 @@ var _ = Describe("The create command", func() {
 		dryRunDocker.On("Exec", "build", "-t", "rifftest/demo:0.0.1", path).
 			Return(nil).
 			Once()
-		dryRunKubeCtl.On("Exec", []string{"apply"}).
-			Return("", nil).
-			Once()
 
 		err = rootCommand.Execute()
 		Expect(err).NotTo(HaveOccurred())
@@ -322,9 +319,6 @@ var _ = Describe("The create command", func() {
 
 		dryRunDocker.On("Exec", "build", "-t", "rifftest/demo:0.0.1-snapshot", path).
 			Return(nil).
-			Once()
-		dryRunKubeCtl.On("Exec", []string{"apply"}).
-			Return("", nil).
 			Once()
 
 		err = rootCommand.Execute()
@@ -349,9 +343,6 @@ var _ = Describe("The create command", func() {
 		dryRunDocker.On("Exec", "build", "-t", "rifftest/demo:0.0.1-snapshot", path).
 			Return(nil).
 			Once()
-		dryRunKubeCtl.On("Exec", []string{"apply"}).
-			Return("", nil).
-			Once()
 
 		err = rootCommand.Execute()
 		Expect(err).NotTo(HaveOccurred())
@@ -374,9 +365,6 @@ var _ = Describe("The create command", func() {
 
 		dryRunDocker.On("Exec", "build", "-t", "rifftest/java:0.0.1", ".").
 			Return(nil).
-			Once()
-		dryRunKubeCtl.On("Exec", []string{"apply"}).
-			Return("", nil).
 			Once()
 
 		err = rootCommand.Execute()

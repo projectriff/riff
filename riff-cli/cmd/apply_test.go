@@ -166,7 +166,14 @@ var _ = Describe("The apply command", func() {
 	})
 
 	It("should report kubectl errors", func() {
-		realKubeCtl.On("Exec", []string{"apply"}).Return("", fmt.Errorf("Whoops"))
+		relPath := "../test_data/command/fn-with-existing-files"
+		absPath, _ := filepath.Abs(relPath)
+		applyCmd.SetArgs([]string{relPath})
+		args := []string{"apply"}
+		for _, f := range []string{"apples-function.yaml", "oranges-function.yaml", "echo-topics.yaml"} {
+			args = append(append(args, "-f"), filepath.Join(absPath, f))
+		}
+		realKubeCtl.On("Exec", args).Return("", fmt.Errorf("Whoops"))
 
 		err := applyCmd.Execute()
 		Expect(err).To(MatchError("Whoops"))
