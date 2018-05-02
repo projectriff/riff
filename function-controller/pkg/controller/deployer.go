@@ -36,7 +36,11 @@ const (
 )
 
 var (
-	zero = int32(0)
+	zero  = int32(0)
+	ports = map[string]string{
+		"http": "8080",
+		"grpc": "10382",
+	}
 )
 
 // Deployer allows the realisation of a function on k8s and its subsequent scaling to accommodate more/less load.
@@ -95,6 +99,14 @@ func (d *deployer) buildMainContainer(function *v1.Function) corev1.Container {
 		Name:  "RIFF_FUNCTION_INVOKER_PROTOCOL",
 		Value: function.Spec.Protocol,
 	})
+	c.Env = append(c.Env, corev1.EnvVar{
+		Name:  "HTTP_PORT",
+		Value: ports["http"],
+	})
+	c.Env = append(c.Env, corev1.EnvVar{
+		Name:  "GRPC_PORT",
+		Value: ports["grpc"],
+	})
 	return c
 }
 
@@ -114,6 +126,7 @@ func (d *deployer) buildSidecarContainer(function *v1.Function) corev1.Container
 		"--outputs", outputDestination,
 		"--group", function.Name,
 		"--protocol", function.Spec.Protocol,
+		"--port", ports[function.Spec.Protocol],
 		"--brokers", strings.Join(d.brokers, ","),
 	}
 	return c

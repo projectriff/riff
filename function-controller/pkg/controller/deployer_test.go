@@ -54,6 +54,31 @@ var _ = Describe("Deployer", func() {
 					Value: "grpc",
 				}))
 			})
+			It("should set the sidecar --protocol and --port arg", func() {
+				deployment := d.buildDeployment(&function)
+				sidecarContainer := deployment.Spec.Template.Spec.Containers[1]
+				args := sidecarContainer.Args
+				Expect(args[indexOf(args, "--protocol")+1]).To(Equal("grpc"))
+				Expect(args[indexOf(args, "--port")+1]).To(Equal("10382"))
+			})
+
+			It("should set the HTTP_PORT var", func() {
+				deployment := d.buildDeployment(&function)
+				mainContainer := deployment.Spec.Template.Spec.Containers[0]
+				Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
+					Name:  "HTTP_PORT",
+					Value: "8080",
+				}))
+			})
+
+			It("should set the GRPC_PORT var", func() {
+				deployment := d.buildDeployment(&function)
+				mainContainer := deployment.Spec.Template.Spec.Containers[0]
+				Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
+					Name:  "GRPC_PORT",
+					Value: "10382",
+				}))
+			})
 		})
 
 		Context("when the protocol is http", func() {
@@ -70,7 +95,42 @@ var _ = Describe("Deployer", func() {
 					Value: "http",
 				}))
 			})
+
+			It("should set the sidecar --protocol and --port arg", func() {
+				deployment := d.buildDeployment(&function)
+				sidecarContainer := deployment.Spec.Template.Spec.Containers[1]
+				args := sidecarContainer.Args
+				Expect(args[indexOf(args, "--protocol")+1]).To(Equal("http"))
+				Expect(args[indexOf(args, "--port")+1]).To(Equal("8080"))
+			})
+
+			It("should set the HTTP_PORT var", func() {
+				deployment := d.buildDeployment(&function)
+				mainContainer := deployment.Spec.Template.Spec.Containers[0]
+				Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
+					Name:  "HTTP_PORT",
+					Value: "8080",
+				}))
+			})
+
+			It("should set the GRPC_PORT var", func() {
+				deployment := d.buildDeployment(&function)
+				mainContainer := deployment.Spec.Template.Spec.Containers[0]
+				Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
+					Name:  "GRPC_PORT",
+					Value: "10382",
+				}))
+			})
 		})
 	})
 
 })
+
+func indexOf(slice []string, elem string) int {
+	for index, item := range slice {
+		if item == elem {
+			return index
+		}
+	}
+	return -1
+}

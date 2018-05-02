@@ -55,7 +55,7 @@ var brokers stringSlice = []string{"localhost:9092"}
 var inputs, outputs stringSlice
 var group, protocol string
 var exitOnComplete = false
-var backoffDurationMs, backoffMultiplier, backoffMaxRetries int
+var backoffDurationMs, backoffMultiplier, backoffMaxRetries, port int
 
 func init() {
 	flag.Var(&brokers, "brokers", "location of the Kafka server(s) to connect to")
@@ -63,6 +63,7 @@ func init() {
 	flag.Var(&outputs, "outputs", "kafka topic(s) to write to with results from the function")
 	flag.StringVar(&group, "group", "", "kafka consumer group to act as")
 	flag.StringVar(&protocol, "protocol", "", "dispatcher protocol to use. One of [http, grpc]")
+	flag.IntVar(&port, "port", -1, "invoker port to call")
 	flag.BoolVar(&exitOnComplete, "exitOnComplete", false, "flag to signal that the sidecar should exit when the output stream is closed")
 	flag.IntVar(&backoffMaxRetries, "maxBackoffRetries", 3, "maximum number of times to retry connecting to the invoker")
 	flag.IntVar(&backoffMultiplier, "backoffMultiplier", 2, "wait time increase for each retry")
@@ -175,7 +176,7 @@ func backoffOrExit(backoff *backoff.Backoff) bool {
 func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
 	switch protocol {
 	case "http":
-		return dispatch.NewWrapper(http.NewHttpDispatcher())
+		return dispatch.NewWrapper(http.NewHttpDispatcher(port))
 	case "grpc":
 		var timeout time.Duration
 		if exitOnComplete {
@@ -183,7 +184,7 @@ func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
 		} else {
 			timeout = 100 * time.Millisecond
 		}
-		return grpc.NewGrpcDispatcher(10382, timeout)
+		return grpc.NewGrpcDispatcher(port, timeout)
 	default:
 		panic("Unsupported Dispatcher " + protocol)
 	}

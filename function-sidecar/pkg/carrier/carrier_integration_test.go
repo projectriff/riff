@@ -17,21 +17,22 @@
 package carrier_test
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"bufio"
+	"math/rand"
 	"net/http"
 	"os"
-	"bufio"
-	"github.com/bsm/sarama-cluster"
-	"math/rand"
 	"time"
+
 	"github.com/Shopify/sarama"
-	"github.com/projectriff/riff/message-transport/pkg/message"
-	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
+	"github.com/bsm/sarama-cluster"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/function-sidecar/pkg/carrier"
 	dispatch "github.com/projectriff/riff/function-sidecar/pkg/dispatcher"
 	dispatchhttp "github.com/projectriff/riff/function-sidecar/pkg/dispatcher/http"
+	"github.com/projectriff/riff/message-transport/pkg/message"
 	"github.com/projectriff/riff/message-transport/pkg/transport"
+	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
 )
 
 const sourceMsg = `World`
@@ -52,7 +53,7 @@ var _ = Describe("Carrier Integration Test", func() {
 
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			bodyScanner := bufio.NewScanner(r.Body)
-			if ! bodyScanner.Scan() {
+			if !bodyScanner.Scan() {
 				Fail("Scan of message body failed")
 			}
 			w.Write([]byte("Hello " + bodyScanner.Text()))
@@ -115,7 +116,7 @@ func startFunctionSidecar(broker string, input string, output string, group stri
 	consumer, err := kafka.NewConsumer(brokers, group, []string{input}, consumerConfig)
 	Expect(err).NotTo(HaveOccurred())
 
-	dispatcher, err := dispatch.NewWrapper(dispatchhttp.NewHttpDispatcher())
+	dispatcher, err := dispatch.NewWrapper(dispatchhttp.NewHttpDispatcher(8080))
 	Expect(err).NotTo(HaveOccurred())
 
 	go carrier.Run(consumer, producer, dispatcher, output)
