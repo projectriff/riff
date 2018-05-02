@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   name: topics.projectriff.io
 spec:
-  scope: Namespaced
+  scope: Cluster
   group: projectriff.io
   version: v1alpha1
   names:
