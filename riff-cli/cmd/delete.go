@@ -92,15 +92,11 @@ func deleteFunctionByName(opts DeleteOptions, actingClient kubectl.KubeCtl, quer
 			}
 			if inputTopic != "" {
 				cmdArgs[2] = inputTopic
-				if err := deleteResources(cmdArgs, actingClient); err != nil {
-					return nil
-				}
+				deleteResources(cmdArgs, actingClient)
 			}
 			if outputTopic != "" {
 				cmdArgs[2] = outputTopic
-				if err := deleteResources(cmdArgs, actingClient); err != nil {
-					return nil
-				}
+				deleteResources(cmdArgs, actingClient)
 			}
 		}
 	}
@@ -129,11 +125,12 @@ func lookupTopicNames(opts DeleteOptions, queryClient kubectl.KubeCtl) (string, 
 		getArgs = append(getArgs, "--namespace", opts.Namespace)
 	}
 	getArgs = append(getArgs, "functions.projectriff.io", opts.FunctionName, "-o", "json")
-	json, err := queryClient.Exec(getArgs)
+	output, err := queryClient.Exec(getArgs)
 	if err != nil {
+		fmt.Println(output)
 		return "", "", err
 	}
-	parser := jsonpath.NewParser([]byte(json))
+	parser := jsonpath.NewParser([]byte(output))
 
 	inputTopic, _ := parser.StringValue(`$.spec.input`)
 	outputTopic, _ := parser.StringValue(`$.spec.output`)

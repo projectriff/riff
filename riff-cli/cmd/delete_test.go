@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/juju/errgo/errors"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
@@ -73,6 +74,33 @@ var _ = Describe("The delete command", func() {
 
 			realKubeCtl.On("Exec", []string{"get", "functions.projectriff.io", "echo", "-o", "json"}).Return(canned_kubectl_get_response, nil)
 			realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myInputTopic"}).Return("", nil)
+			realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myOutputTopic"}).Return("", nil)
+
+			err := deleteCmd.Execute()
+			Expect(err).NotTo(HaveOccurred())
+
+		})
+
+		It("should delete the function when run with --all and the topics do not exist", func() {
+
+			deleteCmd.SetArgs([]string{"--all"})
+			realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "echo"}).Return("", nil)
+
+			realKubeCtl.On("Exec", []string{"get", "functions.projectriff.io", "echo", "-o", "json"}).Return(canned_kubectl_get_response, nil)
+			realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myInputTopic"}).Return("", errors.New("Error from server (NotFound): topics.projectriff.io \"myInputTopic\" not found"))
+			realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myOutputTopic"}).Return("", errors.New("Error from server (NotFound): topics.projectriff.io \"myOutputTopic\" not found"))
+
+			err := deleteCmd.Execute()
+			Expect(err).NotTo(HaveOccurred())
+
+		})
+		It("should delete the function when run with --all and one topic do not exist", func() {
+
+			deleteCmd.SetArgs([]string{"--all"})
+			realKubeCtl.On("Exec", []string{"delete", "functions.projectriff.io", "echo"}).Return("", nil)
+
+			realKubeCtl.On("Exec", []string{"get", "functions.projectriff.io", "echo", "-o", "json"}).Return(canned_kubectl_get_response, nil)
+			realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myInputTopic"}).Return("", errors.New("Error from server (NotFound): topics.projectriff.io \"myInputTopic\" not found"))
 			realKubeCtl.On("Exec", []string{"delete", "topics.projectriff.io", "myOutputTopic"}).Return("", nil)
 
 			err := deleteCmd.Execute()
