@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/mock"
 )
 
 var _ = Describe("The apply command", func() {
@@ -166,14 +167,8 @@ var _ = Describe("The apply command", func() {
 	})
 
 	It("should report kubectl errors", func() {
-		relPath := "../test_data/command/fn-with-existing-files"
-		absPath, _ := filepath.Abs(relPath)
-		applyCmd.SetArgs([]string{relPath})
-		args := []string{"apply"}
-		for _, f := range []string{"apples-function.yaml", "oranges-function.yaml", "echo-topics.yaml"} {
-			args = append(append(args, "-f"), filepath.Join(absPath, f))
-		}
-		realKubeCtl.On("Exec", args).Return("", fmt.Errorf("Whoops"))
+		applyCmd.SetArgs([]string{"../test_data/command/fn-with-existing-files"})
+		realKubeCtl.On("Exec", mock.MatchedBy(func(interface{}) bool { return true })).Return("", fmt.Errorf("Whoops"))
 
 		err := applyCmd.Execute()
 		Expect(err).To(MatchError("Whoops"))
