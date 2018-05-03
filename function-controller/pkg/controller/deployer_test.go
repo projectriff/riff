@@ -38,6 +38,7 @@ var _ = Describe("Deployer", func() {
 
 		BeforeEach(func() {
 			function = v1.Function{}
+			v1.SetDefaults_FunctionSpec(&function.Spec)
 		})
 
 		Context("when the protocol is grpc", func() {

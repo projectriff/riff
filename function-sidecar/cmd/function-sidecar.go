@@ -95,7 +95,7 @@ func main() {
 		output = ""
 	}
 
-	log.Printf("Sidecar for function '%v' (%v->%v) using %v on port %v dispatcher starting\n", group, input, output, protocol, port)
+	log.Printf("Sidecar for function '%v' (%v->%v) using dispatcher %v on port %v starting\n", group, input, output, protocol, port)
 
 	var producer transport.Producer
 
