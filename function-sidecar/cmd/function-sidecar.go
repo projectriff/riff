@@ -55,7 +55,7 @@ var brokers stringSlice = []string{"localhost:9092"}
 var inputs, outputs stringSlice
 var group, protocol string
 var exitOnComplete = false
-var backoffDurationMs, backoffMultiplier, backoffMaxRetries, port int
+var backoffDurationMs, backoffMultiplier, backoffMaxRetries, initialDelayMs, port int
 
 func init() {
 	flag.Var(&brokers, "brokers", "location of the Kafka server(s) to connect to")
@@ -64,6 +64,7 @@ func init() {
 	flag.StringVar(&group, "group", "", "kafka consumer group to act as")
 	flag.StringVar(&protocol, "protocol", "", "dispatcher protocol to use. One of [http, grpc]")
 	flag.IntVar(&port, "port", -1, "invoker port to call")
+	flag.IntVar(&initialDelayMs, "initialDelay", 0, "time to wait (ms) for function container to initialize")
 	flag.BoolVar(&exitOnComplete, "exitOnComplete", false, "flag to signal that the sidecar should exit when the output stream is closed")
 	flag.IntVar(&backoffMaxRetries, "maxBackoffRetries", 3, "maximum number of times to retry connecting to the invoker")
 	flag.IntVar(&backoffMultiplier, "backoffMultiplier", 2, "wait time increase for each retry")
@@ -94,7 +95,7 @@ func main() {
 		output = ""
 	}
 
-	log.Printf("Sidecar for function '%v' (%v->%v) using %v dispatcher starting\n", group, input, output, protocol)
+	log.Printf("Sidecar for function '%v' (%v->%v) using %v on port %v dispatcher starting\n", group, input, output, protocol, port)
 
 	var producer transport.Producer
 
@@ -135,6 +136,10 @@ LOOP:
 			log.Println("Shutting Down...")
 			break LOOP
 		default:
+		}
+
+		if initialDelayMs > 0 {
+			time.Sleep(time.Duration(initialDelayMs))
 		}
 
 		log.Print("Creating dispatcher")

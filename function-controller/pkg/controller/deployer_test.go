@@ -122,6 +122,19 @@ var _ = Describe("Deployer", func() {
 				}))
 			})
 		})
+
+		Context("when initialDelayMs is set", func() {
+			BeforeEach(func() {
+				initialDelay := int32(5000)
+				function.Spec.InitialDelayMs = &initialDelay
+			})
+			It("should set the initialDelayMs value", func() {
+				deployment := d.buildDeployment(&function)
+				sidecarContainer := deployment.Spec.Template.Spec.Containers[1]
+				args := sidecarContainer.Args
+				Expect(args[indexOf(args, "--initialDelay")+1]).To(Equal("5000"))
+			})
+		})
 	})
 
 })
