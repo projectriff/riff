@@ -23,6 +23,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/giantswarm/retry-go"
@@ -33,6 +34,12 @@ import (
 const UseTimeout = 10000000 // "Infinite" number of retries to override default and use the Timeout approach instead
 const ConnectionAttemptTimeout = 1 * time.Minute
 const ConnectionAttemptInterval = 100 * time.Millisecond
+
+var headerBlacklist = map[string]*void{
+	"correlationid": &void{},
+}
+
+type void struct{}
 
 type httpDispatcher struct {
 	port int
@@ -70,15 +77,19 @@ func (hd httpDispatcher) Dispatch(in message.Message) (message.Message, error) {
 
 func propagateIncomingHeaders(message message.Message, request *http.Request) {
 	for h, ss := range message.Headers() {
-		for _, s := range ss {
-			request.Header.Add(h, s)
+		if headerBlacklist[strings.ToLower(h)] == nil {
+			for _, s := range ss {
+				request.Header.Add(h, s)
+			}
 		}
 	}
 }
 
 func propagateOutgoingHeaders(resp *http.Response, message message.Message) {
 	for h, v := range resp.Header {
-		message.Headers()[h] = v
+		if headerBlacklist[strings.ToLower(h)] == nil {
+			message.Headers()[h] = v
+		}
 	}
 }
 
