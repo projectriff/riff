@@ -56,6 +56,10 @@ type FunctionSpec struct {
 	// +optional
 	IdleTimeoutMs *int32 `json:"idleTimeoutMs,omitempty"`
 
+	// How long to wait for the function to initialize.
+	// +optional
+	InitialDelayMs *int32 `json:"initialDelayMs,omitempty"`
+
 	// Container definition to use for the function.
 	Container kapi.Container `json:"container"`
 }
@@ -74,9 +78,13 @@ type FunctionList struct {
 }
 
 var defaultIdleTimeout = int32(10000)
+var defaultInitialDelay = int32(0)
 
 func SetDefaults_FunctionSpec(obj *FunctionSpec) {
 	if obj.IdleTimeoutMs == nil {
 		obj.IdleTimeoutMs = &defaultIdleTimeout
+	}
+	if obj.InitialDelayMs == nil {
+		obj.InitialDelayMs = &defaultInitialDelay
 	}
 }

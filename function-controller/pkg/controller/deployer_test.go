@@ -38,6 +38,7 @@ var _ = Describe("Deployer", func() {
 
 		BeforeEach(func() {
 			function = v1.Function{}
+			v1.SetDefaults_FunctionSpec(&function.Spec)
 		})
 
 		Context("when the protocol is grpc", func() {
@@ -120,6 +121,19 @@ var _ = Describe("Deployer", func() {
 					Name:  "GRPC_PORT",
 					Value: "10382",
 				}))
+			})
+		})
+
+		Context("when initialDelayMs is set", func() {
+			BeforeEach(func() {
+				initialDelay := int32(5000)
+				function.Spec.InitialDelayMs = &initialDelay
+			})
+			It("should set the initialDelayMs value", func() {
+				deployment := d.buildDeployment(&function)
+				sidecarContainer := deployment.Spec.Template.Spec.Containers[1]
+				args := sidecarContainer.Args
+				Expect(args[indexOf(args, "--initialDelay")+1]).To(Equal("5000"))
 			})
 		})
 	})

@@ -18,6 +18,7 @@ package controller
 
 import (
 	"log"
+	"strconv"
 
 	"os"
 
@@ -121,12 +122,15 @@ func (d *deployer) buildSidecarContainer(function *v1.Function) corev1.Container
 	if outputDestination == "" {
 		outputDestination = "replies"
 	}
+
+	//Check for nil and convert int32 to int and then to str.
 	c.Args = []string{
 		"--inputs", function.Spec.Input,
 		"--outputs", outputDestination,
 		"--group", function.Name,
 		"--protocol", function.Spec.Protocol,
 		"--port", ports[function.Spec.Protocol],
+		"--initialDelay", strconv.Itoa(int(*function.Spec.InitialDelayMs)),
 		"--brokers", strings.Join(d.brokers, ","),
 	}
 	return c
