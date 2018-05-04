@@ -36,7 +36,6 @@ func validateFunctionName(name *string, path string) error {
 
 func validateAndCleanArtifact(artifact *string, path string) error {
 	if *artifact != "" {
-		fmt.Printf("artifact: %v\n", *artifact)
 		absFilePath, err := filepath.Abs(path)
 		if err != nil {
 			return err
