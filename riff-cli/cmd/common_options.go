@@ -43,8 +43,8 @@ func validateAndCleanArtifact(artifact *string, path string) error {
 		}
 
 		/*
-		 *	If artifact is relative to current directory or an absolute path then use the absolute path
-		 *  else make it relative to the file path directory. But it must be in the file path directory.
+		 * If artifact is relative to current directory or an absolute path then use the absolute path
+		 * else make it relative to the file path directory. But it must be in the file path directory.
 		 */
 		var absArtifactPath string
 		if strings.IndexRune(*artifact, '.') == 0 || strings.IndexRune(*artifact, os.PathSeparator) == 0 {
@@ -81,7 +81,6 @@ func validateAndCleanArtifact(artifact *string, path string) error {
 			return fmt.Errorf("artifact %s conflicts with filepath %s", absArtifactPath, absFilePath)
 		}
 		*artifact = strings.Replace(absArtifactPath, absFilePath+string(os.PathSeparator), "", 1)
-		fmt.Printf("artifact = %s\n", *artifact)
 	}
 
 	return nil

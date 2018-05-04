@@ -225,6 +225,22 @@ var _ = Describe("The init command", func() {
 		Expect(".").NotTo(HaveUnstagedChanges())
 	})
 
+	It("should allow artifact to be relative to $CWD", func() {
+		relDir := "../test_data/riff-init/matching-invoker-with-invoker-version"
+		invokers, err := stubInvokers(filepath.Join(relDir, "invokers/*.yaml"))
+		Expect(err).NotTo(HaveOccurred())
+
+		rootCommand, _, _, _, err := setupInitTest(invokers)
+		Expect(err).NotTo(HaveOccurred())
+
+		rootCommand.SetArgs(append([]string{"init", "node", "--filepath", relDir, "--artifact", filepath.Join(relDir, "echo.js"), "--invoker-version", "latest"}, commonRiffArgs...))
+
+		err = rootCommand.Execute()
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(relDir).NotTo(HaveUnstagedChanges())
+	})
+
 	It("should allow artifact to be an absolute path", func() {
 		relDir := "../test_data/riff-init/matching-invoker-with-invoker-version"
 		invokers, err := stubInvokers(filepath.Join(relDir, "invokers/*.yaml"))
