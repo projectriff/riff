@@ -65,9 +65,9 @@ func init() {
 	flag.StringVar(&protocol, "protocol", "", "dispatcher protocol to use. One of [http, grpc]")
 	flag.IntVar(&port, "port", -1, "invoker port to call")
 	flag.BoolVar(&exitOnComplete, "exitOnComplete", false, "flag to signal that the sidecar should exit when the output stream is closed")
-	flag.IntVar(&backoffMaxRetries, "maxBackoffRetries", 3, "maximum number of times to retry connecting to the invoker")
-	flag.IntVar(&backoffMultiplier, "backoffMultiplier", 2, "wait time increase for each retry")
-	flag.IntVar(&backoffDurationMs, "backoffDuration", 1000, "base wait time (ms) to wait before retry")
+	flag.IntVar(&backoffMaxRetries, "maxBackoffRetries", 1000, "maximum number of times to retry connecting to the invoker")
+	flag.IntVar(&backoffMultiplier, "backoffMultiplier", 1, "wait time increase for each retry")
+	flag.IntVar(&backoffDurationMs, "backoffDuration", 60, "base wait time (ms) to wait before retry")
 
 }
 
@@ -143,7 +143,7 @@ LOOP:
 			if !backoffOrExit(backoffPtr) {
 				panic(err)
 			} else {
-				log.Printf("Error %v attempting to create dispatcher\n", err)
+				log.Printf("%v attempting to create dispatcher. Retrying...\n", err)
 				continue LOOP
 			}
 		}
@@ -182,7 +182,7 @@ func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
 		if exitOnComplete {
 			timeout = 60 * time.Second
 		} else {
-			timeout = 100 * time.Millisecond
+			timeout = 500 * time.Millisecond
 		}
 		return grpc.NewGrpcDispatcher(port, timeout)
 	default:
