@@ -41,12 +41,9 @@ func validateAndCleanArtifact(artifact *string, path string) error {
 			return err
 		}
 
-		/*
-		 * If artifact is relative to current directory or an absolute path then use the absolute path
-		 * else make it relative to the file path directory. But it must be in the file path directory.
-		 */
 		var absArtifactPath string
-		if strings.IndexRune(*artifact, '.') == 0 || strings.IndexRune(*artifact, os.PathSeparator) == 0 {
+		//If the artifact exists convert get the absolute path. If it doesn't exist, it may exist relative to the filepath
+		if osutils.FileExists(*artifact) {
 			absArtifactPath, err = filepath.Abs(*artifact)
 			if err != nil {
 				return err
