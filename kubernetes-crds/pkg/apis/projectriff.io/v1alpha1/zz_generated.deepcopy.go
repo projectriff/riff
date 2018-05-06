@@ -452,6 +452,7 @@ func (in *InvokerSpec) DeepCopyInto(out *InvokerSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	in.BindingTemplate.DeepCopyInto(&out.BindingTemplate)
 	in.FunctionTemplate.DeepCopyInto(&out.FunctionTemplate)
 	in.TopicTemplate.DeepCopyInto(&out.TopicTemplate)
 	out.Handler = in.Handler

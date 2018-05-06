@@ -37,7 +37,7 @@ type Binding struct {
 type BindingSpec struct {
 
 	// The name of the function to bind
-	Handler string `json:"handler"`
+	Function string `json:"function"`
 
 	// The name of the topic the function is monitoring for input messages.
 	// +optional

@@ -4,5 +4,5 @@ kind: Binding
 metadata:
   name: matching-invoker-with-version
 spec:
-  handler: matching-invoker-with-version
+  function: matching-invoker-with-version
   input: matching-invoker-with-version

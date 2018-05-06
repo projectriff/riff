@@ -4,5 +4,5 @@ kind: Binding
 metadata:
   name: multiple-matching-invokers-with-one-selected
 spec:
-  handler: multiple-matching-invokers-with-one-selected
+  function: multiple-matching-invokers-with-one-selected
   input: multiple-matching-invokers-with-one-selected

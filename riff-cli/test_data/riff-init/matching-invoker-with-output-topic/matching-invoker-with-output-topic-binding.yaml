@@ -4,6 +4,6 @@ kind: Binding
 metadata:
   name: matching-invoker-with-output-topic
 spec:
-  handler: matching-invoker-with-output-topic
+  function: matching-invoker-with-output-topic
   input: matching-invoker-with-output-topic
   output: soundReflection

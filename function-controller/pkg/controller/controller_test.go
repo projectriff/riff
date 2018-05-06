@@ -113,8 +113,8 @@ var _ = Describe("Controller", func() {
 
 	It("should create, update and remove a binding for a function", func() {
 		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-		binding1 := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Handler: "fn", Input: "input1"}}
-		binding2 := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Handler: "fn", Input: "input2"}}
+		binding1 := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Function: "fn", Input: "input1"}}
+		binding2 := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Function: "fn", Input: "input2"}}
 
 		deployer.On("Deploy", binding1, function).Return(nil).Run(func(args mock.Arguments) {
 			bindingHandlers.UpdateFunc(binding1, binding2)
@@ -134,8 +134,8 @@ var _ = Describe("Controller", func() {
 
 	It("should handle multiple bindings for a function", func() {
 		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-		binding1 := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn1"}, Spec: v1.BindingSpec{Handler: "fn", Input: "input"}}
-		binding2 := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn2"}, Spec: v1.BindingSpec{Handler: "fn", Input: "input"}}
+		binding1 := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn1"}, Spec: v1.BindingSpec{Function: "fn", Input: "input"}}
+		binding2 := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn2"}, Spec: v1.BindingSpec{Function: "fn", Input: "input"}}
 
 		deployer.On("Deploy", binding1, function).Return(nil).Run(func(args mock.Arguments) {
 			bindingHandlers.AddFunc(binding2)
@@ -160,7 +160,7 @@ var _ = Describe("Controller", func() {
 		ctrl.SetScalingInterval(10 * time.Millisecond)
 
 		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-		binding := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Handler: "fn", Input: "input"}}
+		binding := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Function: "fn", Input: "input"}}
 		deployer.On("Deploy", binding, function).Return(nil)
 		proposal := make(map[autoscaler.FunctionId]int)
 		proposal[autoscaler.FunctionId{"fn"}] = 1
@@ -183,8 +183,8 @@ var _ = Describe("Controller", func() {
 
 	It("should handle bindings being updated", func() {
 		fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-		b1 := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Handler: "fn", Input: "input"}}
-		b2 := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Handler: "fn", Input: "input2"}}
+		b1 := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Function: "fn", Input: "input"}}
+		b2 := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Function: "fn", Input: "input2"}}
 
 		deployer.On("Deploy", b1, fn).Return(nil).Run(func(args mock.Arguments) {
 			bindingHandlers.UpdateFunc(b1, b2)
@@ -203,7 +203,7 @@ var _ = Describe("Controller", func() {
 	It("should handle functions being updated", func() {
 		fn1 := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Protocol: "http"}}
 		fn2 := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Protocol: "grpc"}}
-		b := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Handler: "fn", Input: "input"}}
+		b := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Function: "fn", Input: "input"}}
 
 		deployer.On("Deploy", b, fn1).Return(nil).Run(func(args mock.Arguments) {
 			functionHandlers.UpdateFunc(fn1, fn2)
@@ -223,7 +223,7 @@ var _ = Describe("Controller", func() {
 		ctrl.SetScalingInterval(10 * time.Millisecond)
 
 		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-		binding := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Handler: "fn", Input: "input"}}
+		binding := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Function: "fn", Input: "input"}}
 		deployer.On("Deploy", binding, function).Return(nil)
 
 		three := int32(3)
@@ -261,7 +261,7 @@ var _ = Describe("Controller", func() {
 		ctrl.SetScalingInterval(10 * time.Millisecond)
 
 		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-		binding := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Handler: "fn", Input: "input"}}
+		binding := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Function: "fn", Input: "input"}}
 		deployer.On("Deploy", binding, function).Return(nil)
 
 		computes := 0
@@ -322,7 +322,7 @@ var _ = Describe("Controller", func() {
 			Context("when the function does not specify maxReplicas", func() {
 				BeforeEach(func() {
 					function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-					binding := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Handler: "fn", Input: "input"}}
+					binding := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Function: "fn", Input: "input"}}
 					deployer.On("Deploy", binding, function).Return(nil)
 					functionHandlers.AddFunc(function)
 					bindingHandlers.AddFunc(binding)
@@ -339,7 +339,7 @@ var _ = Describe("Controller", func() {
 				BeforeEach(func() {
 					five := int32(5)
 					function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{MaxReplicas: &five}}
-					binding := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Handler: "fn", Input: "input"}}
+					binding := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Function: "fn", Input: "input"}}
 					deployer.On("Deploy", binding, function).Return(nil)
 					functionHandlers.AddFunc(function)
 					bindingHandlers.AddFunc(binding)
@@ -358,7 +358,7 @@ var _ = Describe("Controller", func() {
 		Context("when the function does not specify idleTimeoutMs", func() {
 			BeforeEach(func() {
 				function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-				binding := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Handler: "fn", Input: "input"}}
+				binding := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Function: "fn", Input: "input"}}
 				deployer.On("Deploy", binding, function).Return(nil)
 				functionHandlers.AddFunc(function)
 				bindingHandlers.AddFunc(binding)
@@ -382,7 +382,7 @@ var _ = Describe("Controller", func() {
 			BeforeEach(func() {
 				idleTimeoutMs = 300
 				function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{IdleTimeoutMs: &idleTimeoutMs}}
-				binding := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Handler: "fn", Input: "input"}}
+				binding := &v1.Binding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.BindingSpec{Function: "fn", Input: "input"}}
 				deployer.On("Deploy", binding, function).Return(nil)
 				functionHandlers.AddFunc(function)
 				bindingHandlers.AddFunc(binding)

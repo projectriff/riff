@@ -45,6 +45,7 @@ func SetObjectDefaults_Function(in *Function) {
 
 func SetObjectDefaults_Invoker(in *Invoker) {
 	SetDefaults_InvokerSpec(&in.Spec)
+	SetObjectDefaults_Binding(&in.Spec.BindingTemplate)
 	SetObjectDefaults_Function(&in.Spec.FunctionTemplate)
 	SetObjectDefaults_Topic(&in.Spec.TopicTemplate)
 }

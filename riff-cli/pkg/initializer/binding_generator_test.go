@@ -45,7 +45,7 @@ kind: Binding
 metadata:
   name: myfunc
 spec:
-  handler: myfunc
+  function: myfunc
   input: in
 `)
 }
@@ -73,7 +73,7 @@ kind: Binding
 metadata:
   name: myfunc
 spec:
-  handler: myfunc
+  function: myfunc
   input: in
   output: out
 `)

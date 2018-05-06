@@ -204,7 +204,7 @@ func (c *ctrl) onFunctionDeleted(function *v1.Function) {
 func (c *ctrl) onBindingAdded(binding *v1.Binding) {
 	log.Printf("Binding added: %v", binding.Name)
 	c.bindings[bkey(binding)] = binding
-	function := c.functions[fnKey{binding.Spec.Handler}]
+	function := c.functions[fnKey{binding.Spec.Function}]
 	if function != nil {
 		c.createDeployment(binding, function)
 	}
@@ -230,7 +230,7 @@ func (c *ctrl) onBindingUpdated(oldBind *v1.Binding, newBind *v1.Binding) {
 		c.autoscaler.StartMonitoring(newBind.Spec.Input, autoscaler.FunctionId{newBind.Name})
 	}
 
-	function := c.functions[fnKey{newBind.Spec.Handler}]
+	function := c.functions[fnKey{newBind.Spec.Function}]
 	if function != nil {
 		err := c.deployer.Update(newBind, function, int(c.actualReplicas[bindKey]))
 		if err != nil {
@@ -304,7 +304,7 @@ func fkey(function *v1.Function) fnKey {
 	return fnKey{name: function.Name}
 }
 func bhkey(binding *v1.Binding) fnKey {
-	return fnKey{name: binding.Spec.Handler}
+	return fnKey{name: binding.Spec.Function}
 }
 
 func tkey(topic *v1.Topic) topicKey {
@@ -457,7 +457,7 @@ func New(topicInformer informersV1.TopicInformer,
 				}
 			}
 
-			if fn, ok := pctrl.functions[fnKey{binding.Spec.Handler}]; ok {
+			if fn, ok := pctrl.functions[fnKey{binding.Spec.Function}]; ok {
 				if fn.Spec.MaxReplicas != nil {
 					replicas = min(int(*fn.Spec.MaxReplicas), replicas)
 				}

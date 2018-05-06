@@ -30,7 +30,7 @@ func createBinding(opts options.InitOptions, bindingTemplate projectriff_v1.Bind
 	binding.TypeMeta.APIVersion = apiVersion
 	binding.TypeMeta.Kind = bindingKind
 	binding.ObjectMeta.Name = opts.FunctionName
-	binding.Spec.Handler = opts.FunctionName
+	binding.Spec.Function = opts.FunctionName
 	binding.Spec.Input = opts.Input
 	binding.Spec.Output = opts.Output
 

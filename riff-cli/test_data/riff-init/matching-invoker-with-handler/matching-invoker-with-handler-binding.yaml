@@ -4,5 +4,5 @@ kind: Binding
 metadata:
   name: matching-invoker-with-handler
 spec:
-  handler: matching-invoker-with-handler
+  function: matching-invoker-with-handler
   input: matching-invoker-with-handler
