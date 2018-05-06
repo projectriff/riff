@@ -24,14 +24,14 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// Bindings returns a BindingInformer.
-	Bindings() BindingInformer
 	// Functions returns a FunctionInformer.
 	Functions() FunctionInformer
 	// Invokers returns a InvokerInformer.
 	Invokers() InvokerInformer
 	// Topics returns a TopicInformer.
 	Topics() TopicInformer
+	// TopicBindings returns a TopicBindingInformer.
+	TopicBindings() TopicBindingInformer
 }
 
 type version struct {
@@ -41,11 +41,6 @@ type version struct {
 // New returns a new Interface.
 func New(f internalinterfaces.SharedInformerFactory) Interface {
 	return &version{f}
-}
-
-// Bindings returns a BindingInformer.
-func (v *version) Bindings() BindingInformer {
-	return &bindingInformer{factory: v.SharedInformerFactory}
 }
 
 // Functions returns a FunctionInformer.
@@ -61,4 +56,9 @@ func (v *version) Invokers() InvokerInformer {
 // Topics returns a TopicInformer.
 func (v *version) Topics() TopicInformer {
 	return &topicInformer{factory: v.SharedInformerFactory}
+}
+
+// TopicBindings returns a TopicBindingInformer.
+func (v *version) TopicBindings() TopicBindingInformer {
+	return &topicBindingInformer{factory: v.SharedInformerFactory}
 }

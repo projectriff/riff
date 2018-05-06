@@ -25,42 +25,42 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 )
 
-func createBinding(opts options.InitOptions, bindingTemplate projectriff_v1.Binding) ([]byte, error) {
-	binding := bindingTemplate.DeepCopy()
-	binding.TypeMeta.APIVersion = apiVersion
-	binding.TypeMeta.Kind = bindingKind
-	binding.ObjectMeta.Name = opts.FunctionName
-	binding.Spec.Function = opts.FunctionName
-	binding.Spec.Input = opts.Input
-	binding.Spec.Output = opts.Output
+func createTopicBinding(opts options.InitOptions, topicBindingTemplate projectriff_v1.TopicBinding) ([]byte, error) {
+	topicBinding := topicBindingTemplate.DeepCopy()
+	topicBinding.TypeMeta.APIVersion = apiVersion
+	topicBinding.TypeMeta.Kind = topicBindingKind
+	topicBinding.ObjectMeta.Name = opts.FunctionName
+	topicBinding.Spec.Function = opts.FunctionName
+	topicBinding.Spec.Input = opts.Input
+	topicBinding.Spec.Output = opts.Output
 
-	bytes, err := json.Marshal(binding)
+	bytes, err := json.Marshal(topicBinding)
 	if err != nil {
 		return nil, err
 	}
-	bindingMap := map[string]interface{}{}
-	err = json.Unmarshal(bytes, &bindingMap)
+	topicBindingMap := map[string]interface{}{}
+	err = json.Unmarshal(bytes, &topicBindingMap)
 	if err != nil {
 		return nil, err
 	}
 
 	// cleanup properties we don't want to marshal
-	metadata := bindingMap["metadata"].(map[string]interface{})
+	metadata := topicBindingMap["metadata"].(map[string]interface{})
 	delete(metadata, "creationTimestamp")
 
-	return yaml.Marshal(bindingMap)
+	return yaml.Marshal(topicBindingMap)
 }
 
-func createBindingYaml(bindingTemplate projectriff_v1.Binding, opts options.InitOptions) (string, error) {
+func createTopicBindingYaml(topicBindingTemplate projectriff_v1.TopicBinding, opts options.InitOptions) (string, error) {
 	var buffer bytes.Buffer
 
-	binding, err := createBinding(opts, bindingTemplate)
+	topicBinding, err := createTopicBinding(opts, topicBindingTemplate)
 	if err != nil {
 		return "", err
 	}
 
 	buffer.WriteString("---\n")
-	buffer.Write(binding)
+	buffer.Write(topicBinding)
 
 	return buffer.String(), nil
 }

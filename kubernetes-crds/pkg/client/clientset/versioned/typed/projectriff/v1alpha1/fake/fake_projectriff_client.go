@@ -26,10 +26,6 @@ type FakeProjectriffV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeProjectriffV1alpha1) Bindings(namespace string) v1alpha1.BindingInterface {
-	return &FakeBindings{c, namespace}
-}
-
 func (c *FakeProjectriffV1alpha1) Functions(namespace string) v1alpha1.FunctionInterface {
 	return &FakeFunctions{c, namespace}
 }
@@ -40,6 +36,10 @@ func (c *FakeProjectriffV1alpha1) Invokers(namespace string) v1alpha1.InvokerInt
 
 func (c *FakeProjectriffV1alpha1) Topics(namespace string) v1alpha1.TopicInterface {
 	return &FakeTopics{c, namespace}
+}
+
+func (c *FakeProjectriffV1alpha1) TopicBindings(namespace string) v1alpha1.TopicBindingInterface {
+	return &FakeTopicBindings{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

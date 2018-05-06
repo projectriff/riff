@@ -24,24 +24,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBindingYaml(t *testing.T) {
+func TestTopicBindingYaml(t *testing.T) {
 	as := assert.New(t)
 
-	bindingTemplate := projectriff_v1.Binding{}
+	topicBindingTemplate := projectriff_v1.TopicBinding{}
 	opts := options.InitOptions{
 		FunctionName: "myfunc",
 		Input:        "in",
 		UserAccount:  "me",
 		Version:      "0.0.1",
 	}
-	yaml, err := createBindingYaml(bindingTemplate, opts)
+	yaml, err := createTopicBindingYaml(topicBindingTemplate, opts)
 
 	t.Log(yaml)
 
 	as.NoError(err)
 	as.Equal(yaml, `---
 apiVersion: projectriff.io/v1alpha1
-kind: Binding
+kind: TopicBinding
 metadata:
   name: myfunc
 spec:
@@ -50,10 +50,10 @@ spec:
 `)
 }
 
-func TestBindingYaml_WithOutput(t *testing.T) {
+func TestTopicBindingYaml_WithOutput(t *testing.T) {
 	as := assert.New(t)
 
-	bindingTemplate := projectriff_v1.Binding{}
+	topicBindingTemplate := projectriff_v1.TopicBinding{}
 	opts := options.InitOptions{
 		FunctionName: "myfunc",
 		Input:        "in",
@@ -62,14 +62,14 @@ func TestBindingYaml_WithOutput(t *testing.T) {
 		Version:      "0.0.1",
 		Protocol:     "http",
 	}
-	yaml, err := createBindingYaml(bindingTemplate, opts)
+	yaml, err := createTopicBindingYaml(topicBindingTemplate, opts)
 
 	t.Log(yaml)
 
 	as.NoError(err)
 	as.Equal(yaml, `---
 apiVersion: projectriff.io/v1alpha1
-kind: Binding
+kind: TopicBinding
 metadata:
   name: myfunc
 spec:

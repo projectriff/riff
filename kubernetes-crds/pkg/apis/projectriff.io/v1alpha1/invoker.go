@@ -43,13 +43,13 @@ type InvokerSpec struct {
 	Matchers []string `json:"matchers"`
 
 	// Default function properties
-	BindingTemplate Binding `json:"bindingTemplate,omitempty"`
-
-	// Default function properties
 	FunctionTemplate Function `json:"functionTemplate,omitempty"`
 
 	// Default topic properties
 	TopicTemplate Topic `json:"topicTemplate,omitempty"`
+
+	// Default topicbinding properties
+	TopicBindingTemplate TopicBinding `json:"topicBindingTemplate,omitempty"`
 
 	// Handler function, if needed
 	Handler InvokerHandler `json:"handler,omitempty"`

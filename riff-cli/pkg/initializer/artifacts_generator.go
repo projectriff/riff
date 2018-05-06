@@ -28,10 +28,10 @@ import (
 )
 
 const (
-	apiVersion   = "projectriff.io/v1alpha1"
-	bindingKind  = "Binding"
-	functionKind = "Function"
-	topicKind    = "Topic"
+	apiVersion       = "projectriff.io/v1alpha1"
+	functionKind     = "Function"
+	topicKind        = "Topic"
+	topicBindingKind = "TopicBinding"
 )
 
 type resource struct {
@@ -62,13 +62,13 @@ func generateResources(invoker projectriff_v1.Invoker, opts *options.InitOptions
 		Content: content,
 	})
 
-	// {FunctionName}-binding.yaml
-	content, err = createBindingYaml(invoker.Spec.BindingTemplate, *opts)
+	// {FunctionName}-topicbinding.yaml
+	content, err = createTopicBindingYaml(invoker.Spec.TopicBindingTemplate, *opts)
 	if err != nil {
 		return err
 	}
 	resources = append(resources, resource{
-		Path:    fmt.Sprintf("%s-binding.yaml", opts.FunctionName),
+		Path:    fmt.Sprintf("%s-topicbinding.yaml", opts.FunctionName),
 		Content: content,
 	})
 

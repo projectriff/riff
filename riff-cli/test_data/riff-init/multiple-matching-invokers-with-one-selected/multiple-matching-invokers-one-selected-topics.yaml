@@ -1,7 +1,0 @@
----
-apiVersion: projectriff.io/v1alpha1
-kind: Topic
-metadata:
-  name: multiple-matching-invokers-one-selected
-spec:
-  partitions: 1

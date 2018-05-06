@@ -9,13 +9,13 @@ type Deployer struct {
 	mock.Mock
 }
 
-// Deploy provides a mock function with given fields: binding, function
-func (_m *Deployer) Deploy(binding *v1alpha1.Binding, function *v1alpha1.Function) error {
-	ret := _m.Called(binding, function)
+// Deploy provides a mock function with given fields: topicBinding, function
+func (_m *Deployer) Deploy(topicBinding *v1alpha1.TopicBinding, function *v1alpha1.Function) error {
+	ret := _m.Called(topicBinding, function)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*v1alpha1.Binding, *v1alpha1.Function) error); ok {
-		r0 = rf(binding, function)
+	if rf, ok := ret.Get(0).(func(*v1alpha1.TopicBinding, *v1alpha1.Function) error); ok {
+		r0 = rf(topicBinding, function)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -23,13 +23,13 @@ func (_m *Deployer) Deploy(binding *v1alpha1.Binding, function *v1alpha1.Functio
 	return r0
 }
 
-// Scale provides a mock function with given fields: binding, replicas
-func (_m *Deployer) Scale(binding *v1alpha1.Binding, replicas int) error {
-	ret := _m.Called(binding, replicas)
+// Scale provides a mock function with given fields: topicBinding, replicas
+func (_m *Deployer) Scale(topicBinding *v1alpha1.TopicBinding, replicas int) error {
+	ret := _m.Called(topicBinding, replicas)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*v1alpha1.Binding, int) error); ok {
-		r0 = rf(binding, replicas)
+	if rf, ok := ret.Get(0).(func(*v1alpha1.TopicBinding, int) error); ok {
+		r0 = rf(topicBinding, replicas)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -37,13 +37,13 @@ func (_m *Deployer) Scale(binding *v1alpha1.Binding, replicas int) error {
 	return r0
 }
 
-// Undeploy provides a mock function with given fields: binding
-func (_m *Deployer) Undeploy(binding *v1alpha1.Binding) error {
-	ret := _m.Called(binding)
+// Undeploy provides a mock function with given fields: topicBinding
+func (_m *Deployer) Undeploy(topicBinding *v1alpha1.TopicBinding) error {
+	ret := _m.Called(topicBinding)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*v1alpha1.Binding) error); ok {
-		r0 = rf(binding)
+	if rf, ok := ret.Get(0).(func(*v1alpha1.TopicBinding) error); ok {
+		r0 = rf(topicBinding)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -51,13 +51,13 @@ func (_m *Deployer) Undeploy(binding *v1alpha1.Binding) error {
 	return r0
 }
 
-// Update provides a mock function with given fields: binding, function, replicas
-func (_m *Deployer) Update(binding *v1alpha1.Binding, function *v1alpha1.Function, replicas int) error {
-	ret := _m.Called(binding, function, replicas)
+// Update provides a mock function with given fields: topicBinding, function, replicas
+func (_m *Deployer) Update(topicBinding *v1alpha1.TopicBinding, function *v1alpha1.Function, replicas int) error {
+	ret := _m.Called(topicBinding, function, replicas)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*v1alpha1.Binding, *v1alpha1.Function, int) error); ok {
-		r0 = rf(binding, function, replicas)
+	if rf, ok := ret.Get(0).(func(*v1alpha1.TopicBinding, *v1alpha1.Function, int) error); ok {
+		r0 = rf(topicBinding, function, replicas)
 	} else {
 		r0 = ret.Error(0)
 	}

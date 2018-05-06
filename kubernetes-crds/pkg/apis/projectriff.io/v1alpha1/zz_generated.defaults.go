@@ -28,15 +28,11 @@ import (
 // Public to allow building arbitrary schemes.
 // All generated defaulters are covering - they call all nested defaulters.
 func RegisterDefaults(scheme *runtime.Scheme) error {
-	scheme.AddTypeDefaultingFunc(&Binding{}, func(obj interface{}) { SetObjectDefaults_Binding(obj.(*Binding)) })
 	scheme.AddTypeDefaultingFunc(&Function{}, func(obj interface{}) { SetObjectDefaults_Function(obj.(*Function)) })
 	scheme.AddTypeDefaultingFunc(&Invoker{}, func(obj interface{}) { SetObjectDefaults_Invoker(obj.(*Invoker)) })
 	scheme.AddTypeDefaultingFunc(&Topic{}, func(obj interface{}) { SetObjectDefaults_Topic(obj.(*Topic)) })
+	scheme.AddTypeDefaultingFunc(&TopicBinding{}, func(obj interface{}) { SetObjectDefaults_TopicBinding(obj.(*TopicBinding)) })
 	return nil
-}
-
-func SetObjectDefaults_Binding(in *Binding) {
-	SetDefaults_BindingSpec(&in.Spec)
 }
 
 func SetObjectDefaults_Function(in *Function) {
@@ -45,11 +41,14 @@ func SetObjectDefaults_Function(in *Function) {
 
 func SetObjectDefaults_Invoker(in *Invoker) {
 	SetDefaults_InvokerSpec(&in.Spec)
-	SetObjectDefaults_Binding(&in.Spec.BindingTemplate)
 	SetObjectDefaults_Function(&in.Spec.FunctionTemplate)
 	SetObjectDefaults_Topic(&in.Spec.TopicTemplate)
 }
 
 func SetObjectDefaults_Topic(in *Topic) {
 	SetDefaults_TopicSpec(&in.Spec)
+}
+
+func SetObjectDefaults_TopicBinding(in *TopicBinding) {
+	SetDefaults_TopicBindingSpec(&in.Spec)
 }

@@ -25,16 +25,16 @@ import (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:defaulter-gen=true
 
-// Represents the bindings.projectriff.io CRD
-type Binding struct {
+// Represents the topicbindings.projectriff.io CRD
+type TopicBinding struct {
 	meta_v1.TypeMeta   `json:",inline"`
 	meta_v1.ObjectMeta `json:"metadata"`
-	Spec               BindingSpec    `json:"spec"`
-	Status             *BindingStatus `json:"status,omitempty"`
+	Spec               TopicBindingSpec    `json:"spec"`
+	Status             *TopicBindingStatus `json:"status,omitempty"`
 }
 
-// Spec (what the user wants) for a binding.
-type BindingSpec struct {
+// Spec (what the user wants) for a topicbinding.
+type TopicBindingSpec struct {
 
 	// The name of the function to bind
 	Function string `json:"function"`
@@ -48,18 +48,18 @@ type BindingSpec struct {
 	Output string `json:"output,omitempty"`
 }
 
-// Status (computed) for a binding
-type BindingStatus struct {
+// Status (computed) for a topicbinding
+type TopicBindingStatus struct {
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // Returned in list operations
-type BindingList struct {
+type TopicBindingList struct {
 	meta_v1.TypeMeta `json:",inline"`
 	meta_v1.ListMeta `json:"metadata"`
-	Items            []Binding `json:"items"`
+	Items            []TopicBinding `json:"items"`
 }
 
-func SetDefaults_BindingSpec(obj *BindingSpec) {
+func SetDefaults_TopicBindingSpec(obj *TopicBindingSpec) {
 }

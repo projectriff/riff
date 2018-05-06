@@ -91,11 +91,11 @@ func FindRiffResourceDefinitionPaths(path string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	bindings, err := filepath.Glob(filepath.Join(path, "*-binding.yaml"))
+	topicBindings, err := filepath.Glob(filepath.Join(path, "*-topicbinding.yaml"))
 	if err != nil {
 		return nil, err
 	}
-	return append(functions, append(topics, bindings...)...), nil
+	return append(functions, append(topics, topicBindings...)...), nil
 }
 
 func IsDirectory(path string) bool {

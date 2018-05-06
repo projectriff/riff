@@ -53,7 +53,7 @@ func main() {
 		log.Fatalf("Error getting client config: %s", err.Error())
 	}
 
-	topicsInformer, functionsInformer, bindingsInformer, deploymentInformer := makeInformers(config)
+	topicsInformer, functionsInformer, topicBindingsInformer, deploymentInformer := makeInformers(config)
 	deployer, err := controller.NewDeployer(config, brokers)
 	if err != nil {
 		panic(err)
@@ -70,7 +70,7 @@ func main() {
 	}
 
 	autoScaler := autoscaler.NewAutoScaler(metricsReceiver, transportInspector)
-	ctrl := controller.New(topicsInformer, functionsInformer, bindingsInformer, deploymentInformer, deployer, autoScaler, 8080)
+	ctrl := controller.New(topicsInformer, functionsInformer, topicBindingsInformer, deploymentInformer, deployer, autoScaler, 8080)
 
 	stopCh := make(chan struct{})
 	go ctrl.Run(stopCh)
@@ -86,7 +86,7 @@ func main() {
 
 }
 
-func makeInformers(config *rest.Config) (riffInformersV1.TopicInformer, riffInformersV1.FunctionInformer, riffInformersV1.BindingInformer, v1beta1.DeploymentInformer) {
+func makeInformers(config *rest.Config) (riffInformersV1.TopicInformer, riffInformersV1.FunctionInformer, riffInformersV1.TopicBindingInformer, v1beta1.DeploymentInformer) {
 	riffClient, err := riffcs.NewForConfig(config)
 	if err != nil {
 		log.Fatalf("Error building riff clientset: %s", err.Error())
@@ -94,11 +94,11 @@ func makeInformers(config *rest.Config) (riffInformersV1.TopicInformer, riffInfo
 	riffInformerFactory := informers.NewSharedInformerFactory(riffClient, 0)
 	topicsInformer := riffInformerFactory.Projectriff().V1alpha1().Topics()
 	functionsInformer := riffInformerFactory.Projectriff().V1alpha1().Functions()
-	bindingsInformer := riffInformerFactory.Projectriff().V1alpha1().Bindings()
+	topicBindingsInformer := riffInformerFactory.Projectriff().V1alpha1().TopicBindings()
 
 	k8sClient, err := kubernetes.NewForConfig(config)
 	deploymentInformer := k8sInformers.NewSharedInformerFactory(k8sClient, 0).Extensions().V1beta1().Deployments()
-	return topicsInformer, functionsInformer, bindingsInformer, deploymentInformer
+	return topicsInformer, functionsInformer, topicBindingsInformer, deploymentInformer
 }
 
 func makeConsumerConfig() *cluster.Config {

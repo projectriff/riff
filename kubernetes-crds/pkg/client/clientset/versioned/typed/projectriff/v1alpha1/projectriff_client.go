@@ -25,19 +25,15 @@ import (
 
 type ProjectriffV1alpha1Interface interface {
 	RESTClient() rest.Interface
-	BindingsGetter
 	FunctionsGetter
 	InvokersGetter
 	TopicsGetter
+	TopicBindingsGetter
 }
 
 // ProjectriffV1alpha1Client is used to interact with features provided by the projectriff.io group.
 type ProjectriffV1alpha1Client struct {
 	restClient rest.Interface
-}
-
-func (c *ProjectriffV1alpha1Client) Bindings(namespace string) BindingInterface {
-	return newBindings(c, namespace)
 }
 
 func (c *ProjectriffV1alpha1Client) Functions(namespace string) FunctionInterface {
@@ -50,6 +46,10 @@ func (c *ProjectriffV1alpha1Client) Invokers(namespace string) InvokerInterface 
 
 func (c *ProjectriffV1alpha1Client) Topics(namespace string) TopicInterface {
 	return newTopics(c, namespace)
+}
+
+func (c *ProjectriffV1alpha1Client) TopicBindings(namespace string) TopicBindingInterface {
+	return newTopicBindings(c, namespace)
 }
 
 // NewForConfig creates a new ProjectriffV1alpha1Client for the given config.
