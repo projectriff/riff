@@ -30,7 +30,13 @@ func validateFunctionName(name *string, path string) error {
 	if *name == "" {
 		*name, err = functions.FunctionNameFromPath(path)
 	}
-	return err
+	if err != nil {
+		return err
+	}
+	if *name != strings.ToLower(*name) {
+		return fmt.Errorf("function name %s must be lower case", *name)
+	}
+	return nil
 }
 
 func validateAndCleanArtifact(artifact *string, path string) error {

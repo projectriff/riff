@@ -117,6 +117,24 @@ var _ = Describe("The build command", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
+	It("should require docker username to be lowercase", func() {
+		os.Chdir("../test_data/node/square")
+		user := "Foo"
+		buildCommand.SetArgs([]string{"-u", user})
+		err := buildCommand.Execute()
+		Expect(err).To(HaveOccurred())
+		Expect(err).To(MatchError(fmt.Sprintf("user account name %s must be lower case", user)))
+	})
+
+	It("should require function name to be lowercase", func() {
+		os.Chdir("../test_data/node/square")
+		name := "squAre"
+		buildCommand.SetArgs([]string{"-n", name})
+		err := buildCommand.Execute()
+		Expect(err).To(HaveOccurred())
+		Expect(err).To(MatchError(fmt.Sprintf("function name %s must be lower case", name)))
+	})
+
 	It("should work with no parameters at all", func() {
 		os.Chdir("../test_data/node/square")
 		buildCommand.SetArgs([]string{})

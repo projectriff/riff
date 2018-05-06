@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"path/filepath"
 
@@ -59,7 +60,7 @@ func Build(realDocker docker.Docker, dryRunDocker docker.Docker) (*cobra.Command
 		Long: `Build the function based on the code available in the path directory, using the name
 and version specified for the image that is built.`,
 		Example: `  riff build -n <name> -v <version> -f <path> [--push]`,
-		Args: utils.AliasFlagToSoleArg("filepath"),
+		Args:    utils.AliasFlagToSoleArg("filepath"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dockerClient := realDocker
 			if buildOptions.DryRun {
@@ -116,6 +117,10 @@ func pushArgs(opts BuildOptions) []string {
 
 func validateBuildOptions(options *BuildOptions) error {
 	options.FilePath = filepath.Clean(options.FilePath)
-	err := validateFunctionName(&options.FunctionName, options.FilePath)
-	return err
+
+	if options.UserAccount != strings.ToLower(options.UserAccount) {
+		return fmt.Errorf("user account name %s must be lower case", options.UserAccount)
+	}
+	return validateFunctionName(&options.FunctionName, options.FilePath)
+
 }

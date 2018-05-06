@@ -49,9 +49,9 @@ func GetCurrentUsername() string {
 		panic(err)
 	}
 
-	var username string
+	username := user.Username
 	if runtime.GOOS == "windows" {
-		slice := strings.Split(user.Username, "\\")
+		slice := strings.Split(username, "\\")
 		username = slice[len(slice)-1]
 	}
 
