@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -35,23 +36,24 @@ func validateFunctionName(name *string, path string) error {
 
 func validateAndCleanArtifact(artifact *string, path string) error {
 	if *artifact != "" {
-		*artifact = filepath.Clean(*artifact)
-
-		if filepath.IsAbs(*artifact) {
-			return fmt.Errorf("artifact %s must be relative to function path", *artifact)
-		}
-
 		absFilePath, err := filepath.Abs(path)
 		if err != nil {
 			return err
 		}
 
 		var absArtifactPath string
-
-		if osutils.IsDirectory(absFilePath) {
-			absArtifactPath = filepath.Join(absFilePath, *artifact)
+		//If the artifact exists convert get the absolute path. If it doesn't exist, it may exist relative to the filepath
+		if osutils.FileExists(*artifact) {
+			absArtifactPath, err = filepath.Abs(*artifact)
+			if err != nil {
+				return err
+			}
 		} else {
-			absArtifactPath = filepath.Join(filepath.Dir(absFilePath), *artifact)
+			if osutils.IsDirectory(absFilePath) {
+				absArtifactPath = filepath.Join(absFilePath, *artifact)
+			} else {
+				absArtifactPath = filepath.Join(filepath.Dir(absFilePath), *artifact)
+			}
 		}
 
 		if osutils.IsDirectory(absArtifactPath) {
@@ -74,7 +76,9 @@ func validateAndCleanArtifact(artifact *string, path string) error {
 		if !osutils.IsDirectory(absFilePath) && absFilePath != absArtifactPath {
 			return fmt.Errorf("artifact %s conflicts with filepath %s", absArtifactPath, absFilePath)
 		}
+		*artifact = strings.Replace(absArtifactPath, absFilePath+string(os.PathSeparator), "", 1)
 	}
+
 	return nil
 }
 
