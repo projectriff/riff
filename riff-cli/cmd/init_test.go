@@ -143,6 +143,24 @@ var _ = Describe("The init command", func() {
 			Expect(".").NotTo(HaveUnstagedChanges())
 		})
 
+		It("should require function name to be lower case", func() {
+			os.Chdir("../test_data/riff-init/matching-invoker")
+
+			invokers, err := stubInvokers("invokers/*.yaml")
+			Expect(err).NotTo(HaveOccurred())
+			rootCommand, _, _, _, err := setupInitTest(invokers)
+			Expect(err).NotTo(HaveOccurred())
+
+			name := "Echo"
+
+			rootCommand.SetArgs(append([]string{"init", "node", "--name", name}, commonRiffArgs...))
+
+			err = rootCommand.Execute()
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(HavePrefix(fmt.Sprintf("function name %s is invalid", name)))
+
+		})
+
 		It("should ignore other matching invokers when explit invoker is selected", func() {
 			os.Chdir("../test_data/riff-init/multiple-matching-invokers-with-one-selected")
 

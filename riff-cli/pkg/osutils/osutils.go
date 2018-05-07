@@ -24,6 +24,7 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -47,7 +48,14 @@ func GetCurrentUsername() string {
 	if err != nil {
 		panic(err)
 	}
-	return user.Username
+
+	username := user.Username
+	if runtime.GOOS == "windows" {
+		slice := strings.Split(username, "\\")
+		username = slice[len(slice)-1]
+	}
+
+	return strings.ToLower(username)
 }
 
 func FileExists(path string) bool {
