@@ -157,7 +157,7 @@ var _ = Describe("The init command", func() {
 
 			err = rootCommand.Execute()
 			Expect(err).To(HaveOccurred())
-			Expect(err).To(MatchError(fmt.Sprintf("function name %s must be lower case", name)))
+			Expect(err.Error()).To(HavePrefix(fmt.Sprintf("function name %s is invalid", name)))
 
 		})
 

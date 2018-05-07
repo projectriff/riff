@@ -69,7 +69,7 @@ func TestValidateArtifactIsRegularFile(t *testing.T) {
 func TestValidateArtifactIsInSubDirectory(t *testing.T) {
 	filePath := osutils.Path("../test_data")
 	as := assert.New(t)
-	opts := options.InitOptions{FilePath: filePath, Artifact: "python/demo/demo.py"}
+	opts := options.InitOptions{FilePath: filePath, Artifact: "python/demo/demo.py", FunctionName: "demo"}
 	as.NoError(validateInitOptions(&opts))
 }
 

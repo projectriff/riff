@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/projectriff/riff/riff-cli/pkg/functions"
@@ -33,8 +34,11 @@ func validateFunctionName(name *string, path string) error {
 	if err != nil {
 		return err
 	}
-	if *name != strings.ToLower(*name) {
-		return fmt.Errorf("function name %s must be lower case", *name)
+
+	re := regexp.MustCompile("^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
+
+	if !re.MatchString(*name) {
+		return fmt.Errorf("function name %s is invalid. It must comply with DNS 1123 naming standards. The name must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character", *name)
 	}
 	return nil
 }

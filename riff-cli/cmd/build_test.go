@@ -132,7 +132,7 @@ var _ = Describe("The build command", func() {
 		buildCommand.SetArgs([]string{"-n", name})
 		err := buildCommand.Execute()
 		Expect(err).To(HaveOccurred())
-		Expect(err).To(MatchError(fmt.Sprintf("function name %s must be lower case", name)))
+		Expect(err.Error()).To(HavePrefix(fmt.Sprintf("function name %s is invalid", name)))
 	})
 
 	It("should work with no parameters at all", func() {
