@@ -18,11 +18,12 @@ package cmd
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/pkg/osutils"
 	"github.com/spf13/cobra"
-	"path/filepath"
 )
 
 type ApplyOptions struct {
@@ -42,7 +43,6 @@ func Apply(realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) (*cobra.C
 		Example: `  riff apply -f some/function/path
   riff apply -f some/function/path/some.yaml`,
 		Args: utils.AliasFlagToSoleArg("filepath"),
-
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
@@ -78,10 +78,11 @@ func apply(opts ApplyOptions, kubectlClient kubectl.KubeCtl) error {
 	}
 
 	var message string
+	var resourceDefinitionPaths []string
 
 	if osutils.IsDirectory(abs) {
 		message = fmt.Sprintf("Applying resources in %v\n\n", opts.FilePath)
-		resourceDefinitionPaths, err := osutils.FindRiffResourceDefinitionPaths(abs)
+		resourceDefinitionPaths, err = osutils.FindRiffResourceDefinitionPaths(abs)
 		if err != nil {
 			return err
 		}
@@ -92,13 +93,12 @@ func apply(opts ApplyOptions, kubectlClient kubectl.KubeCtl) error {
 		message = fmt.Sprintf("Applying resource %v\n\n", opts.FilePath)
 		cmdArgs = append(cmdArgs, "-f", abs)
 	}
-
+	if len(resourceDefinitionPaths) == 0 {
+		fmt.Printf("No riff resources found in %v\n", opts.FilePath)
+		return nil
+	}
 	fmt.Print(message)
 	output, err := kubectlClient.Exec(cmdArgs)
-	if err != nil {
-		fmt.Printf("%v\n", output)
-		return err
-	}
 	fmt.Printf("%v\n", output)
-	return nil
+	return err
 }
