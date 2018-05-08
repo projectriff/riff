@@ -81,7 +81,7 @@ func Delete(realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) (*cobra.
 }
 
 func deleteFunctionByName(opts DeleteOptions, actingClient kubectl.KubeCtl, queryClient kubectl.KubeCtl) error {
-	if handler, inputTopic, outputTopic, err := lookupByTopicBindingName(opts, queryClient); err != nil {
+	if function, inputTopic, outputTopic, err := lookupByTopicBindingName(opts, queryClient); err != nil {
 		return err
 	} else {
 		cmdArgs := []string{"delete", "<placeholder>", "<placeholder>"}
@@ -95,9 +95,9 @@ func deleteFunctionByName(opts DeleteOptions, actingClient kubectl.KubeCtl, quer
 			return err
 		}
 
-		if handler != "" {
+		if function != "" {
 			cmdArgs[1] = "functions.projectriff.io"
-			cmdArgs[2] = handler
+			cmdArgs[2] = function
 			if err := deleteResources(cmdArgs, actingClient); err != nil {
 				return nil
 			}
@@ -138,8 +138,8 @@ func lookupByTopicBindingName(opts DeleteOptions, queryClient kubectl.KubeCtl) (
 	}
 	parser := jsonpath.NewParser([]byte(output))
 
-	handler, _ := parser.StringValue(`$.spec.handler`)
+	function, _ := parser.StringValue(`$.spec.function`)
 	inputTopic, _ := parser.StringValue(`$.spec.input`)
 	outputTopic, _ := parser.StringValue(`$.spec.output`)
-	return handler, inputTopic, outputTopic, err
+	return function, inputTopic, outputTopic, err
 }

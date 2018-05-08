@@ -18,7 +18,7 @@ var _ = Describe("The delete command", func() {
 				"kind": "TopicBinding",
 				"metadata": {},
 				"spec": {
-					"handler": "%s",
+					"function": "%s",
 					"input": "myInputTopic",
 					"output": "myOutputTopic"
 				}
