@@ -12,10 +12,14 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<protobuf.version>3.4.0</protobuf.version>
-		<grpc.version>1.7.0</grpc.version>
-		<protobuf.plugin.version>0.5.0</protobuf.plugin.version>
+		<protobuf.version>3.5.1</protobuf.version>
+		<grpc.version>1.9.0</grpc.version>
+		<reactor-grpc.version>0.8.1</reactor-grpc.version>
+		<reactor.version>3.1.7.RELEASE</reactor.version>
+		<protobuf.plugin.version>0.5.1</protobuf.plugin.version>
 		<os.plugin.version>1.4.1.Final</os.plugin.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
 	</properties>
 
 		<organization>
@@ -78,9 +82,14 @@ limitations under the License.
 			<version>${grpc.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-stub</artifactId>
-			<version>${grpc.version}</version>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-core</artifactId>
+			<version>${reactor.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.salesforce.servicelibs</groupId>
+			<artifactId>reactor-grpc-stub</artifactId>
+			<version>${reactor-grpc.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -113,7 +122,7 @@ limitations under the License.
 									<sequential>
 										<local name="base" />
 										<basename file="@{file}" property="base" />
-										<copy todir="${basedir}/target/generated-sources" file="@{file}">
+										<copy todir="${basedir}/target/generated-proto" file="@{file}">
 											<filterchain>
 												<concatfilter append="src/main/proto/${base}" />
 											</filterchain>
@@ -148,11 +157,7 @@ limitations under the License.
 				<artifactId>protobuf-maven-plugin</artifactId>
 				<version>${protobuf.plugin.version}</version>
 				<configuration>
-					<protoSourceRoot>target/generated-sources</protoSourceRoot>
-					<attachProtoSources>false</attachProtoSources>
-					<excludes>
-						<exclude>**/google/protobuf/*.proto</exclude>
-					</excludes>
+					<protoSourceRoot>target/generated-proto</protoSourceRoot>
 					<protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
 					<pluginId>grpc-java</pluginId>
 					<pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
@@ -163,6 +168,17 @@ limitations under the License.
 							<goal>compile</goal>
 							<goal>compile-custom</goal>
 						</goals>
+						<configuration>
+							<protocPlugins>
+								<protocPlugin>
+									<id>reactor-grpc</id>
+									<groupId>com.salesforce.servicelibs</groupId>
+									<artifactId>reactor-grpc</artifactId>
+									<version>${reactor-grpc.version}</version>
+									<mainClass>com.salesforce.reactorgrpc.ReactorGrpcGenerator</mainClass>
+								</protocPlugin>
+							</protocPlugins>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
