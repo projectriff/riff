@@ -8,3 +8,5 @@ spec:
     image: rifftest/matching-invoker:0.0.1
   input: matching-invoker
   protocol: grpc
+  windowing:
+    size: 1

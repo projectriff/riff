@@ -8,3 +8,5 @@ spec:
     image: rifftest/matching-invoker-with-invoker-version:0.0.1
   input: matching-invoker-with-invoker-version
   protocol: grpc
+  windowing:
+    size: 1

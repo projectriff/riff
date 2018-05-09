@@ -29,6 +29,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"encoding/json"
 )
 
 const (
@@ -129,6 +130,9 @@ func (d *deployer) buildSidecarContainer(function *v1.Function) corev1.Container
 		"--port", ports[function.Spec.Protocol],
 		"--brokers", strings.Join(d.brokers, ","),
 	}
+
+	bs, _ := json.Marshal(function.Spec.Windowing)
+	c.Env = []corev1.EnvVar{corev1.EnvVar{Name: "WINDOWING_STRATEGY", Value: string(bs)}}
 	return c
 }
 
