@@ -53,6 +53,8 @@ spec:
     image: me/myfunc:0.0.1
   input: in
   protocol: grpc
+  windowing:
+    size: 1
 `)
 }
 
@@ -88,6 +90,8 @@ spec:
   input: in
   output: out
   protocol: http
+  windowing:
+    size: 1
 `)
 }
 
@@ -121,5 +125,7 @@ spec:
     image: me/myfunc:0.0.1
   input: in
   protocol: http
+  windowing:
+    size: 1
 `)
 }

@@ -8,3 +8,5 @@ spec:
     image: rifftest/multiple-matching-invokers-with-one-selected:0.0.1
   input: multiple-matching-invokers-with-one-selected
   protocol: grpc
+  windowing:
+    size: 1

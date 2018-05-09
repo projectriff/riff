@@ -29,7 +29,7 @@ var Codecs = serializer.NewCodecFactory(Scheme)
 var ParameterCodec = runtime.NewParameterCodec(Scheme)
 
 func init() {
-	v1.AddToGroupVersion(Scheme, schema.GroupVersion{Version: "v1alpha1"})
+	v1.AddToGroupVersion(Scheme, schema.GroupVersion{Version: "v1"})
 	AddToScheme(Scheme)
 }
 

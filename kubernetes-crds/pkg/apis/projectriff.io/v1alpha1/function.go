@@ -58,6 +58,9 @@ type FunctionSpec struct {
 
 	// Container definition to use for the function.
 	Container kapi.Container `json:"container"`
+
+	// How to slice streams of incoming messages to the function.
+	Windowing Windowing `json:"windowing"`
 }
 
 // Status (computed) for a function

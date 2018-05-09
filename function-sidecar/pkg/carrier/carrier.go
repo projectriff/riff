@@ -30,6 +30,7 @@ func Run(consumer transport.Consumer, producer transport.Producer, dispatcher di
 			// Incoming message
 			msg, _, err := consumer.Receive()
 			if err == nil {
+				log.Printf(">>> %s\n", msg)
 				dispatcher.Input() <- msg
 			} else {
 				// Transport closed

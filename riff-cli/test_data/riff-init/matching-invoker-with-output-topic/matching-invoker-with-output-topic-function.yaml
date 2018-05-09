@@ -9,3 +9,5 @@ spec:
   input: matching-invoker-with-output-topic
   output: soundReflection
   protocol: grpc
+  windowing:
+    size: 1
