@@ -108,13 +108,13 @@ When using Minikube configure the httpGateway to use `NodePort` with:
 +
 [source, bash]
 ----
-helm install --name projectriff --namespace riff-system projectriff/riff --devel --set kafka.create=true --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install --name projectriff --namespace riff-system projectriff/riff --devel --set kafka.create=true --set httpGateway.service.type=NodePort
 ----
 +
 [NOTE]
 ====
 For a cluster that supports `LoadBalancer` leave out the `--set httpGateway.service.type=NodePort` option.
-For a cluster that uses RBAC leave out the `--set rbac.create=false` option.
+For a cluster that doesn't use RBAC add the `--set rbac.create=false` option.
 ====
 
 - *Install "devel" version of riff chart with locally built snapshot components with Minikube*
