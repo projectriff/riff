@@ -55,8 +55,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&InvokerList{},
 		&Topic{},
 		&TopicList{},
-		&TopicBinding{},
-		&TopicBindingList{},
+		&Link{},
+		&LinkList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil

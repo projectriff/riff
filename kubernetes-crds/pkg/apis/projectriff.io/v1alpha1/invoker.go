@@ -48,8 +48,8 @@ type InvokerSpec struct {
 	// Default topic properties
 	TopicTemplate Topic `json:"topicTemplate,omitempty"`
 
-	// Default topicbinding properties
-	TopicBindingTemplate TopicBinding `json:"topicBindingTemplate,omitempty"`
+	// Default link properties
+	LinkTemplate Link `json:"linkTemplate,omitempty"`
 
 	// Handler function, if needed
 	Handler InvokerHandler `json:"handler,omitempty"`

@@ -25,42 +25,42 @@ import (
 	"github.com/projectriff/riff/riff-cli/pkg/options"
 )
 
-func createTopicBinding(opts options.InitOptions, topicBindingTemplate projectriff_v1.TopicBinding) ([]byte, error) {
-	topicBinding := topicBindingTemplate.DeepCopy()
-	topicBinding.TypeMeta.APIVersion = apiVersion
-	topicBinding.TypeMeta.Kind = topicBindingKind
-	topicBinding.ObjectMeta.Name = opts.FunctionName
-	topicBinding.Spec.Function = opts.FunctionName
-	topicBinding.Spec.Input = opts.Input
-	topicBinding.Spec.Output = opts.Output
+func createLink(opts options.InitOptions, linkTemplate projectriff_v1.Link) ([]byte, error) {
+	link := linkTemplate.DeepCopy()
+	link.TypeMeta.APIVersion = apiVersion
+	link.TypeMeta.Kind = linkKind
+	link.ObjectMeta.Name = opts.FunctionName
+	link.Spec.Function = opts.FunctionName
+	link.Spec.Input = opts.Input
+	link.Spec.Output = opts.Output
 
-	bytes, err := json.Marshal(topicBinding)
+	bytes, err := json.Marshal(link)
 	if err != nil {
 		return nil, err
 	}
-	topicBindingMap := map[string]interface{}{}
-	err = json.Unmarshal(bytes, &topicBindingMap)
+	linkMap := map[string]interface{}{}
+	err = json.Unmarshal(bytes, &linkMap)
 	if err != nil {
 		return nil, err
 	}
 
 	// cleanup properties we don't want to marshal
-	metadata := topicBindingMap["metadata"].(map[string]interface{})
+	metadata := linkMap["metadata"].(map[string]interface{})
 	delete(metadata, "creationTimestamp")
 
-	return yaml.Marshal(topicBindingMap)
+	return yaml.Marshal(linkMap)
 }
 
-func createTopicBindingYaml(topicBindingTemplate projectriff_v1.TopicBinding, opts options.InitOptions) (string, error) {
+func createLinkYaml(linkTemplate projectriff_v1.Link, opts options.InitOptions) (string, error) {
 	var buffer bytes.Buffer
 
-	topicBinding, err := createTopicBinding(opts, topicBindingTemplate)
+	link, err := createLink(opts, linkTemplate)
 	if err != nil {
 		return "", err
 	}
 
 	buffer.WriteString("---\n")
-	buffer.Write(topicBinding)
+	buffer.Write(link)
 
 	return buffer.String(), nil
 }

@@ -65,21 +65,21 @@ type ctrl struct {
 	functionsAdded            chan *v1.Function
 	functionsUpdated          chan *v1.Function
 	functionsDeleted          chan *v1.Function
-	topicBindingsAdded        chan *v1.TopicBinding
-	topicBindingsUpdated      chan deltaTopicBinding
-	topicBindingsDeleted      chan *v1.TopicBinding
+	linksAdded                chan *v1.Link
+	linksUpdated              chan deltaLink
+	linksDeleted              chan *v1.Link
 	deploymentsAddedOrUpdated chan *v1beta1.Deployment // TODO investigate deprecation -> apps?
 	deploymentsDeleted        chan *v1beta1.Deployment // TODO investigate deprecation -> apps?
 
-	topicInformer        informersV1.TopicInformer
-	functionInformer     informersV1.FunctionInformer
-	topicBindingInformer informersV1.TopicBindingInformer
-	deploymentInformer   informersV1Beta1.DeploymentInformer
+	topicInformer      informersV1.TopicInformer
+	functionInformer   informersV1.FunctionInformer
+	linkInformer       informersV1.LinkInformer
+	deploymentInformer informersV1Beta1.DeploymentInformer
 
 	functions      map[fnKey]*v1.Function
 	topics         map[topicKey]*v1.Topic
-	topicBindings  map[topicBindingKey]*v1.TopicBinding
-	actualReplicas map[topicBindingKey]int32
+	links          map[linkKey]*v1.Link
+	actualReplicas map[linkKey]int32
 
 	autoscaler autoscaler.AutoScaler
 
@@ -99,18 +99,18 @@ type topicKey struct {
 	name string
 }
 
-type topicBindingKey struct {
+type linkKey struct {
 	name string
 }
 
-// A deltaBind represents a pair of topicbindings involved in an update
-type deltaTopicBinding struct {
-	before *v1.TopicBinding
-	after  *v1.TopicBinding
+// A deltaBind represents a pair of links involved in an update
+type deltaLink struct {
+	before *v1.Link
+	after  *v1.Link
 }
 
 // Run starts the main controller loop, which streamlines concurrent notifications of topics,
-// functions, topicbindings and deployments coming and going, and periodically runs the function
+// functions, links and deployments coming and going, and periodically runs the function
 // scaling logic.
 func (c *ctrl) Run(stopCh <-chan struct{}) {
 
@@ -118,7 +118,7 @@ func (c *ctrl) Run(stopCh <-chan struct{}) {
 	informerStop := make(chan struct{})
 	go c.topicInformer.Informer().Run(informerStop)
 	go c.functionInformer.Informer().Run(informerStop)
-	go c.topicBindingInformer.Informer().Run(informerStop)
+	go c.linkInformer.Informer().Run(informerStop)
 	go c.deploymentInformer.Informer().Run(informerStop)
 
 	// Run autoscaler
@@ -136,12 +136,12 @@ func (c *ctrl) Run(stopCh <-chan struct{}) {
 			c.onFunctionUpdated(function)
 		case function := <-c.functionsDeleted:
 			c.onFunctionDeleted(function)
-		case topicBinding := <-c.topicBindingsAdded:
-			c.onTopicBindingAdded(topicBinding)
-		case deltaTopicBinding := <-c.topicBindingsUpdated:
-			c.onTopicBindingUpdated(deltaTopicBinding.before, deltaTopicBinding.after)
-		case topicBinding := <-c.topicBindingsDeleted:
-			c.onTopicBindingDeleted(topicBinding)
+		case link := <-c.linksAdded:
+			c.onLinkAdded(link)
+		case deltaLink := <-c.linksUpdated:
+			c.onLinkUpdated(deltaLink.before, deltaLink.after)
+		case link := <-c.linksDeleted:
+			c.onLinkDeleted(link)
 		case deployment := <-c.deploymentsAddedOrUpdated:
 			c.onDeploymentAddedOrUpdated(deployment)
 		case deployment := <-c.deploymentsDeleted:
@@ -170,7 +170,7 @@ func (c *ctrl) SetScalingInterval(interval time.Duration) {
 func (c *ctrl) onTopicAddedOrUpdated(topic *v1.Topic) {
 	log.Printf("Topic added: %v", topic.Name)
 	c.topics[tkey(topic)] = topic
-	// TODO (maybe) update topicbindings for this topic
+	// TODO (maybe) update links for this topic
 }
 
 func (c *ctrl) onTopicDeleted(topic *v1.Topic) {
@@ -181,18 +181,18 @@ func (c *ctrl) onTopicDeleted(topic *v1.Topic) {
 func (c *ctrl) onFunctionAdded(function *v1.Function) {
 	log.Printf("Function added: %v", function.Name)
 	c.functions[fkey(function)] = function
-	// create deployments for pre-existing topicbindings
-	for _, topicBinding := range c.collectTopicBindings(function) {
-		c.createDeployment(topicBinding, function)
+	// create deployments for pre-existing links
+	for _, link := range c.collectLinks(function) {
+		c.createDeployment(link, function)
 	}
 }
 
 func (c *ctrl) onFunctionUpdated(function *v1.Function) {
 	log.Printf("Function updated: %v", function.Name)
 	c.functions[fkey(function)] = function
-	// trigger topicBinding updates
-	for _, topicBinding := range c.collectTopicBindings(function) {
-		c.onTopicBindingUpdated(topicBinding, topicBinding)
+	// trigger link updates
+	for _, link := range c.collectLinks(function) {
+		c.onLinkUpdated(link, link)
 	}
 }
 
@@ -201,81 +201,81 @@ func (c *ctrl) onFunctionDeleted(function *v1.Function) {
 	delete(c.functions, fkey(function))
 }
 
-func (c *ctrl) onTopicBindingAdded(topicBinding *v1.TopicBinding) {
-	log.Printf("TopicBinding added: %v", topicBinding.Name)
-	c.topicBindings[tbkey(topicBinding)] = topicBinding
-	function := c.functions[fnKey{topicBinding.Spec.Function}]
+func (c *ctrl) onLinkAdded(link *v1.Link) {
+	log.Printf("Link added: %v", link.Name)
+	c.links[lkey(link)] = link
+	function := c.functions[fnKey{link.Spec.Function}]
 	if function != nil {
-		c.createDeployment(topicBinding, function)
+		c.createDeployment(link, function)
 	}
 }
 
-func (c *ctrl) onTopicBindingUpdated(oldTopicBinding *v1.TopicBinding, newTopicBinding *v1.TopicBinding) {
-	if oldTopicBinding.Name != newTopicBinding.Name {
-		log.Printf("Error: topicbinding name cannot change on update: %s -> %s", oldTopicBinding.Name, newTopicBinding.Name)
+func (c *ctrl) onLinkUpdated(oldLink *v1.Link, newLink *v1.Link) {
+	if oldLink.Name != newLink.Name {
+		log.Printf("Error: link name cannot change on update: %s -> %s", oldLink.Name, newLink.Name)
 		return
 	}
-	if oldTopicBinding.Namespace != newTopicBinding.Namespace {
-		log.Printf("Error: topicbinding namespace cannot change on update: %s -> %s", oldTopicBinding.Namespace, newTopicBinding.Namespace)
+	if oldLink.Namespace != newLink.Namespace {
+		log.Printf("Error: link namespace cannot change on update: %s -> %s", oldLink.Namespace, newLink.Namespace)
 		return
 	}
-	log.Printf("TopicBinding updated: %v", oldTopicBinding.Name)
+	log.Printf("Link updated: %v", oldLink.Name)
 
-	topicBindingKey := tbkey(oldTopicBinding)
-	c.topicBindings[topicBindingKey] = newTopicBinding
+	linkKey := lkey(oldLink)
+	c.links[linkKey] = newLink
 
-	if newTopicBinding.Spec.Input != oldTopicBinding.Spec.Input {
-		c.autoscaler.StopMonitoring(oldTopicBinding.Spec.Input, autoscaler.FunctionId{oldTopicBinding.Name})
+	if newLink.Spec.Input != oldLink.Spec.Input {
+		c.autoscaler.StopMonitoring(oldLink.Spec.Input, autoscaler.FunctionId{oldLink.Name})
 
-		c.autoscaler.StartMonitoring(newTopicBinding.Spec.Input, autoscaler.FunctionId{newTopicBinding.Name})
+		c.autoscaler.StartMonitoring(newLink.Spec.Input, autoscaler.FunctionId{newLink.Name})
 	}
 
-	function := c.functions[fnKey{newTopicBinding.Spec.Function}]
+	function := c.functions[fnKey{newLink.Spec.Function}]
 	if function != nil {
-		err := c.deployer.Update(newTopicBinding, function, int(c.actualReplicas[topicBindingKey]))
+		err := c.deployer.Update(newLink, function, int(c.actualReplicas[linkKey]))
 		if err != nil {
 			log.Printf("Error %v", err)
 		}
 	}
 }
 
-func (c *ctrl) onTopicBindingDeleted(topicBinding *v1.TopicBinding) {
-	log.Printf("Binding deleted: %v", topicBinding.Name)
-	delete(c.topicBindings, tbkey(topicBinding))
-	err := c.deployer.Undeploy(topicBinding)
+func (c *ctrl) onLinkDeleted(link *v1.Link) {
+	log.Printf("Binding deleted: %v", link.Name)
+	delete(c.links, lkey(link))
+	err := c.deployer.Undeploy(link)
 	if err != nil {
 		log.Printf("Error %v", err)
 	}
-	c.autoscaler.StopMonitoring(topicBinding.Spec.Input, autoscaler.FunctionId{topicBinding.Name})
+	c.autoscaler.StopMonitoring(link.Spec.Input, autoscaler.FunctionId{link.Name})
 }
 
-func (c *ctrl) collectTopicBindings(function *v1.Function) []*v1.TopicBinding {
-	matches := []*v1.TopicBinding{}
+func (c *ctrl) collectLinks(function *v1.Function) []*v1.Link {
+	matches := []*v1.Link{}
 	functionKey := fkey(function)
-	for _, topicBinding := range c.topicBindings {
-		topicBindingFuctionKey := tbfkey(topicBinding)
-		if functionKey == topicBindingFuctionKey {
-			matches = append(matches, topicBinding)
+	for _, link := range c.links {
+		linkFuctionKey := lfkey(link)
+		if functionKey == linkFuctionKey {
+			matches = append(matches, link)
 		}
 	}
 	return matches
 }
 
-func (c *ctrl) createDeployment(topicBinding *v1.TopicBinding, function *v1.Function) {
+func (c *ctrl) createDeployment(link *v1.Link, function *v1.Function) {
 	// TODO create owner references
-	err := c.deployer.Deploy(topicBinding, function)
+	err := c.deployer.Deploy(link, function)
 	if err != nil {
 		log.Printf("Error %v", err)
 	}
 	// TODO maybe rename autoscaler.FunctionId to DeploymentId
-	c.autoscaler.StartMonitoring(topicBinding.Spec.Input, autoscaler.FunctionId{topicBinding.Name})
+	c.autoscaler.StartMonitoring(link.Spec.Input, autoscaler.FunctionId{link.Name})
 }
 
 func (c *ctrl) onDeploymentAddedOrUpdated(deployment *v1beta1.Deployment) {
 	if key := bindKey(deployment); key != nil {
 		log.Printf("Deployment added/updated: %v", deployment.Name)
 		c.actualReplicas[*key] = deployment.Status.Replicas
-		c.autoscaler.InformFunctionReplicas(topicBindingKeyToId(key), int(deployment.Status.Replicas))
+		c.autoscaler.InformFunctionReplicas(linkKeyToId(key), int(deployment.Status.Replicas))
 	}
 }
 
@@ -283,36 +283,36 @@ func (c *ctrl) onDeploymentDeleted(deployment *v1beta1.Deployment) {
 	if key := bindKey(deployment); key != nil {
 		log.Printf("Deployment deleted: %v", deployment.Name)
 		delete(c.actualReplicas, *key)
-		c.autoscaler.InformFunctionReplicas(topicBindingKeyToId(key), 0)
+		c.autoscaler.InformFunctionReplicas(linkKeyToId(key), 0)
 	}
 }
 
-func bindKey(deployment *v1beta1.Deployment) *topicBindingKey {
+func bindKey(deployment *v1beta1.Deployment) *linkKey {
 	if deployment.Labels["function"] != "" {
-		return &topicBindingKey{deployment.Labels["function"]}
+		return &linkKey{deployment.Labels["function"]}
 	} else {
 		return nil
 	}
 }
 
-// TODO: unify topicBindingKey and autoscaler.FunctionId so conversion is not necessary
-func topicBindingKeyToId(key *topicBindingKey) autoscaler.FunctionId {
+// TODO: unify linkKey and autoscaler.FunctionId so conversion is not necessary
+func linkKeyToId(key *linkKey) autoscaler.FunctionId {
 	return autoscaler.FunctionId{key.name}
 }
 
 func fkey(function *v1.Function) fnKey {
 	return fnKey{name: function.Name}
 }
-func tbfkey(topicBinding *v1.TopicBinding) fnKey {
-	return fnKey{name: topicBinding.Spec.Function}
+func lfkey(link *v1.Link) fnKey {
+	return fnKey{name: link.Spec.Function}
 }
 
 func tkey(topic *v1.Topic) topicKey {
 	return topicKey{name: topic.Name}
 }
 
-func tbkey(topicBinding *v1.TopicBinding) topicBindingKey {
-	return topicBindingKey{name: topicBinding.Name}
+func lkey(link *v1.Link) linkKey {
+	return linkKey{name: link.Name}
 }
 
 func (c *ctrl) scale() {
@@ -320,15 +320,15 @@ func (c *ctrl) scale() {
 
 	//log.Printf("Offsets = %v, =>Replicas = %v", offsets, replicas)
 
-	for k, topicBinding := range c.topicBindings {
-		bindKey := tbkey(topicBinding)
-		bindId := topicBindingKeyToId(&bindKey)
+	for k, link := range c.links {
+		bindKey := lkey(link)
+		bindId := linkKeyToId(&bindKey)
 		desired := replicas[bindId]
 
 		//log.Printf("For %v, want %v currently have %v", fn.Name, desired, c.actualReplicas[k])
 
 		if int32(desired) != c.actualReplicas[k] {
-			err := c.deployer.Scale(topicBinding, desired)
+			err := c.deployer.Scale(link, desired)
 			if err != nil {
 				log.Printf("Error %v", err)
 			}
@@ -341,7 +341,7 @@ func (c *ctrl) scale() {
 // New initialises a new function controller, adding event handlers to the provided informers.
 func New(topicInformer informersV1.TopicInformer,
 	functionInformer informersV1.FunctionInformer,
-	topicBindingInformer informersV1.TopicBindingInformer,
+	linkInformer informersV1.LinkInformer,
 	deploymentInformer informersV1Beta1.DeploymentInformer,
 	deployer Deployer,
 	auto autoscaler.AutoScaler,
@@ -355,17 +355,17 @@ func New(topicInformer informersV1.TopicInformer,
 		functionsUpdated:          make(chan *v1.Function, 100),
 		functionsDeleted:          make(chan *v1.Function, 100),
 		functionInformer:          functionInformer,
-		topicBindingsAdded:        make(chan *v1.TopicBinding, 100),
-		topicBindingsUpdated:      make(chan deltaTopicBinding, 100),
-		topicBindingsDeleted:      make(chan *v1.TopicBinding, 100),
-		topicBindingInformer:      topicBindingInformer,
+		linksAdded:                make(chan *v1.Link, 100),
+		linksUpdated:              make(chan deltaLink, 100),
+		linksDeleted:              make(chan *v1.Link, 100),
+		linkInformer:              linkInformer,
 		deploymentsAddedOrUpdated: make(chan *v1beta1.Deployment, 100),
 		deploymentsDeleted:        make(chan *v1beta1.Deployment, 100),
 		deploymentInformer:        deploymentInformer,
 		functions:                 make(map[fnKey]*v1.Function),
 		topics:                    make(map[topicKey]*v1.Topic),
-		topicBindings:             make(map[topicBindingKey]*v1.TopicBinding),
-		actualReplicas:            make(map[topicBindingKey]int32),
+		links:                     make(map[linkKey]*v1.Link),
+		actualReplicas:            make(map[linkKey]int32),
 		deployer:                  deployer,
 		autoscaler:                auto,
 		scalerInterval:            DefaultScalerInterval,
@@ -404,25 +404,25 @@ func New(topicInformer informersV1.TopicInformer,
 			pctrl.functionsDeleted <- fn
 		},
 	})
-	topicBindingInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	linkInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-			topicBinding := obj.(*v1.TopicBinding)
-			v1.SetObjectDefaults_TopicBinding(topicBinding)
-			pctrl.topicBindingsAdded <- topicBinding
+			link := obj.(*v1.Link)
+			v1.SetObjectDefaults_Link(link)
+			pctrl.linksAdded <- link
 		},
 		UpdateFunc: func(old interface{}, new interface{}) {
-			oldTopicBinding := old.(*v1.TopicBinding)
-			v1.SetObjectDefaults_TopicBinding(oldTopicBinding)
+			oldLink := old.(*v1.Link)
+			v1.SetObjectDefaults_Link(oldLink)
 
-			newTopicBinding := new.(*v1.TopicBinding)
-			v1.SetObjectDefaults_TopicBinding(newTopicBinding)
+			newLink := new.(*v1.Link)
+			v1.SetObjectDefaults_Link(newLink)
 
-			pctrl.topicBindingsUpdated <- deltaTopicBinding{before: oldTopicBinding, after: newTopicBinding}
+			pctrl.linksUpdated <- deltaLink{before: oldLink, after: newLink}
 		},
 		DeleteFunc: func(obj interface{}) {
-			topicBinding := obj.(*v1.TopicBinding)
-			v1.SetObjectDefaults_TopicBinding(topicBinding)
-			pctrl.topicBindingsDeleted <- topicBinding
+			link := obj.(*v1.Link)
+			v1.SetObjectDefaults_Link(link)
+			pctrl.linksDeleted <- link
 		},
 	})
 	deploymentInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -450,14 +450,14 @@ func New(topicInformer informersV1.TopicInformer,
 
 	auto.SetMaxReplicasPolicy(func(deployment autoscaler.FunctionId) int {
 		replicas := 1
-		if topicBinding, ok := pctrl.topicBindings[topicBindingKey{deployment.Function}]; ok {
-			if topicBinding.Spec.Input != "" {
-				if topic, ok := pctrl.topics[topicKey{topicBinding.Spec.Input}]; ok {
+		if link, ok := pctrl.links[linkKey{deployment.Function}]; ok {
+			if link.Spec.Input != "" {
+				if topic, ok := pctrl.topics[topicKey{link.Spec.Input}]; ok {
 					replicas = int(*topic.Spec.Partitions)
 				}
 			}
 
-			if fn, ok := pctrl.functions[fnKey{topicBinding.Spec.Function}]; ok {
+			if fn, ok := pctrl.functions[fnKey{link.Spec.Function}]; ok {
 				if fn.Spec.MaxReplicas != nil {
 					replicas = min(int(*fn.Spec.MaxReplicas), replicas)
 				}

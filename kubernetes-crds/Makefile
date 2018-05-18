@@ -57,4 +57,4 @@ kubectl-apply:
 	kubectl apply -f config/function-resource.yaml
 	kubectl apply -f config/invoker-resource.yaml
 	kubectl apply -f config/topic-resource.yaml
-	kubectl apply -f config/topicbinding-resource.yaml
+	kubectl apply -f config/link-resource.yaml

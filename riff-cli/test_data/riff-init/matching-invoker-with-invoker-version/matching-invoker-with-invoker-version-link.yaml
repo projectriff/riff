@@ -1,6 +1,6 @@
 ---
 apiVersion: projectriff.io/v1alpha1
-kind: TopicBinding
+kind: Link
 metadata:
   name: matching-invoker-with-invoker-version
 spec:

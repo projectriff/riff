@@ -27,8 +27,8 @@ type ProjectriffV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	FunctionsGetter
 	InvokersGetter
+	LinksGetter
 	TopicsGetter
-	TopicBindingsGetter
 }
 
 // ProjectriffV1alpha1Client is used to interact with features provided by the projectriff.io group.
@@ -44,12 +44,12 @@ func (c *ProjectriffV1alpha1Client) Invokers(namespace string) InvokerInterface 
 	return newInvokers(c, namespace)
 }
 
-func (c *ProjectriffV1alpha1Client) Topics(namespace string) TopicInterface {
-	return newTopics(c, namespace)
+func (c *ProjectriffV1alpha1Client) Links(namespace string) LinkInterface {
+	return newLinks(c, namespace)
 }
 
-func (c *ProjectriffV1alpha1Client) TopicBindings(namespace string) TopicBindingInterface {
-	return newTopicBindings(c, namespace)
+func (c *ProjectriffV1alpha1Client) Topics(namespace string) TopicInterface {
+	return newTopics(c, namespace)
 }
 
 // NewForConfig creates a new ProjectriffV1alpha1Client for the given config.

@@ -30,8 +30,8 @@ import (
 func RegisterDefaults(scheme *runtime.Scheme) error {
 	scheme.AddTypeDefaultingFunc(&Function{}, func(obj interface{}) { SetObjectDefaults_Function(obj.(*Function)) })
 	scheme.AddTypeDefaultingFunc(&Invoker{}, func(obj interface{}) { SetObjectDefaults_Invoker(obj.(*Invoker)) })
+	scheme.AddTypeDefaultingFunc(&Link{}, func(obj interface{}) { SetObjectDefaults_Link(obj.(*Link)) })
 	scheme.AddTypeDefaultingFunc(&Topic{}, func(obj interface{}) { SetObjectDefaults_Topic(obj.(*Topic)) })
-	scheme.AddTypeDefaultingFunc(&TopicBinding{}, func(obj interface{}) { SetObjectDefaults_TopicBinding(obj.(*TopicBinding)) })
 	return nil
 }
 
@@ -43,12 +43,13 @@ func SetObjectDefaults_Invoker(in *Invoker) {
 	SetDefaults_InvokerSpec(&in.Spec)
 	SetObjectDefaults_Function(&in.Spec.FunctionTemplate)
 	SetObjectDefaults_Topic(&in.Spec.TopicTemplate)
+	SetObjectDefaults_Link(&in.Spec.LinkTemplate)
+}
+
+func SetObjectDefaults_Link(in *Link) {
+	SetDefaults_LinkSpec(&in.Spec)
 }
 
 func SetObjectDefaults_Topic(in *Topic) {
 	SetDefaults_TopicSpec(&in.Spec)
-}
-
-func SetObjectDefaults_TopicBinding(in *TopicBinding) {
-	SetDefaults_TopicBindingSpec(&in.Spec)
 }

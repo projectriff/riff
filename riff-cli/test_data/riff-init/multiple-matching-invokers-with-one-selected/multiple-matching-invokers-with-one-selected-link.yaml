@@ -1,6 +1,6 @@
 ---
 apiVersion: projectriff.io/v1alpha1
-kind: TopicBinding
+kind: Link
 metadata:
   name: multiple-matching-invokers-with-one-selected
 spec:

@@ -34,12 +34,12 @@ func (c *FakeProjectriffV1alpha1) Invokers(namespace string) v1alpha1.InvokerInt
 	return &FakeInvokers{c, namespace}
 }
 
-func (c *FakeProjectriffV1alpha1) Topics(namespace string) v1alpha1.TopicInterface {
-	return &FakeTopics{c, namespace}
+func (c *FakeProjectriffV1alpha1) Links(namespace string) v1alpha1.LinkInterface {
+	return &FakeLinks{c, namespace}
 }
 
-func (c *FakeProjectriffV1alpha1) TopicBindings(namespace string) v1alpha1.TopicBindingInterface {
-	return &FakeTopicBindings{c, namespace}
+func (c *FakeProjectriffV1alpha1) Topics(namespace string) v1alpha1.TopicInterface {
+	return &FakeTopics{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

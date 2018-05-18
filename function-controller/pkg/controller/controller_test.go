@@ -37,7 +37,7 @@ var _ = Describe("Controller", func() {
 		ctrl                 controller.Controller
 		deployer             *mocks.Deployer
 		autoScaler           *mockautoscaler.AutoScaler
-		topicBindingHandlers cache.ResourceEventHandlerFuncs
+		linkHandlers         cache.ResourceEventHandlerFuncs
 		deploymentsHandlers  cache.ResourceEventHandlerFuncs
 		functionHandlers     cache.ResourceEventHandlerFuncs
 		topicHandlers        cache.ResourceEventHandlerFuncs
@@ -51,7 +51,7 @@ var _ = Describe("Controller", func() {
 
 		topicInformer := new(mocks.TopicInformer)
 		functionInformer := new(mocks.FunctionInformer)
-		topicBindingInformer := new(mocks.TopicBindingInformer)
+		linkInformer := new(mocks.LinkInformer)
 		deploymentInformer := new(mocks.DeploymentInformer)
 
 		siiTopics := new(mocks.SharedIndexInformer)
@@ -68,12 +68,12 @@ var _ = Describe("Controller", func() {
 		})
 		siiFunctions.On("Run", mock.Anything)
 
-		siiTopicBindings := new(mocks.SharedIndexInformer)
-		topicBindingInformer.On("Informer").Return(siiTopicBindings)
-		siiTopicBindings.On("AddEventHandler", mock.AnythingOfType("cache.ResourceEventHandlerFuncs")).Run(func(args mock.Arguments) {
-			topicBindingHandlers = args.Get(0).(cache.ResourceEventHandlerFuncs)
+		siiLinks := new(mocks.SharedIndexInformer)
+		linkInformer.On("Informer").Return(siiLinks)
+		siiLinks.On("AddEventHandler", mock.AnythingOfType("cache.ResourceEventHandlerFuncs")).Run(func(args mock.Arguments) {
+			linkHandlers = args.Get(0).(cache.ResourceEventHandlerFuncs)
 		})
-		siiTopicBindings.On("Run", mock.Anything)
+		siiLinks.On("Run", mock.Anything)
 
 		siiDeployments := new(mocks.SharedIndexInformer)
 		deploymentInformer.On("Informer").Return(siiDeployments)
@@ -95,7 +95,7 @@ var _ = Describe("Controller", func() {
 		autoScaler.On("StopMonitoring", mock.AnythingOfType("string"), mock.AnythingOfType("autoscaler.FunctionId")).Return(nil)
 		autoScaler.On("InformFunctionReplicas", mock.AnythingOfType("autoscaler.FunctionId"), mock.AnythingOfType("int"))
 
-		ctrl = controller.New(topicInformer, functionInformer, topicBindingInformer, deploymentInformer, deployer, autoScaler, -1)
+		ctrl = controller.New(topicInformer, functionInformer, linkInformer, deploymentInformer, deployer, autoScaler, -1)
 		closeCh = make(chan struct{}, 2) // 2 allows to easily send in a .Runt() func() on stubs w/o blocking
 	})
 
@@ -111,91 +111,91 @@ var _ = Describe("Controller", func() {
 		ctrl.Run(closeCh)
 	})
 
-	It("should create, update and remove a topicbinding for a function", func() {
+	It("should create, update and remove a link for a function", func() {
 		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-		topicBinding1 := &v1.TopicBinding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.TopicBindingSpec{Function: "fn", Input: "input1"}}
-		topicBinding2 := &v1.TopicBinding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.TopicBindingSpec{Function: "fn", Input: "input2"}}
+		link1 := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input1"}}
+		link2 := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input2"}}
 
-		deployer.On("Deploy", topicBinding1, function).Return(nil).Run(func(args mock.Arguments) {
-			topicBindingHandlers.UpdateFunc(topicBinding1, topicBinding2)
+		deployer.On("Deploy", link1, function).Return(nil).Run(func(args mock.Arguments) {
+			linkHandlers.UpdateFunc(link1, link2)
 		})
-		deployer.On("Update", topicBinding2, function, 0).Return(nil).Run(func(args mock.Arguments) {
-			topicBindingHandlers.DeleteFunc(topicBinding2)
+		deployer.On("Update", link2, function, 0).Return(nil).Run(func(args mock.Arguments) {
+			linkHandlers.DeleteFunc(link2)
 		})
-		deployer.On("Undeploy", topicBinding2).Return(nil).Run(func(args mock.Arguments) {
+		deployer.On("Undeploy", link2).Return(nil).Run(func(args mock.Arguments) {
 			closeCh <- struct{}{}
 		})
 
 		functionHandlers.AddFunc(function)
-		topicBindingHandlers.AddFunc(topicBinding1)
+		linkHandlers.AddFunc(link1)
 
 		ctrl.Run(closeCh)
 	})
 
-	It("should handle multiple topicbindings for a function", func() {
+	It("should handle multiple links for a function", func() {
 		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-		topicBinding1 := &v1.TopicBinding{ObjectMeta: metav1.ObjectMeta{Name: "fn1"}, Spec: v1.TopicBindingSpec{Function: "fn", Input: "input"}}
-		topicBinding2 := &v1.TopicBinding{ObjectMeta: metav1.ObjectMeta{Name: "fn2"}, Spec: v1.TopicBindingSpec{Function: "fn", Input: "input"}}
+		link1 := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn1"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+		link2 := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn2"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
 
-		deployer.On("Deploy", topicBinding1, function).Return(nil).Run(func(args mock.Arguments) {
-			topicBindingHandlers.AddFunc(topicBinding2)
+		deployer.On("Deploy", link1, function).Return(nil).Run(func(args mock.Arguments) {
+			linkHandlers.AddFunc(link2)
 		})
-		deployer.On("Deploy", topicBinding2, function).Return(nil).Run(func(args mock.Arguments) {
-			topicBindingHandlers.DeleteFunc(topicBinding1)
+		deployer.On("Deploy", link2, function).Return(nil).Run(func(args mock.Arguments) {
+			linkHandlers.DeleteFunc(link1)
 		})
-		deployer.On("Undeploy", topicBinding1).Return(nil).Run(func(args mock.Arguments) {
-			topicBindingHandlers.DeleteFunc(topicBinding2)
+		deployer.On("Undeploy", link1).Return(nil).Run(func(args mock.Arguments) {
+			linkHandlers.DeleteFunc(link2)
 		})
-		deployer.On("Undeploy", topicBinding2).Return(nil).Run(func(args mock.Arguments) {
+		deployer.On("Undeploy", link2).Return(nil).Run(func(args mock.Arguments) {
 			closeCh <- struct{}{}
 		})
 
 		functionHandlers.AddFunc(function)
-		topicBindingHandlers.AddFunc(topicBinding1)
+		linkHandlers.AddFunc(link1)
 
 		ctrl.Run(closeCh)
 	})
 
-	It("should handle topicbinding coming and going", func() {
+	It("should handle link coming and going", func() {
 		ctrl.SetScalingInterval(10 * time.Millisecond)
 
 		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-		topicBinding := &v1.TopicBinding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.TopicBindingSpec{Function: "fn", Input: "input"}}
-		deployer.On("Deploy", topicBinding, function).Return(nil)
+		link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+		deployer.On("Deploy", link, function).Return(nil)
 		proposal := make(map[autoscaler.FunctionId]int)
 		proposal[autoscaler.FunctionId{"fn"}] = 1
 		autoScaler.On("Propose").Return(proposal)
 
-		deployer.On("Scale", topicBinding, 1).Return(nil).Run(func(args mock.Arguments) {
+		deployer.On("Scale", link, 1).Return(nil).Run(func(args mock.Arguments) {
 			fmt.Println("Scale")
-			topicBindingHandlers.DeleteFunc(topicBinding)
+			linkHandlers.DeleteFunc(link)
 		})
-		deployer.On("Undeploy", topicBinding).Return(nil).Run(func(args mock.Arguments) {
+		deployer.On("Undeploy", link).Return(nil).Run(func(args mock.Arguments) {
 			fmt.Println("Undeploy")
 			closeCh <- struct{}{}
 		})
 
 		functionHandlers.AddFunc(function)
-		topicBindingHandlers.AddFunc(topicBinding)
+		linkHandlers.AddFunc(link)
 
 		ctrl.Run(closeCh)
 	})
 
-	It("should handle topicbindings being updated", func() {
+	It("should handle links being updated", func() {
 		fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-		topicBinding1 := &v1.TopicBinding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.TopicBindingSpec{Function: "fn", Input: "input"}}
-		topicBinding2 := &v1.TopicBinding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.TopicBindingSpec{Function: "fn", Input: "input2"}}
+		link1 := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+		link2 := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input2"}}
 
-		deployer.On("Deploy", topicBinding1, fn).Return(nil).Run(func(args mock.Arguments) {
-			topicBindingHandlers.UpdateFunc(topicBinding1, topicBinding2)
+		deployer.On("Deploy", link1, fn).Return(nil).Run(func(args mock.Arguments) {
+			linkHandlers.UpdateFunc(link1, link2)
 		})
 
-		deployer.On("Update", topicBinding2, fn, 0).Return(nil).Run(func(args mock.Arguments) {
+		deployer.On("Update", link2, fn, 0).Return(nil).Run(func(args mock.Arguments) {
 			closeCh <- struct{}{}
 		})
 
 		functionHandlers.AddFunc(fn)
-		topicBindingHandlers.AddFunc(topicBinding1)
+		linkHandlers.AddFunc(link1)
 
 		ctrl.Run(closeCh)
 	})
@@ -203,18 +203,18 @@ var _ = Describe("Controller", func() {
 	It("should handle functions being updated", func() {
 		fn1 := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Protocol: "http"}}
 		fn2 := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Protocol: "grpc"}}
-		topicBinding := &v1.TopicBinding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.TopicBindingSpec{Function: "fn", Input: "input"}}
+		link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
 
-		deployer.On("Deploy", topicBinding, fn1).Return(nil).Run(func(args mock.Arguments) {
+		deployer.On("Deploy", link, fn1).Return(nil).Run(func(args mock.Arguments) {
 			functionHandlers.UpdateFunc(fn1, fn2)
 		})
 
-		deployer.On("Update", topicBinding, fn2, 0).Return(nil).Run(func(args mock.Arguments) {
+		deployer.On("Update", link, fn2, 0).Return(nil).Run(func(args mock.Arguments) {
 			closeCh <- struct{}{}
 		})
 
 		functionHandlers.AddFunc(fn1)
-		topicBindingHandlers.AddFunc(topicBinding)
+		linkHandlers.AddFunc(link)
 
 		ctrl.Run(closeCh)
 	})
@@ -223,12 +223,12 @@ var _ = Describe("Controller", func() {
 		ctrl.SetScalingInterval(10 * time.Millisecond)
 
 		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-		topicBinding := &v1.TopicBinding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.TopicBindingSpec{Function: "fn", Input: "input"}}
-		deployer.On("Deploy", topicBinding, function).Return(nil)
+		link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+		deployer.On("Deploy", link, function).Return(nil)
 
 		three := int32(3)
 		topic := &v1.Topic{ObjectMeta: metav1.ObjectMeta{Name: "input"}, Spec: v1.TopicSpec{Partitions: &three}}
-		deployer.On("Deploy", topicBinding, function).Return(nil)
+		deployer.On("Deploy", link, function).Return(nil)
 
 		proposal := make(map[autoscaler.FunctionId]int)
 		proposal[autoscaler.FunctionId{"fn"}] = 1
@@ -242,15 +242,15 @@ var _ = Describe("Controller", func() {
 		proposal[autoscaler.FunctionId{"fn"}] = 3
 		autoScaler.On("Propose").Return(proposal).Once()
 
-		deployer.On("Scale", topicBinding, 1).Return(nil)
-		deployer.On("Scale", topicBinding, 2).Return(nil)
-		deployer.On("Scale", topicBinding, 3).Return(nil).Run(func(args mock.Arguments) {
+		deployer.On("Scale", link, 1).Return(nil)
+		deployer.On("Scale", link, 2).Return(nil)
+		deployer.On("Scale", link, 3).Return(nil).Run(func(args mock.Arguments) {
 			closeCh <- struct{}{}
 		})
 
 		functionHandlers.AddFunc(function)
 		topicHandlers.AddFunc(topic)
-		topicBindingHandlers.AddFunc(topicBinding)
+		linkHandlers.AddFunc(link)
 
 		ctrl.Run(closeCh)
 	})
@@ -261,13 +261,13 @@ var _ = Describe("Controller", func() {
 		ctrl.SetScalingInterval(10 * time.Millisecond)
 
 		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-		topicBinding := &v1.TopicBinding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.TopicBindingSpec{Function: "fn", Input: "input"}}
-		deployer.On("Deploy", topicBinding, function).Return(nil)
+		link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+		deployer.On("Deploy", link, function).Return(nil)
 
 		computes := 0
 		three := int32(3)
 		topic := &v1.Topic{ObjectMeta: metav1.ObjectMeta{Name: "input"}, Spec: v1.TopicSpec{Partitions: &three}}
-		deployer.On("Deploy", topicBinding, function).Return(nil)
+		deployer.On("Deploy", link, function).Return(nil)
 
 		proposal := make(map[autoscaler.FunctionId]int)
 		proposal[autoscaler.FunctionId{"fn"}] = 2
@@ -292,15 +292,15 @@ var _ = Describe("Controller", func() {
 			computes++
 		})
 
-		deployer.On("Scale", topicBinding, 2).Return(nil).Once()
-		deployer.On("Scale", topicBinding, 2).Return(nil).Run(func(args mock.Arguments) {
+		deployer.On("Scale", link, 2).Return(nil).Once()
+		deployer.On("Scale", link, 2).Return(nil).Run(func(args mock.Arguments) {
 			Expect(computes).To(Equal(7))
 			closeCh <- struct{}{}
 		})
 
 		functionHandlers.AddFunc(function)
 		topicHandlers.AddFunc(topic)
-		topicBindingHandlers.AddFunc(topicBinding)
+		linkHandlers.AddFunc(link)
 
 		ctrl.Run(closeCh)
 	})
@@ -322,10 +322,10 @@ var _ = Describe("Controller", func() {
 			Context("when the function does not specify maxReplicas", func() {
 				BeforeEach(func() {
 					function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-					topicBinding := &v1.TopicBinding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.TopicBindingSpec{Function: "fn", Input: "input"}}
-					deployer.On("Deploy", topicBinding, function).Return(nil)
+					link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+					deployer.On("Deploy", link, function).Return(nil)
 					functionHandlers.AddFunc(function)
-					topicBindingHandlers.AddFunc(topicBinding)
+					linkHandlers.AddFunc(link)
 				})
 
 				It("should eventually return 10", func() {
@@ -339,10 +339,10 @@ var _ = Describe("Controller", func() {
 				BeforeEach(func() {
 					five := int32(5)
 					function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{MaxReplicas: &five}}
-					topicBinding := &v1.TopicBinding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.TopicBindingSpec{Function: "fn", Input: "input"}}
-					deployer.On("Deploy", topicBinding, function).Return(nil)
+					link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+					deployer.On("Deploy", link, function).Return(nil)
 					functionHandlers.AddFunc(function)
-					topicBindingHandlers.AddFunc(topicBinding)
+					linkHandlers.AddFunc(link)
 				})
 
 				It("should eventually return 5", func() {
@@ -358,10 +358,10 @@ var _ = Describe("Controller", func() {
 		Context("when the function does not specify idleTimeoutMs", func() {
 			BeforeEach(func() {
 				function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
-				topicBinding := &v1.TopicBinding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.TopicBindingSpec{Function: "fn", Input: "input"}}
-				deployer.On("Deploy", topicBinding, function).Return(nil)
+				link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+				deployer.On("Deploy", link, function).Return(nil)
 				functionHandlers.AddFunc(function)
-				topicBindingHandlers.AddFunc(topicBinding)
+				linkHandlers.AddFunc(link)
 
 				proposal := make(map[autoscaler.FunctionId]int)
 				proposal[autoscaler.FunctionId{"fn"}] = 0
@@ -382,10 +382,10 @@ var _ = Describe("Controller", func() {
 			BeforeEach(func() {
 				idleTimeoutMs = 300
 				function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{IdleTimeoutMs: &idleTimeoutMs}}
-				topicBinding := &v1.TopicBinding{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.TopicBindingSpec{Function: "fn", Input: "input"}}
-				deployer.On("Deploy", topicBinding, function).Return(nil)
+				link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+				deployer.On("Deploy", link, function).Return(nil)
 				functionHandlers.AddFunc(function)
-				topicBindingHandlers.AddFunc(topicBinding)
+				linkHandlers.AddFunc(link)
 
 				proposal := make(map[autoscaler.FunctionId]int)
 				proposal[autoscaler.FunctionId{"fn"}] = 0

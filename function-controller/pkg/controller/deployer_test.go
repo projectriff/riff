@@ -34,8 +34,8 @@ var _ = Describe("Deployer", func() {
 
 	Describe("buildDeployment", func() {
 		var (
-			function     v1.Function
-			topicBinding v1.TopicBinding
+			function v1.Function
+			link     v1.Link
 		)
 
 		BeforeEach(func() {
@@ -45,16 +45,16 @@ var _ = Describe("Deployer", func() {
 					Namespace: "default",
 				},
 			}
-			topicBinding = v1.TopicBinding{
+			link = v1.Link{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "square-topicbinding",
+					Name:      "square-link",
 					Namespace: "default",
 				},
 			}
 		})
 
 		It("should set the HTTP_PORT var", func() {
-			deployment := d.buildDeployment(&topicBinding, &function)
+			deployment := d.buildDeployment(&link, &function)
 			mainContainer := deployment.Spec.Template.Spec.Containers[0]
 			Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
 				Name:  "HTTP_PORT",
@@ -63,7 +63,7 @@ var _ = Describe("Deployer", func() {
 		})
 
 		It("should set the GRPC_PORT var", func() {
-			deployment := d.buildDeployment(&topicBinding, &function)
+			deployment := d.buildDeployment(&link, &function)
 			mainContainer := deployment.Spec.Template.Spec.Containers[0]
 			Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
 				Name:  "GRPC_PORT",
@@ -71,12 +71,12 @@ var _ = Describe("Deployer", func() {
 			}))
 		})
 
-		It("creates an owner reference to the topicbinding", func() {
-			deployment := d.buildDeployment(&topicBinding, &function)
+		It("creates an owner reference to the link", func() {
+			deployment := d.buildDeployment(&link, &function)
 			ownerReferences := deployment.OwnerReferences
 			Expect(len(ownerReferences)).To(Equal(1))
-			Expect(ownerReferences[0].Kind).To(Equal("TopicBinding"))
-			Expect(ownerReferences[0].Name).To(Equal("square-topicbinding"))
+			Expect(ownerReferences[0].Kind).To(Equal("Link"))
+			Expect(ownerReferences[0].Name).To(Equal("square-link"))
 			Expect(*ownerReferences[0].Controller).To(BeTrue())
 			Expect(*ownerReferences[0].BlockOwnerDeletion).To(BeTrue())
 		})
@@ -88,7 +88,7 @@ var _ = Describe("Deployer", func() {
 			})
 
 			It("should set the RIFF_FUNCTION_INVOKER_PROTOCOL var to grpc", func() {
-				deployment := d.buildDeployment(&topicBinding, &function)
+				deployment := d.buildDeployment(&link, &function)
 				mainContainer := deployment.Spec.Template.Spec.Containers[0]
 				Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
 					Name:  "RIFF_FUNCTION_INVOKER_PROTOCOL",
@@ -97,7 +97,7 @@ var _ = Describe("Deployer", func() {
 			})
 
 			It("should set the sidecar --protocol and --port arg", func() {
-				deployment := d.buildDeployment(&topicBinding, &function)
+				deployment := d.buildDeployment(&link, &function)
 				sidecarContainer := deployment.Spec.Template.Spec.Containers[1]
 				args := sidecarContainer.Args
 				Expect(args[indexOf(args, "--protocol")+1]).To(Equal("grpc"))
@@ -113,7 +113,7 @@ var _ = Describe("Deployer", func() {
 			})
 
 			It("should set the RIFF_FUNCTION_INVOKER_PROTOCOL var to http", func() {
-				deployment := d.buildDeployment(&topicBinding, &function)
+				deployment := d.buildDeployment(&link, &function)
 				mainContainer := deployment.Spec.Template.Spec.Containers[0]
 				Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
 					Name:  "RIFF_FUNCTION_INVOKER_PROTOCOL",
@@ -122,7 +122,7 @@ var _ = Describe("Deployer", func() {
 			})
 
 			It("should set the sidecar --protocol and --port arg", func() {
-				deployment := d.buildDeployment(&topicBinding, &function)
+				deployment := d.buildDeployment(&link, &function)
 				sidecarContainer := deployment.Spec.Template.Spec.Containers[1]
 				args := sidecarContainer.Args
 				Expect(args[indexOf(args, "--protocol")+1]).To(Equal("http"))

@@ -30,44 +30,44 @@ import (
 	time "time"
 )
 
-// TopicBindingInformer provides access to a shared informer and lister for
-// TopicBindings.
-type TopicBindingInformer interface {
+// LinkInformer provides access to a shared informer and lister for
+// Links.
+type LinkInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.TopicBindingLister
+	Lister() v1alpha1.LinkLister
 }
 
-type topicBindingInformer struct {
+type linkInformer struct {
 	factory internalinterfaces.SharedInformerFactory
 }
 
-// NewTopicBindingInformer constructs a new informer for TopicBinding type.
+// NewLinkInformer constructs a new informer for Link type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewTopicBindingInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+func NewLinkInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
-				return client.ProjectriffV1alpha1().TopicBindings(namespace).List(options)
+				return client.ProjectriffV1alpha1().Links(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
-				return client.ProjectriffV1alpha1().TopicBindings(namespace).Watch(options)
+				return client.ProjectriffV1alpha1().Links(namespace).Watch(options)
 			},
 		},
-		&projectriff_io_v1alpha1.TopicBinding{},
+		&projectriff_io_v1alpha1.Link{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func defaultTopicBindingInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewTopicBindingInformer(client, v1.NamespaceAll, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
+func defaultLinkInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewLinkInformer(client, v1.NamespaceAll, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
 }
 
-func (f *topicBindingInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&projectriff_io_v1alpha1.TopicBinding{}, defaultTopicBindingInformer)
+func (f *linkInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&projectriff_io_v1alpha1.Link{}, defaultLinkInformer)
 }
 
-func (f *topicBindingInformer) Lister() v1alpha1.TopicBindingLister {
-	return v1alpha1.NewTopicBindingLister(f.Informer().GetIndexer())
+func (f *linkInformer) Lister() v1alpha1.LinkLister {
+	return v1alpha1.NewLinkLister(f.Informer().GetIndexer())
 }

@@ -51,11 +51,11 @@ var _ = Describe("The apply command", func() {
 			Expect(err).NotTo(HaveOccurred())
 			applesFunctionFile, err := filepath.Abs("apples-function.yaml")
 			Expect(err).NotTo(HaveOccurred())
-			applesTopicBindingFile, err := filepath.Abs("apples-topicbinding.yaml")
+			applesLinkFile, err := filepath.Abs("apples-link.yaml")
 			Expect(err).NotTo(HaveOccurred())
 			orangesFunctionFile, err := filepath.Abs("oranges-function.yaml")
 			Expect(err).NotTo(HaveOccurred())
-			orangesTopicBindingFile, err := filepath.Abs("oranges-topicbinding.yaml")
+			orangesLinkFile, err := filepath.Abs("oranges-link.yaml")
 			Expect(err).NotTo(HaveOccurred())
 
 			realKubeCtl.On("Exec", []string{
@@ -63,8 +63,8 @@ var _ = Describe("The apply command", func() {
 				"-f", applesFunctionFile,
 				"-f", orangesFunctionFile,
 				"-f", topicsFile,
-				"-f", applesTopicBindingFile,
-				"-f", orangesTopicBindingFile,
+				"-f", applesLinkFile,
+				"-f", orangesLinkFile,
 			}).Return("", nil)
 
 			err = applyCmd.Execute()
@@ -78,11 +78,11 @@ var _ = Describe("The apply command", func() {
 			Expect(err).NotTo(HaveOccurred())
 			applesFunctionFile, err := filepath.Abs("apples-function.yaml")
 			Expect(err).NotTo(HaveOccurred())
-			applesTopicBindingFile, err := filepath.Abs("apples-topicbinding.yaml")
+			applesLinkFile, err := filepath.Abs("apples-link.yaml")
 			Expect(err).NotTo(HaveOccurred())
 			orangesFunctionFile, err := filepath.Abs("oranges-function.yaml")
 			Expect(err).NotTo(HaveOccurred())
-			orangesTopicBindingFile, err := filepath.Abs("oranges-topicbinding.yaml")
+			orangesLinkFile, err := filepath.Abs("oranges-link.yaml")
 			Expect(err).NotTo(HaveOccurred())
 
 			realKubeCtl.On("Exec", []string{
@@ -91,8 +91,8 @@ var _ = Describe("The apply command", func() {
 				"-f", applesFunctionFile,
 				"-f", orangesFunctionFile,
 				"-f", topicsFile,
-				"-f", applesTopicBindingFile,
-				"-f", orangesTopicBindingFile,
+				"-f", applesLinkFile,
+				"-f", orangesLinkFile,
 			}).Return("", nil)
 
 			applyCmd.SetArgs([]string{"--namespace", "foobar"})
@@ -107,11 +107,11 @@ var _ = Describe("The apply command", func() {
 			Expect(err).NotTo(HaveOccurred())
 			applesFunctionFile, err := filepath.Abs("apples-function.yaml")
 			Expect(err).NotTo(HaveOccurred())
-			applesTopicBindingFile, err := filepath.Abs("apples-topicbinding.yaml")
+			applesLinkFile, err := filepath.Abs("apples-link.yaml")
 			Expect(err).NotTo(HaveOccurred())
 			orangesFunctionFile, err := filepath.Abs("oranges-function.yaml")
 			Expect(err).NotTo(HaveOccurred())
-			orangesTopicBindingFile, err := filepath.Abs("oranges-topicbinding.yaml")
+			orangesLinkFile, err := filepath.Abs("oranges-link.yaml")
 			Expect(err).NotTo(HaveOccurred())
 
 			dryRunKubeCtl.On("Exec", []string{
@@ -119,8 +119,8 @@ var _ = Describe("The apply command", func() {
 				"-f", applesFunctionFile,
 				"-f", orangesFunctionFile,
 				"-f", topicsFile,
-				"-f", applesTopicBindingFile,
-				"-f", orangesTopicBindingFile,
+				"-f", applesLinkFile,
+				"-f", orangesLinkFile,
 			}).Return("", nil)
 
 			applyCmd.SetArgs([]string{"--dry-run"})
@@ -135,11 +135,11 @@ var _ = Describe("The apply command", func() {
 		Expect(err).NotTo(HaveOccurred())
 		applesFunctionFile, err := filepath.Abs("../test_data/command/fn-with-existing-files/apples-function.yaml")
 		Expect(err).NotTo(HaveOccurred())
-		applesTopicBindingFile, err := filepath.Abs("../test_data/command/fn-with-existing-files/apples-topicbinding.yaml")
+		applesLinkFile, err := filepath.Abs("../test_data/command/fn-with-existing-files/apples-link.yaml")
 		Expect(err).NotTo(HaveOccurred())
 		orangesFunctionFile, err := filepath.Abs("../test_data/command/fn-with-existing-files/oranges-function.yaml")
 		Expect(err).NotTo(HaveOccurred())
-		orangesTopicBindingFile, err := filepath.Abs("../test_data/command/fn-with-existing-files/oranges-topicbinding.yaml")
+		orangesLinkFile, err := filepath.Abs("../test_data/command/fn-with-existing-files/oranges-link.yaml")
 		Expect(err).NotTo(HaveOccurred())
 
 		realKubeCtl.On("Exec", []string{
@@ -147,8 +147,8 @@ var _ = Describe("The apply command", func() {
 			"-f", applesFunctionFile,
 			"-f", orangesFunctionFile,
 			"-f", topicsFile,
-			"-f", applesTopicBindingFile,
-			"-f", orangesTopicBindingFile,
+			"-f", applesLinkFile,
+			"-f", orangesLinkFile,
 		}).Return("", nil)
 
 		applyCmd.SetArgs([]string{"../test_data/command/fn-with-existing-files"})
@@ -162,11 +162,11 @@ var _ = Describe("The apply command", func() {
 		Expect(err).NotTo(HaveOccurred())
 		applesFunctionFile, err := filepath.Abs("../test_data/command/fn-with-existing-files/apples-function.yaml")
 		Expect(err).NotTo(HaveOccurred())
-		applesTopicBindingFile, err := filepath.Abs("../test_data/command/fn-with-existing-files/apples-topicbinding.yaml")
+		applesLinkFile, err := filepath.Abs("../test_data/command/fn-with-existing-files/apples-link.yaml")
 		Expect(err).NotTo(HaveOccurred())
 		orangesFunctionFile, err := filepath.Abs("../test_data/command/fn-with-existing-files/oranges-function.yaml")
 		Expect(err).NotTo(HaveOccurred())
-		orangesTopicBindingFile, err := filepath.Abs("../test_data/command/fn-with-existing-files/oranges-topicbinding.yaml")
+		orangesLinkFile, err := filepath.Abs("../test_data/command/fn-with-existing-files/oranges-link.yaml")
 		Expect(err).NotTo(HaveOccurred())
 
 		realKubeCtl.On("Exec", []string{
@@ -174,8 +174,8 @@ var _ = Describe("The apply command", func() {
 			"-f", applesFunctionFile,
 			"-f", orangesFunctionFile,
 			"-f", topicsFile,
-			"-f", applesTopicBindingFile,
-			"-f", orangesTopicBindingFile,
+			"-f", applesLinkFile,
+			"-f", orangesLinkFile,
 		}).Return("", nil)
 
 		applyCmd.SetArgs([]string{"--filepath", "../test_data/command/fn-with-existing-files"})

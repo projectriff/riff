@@ -81,7 +81,7 @@ func Delete(realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) (*cobra.
 }
 
 func deleteFunctionByName(opts DeleteOptions, actingClient kubectl.KubeCtl, queryClient kubectl.KubeCtl) error {
-	if function, inputTopic, outputTopic, err := lookupByTopicBindingName(opts, queryClient); err != nil {
+	if function, inputTopic, outputTopic, err := lookupByLinkName(opts, queryClient); err != nil {
 		return err
 	} else {
 		cmdArgs := []string{"delete", "<placeholder>", "<placeholder>"}
@@ -89,7 +89,7 @@ func deleteFunctionByName(opts DeleteOptions, actingClient kubectl.KubeCtl, quer
 			cmdArgs = append(cmdArgs, "--namespace", opts.Namespace)
 		}
 
-		cmdArgs[1] = "topicbindings.projectriff.io"
+		cmdArgs[1] = "links.projectriff.io"
 		cmdArgs[2] = opts.FunctionName
 		if err := deleteResources(cmdArgs, actingClient); err != nil {
 			return err
@@ -125,12 +125,12 @@ func deleteResources(cmdArgs []string, actingClient kubectl.KubeCtl) error {
 	return err
 }
 
-func lookupByTopicBindingName(opts DeleteOptions, queryClient kubectl.KubeCtl) (string, string, string, error) {
+func lookupByLinkName(opts DeleteOptions, queryClient kubectl.KubeCtl) (string, string, string, error) {
 	getArgs := []string{"get"}
 	if opts.Namespace != "" {
 		getArgs = append(getArgs, "--namespace", opts.Namespace)
 	}
-	getArgs = append(getArgs, "topicbindings.projectriff.io", opts.FunctionName, "-o", "json")
+	getArgs = append(getArgs, "links.projectriff.io", opts.FunctionName, "-o", "json")
 	output, err := queryClient.Exec(getArgs)
 	if err != nil {
 		fmt.Println(output)
