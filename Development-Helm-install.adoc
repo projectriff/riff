@@ -139,7 +139,7 @@ To install locally built Docker images with Helm on minikube, use the `--devel` 
 +
 [source, bash]
 ----
-helm install projectriff/riff --name projectriff --namespace riff-system --devel --set kafka.create=true --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name projectriff --namespace riff-system --devel --set kafka.create=true --set httpGateway.service.type=NodePort
 ----
 
 === Customizing the Installation
