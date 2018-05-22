@@ -68,9 +68,11 @@ type WindowingStrategyFactory func(message.Message) WindowingStrategy
 
 //
 type WindowingStrategy interface {
-	// ShouldClose notifies this strategy that a new message has just been sent to the function, resulting in the optional
-	// error passed as 2nd argument. This is a synchronous way of deciding whether or not a window should be closed.
+	// ShouldClose will be called with each message that is sent to the function, including the message that was passed
+	// to the WindowingStrategyFactory to construct the WindowingStrategy.
+	// This is a synchronous way of deciding whether or not a window should be closed.
 	// ShouldClose should return true if this strategy decides that the current stream should end.
+	// The error argument is the optional error that happened while sending the message to the function.
 	ShouldClose(in message.Message, err error) bool
 
 	// AsyncClose should return a non-nil channel that this strategy will close if it decides that the current window
@@ -294,7 +296,7 @@ func unmarshallFactory() WindowingStrategyFactory {
 		}
 		return ptimeSessionFactoryFactory(d)
 	} else {
-		log.Printf("Will use no windowing strategy (unbounded stream)\n")
+		log.Printf("Will use unbounded windowing strategy\n")
 		return noneFactoryFactory()
 	}
 }
