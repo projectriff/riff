@@ -162,7 +162,7 @@ To set the version tag for the `functionController` to `0.0.5-build.1` use somet
 +
 [source, bash]
 ----
-helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.image.tag=0.0.5-build.1 --devel --set kafka.create=true --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.image.tag=0.0.5-build.1 --devel --set kafka.create=true --set httpGateway.service.type=NodePort
 ----
 
 - *Overriding the image repository and version tag of a riff component with a custom built component image:*
@@ -172,7 +172,7 @@ the `functionController`, use something like the following:
 +
 [source, bash]
 ----
-helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.image.repository=mycustom/function-controller --set functionController.image.tag=0.0.5-test.1 --devel --set kafka.create=true --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.image.repository=mycustom/function-controller --set functionController.image.tag=0.0.5-test.1 --devel --set kafka.create=true --set httpGateway.service.type=NodePort
 ----
 
 - *Overriding the version of the `sidecar` component:*
@@ -182,7 +182,7 @@ the `sidecar` to `0.0.5-build.1` use something like the following:
 +
 [source, bash]
 ----
-helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.sidecar.image.tag=0.0.5-build.1 --devel --set kafka.create=true --set rbac.create=false --set httpGateway.service.type=NodePort
+helm install projectriff/riff --name projectriff --namespace riff-system --set functionController.sidecar.image.tag=0.0.5-build.1 --devel --set kafka.create=true --set httpGateway.service.type=NodePort
 ----
 
 === To tear it all down
