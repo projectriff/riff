@@ -57,10 +57,15 @@ var _ = Describe("DockerUtils", func() {
 
 		Describe("Environment variable propagation", func() {
 			var (
-				homeWasSet bool
-				oldHome    string
-				pathWasSet bool
-				oldPath string
+				homeWasSet    bool
+				oldHome       string
+				pathWasSet    bool
+				oldPath       string
+				dockerWasSet  bool
+				oldDockerHost string
+				oldDockerCert string
+				oldDockerTLS  string
+				oldDockerAPI  string
 			)
 
 			BeforeEach(func() {
@@ -69,6 +74,15 @@ var _ = Describe("DockerUtils", func() {
 
 				oldPath, pathWasSet = os.LookupEnv("PATH")
 				Expect(os.Unsetenv("PATH")).To(Succeed())
+
+				oldDockerHost, dockerWasSet = os.LookupEnv("DOCKER_HOST")
+				oldDockerCert, _ = os.LookupEnv("DOCKER_CERT_PATH")
+				oldDockerTLS, _ = os.LookupEnv("DOCKER_TLS_VERIFY")
+				oldDockerAPI, _ = os.LookupEnv("DOCKER_API_VERSION")
+				Expect(os.Unsetenv("DOCKER_HOST")).To(Succeed())
+				Expect(os.Unsetenv("DOCKER_CERT_PATH")).To(Succeed())
+				Expect(os.Unsetenv("DOCKER_TLS_VERIFY")).To(Succeed())
+				Expect(os.Unsetenv("DOCKER_API_VERSION")).To(Succeed())
 			})
 
 			AfterEach(func() {
@@ -82,6 +96,18 @@ var _ = Describe("DockerUtils", func() {
 					Expect(os.Setenv("PATH", oldPath)).To(Succeed())
 				} else {
 					Expect(os.Unsetenv("PATH")).To(Succeed())
+				}
+
+				if dockerWasSet {
+					Expect(os.Setenv("DOCKER_HOST", oldDockerHost)).To(Succeed())
+					Expect(os.Setenv("DOCKER_CERT_PATH", oldDockerCert)).To(Succeed())
+					Expect(os.Setenv("DOCKER_TLS_VERIFY", oldDockerTLS)).To(Succeed())
+					Expect(os.Setenv("DOCKER_API_VERSION", oldDockerAPI)).To(Succeed())
+				} else {
+					Expect(os.Unsetenv("DOCKER_HOST")).To(Succeed())
+					Expect(os.Unsetenv("DOCKER_CERT_PATH")).To(Succeed())
+					Expect(os.Unsetenv("DOCKER_TLS_VERIFY")).To(Succeed())
+					Expect(os.Unsetenv("DOCKER_API_VERSION")).To(Succeed())
 				}
 			})
 
@@ -102,6 +128,46 @@ var _ = Describe("DockerUtils", func() {
 
 				It("should propagate $PATH", func() {
 					Expect(cmd.Env).To(ConsistOf("PATH=/a:/b"))
+				})
+			})
+
+			Context("when $DOCKER_HOST is set", func() {
+				BeforeEach(func() {
+					Expect(os.Setenv("DOCKER_HOST", "tcp://192.168.99.100:1234")).To(Succeed())
+				})
+
+				It("should propagate $DOCKER_HOST", func() {
+					Expect(cmd.Env).To(ConsistOf("DOCKER_HOST=tcp://192.168.99.100:1234"))
+				})
+			})
+
+			Context("when $DOCKER_CERT_PATH is set", func() {
+				BeforeEach(func() {
+					Expect(os.Setenv("DOCKER_CERT_PATH", "/Users/riff/.minikube/certs")).To(Succeed())
+				})
+
+				It("should propagate $DOCKER_CERT_PATH", func() {
+					Expect(cmd.Env).To(ConsistOf("DOCKER_CERT_PATH=/Users/riff/.minikube/certs"))
+				})
+			})
+
+			Context("when $DOCKER_TLS_VERIFY is set", func() {
+				BeforeEach(func() {
+					Expect(os.Setenv("DOCKER_TLS_VERIFY", "1")).To(Succeed())
+				})
+
+				It("should propagate $DOCKER_TLS_VERIFY", func() {
+					Expect(cmd.Env).To(ConsistOf("DOCKER_TLS_VERIFY=1"))
+				})
+			})
+
+			Context("when $DOCKER_API_VERSION is set", func() {
+				BeforeEach(func() {
+					Expect(os.Setenv("DOCKER_API_VERSION", "1.23")).To(Succeed())
+				})
+
+				It("should propagate $DOCKER_API_VERSION", func() {
+					Expect(cmd.Env).To(ConsistOf("DOCKER_API_VERSION=1.23"))
 				})
 			})
 		})
