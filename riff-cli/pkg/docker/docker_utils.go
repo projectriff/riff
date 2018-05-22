@@ -61,7 +61,7 @@ func (d *processDocker) Exec(command string, cmdArgs ... string) error {
 func createDockerCommand(command string, cmdArgs ...string) *exec.Cmd {
 	commandAndArgs := append([]string{command}, cmdArgs...)
 	cmd := exec.Command("docker", commandAndArgs...)
-	cmd.Env = createEnv("HOME", "PATH")
+	cmd.Env = createEnv("HOME", "PATH", "DOCKER_HOST", "DOCKER_TLS_VERIFY", "DOCKER_CERT_PATH", "DOCKER_API_VERSION")
 	return cmd
 }
 
