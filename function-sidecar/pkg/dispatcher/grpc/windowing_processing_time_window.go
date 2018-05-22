@@ -42,6 +42,6 @@ func (s *ptimeWindow) ShouldClose(in message.Message, err error) bool {
 	return time.Now().After(s.end)
 }
 
-func (s *ptimeWindow) AsyncClose() <-chan struct{} {
+func (s *ptimeWindow) AsyncClosingChannel() <-chan struct{} {
 	return s.done
 }

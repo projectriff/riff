@@ -19,22 +19,21 @@ package grpc
 import "github.com/projectriff/riff/message-transport/pkg/message"
 
 // Type size is a WindowingStrategy based on the number of input messages seen: the stream is closed after N messages.
-type size struct {
-	remaining int
-}
+type size int
 
 // factory
 func sizeFactoryFactory(wanted int) WindowingStrategyFactory {
 	return func (m message.Message) WindowingStrategy {
-		return &size{remaining:wanted}
+		s := size(wanted)
+		return &s
 	}
 }
 
 func (s *size) ShouldClose(in message.Message, err error) bool {
-	s.remaining--
-	return s.remaining == 0
+	*s--
+	return *s == 0
 }
 
-func (s *size) AsyncClose() <-chan struct{} {
+func (s *size) AsyncClosingChannel() <-chan struct{} {
 	return nil
 }

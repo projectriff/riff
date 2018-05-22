@@ -66,7 +66,8 @@ type CorrelationStrategy func(message.Message) interface{}
 // given a new, first message for a stream.
 type WindowingStrategyFactory func(message.Message) WindowingStrategy
 
-//
+// A WindowingStrategy decides how a stream of events should be sliced into windows of related events (bounded streams).
+// It can do so either synchronously (after each event is sent to the function) or asynchronously.
 type WindowingStrategy interface {
 	// ShouldClose will be called with each message that is sent to the function, including the message that was passed
 	// to the WindowingStrategyFactory to construct the WindowingStrategy.
@@ -75,9 +76,9 @@ type WindowingStrategy interface {
 	// The error argument is the optional error that happened while sending the message to the function.
 	ShouldClose(in message.Message, err error) bool
 
-	// AsyncClose should return a non-nil channel that this strategy will close if it decides that the current window
+	// AsyncClosingChannel should return a non-nil channel that this strategy will close if it decides that the current window
 	// should end asynchronously
-	AsyncClose() <-chan struct{}
+	AsyncClosingChannel() <-chan struct{}
 }
 
 const correlationId = "correlationId"
@@ -121,7 +122,7 @@ func (d *grpcDispatcher) handleIncoming() {
 						forwardedHeaders:  retainHeaders(in),
 						key:               key,
 					}
-					closeChan := windowingStrategy.AsyncClose()
+					closeChan := windowingStrategy.AsyncClosingChannel()
 					if closeChan != nil {
 						selectCase := reflect.SelectCase{Chan: reflect.ValueOf(closeChan), Dir: reflect.SelectRecv}
 						cases = append(cases, selectCase)
@@ -142,7 +143,7 @@ func (d *grpcDispatcher) handleIncoming() {
 			if w.windowingStrategy.ShouldClose(in, err) {
 				log.Printf("Closing stream synchronously after msg, for key = %v\n", key)
 				d.close(w)
-				closeChan := w.windowingStrategy.AsyncClose()
+				closeChan := w.windowingStrategy.AsyncClosingChannel()
 				if closeChan != nil {
 					selectCase := reflect.SelectCase{Chan: reflect.ValueOf(closeChan), Dir: reflect.SelectRecv}
 					delete(select2window, selectCase)

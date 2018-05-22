@@ -33,6 +33,6 @@ func (s *none) ShouldClose(in message.Message, err error) bool {
 	return false
 }
 
-func (s *none) AsyncClose() <-chan struct{} {
+func (s *none) AsyncClosingChannel() <-chan struct{} {
 	return nil
 }

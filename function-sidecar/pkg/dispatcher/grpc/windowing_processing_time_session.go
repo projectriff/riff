@@ -48,6 +48,6 @@ func (s *ptimeSession) ShouldClose(in message.Message, err error) bool {
 	return false
 }
 
-func (s *ptimeSession) AsyncClose() <-chan struct{} {
+func (s *ptimeSession) AsyncClosingChannel() <-chan struct{} {
 	return s.done
 }
