@@ -38,6 +38,8 @@ eval $(minikube docker-env)
 ----
 go get github.com/projectriff/riff
 ----
+NOTE: This installs the CLI in the `bin` subdirectory of the first directory listed in `$GOPATH`, but doesn't
+set the CLI version. To set the version, see the link:riff-cli/README.adoc[riff CLI README].
 
 === Build the riff core components
 
