@@ -19,8 +19,9 @@ gen-mocks: $(GO_SOURCES)
 clean:
 	rm -f $(OUTPUT)
 
-dockerize: $(GO_SOURCES) ../vendor
-	docker build .. --build-arg COMPONENT=http-gateway -t projectriff/http-gateway:$(TAG)
+dockerize: .dockerize
+.dockerize: $(GO_SOURCES) ../vendor
+	docker build .. --build-arg COMPONENT=http-gateway -t projectriff/http-gateway:$(TAG) && touch .dockerize
 
 debug-dockerize: $(GO_SOURCES) ../vendor
 	# Need to remove probes as delve starts app in paused state

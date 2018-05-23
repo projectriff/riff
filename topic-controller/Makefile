@@ -15,8 +15,10 @@ $(OUTPUT): $(GO_SOURCES) ../vendor
 clean:
 	rm -f $(OUTPUT)
 
-dockerize: $(GO_SOURCES) ../vendor
-	docker build .. --build-arg COMPONENT=topic-controller -t projectriff/topic-controller:$(TAG)
+dockerize: .dockerize
+
+.dockerize: $(GO_SOURCES) ../vendor
+	docker build .. --build-arg COMPONENT=topic-controller -t projectriff/topic-controller:$(TAG) && touch .dockerize
 
 debug-dockerize: $(GO_SOURCES) ../vendor
 	# Need to remove probes as delve starts app in paused state

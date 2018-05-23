@@ -23,3 +23,6 @@ debug
 *.dat
 *-results.png
 function-controller/simulator
+
+# The following files are created/updated by Makefiles when `make dockerize` is invoked
+.dockerize

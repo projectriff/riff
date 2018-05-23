@@ -26,8 +26,10 @@ verify-mocks: gen-mocks
 clean:
 	rm -f $(OUTPUT)
 
-dockerize: $(GO_SOURCES) ../vendor
-	docker build .. --build-arg COMPONENT=function-controller -t projectriff/function-controller:$(TAG)
+dockerize: .dockerize
+
+.dockerize: $(GO_SOURCES) ../vendor
+	docker build .. --build-arg COMPONENT=function-controller -t projectriff/function-controller:$(TAG) && touch .dockerize
 
 debug-dockerize: $(GO_SOURCES) ../vendor
 	# Need to remove probes as delve starts app in paused state
