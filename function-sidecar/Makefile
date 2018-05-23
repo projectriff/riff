@@ -14,8 +14,10 @@ clean:
 test: ../vendor
 	go test ./...
 
-dockerize: $(GO_SOURCES) ../vendor
-	docker build .. --build-arg COMPONENT=function-sidecar -t projectriff/function-sidecar:$(TAG)
+dockerize: .dockerize
+
+.dockerize: $(GO_SOURCES) ../vendor
+	docker build .. --build-arg COMPONENT=function-sidecar -t projectriff/function-sidecar:$(TAG) && touch .dockerize
 
 debug-dockerize: $(GO_SOURCES) ../vendor
 	docker build .. --build-arg COMPONENT=function-sidecar -t projectriff/function-sidecar:$(TAG) -f ../Dockerfile-debug
