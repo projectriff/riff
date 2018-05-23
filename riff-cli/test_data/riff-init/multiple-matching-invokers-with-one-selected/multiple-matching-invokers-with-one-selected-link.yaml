@@ -6,3 +6,5 @@ metadata:
 spec:
   function: multiple-matching-invokers-with-one-selected
   input: multiple-matching-invokers-with-one-selected
+  windowing:
+    size: 1

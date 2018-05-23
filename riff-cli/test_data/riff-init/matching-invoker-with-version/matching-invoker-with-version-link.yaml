@@ -6,3 +6,5 @@ metadata:
 spec:
   function: matching-invoker-with-version
   input: matching-invoker-with-version
+  windowing:
+    size: 1

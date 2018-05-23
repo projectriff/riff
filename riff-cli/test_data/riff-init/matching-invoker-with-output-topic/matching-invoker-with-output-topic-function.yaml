@@ -7,5 +7,3 @@ spec:
   container:
     image: rifftest/matching-invoker-with-output-topic:0.0.1
   protocol: grpc
-  windowing:
-    size: 1

@@ -7,3 +7,5 @@ spec:
   function: matching-invoker-with-output-topic
   input: matching-invoker-with-output-topic
   output: soundReflection
+  windowing:
+    size: 1

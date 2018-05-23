@@ -47,6 +47,8 @@ metadata:
 spec:
   function: myfunc
   input: in
+  windowing:
+    size: 1
 `)
 }
 
@@ -76,5 +78,7 @@ spec:
   function: myfunc
   input: in
   output: out
+  windowing:
+    size: 1
 `)
 }

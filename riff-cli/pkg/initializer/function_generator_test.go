@@ -52,8 +52,6 @@ spec:
   container:
     image: me/myfunc:0.0.1
   protocol: grpc
-  windowing:
-    size: 1
 `)
 }
 
@@ -86,7 +84,5 @@ spec:
   container:
     image: me/myfunc:0.0.1
   protocol: http
-  windowing:
-    size: 1
 `)
 }

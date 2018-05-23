@@ -33,6 +33,9 @@ func createLink(opts options.InitOptions, linkTemplate projectriff_v1.Link) ([]b
 	link.Spec.Function = opts.FunctionName
 	link.Spec.Input = opts.Input
 	link.Spec.Output = opts.Output
+	if link.Spec.Windowing.IsUnbounded() {
+		link.Spec.Windowing.Size = 1
+	}
 
 	bytes, err := json.Marshal(link)
 	if err != nil {

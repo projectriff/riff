@@ -7,5 +7,3 @@ spec:
   container:
     image: rifftest/matching-invoker-with-version:latest
   protocol: grpc
-  windowing:
-    size: 1

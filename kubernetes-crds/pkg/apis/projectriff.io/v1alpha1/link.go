@@ -46,6 +46,9 @@ type LinkSpec struct {
 	// The name of the topic the function is writing its results to.
 	// +optional
 	Output string `json:"output,omitempty"`
+
+	// How to slice streams of incoming messages to the function.
+	Windowing Windowing `json:"windowing"`
 }
 
 // Status (computed) for a link

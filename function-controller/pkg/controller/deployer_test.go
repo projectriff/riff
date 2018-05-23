@@ -51,6 +51,7 @@ var _ = Describe("Deployer", func() {
 					Namespace: "default",
 				},
 			}
+			link.Spec.Windowing.Size = 1
 		})
 
 		It("should set the HTTP_PORT var", func() {
@@ -68,6 +69,15 @@ var _ = Describe("Deployer", func() {
 			Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
 				Name:  "GRPC_PORT",
 				Value: "10382",
+			}))
+		})
+
+		It("should set the sidecar WINDOWING_STRATEGY var", func() {
+			deployment := d.buildDeployment(&link, &function)
+			mainContainer := deployment.Spec.Template.Spec.Containers[1]
+			Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
+				Name:  "WINDOWING_STRATEGY",
+				Value: "{\"size\":1}",
 			}))
 		})
 

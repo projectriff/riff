@@ -6,3 +6,5 @@ metadata:
 spec:
   function: matching-invoker-with-handler
   input: matching-invoker-with-handler
+  windowing:
+    size: 1

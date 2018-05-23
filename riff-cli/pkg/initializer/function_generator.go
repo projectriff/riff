@@ -34,9 +34,6 @@ func createFunction(opts options.InitOptions, functionTemplate projectriff_v1.Fu
 	if opts.Protocol != "" {
 		function.Spec.Protocol = opts.Protocol
 	}
-	if function.Spec.Windowing.IsUnbounded() {
-		function.Spec.Windowing.Size = 1
-	}
 
 	bytes, err := json.Marshal(function)
 	if err != nil {

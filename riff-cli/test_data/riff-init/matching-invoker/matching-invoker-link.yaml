@@ -6,3 +6,5 @@ metadata:
 spec:
   function: matching-invoker
   input: matching-invoker
+  windowing:
+    size: 1

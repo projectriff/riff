@@ -23,13 +23,14 @@ import (
 
 	"strings"
 
+	"encoding/json"
+
 	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"encoding/json"
 )
 
 const (
@@ -137,8 +138,8 @@ func (d *deployer) buildSidecarContainer(link *v1.Link, protocol string) corev1.
 		"--brokers", strings.Join(d.brokers, ","),
 	}
 
-	bs, _ := json.Marshal(function.Spec.Windowing)
-	c.Env = []corev1.EnvVar{corev1.EnvVar{Name: "WINDOWING_STRATEGY", Value: string(bs)}}
+	ws, _ := json.Marshal(link.Spec.Windowing)
+	c.Env = []corev1.EnvVar{corev1.EnvVar{Name: "WINDOWING_STRATEGY", Value: string(ws)}}
 	return c
 }
 
