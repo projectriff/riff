@@ -12,7 +12,7 @@ spec:
         component: function-controller
     spec:
       containers:
-      - image: projectriff/function-controller:0.0.7-snapshot
+      - image: projectriff/function-controller:0.0.7
         name: function-controller
         imagePullPolicy: IfNotPresent
         livenessProbe:
@@ -35,5 +35,5 @@ spec:
         - name: RIFF_FUNCTION_SIDECAR_REPOSITORY
           value: projectriff/function-sidecar
         - name: RIFF_FUNCTION_SIDECAR_TAG
-          value: 0.0.7-snapshot
+          value: 0.0.7
       serviceAccountName: projectriff-riff
