@@ -21,7 +21,6 @@ import (
 	"strings"
 	"bufio"
 	"os/exec"
-	"os"
 )
 
 //go:generate mockery -name=Docker -inpkg
@@ -49,31 +48,15 @@ func DryRunDocker() Docker {
 }
 
 func (d *processDocker) Exec(command string, cmdArgs ... string) error {
-	cmd := createDockerCommand(command, cmdArgs...)
+	commandAndArgs := append([]string{command}, cmdArgs...)
+
+	cmd := exec.Command("docker", commandAndArgs...)
 	stdout, _ := cmd.StdoutPipe()
 	stderr, _ := cmd.StderrPipe()
 	cmd.Start()
 	print(bufio.NewScanner(stdout), "[STDOUT]")
 	print(bufio.NewScanner(stderr), "[STDERR]")
 	return cmd.Wait()
-}
-
-func createDockerCommand(command string, cmdArgs ...string) *exec.Cmd {
-	commandAndArgs := append([]string{command}, cmdArgs...)
-	cmd := exec.Command("docker", commandAndArgs...)
-	cmd.Env = createEnv("HOME", "PATH")
-	return cmd
-}
-
-// create a process environment based on the environment variables with the given keys
-func createEnv(keys ... string) []string {
-	env := []string{}
-	for _, key := range keys {
-		if value, set := os.LookupEnv(key); set {
-			env = append(env, fmt.Sprintf("%s=%s", key, value))
-		}
-	}
-	return env
 }
 
 // to print the processed information when stdout gets a new line
