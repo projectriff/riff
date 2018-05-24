@@ -100,20 +100,23 @@ func lookupAddress(kube kubectl.KubeCtl, minik minikube.Minikube) (string, strin
 		return "", "", errors.New("Unable to locate http-gateway: " + err.Error())
 	}
 
-	var ipAddress string
+	var ipOrHostname string
 	var pFloat interface{}
 
 	switch portType {
 	case "NodePort":
-		ipAddress, err = minik.QueryIp()
-		if err != nil || strings.Contains(ipAddress, "Error getting IP") {
-			ipAddress = "127.0.0.1"
+		ipOrHostname, err = minik.QueryIp()
+		if err != nil || strings.Contains(ipOrHostname, "Error getting IP") {
+			ipOrHostname = "127.0.0.1"
 		}
 		pFloat, err = parser.Value(`$.items[0].spec.ports[?(@.name == http)].nodePort[0]`)
 	case "LoadBalancer":
-		ipAddress, err = parser.StringValue(`$.items[0].status.loadBalancer.ingress[0].ip`)
-		if ipAddress == "" {
-			return "", "", errors.New("unable to determine http-gateway ip address")
+		ipOrHostname, err = parser.StringValue(`$.items[0].status.loadBalancer.ingress[0].ip`)
+		if ipOrHostname == "" {
+			ipOrHostname, err = parser.StringValue(`$.items[0].status.loadBalancer.ingress[0].hostname`)
+			if ipOrHostname == "" {
+				return "", "", errors.New("unable to determine http-gateway ip address nor hostname")
+			}
 		}
 		pFloat, err = parser.Value(`$.items[0].spec.ports[?(@.name == http)].port[0]`)
 
@@ -125,7 +128,8 @@ func lookupAddress(kube kubectl.KubeCtl, minik minikube.Minikube) (string, strin
 		return "", "", errors.New("Unable to determine gateway port: " + err.Error())
 	}
 	port := strconv.FormatFloat(pFloat.(float64), 'f', 0, 64)
-	return ipAddress, port, nil
+
+	return ipOrHostname, port, nil
 }
 
 func publish(ipAddress string, port string, publishOptions publishOptions) error {
