@@ -25,7 +25,7 @@ You need:
 * A local 1.7+ Kubernetes cluster
 * A docker daemon
 
-To build images with docker in minikube use
+To build images with docker in minikube, issue:
 
 [source, bash]
 ----
@@ -73,6 +73,13 @@ Once you're done playing with riff (see samples below), you can destroy everythi
 [source, bash]
 ----
 make teardown
+----
+
+To unset the environment variables used for building images with docker in minikube, issue:
+
+[source, bash]
+----
+eval $(minikube docker-env -u)
 ----
 
 == [[samples]]Try Some Samples
