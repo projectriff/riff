@@ -28,6 +28,8 @@ type Interface interface {
 	Functions() FunctionInformer
 	// Invokers returns a InvokerInformer.
 	Invokers() InvokerInformer
+	// Links returns a LinkInformer.
+	Links() LinkInformer
 	// Topics returns a TopicInformer.
 	Topics() TopicInformer
 }
@@ -49,6 +51,11 @@ func (v *version) Functions() FunctionInformer {
 // Invokers returns a InvokerInformer.
 func (v *version) Invokers() InvokerInformer {
 	return &invokerInformer{factory: v.SharedInformerFactory}
+}
+
+// Links returns a LinkInformer.
+func (v *version) Links() LinkInformer {
+	return &linkInformer{factory: v.SharedInformerFactory}
 }
 
 // Topics returns a TopicInformer.

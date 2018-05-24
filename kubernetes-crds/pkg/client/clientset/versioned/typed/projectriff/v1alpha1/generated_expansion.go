@@ -20,4 +20,6 @@ type FunctionExpansion interface{}
 
 type InvokerExpansion interface{}
 
+type LinkExpansion interface{}
+
 type TopicExpansion interface{}

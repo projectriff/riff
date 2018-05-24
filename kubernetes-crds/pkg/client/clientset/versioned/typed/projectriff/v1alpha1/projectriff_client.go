@@ -27,6 +27,7 @@ type ProjectriffV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	FunctionsGetter
 	InvokersGetter
+	LinksGetter
 	TopicsGetter
 }
 
@@ -41,6 +42,10 @@ func (c *ProjectriffV1alpha1Client) Functions(namespace string) FunctionInterfac
 
 func (c *ProjectriffV1alpha1Client) Invokers(namespace string) InvokerInterface {
 	return newInvokers(c, namespace)
+}
+
+func (c *ProjectriffV1alpha1Client) Links(namespace string) LinkInterface {
+	return newLinks(c, namespace)
 }
 
 func (c *ProjectriffV1alpha1Client) Topics(namespace string) TopicInterface {

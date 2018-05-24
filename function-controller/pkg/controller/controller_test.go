@@ -16,31 +16,33 @@
 package controller_test
 
 import (
+	"fmt"
 	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/function-controller/mocks"
 	"github.com/projectriff/riff/function-controller/pkg/controller"
+	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler"
+	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler/mockautoscaler"
 	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"
-	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler/mockautoscaler"
-	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler"
 )
 
 var _ = Describe("Controller", func() {
 	var (
-		ctrl                controller.Controller
-		deployer            *mocks.Deployer
-		autoScaler          *mockautoscaler.AutoScaler
-		deploymentsHandlers cache.ResourceEventHandlerFuncs
-		functionHandlers    cache.ResourceEventHandlerFuncs
-		topicHandlers       cache.ResourceEventHandlerFuncs
-		closeCh             chan struct{}
-		maxReplicasPolicy   func(id autoscaler.FunctionId) int
+		ctrl                 controller.Controller
+		deployer             *mocks.Deployer
+		autoScaler           *mockautoscaler.AutoScaler
+		linkHandlers         cache.ResourceEventHandlerFuncs
+		deploymentsHandlers  cache.ResourceEventHandlerFuncs
+		functionHandlers     cache.ResourceEventHandlerFuncs
+		topicHandlers        cache.ResourceEventHandlerFuncs
+		closeCh              chan struct{}
+		maxReplicasPolicy    func(id autoscaler.FunctionId) int
 		delayScaleDownPolicy func(function autoscaler.FunctionId) time.Duration
 	)
 
@@ -49,6 +51,7 @@ var _ = Describe("Controller", func() {
 
 		topicInformer := new(mocks.TopicInformer)
 		functionInformer := new(mocks.FunctionInformer)
+		linkInformer := new(mocks.LinkInformer)
 		deploymentInformer := new(mocks.DeploymentInformer)
 
 		siiTopics := new(mocks.SharedIndexInformer)
@@ -64,6 +67,13 @@ var _ = Describe("Controller", func() {
 			functionHandlers = args.Get(0).(cache.ResourceEventHandlerFuncs)
 		})
 		siiFunctions.On("Run", mock.Anything)
+
+		siiLinks := new(mocks.SharedIndexInformer)
+		linkInformer.On("Informer").Return(siiLinks)
+		siiLinks.On("AddEventHandler", mock.AnythingOfType("cache.ResourceEventHandlerFuncs")).Run(func(args mock.Arguments) {
+			linkHandlers = args.Get(0).(cache.ResourceEventHandlerFuncs)
+		})
+		siiLinks.On("Run", mock.Anything)
 
 		siiDeployments := new(mocks.SharedIndexInformer)
 		deploymentInformer.On("Informer").Return(siiDeployments)
@@ -85,7 +95,7 @@ var _ = Describe("Controller", func() {
 		autoScaler.On("StopMonitoring", mock.AnythingOfType("string"), mock.AnythingOfType("autoscaler.FunctionId")).Return(nil)
 		autoScaler.On("InformFunctionReplicas", mock.AnythingOfType("autoscaler.FunctionId"), mock.AnythingOfType("int"))
 
-		ctrl = controller.New(topicInformer, functionInformer, deploymentInformer, deployer, autoScaler, -1)
+		ctrl = controller.New(topicInformer, functionInformer, linkInformer, deploymentInformer, deployer, autoScaler, -1)
 		closeCh = make(chan struct{}, 2) // 2 allows to easily send in a .Runt() func() on stubs w/o blocking
 	})
 
@@ -101,35 +111,110 @@ var _ = Describe("Controller", func() {
 		ctrl.Run(closeCh)
 	})
 
-	It("should handle functions coming and going", func() {
+	It("should create, update and remove a link for a function", func() {
+		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
+		link1 := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input1"}}
+		link2 := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input2"}}
+
+		deployer.On("Deploy", link1, function).Return(nil).Run(func(args mock.Arguments) {
+			linkHandlers.UpdateFunc(link1, link2)
+		})
+		deployer.On("Update", link2, function, 0).Return(nil).Run(func(args mock.Arguments) {
+			linkHandlers.DeleteFunc(link2)
+		})
+		deployer.On("Undeploy", link2).Return(nil).Run(func(args mock.Arguments) {
+			closeCh <- struct{}{}
+		})
+
+		functionHandlers.AddFunc(function)
+		linkHandlers.AddFunc(link1)
+
+		ctrl.Run(closeCh)
+	})
+
+	It("should handle multiple links for a function", func() {
+		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
+		link1 := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn1"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+		link2 := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn2"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+
+		deployer.On("Deploy", link1, function).Return(nil).Run(func(args mock.Arguments) {
+			linkHandlers.AddFunc(link2)
+		})
+		deployer.On("Deploy", link2, function).Return(nil).Run(func(args mock.Arguments) {
+			linkHandlers.DeleteFunc(link1)
+		})
+		deployer.On("Undeploy", link1).Return(nil).Run(func(args mock.Arguments) {
+			linkHandlers.DeleteFunc(link2)
+		})
+		deployer.On("Undeploy", link2).Return(nil).Run(func(args mock.Arguments) {
+			closeCh <- struct{}{}
+		})
+
+		functionHandlers.AddFunc(function)
+		linkHandlers.AddFunc(link1)
+
+		ctrl.Run(closeCh)
+	})
+
+	It("should handle link coming and going", func() {
 		ctrl.SetScalingInterval(10 * time.Millisecond)
 
-		fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input"}}
-		deployer.On("Deploy", fn).Return(nil)
+		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
+		link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+		deployer.On("Deploy", link, function).Return(nil)
 		proposal := make(map[autoscaler.FunctionId]int)
 		proposal[autoscaler.FunctionId{"fn"}] = 1
 		autoScaler.On("Propose").Return(proposal)
 
-		deployer.On("Scale", fn, 1).Return(nil).Run(func(args mock.Arguments) {
-			functionHandlers.DeleteFunc(fn)
+		deployer.On("Scale", link, 1).Return(nil).Run(func(args mock.Arguments) {
+			fmt.Println("Scale")
+			linkHandlers.DeleteFunc(link)
 		})
-		deployer.On("Undeploy", fn).Return(nil).Run(func(args mock.Arguments) {
+		deployer.On("Undeploy", link).Return(nil).Run(func(args mock.Arguments) {
+			fmt.Println("Undeploy")
 			closeCh <- struct{}{}
 		})
+
+		functionHandlers.AddFunc(function)
+		linkHandlers.AddFunc(link)
+
+		ctrl.Run(closeCh)
+	})
+
+	It("should handle links being updated", func() {
+		fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
+		link1 := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+		link2 := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input2"}}
+
+		deployer.On("Deploy", link1, fn).Return(nil).Run(func(args mock.Arguments) {
+			linkHandlers.UpdateFunc(link1, link2)
+		})
+
+		deployer.On("Update", link2, fn, 0).Return(nil).Run(func(args mock.Arguments) {
+			closeCh <- struct{}{}
+		})
+
 		functionHandlers.AddFunc(fn)
+		linkHandlers.AddFunc(link1)
 
 		ctrl.Run(closeCh)
 	})
 
 	It("should handle functions being updated", func() {
-		fn1 := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input"}}
-		fn2 := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input2"}}
+		fn1 := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Protocol: "http"}}
+		fn2 := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Protocol: "grpc"}}
+		link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
 
-		deployer.On("Update", fn2, 0).Return(nil).Run(func(args mock.Arguments) {
+		deployer.On("Deploy", link, fn1).Return(nil).Run(func(args mock.Arguments) {
+			functionHandlers.UpdateFunc(fn1, fn2)
+		})
+
+		deployer.On("Update", link, fn2, 0).Return(nil).Run(func(args mock.Arguments) {
 			closeCh <- struct{}{}
 		})
 
-		functionHandlers.UpdateFunc(fn1, fn2)
+		functionHandlers.AddFunc(fn1)
+		linkHandlers.AddFunc(link)
 
 		ctrl.Run(closeCh)
 	})
@@ -137,12 +222,13 @@ var _ = Describe("Controller", func() {
 	It("should handle a non-trivial input topic", func() {
 		ctrl.SetScalingInterval(10 * time.Millisecond)
 
-		fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input"}}
-		deployer.On("Deploy", fn).Return(nil)
+		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
+		link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+		deployer.On("Deploy", link, function).Return(nil)
 
 		three := int32(3)
 		topic := &v1.Topic{ObjectMeta: metav1.ObjectMeta{Name: "input"}, Spec: v1.TopicSpec{Partitions: &three}}
-		deployer.On("Deploy", fn).Return(nil)
+		deployer.On("Deploy", link, function).Return(nil)
 
 		proposal := make(map[autoscaler.FunctionId]int)
 		proposal[autoscaler.FunctionId{"fn"}] = 1
@@ -156,13 +242,15 @@ var _ = Describe("Controller", func() {
 		proposal[autoscaler.FunctionId{"fn"}] = 3
 		autoScaler.On("Propose").Return(proposal).Once()
 
-		deployer.On("Scale", fn, 1).Return(nil)
-		deployer.On("Scale", fn, 2).Return(nil)
-		deployer.On("Scale", fn, 3).Return(nil).Run(func(args mock.Arguments) {
+		deployer.On("Scale", link, 1).Return(nil)
+		deployer.On("Scale", link, 2).Return(nil)
+		deployer.On("Scale", link, 3).Return(nil).Run(func(args mock.Arguments) {
 			closeCh <- struct{}{}
 		})
-		functionHandlers.AddFunc(fn)
+
+		functionHandlers.AddFunc(function)
 		topicHandlers.AddFunc(topic)
+		linkHandlers.AddFunc(link)
 
 		ctrl.Run(closeCh)
 	})
@@ -172,13 +260,14 @@ var _ = Describe("Controller", func() {
 	It("should reconcile replicas on disruption", func() {
 		ctrl.SetScalingInterval(10 * time.Millisecond)
 
-		fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input"}}
-		deployer.On("Deploy", fn).Return(nil)
+		function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
+		link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+		deployer.On("Deploy", link, function).Return(nil)
 
 		computes := 0
 		three := int32(3)
 		topic := &v1.Topic{ObjectMeta: metav1.ObjectMeta{Name: "input"}, Spec: v1.TopicSpec{Partitions: &three}}
-		deployer.On("Deploy", fn).Return(nil)
+		deployer.On("Deploy", link, function).Return(nil)
 
 		proposal := make(map[autoscaler.FunctionId]int)
 		proposal[autoscaler.FunctionId{"fn"}] = 2
@@ -203,13 +292,15 @@ var _ = Describe("Controller", func() {
 			computes++
 		})
 
-		deployer.On("Scale", fn, 2).Return(nil).Once()
-		deployer.On("Scale", fn, 2).Return(nil).Run(func(args mock.Arguments) {
+		deployer.On("Scale", link, 2).Return(nil).Once()
+		deployer.On("Scale", link, 2).Return(nil).Run(func(args mock.Arguments) {
 			Expect(computes).To(Equal(7))
 			closeCh <- struct{}{}
 		})
-		functionHandlers.AddFunc(fn)
+
+		functionHandlers.AddFunc(function)
 		topicHandlers.AddFunc(topic)
+		linkHandlers.AddFunc(link)
 
 		ctrl.Run(closeCh)
 	})
@@ -229,31 +320,34 @@ var _ = Describe("Controller", func() {
 			})
 
 			Context("when the function does not specify maxReplicas", func() {
-			    BeforeEach(func() {
-					fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input"}}
-					deployer.On("Deploy", fn).Return(nil)
-					functionHandlers.AddFunc(fn)
+				BeforeEach(func() {
+					function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
+					link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+					deployer.On("Deploy", link, function).Return(nil)
+					functionHandlers.AddFunc(function)
+					linkHandlers.AddFunc(link)
 				})
 
 				It("should eventually return 10", func() {
 					// The controller takes a little while to set up the topic and function.
-					Eventually(func() int { return maxReplicasPolicy(autoscaler.FunctionId{"fn"}); }).Should(Equal(10))
+					Eventually(func() int { return maxReplicasPolicy(autoscaler.FunctionId{"fn"}) }).Should(Equal(10))
 					closeCh <- struct{}{}
 				})
 			})
 
-
 			Context("when the function specifies maxReplicas as 5", func() {
 				BeforeEach(func() {
 					five := int32(5)
-					fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input", MaxReplicas: &five}}
-					deployer.On("Deploy", fn).Return(nil)
-					functionHandlers.AddFunc(fn)
+					function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{MaxReplicas: &five}}
+					link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+					deployer.On("Deploy", link, function).Return(nil)
+					functionHandlers.AddFunc(function)
+					linkHandlers.AddFunc(link)
 				})
 
 				It("should eventually return 5", func() {
 					// The controller takes a little while to update the function.
-					Eventually(func() int { return maxReplicasPolicy(autoscaler.FunctionId{"fn"}); }).Should(Equal(5))
+					Eventually(func() int { return maxReplicasPolicy(autoscaler.FunctionId{"fn"}) }).Should(Equal(5))
 					closeCh <- struct{}{}
 				})
 			})
@@ -262,10 +356,12 @@ var _ = Describe("Controller", func() {
 
 	Describe("delayScaleDownPolicy", func() {
 		Context("when the function does not specify idleTimeoutMs", func() {
-		    BeforeEach(func() {
-				fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input"}}
-				deployer.On("Deploy", fn).Return(nil)
-				functionHandlers.AddFunc(fn)
+			BeforeEach(func() {
+				function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}}
+				link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+				deployer.On("Deploy", link, function).Return(nil)
+				functionHandlers.AddFunc(function)
+				linkHandlers.AddFunc(link)
 
 				proposal := make(map[autoscaler.FunctionId]int)
 				proposal[autoscaler.FunctionId{"fn"}] = 0
@@ -276,18 +372,20 @@ var _ = Describe("Controller", func() {
 
 			It("should consistently return the default scale down delay", func() {
 				// The controller takes a little while to set up the topic and function.
-				Consistently(func() time.Duration { return delayScaleDownPolicy(autoscaler.FunctionId{"fn"}); }).Should(Equal(time.Second*10))
+				Consistently(func() time.Duration { return delayScaleDownPolicy(autoscaler.FunctionId{"fn"}) }).Should(Equal(time.Second * 10))
 				closeCh <- struct{}{}
 			})
 		})
 
 		Context("when the function specifies idleTimeoutMs", func() {
 			var idleTimeoutMs int32
-		    BeforeEach(func() {
+			BeforeEach(func() {
 				idleTimeoutMs = 300
-				fn := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{Input: "input", IdleTimeoutMs: &idleTimeoutMs}}
-				deployer.On("Deploy", fn).Return(nil)
-				functionHandlers.AddFunc(fn)
+				function := &v1.Function{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.FunctionSpec{IdleTimeoutMs: &idleTimeoutMs}}
+				link := &v1.Link{ObjectMeta: metav1.ObjectMeta{Name: "fn"}, Spec: v1.LinkSpec{Function: "fn", Input: "input"}}
+				deployer.On("Deploy", link, function).Return(nil)
+				functionHandlers.AddFunc(function)
+				linkHandlers.AddFunc(link)
 
 				proposal := make(map[autoscaler.FunctionId]int)
 				proposal[autoscaler.FunctionId{"fn"}] = 0
@@ -298,7 +396,7 @@ var _ = Describe("Controller", func() {
 
 			It("should eventually return the specified scale down delay", func() {
 				// The controller takes a little while to set up the function.
-				Eventually(func() time.Duration { return delayScaleDownPolicy(autoscaler.FunctionId{"fn"}); }).Should(Equal(time.Millisecond*time.Duration(idleTimeoutMs)))
+				Eventually(func() time.Duration { return delayScaleDownPolicy(autoscaler.FunctionId{"fn"}) }).Should(Equal(time.Millisecond * time.Duration(idleTimeoutMs)))
 				closeCh <- struct{}{}
 			})
 		})

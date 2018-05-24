@@ -32,7 +32,7 @@ func Initialize(invoker projectriff_v1.Invoker, opts *options.InitOptions) error
 		return err
 	}
 
-	err = generateFunctionArtifacts(invoker, opts)
+	err = generateResources(invoker, opts)
 	if err != nil {
 		return err
 	}

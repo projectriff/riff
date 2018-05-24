@@ -31,22 +31,23 @@ const (
 	apiVersion   = "projectriff.io/v1alpha1"
 	functionKind = "Function"
 	topicKind    = "Topic"
+	linkKind     = "Link"
 )
 
-type functionResource struct {
+type resource struct {
 	Path    string
 	Content string
 }
 
-func generateFunctionArtifacts(invoker projectriff_v1.Invoker, opts *options.InitOptions) error {
-	var functionResources []functionResource
+func generateResources(invoker projectriff_v1.Invoker, opts *options.InitOptions) error {
+	var resources []resource
 
 	// {FunctionName}-topics.yaml
 	content, err := createTopicsYaml(invoker.Spec.TopicTemplate, *opts)
 	if err != nil {
 		return err
 	}
-	functionResources = append(functionResources, functionResource{
+	resources = append(resources, resource{
 		Path:    fmt.Sprintf("%s-topics.yaml", opts.FunctionName),
 		Content: content,
 	})
@@ -56,8 +57,18 @@ func generateFunctionArtifacts(invoker projectriff_v1.Invoker, opts *options.Ini
 	if err != nil {
 		return err
 	}
-	functionResources = append(functionResources, functionResource{
+	resources = append(resources, resource{
 		Path:    fmt.Sprintf("%s-function.yaml", opts.FunctionName),
+		Content: content,
+	})
+
+	// {FunctionName}-link.yaml
+	content, err = createLinkYaml(invoker.Spec.LinkTemplate, *opts)
+	if err != nil {
+		return err
+	}
+	resources = append(resources, resource{
+		Path:    fmt.Sprintf("%s-link.yaml", opts.FunctionName),
 		Content: content,
 	})
 
@@ -67,7 +78,7 @@ func generateFunctionArtifacts(invoker projectriff_v1.Invoker, opts *options.Ini
 		if err != nil {
 			return err
 		}
-		functionResources = append(functionResources, functionResource{
+		resources = append(resources, resource{
 			Path:    file.Path,
 			Content: content,
 		})
@@ -75,11 +86,11 @@ func generateFunctionArtifacts(invoker projectriff_v1.Invoker, opts *options.Ini
 
 	if opts.DryRun {
 		delim := "----"
-		for _, functionResource := range functionResources {
+		for _, resource := range resources {
 			fmt.Println(delim)
-			fmt.Println(functionResource.Path)
+			fmt.Println(resource.Path)
 			fmt.Println(delim)
-			fmt.Println(functionResource.Content)
+			fmt.Println(resource.Content)
 		}
 		fmt.Println(delim)
 	} else {
@@ -87,10 +98,10 @@ func generateFunctionArtifacts(invoker projectriff_v1.Invoker, opts *options.Ini
 		if err != nil {
 			return err
 		}
-		for _, functionResource := range functionResources {
+		for _, resource := range resources {
 			err = writeFile(
-				filepath.Join(workdir, functionResource.Path),
-				functionResource.Content,
+				filepath.Join(workdir, resource.Path),
+				resource.Content,
 				opts.Force)
 			if err != nil {
 				return err
