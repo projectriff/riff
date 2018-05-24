@@ -101,6 +101,7 @@ func lookupAddress(kube kubectl.KubeCtl, minik minikube.Minikube) (string, strin
 	}
 
 	var ipAddress string
+	var hostname string
 	var pFloat interface{}
 
 	switch portType {
@@ -113,8 +114,8 @@ func lookupAddress(kube kubectl.KubeCtl, minik minikube.Minikube) (string, strin
 	case "LoadBalancer":
 		ipAddress, err = parser.StringValue(`$.items[0].status.loadBalancer.ingress[0].ip`)
 		if ipAddress == "" {
-			ipAddress, err = parser.StringValue(`$.items[0].status.loadBalancer.ingress[0].hostname`)
-			if ipAddress == "" {
+			hostname, err = parser.StringValue(`$.items[0].status.loadBalancer.ingress[0].hostname`)
+			if hostname == "" {
 				return "", "", errors.New("unable to determine http-gateway ip address")
 			}
 		}
