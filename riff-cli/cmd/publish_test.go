@@ -19,11 +19,11 @@ package cmd
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/ghttp"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/pkg/minikube"
 	"github.com/spf13/cobra"
 	"io/ioutil"
-	"github.com/onsi/gomega/ghttp"
 	"strings"
 )
 
@@ -33,9 +33,10 @@ var _ = Describe("The publish command", func() {
 		minik          *minikube.MockMinikube
 		publishCommand *cobra.Command
 
-		cannedNodePortReply     string
-		cannedLoadBalancerReply string
-		server                  *ghttp.Server
+		cannedNodePortReply                 string
+		cannedLoadBalancerReply             string
+		cannedLoadBalancerWithHostnameReply string
+		server                              *ghttp.Server
 	)
 
 	BeforeEach(func() {
@@ -55,6 +56,10 @@ var _ = Describe("The publish command", func() {
 		Expect(err).NotTo(HaveOccurred())
 		cannedLoadBalancerReply = strings.Replace(string(b), "<port>", port, 1)
 		cannedLoadBalancerReply = strings.Replace(cannedLoadBalancerReply, "<ip-address>", "localhost", 1)
+		b, err = ioutil.ReadFile("../test_data/publish/LoadBalancerWithHostnameReply.json")
+		Expect(err).NotTo(HaveOccurred())
+		cannedLoadBalancerWithHostnameReply = strings.Replace(string(b), "<port>", port, 1)
+		cannedLoadBalancerWithHostnameReply = strings.Replace(cannedLoadBalancerWithHostnameReply, "<hostname>", "localhost", 1)
 	})
 
 	AfterEach(func() {
@@ -111,6 +116,25 @@ var _ = Describe("The publish command", func() {
 		kubeClient.
 			On("Exec", []string{"get", "svc", "--all-namespaces", "-l", "app=riff,component=http-gateway", "-o", "json"}).
 			Return(cannedLoadBalancerReply, nil)
+
+		server.AppendHandlers(
+			ghttp.CombineHandlers(
+				ghttp.VerifyRequest("POST", "/messages/cmd"),
+				ghttp.VerifyBody([]byte("hello")),
+			),
+		)
+
+		publishCommand.SetArgs([]string{"-d", "hello"})
+
+		err := publishCommand.Execute()
+		Expect(err).NotTo(HaveOccurred())
+		Expect(server.ReceivedRequests()).To(HaveLen(1))
+	})
+
+	It("should work with LoadBalancer service with hostname", func() {
+		kubeClient.
+			On("Exec", []string{"get", "svc", "--all-namespaces", "-l", "app=riff,component=http-gateway", "-o", "json"}).
+			Return(cannedLoadBalancerWithHostnameReply, nil)
 
 		server.AppendHandlers(
 			ghttp.CombineHandlers(
