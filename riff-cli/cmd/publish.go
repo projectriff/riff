@@ -129,7 +129,11 @@ func lookupAddress(kube kubectl.KubeCtl, minik minikube.Minikube) (string, strin
 		return "", "", errors.New("Unable to determine gateway port: " + err.Error())
 	}
 	port := strconv.FormatFloat(pFloat.(float64), 'f', 0, 64)
-	return ipAddress, port, nil
+
+	if ipAddress != "" {
+		return ipAddress, port, nil
+	}
+	return hostname, port, nil
 }
 
 func publish(ipAddress string, port string, publishOptions publishOptions) error {
