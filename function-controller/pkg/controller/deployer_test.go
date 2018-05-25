@@ -140,6 +140,57 @@ var _ = Describe("Deployer", func() {
 		})
 	})
 
+	Describe("the service created by buildService", func() {
+		var (
+			function v1.Function
+			link     v1.Link
+			service  corev1.Service
+		)
+
+		BeforeEach(func() {
+			function = v1.Function{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "square",
+					Namespace: "default",
+				},
+			}
+			link = v1.Link{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "square-link",
+					Namespace: "default",
+				},
+			}
+			link.Spec.Windowing.Size = 1
+		})
+
+		JustBeforeEach(func() {
+			service = d.buildService(&link)
+		})
+
+		It("should inherit the link's name and namespace", func() {
+			Expect(service.Name).To(Equal(link.Name))
+			Expect(service.Namespace).To(Equal(link.Namespace))
+		})
+		
+		It("should be owned by the link", func() {
+			Expect(len(service.OwnerReferences)).To(Equal(1))
+			ownerRef := service.OwnerReferences[0]
+			Expect(ownerRef.Kind).To(Equal("Link"))
+			Expect(ownerRef.Name).To(Equal(link.Name))
+		})
+
+		It("should export the function pods' gRPC ports", func() {
+		    Expect(len(service.Spec.Ports)).To(Equal(1))
+		    servicePort := service.Spec.Ports[0]
+		    Expect(servicePort.Name).To(Equal("grpc"))
+		    Expect(servicePort.Protocol).To(Equal(corev1.ProtocolTCP))
+		    Expect(servicePort.Port).To(Equal(int32(10382)))
+		})
+
+		It("should select the function pods", func() {
+		    Expect(service.Spec.Selector).To(Equal(map[string]string{"link":link.Name, "namespace": link.Namespace}))
+		})
+	})
 })
 
 func indexOf(slice []string, elem string) int {

@@ -41,4 +41,8 @@ spec:
             value: {{ .Values.functionController.sidecar.image.repository }}
           - name: RIFF_FUNCTION_SIDECAR_TAG
             value: {{ .Values.functionController.sidecar.image.tag }}
+          envFrom:
+          - configMapRef:
+              name: riff-feature-flags
+              optional: true
       serviceAccountName: {{ template "riff.serviceAccountName" . }}

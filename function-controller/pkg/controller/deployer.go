@@ -31,6 +31,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"strconv"
 )
 
 const (
@@ -61,8 +62,9 @@ type Deployer interface {
 }
 
 type deployer struct {
-	clientset *kubernetes.Clientset
-	brokers   []string
+	clientset                *kubernetes.Clientset
+	brokers                  []string
+	streamGatewayFeatureFlag bool
 }
 
 func (d *deployer) Deploy(link *v1.Link, function *v1.Function) error {
@@ -70,6 +72,13 @@ func (d *deployer) Deploy(link *v1.Link, function *v1.Function) error {
 	_, err := d.clientset.ExtensionsV1beta1().Deployments(link.Namespace).Create(&deployment)
 	if err != nil {
 		return err
+	}
+	if d.streamGatewayFeatureFlag {
+		service := d.buildService(link)
+		_, err = d.clientset.CoreV1().Services(link.Namespace).Create(&service)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -86,7 +95,7 @@ func (d *deployer) buildDeployment(link *v1.Link, function *v1.Function) v1beta1
 		Spec: v1beta1.DeploymentSpec{
 			Replicas: &zero,
 			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{Name: link.Name, Labels: map[string]string{"function": function.Name, "link": link.Name}},
+				ObjectMeta: metav1.ObjectMeta{Name: link.Name, Labels: map[string]string{"function": function.Name, "link": link.Name, "namespace": link.Namespace}},
 				Spec:       d.buildPodSpec(link, function),
 			},
 		},
@@ -94,8 +103,15 @@ func (d *deployer) buildDeployment(link *v1.Link, function *v1.Function) v1beta1
 }
 
 func (d *deployer) buildPodSpec(link *v1.Link, function *v1.Function) corev1.PodSpec {
-	spec := corev1.PodSpec{
-		Containers: []corev1.Container{d.buildMainContainer(function), d.buildSidecarContainer(link, function.Spec.Protocol)},
+	var spec corev1.PodSpec
+	if d.streamGatewayFeatureFlag {
+		spec = corev1.PodSpec{
+			Containers: []corev1.Container{d.buildMainContainer(function)},
+		}
+	} else {
+		spec = corev1.PodSpec{
+			Containers: []corev1.Container{d.buildMainContainer(function), d.buildSidecarContainer(link, function.Spec.Protocol)},
+		}
 	}
 	return spec
 }
@@ -143,6 +159,30 @@ func (d *deployer) buildSidecarContainer(link *v1.Link, protocol string) corev1.
 	return c
 }
 
+func (d *deployer) buildService(link *v1.Link) corev1.Service {
+	grpcPort, err := strconv.Atoi(ports["grpc"])
+	if err != nil {
+		panic(err) // should never happen
+	}
+
+	return corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      link.Name,
+			Namespace: link.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				*metav1.NewControllerRef(link, v1.SchemeGroupVersion.WithKind("Link")),
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{corev1.ServicePort{Name: "grpc",
+				Protocol: corev1.ProtocolTCP,
+				Port: int32(grpcPort),
+			}},
+			Selector: map[string]string{"link": link.Name, "namespace": link.Namespace}, // TODO: if label selection is scoped by namespace, remove the namespace label
+		},
+	}
+}
+
 func (d *deployer) Undeploy(link *v1.Link) error {
 	propagation := metav1.DeletePropagationForeground
 	return d.clientset.ExtensionsV1beta1().Deployments(link.Namespace).Delete(
@@ -176,10 +216,10 @@ func (d *deployer) Scale(link *v1.Link, replicas int) error {
 	return err
 }
 
-func NewDeployer(config *rest.Config, brokers []string) (Deployer, error) {
+func NewDeployer(config *rest.Config, brokers []string, streamGatewayFeatureFlag bool) (Deployer, error) {
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
-	return &deployer{clientset: clientset, brokers: brokers}, nil
+	return &deployer{clientset: clientset, brokers: brokers, streamGatewayFeatureFlag: streamGatewayFeatureFlag}, nil
 }

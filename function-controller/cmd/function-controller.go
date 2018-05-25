@@ -54,7 +54,9 @@ func main() {
 	}
 
 	topicsInformer, functionsInformer, linksInformer, deploymentInformer := makeInformers(config)
-	deployer, err := controller.NewDeployer(config, brokers)
+	streamGatewayFeatureFlag := os.Getenv("stream-gateway") == "enabled"
+	log.Printf("Feature flag stream-gateway=enabled: %t", streamGatewayFeatureFlag)
+	deployer, err := controller.NewDeployer(config, brokers, streamGatewayFeatureFlag)
 	if err != nil {
 		panic(err)
 	}

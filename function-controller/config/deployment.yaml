@@ -36,4 +36,8 @@ spec:
           value: projectriff/function-sidecar
         - name: RIFF_FUNCTION_SIDECAR_TAG
           value: 0.0.8-snapshot
+        envFrom:
+        - configMapRef:
+            name: riff-feature-flags
+            optional: true
       serviceAccountName: projectriff-riff
