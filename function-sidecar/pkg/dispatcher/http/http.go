@@ -42,6 +42,7 @@ var headerBlacklist = map[string]*void{
 type void struct{}
 
 type httpDispatcher struct {
+	host string
 	port int
 }
 
@@ -49,7 +50,7 @@ func (hd httpDispatcher) Dispatch(in message.Message) (message.Message, error) {
 	client := http.Client{
 		Timeout: time.Duration(60 * time.Second),
 	}
-	url := fmt.Sprintf("http://localhost:%d", hd.port)
+	url := fmt.Sprintf("http://%s:%d", hd.host, hd.port)
 	req, err := http.NewRequest("POST", url, bytes.NewReader(in.Payload()))
 	if err != nil {
 		log.Printf("Error creating POST request to %s: %v", url, err)
@@ -93,10 +94,10 @@ func propagateOutgoingHeaders(resp *http.Response, message message.Message) {
 	}
 }
 
-func NewHttpDispatcher(port int) dispatcher.SynchDispatcher {
+func NewHttpDispatcher(host string, port int) dispatcher.SynchDispatcher {
 	attemptDial := func() error {
-		log.Printf("Waiting for function to accept connection on localhost:%d\n", port)
-		_, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", port))
+		log.Printf("Waiting for function to accept connection on %v:%d\n", host, port)
+		_, err := net.Dial("tcp", fmt.Sprintf("%v:%d", host, port))
 		return err
 	}
 
@@ -108,6 +109,7 @@ func NewHttpDispatcher(port int) dispatcher.SynchDispatcher {
 		panic(err)
 	}
 	return httpDispatcher{
+		host,
 		port,
 	}
 }

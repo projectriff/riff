@@ -214,9 +214,9 @@ func (d *grpcDispatcher) Close() error {
 	return e
 }
 
-func NewGrpcDispatcher(port int, timeout time.Duration) (dispatcher.Dispatcher, error) {
+func NewGrpcDispatcher(host string, port int, timeout time.Duration) (dispatcher.Dispatcher, error) {
 	ctx, _ := context.WithTimeout(context.Background(), timeout)
-	conn, err := grpc.DialContext(ctx, fmt.Sprintf("localhost:%v", port), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.DialContext(ctx, fmt.Sprintf("%v:%v", host, port), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, err
 	}

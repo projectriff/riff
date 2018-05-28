@@ -176,7 +176,7 @@ func backoffOrExit(backoff *backoff.Backoff) bool {
 func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
 	switch protocol {
 	case "http":
-		return dispatch.NewWrapper(http.NewHttpDispatcher(port))
+		return dispatch.NewWrapper(http.NewHttpDispatcher("localhost", port))
 	case "grpc":
 		var timeout time.Duration
 		if exitOnComplete {
@@ -184,7 +184,7 @@ func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
 		} else {
 			timeout = 500 * time.Millisecond
 		}
-		return grpc.NewGrpcDispatcher(port, timeout)
+		return grpc.NewGrpcDispatcher("localhost", port, timeout)
 	default:
 		panic("Unsupported Dispatcher " + protocol)
 	}

@@ -62,7 +62,7 @@ var _ = Describe("gRPC Test", func() {
 		s, err := json.Marshal(strategy)
 		Expect(err).NotTo(HaveOccurred())
 		os.Setenv("WINDOWING_STRATEGY", string(s))
-		d, err = grpc.NewGrpcDispatcher(port, 100*time.Millisecond)
+		d, err = grpc.NewGrpcDispatcher("localhost", port, 100*time.Millisecond)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
