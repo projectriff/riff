@@ -11,7 +11,7 @@ import (
 	"time"
 
 	informers "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions"
-	"github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1"
+	"github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff.io/v1alpha1"
 	"sync"
 )
 

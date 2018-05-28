@@ -33,7 +33,7 @@ import (
 	"github.com/bsm/sarama-cluster"
 	"github.com/projectriff/riff/function-controller/pkg/controller"
 	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler"
-	riffInformersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1"
+	riffInformersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff.io/v1alpha1"
 	"github.com/projectriff/riff/message-transport/pkg/transport/kafka"
 	"github.com/projectriff/riff/message-transport/pkg/transport/metrics/kafka_over_kafka"
 	k8sInformers "k8s.io/client-go/informers"
