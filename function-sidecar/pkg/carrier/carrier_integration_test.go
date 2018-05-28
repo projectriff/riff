@@ -116,7 +116,7 @@ func startFunctionSidecar(broker string, input string, output string, group stri
 	consumer, err := kafka.NewConsumer(brokers, group, []string{input}, consumerConfig)
 	Expect(err).NotTo(HaveOccurred())
 
-	dispatcher, err := dispatch.NewWrapper(dispatchhttp.NewHttpDispatcher(8080))
+	dispatcher, err := dispatch.NewWrapper(dispatchhttp.NewHttpDispatcher("localhost", 8080))
 	Expect(err).NotTo(HaveOccurred())
 
 	go carrier.Run(consumer, producer, dispatcher, output)
