@@ -59,7 +59,7 @@ NOTE: Starting with with Minikube v0.26.0 the default for Minikube is to use the
 
 [source, bash]
 ----
-make dev-setup rbac
+make dev-setup
 ----
 
 Which will:
