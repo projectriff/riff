@@ -240,7 +240,7 @@ func (c *ctrl) onLinkUpdated(oldLink *v1.Link, newLink *v1.Link) {
 }
 
 func (c *ctrl) onLinkDeleted(link *v1.Link) {
-	log.Printf("Binding deleted: %v", link.Name)
+	log.Printf("Link deleted: %v", link.Name)
 	delete(c.links, lkey(link))
 	err := c.deployer.Undeploy(link)
 	if err != nil {
