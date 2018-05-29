@@ -5,13 +5,15 @@ A FaaS for Kubernetes
 
 == Installation of the latest release
 
-See link:https://projectriff.io/docs/getting-started-on-minikube/[Getting started on Minikube] or 
+See link:https://projectriff.io/docs/getting-started-on-minikube/[Getting started on Minikube] or
 link:https://projectriff.io/docs/getting-started-on-gke/[Getting started on GKE] for how to install riff with a Helm Chart,
 and how to install the riff CLI.
 
 == Developer installation
 
 See link:Development-Helm-install.adoc[Installing the riff development version using Helm] to install the latest unreleased builds (git master branch) of riff.
+
+NOTE: Since link:https://github.com/projectriff/riff/pull/578[PR #578] was merged, riff functions will be deployed only when linked to a topic with a link resource. To generate yaml files for links, you must run a development (snapshot) build of the CLI.
 
 == [[manual]] Manual build
 

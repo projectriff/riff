@@ -7,6 +7,8 @@
 * Kubernetes CLI `kubectl` installed and on the local system PATH.
 We recommend using the same version or later as the Kubernetes cluster you are using.
 
+NOTE: Since link:https://github.com/projectriff/riff/pull/578[PR #578] was merged, you must run a development (snapshot) build of the CLI to target a development build of riff.
+
 * Helm, you need helm installed, see instructions link:https://github.com/kubernetes/helm/blob/master/README.md#install[here]. 
 
 * Docker, you only need Docker when building custom versions of riff components or the samples.
