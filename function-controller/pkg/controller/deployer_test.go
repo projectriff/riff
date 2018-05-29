@@ -21,6 +21,7 @@ import (
 	v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/api/extensions/v1beta1"
 )
 
 var _ = Describe("Deployer", func() {
@@ -34,8 +35,9 @@ var _ = Describe("Deployer", func() {
 
 	Describe("buildDeployment", func() {
 		var (
-			function v1.Function
-			link     v1.Link
+			function   v1.Function
+			link       v1.Link
+			deployment v1beta1.Deployment
 		)
 
 		BeforeEach(func() {
@@ -54,8 +56,11 @@ var _ = Describe("Deployer", func() {
 			link.Spec.Windowing.Size = 1
 		})
 
+		JustBeforeEach(func() {
+			deployment = d.buildDeployment(&link, &function)
+		})
+
 		It("should set the HTTP_PORT var", func() {
-			deployment := d.buildDeployment(&link, &function)
 			mainContainer := deployment.Spec.Template.Spec.Containers[0]
 			Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
 				Name:  "HTTP_PORT",
@@ -64,7 +69,6 @@ var _ = Describe("Deployer", func() {
 		})
 
 		It("should set the GRPC_PORT var", func() {
-			deployment := d.buildDeployment(&link, &function)
 			mainContainer := deployment.Spec.Template.Spec.Containers[0]
 			Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
 				Name:  "GRPC_PORT",
@@ -73,7 +77,6 @@ var _ = Describe("Deployer", func() {
 		})
 
 		It("should set the sidecar WINDOWING_STRATEGY var", func() {
-			deployment := d.buildDeployment(&link, &function)
 			mainContainer := deployment.Spec.Template.Spec.Containers[1]
 			Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
 				Name:  "WINDOWING_STRATEGY",
@@ -82,7 +85,6 @@ var _ = Describe("Deployer", func() {
 		})
 
 		It("creates an owner reference to the link", func() {
-			deployment := d.buildDeployment(&link, &function)
 			ownerReferences := deployment.OwnerReferences
 			Expect(len(ownerReferences)).To(Equal(1))
 			Expect(ownerReferences[0].Kind).To(Equal("Link"))
@@ -98,7 +100,6 @@ var _ = Describe("Deployer", func() {
 			})
 
 			It("should set the RIFF_FUNCTION_INVOKER_PROTOCOL var to grpc", func() {
-				deployment := d.buildDeployment(&link, &function)
 				mainContainer := deployment.Spec.Template.Spec.Containers[0]
 				Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
 					Name:  "RIFF_FUNCTION_INVOKER_PROTOCOL",
@@ -107,7 +108,6 @@ var _ = Describe("Deployer", func() {
 			})
 
 			It("should set the sidecar --protocol and --port arg", func() {
-				deployment := d.buildDeployment(&link, &function)
 				sidecarContainer := deployment.Spec.Template.Spec.Containers[1]
 				args := sidecarContainer.Args
 				Expect(args[indexOf(args, "--protocol")+1]).To(Equal("grpc"))
@@ -123,7 +123,6 @@ var _ = Describe("Deployer", func() {
 			})
 
 			It("should set the RIFF_FUNCTION_INVOKER_PROTOCOL var to http", func() {
-				deployment := d.buildDeployment(&link, &function)
 				mainContainer := deployment.Spec.Template.Spec.Containers[0]
 				Expect(mainContainer.Env).To(ContainElement(corev1.EnvVar{
 					Name:  "RIFF_FUNCTION_INVOKER_PROTOCOL",
@@ -132,7 +131,6 @@ var _ = Describe("Deployer", func() {
 			})
 
 			It("should set the sidecar --protocol and --port arg", func() {
-				deployment := d.buildDeployment(&link, &function)
 				sidecarContainer := deployment.Spec.Template.Spec.Containers[1]
 				args := sidecarContainer.Args
 				Expect(args[indexOf(args, "--protocol")+1]).To(Equal("http"))
