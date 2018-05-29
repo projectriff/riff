@@ -14,30 +14,10 @@ rules:
     verbs: ["get", "list", "watch", "create", "delete", "update"]
   - apiGroups: ["apiextensions.k8s.io"]
     resources: ["customresourcedefinitions"]
-    verbs: ["get", "list", "watch", "create", "delete", "update", "patch"]
-  - apiGroups: ["extensions"]
-    resources: ["deployments", "replicasets"]
-    verbs: ["get", "list", "watch", "create", "delete", "update", "patch"]
-  - apiGroups: ["projectriff.io"]
-    resources: ["functions", "topics", "links"]
-    verbs: ["get", "list", "watch"]
----
-kind: Role
-apiVersion: rbac.authorization.k8s.io/{{ required "A valid .Values.rbac.apiVersion entry required!" .Values.rbac.apiVersion }}
-metadata:
-  name: {{ template "riff.fullname" . }}
-  labels:
-    app: {{ template "riff.name" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
-rules:
-  - apiGroups: [""]
-    resources: ["services", "pods"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["extensions"]
-    resources: ["deployments", "replicasets"]
-    verbs: ["get", "list", "watch", "create", "delete", "update", "patch"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "create", "delete", "update"]
   - apiGroups: ["projectriff.io"]
     resources: ["functions", "topics", "links"]
     verbs: ["get", "list", "watch"]
@@ -59,21 +39,3 @@ subjects:
 - kind: ServiceAccount
   name: {{ template "riff.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/{{ required "A valid .Values.rbac.apiVersion entry required!" .Values.rbac.apiVersion }}
-metadata:
-  name: {{ template "riff.fullname" . }}
-  labels:
-    app: {{ template "riff.name" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
-roleRef:
-  kind: Role
-  name: {{ template "riff.fullname" . }}
-  apiGroup: rbac.authorization.k8s.io
-subjects:
-- kind: ServiceAccount
-  name: {{ template "riff.serviceAccountName" . }}
-{{- end -}}
