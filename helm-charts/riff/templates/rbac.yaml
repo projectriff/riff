@@ -39,3 +39,4 @@ subjects:
 - kind: ServiceAccount
   name: {{ template "riff.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
+{{- end -}}
