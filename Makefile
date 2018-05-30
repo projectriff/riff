@@ -51,6 +51,9 @@ teardown:
 	kubectl delete crd/topics.projectriff.io
 	kubectl delete crd/invokers.projectriff.io
 	kubectl delete all,svc -n riff-system -l app=kafka
+	kubectl delete -n riff-system serviceaccount/projectriff-riff
+	kubectl delete clusterrole/projectriff-riff
+	kubectl delete clusterrolebinding/projectriff-riff
 
 vendor: glide.lock
 	glide install -v --force
