@@ -31,8 +31,6 @@ import (
 	"fmt"
 	"github.com/projectriff/riff/message-transport/pkg/message"
 	"github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
-	"os"
-	"encoding/json"
 )
 
 func init() {
@@ -59,10 +57,7 @@ var _ = Describe("gRPC Test", func() {
 		Expect(err).NotTo(HaveOccurred())
 		go server.Serve(l)
 
-		s, err := json.Marshal(strategy)
-		Expect(err).NotTo(HaveOccurred())
-		os.Setenv("WINDOWING_STRATEGY", string(s))
-		d, err = grpc.NewGrpcDispatcher("localhost", port, 100*time.Millisecond)
+		d, err = grpc.NewGrpcDispatcher("localhost", port, strategy, 100*time.Millisecond)
 		Expect(err).NotTo(HaveOccurred())
 	})
 

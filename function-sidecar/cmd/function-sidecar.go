@@ -38,6 +38,8 @@ import (
 	"github.com/projectriff/riff/message-transport/pkg/transport"
 	"github.com/projectriff/riff/message-transport/pkg/transport/metrics/kafka_over_kafka"
 	"github.com/satori/go.uuid"
+	"encoding/json"
+	"github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 )
 
 type stringSlice []string
@@ -184,7 +186,9 @@ func createDispatcher(protocol string) (dispatch.Dispatcher, error) {
 		} else {
 			timeout = 500 * time.Millisecond
 		}
-		return grpc.NewGrpcDispatcher("localhost", port, timeout)
+		var w v1alpha1.Windowing
+		json.Unmarshal([]byte(os.Getenv("WINDOWING_STRATEGY")), &w)
+		return grpc.NewGrpcDispatcher("localhost", port, w, timeout)
 	default:
 		panic("Unsupported Dispatcher " + protocol)
 	}

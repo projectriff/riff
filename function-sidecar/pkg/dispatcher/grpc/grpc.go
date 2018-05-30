@@ -29,8 +29,6 @@ import (
 	"github.com/projectriff/riff/function-sidecar/pkg/dispatcher/grpc/function"
 	"github.com/projectriff/riff/message-transport/pkg/message"
 	"golang.org/x/net/context"
-	"encoding/json"
-	"os"
 	"github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
 	"reflect"
 )
@@ -214,7 +212,7 @@ func (d *grpcDispatcher) Close() error {
 	return e
 }
 
-func NewGrpcDispatcher(host string, port int, timeout time.Duration) (dispatcher.Dispatcher, error) {
+func NewGrpcDispatcher(host string, port int, w v1alpha1.Windowing, timeout time.Duration) (dispatcher.Dispatcher, error) {
 	ctx, _ := context.WithTimeout(context.Background(), timeout)
 	conn, err := grpc.DialContext(ctx, fmt.Sprintf("%v:%v", host, port), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
@@ -227,7 +225,7 @@ func NewGrpcDispatcher(host string, port int, timeout time.Duration) (dispatcher
 		output:           make(chan message.Message, 100),
 		closed:           make(chan struct{}),
 		streams:          make(map[interface{}]*window),
-		windowingFactory: unmarshallFactory(),
+		windowingFactory: unmarshallFactory(w),
 		correlation:      func(m message.Message) interface{} {
 			if c, ok := m.Headers()[correlationId] ; ok {
 				return c[0]
@@ -262,10 +260,7 @@ func toDispatcher(grpc *function.Message) message.Message {
 	return message.NewMessage(grpc.Payload, dHeaders)
 }
 
-func unmarshallFactory() WindowingStrategyFactory {
-	var w v1alpha1.Windowing
-	json.Unmarshal([]byte(os.Getenv("WINDOWING_STRATEGY")), &w)
-
+func unmarshallFactory(w v1alpha1.Windowing) WindowingStrategyFactory {
 	strategies := 0
 	v := reflect.ValueOf(w)
 	for i := 0; i < v.NumField(); i++ {
