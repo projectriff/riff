@@ -40,12 +40,10 @@ func Delete(realKubeCtl kubectl.KubeCtl, dryRunKubeCtl kubectl.KubeCtl) (*cobra.
 	deleteOptions := DeleteOptions{}
 
 	var deleteCmd = &cobra.Command{
-		Use:   "delete",
-		Short: "Delete function resources in the cluster",
-		Long:  `Delete the resource[s] for the function or path specified.`,
-		Example: `  riff delete -n square
-    or
-  riff delete -f function/square`,
+		Use:     "delete",
+		Short:   "Delete function resources in the cluster",
+		Long:    `Delete the resource[s] for the function or path specified.`,
+		Example: `  riff delete -n square`,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// From this point on, errors are execution errors, not misuse of flags

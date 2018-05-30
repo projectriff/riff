@@ -14,8 +14,6 @@ riff delete [flags]
 
 ```
   riff delete -n square
-    or
-  riff delete -f function/square
 ```
 
 ### Options
