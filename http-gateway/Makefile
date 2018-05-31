@@ -17,17 +17,18 @@ gen-mocks: $(GO_SOURCES)
 	go generate ./...
 
 clean:
-	rm -f $(OUTPUT)
+	rm -f $(OUTPUT) .dockerize
 
 dockerize: .dockerize
-.dockerize: $(GO_SOURCES) ../vendor
+
+.dockerize: $(GO_SOURCES) ../vendor ../Dockerfile ../.dockerignore
 	docker build .. --build-arg COMPONENT=http-gateway -t projectriff/http-gateway:$(TAG) && touch .dockerize
 
-debug-dockerize: $(GO_SOURCES) ../vendor
+debug-dockerize: $(GO_SOURCES) ../vendor ../Dockerfile-debug ../.dockerignore
 	# Need to remove probes as delve starts app in paused state
 	-kubectl patch deploy/http-gateway --type=json -p='[{"op":"remove", "path":"/spec/template/spec/containers/0/livenessProbe"}]'
 	-kubectl patch deploy/http-gateway --type=json -p='[{"op":"remove", "path":"/spec/template/spec/containers/0/readinessProbe"}]'
-	docker build .. --build-arg COMPONENT=http-gateway -t projectriff/http-gateway:$(TAG) -f ../Dockerfile-debug
+	docker build .. --build-arg COMPONENT=http-gateway -t projectriff/http-gateway:$(TAG) -f ../Dockerfile-debug && rm .dockerize
 
 ../vendor: ../glide.lock
 	cd .. && glide install -v --force

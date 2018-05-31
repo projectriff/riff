@@ -9,18 +9,18 @@ $(OUTPUT): $(GO_SOURCES) ../vendor
 	go build cmd/function-sidecar.go
 
 clean:
-	rm -f $(OUTPUT)
+	rm -f $(OUTPUT) .dockerize
 
 test: ../vendor
 	go test ./...
 
 dockerize: .dockerize
 
-.dockerize: $(GO_SOURCES) ../vendor
+.dockerize: $(GO_SOURCES) ../vendor ../Dockerfile ../.dockerignore
 	docker build .. --build-arg COMPONENT=function-sidecar -t projectriff/function-sidecar:$(TAG) && touch .dockerize
 
-debug-dockerize: $(GO_SOURCES) ../vendor
-	docker build .. --build-arg COMPONENT=function-sidecar -t projectriff/function-sidecar:$(TAG) -f ../Dockerfile-debug
+debug-dockerize: $(GO_SOURCES) ../vendor ../Dockerfile-debug ../.dockerignore
+	docker build .. --build-arg COMPONENT=function-sidecar -t projectriff/function-sidecar:$(TAG) -f ../Dockerfile-debug && rm .dockerize
 
 pkg/dispatcher/grpc/function/function.pb.go: ../function-proto/function.proto
 	protoc -I ../function-proto ../function-proto/function.proto --go_out=plugins=grpc:pkg/dispatcher/grpc/function
