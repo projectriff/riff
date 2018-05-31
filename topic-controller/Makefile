@@ -13,11 +13,11 @@ $(OUTPUT): $(GO_SOURCES) ../vendor
 	go build cmd/topic-controller.go
 
 clean:
-	rm -f $(OUTPUT)
+	rm -f $(OUTPUT) .dockerize
 
 dockerize: .dockerize
 
-.dockerize: $(GO_SOURCES) ../vendor
+.dockerize: $(GO_SOURCES) ../vendor ../Dockerfile ../.dockerignore
 	docker build .. --build-arg COMPONENT=topic-controller -t projectriff/topic-controller:$(TAG) && touch .dockerize
 
 debug-dockerize: $(GO_SOURCES) ../vendor

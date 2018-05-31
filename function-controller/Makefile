@@ -24,11 +24,11 @@ verify-mocks: gen-mocks
 	git diff --exit-code $(GENERATED_SOURCES)
 
 clean:
-	rm -f $(OUTPUT)
+	rm -f $(OUTPUT) .dockerize
 
 dockerize: .dockerize
 
-.dockerize: $(GO_SOURCES) ../vendor
+.dockerize: $(GO_SOURCES) ../vendor ../Dockerfile ../.dockerignore
 	docker build .. --build-arg COMPONENT=function-controller -t projectriff/function-controller:$(TAG) && touch .dockerize
 
 debug-dockerize: $(GO_SOURCES) ../vendor

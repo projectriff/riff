@@ -17,10 +17,11 @@ gen-mocks: $(GO_SOURCES)
 	go generate ./...
 
 clean:
-	rm -f $(OUTPUT)
+	rm -f $(OUTPUT) .dockerize
 
 dockerize: .dockerize
-.dockerize: $(GO_SOURCES) ../vendor
+
+.dockerize: $(GO_SOURCES) ../vendor ../Dockerfile ../.dockerignore
 	docker build .. --build-arg COMPONENT=http-gateway -t projectriff/http-gateway:$(TAG) && touch .dockerize
 
 debug-dockerize: $(GO_SOURCES) ../vendor

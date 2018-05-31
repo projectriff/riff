@@ -9,14 +9,14 @@ $(OUTPUT): $(GO_SOURCES) ../vendor
 	go build cmd/function-sidecar.go
 
 clean:
-	rm -f $(OUTPUT)
+	rm -f $(OUTPUT) .dockerize
 
 test: ../vendor
 	go test ./...
 
 dockerize: .dockerize
 
-.dockerize: $(GO_SOURCES) ../vendor
+.dockerize: $(GO_SOURCES) ../vendor ../Dockerfile ../.dockerignore
 	docker build .. --build-arg COMPONENT=function-sidecar -t projectriff/function-sidecar:$(TAG) && touch .dockerize
 
 debug-dockerize: $(GO_SOURCES) ../vendor
