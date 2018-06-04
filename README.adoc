@@ -55,7 +55,7 @@ make dockerize
 
 If you want to quickly standup a development copy of riff:
 
-NOTE: Starting with with Minikube v0.26.0 the default for Minikube is to use the kubeadm bootstrapper which enables RBAC. The older localkube bootstrapper is now deprecated. The following instructions assume that your cluster is running with RBAC enabled. It is still possible to install riff without RBAC roles by omitting the `rbac` target from the make command.
+NOTE: Starting with with Minikube v0.26.0 the default for Minikube is to use the kubeadm bootstrapper which enables RBAC. The older localkube bootstrapper is now deprecated. The following instructions assume that your cluster is running with RBAC enabled. To install riff without RBAC roles you could use the link:Development-Helm-install.adoc[Helm chart].
 
 [source, bash]
 ----
