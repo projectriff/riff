@@ -1,7 +1,7 @@
-.PHONY: build clean dockerize test kubectl-apply
+.PHONY: build clean dockerize test kubectl-apply force-image-rebuild
 OUTPUT = http-gateway
-
 GO_SOURCES = $(shell find cmd pkg -type f -name '*.go')
+IMAGE_NOT_PRESENT=$(shell docker image inspect `cat .dockerize 2>/dev/null` > /dev/null 2>&1 ; if [ $$? != 0 ] ; then echo "force-image-rebuild" ; else echo "" ; fi)
 TAG ?= $(shell cat ../VERSION)
 
 build: $(OUTPUT)
@@ -21,8 +21,8 @@ clean:
 
 dockerize: .dockerize
 
-.dockerize: $(GO_SOURCES) ../vendor ../Dockerfile ../.dockerignore
-	docker build .. --build-arg COMPONENT=http-gateway -t projectriff/http-gateway:$(TAG) && touch .dockerize
+.dockerize: $(GO_SOURCES) ../vendor ../Dockerfile ../.dockerignore $(IMAGE_NOT_PRESENT)
+	docker build .. --build-arg COMPONENT=http-gateway -t projectriff/http-gateway:$(TAG) -q > .dockerize
 
 debug-dockerize: $(GO_SOURCES) ../vendor ../Dockerfile-debug ../.dockerignore
 	# Need to remove probes as delve starts app in paused state

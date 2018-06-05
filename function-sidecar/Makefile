@@ -1,6 +1,7 @@
-.PHONY: build clean grpc dockerize test
+.PHONY: build clean grpc dockerize test force-image-rebuild
 OUTPUT = function-sidecar
 GO_SOURCES = $(shell find pkg cmd -type f -name '*.go')
+IMAGE_NOT_PRESENT=$(shell docker image inspect `cat .dockerize 2>/dev/null` > /dev/null 2>&1 ; if [ $$? != 0 ] ; then echo "force-image-rebuild" ; else echo "" ; fi)
 TAG ?= $(shell cat ../VERSION)
 
 build: $(OUTPUT)
@@ -16,8 +17,8 @@ test: ../vendor
 
 dockerize: .dockerize
 
-.dockerize: $(GO_SOURCES) ../vendor ../Dockerfile ../.dockerignore
-	docker build .. --build-arg COMPONENT=function-sidecar -t projectriff/function-sidecar:$(TAG) && touch .dockerize
+.dockerize: $(GO_SOURCES) ../vendor ../Dockerfile ../.dockerignore $(IMAGE_NOT_PRESENT)
+	docker build .. --build-arg COMPONENT=function-sidecar -t projectriff/function-sidecar:$(TAG) -q > .dockerize
 
 debug-dockerize: $(GO_SOURCES) ../vendor ../Dockerfile-debug ../.dockerignore
 	docker build .. --build-arg COMPONENT=function-sidecar -t projectriff/function-sidecar:$(TAG) -f ../Dockerfile-debug && rm .dockerize
