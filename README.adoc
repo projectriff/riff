@@ -34,22 +34,29 @@ To build images with docker in minikube, issue:
 eval $(minikube docker-env)
 ----
 
-=== Get the main riff repo and install the CLI
+=== Get the main riff repo
 
 [source, bash]
 ----
-go get github.com/projectriff/riff
+go get -d github.com/projectriff/riff/...
 ----
-NOTE: This installs the CLI in the `bin` subdirectory of the first directory listed in `$GOPATH`, but doesn't
-set the CLI version. To set the version, see the link:riff-cli/README.adoc[riff CLI README].
 
 === Build the riff core components
 
 [source, bash]
 ----
 cd $(go env GOPATH)/src/github.com/projectriff/riff
-make dockerize
+make clean dockerize
 ----
+
+=== Build and install the CLI
+
+[source, bash]
+----
+cd $(go env GOPATH)/src/github.com/projectriff/riff
+make -C riff-cli/ build install
+----
+NOTE: This installs the CLI in the `bin` subdirectory of the first directory listed in `$GOPATH`.
 
 === Setup for development
 

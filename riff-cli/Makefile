@@ -21,6 +21,9 @@ test: build
 $(OUTPUT): $(GO_SOURCES) ../vendor
 	go build -ldflags "-X main.version=$(VERSION)" -o $(OUTPUT) ../cli.go
 
+install: build
+	cp $(OUTPUT) $(GOPATH)/bin
+
 release: $(GO_SOURCES) ../vendor
 	GOOS=darwin   GOARCH=amd64 go build -ldflags "-X main.version=$(VERSION)" -o $(OUTPUT) ../cli.go && tar -czf riff-darwin-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
 	GOOS=linux    GOARCH=amd64 go build -ldflags "-X main.version=$(VERSION)" -o $(OUTPUT) ../cli.go && tar -czf riff-linux-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)

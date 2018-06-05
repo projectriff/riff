@@ -64,8 +64,9 @@ make -C riff-cli/ build
 == Add riff binary to PATH
 ```
 cd $(go env GOPATH)/src/github.com/projectriff/riff
-cp riff-cli/riff /usr/local/bin/riff
+make -C riff-cli/ install
 ```
+NOTE: This installs the CLI in the `bin` subdirectory of the first directory listed in `$GOPATH`.
 
 == Running tests
 ```
