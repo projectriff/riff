@@ -46,8 +46,9 @@ go get -d github.com/projectriff/riff/...
 [source, bash]
 ----
 cd $(go env GOPATH)/src/github.com/projectriff/riff
-make clean dockerize
+make dockerize
 ----
+NOTE: If you delete and create a new Minikube after youre first build, you can use `make clean dockerize` to force all images to get rebuilt.
 
 === Build and install the CLI
 
@@ -56,7 +57,7 @@ make clean dockerize
 cd $(go env GOPATH)/src/github.com/projectriff/riff
 make -C riff-cli/ build install
 ----
-NOTE: This installs the CLI in the `bin` subdirectory of the first directory listed in `$GOPATH`.
+NOTE: This installs the CLI in `$GOBIN`, or if that is not set, in the `bin` subdirectory of the directory specified in `$GOPATH`.
 
 === Setup for development
 

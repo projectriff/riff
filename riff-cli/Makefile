@@ -4,7 +4,7 @@ OUTPUT_WINDOWS = $(OUTPUT).exe
 GO_SOURCES = $(shell find cmd pkg -type f -name '*.go' -not -name 'mock_*.go')
 VERSION ?= $(shell cat ../VERSION)
 GENERATED_SOURCES = $(shell find pkg -type f -name 'mock_*.go')
-
+GOBIN ?= $(GOPATH)/bin
 
 all: build docs test
 
@@ -22,7 +22,7 @@ $(OUTPUT): $(GO_SOURCES) ../vendor
 	go build -ldflags "-X main.version=$(VERSION)" -o $(OUTPUT) ../cli.go
 
 install: build
-	cp $(OUTPUT) $(GOPATH)/bin
+	cp $(OUTPUT) $(GOBIN)
 
 release: $(GO_SOURCES) ../vendor
 	GOOS=darwin   GOARCH=amd64 go build -ldflags "-X main.version=$(VERSION)" -o $(OUTPUT) ../cli.go && tar -czf riff-darwin-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
