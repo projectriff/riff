@@ -66,7 +66,7 @@ make -C riff-cli/ build
 cd $(go env GOPATH)/src/github.com/projectriff/riff
 make -C riff-cli/ install
 ```
-NOTE: This installs the CLI in the `bin` subdirectory of the first directory listed in `$GOPATH`.
+NOTE: This installs the CLI in `$GOBIN`, or if that is not set, in the `bin` subdirectory of the directory specified in `$GOPATH`.
 
 == Running tests
 ```
