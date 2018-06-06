@@ -4,7 +4,7 @@ OUTPUT_WINDOWS = $(OUTPUT).exe
 GO_SOURCES = $(shell find cmd pkg -type f -name '*.go' -not -name 'mock_*.go')
 VERSION ?= $(shell cat ../VERSION)
 GENERATED_SOURCES = $(shell find pkg -type f -name 'mock_*.go')
-GOBIN ?= $(GOPATH)/bin
+GOBIN ?= $(shell go env GOPATH)/bin
 
 all: build docs test
 
