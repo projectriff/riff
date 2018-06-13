@@ -1,20 +1,18 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "kafka.fullname" . }}
+  name: {{ template "kafka.brokers" . }}
   labels:
     app: {{ template "kafka.name" . }}
-    component: kafka
+    component: kafka-brokers
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.kafka.service.type }}
+  clusterIP: None
   ports:
-    - port: {{ .Values.kafka.service.externalPort }}
-      targetPort: {{ .Values.kafka.service.internalPort }}
-      protocol: TCP
-      name: {{ .Values.kafka.service.name }}
+    - port: 9092
+      name: broker # Port is not used
   selector:
     app: {{ template "kafka.name" . }}
     component: kafka-broker
