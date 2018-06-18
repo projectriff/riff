@@ -1,7 +1,7 @@
 package: github.com/projectriff/riff
 import:
 - package: k8s.io/client-go
-  version: v5.0.1
+  version: kubernetes-1.10.0
   subpackages:
   - discovery
   - discovery/fake

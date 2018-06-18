@@ -31,7 +31,7 @@ import (
 	"log"
 
 	"github.com/golang/glog"
-	informersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff/v1alpha1"
+	informersV1 "github.com/projectriff/riff/kubernetes-crds/pkg/client/informers/externalversions/projectriff.io/v1alpha1"
 	"github.com/projectriff/riff/topic-controller/pkg/topic"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
