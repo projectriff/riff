@@ -25,7 +25,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/ghodss/yaml"
 	projectriff_v1 "github.com/projectriff/riff/kubernetes-crds/pkg/apis/projectriff.io/v1alpha1"
@@ -159,25 +158,26 @@ func (operations *invokerOperations) Table(args ...string) (string, error) {
 }
 
 func (operations *invokerOperations) List() ([]projectriff_v1.Invoker, error) {
-	if invokerPaths, invokerPathsSet := os.LookupEnv("RIFF_INVOKER_PATHS"); invokerPathsSet {
-		return listFromDisk(strings.Split(invokerPaths, ","))
+	if invokerPaths, ok := os.LookupEnv("RIFF_INVOKER_PATHS"); ok {
+		return listFromPaths(invokerPaths)
 	}
 	return listFromKubeCtl(operations.kubeCtl)
 }
 
-func listFromDisk(invokerPaths []string) ([]projectriff_v1.Invoker, error) {
+func listFromPaths(invokerPaths string) ([]projectriff_v1.Invoker, error) {
+	invokerURLs, err := resolveInvokerURLs(invokerPaths)
+	if err != nil {
+		return nil, err
+	}
+	if len(invokerURLs) == 0 {
+		return nil, fmt.Errorf("No invokers found at %s", invokerPaths)
+	}
+	invokersBytes, err := loadInvokers(invokerURLs)
+
 	invokers := []projectriff_v1.Invoker{}
-	for _, invokerPath := range invokerPaths {
-		invokerPath = strings.TrimSpace(invokerPath)
-		if invokerPath == "" {
-			continue
-		}
-		invokerBytes, err := ioutil.ReadFile(invokerPath)
-		if err != nil {
-			return nil, err
-		}
+	for _, bytes := range invokersBytes {
 		invoker := projectriff_v1.Invoker{}
-		err = yaml.Unmarshal(invokerBytes, &invoker)
+		err = yaml.Unmarshal(bytes, &invoker)
 		if err != nil {
 			return nil, err
 		}
