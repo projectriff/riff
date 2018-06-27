@@ -9,19 +9,23 @@ set ytics nomirror
 set y2tics
 set y2label 'Queue length'
 
+WRITES_STYLE  ="filledcurve fs solid 0.5 noborder linecolor '#efecbf'"
+QUEUES_STYLE  ="lines linecolor '#bdd4f9'"
+REPLICAS_STYLE="lines linecolor '#870202'"
+
 set multiplot layout 3, 1
   set title 'Step Scenario'
-  plot "step-scenario.dat" using 1:4  with lines  title "writes"        linecolor "#000000"  axes x1y1, \
-                        "" using 1:3  with lines  title "queue length"  linecolor "#bdd4f9"  axes x1y2, \
-                        "" using 1:2  with lines  title "replicas"      linecolor "#870202"  axes x1y1
+  plot "step-scenario.dat" using 1:4  title "writes"       with @WRITES_STYLE   axes x1y1, \
+                        "" using 1:3  title "queue length" with @QUEUES_STYLE  axes x1y2, \
+                        "" using 1:2  title "replicas"     with @REPLICAS_STYLE axes x1y1
 
   set title 'Sinusoidal Scenario'
-  plot "sine-scenario.dat" using 1:4  with lines  title "writes"        linecolor "#000000"  axes x1y1, \
-                        "" using 1:3  with lines  title "queue length"  linecolor "#bdd4f9"  axes x1y2, \
-                        "" using 1:2  with lines  title "replicas"      linecolor "#870202"  axes x1y1
+  plot "sine-scenario.dat" using 1:4  title "writes"       with @WRITES_STYLE   axes x1y1, \
+                        "" using 1:3  title "queue length" with @QUEUES_STYLE  axes x1y2, \
+                        "" using 1:2  title "replicas"     with @REPLICAS_STYLE axes x1y1
 
   set title 'Ramp Scenario'
-  plot "ramp-scenario.dat" using 1:4  with lines  title "writes"        linecolor "#000000"  axes x1y1, \
-                        "" using 1:3  with lines  title "queue length"  linecolor "#bdd4f9"  axes x1y2, \
-                        "" using 1:2  with lines  title "replicas"      linecolor "#870202"  axes x1y1
+  plot "ramp-scenario.dat" using 1:4  title "writes"       with @WRITES_STYLE   axes x1y1, \
+                        "" using 1:3  title "queue length" with @QUEUES_STYLE  axes x1y2, \
+                        "" using 1:2  title "replicas"     with @REPLICAS_STYLE axes x1y1
 unset multiplot
