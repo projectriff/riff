@@ -75,3 +75,7 @@ func (scenario *combinedScenario) UpdatedConsumerFor(receiver metrics.MetricsRec
 		(*queueLen)--
 	}
 }
+
+func (scenario *combinedScenario) SimulationSteps() int {
+	return 10000
+}

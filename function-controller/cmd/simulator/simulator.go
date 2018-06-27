@@ -58,7 +58,7 @@ func main() {
 
 	writes := 0
 
-	for i := 0; i < simulationSteps; i++ {
+	for i := 0; i < simUpdater.SimulationSteps(); i++ {
 		simUpdater.UpdateProducerFor(receiver, i, &queueLen, &writes)
 		simUpdater.UpdatedConsumerFor(receiver, i, actualReplicas, &queueLen)
 

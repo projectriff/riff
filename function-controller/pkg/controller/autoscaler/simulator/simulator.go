@@ -23,6 +23,8 @@ import (
 type SimulationUpdater interface {
 	UpdateProducerFor(receiver metrics.MetricsReceiver, simulationRound int, queueLen *int64, writes *int)
 	UpdatedConsumerFor(receiver metrics.MetricsReceiver, simulationRound int, replicas int, queueLen *int64)
+
+	SimulationSteps() int
 }
 
 type ReplicaModel interface {
