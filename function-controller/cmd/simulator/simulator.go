@@ -35,6 +35,11 @@ func main() {
 	receiver, simUpdater, rm := scenarios.MakeNewStepScenario(simulationSteps)
 	runScenario("step", receiver, simUpdater, rm)
 
+	receiver, simUpdater, rm = scenarios.MakeNewSinusoidalScenario(simulationSteps)
+	runScenario("sine", receiver, simUpdater, rm)
+
+	receiver, simUpdater, rm = scenarios.MakeNewRampScenario(simulationSteps)
+	runScenario("ramp", receiver, simUpdater, rm)
 }
 
 type stubInspector struct {
