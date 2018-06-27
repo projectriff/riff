@@ -25,8 +25,14 @@ func MakeNewSinusoidalScenario(simulationSteps int) (metrics.MetricsReceiver, si
 func (scenario *sinusoidalScenario) UpdateProducerFor(receiver metrics.MetricsReceiver, simulationRound int, queueLen *int64, writes *int) {
 	stubReceiver := receiver.(stubReceiver)
 
-	numToWrite := 0
-	numToWrite = maxWritesPerTick/2 + int(maxWritesPerTick*math.Sin(float64((simulationRound)/100))/2)
+	roundSegment := (simulationRound / 500)
+	roundOffset := (scenario.simulationSteps / 2) * roundSegment
+	adjustedRound := simulationRound - roundOffset
+	rawSine := math.Sin(float64((adjustedRound / 100)))
+	writeSine := rawSine * maxWritesPerTick
+	clampedSine := math.Max(0, writeSine)
+
+	numToWrite := int(clampedSine)
 
 	*writes = numToWrite
 

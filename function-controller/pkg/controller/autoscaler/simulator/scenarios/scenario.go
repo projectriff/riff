@@ -8,7 +8,7 @@ const (
 	replicaInitialisationDelaySteps = 15 // 1.5 s delayed initialisation (termination is immediate)
 	containerPullDelaySteps         = 0  // 50 // 5.0 s extra delay in starting the first replica
 
-	maxWritesPerTick = 40
+	maxWritesPerTick = 100
 )
 
 type stubReceiver struct {
