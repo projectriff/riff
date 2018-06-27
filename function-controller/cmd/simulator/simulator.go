@@ -40,8 +40,7 @@ func main() {
 
 	stubFunctionID := autoscaler.LinkId{Link: "stub function"}
 
-	scenario := scenarios.CombinedScenario{}
-	receiver, simUpdater, rm := scenario.MakeNewSimulation()
+	receiver, simUpdater, rm := scenarios.MakeNewCombinedScenario()
 	queueLen := int64(0)
 	inspector := newStubInspector(&queueLen)
 
@@ -60,8 +59,8 @@ func main() {
 	writes := 0
 
 	for i := 0; i < simulationSteps; i++ {
-		simUpdater.UpdateProducerFor(i, &queueLen, &writes)
-		simUpdater.UpdatedConsumerFor(i, actualReplicas, &queueLen)
+		simUpdater.UpdateProducerFor(receiver, i, &queueLen, &writes)
+		simUpdater.UpdatedConsumerFor(receiver, i, actualReplicas, &queueLen)
 
 		scalerOutput := scaler.Propose()
 

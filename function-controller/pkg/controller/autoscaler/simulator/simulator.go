@@ -21,8 +21,8 @@ import (
 )
 
 type SimulationUpdater interface {
-	UpdateProducerFor(simulationRound int, queueLen *int64, writes *int)
-	UpdatedConsumerFor(simulationRound int, replicas int, queueLen *int64)
+	UpdateProducerFor(receiver metrics.MetricsReceiver, simulationRound int, queueLen *int64, writes *int)
+	UpdatedConsumerFor(receiver metrics.MetricsReceiver, simulationRound int, replicas int, queueLen *int64)
 }
 
 type ReplicaModel interface {
@@ -34,4 +34,3 @@ type ReplicaModel interface {
 type SimulationConfiguration interface {
 	MakeNewSimulation() (metrics.MetricsReceiver, SimulationUpdater, ReplicaModel)
 }
-
