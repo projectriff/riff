@@ -1,54 +1,45 @@
 package scenarios
 
 import (
-	"math"
 	"time"
 
 	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler/simulator"
 	"github.com/projectriff/riff/message-transport/pkg/transport/metrics"
 )
 
-type combinedScenario struct{}
+type stepScenario struct {
+	simulationSteps int
+}
 
-func MakeNewCombinedScenario() (metrics.MetricsReceiver, simulator.SimulationUpdater, simulator.ReplicaModel) {
+func MakeNewStepScenario(simulationSteps int) (metrics.MetricsReceiver, simulator.SimulationUpdater, simulator.ReplicaModel) {
 	stubReceiver := newStubReceiver()
 	rm := &replicaModel{initialDelay: containerPullDelaySteps}
-	scenario := &combinedScenario{}
+	scenario := &stepScenario{
+		simulationSteps: simulationSteps,
+	}
 
 	return stubReceiver, scenario, rm
 }
 
-func (scenario *combinedScenario) UpdateProducerFor(receiver metrics.MetricsReceiver, simulationRound int, queueLen *int64, writes *int) {
+func (scenario *stepScenario) UpdateProducerFor(receiver metrics.MetricsReceiver, simulationRound int, queueLen *int64, writes *int) {
 	stubReceiver := receiver.(stubReceiver)
 
 	numToWrite := 0
-	if simulationRound < 100 {
+	if simulationRound < int(float64(scenario.simulationSteps)*0.02) {
 		// initial quiet interval
 		numToWrite = 0
-	} else if simulationRound < 1000 {
+	} else if simulationRound < int(float64(scenario.simulationSteps)*0.3) {
 		// step up
 		numToWrite = maxWritesPerTick / 2
-	} else if simulationRound < 2000 {
+	} else if simulationRound < int(float64(scenario.simulationSteps)*0.6) {
 		// further step up
 		numToWrite = maxWritesPerTick
-	} else if simulationRound < 3000 {
+	} else if simulationRound < int(float64(scenario.simulationSteps)*0.98) {
 		// step down
 		numToWrite = maxWritesPerTick / 2
-	} else if simulationRound < 4000 {
+	} else if simulationRound < int(float64(scenario.simulationSteps)*0.999) {
 		// step down to quiet interval
 		numToWrite = 0
-	} else if simulationRound < 6000 {
-		// sinusoidal interval
-		numToWrite = maxWritesPerTick/2 + int(maxWritesPerTick*math.Sin(float64((simulationRound-4000)/167))/2)
-	} else if simulationRound < 7000 {
-		// step down to quiet interval
-		numToWrite = 0
-	} else if simulationRound < 8000 {
-		// ramp up
-		numToWrite = maxWritesPerTick * (simulationRound - 7000) / 1000
-	} else if simulationRound < 9000 {
-		// ramp down
-		numToWrite = maxWritesPerTick * (9000 - simulationRound) / 1000
 	}
 
 	*writes = numToWrite
@@ -59,7 +50,7 @@ func (scenario *combinedScenario) UpdateProducerFor(receiver metrics.MetricsRece
 	}
 }
 
-func (scenario *combinedScenario) UpdatedConsumerFor(receiver metrics.MetricsReceiver, simulationRound int, replicas int, queueLen *int64) {
+func (scenario *stepScenario) UpdatedConsumerFor(receiver metrics.MetricsReceiver, simulationRound int, replicas int, queueLen *int64) {
 	stubReceiver := receiver.(stubReceiver)
 
 	if replicas == 0 {
