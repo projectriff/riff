@@ -19,6 +19,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler"
 	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler/simulator"
@@ -31,15 +32,30 @@ const (
 	maxReplicas     = 1000000 // avoid setting this too high to avoid int overflow during scaling calculation. 1000000 is a reasonable high value.
 )
 
+var waitGroup sync.WaitGroup
+
 func main() {
-	receiver, simUpdater, rm := scenarios.MakeNewStepScenario(simulationSteps)
-	runScenario("step", receiver, simUpdater, rm)
+	waitGroup.Add(3)
 
-	receiver, simUpdater, rm = scenarios.MakeNewSinusoidalScenario(simulationSteps)
-	runScenario("sine", receiver, simUpdater, rm)
+	go func() {
+		receiver, simUpdater, rm := scenarios.MakeNewStepScenario(simulationSteps)
+		runScenario("step", receiver, simUpdater, rm)
+		waitGroup.Done()
+	}()
 
-	receiver, simUpdater, rm = scenarios.MakeNewRampScenario(simulationSteps)
-	runScenario("ramp", receiver, simUpdater, rm)
+	go func() {
+		receiver, simUpdater, rm := scenarios.MakeNewSinusoidalScenario(simulationSteps)
+		runScenario("sine", receiver, simUpdater, rm)
+		waitGroup.Done()
+	}()
+
+	go func() {
+		receiver, simUpdater, rm := scenarios.MakeNewRampScenario(simulationSteps)
+		runScenario("ramp", receiver, simUpdater, rm)
+		waitGroup.Done()
+	}()
+
+	waitGroup.Wait()
 }
 
 type stubInspector struct {
