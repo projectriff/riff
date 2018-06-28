@@ -15,9 +15,11 @@ REPLICAS_STYLE="lines linecolor '#870202'"
 
 set multiplot layout 3, 1
   set title 'Step Scenario'
+  set logscale y
   plot "step-scenario.dat" using 1:4  title "writes"       with @WRITES_STYLE   axes x1y1, \
                         "" using 1:3  title "queue length" with @QUEUES_STYLE  axes x1y2, \
                         "" using 1:2  title "replicas"     with @REPLICAS_STYLE axes x1y1
+  unset logscale y
 
   set title 'Sinusoidal Scenario'
   plot "sine-scenario.dat" using 1:4  title "writes"       with @WRITES_STYLE   axes x1y1, \
