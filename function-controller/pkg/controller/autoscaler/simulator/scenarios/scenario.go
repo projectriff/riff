@@ -2,26 +2,14 @@ package scenarios
 
 import (
 	"github.com/projectriff/riff/message-transport/pkg/transport/metrics"
-	"github.com/projectriff/riff/function-controller/pkg/controller/autoscaler/simulator"
-	"math"
-	"time"
 )
 
 const (
 	replicaInitialisationDelaySteps = 15 // 1.5 s delayed initialisation (termination is immediate)
 	containerPullDelaySteps         = 0  // 50 // 5.0 s extra delay in starting the first replica
 
-	maxWritesPerTick = 40
+	maxWritesPerTick = 100
 )
-
-type CombinedScenario struct {}
-
-func (scenario CombinedScenario) MakeNewSimulation() (metrics.MetricsReceiver, simulator.SimulationUpdater, simulator.ReplicaModel) {
-	stubReceiver := newStubReceiver()
-	rm := &replicaModel{initialDelay: containerPullDelaySteps}
-
-	return stubReceiver, stubReceiver, rm
-}
 
 type stubReceiver struct {
 	producerMetricsChan chan metrics.ProducerAggregateMetric
@@ -30,75 +18,20 @@ type stubReceiver struct {
 	currentRound int
 }
 
-func (rec *stubReceiver) ProducerMetrics() <-chan metrics.ProducerAggregateMetric {
+func (rec stubReceiver) ProducerMetrics() <-chan metrics.ProducerAggregateMetric {
 	return rec.producerMetricsChan
 }
 
-func (rec *stubReceiver) ConsumerMetrics() <-chan metrics.ConsumerAggregateMetric {
+func (rec stubReceiver) ConsumerMetrics() <-chan metrics.ConsumerAggregateMetric {
 	return rec.consumerMetricsChan
 }
 
-func (rec *stubReceiver) UpdateProducerFor(simulationRound int, queueLen *int64, writes *int) {
-	numToWrite := 0
-	if simulationRound < 100 {
-		// initial quiet interval
-		numToWrite = 0
-	} else if simulationRound < 1000 {
-		// step up
-		numToWrite = maxWritesPerTick / 2
-	} else if simulationRound < 2000 {
-		// further step up
-		numToWrite = maxWritesPerTick
-	} else if simulationRound < 3000 {
-		// step down
-		numToWrite = maxWritesPerTick / 2
-	} else if simulationRound < 4000 {
-		// step down to quiet interval
-		numToWrite = 0
-	} else if simulationRound < 6000 {
-		// sinusoidal interval
-		numToWrite = maxWritesPerTick/2 + int(maxWritesPerTick*math.Sin(float64((simulationRound-4000)/167))/2)
-	} else if simulationRound < 7000 {
-		// step down to quiet interval
-		numToWrite = 0
-	} else if simulationRound < 8000 {
-		// ramp up
-		numToWrite = maxWritesPerTick * (simulationRound - 7000) / 1000
-	} else if simulationRound < 9000 {
-		// ramp down
-		numToWrite = maxWritesPerTick * (9000 - simulationRound) / 1000
-	}
-
-	*writes = numToWrite
-
-	for i := numToWrite; i > 0; i-- {
-		rec.producerMetricsChan <- metrics.ProducerAggregateMetric{Topic: "topic", Count: 1}
-		(*queueLen)++
-	}
-}
-
-func (rec *stubReceiver) UpdatedConsumerFor(simulationRound int, replicas int, queueLen *int64) {
-	if replicas == 0 {
-		return // nothing doing
-	}
-
-	numToRead := 10 * replicas
-	if *queueLen < int64(numToRead) {
-		numToRead = int(*queueLen)
-	}
-	for i := numToRead; i > 0; i-- {
-		rec.consumerMetricsChan <- metrics.ConsumerAggregateMetric{Topic: "topic", ConsumerGroup: "stub function", Pod: "pod" /*should vary by replica*/ , Count: 1, Interval: time.Millisecond}
-		(*queueLen)--
-	}
-}
-
-func newStubReceiver() *stubReceiver {
-	return &stubReceiver{
+func newStubReceiver() stubReceiver {
+	return stubReceiver{
 		producerMetricsChan: make(chan metrics.ProducerAggregateMetric),
 		consumerMetricsChan: make(chan metrics.ConsumerAggregateMetric),
 	}
 }
-
 
 // A replicaModel models the way new replicas take a while to start.
 // An increase of N in the desired number of replicas results in N items being added to `scheduled`. Each item in
