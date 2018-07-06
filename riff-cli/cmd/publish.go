@@ -26,6 +26,7 @@ import (
 	"strconv"
 
 	"github.com/juju/errgo/errors"
+	"github.com/projectriff/riff/riff-cli/cmd/utils"
 	"github.com/projectriff/riff/riff-cli/pkg/jsonpath"
 	"github.com/projectriff/riff/riff-cli/pkg/kubectl"
 	"github.com/projectriff/riff/riff-cli/pkg/minikube"
@@ -36,6 +37,7 @@ import (
 type publishOptions struct {
 	contentType string
 	input       string
+	httpGateway string
 	data        string
 	reply       bool
 	count       int
@@ -63,6 +65,12 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
+			// get the viper value from env var, config file or flag option
+			publishOptions.httpGateway = utils.GetStringValueWithOverride("gateway", *cmd.Flags())
+			if publishOptions.httpGateway != "" {
+				return publishAtEndpoint(publishOptions.httpGateway, publishOptions)
+			}
+
 			ipAddress, port, err := lookupAddress(kube, minik)
 			if err != nil {
 				return err
@@ -77,6 +85,7 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 	publishCmd.Flags().IntVarP(&publishOptions.count, "count", "c", 1, "the number of times to post the data")
 	publishCmd.Flags().IntVarP(&publishOptions.pause, "pause", "p", 0, "the number of seconds to wait between postings")
 	publishCmd.Flags().StringVarP(&publishOptions.contentType, "content-type", "", "text/plain", "the content type")
+	publishCmd.Flags().StringVarP(&publishOptions.httpGateway, "gateway", "g", "", "the http gateway endpoint")
 	publishCmd.Flags().String("namespace", "", "the namespace of the http-gateway")
 
 	publishCmd.MarkFlagRequired("data")
@@ -87,6 +96,8 @@ will post '{"hello":"world"}' as json to the 'concat' topic and wait for a reply
 
 func lookupAddress(kube kubectl.KubeCtl, minik minikube.Minikube) (string, string, error) {
 	cmdArgs := []string{"get", "svc", "--all-namespaces", "-l", "app=riff,component=http-gateway", "-o", "json"}
+
+
 	output, err := kube.Exec(cmdArgs)
 
 	if err != nil {
@@ -122,7 +133,7 @@ func lookupAddress(kube kubectl.KubeCtl, minik minikube.Minikube) (string, strin
 		pFloat, err = parser.Value(`$.items[0].spec.ports[?(@.name == http)].port[0]`)
 
 	default:
-		return "", "", fmt.Errorf("Unkown port type %s", portType)
+		return "", "", fmt.Errorf("Unknown port type %s - http gateway service must use NodePort or LoadBalancer, or use --gateway option to specify the endpoint", portType)
 	}
 
 	if err != nil {
@@ -133,13 +144,14 @@ func lookupAddress(kube kubectl.KubeCtl, minik minikube.Minikube) (string, strin
 	return ipOrHostname, port, nil
 }
 
-func publish(ipAddress string, port string, publishOptions publishOptions) error {
+
+func publishAtEndpoint(endPoint string, publishOptions publishOptions) error {
 	resource := "messages"
 	if publishOptions.reply {
 		resource = "requests"
 	}
 
-	url := fmt.Sprintf("http://%s:%s/%s/%s", ipAddress, port, resource, publishOptions.input)
+	url := fmt.Sprintf("%s/%s/%s", endPoint, resource, publishOptions.input)
 
 	fmt.Printf("Posting to %s\n", url)
 
@@ -158,9 +170,19 @@ func publish(ipAddress string, port string, publishOptions publishOptions) error
 	return nil
 }
 
+func publish(ipAddress string, port string, publishOptions publishOptions) error {
+
+	endpoint := fmt.Sprintf("http://%s:%s/", ipAddress, port)
+
+	fmt.Printf("Using Endpoint  %s\n", endpoint)
+
+	return publishAtEndpoint(endpoint,publishOptions)
+}
+
 func doPost(url string, publishOptions publishOptions) (string, error) {
 	resp, err := http.Post(url, publishOptions.contentType, strings.NewReader(publishOptions.data))
 	if err != nil {
+		fmt.Printf("Error while posting at %s\n", url)
 		return "", err
 	}
 	defer resp.Body.Close()
