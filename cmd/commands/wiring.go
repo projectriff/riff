@@ -98,6 +98,8 @@ the riff tool is used to create and manage function resources for the riff FaaS 
 		},
 	}
 
+	installAdvancedUsage(rootCmd)
+
 	rootCmd.PersistentFlags().StringVar(&kubeconfig, "kubeconfig", "~/.kube/config", "`path` to a kubeconfig.")
 	rootCmd.PersistentFlags().StringVar(&masterURL, "master", "", "the `address` of the Kubernetes API server. Overrides any value in kubeconfig.")
 

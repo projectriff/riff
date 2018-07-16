@@ -111,6 +111,8 @@ func FunctionCreate(fcTool *tool.Client) *cobra.Command {
 		},
 	}
 
+	LabelArgs(command, "<invoker>", "<function-name>")
+
 	command.Flags().VarP(
 		BroadcastStringValue("",
 			&createFunctionOptions.Namespace,
@@ -169,6 +171,8 @@ func FunctionSubscribe(fcClient *tool.Client) *cobra.Command {
 		},
 	}
 
+	LabelArgs(command, "<function-name>")
+
 	command.Flags().StringVarP(&createSubscriptionOptions.Channel, "input", "i", "", "name of the input `channel` to subscribe the function to.")
 	command.MarkFlagRequired("input")
 	command.Flags().StringVarP(&createSubscriptionOptions.Namespace, "namespace", "n", "", namespaceUsage)
@@ -194,6 +198,9 @@ func FunctionDelete(fcClient *tool.Client) *cobra.Command {
 			return (*fcClient).DeleteFunction(deleteFunctionOptions)
 		},
 	}
+
+	LabelArgs(command, "<function-name>")
+
 	command.Flags().StringVarP(&deleteFunctionOptions.Namespace, "namespace", "n", "", namespaceUsage)
 
 	return command

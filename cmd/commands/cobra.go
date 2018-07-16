@@ -20,6 +20,11 @@ import (
 	"fmt"
 	"strings"
 
+	"unicode"
+
+	"io"
+	"text/template"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation"
@@ -65,6 +70,15 @@ func KubernetesValidation(k8s func(string) []string) PositionalArg {
 
 func ValidName() PositionalArg {
 	return KubernetesValidation(validation.IsDNS1123Subdomain)
+}
+
+func LabelArgs(cmd *cobra.Command, labels ...string) {
+	if cmd.Annotations == nil {
+		cmd.Annotations = make(map[string]string)
+	}
+	for i, label := range labels {
+		cmd.Annotations[fmt.Sprintf("arg%d", i)] = label
+	}
 }
 
 // =============================================== Flags related functions =============================================
@@ -174,4 +188,86 @@ func BroadcastStringValue(value string, ptrs ...*string) pflag.Value {
 		*ptrs[i] = value
 	}
 	return broadcastStringValue(ptrs)
+}
+
+// =========================================== Usage related functions =================================================
+
+func installAdvancedUsage(rootCmd *cobra.Command) {
+	rootCmd.SetUsageFunc(func(c *cobra.Command) error {
+		c.InitDefaultHelpFlag()
+		err := tmpl(c.OutOrStderr(), c.UsageTemplate(), c)
+		if err != nil {
+			c.Println(err)
+		}
+		return err
+	})
+	rootCmd.SetUsageTemplate(`Usage:{{if .Runnable}}
+  {{useline .}}{{end}}{{if .HasAvailableSubCommands}}
+  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+
+Aliases:
+  {{.NameAndAliases}}{{end}}{{if .HasExample}}
+
+Examples:
+{{.Example}}{{end}}{{if .HasAvailableSubCommands}}
+
+Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+Flags:
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+Global Flags:
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}
+
+Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
+  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+
+Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
+`)
+}
+
+func tmpl(w io.Writer, text string, data interface{}) error {
+	t := template.New("top")
+	templateFuncs := template.FuncMap{
+		"trim":                    strings.TrimSpace,
+		"trimRightSpace":          trimRightSpace,
+		"trimTrailingWhitespaces": trimRightSpace,
+		"rpad":    rpad,
+		"gt":      cobra.Gt,
+		"eq":      cobra.Eq,
+		"useline": useline,
+	}
+	t.Funcs(templateFuncs)
+	template.Must(t.Parse(text))
+	return t.Execute(w, data)
+}
+
+// rpad adds padding to the right of a string.
+func rpad(s string, padding int) string {
+	template := fmt.Sprintf("%%-%ds", padding)
+	return fmt.Sprintf(template, s)
+}
+
+func trimRightSpace(s string) string {
+	return strings.TrimRightFunc(s, unicode.IsSpace)
+}
+
+// useline returns the default cobra Useline() of a command, enhanced with markers for named arguments
+func useline(c *cobra.Command) string {
+	result := c.UseLine()
+	flags := ""
+	if strings.HasSuffix(result, " [flags]") {
+		flags = " [flags]"
+		result = result[0 : len(result)-len(flags)]
+	}
+
+	ok := true
+	for i := 0; ok; i++ {
+		info, found := c.Annotations[fmt.Sprintf("arg%d", i)]
+		ok = found
+		result += " " + info
+	}
+
+	return result + flags
 }

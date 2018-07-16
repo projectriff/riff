@@ -45,7 +45,9 @@ func ChannelCreate(fcTool *tool.Client) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "create",
 		Short: "create a new channel on a namespace or cluster bus",
-		Args:  ArgValidationConjunction(cobra.ExactArgs(channelCreateNumberOfArgs), AtPosition(channelCreateNameIndex, ValidName())),
+		Args: ArgValidationConjunction(
+			cobra.ExactArgs(channelCreateNumberOfArgs),
+			AtPosition(channelCreateNameIndex, ValidName())),
 		Example: `  riff channel create tweets --bus kafka --namespace steve-ns
   riff channel create orders --cluster-bus global-rabbit`,
 		PreRunE: FlagsValidatorAsCobraRunE(exactlyOneOfBusOrClusterBus),
@@ -60,6 +62,8 @@ func ChannelCreate(fcTool *tool.Client) *cobra.Command {
 			return err
 		},
 	}
+
+	LabelArgs(command, "<channel-name>")
 
 	command.Flags().StringVar(&options.Bus, "bus", "", busUsage)
 	command.Flags().StringVar(&options.ClusterBus, "cluster-bus", "", clusterBusUsage)
