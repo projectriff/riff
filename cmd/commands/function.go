@@ -33,6 +33,11 @@ const (
 	functionSubscribeNumberOfArgs
 )
 
+const (
+	functionDeleteFunctionIndex = iota
+	functionDeleteNumberOfArgs
+)
+
 func Function() *cobra.Command {
 	return &cobra.Command{
 		Use:   "function",
@@ -167,6 +172,29 @@ func FunctionSubscribe(fcClient *tool.Client) *cobra.Command {
 	command.Flags().StringVarP(&createSubscriptionOptions.Channel, "input", "i", "", "name of the input `channel` to subscribe the function to.")
 	command.MarkFlagRequired("input")
 	command.Flags().StringVarP(&createSubscriptionOptions.Namespace, "namespace", "n", "", namespaceUsage)
+
+	return command
+}
+
+func FunctionDelete(fcClient *tool.Client) *cobra.Command {
+
+	deleteFunctionOptions := tool.DeleteFunctionOptions{}
+
+	command := &cobra.Command{
+		Use:     "delete",
+		Short:   "delete an existing function",
+		Example: `  riff function delete square --namespace joseph-ns`,
+		Args: ArgValidationConjunction(
+			cobra.ExactArgs(functionDeleteNumberOfArgs),
+			AtPosition(functionDeleteFunctionIndex, ValidName()),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fnName := args[functionDeleteFunctionIndex]
+			deleteFunctionOptions.Name = fnName
+			return (*fcClient).DeleteFunction(deleteFunctionOptions)
+		},
+	}
+	command.Flags().StringVarP(&deleteFunctionOptions.Namespace, "namespace", "n", "", namespaceUsage)
 
 	return command
 }

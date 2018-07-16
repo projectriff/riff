@@ -25,41 +25,35 @@ import (
 	serving "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/pivotal-cf-experimental/riff-cli/pkg/tool"
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-type EventingInterfaceFactory func(kubeconfig string, masterURL string) (eventing.Interface, error)
+type ClientSetFactory func(kubeconfig string, masterURL string) (*rest.Config, eventing.Interface, serving.Interface, error)
 
-type ServingInterfaceFactory func(kubeconfig string, masterURL string) (serving.Interface, error)
-
-var realChannelsInterfaceFactory = func(kubeconfig string, masterURL string) (eventing.Interface, error) {
+var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.ClientConfig, eventing.Interface, serving.Interface, error) {
 
 	kubeconfig, err := resolveHomePath(kubeconfig)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
-	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
+
+	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeconfig},
+		&clientcmd.ConfigOverrides{ClusterInfo: clientcmdapi.Cluster{Server: masterURL}})
+
+	cfg, err := clientConfig.ClientConfig()
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
-	clientset, err := eventing.NewForConfig(cfg)
-
-	return clientset, err
-}
-
-var realServingInterfaceFactory = func(kubeconfig string, masterURL string) (serving.Interface, error) {
-
-	kubeconfig, err := resolveHomePath(kubeconfig)
+	eventingClientSet, err := eventing.NewForConfig(cfg)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
-	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
-	if err != nil {
-		return nil, err
-	}
-	clientset, err := serving.NewForConfig(cfg)
+	servingClientSet, err := serving.NewForConfig(cfg)
 
-	return clientset, err
+	return clientConfig, eventingClientSet, servingClientSet, err
 }
 
 func resolveHomePath(p string) (string, error) {
@@ -95,15 +89,11 @@ the riff tool is used to create and manage function resources for the riff FaaS 
 		SuggestionsMinimumDistance: 2,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			eventingClientSet, err := realChannelsInterfaceFactory(kubeconfig, masterURL)
+			clientConfig, eventingClientSet, servingClientSet, err := realClientSetFactory(kubeconfig, masterURL)
 			if err != nil {
 				return err
 			}
-			servingClientSet, err := realServingInterfaceFactory(kubeconfig, masterURL)
-			if err != nil {
-				return err
-			}
-			client = tool.NewClient(eventingClientSet, servingClientSet)
+			client = tool.NewClient(clientConfig, eventingClientSet, servingClientSet)
 			return nil
 		},
 	}
@@ -115,6 +105,7 @@ the riff tool is used to create and manage function resources for the riff FaaS 
 	function.AddCommand(
 		FunctionCreate(&client),
 		FunctionSubscribe(&client),
+		FunctionDelete(&client),
 	)
 
 	channel := Channel()

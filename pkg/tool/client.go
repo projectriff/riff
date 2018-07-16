@@ -22,19 +22,22 @@ import (
 	eventing_cs "github.com/knative/eventing/pkg/client/clientset/versioned"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	serving_cs "github.com/knative/serving/pkg/client/clientset/versioned"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 type Client interface {
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
 	CreateChannel(options CreateChannelOptions) (*eventing.Channel, error)
 	CreateFunction(options CreateFunctionOptions) (*serving.Service, error)
+	DeleteFunction(options DeleteFunctionOptions) error
 }
 
 type client struct {
-	eventing eventing_cs.Interface
-	serving  serving_cs.Interface
+	eventing     eventing_cs.Interface
+	serving      serving_cs.Interface
+	clientConfig clientcmd.ClientConfig
 }
 
-func NewClient(eventing eventing_cs.Interface, serving serving_cs.Interface) Client {
-	return &client{eventing: eventing, serving: serving}
+func NewClient(clientConfig clientcmd.ClientConfig, eventing eventing_cs.Interface, serving serving_cs.Interface) Client {
+	return &client{clientConfig: clientConfig, eventing: eventing, serving: serving}
 }

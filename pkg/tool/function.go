@@ -23,16 +23,18 @@ import (
 )
 
 type CreateFunctionOptions struct {
-	Name      string
-	Namespace string
-	Image     string
+	Namespaced
+	Name  string
+	Image string
 }
 
 func (c *client) CreateFunction(options CreateFunctionOptions) (*v1alpha1.Service, error) {
+	ns := c.explicitOrConfigNamespace(options.Namespaced)
+
 	s := v1alpha1.Service{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      options.Name,
-			Namespace: options.Namespace,
+			Namespace: ns,
 		},
 		Spec: v1alpha1.ServiceSpec{
 			RunLatest: &v1alpha1.RunLatestType{
@@ -49,7 +51,19 @@ func (c *client) CreateFunction(options CreateFunctionOptions) (*v1alpha1.Servic
 		},
 	}
 
-	svc, err := c.serving.ServingV1alpha1().Services(options.Namespace).Create(&s)
+	svc, err := c.serving.ServingV1alpha1().Services(ns).Create(&s)
 
 	return svc, err
+}
+
+type DeleteFunctionOptions struct {
+	Namespaced
+	Name string
+}
+
+func (c *client) DeleteFunction(options DeleteFunctionOptions) error {
+
+	ns := c.explicitOrConfigNamespace(options.Namespaced)
+
+	return c.serving.ServingV1alpha1().Services(ns).Delete(options.Name, nil)
 }

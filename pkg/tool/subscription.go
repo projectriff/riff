@@ -22,17 +22,19 @@ import (
 )
 
 type CreateSubscriptionOptions struct {
+	Namespaced
 	Name       string
-	Namespace  string
 	Channel    string
 	Subscriber string
 }
 
 func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha1.Subscription, error) {
+	ns := c.explicitOrConfigNamespace(options.Namespaced)
+
 	s := v1alpha1.Subscription{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      options.Name,
-			Namespace: options.Namespace,
+			Namespace: ns,
 		},
 		Spec: v1alpha1.SubscriptionSpec{
 			Channel:    options.Channel,
@@ -40,7 +42,7 @@ func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha
 		},
 	}
 
-	subscription, e := c.eventing.ChannelsV1alpha1().Subscriptions(options.Namespace).Create(&s)
+	subscription, e := c.eventing.ChannelsV1alpha1().Subscriptions(ns).Create(&s)
 
 	return subscription, e
 }
