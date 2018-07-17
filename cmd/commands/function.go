@@ -17,6 +17,9 @@
 package commands
 
 import (
+	"fmt"
+
+	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	"github.com/pivotal-cf-experimental/riff-cli/pkg/tool"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -56,6 +59,8 @@ func FunctionCreate(fcTool *tool.Client) *cobra.Command {
 	createFunctionOptions := tool.CreateFunctionOptions{}
 	createSubscriptionOptions := tool.CreateSubscriptionOptions{}
 
+	var write, force = false, false
+
 	command := &cobra.Command{
 		Use:   "create",
 		Short: "create a new function resource, with optional input binding",
@@ -74,37 +79,48 @@ func FunctionCreate(fcTool *tool.Client) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			e := yaml.NewEncoder(cmd.OutOrStdout())
-
 			fnName := args[functionCreateFunctionIndex]
 			createFunctionOptions.Name = fnName
 			f, err := (*fcTool).CreateFunction(createFunctionOptions)
 			if err != nil {
 				return err
 			}
-			if err = e.Encode(f); err != nil {
-				return err
-			}
 
+			var c *v1alpha1.Channel
+			var subscr *v1alpha1.Subscription
 			if createChannelOptions.Name != "" {
-				c, err := (*fcTool).CreateChannel(createChannelOptions)
+				c, err = (*fcTool).CreateChannel(createChannelOptions)
 				if err != nil {
-					return err
-				}
-				if err = e.Encode(c); err != nil {
 					return err
 				}
 
 				createSubscriptionOptions.Name = subscriptionNameFromFunction(fnName)
 				createSubscriptionOptions.Subscriber = subscriberNameFromFunction(fnName) // TODO
-				subscr, err := (*fcTool).CreateSubscription(createSubscriptionOptions)
+				subscr, err = (*fcTool).CreateSubscription(createSubscriptionOptions)
 				if err != nil {
 					return err
 				}
-				if err = e.Encode(subscr); err != nil {
+			}
+
+			if write {
+				fmarshaller, err := NewMarshaller(fmt.Sprintf("%s-function.yaml", fnName), force)
+				if err != nil {
 					return err
 				}
+				if err = fmarshaller.Marshal(f); err != nil {
+					return err
+				}
+				if createChannelOptions.Name != "" {
+					cmarshaller, err := NewMarshaller(fmt.Sprintf("%s-channel.yaml", createChannelOptions.Name), force)
+					if err = cmarshaller.Marshal(c); err != nil {
+						return err
+					}
+					smarshaller, err := NewMarshaller(fmt.Sprintf("%s-subscription.yaml", subscr.Name), force)
+					if err = smarshaller.Marshal(subscr); err != nil {
+						return err
+					}
 
+				}
 			}
 
 			return err
@@ -135,6 +151,9 @@ func FunctionCreate(fcTool *tool.Client) *cobra.Command {
 
 	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "reference to an already built `name[:tag]` image that contains the function.")
 	command.Flags().String("build", "", "TODO: build options?")
+
+	command.Flags().BoolVarP(&write, "write", "w", false, "whether to write yaml files for created resources")
+	command.Flags().BoolVarP(&force, "force", "f", false, "force writing of files if they already exist")
 
 	return command
 }

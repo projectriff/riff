@@ -19,7 +19,8 @@ package commands
 import (
 	"github.com/pivotal-cf-experimental/riff-cli/pkg/tool"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
+	//"gopkg.in/yaml.v2"
+	"fmt"
 )
 
 func Channel() *cobra.Command {
@@ -34,6 +35,11 @@ const (
 	channelCreateNumberOfArgs
 )
 
+const (
+	channelDeleteNameIndex = iota
+	channelDeleteNumberOfArgs
+)
+
 var exactlyOneOfBusOrClusterBus = FlagsValidationConjunction(
 	AtLeastOneOf("bus", "cluster-bus"),
 	AtMostOneOf("bus", "cluster-bus"),
@@ -41,6 +47,7 @@ var exactlyOneOfBusOrClusterBus = FlagsValidationConjunction(
 
 func ChannelCreate(fcTool *tool.Client) *cobra.Command {
 	options := tool.CreateChannelOptions{}
+	var write, force = false, false
 
 	command := &cobra.Command{
 		Use:   "create",
@@ -52,14 +59,25 @@ func ChannelCreate(fcTool *tool.Client) *cobra.Command {
   riff channel create orders --cluster-bus global-rabbit`,
 		PreRunE: FlagsValidatorAsCobraRunE(exactlyOneOfBusOrClusterBus),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			options.Name = args[channelCreateNameIndex]
+			channelName := args[channelCreateNameIndex]
+			options.Name = channelName
 
 			c, err := (*fcTool).CreateChannel(options)
+			if err != nil {
+				return err
+			}
 
-			e := yaml.NewEncoder(cmd.OutOrStdout())
-			err = e.Encode(c)
+			if write {
+				marshaller, err := NewMarshaller(fmt.Sprintf("%s-channel.yaml", channelName), force)
+				if err != nil {
+					return err
+				}
+				if err = marshaller.Marshal(c); err != nil {
+					return err
+				}
+			}
 
-			return err
+			return nil
 		},
 	}
 
@@ -67,6 +85,33 @@ func ChannelCreate(fcTool *tool.Client) *cobra.Command {
 
 	command.Flags().StringVar(&options.Bus, "bus", "", busUsage)
 	command.Flags().StringVar(&options.ClusterBus, "cluster-bus", "", clusterBusUsage)
+	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", namespaceUsage)
+
+	command.Flags().BoolVarP(&write, "write", "w", false, "whether to write yaml files for created resources")
+	command.Flags().BoolVarP(&force, "force", "f", false, "force writing of files if they already exist")
+	return command
+}
+
+func ChannelDelete(fcTool *tool.Client) *cobra.Command {
+	options := tool.DeleteChannelOptions{}
+
+	command := &cobra.Command{
+		Use:   "delete",
+		Short: "delete an existing channel",
+		Args: ArgValidationConjunction(
+			cobra.ExactArgs(channelDeleteNumberOfArgs),
+			AtPosition(channelDeleteNameIndex, ValidName())),
+		Example: `  riff channel delete tweets`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			options.Name = args[channelDeleteNameIndex]
+
+			err := (*fcTool).DeleteChannel(options)
+			return err
+		},
+	}
+
+	LabelArgs(command, "<channel-name>")
+
 	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", namespaceUsage)
 	return command
 }

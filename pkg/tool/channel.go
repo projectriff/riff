@@ -22,17 +22,21 @@ import (
 )
 
 type CreateChannelOptions struct {
+	Namespaced
 	Name       string
-	Namespace  string
 	Bus        string
 	ClusterBus string
 }
 
 func (c *client) CreateChannel(options CreateChannelOptions) (*v1alpha1.Channel, error) {
+	ns := c.explicitOrConfigNamespace(options.Namespaced)
 	channel := v1alpha1.Channel{
+		TypeMeta: v1.TypeMeta{
+			APIVersion: "channels.knative.dev/v1alpha1",
+			Kind:       "Channel",
+		},
 		ObjectMeta: v1.ObjectMeta{
-			Name:      options.Name,
-			Namespace: options.Namespace,
+			Name: options.Name,
 		},
 		Spec: v1alpha1.ChannelSpec{
 			ClusterBus: options.ClusterBus,
@@ -40,7 +44,20 @@ func (c *client) CreateChannel(options CreateChannelOptions) (*v1alpha1.Channel,
 		},
 	}
 
-	created, err := c.eventing.ChannelsV1alpha1().Channels(options.Namespace).Create(&channel)
+	_, err := c.eventing.ChannelsV1alpha1().Channels(ns).Create(&channel)
 
-	return created, err
+	return &channel, err
+}
+
+type DeleteChannelOptions struct {
+	Namespaced
+	Name string
+}
+
+func (c *client) DeleteChannel(options DeleteChannelOptions) error {
+	ns := c.explicitOrConfigNamespace(options.Namespaced)
+
+	err := c.eventing.ChannelsV1alpha1().Channels(ns).Delete(options.Name, nil)
+
+	return err
 }

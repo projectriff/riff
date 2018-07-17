@@ -28,6 +28,7 @@ import (
 type Client interface {
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
 	CreateChannel(options CreateChannelOptions) (*eventing.Channel, error)
+	DeleteChannel(options DeleteChannelOptions) error
 	CreateFunction(options CreateFunctionOptions) (*serving.Service, error)
 	DeleteFunction(options DeleteFunctionOptions) error
 }

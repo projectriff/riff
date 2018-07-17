@@ -113,6 +113,7 @@ the riff tool is used to create and manage function resources for the riff FaaS 
 	channel := Channel()
 	channel.AddCommand(
 		ChannelCreate(&client),
+		ChannelDelete(&client),
 	)
 
 	rootCmd.AddCommand(

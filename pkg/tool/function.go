@@ -32,9 +32,12 @@ func (c *client) CreateFunction(options CreateFunctionOptions) (*v1alpha1.Servic
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
 
 	s := v1alpha1.Service{
+		TypeMeta: meta_v1.TypeMeta{
+			APIVersion: "serving.knative.dev/v1alpha1",
+			Kind:       "Service",
+		},
 		ObjectMeta: meta_v1.ObjectMeta{
-			Name:      options.Name,
-			Namespace: ns,
+			Name: options.Name,
 		},
 		Spec: v1alpha1.ServiceSpec{
 			RunLatest: &v1alpha1.RunLatestType{
@@ -51,9 +54,9 @@ func (c *client) CreateFunction(options CreateFunctionOptions) (*v1alpha1.Servic
 		},
 	}
 
-	svc, err := c.serving.ServingV1alpha1().Services(ns).Create(&s)
+	_, err := c.serving.ServingV1alpha1().Services(ns).Create(&s)
 
-	return svc, err
+	return &s, err
 }
 
 type DeleteFunctionOptions struct {

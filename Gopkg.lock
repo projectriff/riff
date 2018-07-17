@@ -8,10 +8,10 @@
   version = "v1.0.8"
 
 [[projects]]
+  branch = "master"
   name = "github.com/ghodss/yaml"
   packages = ["."]
-  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
-  version = "v1.0.0"
+  revision = "e9ed3c6dfb39bb1a32197cb10d527906fe4da4b6"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -119,8 +119,14 @@
   branch = "master"
   name = "github.com/knative/serving"
   packages = [
+    "pkg/apis/istio",
+    "pkg/apis/istio/v1alpha3",
     "pkg/apis/serving",
-    "pkg/apis/serving/v1alpha1"
+    "pkg/apis/serving/v1alpha1",
+    "pkg/client/clientset/versioned",
+    "pkg/client/clientset/versioned/scheme",
+    "pkg/client/clientset/versioned/typed/istio/v1alpha3",
+    "pkg/client/clientset/versioned/typed/serving/v1alpha1"
   ]
   revision = "b9fe16e03287dd327fd2cf9f8d4a47d40895ddc8"
 
@@ -395,6 +401,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "de751dbc3e6e51c26404fd061ce0daea149156068d0a113f525e4b3ef49b2c4d"
+  inputs-digest = "aa638a50fda5a97560a36a0a7bab8c4ed68d08ad6c76be438c597bbf6b396d7b"
   solver-name = "gps-cdcl"
   solver-version = 1

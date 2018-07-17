@@ -32,9 +32,13 @@ func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
 
 	s := v1alpha1.Subscription{
+		TypeMeta: meta_v1.TypeMeta{
+			APIVersion: "channels.knative.dev/v1alpha1",
+			Kind:       "Subscription",
+		},
+
 		ObjectMeta: meta_v1.ObjectMeta{
-			Name:      options.Name,
-			Namespace: ns,
+			Name: options.Name,
 		},
 		Spec: v1alpha1.SubscriptionSpec{
 			Channel:    options.Channel,
@@ -42,7 +46,7 @@ func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha
 		},
 	}
 
-	subscription, e := c.eventing.ChannelsV1alpha1().Subscriptions(ns).Create(&s)
+	_, e := c.eventing.ChannelsV1alpha1().Subscriptions(ns).Create(&s)
 
-	return subscription, e
+	return &s, e
 }

@@ -51,3 +51,7 @@
 
   # HEAD as of 2018-06-29
   #revision = "22e3cb0f057daf224ef3af5cc37feb9b152f880e"
+
+[[constraint]]
+  name = "github.com/ghodss/yaml"
+  branch = "master"
