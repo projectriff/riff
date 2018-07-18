@@ -25,6 +25,7 @@ import (
 	serving "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/pivotal-cf-experimental/riff-cli/pkg/tool"
 	"github.com/spf13/cobra"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
