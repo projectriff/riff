@@ -20,6 +20,7 @@ package tool
 import (
 	eventing "github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	eventing_cs "github.com/knative/eventing/pkg/client/clientset/versioned"
+	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	serving_cs "github.com/knative/serving/pkg/client/clientset/versioned"
 	"k8s.io/client-go/tools/clientcmd"
@@ -30,6 +31,7 @@ type Client interface {
 	CreateChannel(options CreateChannelOptions) (*eventing.Channel, error)
 	DeleteChannel(options DeleteChannelOptions) error
 	CreateFunction(options CreateFunctionOptions) (*serving.Service, error)
+	FunctionStatus(options FunctionStatusOptions) (*v1alpha1.ServiceCondition, error)
 	DeleteFunction(options DeleteFunctionOptions) error
 }
 

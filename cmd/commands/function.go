@@ -19,6 +19,8 @@ package commands
 import (
 	"fmt"
 
+	"time"
+
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	"github.com/projectriff/riff-cli/pkg/tool"
 	"github.com/spf13/cobra"
@@ -29,6 +31,11 @@ const (
 	functionCreateInvokerIndex = iota
 	functionCreateFunctionIndex
 	functionCreateNumberOfArgs
+)
+
+const (
+	functionStatusFunctionIndex = iota
+	functionStatusNumberOfArgs
 )
 
 const (
@@ -161,6 +168,48 @@ func FunctionCreate(fcTool *tool.Client) *cobra.Command {
 
 	command.Flags().BoolVarP(&write, "write", "w", false, "whether to write yaml files for created resources.")
 	command.Flags().BoolVarP(&force, "force", "f", false, "force writing of files if they already exist.")
+
+	return command
+}
+
+func FunctionStatus(fcClient *tool.Client) *cobra.Command {
+
+	functionStatusOptions := tool.FunctionStatusOptions{}
+
+	command := &cobra.Command{
+		Use:     "status",
+		Short:   "display the status of a function",
+		Long:    "display the status conditions of a function's service",
+		Example: `  riff function status square --namespace joseph-ns`,
+		Args: ArgValidationConjunction(
+			cobra.ExactArgs(functionStatusNumberOfArgs),
+			AtPosition(functionStatusFunctionIndex, ValidName()),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fnName := args[functionStatusFunctionIndex]
+			functionStatusOptions.Name = fnName
+			cond, err := (*fcClient).FunctionStatus(functionStatusOptions)
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("Last Transition Time:        %s\n", cond.LastTransitionTime.Format(time.RFC3339))
+
+			if cond.Reason != "" {
+				fmt.Printf("Message:                     %s\n", cond.Message)
+				fmt.Printf("Reason:                      %s\n", cond.Reason)
+			}
+
+			fmt.Printf("Status:                      %s\n", cond.Status)
+			fmt.Printf("Type:                        %s\n", cond.Type)
+
+			return nil
+		},
+	}
+
+	LabelArgs(command, "<function-name>")
+
+	command.Flags().StringVarP(&functionStatusOptions.Namespace, "namespace", "n", "", namespaceUsage)
 
 	return command
 }

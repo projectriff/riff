@@ -1,26 +1,25 @@
-## riff function subscribe
+## riff function delete
 
-subscribe a function to an existing input channel
+delete an existing function
 
 ### Synopsis
 
-subscribe a function to an existing input channel
+delete an existing function
 
 ```
-riff function subscribe [flags]
+riff function delete [flags]
 ```
 
 ### Examples
 
 ```
-  riff function subscribe square --input numbers --namespace joseph-ns
+  riff function delete square --namespace joseph-ns
 ```
 
 ### Options
 
 ```
-  -h, --help                  help for subscribe
-  -i, --input channel         name of the input channel to subscribe the function to.
+  -h, --help                  help for delete
   -n, --namespace namespace   the namespace to use when interacting with resources.
 ```
 

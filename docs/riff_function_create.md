@@ -23,10 +23,12 @@ riff function create [flags]
       --build string          TODO: build options?
       --bus name              the name of the bus to create the channel in.
       --cluster-bus name      the name of the cluster bus to create the channel in.
+  -f, --force                 force writing of files if they already exist
   -h, --help                  help for create
       --image name[:tag]      reference to an already built name[:tag] image that contains the function.
   -i, --input channel         name of the input channel to subscribe the function to.
-  -n, --namespace namespace   the namespace to create resources in.
+  -n, --namespace namespace   the namespace to use when interacting with resources.
+  -w, --write                 whether to write yaml files for created resources
 ```
 
 ### Options inherited from parent commands

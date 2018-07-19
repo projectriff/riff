@@ -17,6 +17,8 @@
 package tool
 
 import (
+	"errors"
+
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	core_v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -65,6 +67,29 @@ func (c *client) CreateFunction(options CreateFunctionOptions) (*v1alpha1.Servic
 	_, err := c.serving.ServingV1alpha1().Services(ns).Create(&s)
 
 	return &s, err
+}
+
+type FunctionStatusOptions struct {
+	Namespaced
+	Name string
+}
+
+func (c *client) FunctionStatus(options FunctionStatusOptions) (*v1alpha1.ServiceCondition, error) {
+
+	ns := c.explicitOrConfigNamespace(options.Namespaced)
+
+	s, err := c.serving.ServingV1alpha1().Services(ns).Get(options.Name, meta_v1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, cond := range s.Status.Conditions {
+		if cond.Type == v1alpha1.ServiceConditionReady {
+			return &cond, nil
+		}
+	}
+
+	return nil, errors.New("No condition of type ServiceConditionReady found for the service")
 }
 
 type DeleteFunctionOptions struct {

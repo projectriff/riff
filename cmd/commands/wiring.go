@@ -107,6 +107,7 @@ the riff tool is used to create and manage function resources for the riff FaaS 
 	function := Function()
 	function.AddCommand(
 		FunctionCreate(&client),
+		FunctionStatus(&client),
 		FunctionSubscribe(&client),
 		FunctionDelete(&client),
 	)

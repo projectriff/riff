@@ -1,26 +1,25 @@
-## riff function subscribe
+## riff function status
 
-subscribe a function to an existing input channel
+display the status of a function
 
 ### Synopsis
 
-subscribe a function to an existing input channel
+display the status conditions of a function's service
 
 ```
-riff function subscribe [flags]
+riff function status [flags]
 ```
 
 ### Examples
 
 ```
-  riff function subscribe square --input numbers --namespace joseph-ns
+  riff function status square --namespace joseph-ns
 ```
 
 ### Options
 
 ```
-  -h, --help                  help for subscribe
-  -i, --input channel         name of the input channel to subscribe the function to.
+  -h, --help                  help for status
   -n, --namespace namespace   the namespace to use when interacting with resources.
 ```
 

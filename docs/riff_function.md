@@ -23,5 +23,7 @@ interact with function related resources
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
 * [riff function create](riff_function_create.md)	 - create a new function resource, with optional input binding
+* [riff function delete](riff_function_delete.md)	 - delete an existing function
+* [riff function status](riff_function_status.md)	 - display the status of a function
 * [riff function subscribe](riff_function_subscribe.md)	 - subscribe a function to an existing input channel
 
