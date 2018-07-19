@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
-	"github.com/projectriff/riff-cli/pkg/tool"
+	"github.com/projectriff/riff-cli/pkg/core"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -55,16 +55,16 @@ func Function() *cobra.Command {
 	}
 }
 
-func FunctionCreate(fcTool *tool.Client) *cobra.Command {
+func FunctionCreate(fcTool *core.Client) *cobra.Command {
 
 	var fromImageOrToImage = FlagsValidationConjunction(
 		AtLeastOneOf("from-image", "to-image"),
 		AtMostOneOf("from-image", "to-image"),
 	)
 
-	createChannelOptions := tool.CreateChannelOptions{}
-	createFunctionOptions := tool.CreateFunctionOptions{}
-	createSubscriptionOptions := tool.CreateSubscriptionOptions{}
+	createChannelOptions := core.CreateChannelOptions{}
+	createFunctionOptions := core.CreateFunctionOptions{}
+	createSubscriptionOptions := core.CreateSubscriptionOptions{}
 
 	var write, force = false, false
 
@@ -172,9 +172,9 @@ func FunctionCreate(fcTool *tool.Client) *cobra.Command {
 	return command
 }
 
-func FunctionStatus(fcClient *tool.Client) *cobra.Command {
+func FunctionStatus(fcClient *core.Client) *cobra.Command {
 
-	functionStatusOptions := tool.FunctionStatusOptions{}
+	functionStatusOptions := core.FunctionStatusOptions{}
 
 	command := &cobra.Command{
 		Use:     "status",
@@ -214,9 +214,9 @@ func FunctionStatus(fcClient *tool.Client) *cobra.Command {
 	return command
 }
 
-func FunctionSubscribe(fcClient *tool.Client) *cobra.Command {
+func FunctionSubscribe(fcClient *core.Client) *cobra.Command {
 
-	createSubscriptionOptions := tool.CreateSubscriptionOptions{}
+	createSubscriptionOptions := core.CreateSubscriptionOptions{}
 
 	command := &cobra.Command{
 		Use:     "subscribe",
@@ -255,9 +255,9 @@ func FunctionSubscribe(fcClient *tool.Client) *cobra.Command {
 	return command
 }
 
-func FunctionDelete(fcClient *tool.Client) *cobra.Command {
+func FunctionDelete(fcClient *core.Client) *cobra.Command {
 
-	deleteFunctionOptions := tool.DeleteFunctionOptions{}
+	deleteFunctionOptions := core.DeleteFunctionOptions{}
 
 	command := &cobra.Command{
 		Use:     "delete",

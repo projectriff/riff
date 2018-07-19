@@ -14,39 +14,50 @@
  * limitations under the License.
  */
 
-package tool
+package core
 
 import (
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type CreateSubscriptionOptions struct {
+type CreateChannelOptions struct {
 	Namespaced
 	Name       string
-	Channel    string
-	Subscriber string
+	Bus        string
+	ClusterBus string
 }
 
-func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha1.Subscription, error) {
+func (c *client) CreateChannel(options CreateChannelOptions) (*v1alpha1.Channel, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
-
-	s := v1alpha1.Subscription{
-		TypeMeta: meta_v1.TypeMeta{
+	channel := v1alpha1.Channel{
+		TypeMeta: v1.TypeMeta{
 			APIVersion: "channels.knative.dev/v1alpha1",
-			Kind:       "Subscription",
+			Kind:       "Channel",
 		},
-
-		ObjectMeta: meta_v1.ObjectMeta{
+		ObjectMeta: v1.ObjectMeta{
 			Name: options.Name,
 		},
-		Spec: v1alpha1.SubscriptionSpec{
-			Channel:    options.Channel,
-			Subscriber: options.Subscriber,
+		Spec: v1alpha1.ChannelSpec{
+			ClusterBus: options.ClusterBus,
+			Bus:        options.Bus,
 		},
 	}
 
-	_, e := c.eventing.ChannelsV1alpha1().Subscriptions(ns).Create(&s)
+	_, err := c.eventing.ChannelsV1alpha1().Channels(ns).Create(&channel)
 
-	return &s, e
+	return &channel, err
+}
+
+type DeleteChannelOptions struct {
+	Namespaced
+	Name string
+}
+
+func (c *client) DeleteChannel(options DeleteChannelOptions) error {
+	ns := c.explicitOrConfigNamespace(options.Namespaced)
+
+	err := c.eventing.ChannelsV1alpha1().Channels(ns).Delete(options.Name, nil)
+
+	return err
 }

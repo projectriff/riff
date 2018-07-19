@@ -15,7 +15,7 @@
  *
  */
 
-package tool
+package core
 
 import (
 	eventing "github.com/knative/eventing/pkg/apis/channels/v1alpha1"

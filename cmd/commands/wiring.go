@@ -23,7 +23,7 @@ import (
 
 	eventing "github.com/knative/eventing/pkg/client/clientset/versioned"
 	serving "github.com/knative/serving/pkg/client/clientset/versioned"
-	"github.com/projectriff/riff-cli/pkg/tool"
+	"github.com/projectriff/riff-cli/pkg/core"
 	"github.com/spf13/cobra"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
@@ -78,14 +78,14 @@ func CreateAndWireRootCommand() *cobra.Command {
 
 	kubeconfig := ""
 	masterURL := ""
-	var client tool.Client
+	var client core.Client
 
 	rootCmd := &cobra.Command{
 		Use:   "riff",
 		Short: "Commands for creating and managing function resources",
 		Long: `riff is for functions
 
-the riff tool is used to create and manage function resources for the riff FaaS platform https://projectriff.io/`,
+the riff core is used to create and manage function resources for the riff FaaS platform https://projectriff.io/`,
 		DisableAutoGenTag:          true,
 		SuggestionsMinimumDistance: 2,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
@@ -94,7 +94,7 @@ the riff tool is used to create and manage function resources for the riff FaaS 
 			if err != nil {
 				return err
 			}
-			client = tool.NewClient(clientConfig, eventingClientSet, servingClientSet)
+			client = core.NewClient(clientConfig, eventingClientSet, servingClientSet)
 			return nil
 		},
 	}

@@ -15,7 +15,7 @@
  *
  */
 
-package tool
+package core
 
 type Namespaced struct {
 	Namespace string

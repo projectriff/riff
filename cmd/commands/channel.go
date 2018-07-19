@@ -19,7 +19,7 @@ package commands
 import (
 	"fmt"
 
-	"github.com/projectriff/riff-cli/pkg/tool"
+	"github.com/projectriff/riff-cli/pkg/core"
 	"github.com/spf13/cobra"
 )
 
@@ -45,8 +45,8 @@ var exactlyOneOfBusOrClusterBus = FlagsValidationConjunction(
 	AtMostOneOf("bus", "cluster-bus"),
 )
 
-func ChannelCreate(fcTool *tool.Client) *cobra.Command {
-	options := tool.CreateChannelOptions{}
+func ChannelCreate(fcTool *core.Client) *cobra.Command {
+	options := core.CreateChannelOptions{}
 	var write, force = false, false
 
 	command := &cobra.Command{
@@ -92,8 +92,8 @@ func ChannelCreate(fcTool *tool.Client) *cobra.Command {
 	return command
 }
 
-func ChannelDelete(fcTool *tool.Client) *cobra.Command {
-	options := tool.DeleteChannelOptions{}
+func ChannelDelete(fcTool *core.Client) *cobra.Command {
+	options := core.DeleteChannelOptions{}
 
 	command := &cobra.Command{
 		Use:   "delete",
