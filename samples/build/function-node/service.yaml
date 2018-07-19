@@ -1,0 +1,30 @@
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: riff-square
+  namespace: default
+spec:
+  runLatest:
+    configuration:
+      build:
+        serviceAccountName: riff-build
+        source:
+          git:
+            url: https://github.com/trisberg/node-fun-square.git
+            revision: master
+        template:
+          name: riff
+          arguments:
+          - name: IMAGE
+            value: &image gcr.io/cf-spring-funkytown/node-fun-square
+          - name: INVOKER_PATH
+            value: https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml
+          - name: FUNCTION_ARTIFACT
+            value: square.js
+          - name: FUNCTION_NAME
+            value: square
+      revisionTemplate:
+        spec:
+          container:
+            image: *image
+            imagePullPolicy: Always
