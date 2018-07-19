@@ -19,7 +19,7 @@ package main
 import (
 	"os"
 
-	"github.com/pivotal-cf-experimental/riff-cli/cmd/commands"
+	"github.com/projectriff/riff-cli/cmd/commands"
 )
 
 func main() {

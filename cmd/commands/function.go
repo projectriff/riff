@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
-	"github.com/pivotal-cf-experimental/riff-cli/pkg/tool"
+	"github.com/projectriff/riff-cli/pkg/tool"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )

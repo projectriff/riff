@@ -17,10 +17,10 @@
 package commands
 
 import (
-	"github.com/pivotal-cf-experimental/riff-cli/pkg/tool"
-	"github.com/spf13/cobra"
-	//"gopkg.in/yaml.v2"
 	"fmt"
+
+	"github.com/projectriff/riff-cli/pkg/tool"
+	"github.com/spf13/cobra"
 )
 
 func Channel() *cobra.Command {

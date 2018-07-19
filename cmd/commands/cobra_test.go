@@ -19,7 +19,7 @@ package commands_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pivotal-cf-experimental/riff-cli/cmd/commands"
+	"github.com/projectriff/riff-cli/cmd/commands"
 )
 
 var _ = Describe("The cobra extensions", func() {
