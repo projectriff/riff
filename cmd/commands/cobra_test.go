@@ -25,10 +25,9 @@ import (
 var _ = Describe("The cobra extensions", func() {
 
 	Context("the broadcasting string value", func() {
-		GinkgoRecover()
 		It("should panic when constructed with 0 pointers", func() {
 
-			//commands.BroadcastStringValue("default")
+			Expect(func() { commands.BroadcastStringValue("default") }).To(Panic())
 
 		})
 

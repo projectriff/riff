@@ -24,8 +24,16 @@ import (
 
 type CreateFunctionOptions struct {
 	Namespaced
-	Name  string
-	Image string
+	Name string
+
+	ToImage string
+
+	FromImage   string
+	GitRepo     string
+	GitRevision string
+
+	Handler  string
+	Artifact string
 }
 
 func (c *client) CreateFunction(options CreateFunctionOptions) (*v1alpha1.Service, error) {
@@ -45,7 +53,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions) (*v1alpha1.Servic
 					RevisionTemplate: v1alpha1.RevisionTemplateSpec{
 						Spec: v1alpha1.RevisionSpec{
 							Container: core_v1.Container{
-								Image: options.Image,
+								Image: options.ToImage,
 							},
 						},
 					},

@@ -50,9 +50,9 @@ func Function() *cobra.Command {
 
 func FunctionCreate(fcTool *tool.Client) *cobra.Command {
 
-	var exactlyOneOfImageOrBuild = FlagsValidationConjunction(
-		AtLeastOneOf("image", "build"),
-		AtMostOneOf("image", "build"),
+	var fromImageOrToImage = FlagsValidationConjunction(
+		AtLeastOneOf("from-image", "to-image"),
+		AtMostOneOf("from-image", "to-image"),
 	)
 
 	createChannelOptions := tool.CreateChannelOptions{}
@@ -64,8 +64,8 @@ func FunctionCreate(fcTool *tool.Client) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "create",
 		Short: "create a new function resource, with optional input binding",
-		Example: `  riff function create node square --image acme/square:1.0 --namespace joseph-ns
-  riff function create java tweets-logger --image acme/tweets-logger:1.0.0 --input tweets --bus kafka`,
+		Example: `  riff function create node square --from-image acme/square:1.0 --namespace joseph-ns
+  riff function create java tweets-logger --from-image acme/tweets-logger:1.0.0 --input tweets --bus kafka`,
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(functionCreateNumberOfArgs),
 			AtPosition(functionCreateInvokerIndex, ValidName()),
@@ -73,8 +73,10 @@ func FunctionCreate(fcTool *tool.Client) *cobra.Command {
 		),
 		PreRunE: FlagsValidatorAsCobraRunE(
 			FlagsValidationConjunction(
-				FlagsDependency("input", exactlyOneOfBusOrClusterBus),
-				exactlyOneOfImageOrBuild,
+				fromImageOrToImage,
+				FlagsDependency(NotSet("to-image"), NoneOf("git-repo", "git-revision", "handler", "artifact")),
+				FlagsDependency(Set("input"), exactlyOneOfBusOrClusterBus),
+				FlagsDependency(NotSet("input"), NoneOf("bus", "cluster-bus")),
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -149,11 +151,16 @@ func FunctionCreate(fcTool *tool.Client) *cobra.Command {
 	command.Flags().StringVar(&createChannelOptions.Bus, "bus", "", busUsage)
 	command.Flags().StringVar(&createChannelOptions.ClusterBus, "cluster-bus", "", clusterBusUsage)
 
-	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "reference to an already built `name[:tag]` image that contains the function.")
-	command.Flags().String("build", "", "TODO: build options?")
+	command.Flags().StringVar(&createFunctionOptions.ToImage, "from-image", "", "reference to an already built `name[:tag]` image that contains the function.")
 
-	command.Flags().BoolVarP(&write, "write", "w", false, "whether to write yaml files for created resources")
-	command.Flags().BoolVarP(&force, "force", "f", false, "force writing of files if they already exist")
+	command.Flags().StringVar(&createFunctionOptions.ToImage, "to-image", "", "the name of the image to build. Must be a writable `repository/image[:tag]` with write credentials configured.")
+	command.Flags().StringVar(&createFunctionOptions.GitRepo, "git-repo", "", "the `URL` for the git repo hosting the function source.")
+	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` to build.")
+	command.Flags().StringVar(&createFunctionOptions.Handler, "handler", "", "name of `method or class` to invoke. See specific invoker for detail.")
+	command.Flags().StringVar(&createFunctionOptions.Artifact, "artifact", "", "`path` to the function artifact, source code or jar file. Attempts detection if not specified.")
+
+	command.Flags().BoolVarP(&write, "write", "w", false, "whether to write yaml files for created resources.")
+	command.Flags().BoolVarP(&force, "force", "f", false, "force writing of files if they already exist.")
 
 	return command
 }

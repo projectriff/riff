@@ -108,17 +108,61 @@ func FlagsValidationConjunction(validators ...FlagsValidator) FlagsValidator {
 	}
 }
 
-// FlagsDependency returns a validator that will evaluate the given delegate if the provided flag has been set.
+type FlagsMatcher interface {
+	Evaluate(command *cobra.Command) bool
+	Description() string
+}
+
+type flagsMatcher struct {
+	eval func(command *cobra.Command) bool
+	desc string
+}
+
+func (fm flagsMatcher) Evaluate(command *cobra.Command) bool {
+	return fm.eval(command)
+}
+
+func (fm flagsMatcher) Description() string {
+	return fm.desc
+}
+
+func Set(name string) FlagsMatcher {
+	return flagsMatcher{
+		eval: func(cmd *cobra.Command) bool {
+			f := cmd.Flag(name)
+			if f == nil {
+				panic(fmt.Sprintf("Expected to find flag named %q in command %q", name, cmd.Use))
+			}
+			return f.Changed
+		},
+		desc: fmt.Sprintf("--%s is set", name),
+	}
+}
+
+func NotSet(name string) FlagsMatcher {
+	return flagsMatcher{
+		eval: func(cmd *cobra.Command) bool {
+			f := cmd.Flag(name)
+			if f == nil {
+				panic(fmt.Sprintf("Expected to find flag named %q in command %q", name, cmd.Use))
+			}
+			return !f.Changed
+		},
+		desc: fmt.Sprintf("--%s is not set", name),
+	}
+}
+
+// FlagsDependency returns a validator that will evaluate the given delegate if the provided flag matcher returns true.
 // Use to enforce scenarios such as "if --foo is set, then --bar must be set as well".
-func FlagsDependency(flag string, delegate FlagsValidator) FlagsValidator {
+func FlagsDependency(matcher FlagsMatcher, delegate FlagsValidator) FlagsValidator {
 	return func(cmd *cobra.Command) error {
-		f := cmd.Flag(flag)
-		if f == nil {
-			panic(fmt.Sprintf("Expected to find flag named %q in command %q", flag, cmd.Use))
-		}
-		if f.Changed {
+		if matcher.Evaluate(cmd) {
 			// Flag set. Delegate condition must HOLD
-			return delegate(cmd)
+			err := delegate(cmd)
+			if err != nil {
+				return fmt.Errorf("when %v, %v", matcher.Description(), err)
+			}
+			return nil
 		} else {
 			// Flag not set. Don't check delegate.
 			return nil
@@ -160,6 +204,22 @@ func AtMostOneOf(flagNames ...string) FlagsValidator {
 		} else {
 			return nil
 		}
+	}
+}
+
+// NoneOf returns a FlagsValidator that asserts that none of the passed in flags are set.
+func NoneOf(flagNames ...string) FlagsValidator {
+	return func(cmd *cobra.Command) error {
+		for _, f := range flagNames {
+			flag := cmd.Flag(f)
+			if flag == nil {
+				panic(fmt.Sprintf("Expected to find flag named %q in command %q", f, cmd.Use))
+			}
+			if flag.Changed {
+				return fmt.Errorf("--%s should not be set", f)
+			}
+		}
+		return nil
 	}
 }
 
