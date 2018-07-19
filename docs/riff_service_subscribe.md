@@ -1,26 +1,26 @@
-## riff function subscribe
+## riff service subscribe
 
-subscribe a function to an existing input channel
+subscribe a service to an existing input channel
 
 ### Synopsis
 
-subscribe a function to an existing input channel
+subscribe a service to an existing input channel
 
 ```
-riff function subscribe [flags]
+riff service subscribe [flags]
 ```
 
 ### Examples
 
 ```
-  riff function subscribe square --input numbers --namespace joseph-ns
+  riff service subscribe square --input numbers --namespace joseph-ns
 ```
 
 ### Options
 
 ```
   -h, --help                  help for subscribe
-  -i, --input channel         name of the input channel to subscribe the function to.
+  -i, --input channel         name of the input channel to subscribe the service to.
   -n, --namespace namespace   the namespace to use when interacting with resources.
 ```
 
@@ -33,5 +33,5 @@ riff function subscribe [flags]
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - interact with function related resources
+* [riff service](riff_service.md)	 - interact with service related resources
 

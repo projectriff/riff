@@ -19,33 +19,15 @@ package commands
 import (
 	"fmt"
 
-	"time"
-
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	"github.com/projectriff/riff-cli/pkg/core"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 )
 
 const (
 	functionCreateInvokerIndex = iota
-	functionCreateFunctionIndex
+	functionCreateFunctionNameIndex
 	functionCreateNumberOfArgs
-)
-
-const (
-	functionStatusFunctionIndex = iota
-	functionStatusNumberOfArgs
-)
-
-const (
-	functionSubscribeFunctionIndex = iota
-	functionSubscribeNumberOfArgs
-)
-
-const (
-	functionDeleteFunctionIndex = iota
-	functionDeleteNumberOfArgs
 )
 
 func Function() *cobra.Command {
@@ -57,11 +39,6 @@ func Function() *cobra.Command {
 
 func FunctionCreate(fcTool *core.Client) *cobra.Command {
 
-	var fromImageOrToImage = FlagsValidationConjunction(
-		AtLeastOneOf("from-image", "to-image"),
-		AtMostOneOf("from-image", "to-image"),
-	)
-
 	createChannelOptions := core.CreateChannelOptions{}
 	createFunctionOptions := core.CreateFunctionOptions{}
 	createSubscriptionOptions := core.CreateSubscriptionOptions{}
@@ -71,25 +48,27 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "create",
 		Short: "create a new function resource, with optional input binding",
-		Example: `  riff function create node square --from-image acme/square:1.0 --namespace joseph-ns
-  riff function create java tweets-logger --from-image acme/tweets-logger:1.0.0 --input tweets --bus kafka`,
+		Example: `  riff function create node square --git-repo https://github.com/acme/square --image acme/square --namespace joseph-ns
+  riff function create java tweets-logger --git-repo https://github.com/acme/tweets --image acme/tweets-logger:1.0.0 --input tweets --bus kafka`,
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(functionCreateNumberOfArgs),
 			AtPosition(functionCreateInvokerIndex, ValidName()),
-			AtPosition(functionCreateFunctionIndex, ValidName()),
+			AtPosition(functionCreateFunctionNameIndex, ValidName()),
 		),
 		PreRunE: FlagsValidatorAsCobraRunE(
 			FlagsValidationConjunction(
-				fromImageOrToImage,
-				FlagsDependency(NotSet("to-image"), NoneOf("git-repo", "git-revision", "handler", "artifact")),
 				FlagsDependency(Set("input"), exactlyOneOfBusOrClusterBus),
 				FlagsDependency(NotSet("input"), NoneOf("bus", "cluster-bus")),
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			fnName := args[functionCreateFunctionIndex]
+			fnName := args[functionCreateFunctionNameIndex]
+			invoker := args[functionCreateInvokerIndex]
+			invokerURL := fmt.Sprintf("https://github.com/projectriff/%s-function-invoker/raw/v0.0.7/%s-invoker.yaml", invoker, invoker)
+
 			createFunctionOptions.Name = fnName
+			createFunctionOptions.InvokerURL = invokerURL
 			f, err := (*fcTool).CreateFunction(createFunctionOptions)
 			if err != nil {
 				return err
@@ -103,8 +82,8 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 					return err
 				}
 
-				createSubscriptionOptions.Name = subscriptionNameFromFunction(fnName)
-				createSubscriptionOptions.Subscriber = subscriberNameFromFunction(fnName) // TODO
+				createSubscriptionOptions.Name = subscriptionNameFromService(fnName)
+				createSubscriptionOptions.Subscriber = subscriberNameFromService(fnName)
 				subscr, err = (*fcTool).CreateSubscription(createSubscriptionOptions)
 				if err != nil {
 					return err
@@ -112,7 +91,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 			}
 
 			if write {
-				fmarshaller, err := NewMarshaller(fmt.Sprintf("%s-function.yaml", fnName), force)
+				fmarshaller, err := NewMarshaller(fmt.Sprintf("%s-service.yaml", fnName), force)
 				if err != nil {
 					return err
 				}
@@ -158,10 +137,10 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	command.Flags().StringVar(&createChannelOptions.Bus, "bus", "", busUsage)
 	command.Flags().StringVar(&createChannelOptions.ClusterBus, "cluster-bus", "", clusterBusUsage)
 
-	command.Flags().StringVar(&createFunctionOptions.ToImage, "from-image", "", "reference to an already built `name[:tag]` image that contains the function.")
-
-	command.Flags().StringVar(&createFunctionOptions.ToImage, "to-image", "", "the name of the image to build. Must be a writable `repository/image[:tag]` with write credentials configured.")
+	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "the name of the image to build. Must be a writable `repository/image[:tag]` with write credentials configured.")
+	command.MarkFlagRequired("image")
 	command.Flags().StringVar(&createFunctionOptions.GitRepo, "git-repo", "", "the `URL` for the git repo hosting the function source.")
+	command.MarkFlagRequired("git-repo")
 	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` to build.")
 	command.Flags().StringVar(&createFunctionOptions.Handler, "handler", "", "name of `method or class` to invoke. See specific invoker for detail.")
 	command.Flags().StringVar(&createFunctionOptions.Artifact, "artifact", "", "`path` to the function artifact, source code or jar file. Attempts detection if not specified.")
@@ -170,122 +149,4 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	command.Flags().BoolVarP(&force, "force", "f", false, "force writing of files if they already exist.")
 
 	return command
-}
-
-func FunctionStatus(fcClient *core.Client) *cobra.Command {
-
-	functionStatusOptions := core.FunctionStatusOptions{}
-
-	command := &cobra.Command{
-		Use:     "status",
-		Short:   "display the status of a function",
-		Long:    "display the status conditions of a function's service",
-		Example: `  riff function status square --namespace joseph-ns`,
-		Args: ArgValidationConjunction(
-			cobra.ExactArgs(functionStatusNumberOfArgs),
-			AtPosition(functionStatusFunctionIndex, ValidName()),
-		),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			fnName := args[functionStatusFunctionIndex]
-			functionStatusOptions.Name = fnName
-			cond, err := (*fcClient).FunctionStatus(functionStatusOptions)
-			if err != nil {
-				return err
-			}
-
-			fmt.Printf("Last Transition Time:        %s\n", cond.LastTransitionTime.Format(time.RFC3339))
-
-			if cond.Reason != "" {
-				fmt.Printf("Message:                     %s\n", cond.Message)
-				fmt.Printf("Reason:                      %s\n", cond.Reason)
-			}
-
-			fmt.Printf("Status:                      %s\n", cond.Status)
-			fmt.Printf("Type:                        %s\n", cond.Type)
-
-			return nil
-		},
-	}
-
-	LabelArgs(command, "<function-name>")
-
-	command.Flags().StringVarP(&functionStatusOptions.Namespace, "namespace", "n", "", namespaceUsage)
-
-	return command
-}
-
-func FunctionSubscribe(fcClient *core.Client) *cobra.Command {
-
-	createSubscriptionOptions := core.CreateSubscriptionOptions{}
-
-	command := &cobra.Command{
-		Use:     "subscribe",
-		Short:   "subscribe a function to an existing input channel",
-		Example: `  riff function subscribe square --input numbers --namespace joseph-ns`,
-		Args: ArgValidationConjunction(
-			cobra.ExactArgs(functionSubscribeNumberOfArgs),
-			AtPosition(functionSubscribeFunctionIndex, ValidName()),
-		),
-		RunE: func(cmd *cobra.Command, args []string) error {
-
-			e := yaml.NewEncoder(cmd.OutOrStdout())
-
-			fnName := args[functionSubscribeFunctionIndex]
-
-			createSubscriptionOptions.Name = subscriptionNameFromFunction(fnName)
-			createSubscriptionOptions.Subscriber = subscriberNameFromFunction(fnName)
-			s, err := (*fcClient).CreateSubscription(createSubscriptionOptions)
-			if err != nil {
-				return err
-			}
-			if err = e.Encode(s); err != nil {
-				return err
-			}
-
-			return err
-		},
-	}
-
-	LabelArgs(command, "<function-name>")
-
-	command.Flags().StringVarP(&createSubscriptionOptions.Channel, "input", "i", "", "name of the input `channel` to subscribe the function to.")
-	command.MarkFlagRequired("input")
-	command.Flags().StringVarP(&createSubscriptionOptions.Namespace, "namespace", "n", "", namespaceUsage)
-
-	return command
-}
-
-func FunctionDelete(fcClient *core.Client) *cobra.Command {
-
-	deleteFunctionOptions := core.DeleteFunctionOptions{}
-
-	command := &cobra.Command{
-		Use:     "delete",
-		Short:   "delete an existing function",
-		Example: `  riff function delete square --namespace joseph-ns`,
-		Args: ArgValidationConjunction(
-			cobra.ExactArgs(functionDeleteNumberOfArgs),
-			AtPosition(functionDeleteFunctionIndex, ValidName()),
-		),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			fnName := args[functionDeleteFunctionIndex]
-			deleteFunctionOptions.Name = fnName
-			return (*fcClient).DeleteFunction(deleteFunctionOptions)
-		},
-	}
-
-	LabelArgs(command, "<function-name>")
-
-	command.Flags().StringVarP(&deleteFunctionOptions.Namespace, "namespace", "n", "", namespaceUsage)
-
-	return command
-}
-
-// TODO
-func subscriberNameFromFunction(fnName string) string {
-	return fnName
-}
-
-func subscriptionNameFromFunction(fnName string) string {
-	return fnName
 }

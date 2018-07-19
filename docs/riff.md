@@ -20,4 +20,5 @@ the riff core is used to create and manage function resources for the riff FaaS 
 
 * [riff channel](riff_channel.md)	 - interact with channel related resources
 * [riff function](riff_function.md)	 - interact with function related resources
+* [riff service](riff_service.md)	 - interact with service related resources
 

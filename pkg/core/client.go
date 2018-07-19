@@ -27,12 +27,16 @@ import (
 )
 
 type Client interface {
+	CreateFunction(options CreateFunctionOptions) (*serving.Service, error)
+
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
+
 	CreateChannel(options CreateChannelOptions) (*eventing.Channel, error)
 	DeleteChannel(options DeleteChannelOptions) error
-	CreateFunction(options CreateFunctionOptions) (*serving.Service, error)
-	FunctionStatus(options FunctionStatusOptions) (*v1alpha1.ServiceCondition, error)
-	DeleteFunction(options DeleteFunctionOptions) error
+
+	CreateService(options CreateServiceOptions) (*serving.Service, error)
+	DeleteService(options DeleteServiceOptions) error
+	ServiceStatus(options ServiceStatusOptions) (*v1alpha1.ServiceCondition, error)
 }
 
 type client struct {

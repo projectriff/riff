@@ -17,49 +17,44 @@
 package core
 
 import (
-	"errors"
-
+	build "github.com/knative/build/pkg/apis/build/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	core_v1 "k8s.io/api/core/v1"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type CreateFunctionOptions struct {
-	Namespaced
-	Name string
+	CreateServiceOptions
 
-	ToImage string
-
-	FromImage   string
 	GitRepo     string
 	GitRevision string
 
-	Handler  string
-	Artifact string
+	InvokerURL string
+	Handler    string
+	Artifact   string
 }
 
 func (c *client) CreateFunction(options CreateFunctionOptions) (*v1alpha1.Service, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
 
-	s := v1alpha1.Service{
-		TypeMeta: meta_v1.TypeMeta{
-			APIVersion: "serving.knative.dev/v1alpha1",
-			Kind:       "Service",
+	s := newService(options.CreateServiceOptions)
+
+	s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{}
+
+	s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
+		ServiceAccountName: "riff-build",
+		Source: &build.SourceSpec{
+			Git: &build.GitSourceSpec{
+				Url:      options.GitRepo,
+				Revision: options.GitRevision,
+			},
 		},
-		ObjectMeta: meta_v1.ObjectMeta{
-			Name: options.Name,
-		},
-		Spec: v1alpha1.ServiceSpec{
-			RunLatest: &v1alpha1.RunLatestType{
-				Configuration: v1alpha1.ConfigurationSpec{
-					RevisionTemplate: v1alpha1.RevisionTemplateSpec{
-						Spec: v1alpha1.RevisionSpec{
-							Container: core_v1.Container{
-								Image: options.ToImage,
-							},
-						},
-					},
-				},
+		Template: &build.TemplateInstantiationSpec{
+			Name: "riff",
+			Arguments: []build.ArgumentSpec{
+				{Name: "IMAGE", Value: options.Image},
+				{Name: "INVOKER_PATH", Value: options.InvokerURL},
+				{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
+				{Name: "FUNCTION_HANDLER", Value: options.Handler},
+				{Name: "FUNCTION_NAME", Value: options.Name},
 			},
 		},
 	}
@@ -67,39 +62,4 @@ func (c *client) CreateFunction(options CreateFunctionOptions) (*v1alpha1.Servic
 	_, err := c.serving.ServingV1alpha1().Services(ns).Create(&s)
 
 	return &s, err
-}
-
-type FunctionStatusOptions struct {
-	Namespaced
-	Name string
-}
-
-func (c *client) FunctionStatus(options FunctionStatusOptions) (*v1alpha1.ServiceCondition, error) {
-
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
-
-	s, err := c.serving.ServingV1alpha1().Services(ns).Get(options.Name, meta_v1.GetOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	for _, cond := range s.Status.Conditions {
-		if cond.Type == v1alpha1.ServiceConditionReady {
-			return &cond, nil
-		}
-	}
-
-	return nil, errors.New("No condition of type ServiceConditionReady found for the service")
-}
-
-type DeleteFunctionOptions struct {
-	Namespaced
-	Name string
-}
-
-func (c *client) DeleteFunction(options DeleteFunctionOptions) error {
-
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
-
-	return c.serving.ServingV1alpha1().Services(ns).Delete(options.Name, nil)
 }

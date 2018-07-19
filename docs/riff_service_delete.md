@@ -1,25 +1,25 @@
-## riff function status
+## riff service delete
 
-display the status of a function
+delete an existing service
 
 ### Synopsis
 
-display the status conditions of a function's service
+delete an existing service
 
 ```
-riff function status [flags]
+riff service delete [flags]
 ```
 
 ### Examples
 
 ```
-  riff function status square --namespace joseph-ns
+  riff service delete square --namespace joseph-ns
 ```
 
 ### Options
 
 ```
-  -h, --help                  help for status
+  -h, --help                  help for delete
   -n, --namespace namespace   the namespace to use when interacting with resources.
 ```
 
@@ -32,5 +32,5 @@ riff function status [flags]
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - interact with function related resources
+* [riff service](riff_service.md)	 - interact with service related resources
 
