@@ -1,0 +1,44 @@
+apiVersion: build.knative.dev/v1alpha1
+kind: BuildTemplate
+metadata:
+  name: riff
+spec:
+  parameters:
+  - name: IMAGE
+    description: The name of the image to push
+  - name: DOCKERFILE
+    description: Path to the Dockerfile to build.
+    default: /workspace/Dockerfile
+  - name: INVOKER_PATH
+    description: Path to the riff invoker.yaml, may be a local path or http
+  - name: FUNCTION_ARTIFACT
+    description: Path to the function artifact, source code or jar file (attempts detection if not specified)
+    default: ""
+  - name: FUNCTION_HANDLER
+    description: Name of method or class to invoke (see specific invoker for detail)
+    default: ""
+  - name: FUNCTION_FILE_PATH
+    description: Path or directory used for the function (defaults to the current directory)
+    default: "."
+  - name: FUNCTION_NAME
+    description: The name of the function
+    default: fn
+  steps:
+  - name: init
+    image: scothis/riff-init:c6a34921ff4ba884b851942761bad9bf6fc2729d3727f8a95c832ec1081c3669
+    env:
+    - name: RIFF_INVOKER_PATHS
+      value: ${INVOKER_PATH}
+    - name: FUNCTION_ARTIFACT
+      value: ${FUNCTION_ARTIFACT}
+    - name: FUNCTION_HANDLER
+      value: ${FUNCTION_HANDLER}
+    - name: FUNCTION_FILE_PATH
+      value: ${FUNCTION_FILE_PATH}
+    - name: FUNCTION_NAME
+      value: ${FUNCTION_NAME}
+  - name: build-and-push
+    image: gcr.io/kaniko-project/executor
+    args:
+    - --dockerfile=${DOCKERFILE}
+    - --destination=${IMAGE}

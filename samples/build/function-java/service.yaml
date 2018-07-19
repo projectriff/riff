@@ -1,0 +1,32 @@
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: riff-upper
+  namespace: default
+spec:
+  runLatest:
+    configuration:
+      build:
+        serviceAccountName: riff-build
+        source:
+          git:
+            url: https://github.com/trisberg/java-fun-upper.git
+            revision: jar
+        template:
+          name: riff
+          arguments:
+          - name: IMAGE
+            value: &image gcr.io/cf-spring-funkytown/java-fun-upper
+          - name: INVOKER_PATH
+            value: https://github.com/projectriff/java-function-invoker/raw/v0.0.7/java-invoker.yaml
+          - name: FUNCTION_ARTIFACT
+            value: upper-1.0.0.jar
+          - name: FUNCTION_HANDLER
+            value: functions.Upper
+          - name: FUNCTION_NAME
+            value: upper
+      revisionTemplate:
+        spec:
+          container:
+            image: *image
+            imagePullPolicy: Always
