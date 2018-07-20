@@ -1,10 +1,10 @@
 ## riff channel list
 
-list channel resources
+List channel resources.
 
 ### Synopsis
 
-list channel resources
+List channel resources.
 
 ```
 riff channel list [flags]
@@ -14,7 +14,7 @@ riff channel list [flags]
 
 ```
   riff channel list
-  riff channel list --namespace joseph-ns
+riff channel list --namespace joseph-ns
 ```
 
 ### Options

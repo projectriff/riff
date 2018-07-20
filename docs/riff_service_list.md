@@ -1,10 +1,10 @@
 ## riff service list
 
-list service resources
+List service resources.
 
 ### Synopsis
 
-list service resources
+List service resources.
 
 ```
 riff service list [flags]

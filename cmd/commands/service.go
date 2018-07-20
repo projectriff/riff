@@ -29,10 +29,7 @@ import (
 	"github.com/projectriff/riff-cli/pkg/core"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
-)
-
-const (
-	serviceListNumberOfArgs = 0
+	"k8s.io/api/core/v1"
 )
 
 const (
@@ -43,6 +40,10 @@ const (
 const (
 	serviceStatusServiceNameIndex = iota
 	serviceStatusNumberOfArgs
+)
+
+const (
+	serviceListNumberOfArgs = iota
 )
 
 const (
@@ -66,35 +67,6 @@ func Service() *cobra.Command {
 		Short: "interact with service related resources",
 		Long:  "interact with service (as in service.serving.knative.dev) related resources",
 	}
-}
-
-func ServiceList(fcTool *core.Client) *cobra.Command {
-	listServiceOptions := core.ListServiceOptions{}
-
-	command := &cobra.Command{
-		Use:   "list",
-		Short: "list service resources",
-		Example: `  riff service list
-  riff service list --namespace joseph-ns`,
-		Args: cobra.ExactArgs(serviceListNumberOfArgs),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			services, err := (*fcTool).ListServices(listServiceOptions)
-			if err != nil {
-				return err
-			}
-
-			fmt.Println("NAME")
-			for _, service := range services.Items {
-				fmt.Println(service.Name)
-			}
-
-			return nil
-		},
-	}
-
-	command.Flags().StringVarP(&listServiceOptions.Namespace, "namespace", "n", "", namespaceUsage)
-
-	return command
 }
 
 func ServiceCreate(fcTool *core.Client) *cobra.Command {
@@ -237,6 +209,63 @@ func ServiceStatus(fcClient *core.Client) *cobra.Command {
 	LabelArgs(command, "<service-name>")
 
 	command.Flags().StringVarP(&serviceStatusOptions.Namespace, "namespace", "n", "", namespaceUsage)
+
+	return command
+}
+
+func ServiceList(fcClient *core.Client) *cobra.Command {
+	listServiceOptions := core.ListServiceOptions{}
+
+	command := &cobra.Command{
+		Use:   "list",
+		Short: "List service resources.",
+		Example: `  riff service list
+  riff service list --namespace joseph-ns`,
+		Args: cobra.ExactArgs(serviceListNumberOfArgs),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			services, err := (*fcClient).ListServices(listServiceOptions)
+			if err != nil {
+				return err
+			}
+
+			maxServiceNameLength := 0
+			for _, service := range services.Items {
+				if len(service.Name) > maxServiceNameLength {
+					maxServiceNameLength = len(service.Name)
+				}
+			}
+			pad := fmt.Sprintf("%%-%ds%%s\n", maxServiceNameLength+1)
+
+			fmt.Fprintf(cmd.OutOrStdout(), pad, "NAME", "STATUS")
+			for _, service := range services.Items {
+				serviceStatusOptions := core.ServiceStatusOptions{
+					Namespaced: listServiceOptions.Namespaced,
+					Name:       service.Name,
+				}
+
+				cond, err := (*fcClient).ServiceStatus(serviceStatusOptions)
+				var status string
+				if err != nil {
+					status = err.Error()
+				} else {
+					switch cond.Status {
+					case v1.ConditionTrue:
+						status = "Running"
+					case v1.ConditionFalse:
+						status = fmt.Sprintf("%s: %s", cond.Reason, cond.Message)
+					default:
+						status = "Unknown"
+					}
+				}
+
+				fmt.Fprintf(cmd.OutOrStdout(), pad, service.Name, status)
+			}
+
+			return err
+		},
+	}
+
+	command.Flags().StringVarP(&listServiceOptions.Namespace, "namespace", "n", "", namespaceUsage)
 
 	return command
 }

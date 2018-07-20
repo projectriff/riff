@@ -31,42 +31,14 @@ func Channel() *cobra.Command {
 }
 
 const (
-	channelListNumberOfArgs = 0
-)
-
-func ChannelList(fcTool *core.Client) *cobra.Command {
-	listChannelOptions := core.ListChannelOptions{}
-
-	command := &cobra.Command{
-		Use:   "list",
-		Short: "list channel resources",
-		Example: `  riff channel list
-  riff channel list --namespace joseph-ns`,
-		Args: cobra.ExactArgs(channelListNumberOfArgs),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			channels, err := (*fcTool).ListChannels(listChannelOptions)
-			if err != nil {
-				return err
-			}
-
-			fmt.Println("NAME")
-			for _, channel := range channels.Items {
-				fmt.Println(channel.Name)
-			}
-
-			return nil
-		},
-	}
-
-	command.Flags().StringVarP(&listChannelOptions.Namespace, "namespace", "n", "", namespaceUsage)
-
-	return command
-}
-
-const (
 	channelCreateNameIndex = iota
 	channelCreateNumberOfArgs
 )
+
+const (
+	channelListNumberOfArgs = iota
+)
+
 
 const (
 	channelDeleteNameIndex = iota
@@ -122,6 +94,35 @@ func ChannelCreate(fcTool *core.Client) *cobra.Command {
 
 	command.Flags().BoolVarP(&write, "write", "w", false, "whether to write yaml files for created resources")
 	command.Flags().BoolVarP(&force, "force", "f", false, "force writing of files if they already exist")
+	return command
+}
+
+func ChannelList(fcTool *core.Client) *cobra.Command {
+	listChannelOptions := core.ListChannelOptions{}
+
+	command := &cobra.Command{
+		Use:   "list",
+		Short: "List channel resources.",
+		Example: `  riff channel list
+riff channel list --namespace joseph-ns`,
+		Args: cobra.ExactArgs(channelListNumberOfArgs),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			channels, err := (*fcTool).ListChannels(listChannelOptions)
+			if err != nil {
+				return err
+			}
+
+			fmt.Fprintln(cmd.OutOrStdout(),"NAME")
+			for _, channel := range channels.Items {
+				fmt.Fprintln(cmd.OutOrStdout(),channel.Name)
+			}
+
+			return nil
+		},
+	}
+
+	command.Flags().StringVarP(&listChannelOptions.Namespace, "namespace", "n", "", namespaceUsage)
+
 	return command
 }
 

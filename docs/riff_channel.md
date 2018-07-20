@@ -24,5 +24,5 @@ interact with channel related resources
 * [riff](riff.md)	 - Commands for creating and managing function resources
 * [riff channel create](riff_channel_create.md)	 - create a new channel on a namespace or cluster bus
 * [riff channel delete](riff_channel_delete.md)	 - delete an existing channel
-* [riff channel list](riff_channel_list.md)	 - list channel resources
+* [riff channel list](riff_channel_list.md)	 - List channel resources.
 
