@@ -6,9 +6,6 @@ spec:
   parameters:
   - name: IMAGE
     description: The name of the image to push
-  - name: DOCKERFILE
-    description: Path to the Dockerfile to build.
-    default: /workspace/Dockerfile
   - name: INVOKER_PATH
     description: Path to the riff invoker.yaml, may be a local path or http
   - name: FUNCTION_ARTIFACT
@@ -25,20 +22,15 @@ spec:
     default: fn
   steps:
   - name: init
-    image: scothis/riff-init:c6a34921ff4ba884b851942761bad9bf6fc2729d3727f8a95c832ec1081c3669
-    env:
-    - name: RIFF_INVOKER_PATHS
-      value: ${INVOKER_PATH}
-    - name: FUNCTION_ARTIFACT
-      value: ${FUNCTION_ARTIFACT}
-    - name: FUNCTION_HANDLER
-      value: ${FUNCTION_HANDLER}
-    - name: FUNCTION_FILE_PATH
-      value: ${FUNCTION_FILE_PATH}
-    - name: FUNCTION_NAME
-      value: ${FUNCTION_NAME}
+    image: projectriff/riff-init:0.1.0-snapshot-ci-c25427f4e1c717a9f036291aad54d4c0a8e9a93b
+    args:
+    - --invoker=${INVOKER_PATH}
+    - --name=${FUNCTION_NAME}
+    - --artifact=${FUNCTION_ARTIFACT}
+    - --handler=${FUNCTION_HANDLER}
+    - --filepath=${FUNCTION_FILE_PATH}
   - name: build-and-push
     image: gcr.io/kaniko-project/executor
     args:
-    - --dockerfile=${DOCKERFILE}
+    - --dockerfile=/workspace/Dockerfile
     - --destination=${IMAGE}
