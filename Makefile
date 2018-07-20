@@ -1,6 +1,8 @@
-.PHONY: build clean test
+.PHONY: build clean test all
 OUTPUT = ./riff
 GO_SOURCES = $(shell find cmd pkg -type f -name '*.go' -not -name 'mock_*.go')
+
+all: test docs
 
 build: $(OUTPUT)
 
