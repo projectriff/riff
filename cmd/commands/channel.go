@@ -30,6 +30,34 @@ func Channel() *cobra.Command {
 	}
 }
 
+func ChannelList(fcTool *core.Client) *cobra.Command {
+	listChannelOptions := core.ListChannelOptions{}
+
+	command := &cobra.Command{
+		Use:   "list",
+		Short: "list channel resources",
+		Example: `  riff channel list
+  riff channel list --namespace joseph-ns`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			channels, err := (*fcTool).ListChannels(listChannelOptions)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println("NAME")
+			for _, channel := range channels.Items {
+				fmt.Println(channel.Name)
+			}
+
+			return err
+		},
+	}
+
+	command.Flags().StringVarP(&listChannelOptions.Namespace, "namespace", "n", "", namespaceUsage)
+
+	return command
+}
+
 const (
 	channelCreateNameIndex = iota
 	channelCreateNumberOfArgs

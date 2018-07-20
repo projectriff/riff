@@ -32,9 +32,11 @@ type Client interface {
 
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
 
+	ListChannels(options ListChannelOptions) (*eventing.ChannelList, error)
 	CreateChannel(options CreateChannelOptions) (*eventing.Channel, error)
 	DeleteChannel(options DeleteChannelOptions) error
 
+	ListServices(options ListServiceOptions) (*serving.ServiceList, error)
 	CreateService(options CreateServiceOptions) (*serving.Service, error)
 	DeleteService(options DeleteServiceOptions) error
 	ServiceStatus(options ServiceStatusOptions) (*v1alpha1.ServiceCondition, error)

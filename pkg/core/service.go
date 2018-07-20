@@ -29,6 +29,18 @@ const (
 	ingressServiceName = "knative-ingressgateway"
 )
 
+type ListServiceOptions struct {
+	Namespaced
+}
+
+func (c *client) ListServices(options ListServiceOptions) (*v1alpha1.ServiceList, error) {
+	ns := c.explicitOrConfigNamespace(options.Namespaced)
+
+	services, err := c.serving.ServingV1alpha1().Services(ns).List(meta_v1.ListOptions{})
+
+	return services, err
+}
+
 type CreateServiceOptions struct {
 	Namespaced
 	Name string
@@ -105,7 +117,7 @@ func (c *client) ServiceCoordinates(options ServiceInvokeOptions) (string, strin
 	}
 	ingresses := ksvc.Status.LoadBalancer.Ingress
 	if len(ingresses) == 0 {
-		return "","", errors.New("Ingress not available")
+		return "", "", errors.New("Ingress not available")
 	}
 	ingressIP := ingresses[0].IP
 

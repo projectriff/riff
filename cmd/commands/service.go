@@ -64,6 +64,34 @@ func Service() *cobra.Command {
 	}
 }
 
+func ServiceList(fcTool *core.Client) *cobra.Command {
+	listServiceOptions := core.ListServiceOptions{}
+
+	command := &cobra.Command{
+		Use:   "list",
+		Short: "list service resources",
+		Example: `  riff service list
+  riff service list --namespace joseph-ns`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			services, err := (*fcTool).ListServices(listServiceOptions)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println("NAME")
+			for _, service := range services.Items {
+				fmt.Println(service.Name)
+			}
+
+			return err
+		},
+	}
+
+	command.Flags().StringVarP(&listServiceOptions.Namespace, "namespace", "n", "", namespaceUsage)
+
+	return command
+}
+
 func ServiceCreate(fcTool *core.Client) *cobra.Command {
 
 	createChannelOptions := core.CreateChannelOptions{}

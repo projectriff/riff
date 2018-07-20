@@ -113,6 +113,7 @@ the riff core is used to create and manage function resources for the riff FaaS 
 
 	service := Service()
 	service.AddCommand(
+		ServiceList(&client),
 		ServiceCreate(&client),
 		ServiceStatus(&client),
 		ServiceInvoke(&client),
@@ -122,6 +123,7 @@ the riff core is used to create and manage function resources for the riff FaaS 
 
 	channel := Channel()
 	channel.AddCommand(
+		ChannelList(&client),
 		ChannelCreate(&client),
 		ChannelDelete(&client),
 	)

@@ -18,8 +18,20 @@ package core
 
 import (
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+type ListChannelOptions struct {
+	Namespaced
+}
+
+func (c *client) ListChannels(options ListChannelOptions) (*v1alpha1.ChannelList, error) {
+	ns := c.explicitOrConfigNamespace(options.Namespaced)
+
+	channels, err := c.eventing.ChannelsV1alpha1().Channels(ns).List(meta_v1.ListOptions{})
+
+	return channels, err
+}
 
 type CreateChannelOptions struct {
 	Namespaced
@@ -31,11 +43,11 @@ type CreateChannelOptions struct {
 func (c *client) CreateChannel(options CreateChannelOptions) (*v1alpha1.Channel, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
 	channel := v1alpha1.Channel{
-		TypeMeta: v1.TypeMeta{
+		TypeMeta: meta_v1.TypeMeta{
 			APIVersion: "channels.knative.dev/v1alpha1",
 			Kind:       "Channel",
 		},
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: meta_v1.ObjectMeta{
 			Name: options.Name,
 		},
 		Spec: v1alpha1.ChannelSpec{
