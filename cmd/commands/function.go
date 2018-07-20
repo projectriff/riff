@@ -45,6 +45,11 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 
 	var write, force = false, false
 
+	invokers := map[string]string{
+		"java": "https://github.com/projectriff/java-function-invoker/raw/v0.0.7/java-invoker.yaml",
+		"node": "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
+	}
+
 	command := &cobra.Command{
 		Use:   "create",
 		Short: "create a new function resource, with optional input binding",
@@ -65,7 +70,10 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 
 			fnName := args[functionCreateFunctionNameIndex]
 			invoker := args[functionCreateInvokerIndex]
-			invokerURL := fmt.Sprintf("https://github.com/projectriff/%s-function-invoker/raw/v0.0.7/%s-invoker.yaml", invoker, invoker)
+			invokerURL, exists := invokers[invoker]
+			if !exists {
+				return fmt.Errorf("unknown invoker: %s", invoker)
+			}
 
 			createFunctionOptions.Name = fnName
 			createFunctionOptions.InvokerURL = invokerURL
