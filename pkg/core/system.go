@@ -19,6 +19,9 @@ package core
 import (
 	"net/url"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"bytes"
 )
 
 type SystemInstallOptions struct {
@@ -28,20 +31,23 @@ type SystemInstallOptions struct {
 func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) error {
 
 	istioRelease := "https://storage.googleapis.com/riff-releases/istio-riff-0.1.0.yaml"
-	servingRelease := "https://storage.googleapis.com/knative-releases/latest/release-no-mon.yaml"
-	eventingRelease := "https://storage.googleapis.com/knative-releases/latest/release-eventing.yaml"
-	stubBusRelease := "https://storage.googleapis.com/knative-releases/latest/release-eventing-clusterbus-stub.yaml"
-
-	if options.NodePort {
-		print("The --node-port option is not supported yet\n")
-	}
+	servingRelease := "https://storage.googleapis.com/riff-releases/release-no-mon-riff-0.1.0.yaml"
+	eventingRelease := "https://storage.googleapis.com/riff-releases/release-eventing-riff-0.1.0.yaml"
+	stubBusRelease := "https://storage.googleapis.com/riff-releases/release-eventing-clusterbus-stub-riff-0.1.0.yaml"
 
 	istioUrl, err := resolveReleaseURLs(istioRelease)
 	if err != nil {
 		return err
 	}
 	print("Installing Istio: ", istioUrl.String(), "\n")
-	istioLog, err := kc.kubeCtl.Exec([]string{"apply", "-f", istioUrl.String()})
+	istioYaml, err := loadRelease(istioUrl)
+	if err != nil {
+		return err
+	}
+	if options.NodePort {
+		istioYaml = bytes.Replace(istioYaml, []byte("LoadBalancer"), []byte("NodePort"), -1)
+	}
+	istioLog, err := kc.kubeCtl.ExecStdin([]string{"apply", "-f", "-"}, &istioYaml)
 	if err != nil {
 		print(istioLog, "\n")
 		return err
@@ -53,7 +59,14 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) error {
 		return err
 	}
 	print("Installing Knative Serving: ", servingUrl.String(), "\n")
-	servingLog, err := kc.kubeCtl.Exec([]string{"apply", "-f", servingUrl.String()})
+	servingYaml, err := loadRelease(servingUrl)
+	if err != nil {
+		return err
+	}
+	if options.NodePort {
+		servingYaml = bytes.Replace(servingYaml, []byte("LoadBalancer"), []byte("NodePort"), -1)
+	}
+	servingLog, err := kc.kubeCtl.ExecStdin([]string{"apply", "-f", "-"}, &servingYaml)
 	if err != nil {
 		print(servingLog, "\n")
 		return err
@@ -97,4 +110,17 @@ func resolveReleaseURLs(filename string) (url.URL, error) {
 		return *u, nil
 	}
 	return *u, fmt.Errorf("Filename must be file, http or https, got %s", u.Scheme)
+}
+
+func loadRelease(url url.URL) ([]byte, error) {
+	resp, err := http.Get(url.String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
 }
