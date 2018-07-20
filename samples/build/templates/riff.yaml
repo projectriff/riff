@@ -21,7 +21,7 @@ spec:
     description: The name of the function
     default: fn
   steps:
-  - name: init
+  - name: riff-init
     image: projectriff/riff-init:0.1.0-snapshot-ci-c25427f4e1c717a9f036291aad54d4c0a8e9a93b
     args:
     - --invoker=${INVOKER_PATH}
