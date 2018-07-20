@@ -35,10 +35,7 @@ type ListServiceOptions struct {
 
 func (c *client) ListServices(options ListServiceOptions) (*v1alpha1.ServiceList, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
-
-	services, err := c.serving.ServingV1alpha1().Services(ns).List(meta_v1.ListOptions{})
-
-	return services, err
+	return c.serving.ServingV1alpha1().Services(ns).List(meta_v1.ListOptions{})
 }
 
 type CreateServiceOptions struct {

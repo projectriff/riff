@@ -32,6 +32,10 @@ import (
 )
 
 const (
+	serviceListNumberOfArgs = 0
+)
+
+const (
 	serviceCreateServiceNameIndex = iota
 	serviceCreateNumberOfArgs
 )
@@ -72,6 +76,7 @@ func ServiceList(fcTool *core.Client) *cobra.Command {
 		Short: "list service resources",
 		Example: `  riff service list
   riff service list --namespace joseph-ns`,
+		Args: cobra.ExactArgs(serviceListNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			services, err := (*fcTool).ListServices(listServiceOptions)
 			if err != nil {
@@ -83,7 +88,7 @@ func ServiceList(fcTool *core.Client) *cobra.Command {
 				fmt.Println(service.Name)
 			}
 
-			return err
+			return nil
 		},
 	}
 

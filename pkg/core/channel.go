@@ -27,10 +27,7 @@ type ListChannelOptions struct {
 
 func (c *client) ListChannels(options ListChannelOptions) (*v1alpha1.ChannelList, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
-
-	channels, err := c.eventing.ChannelsV1alpha1().Channels(ns).List(meta_v1.ListOptions{})
-
-	return channels, err
+	return c.eventing.ChannelsV1alpha1().Channels(ns).List(meta_v1.ListOptions{})
 }
 
 type CreateChannelOptions struct {
