@@ -81,6 +81,7 @@ func CreateAndWireRootCommand() *cobra.Command {
 	kubeconfig := ""
 	masterURL := ""
 	var client core.Client
+	var kc core.KubectlClient
 
 	rootCmd := &cobra.Command{
 		Use:   "riff",
@@ -97,6 +98,7 @@ the riff core is used to create and manage function resources for the riff FaaS 
 				return err
 			}
 			client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet)
+			kc = core.NewKubectlClient()
 			return nil
 		},
 	}
@@ -128,10 +130,22 @@ the riff core is used to create and manage function resources for the riff FaaS 
 		ChannelDelete(&client),
 	)
 
+	namespace := Namespace()
+	namespace.AddCommand(
+		NamespaceInit(&kc),
+	)
+
+	system := System()
+	system.AddCommand(
+		SystemInstall(&kc),
+	)
+
 	rootCmd.AddCommand(
 		function,
 		service,
 		channel,
+		namespace,
+		system,
 		Docs(rootCmd),
 	)
 
