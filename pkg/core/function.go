@@ -37,8 +37,6 @@ func (c *client) CreateFunction(options CreateFunctionOptions) (*v1alpha1.Servic
 
 	s := newService(options.CreateServiceOptions)
 
-	s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{}
-
 	s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
 		ServiceAccountName: "riff-build",
 		Source: &build.SourceSpec{
