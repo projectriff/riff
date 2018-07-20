@@ -28,6 +28,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation"
+	"errors"
 )
 
 // =============================================== Args related functions ==============================================
@@ -80,6 +81,17 @@ func LabelArgs(cmd *cobra.Command, labels ...string) {
 		cmd.Annotations[fmt.Sprintf("arg%d", i)] = label
 	}
 }
+
+func ArgNamePrefix(cmd *cobra.Command, args []string) error {
+	if len(args) < 1 {
+		return errors.New("requires at least one arg")
+	}
+	if err := ValidName()(cmd, args[0]); err != nil {
+		return err
+	}
+	return nil
+}
+
 
 // =============================================== Flags related functions =============================================
 

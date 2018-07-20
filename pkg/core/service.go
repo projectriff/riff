@@ -24,6 +24,11 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	istioNamespace     = "istio-system"
+	ingressServiceName = "knative-ingressgateway"
+)
+
 type CreateServiceOptions struct {
 	Namespaced
 	Name string
@@ -73,9 +78,7 @@ type ServiceStatusOptions struct {
 
 func (c *client) ServiceStatus(options ServiceStatusOptions) (*v1alpha1.ServiceCondition, error) {
 
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
-
-	s, err := c.serving.ServingV1alpha1().Services(ns).Get(options.Name, meta_v1.GetOptions{})
+	s, err := c.service(options.Namespaced, options.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -87,6 +90,38 @@ func (c *client) ServiceStatus(options ServiceStatusOptions) (*v1alpha1.ServiceC
 	}
 
 	return nil, errors.New("No condition of type ServiceConditionReady found for the service")
+}
+
+type ServiceInvokeOptions struct {
+	Namespaced
+	Name string
+}
+
+func (c *client) ServiceCoordinates(options ServiceInvokeOptions) (string, string, error) {
+
+	ksvc, err := c.kubeClient.CoreV1().Services(istioNamespace).Get(ingressServiceName, meta_v1.GetOptions{})
+	if err != nil {
+		return "", "", err
+	}
+	ingresses := ksvc.Status.LoadBalancer.Ingress
+	if len(ingresses) == 0 {
+		return "","", errors.New("Ingress not available")
+	}
+	ingressIP := ingresses[0].IP
+
+	s, err := c.service(options.Namespaced, options.Name)
+	if err != nil {
+		return "", "", err
+	}
+
+	return ingressIP, s.Status.Domain, nil
+}
+
+func (c *client) service(namespace Namespaced, name string) (*v1alpha1.Service, error) {
+
+	ns := c.explicitOrConfigNamespace(namespace)
+
+	return c.serving.ServingV1alpha1().Services(ns).Get(name, meta_v1.GetOptions{})
 }
 
 type DeleteServiceOptions struct {

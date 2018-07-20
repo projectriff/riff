@@ -25,19 +25,17 @@ import (
 	serving "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/projectriff/riff-cli/pkg/core"
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-type ClientSetFactory func(kubeconfig string, masterURL string) (*rest.Config, eventing.Interface, serving.Interface, error)
-
-var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.ClientConfig, eventing.Interface, serving.Interface, error) {
+var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.ClientConfig, kubernetes.Interface, eventing.Interface, serving.Interface, error) {
 
 	kubeconfig, err := resolveHomePath(kubeconfig)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
@@ -46,15 +44,19 @@ var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.
 
 	cfg, err := clientConfig.ClientConfig()
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
+	}
+	kubeClientSet, err := kubernetes.NewForConfig(cfg)
+	if err != nil {
+		return nil, nil, nil, nil, err
 	}
 	eventingClientSet, err := eventing.NewForConfig(cfg)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	servingClientSet, err := serving.NewForConfig(cfg)
 
-	return clientConfig, eventingClientSet, servingClientSet, err
+	return clientConfig, kubeClientSet, eventingClientSet, servingClientSet, err
 }
 
 func resolveHomePath(p string) (string, error) {
@@ -90,11 +92,11 @@ the riff core is used to create and manage function resources for the riff FaaS 
 		SuggestionsMinimumDistance: 2,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			clientConfig, eventingClientSet, servingClientSet, err := realClientSetFactory(kubeconfig, masterURL)
+			clientConfig, kubeClientSet, eventingClientSet, servingClientSet, err := realClientSetFactory(kubeconfig, masterURL)
 			if err != nil {
 				return err
 			}
-			client = core.NewClient(clientConfig, eventingClientSet, servingClientSet)
+			client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet)
 			return nil
 		},
 	}
@@ -113,6 +115,7 @@ the riff core is used to create and manage function resources for the riff FaaS 
 	service.AddCommand(
 		ServiceCreate(&client),
 		ServiceStatus(&client),
+		ServiceInvoke(&client),
 		ServiceSubscribe(&client),
 		ServiceDelete(&client),
 	)

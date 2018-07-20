@@ -21,6 +21,10 @@ import (
 
 	"time"
 
+	"os"
+	"os/exec"
+	"strings"
+
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	"github.com/projectriff/riff-cli/pkg/core"
 	"github.com/spf13/cobra"
@@ -38,6 +42,11 @@ const (
 )
 
 const (
+	serviceInvokeServiceNameIndex = iota
+	serviceInvokeMinimumNumberOfArgs
+)
+
+const (
 	serviceSubscribeServiceNameIndex = iota
 	serviceSubscribeNumberOfArgs
 )
@@ -51,7 +60,7 @@ func Service() *cobra.Command {
 	return &cobra.Command{
 		Use:   "service",
 		Short: "interact with service related resources",
-		Long: "interact with service (as in service.serving.knative.dev) related resources",
+		Long:  "interact with service (as in service.serving.knative.dev) related resources",
 	}
 }
 
@@ -192,9 +201,61 @@ func ServiceStatus(fcClient *core.Client) *cobra.Command {
 		},
 	}
 
-	LabelArgs(command, "<function-name>")
+	LabelArgs(command, "<service-name>")
 
 	command.Flags().StringVarP(&serviceStatusOptions.Namespace, "namespace", "n", "", namespaceUsage)
+
+	return command
+}
+
+func ServiceInvoke(fcClient *core.Client) *cobra.Command {
+
+	serviceInvokeOptions := core.ServiceInvokeOptions{}
+
+	command := &cobra.Command{
+		Use:   "invoke",
+		Short: "Invoke a service.",
+		Long: `Invoke a service by shelling out to curl.
+
+The curl command is printed so it can be copied and extended.
+
+Additional curl arguments and flags may be specified after a double dash (--).`,
+		Example: `  riff service invoke square --namespace joseph-ns
+  riff service invoke square -- --include`,
+		Args: ArgNamePrefix,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			serviceInvokeOptions.Name = args[serviceInvokeServiceNameIndex]
+			ingressIP, hostName, err := (*fcClient).ServiceCoordinates(serviceInvokeOptions)
+			if err != nil {
+				return err
+			}
+
+			curlPrint := fmt.Sprintf("curl %s", ingressIP)
+			curlCmd := exec.Command("curl", ingressIP)
+
+			curlCmd.Stdin = os.Stdin
+			curlCmd.Stdout = cmd.OutOrStdout()
+			curlCmd.Stderr = cmd.OutOrStderr()
+
+			nonFlagArgs := cmd.Flags().Args()
+			if len(nonFlagArgs) > serviceInvokeMinimumNumberOfArgs {
+				curlCmd.Args = append(curlCmd.Args, nonFlagArgs[1:]...)
+				curlPrint = fmt.Sprintf("%s %s", curlPrint, strings.Join(nonFlagArgs[1:], " "))
+			}
+
+			hostHeader := fmt.Sprintf("Host: %s", hostName)
+			curlCmd.Args = append(curlCmd.Args, "-H", hostHeader)
+			curlPrint = fmt.Sprintf("%s -H %q", curlPrint, hostHeader)
+
+			fmt.Fprintln(cmd.OutOrStdout(), curlPrint)
+
+			return curlCmd.Run()
+		},
+	}
+
+	LabelArgs(command, "<service-name>")
+
+	command.Flags().StringVarP(&serviceInvokeOptions.Namespace, "namespace", "n", "", namespaceUsage)
 
 	return command
 }

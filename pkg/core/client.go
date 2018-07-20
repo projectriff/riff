@@ -18,6 +18,7 @@
 package core
 
 import (
+	"k8s.io/client-go/kubernetes"
 	eventing "github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	eventing_cs "github.com/knative/eventing/pkg/client/clientset/versioned"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
@@ -37,14 +38,16 @@ type Client interface {
 	CreateService(options CreateServiceOptions) (*serving.Service, error)
 	DeleteService(options DeleteServiceOptions) error
 	ServiceStatus(options ServiceStatusOptions) (*v1alpha1.ServiceCondition, error)
+	ServiceCoordinates(options ServiceInvokeOptions) (ingressIP string, hostName string, err error)
 }
 
 type client struct {
+	kubeClient   kubernetes.Interface
 	eventing     eventing_cs.Interface
 	serving      serving_cs.Interface
 	clientConfig clientcmd.ClientConfig
 }
 
-func NewClient(clientConfig clientcmd.ClientConfig, eventing eventing_cs.Interface, serving serving_cs.Interface) Client {
-	return &client{clientConfig: clientConfig, eventing: eventing, serving: serving}
+func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface) Client {
+	return &client{clientConfig: clientConfig, kubeClient: kubeClient, eventing: eventing, serving: serving}
 }
