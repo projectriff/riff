@@ -51,6 +51,7 @@ func Service() *cobra.Command {
 	return &cobra.Command{
 		Use:   "service",
 		Short: "interact with service related resources",
+		Long: "interact with service (as in service.serving.knative.dev) related resources",
 	}
 }
 
