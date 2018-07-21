@@ -18,6 +18,8 @@ package core
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	core_v1 "k8s.io/api/core/v1"
@@ -112,11 +114,27 @@ func (c *client) ServiceCoordinates(options ServiceInvokeOptions) (string, strin
 	if err != nil {
 		return "", "", err
 	}
+	var ingressIP string
 	ingresses := ksvc.Status.LoadBalancer.Ingress
-	if len(ingresses) == 0 {
-		return "", "", errors.New("Ingress not available")
+	if len(ingresses) > 0 {
+		ingressIP = ingresses[0].IP
 	}
-	ingressIP := ingresses[0].IP
+	if ingressIP == "" {
+		for _, port := range ksvc.Spec.Ports {
+			if port.Name == "http" {
+				config, err := c.clientConfig.ClientConfig()
+				if err != nil {
+					return "", "", err
+				}
+				host := config.Host[0:strings.LastIndex(config.Host, ":")]
+				host = strings.Replace(host, "https", "http", 1)
+				ingressIP = fmt.Sprintf("%s:%d", host, port.NodePort)
+			}
+		}
+		if ingressIP == "" {
+			return "", "", errors.New("Ingress not available")
+		}
+	}
 
 	s, err := c.service(options.Namespaced, options.Name)
 	if err != nil {
