@@ -299,15 +299,21 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 			curlCmd.Stdout = cmd.OutOrStdout()
 			curlCmd.Stderr = cmd.OutOrStderr()
 
-			nonFlagArgs := cmd.Flags().Args()
-			if len(nonFlagArgs) > serviceInvokeMinimumNumberOfArgs {
-				curlCmd.Args = append(curlCmd.Args, nonFlagArgs[1:]...)
-				curlPrint = fmt.Sprintf("%s %s", curlPrint, strings.Join(nonFlagArgs[1:], " "))
-			}
-
 			hostHeader := fmt.Sprintf("Host: %s", hostName)
 			curlCmd.Args = append(curlCmd.Args, "-H", hostHeader)
 			curlPrint = fmt.Sprintf("%s -H %q", curlPrint, hostHeader)
+
+			nonFlagArgs := cmd.Flags().Args()
+			if len(nonFlagArgs) > serviceInvokeMinimumNumberOfArgs {
+				curlCmd.Args = append(curlCmd.Args, nonFlagArgs[1:]...)
+				curlPrintArgs := append([]string(nil), nonFlagArgs[1:]...)
+				for i, arg := range curlPrintArgs {
+					if strings.Contains(arg, " ") {
+						curlPrintArgs[i] = "\"" + arg + "\""
+					}
+				}
+				curlPrint = fmt.Sprintf("%s %s", curlPrint, strings.Join(curlPrintArgs, " "))
+			}
 
 			fmt.Fprintln(cmd.OutOrStdout(), curlPrint)
 
