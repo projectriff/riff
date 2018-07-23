@@ -1,3 +1,7 @@
 .DS_Store
 .idea/
-riff
+/riff
+/riff.exe
+/riff-darwin-amd64.tgz
+/riff-linux-amd64.tgz
+/riff-windows-amd64.zip
