@@ -78,7 +78,8 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new service resource, with optional input binding",
-		// TODO add Long help text which mentions image
+		Long: `Create a new service resource from a given image.
+If an input channel and bus are specified, create the channel in the bus and subscribe the service to the channel.`,
 		Example: `  riff service create square --image acme/square:1.0 --namespace joseph-ns
   riff service create tweets-logger --image acme/tweets-logger:1.0.0 --input tweets --bus kafka`,
 		Args: ArgValidationConjunction(

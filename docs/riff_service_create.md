@@ -4,7 +4,8 @@ Create a new service resource, with optional input binding
 
 ### Synopsis
 
-Create a new service resource, with optional input binding
+Create a new service resource from a given image.
+If an input channel and bus are specified, create the channel in the bus and subscribe the service to the channel.
 
 ```
 riff service create [flags]
