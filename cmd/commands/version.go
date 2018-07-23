@@ -28,7 +28,7 @@ var cli_version = "unknown"
 func Version() *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
-		Short: "print version information about riff",
+		Short: "Print version information about riff",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			fmt.Fprintf(cmd.OutOrStdout(), "Version\n  riff cli: %s\n", cli_version)
 			return nil

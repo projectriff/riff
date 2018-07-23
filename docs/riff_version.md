@@ -1,10 +1,10 @@
 ## riff version
 
-print version information about riff
+Print version information about riff
 
 ### Synopsis
 
-print version information about riff
+Print version information about riff
 
 ```
 riff version [flags]
@@ -19,8 +19,8 @@ riff version [flags]
 ### Options inherited from parent commands
 
 ```
-      --kubeconfig path   path to a kubeconfig. (default "~/.kube/config")
-      --master address    the address of the Kubernetes API server. Overrides any value in kubeconfig.
+      --kubeconfig path   the path of a kubeconfig (default "~/.kube/config")
+      --master address    the address of the Kubernetes API server; overrides any value in kubeconfig
 ```
 
 ### SEE ALSO
