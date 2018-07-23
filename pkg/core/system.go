@@ -56,30 +56,9 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) error {
 	}
 	print("Istio for riff installed\n", "\n")
 
-	print("Waiting for istio-sidecar-injector to start ")
-	for i := 0; i < 36; i++ {
-		print(".")
-		injectorStatus, err := kc.kubeCtl.Exec([]string{"get", "pod", "-n", "istio-system", "-l", "istio=sidecar-injector", "-o", "jsonpath='{.items[0].status.phase}'"})
-		if err != nil {
-			return err
-		}
-		if injectorStatus == "'Error'" {
-			return errors.New("istio-sidecar-injector pod failed to start")
-		}
-		if injectorStatus == "'Running'" {
-			print(" ", injectorStatus)
-			break
-		}
-		time.Sleep(10 * time.Second) // wait for it to start
-	}
-	print("\n\n")
-	time.Sleep(5 * time.Second) // allow k8s to catch up a bit
-	injectorStatus, err := kc.kubeCtl.Exec([]string{"get", "pod", "-n", "istio-system", "-l", "istio=sidecar-injector", "-o", "jsonpath='{.items[0].status.phase}'"})
+	err = waitForIstioSidecarInjector(kc)
 	if err != nil {
 		return err
-	}
-	if injectorStatus != "'Running'" {
-		return errors.New("istio-sidecar-injector pod did not start in time")
 	}
 
 	servingUrl, err := resolveReleaseURLs(servingRelease)
@@ -151,4 +130,25 @@ func loadRelease(url url.URL) ([]byte, error) {
 		return nil, err
 	}
 	return body, nil
+}
+
+func waitForIstioSidecarInjector(kc *kubectlClient) error {
+	print("Waiting for istio-sidecar-injector to start ")
+	for i := 0; i < 36; i++ {
+		print(".")
+		injectorStatus, err := kc.kubeCtl.Exec([]string{"get", "pod", "-n", "istio-system", "-l", "istio=sidecar-injector", "-o", "jsonpath='{.items[0].status.phase}'"})
+		if err != nil {
+			return err
+		}
+		if injectorStatus == "'Error'" {
+			return errors.New("istio-sidecar-injector pod failed to start")
+		}
+		if injectorStatus == "'Running'" {
+			print("\n\n", injectorStatus)
+			return nil
+		}
+		time.Sleep(10 * time.Second) // wait for it to start
+	}
+	print("\n\n")
+	return errors.New("istio-sidecar-injector pod did not start in time")
 }
