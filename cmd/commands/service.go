@@ -75,8 +75,6 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 	createServiceOptions := core.CreateServiceOptions{}
 	createSubscriptionOptions := core.CreateSubscriptionOptions{}
 
-	var write, force = false, false
-
 	command := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new service resource, with optional input binding",
@@ -118,24 +116,20 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 				}
 			}
 
-			if write {
-				fmarshaller, err := NewMarshaller(fmt.Sprintf("%s-service.yaml", fnName), force)
-				if err != nil {
+			if createServiceOptions.DryRun {
+				marshaller := NewMarshaller(cmd.OutOrStdout())
+				if err = marshaller.Marshal(f); err != nil {
 					return err
 				}
-				if err = fmarshaller.Marshal(f); err != nil {
-					return err
+				if c != nil {
+					if err = marshaller.Marshal(c); err != nil {
+						return err
+					}
 				}
-				if createChannelOptions.Name != "" {
-					cmarshaller, err := NewMarshaller(fmt.Sprintf("%s-channel.yaml", createChannelOptions.Name), force)
-					if err = cmarshaller.Marshal(c); err != nil {
+				if subscr != nil {
+					if err = marshaller.Marshal(subscr); err != nil {
 						return err
 					}
-					smarshaller, err := NewMarshaller(fmt.Sprintf("%s-subscription.yaml", subscr.Name), force)
-					if err = smarshaller.Marshal(subscr); err != nil {
-						return err
-					}
-
 				}
 			}
 
@@ -162,13 +156,19 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 		"input", "i", "name of the service's input `channel`, if any",
 	)
 
+	command.Flags().VarPF(
+		BroadcastBoolValue(false,
+			&createServiceOptions.DryRun,
+			&createChannelOptions.DryRun,
+			&createSubscriptionOptions.DryRun,
+		),
+		"dry-run", "", dryRunUsage,
+	).NoOptDefVal = "true"
+
 	command.Flags().StringVar(&createChannelOptions.Bus, "bus", "", busUsage)
 	command.Flags().StringVar(&createChannelOptions.ClusterBus, "cluster-bus", "", clusterBusUsage)
 
 	command.Flags().StringVar(&createServiceOptions.Image, "image", "", "the `name[:tag]` reference of an image containing the application/function")
-
-	command.Flags().BoolVarP(&write, "write", "w", false, "whether to write yaml files for created resources.")
-	command.Flags().BoolVarP(&force, "force", "f", false, "whether to force writing of files if they already exist.")
 
 	return command
 }

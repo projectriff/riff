@@ -35,6 +35,7 @@ type CreateChannelOptions struct {
 	Name       string
 	Bus        string
 	ClusterBus string
+	DryRun     bool
 }
 
 func (c *client) CreateChannel(options CreateChannelOptions) (*v1alpha1.Channel, error) {
@@ -53,9 +54,12 @@ func (c *client) CreateChannel(options CreateChannelOptions) (*v1alpha1.Channel,
 		},
 	}
 
-	_, err := c.eventing.ChannelsV1alpha1().Channels(ns).Create(&channel)
-
-	return &channel, err
+	if !options.DryRun {
+		_, err := c.eventing.ChannelsV1alpha1().Channels(ns).Create(&channel)
+		return &channel, err
+	} else {
+		return &channel, nil
+	}
 }
 
 type DeleteChannelOptions struct {

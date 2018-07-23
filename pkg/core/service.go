@@ -45,6 +45,8 @@ type CreateServiceOptions struct {
 	Name string
 
 	Image string
+
+	DryRun bool
 }
 
 func (c *client) CreateService(options CreateServiceOptions) (*v1alpha1.Service, error) {
@@ -52,9 +54,13 @@ func (c *client) CreateService(options CreateServiceOptions) (*v1alpha1.Service,
 
 	s := newService(options)
 
-	_, err := c.serving.ServingV1alpha1().Services(ns).Create(&s)
+	if !options.DryRun {
+		_, err := c.serving.ServingV1alpha1().Services(ns).Create(&s)
+		return &s, err
+	} else {
+		return &s, nil
+	}
 
-	return &s, err
 }
 
 func newService(options CreateServiceOptions) v1alpha1.Service {

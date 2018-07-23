@@ -21,9 +21,9 @@ riff function create [flags]
 
 ```
       --artifact path                  path to the function source code or jar file; auto-detected if not specified
-      --bus name                       the name of a bus for the channel
-      --cluster-bus name               the name of a cluster bus for the channel
-  -f, --force                          whether to force writing of files if they already exist.
+      --bus name                       the name of the bus to create the channel in.
+      --cluster-bus name               the name of the cluster bus to create the channel in.
+      --dry-run                        don't create resources but print yaml representation on stdout
       --git-repo URL                   the URL for a git repository hosting the function code
       --git-revision ref-spec          the git ref-spec of the function code to use (default "master")
       --handler method or class        the name of the method or class to invoke, depending on the invoker used
@@ -31,7 +31,6 @@ riff function create [flags]
       --image repository/image[:tag]   the name of the image to build; must be a writable repository/image[:tag] with credentials configured
   -i, --input channel                  name of the function's input channel, if any
   -n, --namespace namespace            the namespace of the subscription, channel, and function
-  -w, --write                          whether to write yaml files for created resources
 ```
 
 ### Options inherited from parent commands

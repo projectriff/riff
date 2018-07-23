@@ -39,7 +39,6 @@ const (
 	channelListNumberOfArgs = iota
 )
 
-
 const (
 	channelDeleteNameIndex = iota
 	channelDeleteNumberOfArgs
@@ -52,7 +51,6 @@ var exactlyOneOfBusOrClusterBus = FlagsValidationConjunction(
 
 func ChannelCreate(fcTool *core.Client) *cobra.Command {
 	options := core.CreateChannelOptions{}
-	var write, force = false, false
 
 	command := &cobra.Command{
 		Use:   "create",
@@ -72,11 +70,8 @@ func ChannelCreate(fcTool *core.Client) *cobra.Command {
 				return err
 			}
 
-			if write {
-				marshaller, err := NewMarshaller(fmt.Sprintf("%s-channel.yaml", channelName), force)
-				if err != nil {
-					return err
-				}
+			if options.DryRun {
+				marshaller := NewMarshaller(cmd.OutOrStdout())
 				if err = marshaller.Marshal(c); err != nil {
 					return err
 				}
@@ -92,8 +87,7 @@ func ChannelCreate(fcTool *core.Client) *cobra.Command {
 	command.Flags().StringVar(&options.ClusterBus, "cluster-bus", "", clusterBusUsage)
 	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", "the `namespace` of the channel and any non-cluster bus")
 
-	command.Flags().BoolVarP(&write, "write", "w", false, "whether to write yaml files for created resources")
-	command.Flags().BoolVarP(&force, "force", "f", false, "whether to force writing of files if they already exist")
+	command.Flags().BoolVar(&options.DryRun, "dry-run", false, dryRunUsage)
 	return command
 }
 
@@ -112,9 +106,9 @@ func ChannelList(fcTool *core.Client) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(cmd.OutOrStdout(),"NAME")
+			fmt.Fprintln(cmd.OutOrStdout(), "NAME")
 			for _, channel := range channels.Items {
-				fmt.Fprintln(cmd.OutOrStdout(),channel.Name)
+				fmt.Fprintln(cmd.OutOrStdout(), channel.Name)
 			}
 
 			return nil

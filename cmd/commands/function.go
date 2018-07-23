@@ -43,8 +43,6 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	createFunctionOptions := core.CreateFunctionOptions{}
 	createSubscriptionOptions := core.CreateSubscriptionOptions{}
 
-	var write, force = false, false
-
 	invokers := map[string]string{
 		"java": "https://github.com/projectriff/java-function-invoker/raw/v0.0.7/java-invoker.yaml",
 		"node": "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
@@ -99,24 +97,20 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 				}
 			}
 
-			if write {
-				fmarshaller, err := NewMarshaller(fmt.Sprintf("%s-service.yaml", fnName), force)
-				if err != nil {
+			if createFunctionOptions.DryRun {
+				marshaller := NewMarshaller(cmd.OutOrStdout())
+				if err = marshaller.Marshal(f); err != nil {
 					return err
 				}
-				if err = fmarshaller.Marshal(f); err != nil {
-					return err
+				if c != nil {
+					if err = marshaller.Marshal(c); err != nil {
+						return err
+					}
 				}
-				if createChannelOptions.Name != "" {
-					cmarshaller, err := NewMarshaller(fmt.Sprintf("%s-channel.yaml", createChannelOptions.Name), force)
-					if err = cmarshaller.Marshal(c); err != nil {
+				if subscr != nil {
+					if err = marshaller.Marshal(subscr); err != nil {
 						return err
 					}
-					smarshaller, err := NewMarshaller(fmt.Sprintf("%s-subscription.yaml", subscr.Name), force)
-					if err = smarshaller.Marshal(subscr); err != nil {
-						return err
-					}
-
 				}
 			}
 
@@ -143,6 +137,15 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 		"input", "i", "name of the function's input `channel`, if any",
 	)
 
+	command.Flags().VarPF(
+		BroadcastBoolValue(false,
+			&createFunctionOptions.DryRun,
+			&createChannelOptions.DryRun,
+			&createSubscriptionOptions.DryRun,
+		),
+		"dry-run", "", dryRunUsage,
+	).NoOptDefVal = "true"
+
 	command.Flags().StringVar(&createChannelOptions.Bus, "bus", "", busUsage)
 	command.Flags().StringVar(&createChannelOptions.ClusterBus, "cluster-bus", "", clusterBusUsage)
 
@@ -153,9 +156,6 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` of the function code to use")
 	command.Flags().StringVar(&createFunctionOptions.Handler, "handler", "", "the name of the `method or class` to invoke, depending on the invoker used")
 	command.Flags().StringVar(&createFunctionOptions.Artifact, "artifact", "", "`path` to the function source code or jar file; auto-detected if not specified")
-
-	command.Flags().BoolVarP(&write, "write", "w", false, "whether to write yaml files for created resources")
-	command.Flags().BoolVarP(&force, "force", "f", false, "whether to force writing of files if they already exist.")
 
 	return command
 }

@@ -26,6 +26,7 @@ type CreateSubscriptionOptions struct {
 	Name       string
 	Channel    string
 	Subscriber string
+	DryRun     bool
 }
 
 func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha1.Subscription, error) {
@@ -46,7 +47,11 @@ func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha
 		},
 	}
 
-	_, e := c.eventing.ChannelsV1alpha1().Subscriptions(ns).Create(&s)
+	if !options.DryRun {
+		_, e := c.eventing.ChannelsV1alpha1().Subscriptions(ns).Create(&s)
+		return &s, e
+	} else {
+		return &s, nil
+	}
 
-	return &s, e
 }

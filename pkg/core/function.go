@@ -57,7 +57,11 @@ func (c *client) CreateFunction(options CreateFunctionOptions) (*v1alpha1.Servic
 		},
 	}
 
-	_, err := c.serving.ServingV1alpha1().Services(ns).Create(&s)
+	if !options.DryRun {
+		_, err := c.serving.ServingV1alpha1().Services(ns).Create(&s)
+		return &s, err
+	} else {
+		return &s, nil
+	}
 
-	return &s, err
 }

@@ -17,6 +17,7 @@
 package commands
 
 const (
-	clusterBusUsage = "the `name` of a cluster bus for the channel"
-	busUsage        = "the `name` of a bus for the channel"
+	clusterBusUsage = "the `name` of the cluster bus to create the channel in."
+	busUsage        = "the `name` of the bus to create the channel in."
+	dryRunUsage     = "don't create resources but print yaml representation on stdout"
 )

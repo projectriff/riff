@@ -20,10 +20,6 @@ package commands
 import (
 	"io"
 
-	"os"
-
-	"fmt"
-
 	"github.com/ghodss/yaml"
 )
 
@@ -35,16 +31,8 @@ type marshaller struct {
 	io.Writer
 }
 
-func NewMarshaller(name string, force bool) (Marshaller, error) {
-	_, err := os.Stat(name)
-	if os.IsNotExist(err) || force {
-		f, err := os.Create(name)
-		if err != nil {
-			return nil, err
-		}
-		return &marshaller{Writer: f}, nil
-	}
-	return nil, fmt.Errorf("not overwriting existing %q file", name)
+func NewMarshaller(w io.Writer) Marshaller {
+	return &marshaller{Writer: w}
 }
 
 func (w *marshaller) Marshal(o interface{}) error {

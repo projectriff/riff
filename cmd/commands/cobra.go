@@ -25,10 +25,12 @@ import (
 	"io"
 	"text/template"
 
+	"errors"
+	"strconv"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation"
-	"errors"
 )
 
 // =============================================== Args related functions ==============================================
@@ -91,7 +93,6 @@ func ArgNamePrefix(cmd *cobra.Command, args []string) error {
 	}
 	return nil
 }
-
 
 // =============================================== Flags related functions =============================================
 
@@ -260,6 +261,39 @@ func BroadcastStringValue(value string, ptrs ...*string) pflag.Value {
 		*ptrs[i] = value
 	}
 	return broadcastStringValue(ptrs)
+}
+
+type broadcastBoolValue []*bool
+
+func (bbv broadcastBoolValue) Set(v string) error {
+	b, err := strconv.ParseBool(v)
+	if err != nil {
+		return err
+	}
+	for _, p := range bbv {
+		*p = b
+	}
+	return nil
+}
+
+func (bbv broadcastBoolValue) String() string {
+	return strconv.FormatBool(*bbv[0])
+}
+
+func (bbv broadcastBoolValue) Type() string {
+	return "bool"
+}
+
+func (bbv broadcastBoolValue) IsBoolFlag() bool { return true }
+
+func BroadcastBoolValue(value bool, ptrs ...*bool) pflag.Value {
+	if len(ptrs) < 1 {
+		panic("At least one bool pointer must be provided")
+	}
+	for i, _ := range ptrs {
+		*ptrs[i] = value
+	}
+	return broadcastBoolValue(ptrs)
 }
 
 // =========================================== Usage related functions =================================================
