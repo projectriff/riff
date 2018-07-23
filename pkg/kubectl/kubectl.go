@@ -38,7 +38,7 @@ func (kc *processKubeCtl) Exec(cmdArgs []string) (string, error) {
 }
 
 func (kc *processKubeCtl) ExecStdin(cmdArgs []string, stdin *[]byte) (string, error) {
-	out, err := osutils.ExecStdin("kubectl", cmdArgs, stdin, 20*time.Second)
+	out, err := osutils.ExecStdin("kubectl", cmdArgs, stdin, 60*time.Second)
 	return string(out), err
 }
 
