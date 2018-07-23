@@ -377,3 +377,21 @@ func useline(c *cobra.Command) string {
 
 	return result + flags
 }
+
+// =========================================== General Cobra functions =================================================
+
+// Visit applies the provided function f to the given command and its children, depth first.
+// Exits as soon as an error occurs.
+func Visit(cmd *cobra.Command, f func(c *cobra.Command) error) error {
+	err := f(cmd)
+	if err != nil {
+		return err
+	}
+	for _, c := range cmd.Commands() {
+		err := Visit(c, f)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}

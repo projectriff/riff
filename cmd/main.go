@@ -19,6 +19,8 @@ package main
 import (
 	"os"
 
+	"fmt"
+
 	"github.com/projectriff/riff-cli/cmd/commands"
 )
 
@@ -28,6 +30,7 @@ func main() {
 
 	err := root.Execute()
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 }

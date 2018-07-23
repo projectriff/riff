@@ -89,6 +89,7 @@ func CreateAndWireRootCommand() *cobra.Command {
 		Long: `riff is for functions
 
 the riff core is used to create and manage function resources for the riff FaaS platform https://projectriff.io/`,
+		SilenceErrors:              true, // We'll print errors ourselves (after usage rather than before)
 		DisableAutoGenTag:          true,
 		SuggestionsMinimumDistance: 2,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
@@ -148,6 +149,19 @@ the riff core is used to create and manage function resources for the riff FaaS 
 		system,
 		Docs(rootCmd),
 	)
+
+	Visit(rootCmd, func(c *cobra.Command) error {
+		// Disable usage printing as soon as we enter RunE(), as errors that happen from then on
+		// are not mis-usage error, but "regular" runtime errors
+		exec := c.RunE
+		if exec != nil {
+			c.RunE = func(cmd *cobra.Command, args []string) error {
+				c.SilenceUsage = true
+				return exec(cmd, args)
+			}
+		}
+		return nil
+	})
 
 	return rootCmd
 }
