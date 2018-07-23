@@ -30,7 +30,7 @@ riff function create [flags]
   -h, --help                           help for create
       --image repository/image[:tag]   the name of the image to build; must be a writable repository/image[:tag] with credentials configured
   -i, --input channel                  name of the function's input channel, if any
-  -n, --namespace namespace            the namespace of the function and the specified resources
+  -n, --namespace namespace            the namespace of the subscription, channel, and function
   -w, --write                          whether to write yaml files for created resources
 ```
 
