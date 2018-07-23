@@ -17,7 +17,7 @@
 package commands
 
 const (
-	namespaceUsage  = "the `namespace` to use when interacting with resources."
-	clusterBusUsage = "the `name` of the cluster bus to create the channel in."
-	busUsage        = "the `name` of the bus to create the channel in."
+	namespaceUsage  = "the `namespace` of resource names"
+	clusterBusUsage = "the `name` of a cluster bus for the channel"
+	busUsage        = "the `name` of a bus for the channel"
 )

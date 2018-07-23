@@ -1,10 +1,10 @@
 ## riff channel list
 
-List channel resources.
+List channels
 
 ### Synopsis
 
-List channel resources.
+List channels
 
 ```
 riff channel list [flags]
@@ -14,24 +14,24 @@ riff channel list [flags]
 
 ```
   riff channel list
-riff channel list --namespace joseph-ns
+  riff channel list --namespace joseph-ns
 ```
 
 ### Options
 
 ```
   -h, --help                  help for list
-  -n, --namespace namespace   the namespace to use when interacting with resources.
+  -n, --namespace namespace   the namespace of resource names
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --kubeconfig path   path to a kubeconfig. (default "~/.kube/config")
-      --master address    the address of the Kubernetes API server. Overrides any value in kubeconfig.
+      --kubeconfig path   the path of a kubeconfig (default "~/.kube/config")
+      --master address    the address of the Kubernetes API server; overrides any value in kubeconfig
 ```
 
 ### SEE ALSO
 
-* [riff channel](riff_channel.md)	 - interact with channel related resources
+* [riff channel](riff_channel.md)	 - Interact with channel related resources
 

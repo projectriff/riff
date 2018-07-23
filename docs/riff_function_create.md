@@ -1,10 +1,10 @@
 ## riff function create
 
-create a new function resource, with optional input binding
+Create a new function resource, with optional input binding
 
 ### Synopsis
 
-create a new function resource, with optional input binding
+Create a new function resource, with optional input binding
 
 ```
 riff function create [flags]
@@ -20,28 +20,28 @@ riff function create [flags]
 ### Options
 
 ```
-      --artifact path                  path to the function artifact, source code or jar file. Attempts detection if not specified.
-      --bus name                       the name of the bus to create the channel in.
-      --cluster-bus name               the name of the cluster bus to create the channel in.
-  -f, --force                          force writing of files if they already exist.
-      --git-repo URL                   the URL for the git repo hosting the function source.
-      --git-revision ref-spec          the git ref-spec to build. (default "master")
-      --handler method or class        name of method or class to invoke. See specific invoker for detail.
+      --artifact path                  path to the function source code or jar file; auto-detected if not specified
+      --bus name                       the name of a bus for the channel
+      --cluster-bus name               the name of a cluster bus for the channel
+  -f, --force                          whether to force writing of files if they already exist.
+      --git-repo URL                   the URL for a git repository hosting the function code
+      --git-revision ref-spec          the git ref-spec of the function code to use (default "master")
+      --handler method or class        the name of the method or class to invoke, depending on the invoker used
   -h, --help                           help for create
-      --image repository/image[:tag]   the name of the image to build. Must be a writable repository/image[:tag] with write credentials configured.
-  -i, --input channel                  name of the input channel to subscribe the function to.
-  -n, --namespace namespace            the namespace to use when interacting with resources.
-  -w, --write                          whether to write yaml files for created resources.
+      --image repository/image[:tag]   the name of the image to build; must be a writable repository/image[:tag] with credentials configured
+  -i, --input channel                  name of the function's input channel, if any
+  -n, --namespace namespace            the namespace of resource names
+  -w, --write                          whether to write yaml files for created resources
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --kubeconfig path   path to a kubeconfig. (default "~/.kube/config")
-      --master address    the address of the Kubernetes API server. Overrides any value in kubeconfig.
+      --kubeconfig path   the path of a kubeconfig (default "~/.kube/config")
+      --master address    the address of the Kubernetes API server; overrides any value in kubeconfig
 ```
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - interact with function related resources
+* [riff function](riff_function.md)	 - Interact with function related resources
 

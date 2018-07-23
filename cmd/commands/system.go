@@ -33,7 +33,8 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "install",
-		Short: "install the riff and Knative system components",
+		Short: "Install the riff and Knative system components",
+		// TODO: add Long help text to explain when to use NodePort instead of LoadBalancer
 		Example: `  riff system install`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*kc).SystemInstall(options)
@@ -44,7 +45,7 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
 		},
 	}
 
-	command.Flags().BoolVarP(&options.NodePort, "node-port", "", false, "use NodePort instead of LoadBalancer for ingress gateways")
+	command.Flags().BoolVarP(&options.NodePort, "node-port", "", false, "whether to use NodePort instead of LoadBalancer for ingress gateways")
 
 	return command
 }

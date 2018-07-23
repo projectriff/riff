@@ -64,8 +64,8 @@ const (
 func Service() *cobra.Command {
 	return &cobra.Command{
 		Use:   "service",
-		Short: "interact with service related resources",
-		Long:  "interact with service (as in service.serving.knative.dev) related resources",
+		Short: "Interact with service related resources",
+		Long:  "Interact with service (as in service.serving.knative.dev) related resources.",
 	}
 }
 
@@ -79,7 +79,8 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "create",
-		Short: "create a new service resource, with optional input binding",
+		Short: "Create a new service resource, with optional input binding",
+		// TODO add Long help text which mentions image
 		Example: `  riff service create square --image acme/square:1.0 --namespace joseph-ns
   riff service create tweets-logger --image acme/tweets-logger:1.0.0 --input tweets --bus kafka`,
 		Args: ArgValidationConjunction(
@@ -142,7 +143,7 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 		},
 	}
 
-	LabelArgs(command, "<service-name>")
+	LabelArgs(command, "SERVICE_NAME")
 
 	command.Flags().VarP(
 		BroadcastStringValue("",
@@ -158,16 +159,16 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 			&createChannelOptions.Name,
 			&createSubscriptionOptions.Channel,
 		),
-		"input", "i", "name of the input `channel` to subscribe the service to.",
+		"input", "i", "name of the service's input `channel`, if any",
 	)
 
 	command.Flags().StringVar(&createChannelOptions.Bus, "bus", "", busUsage)
 	command.Flags().StringVar(&createChannelOptions.ClusterBus, "cluster-bus", "", clusterBusUsage)
 
-	command.Flags().StringVar(&createServiceOptions.Image, "image", "", "reference to an already built `name[:tag]` image that contains the application/function.")
+	command.Flags().StringVar(&createServiceOptions.Image, "image", "", "the `name[:tag]` reference of an image containing the application/function")
 
 	command.Flags().BoolVarP(&write, "write", "w", false, "whether to write yaml files for created resources.")
-	command.Flags().BoolVarP(&force, "force", "f", false, "force writing of files if they already exist.")
+	command.Flags().BoolVarP(&force, "force", "f", false, "whether to force writing of files if they already exist.")
 
 	return command
 }
@@ -178,7 +179,7 @@ func ServiceStatus(fcClient *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:     "status",
-		Short:   "display the status of a service",
+		Short:   "Display the status of a service",
 		Example: `  riff service status square --namespace joseph-ns`,
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(serviceStatusNumberOfArgs),
@@ -206,7 +207,7 @@ func ServiceStatus(fcClient *core.Client) *cobra.Command {
 		},
 	}
 
-	LabelArgs(command, "<service-name>")
+	LabelArgs(command, "SERVICE_NAME")
 
 	command.Flags().StringVarP(&serviceStatusOptions.Namespace, "namespace", "n", "", namespaceUsage)
 
@@ -218,7 +219,7 @@ func ServiceList(fcClient *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "list",
-		Short: "List service resources.",
+		Short: "List service resources",
 		Example: `  riff service list
   riff service list --namespace joseph-ns`,
 		Args: cobra.ExactArgs(serviceListNumberOfArgs),
@@ -276,7 +277,7 @@ func ServiceInvoke(fcClient *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "invoke",
-		Short: "Invoke a service.",
+		Short: "Invoke a service",
 		Long: `Invoke a service by shelling out to curl.
 
 The curl command is printed so it can be copied and extended.
@@ -321,7 +322,7 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 		},
 	}
 
-	LabelArgs(command, "<service-name>")
+	LabelArgs(command, "SERVICE_NAME")
 
 	command.Flags().StringVarP(&serviceInvokeOptions.Namespace, "namespace", "n", "", namespaceUsage)
 
@@ -334,7 +335,7 @@ func ServiceSubscribe(fcClient *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:     "subscribe",
-		Short:   "subscribe a service to an existing input channel",
+		Short:   "Subscribe a service to an existing input channel",
 		Example: `  riff service subscribe square --input numbers --namespace joseph-ns`,
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(serviceSubscribeNumberOfArgs),
@@ -362,10 +363,10 @@ func ServiceSubscribe(fcClient *core.Client) *cobra.Command {
 		},
 	}
 
-	LabelArgs(command, "<service-name>")
+	LabelArgs(command, "SERVICE_NAME")
 
 	command.Flags().StringVar(&createSubscriptionOptions.Name, "subscription", "", "`name` of the subscription (default SERVICE_NAME)")
-	command.Flags().StringVarP(&createSubscriptionOptions.Channel, "input", "i", "", "name of the input `channel` to subscribe the service to.")
+	command.Flags().StringVarP(&createSubscriptionOptions.Channel, "input", "i", "", "the name of an input `channel` for the service")
 	command.MarkFlagRequired("input")
 	command.Flags().StringVarP(&createSubscriptionOptions.Namespace, "namespace", "n", "", namespaceUsage)
 
@@ -378,7 +379,7 @@ func ServiceDelete(fcClient *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:     "delete",
-		Short:   "delete an existing service",
+		Short:   "Delete an existing service",
 		Example: `  riff service delete square --namespace joseph-ns`,
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(serviceDeleteNumberOfArgs),
@@ -391,7 +392,7 @@ func ServiceDelete(fcClient *core.Client) *cobra.Command {
 		},
 	}
 
-	LabelArgs(command, "<service-name>")
+	LabelArgs(command, "SERVICE_NAME")
 
 	command.Flags().StringVarP(&deleteServiceOptions.Namespace, "namespace", "n", "", namespaceUsage)
 

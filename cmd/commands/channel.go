@@ -26,7 +26,7 @@ import (
 func Channel() *cobra.Command {
 	return &cobra.Command{
 		Use:   "channel",
-		Short: "interact with channel related resources",
+		Short: "Interact with channel related resources",
 	}
 }
 
@@ -56,7 +56,7 @@ func ChannelCreate(fcTool *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "create",
-		Short: "create a new channel on a namespace or cluster bus",
+		Short: "Create a new channel on a bus or a cluster bus",
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(channelCreateNumberOfArgs),
 			AtPosition(channelCreateNameIndex, ValidName())),
@@ -86,14 +86,14 @@ func ChannelCreate(fcTool *core.Client) *cobra.Command {
 		},
 	}
 
-	LabelArgs(command, "<channel-name>")
+	LabelArgs(command, "CHANNEL_NAME")
 
 	command.Flags().StringVar(&options.Bus, "bus", "", busUsage)
 	command.Flags().StringVar(&options.ClusterBus, "cluster-bus", "", clusterBusUsage)
 	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", namespaceUsage)
 
 	command.Flags().BoolVarP(&write, "write", "w", false, "whether to write yaml files for created resources")
-	command.Flags().BoolVarP(&force, "force", "f", false, "force writing of files if they already exist")
+	command.Flags().BoolVarP(&force, "force", "f", false, "whether to force writing of files if they already exist")
 	return command
 }
 
@@ -102,9 +102,9 @@ func ChannelList(fcTool *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "list",
-		Short: "List channel resources.",
+		Short: "List channels",
 		Example: `  riff channel list
-riff channel list --namespace joseph-ns`,
+  riff channel list --namespace joseph-ns`,
 		Args: cobra.ExactArgs(channelListNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			channels, err := (*fcTool).ListChannels(listChannelOptions)
@@ -131,7 +131,7 @@ func ChannelDelete(fcTool *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "delete",
-		Short: "delete an existing channel",
+		Short: "Delete an existing channel",
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(channelDeleteNumberOfArgs),
 			AtPosition(channelDeleteNameIndex, ValidName())),
@@ -144,7 +144,7 @@ func ChannelDelete(fcTool *core.Client) *cobra.Command {
 		},
 	}
 
-	LabelArgs(command, "<channel-name>")
+	LabelArgs(command, "CHANNEL_NAME")
 
 	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", namespaceUsage)
 	return command

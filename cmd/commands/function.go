@@ -33,7 +33,7 @@ const (
 func Function() *cobra.Command {
 	return &cobra.Command{
 		Use:   "function",
-		Short: "interact with function related resources",
+		Short: "Interact with function related resources",
 	}
 }
 
@@ -52,7 +52,8 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "create",
-		Short: "create a new function resource, with optional input binding",
+		Short: "Create a new function resource, with optional input binding",
+		// TODO: add Long help text to mention invoker, git repo. etc. and explain that a function is a subtype of service.serving.knative.dev and so that riff service list/status/invoke/delete may be used with it.
 		Example: `  riff function create node square --git-repo https://github.com/acme/square --image acme/square --namespace joseph-ns
   riff function create java tweets-logger --git-repo https://github.com/acme/tweets --image acme/tweets-logger:1.0.0 --input tweets --bus kafka`,
 		Args: ArgValidationConjunction(
@@ -123,7 +124,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 		},
 	}
 
-	LabelArgs(command, "<invoker>", "<function-name>")
+	LabelArgs(command, "INVOKER", "FUNCTION_NAME")
 
 	command.Flags().VarP(
 		BroadcastStringValue("",
@@ -139,22 +140,22 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 			&createChannelOptions.Name,
 			&createSubscriptionOptions.Channel,
 		),
-		"input", "i", "name of the input `channel` to subscribe the function to.",
+		"input", "i", "name of the function's input `channel`, if any",
 	)
 
 	command.Flags().StringVar(&createChannelOptions.Bus, "bus", "", busUsage)
 	command.Flags().StringVar(&createChannelOptions.ClusterBus, "cluster-bus", "", clusterBusUsage)
 
-	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "the name of the image to build. Must be a writable `repository/image[:tag]` with write credentials configured.")
+	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
 	command.MarkFlagRequired("image")
-	command.Flags().StringVar(&createFunctionOptions.GitRepo, "git-repo", "", "the `URL` for the git repo hosting the function source.")
+	command.Flags().StringVar(&createFunctionOptions.GitRepo, "git-repo", "", "the `URL` for a git repository hosting the function code")
 	command.MarkFlagRequired("git-repo")
-	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` to build.")
-	command.Flags().StringVar(&createFunctionOptions.Handler, "handler", "", "name of `method or class` to invoke. See specific invoker for detail.")
-	command.Flags().StringVar(&createFunctionOptions.Artifact, "artifact", "", "`path` to the function artifact, source code or jar file. Attempts detection if not specified.")
+	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` of the function code to use")
+	command.Flags().StringVar(&createFunctionOptions.Handler, "handler", "", "the name of the `method or class` to invoke, depending on the invoker used")
+	command.Flags().StringVar(&createFunctionOptions.Artifact, "artifact", "", "`path` to the function source code or jar file; auto-detected if not specified")
 
-	command.Flags().BoolVarP(&write, "write", "w", false, "whether to write yaml files for created resources.")
-	command.Flags().BoolVarP(&force, "force", "f", false, "force writing of files if they already exist.")
+	command.Flags().BoolVarP(&write, "write", "w", false, "whether to write yaml files for created resources")
+	command.Flags().BoolVarP(&force, "force", "f", false, "whether to force writing of files if they already exist.")
 
 	return command
 }

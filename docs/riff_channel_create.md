@@ -1,10 +1,10 @@
 ## riff channel create
 
-create a new channel on a namespace or cluster bus
+Create a new channel on a bus or a cluster bus
 
 ### Synopsis
 
-create a new channel on a namespace or cluster bus
+Create a new channel on a bus or a cluster bus
 
 ```
 riff channel create [flags]
@@ -20,22 +20,22 @@ riff channel create [flags]
 ### Options
 
 ```
-      --bus name              the name of the bus to create the channel in.
-      --cluster-bus name      the name of the cluster bus to create the channel in.
-  -f, --force                 force writing of files if they already exist
+      --bus name              the name of a bus for the channel
+      --cluster-bus name      the name of a cluster bus for the channel
+  -f, --force                 whether to force writing of files if they already exist
   -h, --help                  help for create
-  -n, --namespace namespace   the namespace to use when interacting with resources.
+  -n, --namespace namespace   the namespace of resource names
   -w, --write                 whether to write yaml files for created resources
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --kubeconfig path   path to a kubeconfig. (default "~/.kube/config")
-      --master address    the address of the Kubernetes API server. Overrides any value in kubeconfig.
+      --kubeconfig path   the path of a kubeconfig (default "~/.kube/config")
+      --master address    the address of the Kubernetes API server; overrides any value in kubeconfig
 ```
 
 ### SEE ALSO
 
-* [riff channel](riff_channel.md)	 - interact with channel related resources
+* [riff channel](riff_channel.md)	 - Interact with channel related resources
 

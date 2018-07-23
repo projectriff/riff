@@ -1,15 +1,15 @@
-## riff function
+## riff system
 
-Interact with function related resources
+Manage system related resources
 
 ### Synopsis
 
-Interact with function related resources
+Manage system related resources
 
 ### Options
 
 ```
-  -h, --help   help for function
+  -h, --help   help for system
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +22,5 @@ Interact with function related resources
 ### SEE ALSO
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
-* [riff function create](riff_function_create.md)	 - Create a new function resource, with optional input binding
+* [riff system install](riff_system_install.md)	 - Install the riff and Knative system components
 

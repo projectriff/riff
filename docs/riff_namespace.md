@@ -1,15 +1,15 @@
-## riff function
+## riff namespace
 
-Interact with function related resources
+Manage namespaces used for riff resources
 
 ### Synopsis
 
-Interact with function related resources
+Manage namespaces used for riff resources
 
 ### Options
 
 ```
-  -h, --help   help for function
+  -h, --help   help for namespace
 ```
 
 ### Options inherited from parent commands
@@ -22,5 +22,5 @@ Interact with function related resources
 ### SEE ALSO
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
-* [riff function create](riff_function_create.md)	 - Create a new function resource, with optional input binding
+* [riff namespace init](riff_namespace_init.md)	 - initialize riff resources in the namespace
 

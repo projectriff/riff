@@ -105,8 +105,8 @@ the riff core is used to create and manage function resources for the riff FaaS 
 
 	installAdvancedUsage(rootCmd)
 
-	rootCmd.PersistentFlags().StringVar(&kubeconfig, "kubeconfig", "~/.kube/config", "`path` to a kubeconfig.")
-	rootCmd.PersistentFlags().StringVar(&masterURL, "master", "", "the `address` of the Kubernetes API server. Overrides any value in kubeconfig.")
+	rootCmd.PersistentFlags().StringVar(&kubeconfig, "kubeconfig", "~/.kube/config", "the `path` of a kubeconfig")
+	rootCmd.PersistentFlags().StringVar(&masterURL, "master", "", "the `address` of the Kubernetes API server; overrides any value in kubeconfig")
 
 	function := Function()
 	function.AddCommand(
