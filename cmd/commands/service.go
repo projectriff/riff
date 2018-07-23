@@ -151,7 +151,7 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 			&createChannelOptions.Namespace,
 			&createSubscriptionOptions.Namespace,
 		),
-		"namespace", "n", namespaceUsage,
+		"namespace", "n", "the `namespace` of the service and any namespaced resources specified",
 	)
 
 	command.Flags().VarP(
@@ -209,7 +209,7 @@ func ServiceStatus(fcClient *core.Client) *cobra.Command {
 
 	LabelArgs(command, "SERVICE_NAME")
 
-	command.Flags().StringVarP(&serviceStatusOptions.Namespace, "namespace", "n", "", namespaceUsage)
+	command.Flags().StringVarP(&serviceStatusOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
 
 	return command
 }
@@ -266,7 +266,7 @@ func ServiceList(fcClient *core.Client) *cobra.Command {
 		},
 	}
 
-	command.Flags().StringVarP(&listServiceOptions.Namespace, "namespace", "n", "", namespaceUsage)
+	command.Flags().StringVarP(&listServiceOptions.Namespace, "namespace", "n", "", "the `namespace` of the services to be listed")
 
 	return command
 }
@@ -324,7 +324,7 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 
 	LabelArgs(command, "SERVICE_NAME")
 
-	command.Flags().StringVarP(&serviceInvokeOptions.Namespace, "namespace", "n", "", namespaceUsage)
+	command.Flags().StringVarP(&serviceInvokeOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
 
 	return command
 }
@@ -368,7 +368,7 @@ func ServiceSubscribe(fcClient *core.Client) *cobra.Command {
 	command.Flags().StringVar(&createSubscriptionOptions.Name, "subscription", "", "`name` of the subscription (default SERVICE_NAME)")
 	command.Flags().StringVarP(&createSubscriptionOptions.Channel, "input", "i", "", "the name of an input `channel` for the service")
 	command.MarkFlagRequired("input")
-	command.Flags().StringVarP(&createSubscriptionOptions.Namespace, "namespace", "n", "", namespaceUsage)
+	command.Flags().StringVarP(&createSubscriptionOptions.Namespace, "namespace", "n", "", "the `namespace` of the subscription, channel, and service")
 
 	return command
 }
@@ -394,7 +394,7 @@ func ServiceDelete(fcClient *core.Client) *cobra.Command {
 
 	LabelArgs(command, "SERVICE_NAME")
 
-	command.Flags().StringVarP(&deleteServiceOptions.Namespace, "namespace", "n", "", namespaceUsage)
+	command.Flags().StringVarP(&deleteServiceOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
 
 	return command
 }

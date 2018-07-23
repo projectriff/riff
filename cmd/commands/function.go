@@ -132,7 +132,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 			&createChannelOptions.Namespace,
 			&createSubscriptionOptions.Namespace,
 		),
-		"namespace", "n", namespaceUsage,
+		"namespace", "n", "the `namespace` of the subscription, channel, and function",
 	)
 
 	command.Flags().VarP(

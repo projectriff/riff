@@ -25,7 +25,7 @@ riff service invoke [flags]
 
 ```
   -h, --help                  help for invoke
-  -n, --namespace namespace   the namespace of resource names
+  -n, --namespace namespace   the namespace of the service
 ```
 
 ### Options inherited from parent commands

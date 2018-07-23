@@ -24,7 +24,7 @@ riff channel create [flags]
       --cluster-bus name      the name of a cluster bus for the channel
   -f, --force                 whether to force writing of files if they already exist
   -h, --help                  help for create
-  -n, --namespace namespace   the namespace of resource names
+  -n, --namespace namespace   the namespace of the channel and any non-cluster bus
   -w, --write                 whether to write yaml files for created resources
 ```
 

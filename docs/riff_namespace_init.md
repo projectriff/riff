@@ -19,9 +19,8 @@ riff namespace init [flags]
 ### Options
 
 ```
-  -h, --help                  help for init
-  -n, --namespace namespace   the namespace of resource names
-  -s, --secret secret         the name of a secret containing credentials for the image registry
+  -h, --help            help for init
+  -s, --secret secret   the name of a secret containing credentials for the image registry
 ```
 
 ### Options inherited from parent commands

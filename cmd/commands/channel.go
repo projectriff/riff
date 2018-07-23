@@ -90,7 +90,7 @@ func ChannelCreate(fcTool *core.Client) *cobra.Command {
 
 	command.Flags().StringVar(&options.Bus, "bus", "", busUsage)
 	command.Flags().StringVar(&options.ClusterBus, "cluster-bus", "", clusterBusUsage)
-	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", namespaceUsage)
+	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", "the `namespace` of the channel and any non-cluster bus")
 
 	command.Flags().BoolVarP(&write, "write", "w", false, "whether to write yaml files for created resources")
 	command.Flags().BoolVarP(&force, "force", "f", false, "whether to force writing of files if they already exist")
@@ -121,7 +121,7 @@ func ChannelList(fcTool *core.Client) *cobra.Command {
 		},
 	}
 
-	command.Flags().StringVarP(&listChannelOptions.Namespace, "namespace", "n", "", namespaceUsage)
+	command.Flags().StringVarP(&listChannelOptions.Namespace, "namespace", "n", "", "the `namespace` of the channels to be listed")
 
 	return command
 }
@@ -146,6 +146,6 @@ func ChannelDelete(fcTool *core.Client) *cobra.Command {
 
 	LabelArgs(command, "CHANNEL_NAME")
 
-	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", namespaceUsage)
+	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", "the `namespace` of the channel")
 	return command
 }

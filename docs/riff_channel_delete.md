@@ -20,7 +20,7 @@ riff channel delete [flags]
 
 ```
   -h, --help                  help for delete
-  -n, --namespace namespace   the namespace of resource names
+  -n, --namespace namespace   the namespace of the channel
 ```
 
 ### Options inherited from parent commands

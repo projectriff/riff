@@ -21,7 +21,7 @@ riff service list [flags]
 
 ```
   -h, --help                  help for list
-  -n, --namespace namespace   the namespace of resource names
+  -n, --namespace namespace   the namespace of the services to be listed
 ```
 
 ### Options inherited from parent commands

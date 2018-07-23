@@ -26,7 +26,7 @@ riff service create [flags]
   -h, --help                  help for create
       --image name[:tag]      the name[:tag] reference of an image containing the application/function
   -i, --input channel         name of the service's input channel, if any
-  -n, --namespace namespace   the namespace of resource names
+  -n, --namespace namespace   the namespace of the service and any namespaced resources specified
   -w, --write                 whether to write yaml files for created resources.
 ```
 

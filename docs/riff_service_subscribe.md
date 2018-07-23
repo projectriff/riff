@@ -21,7 +21,7 @@ riff service subscribe [flags]
 ```
   -h, --help                  help for subscribe
   -i, --input channel         the name of an input channel for the service
-  -n, --namespace namespace   the namespace of resource names
+  -n, --namespace namespace   the namespace of the subscription, channel, and service
       --subscription name     name of the subscription (default SERVICE_NAME)
 ```
 
