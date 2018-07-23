@@ -19,6 +19,7 @@ package commands
 import (
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff-cli/pkg/core"
+	"errors"
 )
 
 func System() *cobra.Command {
@@ -36,6 +37,17 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
 		Short: "Install the riff and Knative system components",
 		// TODO: add Long help text to explain when to use NodePort instead of LoadBalancer
 		Example: `  riff system install`,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			// TODO: implement support for global flags - for now don't allow their use
+			if cmd.Flags().Changed("kubeconfig") {
+				return errors.New("The 'kubeconfig' flag is not yet supported by the 'system install' command")
+			}
+			m, _ := cmd.Flags().GetString("master")
+			if len(m) > 0 {
+				return errors.New("The 'master' flag is not yet supported by the 'system install' command")
+			}
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*kc).SystemInstall(options)
 			if err != nil {
