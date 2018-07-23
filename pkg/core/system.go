@@ -17,13 +17,13 @@
 package core
 
 import (
-	"net/url"
+	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"bytes"
+	"net/url"
 	"time"
-	"errors"
 )
 
 type SystemInstallOptions struct {
@@ -144,7 +144,7 @@ func waitForIstioSidecarInjector(kc *kubectlClient) error {
 			return errors.New("istio-sidecar-injector pod failed to start")
 		}
 		if injectorStatus == "'Running'" {
-			print("\n\n", injectorStatus)
+			print(injectorStatus, "\n\n")
 			return nil
 		}
 		time.Sleep(10 * time.Second) // wait for it to start
