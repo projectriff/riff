@@ -346,7 +346,9 @@ func ServiceSubscribe(fcClient *core.Client) *cobra.Command {
 
 			fnName := args[serviceSubscribeServiceNameIndex]
 
-			createSubscriptionOptions.Name = subscriptionNameFromService(fnName)
+			if createSubscriptionOptions.Name == "" {
+				createSubscriptionOptions.Name = subscriptionNameFromService(fnName)
+			}
 			createSubscriptionOptions.Subscriber = subscriberNameFromService(fnName)
 			s, err := (*fcClient).CreateSubscription(createSubscriptionOptions)
 			if err != nil {
@@ -362,6 +364,7 @@ func ServiceSubscribe(fcClient *core.Client) *cobra.Command {
 
 	LabelArgs(command, "<service-name>")
 
+	command.Flags().StringVar(&createSubscriptionOptions.Name, "subscription", "", "`name` of the subscription (default SERVICE_NAME)")
 	command.Flags().StringVarP(&createSubscriptionOptions.Channel, "input", "i", "", "name of the input `channel` to subscribe the service to.")
 	command.MarkFlagRequired("input")
 	command.Flags().StringVarP(&createSubscriptionOptions.Namespace, "namespace", "n", "", namespaceUsage)
