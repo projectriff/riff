@@ -23,4 +23,4 @@ the riff core is used to create and manage function resources for the riff FaaS 
 * [riff namespace](riff_namespace.md)	 - Manage namespaces used for riff resources
 * [riff service](riff_service.md)	 - Interact with service related resources
 * [riff system](riff_system.md)	 - Manage system related resources
-
+* [riff version](riff_version.md)	 - Print version information about riff

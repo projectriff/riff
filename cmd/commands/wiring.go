@@ -148,6 +148,7 @@ the riff core is used to create and manage function resources for the riff FaaS 
 		namespace,
 		system,
 		Docs(rootCmd),
+		Version(),
 	)
 
 	Visit(rootCmd, func(c *cobra.Command) error {
