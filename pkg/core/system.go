@@ -99,13 +99,7 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) error {
 	print("Applying Stub ClusterBus resource: ", busUrl.String(), "\n")
 	busLog, err := kc.kubeCtl.Exec([]string{"apply", "-f", busUrl.String()})
 	print(busLog, "\n")
-	if err != nil {
-		return err
-	}
-
-	print("riff system install is complete\n", "\n")
-
-	return nil
+	return err
 }
 
 func resolveReleaseURLs(filename string) (url.URL, error) {

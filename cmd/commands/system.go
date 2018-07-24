@@ -53,6 +53,8 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
+			printSuccessfulCompletion(cmd)
 			return nil
 		},
 	}

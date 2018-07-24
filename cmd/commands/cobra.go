@@ -395,3 +395,7 @@ func Visit(cmd *cobra.Command, f func(c *cobra.Command) error) error {
 	}
 	return nil
 }
+
+func printSuccessfulCompletion(cmd *cobra.Command) {
+	fmt.Fprintf(cmd.OutOrStdout(), "%s completed successfully\n", cmd.CommandPath())
+}

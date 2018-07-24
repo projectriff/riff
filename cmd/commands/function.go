@@ -112,9 +112,11 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 						return err
 					}
 				}
+			} else {
+				printSuccessfulCompletion(cmd)
 			}
 
-			return err
+			return nil
 		},
 	}
 

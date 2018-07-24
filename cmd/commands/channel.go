@@ -75,6 +75,8 @@ func ChannelCreate(fcTool *core.Client) *cobra.Command {
 				if err = marshaller.Marshal(c); err != nil {
 					return err
 				}
+			} else {
+				printSuccessfulCompletion(cmd)
 			}
 
 			return nil
@@ -138,7 +140,12 @@ func ChannelDelete(fcTool *core.Client) *cobra.Command {
 			options.Name = args[channelDeleteNameIndex]
 
 			err := (*fcTool).DeleteChannel(options)
-			return err
+			if err != nil {
+				return err
+			}
+
+			printSuccessfulCompletion(cmd)
+			return nil
 		},
 	}
 

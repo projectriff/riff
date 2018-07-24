@@ -132,9 +132,11 @@ If an input channel and bus are specified, create the channel in the bus and sub
 						return err
 					}
 				}
+			} else {
+				printSuccessfulCompletion(cmd)
 			}
 
-			return err
+			return nil
 		},
 	}
 
@@ -364,7 +366,8 @@ func ServiceSubscribe(fcClient *core.Client) *cobra.Command {
 				return err
 			}
 
-			return err
+			printSuccessfulCompletion(cmd)
+			return nil
 		},
 	}
 
@@ -393,7 +396,13 @@ func ServiceDelete(fcClient *core.Client) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			fnName := args[serviceDeleteServiceNameIndex]
 			deleteServiceOptions.Name = fnName
-			return (*fcClient).DeleteService(deleteServiceOptions)
+			err := (*fcClient).DeleteService(deleteServiceOptions)
+			if err != nil {
+				return err
+			}
+
+			printSuccessfulCompletion(cmd)
+			return nil
 		},
 	}
 
