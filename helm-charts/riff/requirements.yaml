@@ -1,6 +1,0 @@
-dependencies:
-- name: kafka
-  version: 0.0.2
-  repository: https://riff-charts.storage.googleapis.com/
-  condition: kafka.create
-

@@ -1,3 +1,0 @@
-= gRPC Go
-
-See the official https://grpc.io/docs/quickstart/go.html[gRPC for Go] reference guide.

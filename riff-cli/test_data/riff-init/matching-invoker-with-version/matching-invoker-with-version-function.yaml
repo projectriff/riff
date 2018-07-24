@@ -1,9 +1,0 @@
----
-apiVersion: projectriff.io/v1alpha1
-kind: Function
-metadata:
-  name: matching-invoker-with-version
-spec:
-  container:
-    image: rifftest/matching-invoker-with-version:latest
-  protocol: grpc

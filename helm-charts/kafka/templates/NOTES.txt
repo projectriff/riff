@@ -1,3 +1,0 @@
-1. Connect to the installed Kafka cluster by using:
-   Kafka broker nodes: {{ template "kafka.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.kafka.service.externalPort }}
-   Zookeeper nodes: {{ template "kafka.zkname" . }}.{{ .Release.Namespace }}:{{ .Values.zookeeper.service.externalPort }}
