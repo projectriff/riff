@@ -1,9 +1,11 @@
 language: go
 go:
 - '1.10'
+install: "go get -u github.com/golang/dep/cmd/dep"
 matrix:
   include:
   - stage: test
+    script: make test
   - stage: fats
     script: "curl -s -L https://github.com/projectriff/fats/raw/master/.travis.fats-trigger.sh | bash"
 stages:
