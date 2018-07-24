@@ -30,6 +30,10 @@
   version = "v0.0.3"
 
 [[constraint]]
+  name = "github.com/spf13/pflag"
+  version = "v1.0.1"
+
+[[constraint]]
   name = "k8s.io/api"
   version = "kubernetes-1.10.0"
 
@@ -47,11 +51,18 @@
 
 [[constraint]]
   name = "github.com/knative/eventing"
-  branch = "master"
+  revision = "f3ce0d1847b51a47918870ec1dea7871e813a8c6" # Awaiting proper tag / blessed sha
 
-  # HEAD as of 2018-06-29
-  #revision = "22e3cb0f057daf224ef3af5cc37feb9b152f880e"
+[[constraint]]
+  name = "github.com/knative/serving"
+  version = "v0.1.0"
+
+[[constraint]]
+  name = "github.com/knative/build"
+  # This is v0.1.0, but dep doesn't know how to detect that. Can't use v0.1.0 because serving has a dependency against
+  # the sha, not the logical v0.1.0 tag...
+  revision = "5c1d8c8469d1ed34b2aecf4c2305b3a57fff2ee3"
 
 [[constraint]]
   name = "github.com/ghodss/yaml"
-  branch = "master"
+  version = "v1.0.0"
