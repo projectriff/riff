@@ -4,9 +4,10 @@ Commands for creating and managing function resources
 
 ### Synopsis
 
-riff is for functions
+riff is for functions.
 
-the riff core is used to create and manage function resources for the riff FaaS platform https://projectriff.io/
+riff is a CLI for functions on Knative.
+See https://projectriff.io and https://github.com/knative/docs
 
 ### Options
 

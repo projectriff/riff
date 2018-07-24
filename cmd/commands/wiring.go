@@ -86,9 +86,10 @@ func CreateAndWireRootCommand() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "riff",
 		Short: "Commands for creating and managing function resources",
-		Long: `riff is for functions
+		Long: `riff is for functions.
 
-the riff core is used to create and manage function resources for the riff FaaS platform https://projectriff.io/`,
+riff is a CLI for functions on Knative.
+See https://projectriff.io and https://github.com/knative/docs`,
 		SilenceErrors:              true, // We'll print errors ourselves (after usage rather than before)
 		DisableAutoGenTag:          true,
 		SuggestionsMinimumDistance: 2,
