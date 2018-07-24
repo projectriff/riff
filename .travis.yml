@@ -1,6 +1,7 @@
 language: go
 go:
 - '1.10'
+install: "go get -u github.com/golang/dep/cmd/dep"
 matrix:
   include:
   - stage: test
