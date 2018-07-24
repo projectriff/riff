@@ -19,10 +19,8 @@ debug
 
 .DS_Store
 
-## Simulator artefacts ###
-*.dat
-*-results.png
-function-controller/simulator
-
-# The following files are created/updated by Makefiles when `make dockerize` is invoked
-.dockerize
+/riff
+/riff.exe
+/riff-darwin-amd64.tgz
+/riff-linux-amd64.tgz
+/riff-windows-amd64.zip

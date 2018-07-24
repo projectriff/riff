@@ -1,0 +1,57 @@
+= riff is for functions image:https://travis-ci.org/projectriff/riff.svg?branch=master["Build Status", link="https://travis-ci.org/projectriff/riff"]
+
+image::logo.png[riff logo, link=https://projectriff.io/]
+= A FaaS for Kubernetes
+
+The riff project builds on top of the link:https://github.com/knative/[Knative] project's build, serving and eventing features.
+
+== Installation of the latest release
+
+See link:https://projectriff.io/docs/getting-started-with-knative-riff-on-minikube/[Getting started on Minikube] or
+link:https://projectriff.io/docs/getting-started-with-knative-riff-on-gke/[Getting started on GKE] for how to install the riff CLI and the riff system.
+
+== Developer installation of Knative
+
+See link:https://github.com/knative/eventing/blob/master/DEVELOPMENT.md[Development] to install the Knative Build, Serving and Eventing projects.
+
+== [[manual]] Manual build of the riff CLI
+
+This is the best option if you want to modify the riff CLI.
+
+=== Prerequisites
+
+You need:
+
+* A working Go environment
+
+=== Get the main riff repo
+
+[source, bash]
+----
+go get -d github.com/projectriff/riff/...
+----
+
+=== Build the riff CLI
+
+[source, bash]
+----
+cd $(go env GOPATH)/src/github.com/projectriff/riff
+make build
+----
+
+=== Build and install the riff CLI
+
+[source, bash]
+----
+cd $(go env GOPATH)/src/github.com/projectriff/riff
+make build install
+----
+NOTE: This installs the CLI in `$GOBIN`, or if that is not set, in the `bin` subdirectory of the directory specified in `$GOPATH`.
+
+== Contributing to riff
+
+Please refer to the link:CONTRIBUTING.adoc[Contributors' Guide].
+
+== Maintaining riff
+
+Please refer to the link:MAINTAINING.adoc[Maintainers' Guide].
