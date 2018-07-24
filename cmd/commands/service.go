@@ -230,40 +230,44 @@ func ServiceList(fcClient *core.Client) *cobra.Command {
 				return err
 			}
 
-			maxServiceNameLength := 0
-			for _, service := range services.Items {
-				if len(service.Name) > maxServiceNameLength {
-					maxServiceNameLength = len(service.Name)
-				}
-			}
-			pad := fmt.Sprintf("%%-%ds%%s\n", maxServiceNameLength+1)
-
-			fmt.Fprintf(cmd.OutOrStdout(), pad, "NAME", "STATUS")
-			for _, service := range services.Items {
-				serviceStatusOptions := core.ServiceStatusOptions{
-					Namespaced: listServiceOptions.Namespaced,
-					Name:       service.Name,
-				}
-
-				cond, err := (*fcClient).ServiceStatus(serviceStatusOptions)
-				var status string
-				if err != nil {
-					status = err.Error()
-				} else {
-					switch cond.Status {
-					case v1.ConditionTrue:
-						status = "Running"
-					case v1.ConditionFalse:
-						status = fmt.Sprintf("%s: %s", cond.Reason, cond.Message)
-					default:
-						status = "Unknown"
+			if len(services.Items) == 0 {
+				fmt.Fprintln(cmd.OutOrStdout(), "No resources found.")
+			} else {
+				maxServiceNameLength := 0
+				for _, service := range services.Items {
+					if len(service.Name) > maxServiceNameLength {
+						maxServiceNameLength = len(service.Name)
 					}
 				}
+				pad := fmt.Sprintf("%%-%ds%%s\n", maxServiceNameLength+1)
 
-				fmt.Fprintf(cmd.OutOrStdout(), pad, service.Name, status)
+				fmt.Fprintf(cmd.OutOrStdout(), pad, "NAME", "STATUS")
+				for _, service := range services.Items {
+					serviceStatusOptions := core.ServiceStatusOptions{
+						Namespaced: listServiceOptions.Namespaced,
+						Name:       service.Name,
+					}
+
+					cond, err := (*fcClient).ServiceStatus(serviceStatusOptions)
+					var status string
+					if err != nil {
+						status = err.Error()
+					} else {
+						switch cond.Status {
+						case v1.ConditionTrue:
+							status = "Running"
+						case v1.ConditionFalse:
+							status = fmt.Sprintf("%s: %s", cond.Reason, cond.Message)
+						default:
+							status = "Unknown"
+						}
+					}
+
+					fmt.Fprintf(cmd.OutOrStdout(), pad, service.Name, status)
+				}
 			}
 
-			return err
+			return nil
 		},
 	}
 

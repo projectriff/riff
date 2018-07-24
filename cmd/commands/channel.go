@@ -106,9 +106,13 @@ func ChannelList(fcTool *core.Client) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintln(cmd.OutOrStdout(), "NAME")
-			for _, channel := range channels.Items {
-				fmt.Fprintln(cmd.OutOrStdout(), channel.Name)
+			if len(channels.Items) == 0 {
+				fmt.Fprintln(cmd.OutOrStdout(), "No resources found.")
+			} else {
+				fmt.Fprintln(cmd.OutOrStdout(), "NAME")
+				for _, channel := range channels.Items {
+					fmt.Fprintln(cmd.OutOrStdout(), channel.Name)
+				}
 			}
 
 			return nil
