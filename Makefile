@@ -3,6 +3,7 @@ OUTPUT = ./riff
 GO_SOURCES = $(shell find cmd pkg -type f -name '*.go' -not -name 'mock_*.go')
 VERSION ?= $(shell cat VERSION)
 LDFLAGS_VERSION = -X github.com/projectriff/riff-cli/cmd/commands.cli_version=$(VERSION)
+GOBIN ?= $(shell go env GOPATH)/bin
 
 all: test docs
 
@@ -10,6 +11,9 @@ build: $(OUTPUT)
 
 test: build
 	go test ./...
+
+install: build
+	cp $(OUTPUT) $(GOBIN)
 
 $(OUTPUT): $(GO_SOURCES) vendor VERSION
 	go build -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)" cmd/main.go
