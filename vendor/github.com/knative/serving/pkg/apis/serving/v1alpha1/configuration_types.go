@@ -181,7 +181,6 @@ func (cs *ConfigurationStatus) setCondition(new *ConfigurationCondition) {
 	if new == nil {
 		return
 	}
-
 	t := new.Type
 	var conditions []ConfigurationCondition
 	for _, cond := range cs.Conditions {
@@ -258,6 +257,15 @@ func (cs *ConfigurationStatus) MarkLatestCreatedFailed(name, message string) {
 			Message: fmt.Sprintf("Revision %q failed with message: %q.", name, message),
 		})
 	}
+}
+
+func (cs *ConfigurationStatus) MarkRevisionCreationFailed(message string) {
+	cs.setCondition(&ConfigurationCondition{
+		Type:    ConfigurationConditionReady,
+		Status:  corev1.ConditionFalse,
+		Reason:  "RevisionFailed",
+		Message: fmt.Sprintf("Revision creation failed with message: %q.", message),
+	})
 }
 
 func (cs *ConfigurationStatus) MarkLatestReadyDeleted() {

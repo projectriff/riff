@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/sets"
 
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -51,17 +52,8 @@ type FeedSpec struct {
 // FeedAction specifies the target handler - a Knative route or channel - for
 // events produced by an EventTrigger.
 type FeedAction struct {
-	// You must specify one and only of these.
-
-	// RouteName specifies Knative route as a target.
-	RouteName string `json:"routeName,omitempty"`
-
-	// ChannelName specifies the channel name as a target
-	// If ChannelName specifies a full DNS (for example:
-	// flow-example-channel.default.svc.cluster.local)
-	// it's returned as is.
-	// TODO: clean up the action names.
-	ChannelName string `json:"channelName,omitempty"`
+	// DNSName is the target for this feed.
+	DNSName string `json:"dnsName,omitempty"`
 }
 
 // EventTrigger specifies the intention that a particular event type and
@@ -178,6 +170,10 @@ type FeedConditionType string
 const (
 	// FeedConditionReady specifies that the feed has started successfully.
 	FeedConditionReady FeedConditionType = "Ready"
+
+	// FeedConditionDependenciesSatisfied specifies that all the dependencies for
+	// feed have been satisfied
+	FeedConditionDependenciesSatisfied FeedConditionType = "DependenciesSatisfied"
 )
 
 // FeedCondition defines a readiness condition for a Feed.
@@ -235,4 +231,64 @@ func (fs *FeedStatus) RemoveCondition(t FeedConditionType) {
 		}
 	}
 	fs.Conditions = conditions
+}
+
+func (fs *FeedStatus) InitializeConditions() {
+	for _, cond := range []FeedConditionType{
+		FeedConditionReady,
+	} {
+		if fc := fs.GetCondition(cond); fc == nil {
+			fs.SetCondition(&FeedCondition{
+				Type:   cond,
+				Status: corev1.ConditionUnknown,
+			})
+		}
+	}
+}
+
+// AddFinalizer adds the given value to the list of finalizers if it doesn't
+// already exist.
+func (f *Feed) AddFinalizer(value string) {
+	finalizers := sets.NewString(f.GetFinalizers()...)
+	finalizers.Insert(value)
+	f.SetFinalizers(finalizers.List())
+}
+
+// RemoveFinalizer removes the given value from the list of finalizers if it
+// exists.
+func (f *Feed) RemoveFinalizer(value string) {
+	finalizers := sets.NewString(f.GetFinalizers()...)
+	finalizers.Delete(value)
+	if finalizers.Len() == 0 {
+		// if no finalizers, set to nil list, not an empty slice.
+		f.SetFinalizers([]string(nil))
+	} else {
+		f.SetFinalizers(finalizers.List())
+	}
+}
+
+// HasFinalizer returns true if a finalizer exists, or false otherwise.
+func (f *Feed) HasFinalizer(value string) bool {
+	for _, f := range f.GetFinalizers() {
+		if f == value {
+			return true
+		}
+	}
+	return false
+}
+
+// SetOwnerReference adds the given owner reference to the list of owner
+// references, replacing the corresponding owner reference if it exists.
+func (f *Feed) SetOwnerReference(or *metav1.OwnerReference) {
+	var refs []metav1.OwnerReference
+
+	for _, ref := range f.GetOwnerReferences() {
+		if !(ref.APIVersion == or.APIVersion &&
+			ref.Kind == or.Kind &&
+			ref.Name == or.Name) {
+			refs = append(refs, ref)
+		}
+	}
+	refs = append(refs, *or)
+	f.SetOwnerReferences(refs)
 }
