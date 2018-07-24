@@ -28,7 +28,6 @@ import (
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 	"k8s.io/api/core/v1"
 )
 
@@ -350,8 +349,6 @@ func ServiceSubscribe(fcClient *core.Client) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			e := yaml.NewEncoder(cmd.OutOrStdout())
-
 			fnName := args[serviceSubscribeServiceNameIndex]
 
 			if createSubscriptionOptions.Name == "" {
@@ -362,11 +359,14 @@ func ServiceSubscribe(fcClient *core.Client) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if err = e.Encode(s); err != nil {
-				return err
+			if createSubscriptionOptions.DryRun {
+				marshaller := NewMarshaller(cmd.OutOrStdout())
+				if err = marshaller.Marshal(s); err != nil {
+					return err
+				}
+			} else {
+				printSuccessfulCompletion(cmd)
 			}
-
-			printSuccessfulCompletion(cmd)
 			return nil
 		},
 	}
@@ -377,6 +377,7 @@ func ServiceSubscribe(fcClient *core.Client) *cobra.Command {
 	command.Flags().StringVarP(&createSubscriptionOptions.Channel, "input", "i", "", "the name of an input `channel` for the service")
 	command.MarkFlagRequired("input")
 	command.Flags().StringVarP(&createSubscriptionOptions.Namespace, "namespace", "n", "", "the `namespace` of the subscription, channel, and service")
+	command.Flags().BoolVar(&createSubscriptionOptions.DryRun, "dry-run", false, dryRunUsage)
 
 	return command
 }

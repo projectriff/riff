@@ -19,6 +19,7 @@ riff service subscribe [flags]
 ### Options
 
 ```
+      --dry-run               don't create resources but print yaml representation on stdout
   -h, --help                  help for subscribe
   -i, --input channel         the name of an input channel for the service
   -n, --namespace namespace   the namespace of the subscription, channel, and service
