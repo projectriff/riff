@@ -19,7 +19,8 @@ package commands
 import (
 	"os"
 
-	"github.com/projectriff/riff/riff-cli/pkg/osutils"
+	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 )
@@ -30,20 +31,22 @@ func Docs(rootCmd *cobra.Command) *cobra.Command {
 
 	var docsCmd = &cobra.Command{
 		Use:    "docs",
-		Short:  "generate riff-cli command documentation",
+		Short:  "generate riff command documentation",
 		Hidden: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			if !osutils.IsDirectory(directory) {
+			fi, err := os.Stat(directory)
+			if os.IsNotExist(err) {
 				if err := os.Mkdir(directory, 0744); err != nil {
 					return err
 				}
+			} else if !fi.Mode().IsDir() {
+				return fmt.Errorf("path %q already exists but is not a directory", directory)
 			}
-
 			return doc.GenMarkdownTree(rootCmd, directory)
 
 		},
 	}
-	docsCmd.Flags().StringVarP(&directory, "dir", "d", osutils.Path(osutils.GetCWD()+"/docs"), "the output directory for the docs.")
+	docsCmd.Flags().StringVarP(&directory, "dir", "d", "docs", "the output directory for the docs.")
 	return docsCmd
 }

@@ -23,7 +23,7 @@ import (
 
 	eventing "github.com/knative/eventing/pkg/client/clientset/versioned"
 	serving "github.com/knative/serving/pkg/client/clientset/versioned"
-	"github.com/projectriff/riff-cli/pkg/core"
+	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"

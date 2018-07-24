@@ -18,7 +18,7 @@
 package core
 
 import (
-	"github.com/projectriff/riff-cli/pkg/kubectl"
+	"github.com/projectriff/riff/pkg/kubectl"
 )
 
 type KubectlClient interface {

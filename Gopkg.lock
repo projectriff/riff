@@ -235,14 +235,6 @@
   version = "v1.4.0"
 
 [[projects]]
-  digest = "1:3926fd716fbaab301b32788df16b66139b87a014390dd25e52b842ee38f233c6"
-  name = "github.com/projectriff/riff"
-  packages = ["riff-cli/pkg/osutils"]
-  pruneopts = "NUT"
-  revision = "49fd9f01201489e94e8dfa91e57482da405b9911"
-  version = "v0.0.7"
-
-[[projects]]
   digest = "1:bcfa8e184764796499312e55cd8a5fff63896eca0d6faff6b6e43ac6a98a498a"
   name = "github.com/russross/blackfriday"
   packages = ["."]
@@ -553,7 +545,6 @@
     "github.com/knative/serving/pkg/client/clientset/versioned",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
-    "github.com/projectriff/riff/riff-cli/pkg/osutils",
     "github.com/spf13/cobra",
     "github.com/spf13/cobra/doc",
     "github.com/spf13/pflag",

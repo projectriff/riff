@@ -19,7 +19,7 @@ package commands
 import (
 	"fmt"
 
-	"github.com/projectriff/riff-cli/pkg/core"
+	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
 )
 

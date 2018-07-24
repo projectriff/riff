@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
-	"github.com/projectriff/riff-cli/pkg/core"
+	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
 )
 

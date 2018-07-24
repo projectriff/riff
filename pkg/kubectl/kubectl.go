@@ -19,7 +19,7 @@ package kubectl
 import (
 	"time"
 
-	"github.com/projectriff/riff-cli/pkg/osutils"
+	"github.com/projectriff/riff/pkg/osutils"
 )
 
 type KubeCtl interface {

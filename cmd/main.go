@@ -21,7 +21,7 @@ import (
 
 	"fmt"
 
-	"github.com/projectriff/riff-cli/cmd/commands"
+	"github.com/projectriff/riff/cmd/commands"
 )
 
 func main() {
