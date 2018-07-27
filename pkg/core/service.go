@@ -120,12 +120,15 @@ func (c *client) ServiceCoordinates(options ServiceInvokeOptions) (string, strin
 	if err != nil {
 		return "", "", err
 	}
-	var ingressIP string
+	var ingress string
 	ingresses := ksvc.Status.LoadBalancer.Ingress
 	if len(ingresses) > 0 {
-		ingressIP = ingresses[0].IP
+		ingress = ingresses[0].IP
+		if ingress == "" {
+			ingress = ingresses[0].Hostname
+		}
 	}
-	if ingressIP == "" {
+	if ingress == "" {
 		for _, port := range ksvc.Spec.Ports {
 			if port.Name == "http" {
 				config, err := c.clientConfig.ClientConfig()
@@ -134,10 +137,10 @@ func (c *client) ServiceCoordinates(options ServiceInvokeOptions) (string, strin
 				}
 				host := config.Host[0:strings.LastIndex(config.Host, ":")]
 				host = strings.Replace(host, "https", "http", 1)
-				ingressIP = fmt.Sprintf("%s:%d", host, port.NodePort)
+				ingress = fmt.Sprintf("%s:%d", host, port.NodePort)
 			}
 		}
-		if ingressIP == "" {
+		if ingress == "" {
 			return "", "", errors.New("Ingress not available")
 		}
 	}
@@ -147,7 +150,7 @@ func (c *client) ServiceCoordinates(options ServiceInvokeOptions) (string, strin
 		return "", "", err
 	}
 
-	return ingressIP, s.Status.Domain, nil
+	return ingress, s.Status.Domain, nil
 }
 
 func (c *client) service(namespace Namespaced, name string) (*v1alpha1.Service, error) {
