@@ -294,13 +294,13 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 		Args: ArgNamePrefix,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			serviceInvokeOptions.Name = args[serviceInvokeServiceNameIndex]
-			ingressIP, hostName, err := (*fcClient).ServiceCoordinates(serviceInvokeOptions)
+			ingress, hostName, err := (*fcClient).ServiceCoordinates(serviceInvokeOptions)
 			if err != nil {
 				return err
 			}
 
-			curlPrint := fmt.Sprintf("curl %s", ingressIP)
-			curlCmd := exec.Command("curl", ingressIP)
+			curlPrint := fmt.Sprintf("curl %s", ingress)
+			curlCmd := exec.Command("curl", ingress)
 
 			curlCmd.Stdin = os.Stdin
 			curlCmd.Stdout = cmd.OutOrStdout()
