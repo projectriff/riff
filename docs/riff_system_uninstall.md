@@ -1,27 +1,27 @@
-## riff system install
+## riff system uninstall
 
-Install the riff and Knative system components
+Remove all riff and Knative system components
 
 ### Synopsis
 
-Install the riff and Knative system components
+Remove all riff and Knative system components
 
 ```
-riff system install [flags]
+riff system uninstall [flags]
 ```
 
 ### Examples
 
 ```
-  riff system install
+  riff system uninstall
 ```
 
 ### Options
 
 ```
-      --force       force the install of Knative system components for riff
-  -h, --help        help for install
-      --node-port   whether to use NodePort instead of LoadBalancer for ingress gateways
+      --force   force the removal of system components
+  -h, --help    help for uninstall
+      --istio   include Istio and the istio-system namespace in the removal
 ```
 
 ### Options inherited from parent commands

@@ -60,6 +60,43 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
 	}
 
 	command.Flags().BoolVarP(&options.NodePort, "node-port", "", false, "whether to use NodePort instead of LoadBalancer for ingress gateways")
+	command.Flags().BoolVarP(&options.Force, "force", "", false, "force the install of Knative system components for riff")
+
+	return command
+}
+
+func SystemUninstall(kc *core.KubectlClient) *cobra.Command {
+	options := core.SystemUninstallOptions{}
+
+	command := &cobra.Command{
+		Use:   "uninstall",
+		Short: "Remove all riff and Knative system components",
+		Example: `  riff system uninstall`,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			// TODO: implement support for global flags - for now don't allow their use
+			if cmd.Flags().Changed("kubeconfig") {
+				return errors.New("The 'kubeconfig' flag is not yet supported by the 'system install' command")
+			}
+			m, _ := cmd.Flags().GetString("master")
+			if len(m) > 0 {
+				return errors.New("The 'master' flag is not yet supported by the 'system install' command")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			err, completed := (*kc).SystemUninstall(options)
+			if err != nil {
+				return err
+			}
+			if completed {
+				printSuccessfulCompletion(cmd)
+			}
+			return nil
+		},
+	}
+
+	command.Flags().BoolVarP(&options.Istio, "istio", "", false, "include Istio and the istio-system namespace in the removal")
+	command.Flags().BoolVarP(&options.Force, "force", "", false, "force the removal of system components")
 
 	return command
 }

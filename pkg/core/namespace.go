@@ -17,6 +17,8 @@
 
 package core
 
+import "fmt"
+
 type Namespaced struct {
 	Namespace string
 }
@@ -37,11 +39,11 @@ func (c *client) explicitOrConfigNamespace(namespaced Namespaced) string {
 
 func (kc *kubectlClient) NamespaceInit(options NamespaceInitOptions) error {
 
-	buildtemplateRelease := "https://storage.googleapis.com/riff-releases/riff-buildtemplate-0.1.0.yaml"
+	riffBuildRelease := "https://storage.googleapis.com/riff-releases/riff-build-0.1.1.yaml"
 
 	ns := options.NamespaceName
 
-	print("Initializing ", ns, " namespace ", "\n\n")
+	fmt.Printf("Initializing %s namespace\n\n", ns)
 
 	if ns != "default" {
 		nsYaml := []byte(`apiVersion: v1
@@ -56,15 +58,6 @@ metadata:
 		}
 	}
 
-	print("Labeling namespace ", ns, " for sidecar injection", "\n")
-	cmdArgs := []string{"label", "namespace", ns, "istio-injection=enabled"}
-	injectLog, err := kc.kubeCtl.Exec(cmdArgs)
-	if err != nil {
-		print("namespace ", ns, " already labeled", "\n\n")
-	} else {
-		print(injectLog, "\n")
-	}
-
 	saYaml := []byte(`apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -72,26 +65,25 @@ metadata:
 secrets:
 - name: ` + options.SecretName)
 
-	print("Applying serviceaccount resource riff-build using secret ", options.SecretName, " in namespace ", ns, "\n")
+	fmt.Printf("Applying serviceaccount resource riff-build using secret %s in namespace %s\n", options.SecretName, ns)
 	saLog, err := kc.kubeCtl.ExecStdin([]string{"apply", "-n", ns, "-f", "-"}, &saYaml)
 	if err != nil {
-		print(saLog)
-		print(err.Error(), "\n\n")
+		fmt.Print(saLog)
+		fmt.Printf("%s\n\n", err.Error())
 	} else {
-		print(saLog, "\n")
+		fmt.Printf("%s\n", saLog)
 	}
 
-	buildtemplateUrl, err := resolveReleaseURLs(buildtemplateRelease)
+	riffBuildUrl, err := resolveReleaseURLs(riffBuildRelease)
 	if err != nil {
 		return err
 	}
-	print("Applying buildtemplate resource riff in namespace ", ns, "\n")
-	buildtemplateLog, err := kc.kubeCtl.Exec([]string{"apply", "-f", buildtemplateUrl.String()})
-	print(buildtemplateLog, "\n")
+	fmt.Printf("Applying riff build resources in namespace %s\n", ns)
+	riffBuildLog, err := kc.kubeCtl.Exec([]string{"apply", "-f", riffBuildUrl.String()})
+	fmt.Printf("%s\n", riffBuildLog)
 	if err != nil {
 		return err
 	}
 
 	return nil
 }
-

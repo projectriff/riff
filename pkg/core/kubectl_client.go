@@ -23,6 +23,7 @@ import (
 
 type KubectlClient interface {
 	SystemInstall(options SystemInstallOptions) error
+	SystemUninstall(options SystemUninstallOptions) (error, bool)
 	NamespaceInit(options NamespaceInitOptions) error
 }
 

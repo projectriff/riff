@@ -140,6 +140,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	system := System()
 	system.AddCommand(
 		SystemInstall(&kc),
+		SystemUninstall(&kc),
 	)
 
 	rootCmd.AddCommand(

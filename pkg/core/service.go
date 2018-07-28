@@ -27,7 +27,6 @@ import (
 )
 
 const (
-	istioNamespace     = "istio-system"
 	ingressServiceName = "knative-ingressgateway"
 )
 
