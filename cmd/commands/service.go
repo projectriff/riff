@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
+	v1alpha12 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
 	"k8s.io/api/core/v1"
@@ -171,7 +172,7 @@ If an input channel and bus are specified, create the channel in the bus and sub
 	command.Flags().StringVar(&createChannelOptions.ClusterBus, "cluster-bus", "", clusterBusUsage)
 
 	command.Flags().StringVar(&createServiceOptions.Image, "image", "", "the `name[:tag]` reference of an image containing the application/function")
-
+	command.MarkFlagRequired("image")
 	return command
 }
 
@@ -195,15 +196,15 @@ func ServiceStatus(fcClient *core.Client) *cobra.Command {
 				return err
 			}
 
-			fmt.Printf("Last Transition Time:        %s\n", cond.LastTransitionTime.Format(time.RFC3339))
+			fmt.Fprintf(cmd.OutOrStdout(), "Last Transition Time:        %s\n", cond.LastTransitionTime.Format(time.RFC3339))
 
 			if cond.Reason != "" {
-				fmt.Printf("Message:                     %s\n", cond.Message)
-				fmt.Printf("Reason:                      %s\n", cond.Reason)
+				fmt.Fprintf(cmd.OutOrStdout(), "Message:                     %s\n", cond.Message)
+				fmt.Fprintf(cmd.OutOrStdout(), "Reason:                      %s\n", cond.Reason)
 			}
 
-			fmt.Printf("Status:                      %s\n", cond.Status)
-			fmt.Printf("Type:                        %s\n", cond.Type)
+			fmt.Fprintf(cmd.OutOrStdout(), "Status:                      %s\n", cond.Status)
+			fmt.Fprintf(cmd.OutOrStdout(), "Type:                        %s\n", cond.Type)
 
 			return nil
 		},
@@ -234,7 +235,7 @@ func ServiceList(fcClient *core.Client) *cobra.Command {
 			if len(services.Items) == 0 {
 				fmt.Fprintln(cmd.OutOrStdout(), "No resources found.")
 			} else {
-				maxServiceNameLength := 0
+				maxServiceNameLength := len("NAME ") //Make sure column names have enough room, even with short service names
 				for _, service := range services.Items {
 					if len(service.Name) > maxServiceNameLength {
 						maxServiceNameLength = len(service.Name)
@@ -244,15 +245,10 @@ func ServiceList(fcClient *core.Client) *cobra.Command {
 
 				fmt.Fprintf(cmd.OutOrStdout(), pad, "NAME", "STATUS")
 				for _, service := range services.Items {
-					serviceStatusOptions := core.ServiceStatusOptions{
-						Namespaced: listServiceOptions.Namespaced,
-						Name:       service.Name,
-					}
-
-					cond, err := (*fcClient).ServiceStatus(serviceStatusOptions)
+					cond := service.Status.GetCondition(v1alpha12.ServiceConditionReady)
 					var status string
-					if err != nil {
-						status = err.Error()
+					if cond == nil {
+						status = "Unknown"
 					} else {
 						switch cond.Status {
 						case v1.ConditionTrue:
@@ -291,7 +287,10 @@ The curl command is printed so it can be copied and extended.
 Additional curl arguments and flags may be specified after a double dash (--).`,
 		Example: `  riff service invoke square --namespace joseph-ns
   riff service invoke square -- --include`,
-		Args: ArgNamePrefix,
+		Args: ArgValidationConjunction(
+			cobra.MinimumNArgs(serviceInvokeMinimumNumberOfArgs),
+			AtPosition(serviceInvokeServiceNameIndex, ValidName()),
+		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			serviceInvokeOptions.Name = args[serviceInvokeServiceNameIndex]
 			ingressIP, hostName, err := (*fcClient).ServiceCoordinates(serviceInvokeOptions)
@@ -414,11 +413,14 @@ func ServiceDelete(fcClient *core.Client) *cobra.Command {
 	return command
 }
 
-// TODO
-func subscriberNameFromService(fnName string) string {
+// subscriptionNameFromService returns the name to use for the subscription being created alongside
+// a service/function. By convention, this is chosen to be the name of the service.
+func subscriptionNameFromService(fnName string) string {
 	return fnName
 }
 
-func subscriptionNameFromService(fnName string) string {
+// subscriberNameFromService returns the name to use for the `subscriber` field of a subscription,
+// given a service/function that is being created/subscribed. This has to be the name of the service itself.
+func subscriberNameFromService(fnName string) string {
 	return fnName
 }
