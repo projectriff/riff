@@ -315,7 +315,11 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 				curlCmd.Args = append(curlCmd.Args, nonFlagArgs[1:]...)
 				curlPrintArgs := append([]string(nil), nonFlagArgs[1:]...)
 				for i, arg := range curlPrintArgs {
-					if strings.Contains(arg, " ") {
+					if strings.HasPrefix(arg, "-w") && len(arg) > 2 {
+						curlPrintArgs[i] = "-w \"" + arg[2:] + "\""
+					} else if strings.Contains(arg, "\\") {
+						curlPrintArgs[i] = "\"" + arg + "\""
+					} else if strings.Contains(arg, " ") {
 						curlPrintArgs[i] = "\"" + arg + "\""
 					}
 				}
