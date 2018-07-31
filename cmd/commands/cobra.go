@@ -48,6 +48,18 @@ func ArgValidationConjunction(validators ...cobra.PositionalArgs) cobra.Position
 	}
 }
 
+// UpToDashDash returns a validator that will invoke the `delegate` validator, but only with args before the
+// splitting `--`, if any
+func UpToDashDash(delegate cobra.PositionalArgs) cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		if cmd.ArgsLenAtDash() >= 0 {
+			return delegate(cmd, args[0:cmd.ArgsLenAtDash()])
+		} else {
+			return delegate(cmd, args)
+		}
+	}
+}
+
 // PositionalArg is a function for validating a single argument
 type PositionalArg func(cmd *cobra.Command, arg string) error
 
