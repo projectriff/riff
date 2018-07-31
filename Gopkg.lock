@@ -18,6 +18,14 @@
   version = "v1.0.8"
 
 [[projects]]
+  digest = "1:660c47386114a34e34de14af818761935532a7d1f4dd5986981e3718b9b3001f"
+  name = "github.com/frioux/shellquote"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "3d87e6bbf7091fdbe953f5c2fd4a642a5d0cf494"
+  version = "v0.0.1"
+
+[[projects]]
   digest = "1:81466b4218bf6adddac2572a30ac733a9255919bc2f470b4827a317bd4ee1756"
   name = "github.com/ghodss/yaml"
   packages = ["."]
@@ -537,6 +545,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/frioux/shellquote",
     "github.com/ghodss/yaml",
     "github.com/knative/build/pkg/apis/build/v1alpha1",
     "github.com/knative/eventing/pkg/apis/channels/v1alpha1",

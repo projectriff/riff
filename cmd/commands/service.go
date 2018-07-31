@@ -23,8 +23,8 @@ import (
 
 	"os"
 	"os/exec"
-	"strings"
 
+	"github.com/frioux/shellquote"
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
@@ -47,7 +47,7 @@ const (
 
 const (
 	serviceInvokeServiceNameIndex = iota
-	serviceInvokeMinimumNumberOfArgs
+	serviceInvokeNumberOfArgs
 )
 
 const (
@@ -291,7 +291,10 @@ The curl command is printed so it can be copied and extended.
 Additional curl arguments and flags may be specified after a double dash (--).`,
 		Example: `  riff service invoke square --namespace joseph-ns
   riff service invoke square -- --include`,
-		Args: ArgNamePrefix,
+		Args: UpToDashDash(ArgValidationConjunction(
+			cobra.ExactArgs(serviceInvokeNumberOfArgs),
+			AtPosition(serviceInvokeServiceNameIndex, ValidName()),
+		)),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			serviceInvokeOptions.Name = args[serviceInvokeServiceNameIndex]
 			ingress, hostName, err := (*fcClient).ServiceCoordinates(serviceInvokeOptions)
@@ -299,7 +302,6 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 				return err
 			}
 
-			curlPrint := fmt.Sprintf("curl %s", ingress)
 			curlCmd := exec.Command("curl", ingress)
 
 			curlCmd.Stdin = os.Stdin
@@ -308,21 +310,16 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 
 			hostHeader := fmt.Sprintf("Host: %s", hostName)
 			curlCmd.Args = append(curlCmd.Args, "-H", hostHeader)
-			curlPrint = fmt.Sprintf("%s -H %q", curlPrint, hostHeader)
 
-			nonFlagArgs := cmd.Flags().Args()
-			if len(nonFlagArgs) > serviceInvokeMinimumNumberOfArgs {
-				curlCmd.Args = append(curlCmd.Args, nonFlagArgs[1:]...)
-				curlPrintArgs := append([]string(nil), nonFlagArgs[1:]...)
-				for i, arg := range curlPrintArgs {
-					if strings.Contains(arg, " ") {
-						curlPrintArgs[i] = "\"" + arg + "\""
-					}
-				}
-				curlPrint = fmt.Sprintf("%s %s", curlPrint, strings.Join(curlPrintArgs, " "))
+			if cmd.ArgsLenAtDash() > 0 {
+				curlCmd.Args = append(curlCmd.Args, args[cmd.ArgsLenAtDash():]...)
 			}
 
-			fmt.Fprintln(cmd.OutOrStdout(), curlPrint)
+			quoted, err := shellquote.Quote(curlCmd.Args)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintln(cmd.OutOrStdout(), quoted)
 
 			return curlCmd.Run()
 		},
