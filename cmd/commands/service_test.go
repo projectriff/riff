@@ -95,6 +95,8 @@ var _ = Describe("The riff service create command", func() {
 			o := core.CreateServiceOptions{
 				Name:  "my-service",
 				Image: "foo/bar",
+				Env: []string{},
+				EnvFrom: []string{},
 			}
 			o.Namespace = "ns"
 
@@ -110,6 +112,22 @@ var _ = Describe("The riff service create command", func() {
 			err := sc.Execute()
 			Expect(err).To(MatchError(e))
 		})
+		It("should add env vars when asked to", func() {
+			sc.SetArgs([]string{"my-service", "--image", "foo/bar", "--namespace", "ns", "--env", "FOO=bar",
+				"--env", "BAZ=qux", "--env-from", "secretKeyRef:foo:bar"})
+
+			o := core.CreateServiceOptions{
+				Name:  "my-service",
+				Image: "foo/bar",
+				Env: []string{"FOO=bar", "BAZ=qux"},
+				EnvFrom: []string{"secretKeyRef:foo:bar"},
+			}
+			o.Namespace = "ns"
+
+			asMock.On("CreateService", o).Return(nil, nil)
+			err := sc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		})
 		It("should print when --dry-run is set", func() {
 			sc.SetArgs([]string{"square", "--image", "foo/bar",
 				"--input", "my-channel", "--bus", "kafka", "--dry-run"})
@@ -117,6 +135,8 @@ var _ = Describe("The riff service create command", func() {
 			serviceOptions := core.CreateServiceOptions{
 				Name:   "square",
 				Image:  "foo/bar",
+				Env: []string{},
+				EnvFrom: []string{},
 				DryRun: true,
 			}
 			channelOptions := core.CreateChannelOptions{

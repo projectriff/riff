@@ -79,8 +79,13 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 		Use:   "create",
 		Short: "Create a new service resource, with optional input binding",
 		Long: `Create a new service resource from a given image.
-If an input channel and bus are specified, create the channel in the bus and subscribe the service to the channel.`,
+
+` + channelLongDesc + `
+
+` + envFromLongDesc + `
+`,
 		Example: `  riff service create square --image acme/square:1.0 --namespace joseph-ns
+  riff service create greeter --image acme/greeter:1.0 --env FOO=bar --env MESSAGE=Hello
   riff service create tweets-logger --image acme/tweets-logger:1.0.0 --input tweets --bus kafka`,
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(serviceCreateNumberOfArgs),
@@ -173,6 +178,10 @@ If an input channel and bus are specified, create the channel in the bus and sub
 
 	command.Flags().StringVar(&createServiceOptions.Image, "image", "", "the `name[:tag]` reference of an image containing the application/function")
 	command.MarkFlagRequired("image")
+
+	command.Flags().StringArrayVar(&createServiceOptions.Env, "env", []string{}, envUsage)
+	command.Flags().StringArrayVar(&createServiceOptions.EnvFrom, "env-from", []string{}, envFromUsage)
+
 	return command
 }
 

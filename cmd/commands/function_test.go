@@ -99,6 +99,8 @@ var _ = Describe("The riff function command", func() {
 			}
 			o.Name = "square"
 			o.Image = "foo/bar"
+			o.Env = []string{}
+			o.EnvFrom = []string{}
 
 			asMock.On("CreateFunction", o).Return(nil, nil)
 			err := fc.Execute()
@@ -112,6 +114,24 @@ var _ = Describe("The riff function command", func() {
 			err := fc.Execute()
 			Expect(err).To(MatchError(e))
 		})
+		It("should add env vars when asked to", func() {
+			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
+				"--env", "FOO=bar", "--env", "BAZ=qux", "--env-from", "secretKeyRef:foo:bar"})
+
+			o := core.CreateFunctionOptions{
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+				InvokerURL:  "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
+			}
+			o.Name = "square"
+			o.Image = "foo/bar"
+			o.Env = []string{"FOO=bar", "BAZ=qux"}
+			o.EnvFrom = []string{"secretKeyRef:foo:bar"}
+
+			asMock.On("CreateFunction", o).Return(nil, nil)
+			err := fc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		})
 		It("should create channel/subscription when asked to", func() {
 			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
 				"--input", "my-channel", "--bus", "kafka"})
@@ -123,6 +143,8 @@ var _ = Describe("The riff function command", func() {
 			}
 			functionOptions.Name = "square"
 			functionOptions.Image = "foo/bar"
+			functionOptions.Env = []string{}
+			functionOptions.EnvFrom = []string{}
 
 			channelOptions := core.CreateChannelOptions{
 				Name: "my-channel",
@@ -151,6 +173,8 @@ var _ = Describe("The riff function command", func() {
 			}
 			functionOptions.Name = "square"
 			functionOptions.Image = "foo/bar"
+			functionOptions.Env = []string{}
+			functionOptions.EnvFrom = []string{}
 			functionOptions.DryRun = true
 
 			channelOptions := core.CreateChannelOptions{
