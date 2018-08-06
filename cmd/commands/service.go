@@ -172,6 +172,8 @@ If an input channel and bus are specified, create the channel in the bus and sub
 
 	command.Flags().StringVar(&createServiceOptions.Image, "image", "", "the `name[:tag]` reference of an image containing the application/function")
 
+	command.Flags().StringArrayVar(&createServiceOptions.Env, "env", []string{""}, "environment variable expressed in a 'key=value' format. The value can be a 'valueFrom' expression")
+
 	return command
 }
 

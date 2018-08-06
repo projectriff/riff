@@ -159,5 +159,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	command.Flags().StringVar(&createFunctionOptions.Handler, "handler", "", "the name of the `method or class` to invoke, depending on the invoker used")
 	command.Flags().StringVar(&createFunctionOptions.Artifact, "artifact", "", "`path` to the function source code or jar file; auto-detected if not specified")
 
+	command.Flags().StringArrayVar(&createFunctionOptions.Env, "env", []string{""}, "environment variable expressed in a 'key=value' format. The value can be a 'valueFrom' expression")
+
 	return command
 }
