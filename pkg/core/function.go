@@ -35,7 +35,10 @@ type CreateFunctionOptions struct {
 func (c *client) CreateFunction(options CreateFunctionOptions) (*v1alpha1.Service, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
 
-	s := newService(options.CreateServiceOptions)
+	s, err := newService(options.CreateServiceOptions)
+	if err != nil {
+		return nil, err
+	}
 
 	s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
 		ServiceAccountName: "riff-build",
