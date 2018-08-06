@@ -31,8 +31,7 @@ import (
 
 const (
 	istioNamespace  = "istio-system"
-	istioCrds       = "https://storage.googleapis.com/riff-releases/istio-crds-riff-0.1.1.yaml"
-	istioRelease    = "https://storage.googleapis.com/riff-releases/istio-system-riff-0.1.1.yaml"
+	istioRelease    = "https://storage.googleapis.com/riff-releases/istio-riff-0.1.1.yaml"
 	servingRelease  = "https://storage.googleapis.com/riff-releases/serving-release-no-mon-riff-0.1.1.yaml"
 	eventingRelease = "https://storage.googleapis.com/riff-releases/eventing-release-riff-0.1.1.yaml"
 	stubBusRelease  = "https://storage.googleapis.com/riff-releases/eventing-release-clusterbus-stub-riff-0.1.1.yaml"
@@ -62,9 +61,7 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) error {
 
 	istioStatus, err := getNamespaceStatus(kc,istioNamespace)
 	if istioStatus == "'NotFound'" {
-		fmt.Print("Installing Istio CRDs and components\n")
-		applyResources(kc, istioCrds)
-
+		fmt.Print("Installing Istio Components\n")
 		istioYaml, err := loadRelease(istioRelease)
 		if err != nil {
 			return err
