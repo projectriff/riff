@@ -44,8 +44,9 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	createSubscriptionOptions := core.CreateSubscriptionOptions{}
 
 	invokers := map[string]string{
-		"java": "https://github.com/projectriff/java-function-invoker/raw/v0.0.7/java-invoker.yaml",
-		"node": "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
+		"command": "https://github.com/projectriff/command-function-invoker/raw/v0.0.7/command-invoker.yaml",
+		"java":    "https://github.com/projectriff/java-function-invoker/raw/v0.0.7/java-invoker.yaml",
+		"node":    "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
 	}
 
 	command := &cobra.Command{
