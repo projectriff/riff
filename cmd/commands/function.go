@@ -86,7 +86,7 @@ From then on you can use the sub-commands for the 'service' command to interact 
 
 			createFunctionOptions.Name = fnName
 			createFunctionOptions.InvokerURL = invokerURL
-			f, err := (*fcTool).CreateFunction(createFunctionOptions)
+			f, err := (*fcTool).CreateFunction(createFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err
 			}
@@ -156,6 +156,13 @@ From then on you can use the sub-commands for the 'service' command to interact 
 			&createSubscriptionOptions.DryRun,
 		),
 		"dry-run", "", dryRunUsage,
+	).NoOptDefVal = "true"
+
+	command.Flags().VarPF(
+		BroadcastBoolValue(false,
+			&createFunctionOptions.Verbose,
+		),
+		"verbose", "v", verboseUsage,
 	).NoOptDefVal = "true"
 
 	command.Flags().StringVar(&createChannelOptions.Bus, "bus", "", busUsage)

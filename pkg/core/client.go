@@ -25,11 +25,12 @@ import (
 	serving_cs "github.com/knative/serving/pkg/client/clientset/versioned"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"io"
 )
 
 //go:generate mockery -name=Client
 type Client interface {
-	CreateFunction(options CreateFunctionOptions) (*serving.Service, error)
+	CreateFunction(options CreateFunctionOptions, log io.Writer) (*serving.Service, error)
 
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
 

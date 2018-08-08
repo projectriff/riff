@@ -19,6 +19,19 @@ package core
 import (
 	build "github.com/knative/build/pkg/apis/build/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	"github.com/boz/kail"
+	"k8s.io/apimachinery/pkg/labels"
+	"fmt"
+	"context"
+	"time"
+	"github.com/boz/go-logutil"
+	"log"
+	"io/ioutil"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"io"
+	"github.com/boz/kcache/types/pod"
+	"strings"
 )
 
 type CreateFunctionOptions struct {
@@ -32,7 +45,7 @@ type CreateFunctionOptions struct {
 	Artifact   string
 }
 
-func (c *client) CreateFunction(options CreateFunctionOptions) (*v1alpha1.Service, error) {
+func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
 
 	s, err := newService(options.CreateServiceOptions)
@@ -62,9 +75,220 @@ func (c *client) CreateFunction(options CreateFunctionOptions) (*v1alpha1.Servic
 
 	if !options.DryRun {
 		_, err := c.serving.ServingV1alpha1().Services(ns).Create(s)
-		return s, err
-	} else {
-		return s, nil
+		if err != nil {
+			return nil, err
+		}
+
+		if options.Verbose {
+			stopChan := make(chan struct{})
+			errChan := make(chan error)
+			go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, errChan)
+			err := c.waitForSuccessOrFailure(ns, s.Name, stopChan, errChan)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
+	return s, nil
+}
+
+func (c *client) displayFunctionCreationProgress(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}, errChan chan<- error) {
+	revName, err := c.revisionName(serviceNamespace, serviceName, logWriter, stopChan)
+	if err != nil {
+		errChan <- err
+		return
+	} else if revName == "" { // stopped
+		return
+	}
+
+	ctx := newContext()
+
+	podController, err := c.podController(revName, serviceName, ctx)
+	if err != nil {
+		errChan <- err
+		return
+	}
+
+	config, err := c.clientConfig.ClientConfig()
+	if err != nil {
+		errChan <- err
+		return
+	}
+
+	controller, err := kail.NewController(ctx, c.kubeClient, config, podController, kail.NewContainerFilter([]string{}), time.Hour)
+	if err != nil {
+		errChan <- err
+		return
+	}
+
+	streamLogs(logWriter, controller, stopChan)
+	close(errChan)
+}
+
+func (c *client) revisionName(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}) (string, error) {
+	fmt.Fprintf(logWriter, "Waiting for LatestCreatedRevisionName:")
+	revName := ""
+	for {
+		serviceObj, err := c.serving.ServingV1alpha1().Services(serviceNamespace).Get(serviceName, v1.GetOptions{})
+		if err != nil {
+			return "", err
+		}
+		revName = serviceObj.Status.LatestCreatedRevisionName
+		if revName != "" {
+			break
+		}
+		time.Sleep(1000 * time.Millisecond)
+		fmt.Fprintf(logWriter, ".")
+		select {
+		case <-stopChan:
+			return "", nil
+		default:
+			// continue
+		}
+	}
+	fmt.Fprintf(logWriter, " %s\n", revName)
+	return revName, nil
+}
+
+func newContext() context.Context {
+	ctx := context.Background()
+	// avoid kail logs appearing
+	l := logutil.New(log.New(ioutil.Discard, "", log.LstdFlags), ioutil.Discard)
+	ctx = logutil.NewContext(ctx, l)
+	return ctx
+}
+
+func (c *client) podController(revName string, serviceName string, ctx context.Context) (pod.Controller, error) {
+	dsb := kail.NewDSBuilder()
+
+	buildSelOld, err := labels.Parse(fmt.Sprintf("%s=%s", "build-name", revName))
+	if err != nil {
+		return nil, err
+	}
+	buildSel, err := labels.Parse(fmt.Sprintf("%s=%s", "build.knative.dev/buildName", revName))
+	if err != nil {
+		return nil, err
+	}
+	runtimeSel, err := labels.Parse(fmt.Sprintf("%s=%s", "serving.knative.dev/configuration", serviceName))
+	if err != nil {
+		return nil, err
+	}
+	ds, err := dsb.WithSelectors(or(buildSel, runtimeSel, buildSelOld)).Create(ctx, c.kubeClient) // delete buildSelOld when https://github.com/knative/build/pull/299 is integrated into k/s
+	if err != nil {
+		return nil, err
+	}
+
+	return ds.Pods(), nil
+}
+
+func streamLogs(log io.Writer, controller kail.Controller, stopChan <-chan struct{}) {
+	events := controller.Events()
+	done := controller.Done()
+	writer := NewWriter(log)
+	for {
+		select {
+		case ev := <-events:
+			// filter out sidecar logs
+			container := ev.Source().Container()
+			switch container {
+			case "queue-proxy":
+			case "istio-init":
+			case "istio-proxy":
+			default:
+				writer.Print(ev)
+			}
+		case <-done:
+			return
+		case <-stopChan:
+			return
+		}
+	}
+}
+
+func (c *client) waitForSuccessOrFailure(namespace string, name string, stopChan chan<- struct{}, errChan <-chan error) error {
+	defer close(stopChan)
+	for i := 0; i >= 0; i++ {
+		select {
+		case err := <-errChan:
+			return err
+		default:
+		}
+		time.Sleep(500 * time.Millisecond)
+		serviceStatusOptions := ServiceStatusOptions{
+			Namespaced: Namespaced{namespace},
+			Name:       name,
+		}
+		cond, err := c.ServiceStatus(serviceStatusOptions)
+		if err != nil {
+			// allow some time for service status to show up
+			if i < 20 {
+				continue
+			}
+			return fmt.Errorf("waitForSuccessOrFailure failed to obtain service status: %v", err)
+		}
+
+		switch cond.Status {
+		case corev1.ConditionTrue:
+			return nil
+		case corev1.ConditionFalse:
+			var message string
+			conds, err := c.ServiceConditions(serviceStatusOptions)
+			if err != nil {
+				// fall back to a basic message
+				message = cond.Message
+			} else {
+				message = serviceConditionsMessage(conds, cond.Message)
+			}
+			return fmt.Errorf("function create failed: %s: %s", cond.Reason, message)
+		default:
+			// keep going until outcome is known
+		}
+	}
+	return nil
+}
+
+func serviceConditionsMessage(conds []v1alpha1.ServiceCondition,primaryMessage string) string {
+	msg := []string{primaryMessage}
+	for _, cond := range conds {
+		if cond.Status == corev1.ConditionFalse && cond.Type != v1alpha1.ServiceConditionReady && cond.Message != primaryMessage {
+			msg = append(msg, cond.Message)
+		}
+	}
+	return strings.Join(msg, "; ")
+}
+
+func or(disjuncts ...labels.Selector) labels.Selector {
+	return selectorDisjunction(disjuncts)
+}
+
+type selectorDisjunction []labels.Selector
+
+func (selectorDisjunction) Add(r ...labels.Requirement) labels.Selector {
+	panic("implement me")
+}
+
+func (selectorDisjunction) DeepCopySelector() labels.Selector {
+	panic("implement me")
+}
+
+func (selectorDisjunction) Empty() bool {
+	panic("implement me")
+}
+
+func (sd selectorDisjunction) Matches(lbls labels.Labels) bool {
+	for _, s := range sd {
+		if s.Matches(lbls) {
+			return true
+		}
+	}
+	return false
+}
+
+func (selectorDisjunction) Requirements() (requirements labels.Requirements, selectable bool) {
+	panic("implement me")
+}
+
+func (selectorDisjunction) String() string {
+	panic("implement me")
 }
