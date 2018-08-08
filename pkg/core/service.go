@@ -45,7 +45,8 @@ type CreateServiceOptions struct {
 	Image   string
 	Env     []string
 	EnvFrom []string
-	DryRun  bool
+	DryRun bool
+	Verbose bool
 }
 
 func (c *client) CreateService(options CreateServiceOptions) (*v1alpha1.Service, error) {

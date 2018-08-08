@@ -27,4 +27,5 @@ const (
 or 'secretKeyRef' to select a key from a Secret. The following formats are supported:
   --env-from configMapKeyRef:{config-map-name}:{key-to-select}
   --env-from secretKeyRef:{secret-name}:{key-to-select}`
+	verboseUsage = "print details of command progress"
 )

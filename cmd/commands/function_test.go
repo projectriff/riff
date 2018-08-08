@@ -102,7 +102,7 @@ var _ = Describe("The riff function command", func() {
 			o.Env = []string{}
 			o.EnvFrom = []string{}
 
-			asMock.On("CreateFunction", o).Return(nil, nil)
+			asMock.On("CreateFunction", o, mock.Anything).Return(nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -110,7 +110,7 @@ var _ = Describe("The riff function command", func() {
 			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 
 			e := fmt.Errorf("some error")
-			asMock.On("CreateFunction", mock.Anything).Return(nil, e)
+			asMock.On("CreateFunction", mock.Anything, mock.Anything).Return(nil, e)
 			err := fc.Execute()
 			Expect(err).To(MatchError(e))
 		})
@@ -128,7 +128,7 @@ var _ = Describe("The riff function command", func() {
 			o.Env = []string{"FOO=bar", "BAZ=qux"}
 			o.EnvFrom = []string{"secretKeyRef:foo:bar"}
 
-			asMock.On("CreateFunction", o).Return(nil, nil)
+			asMock.On("CreateFunction", o, mock.Anything).Return(nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -156,7 +156,7 @@ var _ = Describe("The riff function command", func() {
 				Subscriber: "square",
 			}
 
-			asMock.On("CreateFunction", functionOptions).Return(nil, nil)
+			asMock.On("CreateFunction", functionOptions, mock.Anything).Return(nil, nil)
 			asMock.On("CreateChannel", channelOptions).Return(nil, nil)
 			asMock.On("CreateSubscription", subscriptionOptions).Return(nil, nil)
 			err := fc.Execute()
@@ -195,7 +195,7 @@ var _ = Describe("The riff function command", func() {
 			c.Name = "my-channel"
 			s := v1alpha12.Subscription{}
 			s.Name = "square"
-			asMock.On("CreateFunction", functionOptions).Return(&f, nil)
+			asMock.On("CreateFunction", functionOptions, mock.Anything).Return(&f, nil)
 			asMock.On("CreateChannel", channelOptions).Return(&c, nil)
 			asMock.On("CreateSubscription", subscriptionOptions).Return(&s, nil)
 
