@@ -48,8 +48,8 @@ type SystemUninstallOptions struct {
 }
 
 var (
-	knativeNameSpaces = []string{"knative-eventing", "knative-serving", "knative-build"}
-	allNameSpaces = append(knativeNameSpaces, istioNamespace)
+	knativeNamespaces = []string{"knative-eventing", "knative-serving", "knative-build"}
+	allNameSpaces     = append(knativeNamespaces, istioNamespace)
 )
 
 func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) error {
@@ -118,16 +118,16 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) error {
 	return nil
 }
 
-func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (error, bool) {
+func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) error {
 
 	err := ensureNotTerminating(kc, allNameSpaces, "This would indicate that the system was already uninstalled.")
 	if err != nil {
-		return err, false
+		return err
 	}
-	knativeNsCount, err := checkNamespacesExists(kc, knativeNameSpaces)
+	knativeNsCount, err := checkNamespacesExists(kc, knativeNamespaces)
 	istioNsCount, err := checkNamespacesExists(kc, []string{istioNamespace})
 	if err != nil {
-		return err, false
+		return err
 	}
 	if knativeNsCount == 0 {
 		fmt.Print("No Knative components for riff found\n")
@@ -135,40 +135,40 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (error,
 		if !options.Force {
 			answer, err := confirm("Are you sure you want to uninstall the riff system?")
 			if err != nil {
-				return err, false
+				return err
 			}
 			if !answer {
-				return nil, false
+				return nil
 			}
 		}
 		fmt.Print("Removing Knative for riff components\n")
 		err = deleteCrds(kc, "knative.dev")
 		if err != nil {
-			return err, false
+			return err
 		}
 		err = deleteClusterResources(kc, "clusterrolebinding", "knative-")
 		if err != nil {
-			return err, false
+			return err
 		}
 		err = deleteClusterResources(kc, "clusterrolebinding", "build-controller-")
 		if err != nil {
-			return err, false
+			return err
 		}
 		err = deleteClusterResources(kc, "clusterrolebinding", "eventing-controller-")
 		if err != nil {
-			return err, false
+			return err
 		}
 		err = deleteClusterResources(kc, "clusterrolebinding", "clusterbus-controller-")
 		if err != nil {
-			return err, false
+			return err
 		}
 		err = deleteClusterResources(kc, "clusterrole", "knative-")
 		if err != nil {
-			return err, false
+			return err
 		}
-		err = deleteNamespaces(kc, knativeNameSpaces)
+		err = deleteNamespaces(kc, knativeNamespaces)
 		if err != nil {
-			return err, false
+			return err
 		}
 	}
 	if istioNsCount == 0 {
@@ -176,35 +176,35 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (error,
 	} else {
 		if !options.Istio {
 			if options.Force {
-				return nil, true
+				return nil
 			}
 			answer, err := confirm("Do you also want to uninstall Istio components?")
 			if err != nil {
-				return err, false
+				return err
 			}
 			if !answer {
-				return nil, true
+				return nil
 			}
 		}
 		fmt.Print("Removing Istio components\n")
 		err = deleteCrds(kc, "istio.io")
 		if err != nil {
-			return err, false
+			return err
 		}
 		err = deleteClusterResources(kc, "clusterrolebinding", "istio-")
 		if err != nil {
-			return err, false
+			return err
 		}
 		err = deleteClusterResources(kc, "clusterrole", "istio-")
 		if err != nil {
-			return err, false
+			return err
 		}
 		err = deleteNamespaces(kc, []string{istioNamespace})
 		if err != nil {
-			return err, false
+			return err
 		}
 	}
-	return nil, true
+	return nil
 }
 
 func resolveReleaseURLs(filename string) (url.URL, error) {

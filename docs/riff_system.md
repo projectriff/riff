@@ -22,6 +22,6 @@ Manage system related resources
 ### SEE ALSO
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
-* [riff system install](riff_system_install.md)	 - Install the riff and Knative system components
-* [riff system uninstall](riff_system_uninstall.md)	 - Remove all riff and Knative system components
+* [riff system install](riff_system_install.md)	 - Install riff and Knative system components
+* [riff system uninstall](riff_system_uninstall.md)	 - Remove riff and Knative system components
 

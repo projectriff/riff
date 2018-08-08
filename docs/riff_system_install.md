@@ -1,10 +1,15 @@
 ## riff system install
 
-Install the riff and Knative system components
+Install riff and Knative system components
 
 ### Synopsis
 
-Install the riff and Knative system components
+Install riff and Knative system components
+
+If an 'istio-system' namespace isn't found then the it will be created and Istio components will be installed.
+
+Use the '--node-port' flag when installing on Minikube and other clusters that don't support an external load balancer.'
+
 
 ```
 riff system install [flags]
@@ -19,7 +24,7 @@ riff system install [flags]
 ### Options
 
 ```
-      --force       force the install of Knative system components for riff
+      --force       force the install of components without getting any prompts
   -h, --help        help for install
       --node-port   whether to use NodePort instead of LoadBalancer for ingress gateways
 ```
