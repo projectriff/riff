@@ -39,7 +39,7 @@ func (c *client) explicitOrConfigNamespace(namespaced Namespaced) string {
 
 func (kc *kubectlClient) NamespaceInit(options NamespaceInitOptions) error {
 
-	riffBuildRelease := "https://storage.googleapis.com/riff-releases/riff-build-0.1.1.yaml"
+	riffBuildRelease := "https://storage.googleapis.com/riff-releases/previous/riff-build/riff-build-0.1.0.yaml"
 
 	ns := options.NamespaceName
 
