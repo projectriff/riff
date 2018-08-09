@@ -32,7 +32,8 @@ import (
 
 const (
 	istioNamespace  = "istio-system"
-	istioRelease    = "https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff.yaml"
+	istioCrds       = "https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-crds.yaml"
+	istioRelease    = "https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-main.yaml"
 	servingRelease  = "https://storage.googleapis.com/knative-releases/serving/previous/v20180809-6b01d8e/release-no-mon.yaml"
 	eventingRelease = "https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/release.yaml"
 	stubBusRelease  = "https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/release-clusterbus-stub.yaml"
@@ -62,7 +63,9 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 
 	istioStatus, err := getNamespaceStatus(kc,istioNamespace)
 	if istioStatus == "'NotFound'" {
-		fmt.Print("Installing Istio Components\n")
+		fmt.Print("Installing Istio components\n")
+		applyResources(kc, istioCrds)
+		time.Sleep(5 * time.Second) // wait for them to get created
 		istioYaml, err := loadRelease(istioRelease)
 		if err != nil {
 			return false, err
@@ -95,7 +98,7 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 		return false, err
 	}
 
-	fmt.Print("Installing Knative Components\n")
+	fmt.Print("Installing Knative components\n")
 
 	servingYaml, err := loadRelease(servingRelease)
 	if err != nil {
