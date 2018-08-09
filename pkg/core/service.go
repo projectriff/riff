@@ -45,25 +45,41 @@ type CreateServiceOptions struct {
 
 	Image string
 
+	Env []string
+	EnvFrom []string
+
 	DryRun bool
 }
 
 func (c *client) CreateService(options CreateServiceOptions) (*v1alpha1.Service, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
 
-	s := newService(options)
+	s, err := newService(options)
+	if err != nil {
+		return nil, err
+	}
 
 	if !options.DryRun {
-		_, err := c.serving.ServingV1alpha1().Services(ns).Create(&s)
-		return &s, err
+		_, err := c.serving.ServingV1alpha1().Services(ns).Create(s)
+		return s, err
 	} else {
-		return &s, nil
+		return s, nil
 	}
 
 }
 
-func newService(options CreateServiceOptions) v1alpha1.Service {
-	return v1alpha1.Service{
+func newService(options CreateServiceOptions) (*v1alpha1.Service, error) {
+	envVars, err := ParseEnvVar(options.Env)
+	if err != nil {
+		return nil, err
+	}
+	envVarsFrom, err := ParseEnvVarSource(options.EnvFrom)
+	if err != nil {
+		return nil, err
+	}
+	envVars = append(envVars, envVarsFrom...)
+
+	s := v1alpha1.Service{
 		TypeMeta: meta_v1.TypeMeta{
 			APIVersion: "serving.knative.dev/v1alpha1",
 			Kind:       "Service",
@@ -77,6 +93,7 @@ func newService(options CreateServiceOptions) v1alpha1.Service {
 					RevisionTemplate: v1alpha1.RevisionTemplateSpec{
 						Spec: v1alpha1.RevisionSpec{
 							Container: core_v1.Container{
+								Env: envVars,
 								Image: options.Image,
 							},
 						},
@@ -85,6 +102,8 @@ func newService(options CreateServiceOptions) v1alpha1.Service {
 			},
 		},
 	}
+
+	return &s, nil
 }
 
 type ServiceStatusOptions struct {

@@ -52,7 +52,16 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new function resource, with optional input binding",
-		// TODO: add Long help text to mention invoker, git repo. etc. and explain that a function is a subtype of service.serving.knative.dev and so that riff service list/status/invoke/delete may be used with it.
+		Long: `Create a new function resource from the content of the provided Git repo/revision.
+
+The INVOKER arg defines the language invoker that is added to the function code in the build step. The resulting image is 
+then used to create a Knative Service (service.serving.knative.dev) instance of the name specified for the function. 
+From then on you can use the sub-commands for the 'service' command to interact with the service created for the function. 
+
+` + channelLongDesc + `
+
+` + envFromLongDesc + `
+`,
 		Example: `  riff function create node square --git-repo https://github.com/acme/square --image acme/square --namespace joseph-ns
   riff function create java tweets-logger --git-repo https://github.com/acme/tweets --image acme/tweets-logger:1.0.0 --input tweets --bus kafka`,
 		Args: ArgValidationConjunction(
@@ -159,6 +168,9 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` of the function code to use")
 	command.Flags().StringVar(&createFunctionOptions.Handler, "handler", "", "the name of the `method or class` to invoke, depending on the invoker used")
 	command.Flags().StringVar(&createFunctionOptions.Artifact, "artifact", "", "`path` to the function source code or jar file; auto-detected if not specified")
+
+	command.Flags().StringArrayVar(&createFunctionOptions.Env, "env", []string{}, envUsage)
+	command.Flags().StringArrayVar(&createFunctionOptions.EnvFrom, "env-from", []string{}, envFromUsage)
 
 	return command
 }

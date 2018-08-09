@@ -4,7 +4,19 @@ Create a new function resource, with optional input binding
 
 ### Synopsis
 
-Create a new function resource, with optional input binding
+Create a new function resource from the content of the provided Git repo/revision.
+
+The INVOKER arg defines the language invoker that is added to the function code in the build step. The resulting image is 
+then used to create a Knative Service (service.serving.knative.dev) instance of the name specified for the function. 
+From then on you can use the sub-commands for the 'service' command to interact with the service created for the function. 
+
+If an input channel and bus are specified, create the channel in the bus and subscribe the service to the channel.
+
+If an env-from flag is specified the source reference can be 'configMapKeyRef' to select a key from a ConfigMap
+or 'secretKeyRef' to select a key from a Secret. The following formats are supported:
+  --env-from configMapKeyRef:{config-map-name}:{key-to-select}
+  --env-from secretKeyRef:{secret-name}:{key-to-select}
+
 
 ```
 riff function create [flags]
@@ -24,6 +36,8 @@ riff function create [flags]
       --bus name                       the name of the bus to create the channel in.
       --cluster-bus name               the name of the cluster bus to create the channel in.
       --dry-run                        don't create resources but print yaml representation on stdout
+      --env stringArray                environment variable expressed in a 'key=value' format
+      --env-from stringArray           environment variable created from a source reference; see command help for supported formats
       --git-repo URL                   the URL for a git repository hosting the function code
       --git-revision ref-spec          the git ref-spec of the function code to use (default "master")
       --handler method or class        the name of the method or class to invoke, depending on the invoker used

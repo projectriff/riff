@@ -20,4 +20,11 @@ const (
 	clusterBusUsage = "the `name` of the cluster bus to create the channel in."
 	busUsage        = "the `name` of the bus to create the channel in."
 	dryRunUsage     = "don't create resources but print yaml representation on stdout"
+	envUsage        = "environment variable expressed in a 'key=value' format"
+	envFromUsage    = "environment variable created from a source reference; see command help for supported formats"
+	channelLongDesc = "If an input channel and bus are specified, create the channel in the bus and subscribe the service to the channel."
+	envFromLongDesc = `If an env-from flag is specified the source reference can be 'configMapKeyRef' to select a key from a ConfigMap
+or 'secretKeyRef' to select a key from a Secret. The following formats are supported:
+  --env-from configMapKeyRef:{config-map-name}:{key-to-select}
+  --env-from secretKeyRef:{secret-name}:{key-to-select}`
 )
