@@ -27,6 +27,7 @@ import (
 	"bufio"
 	"os"
 	"strings"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -89,7 +90,7 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) error {
 		}
 	}
 
-	err = waitForIstioSidecarInjector(kc)
+	err = waitForIstioComponents(kc)
 	if err != nil {
 		return err
 	}
@@ -235,28 +236,42 @@ func loadRelease(release string) ([]byte, error) {
 	return body, nil
 }
 
-func waitForIstioSidecarInjector(kc *kubectlClient) error {
-	print("Waiting for istio-sidecar-injector to start ")
+func waitForIstioComponents(kc *kubectlClient) error {
+	fmt.Print("Waiting for the Istio components to start ")
 	for i := 0; i < 36; i++ {
 		fmt.Print(".")
-		injectorStatus, err := kc.kubeCtl.Exec([]string{"get", "pod", "-n", istioNamespace, "-l", "istio=sidecar-injector", "-o", "jsonpath='{.items[0].status.phase}'"})
+		pods := kc.kubeClient.CoreV1().Pods(istioNamespace)
+		podList, err := pods.List(metav1.ListOptions{})
 		if err != nil {
-			// might take some time for the pod to show up so ignore early errors
-			if i > 3 {
-				return err
+			return err
+		}
+		waitLonger := false
+		for _, pod := range podList.Items {
+			if !strings.HasPrefix(pod.Name, "istio-") {
+				continue
+			}
+			if pod.Status.Phase != "Running" && pod.Status.Phase != "Succeeded" {
+				waitLonger = true
+				break
+			} else {
+				if pod.Status.Phase == "Running" {
+					containers := pod.Status.ContainerStatuses
+					for _, cont := range containers {
+						if !cont.Ready {
+							waitLonger = true
+							break
+						}
+					}
+				}
 			}
 		}
-		if injectorStatus == "'Error'" {
-			return errors.New("istio-sidecar-injector pod failed to start")
-		}
-		if injectorStatus == "'Running'" {
-			print(injectorStatus, "\n\n")
+		if !waitLonger {
+			fmt.Print(" all components are 'Running'\n\n")
 			return nil
 		}
-		time.Sleep(10 * time.Second) // wait for it to start
+		time.Sleep(10 * time.Second) // wait for them to start
 	}
-	fmt.Print("\n\n")
-	return errors.New("istio-sidecar-injector pod did not start in time")
+	return errors.New("the Istio components did not start in time")
 }
 
 func applyResources(kc *kubectlClient, release string) error {
