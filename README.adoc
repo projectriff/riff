@@ -7,8 +7,14 @@ The riff project builds on top of the link:https://github.com/knative/[Knative] 
 
 == Installation of the latest release
 
+Official binary release are avilable from the link:https://github.com/projectriff/riff/releases[Releases] page.
+
 See link:https://projectriff.io/docs/getting-started-with-knative-riff-on-minikube/[Getting started on Minikube] or
 link:https://projectriff.io/docs/getting-started-with-knative-riff-on-gke/[Getting started on GKE] for how to install the riff CLI and the riff system.
+
+=== Community releases
+
+NOTE: Community releases are not created, managed or monitored by the riff team.
 
 To install the `riff` CLI for MacOS with Homebrew:
 
@@ -26,8 +32,6 @@ echo "deb http://apt.starkandwayne.com stable main" | tee /etc/apt/sources.list.
 apt-get update
 apt-get install riff
 ----
-
-For Windows or other Linux, download from link:https://github.com/projectriff/riff/releases[Releases] page.
 
 == Developer installation of Knative
 
