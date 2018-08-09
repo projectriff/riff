@@ -31,10 +31,10 @@ import (
 
 const (
 	istioNamespace  = "istio-system"
-	istioRelease    = "https://storage.googleapis.com/riff-releases/istio-riff-0.1.1.yaml"
-	servingRelease  = "https://storage.googleapis.com/riff-releases/serving-release-no-mon-riff-0.1.1.yaml"
-	eventingRelease = "https://storage.googleapis.com/riff-releases/eventing-release-riff-0.1.1.yaml"
-	stubBusRelease  = "https://storage.googleapis.com/riff-releases/eventing-release-clusterbus-stub-riff-0.1.1.yaml"
+	istioRelease    = "https://storage.googleapis.com/knative-releases/serving/previous/v20180809-6b01d8e/istio.yaml"
+	servingRelease  = "https://storage.googleapis.com/knative-releases/serving/previous/v20180809-6b01d8e/release-no-mon.yaml"
+	eventingRelease = "https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/release.yaml"
+	stubBusRelease  = "https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/release-clusterbus-stub.yaml"
 )
 
 type SystemInstallOptions struct {
