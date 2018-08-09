@@ -54,12 +54,16 @@ Use the '--node-port' flag when installing on Minikube and other clusters that d
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := (*kc).SystemInstall(options)
+			complete, err := (*kc).SystemInstall(options)
 			if err != nil {
 				return err
 			}
 
-			printSuccessfulCompletion(cmd)
+			if complete {
+				printSuccessfulCompletion(cmd)
+			} else {
+				printInterruptedCompletion(cmd)
+			}
 			return nil
 		},
 	}
@@ -93,11 +97,15 @@ Use the '--istio' flag to also remove Istio components.'
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := (*kc).SystemUninstall(options)
+			complete, err := (*kc).SystemUninstall(options)
 			if err != nil {
 				return err
 			}
-			printSuccessfulCompletion(cmd)
+			if complete {
+				printSuccessfulCompletion(cmd)
+			} else {
+				printInterruptedCompletion(cmd)
+			}
 			return nil
 		},
 	}
