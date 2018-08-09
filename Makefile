@@ -1,6 +1,8 @@
-.PHONY: build clean test all release
+.PHONY: build clean test all release gen-mocks
+
 OUTPUT = ./riff
-GO_SOURCES = $(shell find cmd pkg -type f -name '*.go' -not -name 'mock_*.go')
+GO_SOURCES = $(shell find cmd pkg -type f -name '*.go' -not -regex '.*/mocks/.*')
+GO_GENERATED_SOURCES = $(shell find cmd pkg -type f -name '*.go' -regex '.*/mocks/.*')
 VERSION ?= $(shell cat VERSION)
 LDFLAGS_VERSION = -X github.com/projectriff/riff/cmd/commands.cli_version=$(VERSION)
 GOBIN ?= $(shell go env GOPATH)/bin
@@ -9,8 +11,15 @@ all: test docs
 
 build: $(OUTPUT)
 
-test: build
+test: build gen-mocks
 	go test ./...
+
+gen-mocks: $(GO_GENERATED_SOURCES)
+
+$(GO_GENERATED_SOURCES): $(GO_SOURCES) vendor VERSION
+	which mockery || go get -u github.com/vektra/mockery/.../
+
+	go generate ./...
 
 install: build
 	cp $(OUTPUT) $(GOBIN)

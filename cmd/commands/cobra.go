@@ -25,7 +25,6 @@ import (
 	"io"
 	"text/template"
 
-	"errors"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -94,16 +93,6 @@ func LabelArgs(cmd *cobra.Command, labels ...string) {
 	for i, label := range labels {
 		cmd.Annotations[fmt.Sprintf("arg%d", i)] = label
 	}
-}
-
-func ArgNamePrefix(cmd *cobra.Command, args []string) error {
-	if len(args) < 1 {
-		return errors.New("requires at least one arg")
-	}
-	if err := ValidName()(cmd, args[0]); err != nil {
-		return err
-	}
-	return nil
 }
 
 // =============================================== Flags related functions =============================================
