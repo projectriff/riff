@@ -10,6 +10,25 @@ The riff project builds on top of the link:https://github.com/knative/[Knative] 
 See link:https://projectriff.io/docs/getting-started-with-knative-riff-on-minikube/[Getting started on Minikube] or
 link:https://projectriff.io/docs/getting-started-with-knative-riff-on-gke/[Getting started on GKE] for how to install the riff CLI and the riff system.
 
+To install the `riff` CLI for MacOS with Homebrew:
+
+[source, bash]
+----
+brew install starkandwayne/cf/riff
+----
+
+To install the CLI for Debian/Ubuntu Linux:
+
+[source, bash]
+----
+wget -q -O - https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master/public.key | apt-key add -
+echo "deb http://apt.starkandwayne.com stable main" | tee /etc/apt/sources.list.d/starkandwayne.list
+apt-get update
+apt-get install riff
+----
+
+For Windows or other Linux, download from link:https://github.com/projectriff/riff/releases[Releases] page.
+
 == Developer installation of Knative
 
 See link:https://github.com/knative/eventing/blob/master/DEVELOPMENT.md[Development] to install the Knative Build, Serving and Eventing projects.
