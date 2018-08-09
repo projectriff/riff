@@ -32,7 +32,7 @@ import (
 
 const (
 	istioNamespace  = "istio-system"
-	istioRelease    = "https://storage.googleapis.com/knative-releases/serving/previous/v20180809-6b01d8e/istio.yaml"
+	istioRelease    = "https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff.yaml"
 	servingRelease  = "https://storage.googleapis.com/knative-releases/serving/previous/v20180809-6b01d8e/release-no-mon.yaml"
 	eventingRelease = "https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/release.yaml"
 	stubBusRelease  = "https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/release-clusterbus-stub.yaml"
