@@ -100,7 +100,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 				return err
 			}
 			client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet)
-			kc = core.NewKubectlClient()
+			kc = core.NewKubectlClient(kubeClientSet)
 			return nil
 		},
 	}

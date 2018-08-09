@@ -19,6 +19,7 @@ package core
 
 import (
 	"github.com/projectriff/riff/pkg/kubectl"
+	"k8s.io/client-go/kubernetes"
 )
 
 type KubectlClient interface {
@@ -28,9 +29,10 @@ type KubectlClient interface {
 }
 
 type kubectlClient struct {
-	kubeCtl kubectl.KubeCtl
+	kubeClient	kubernetes.Interface
+	kubeCtl 	kubectl.KubeCtl
 }
 
-func NewKubectlClient() KubectlClient {
-	return &kubectlClient{kubeCtl: kubectl.RealKubeCtl()}
+func NewKubectlClient(kubeClient kubernetes.Interface) KubectlClient {
+	return &kubectlClient{kubeClient: kubeClient, kubeCtl: kubectl.RealKubeCtl()}
 }
