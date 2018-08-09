@@ -53,11 +53,11 @@ var (
 	allNameSpaces     = append(knativeNamespaces, istioNamespace)
 )
 
-func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) error {
+func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, error) {
 
 	err := ensureNotTerminating(kc, allNameSpaces, "Please try again later.")
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	istioStatus, err := getNamespaceStatus(kc,istioNamespace)
@@ -65,7 +65,7 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) error {
 		fmt.Print("Installing Istio Components\n")
 		istioYaml, err := loadRelease(istioRelease)
 		if err != nil {
-			return err
+			return false, err
 		}
 		if options.NodePort {
 			istioYaml = bytes.Replace(istioYaml, []byte("LoadBalancer"), []byte("NodePort"), -1)
@@ -74,7 +74,7 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) error {
 		istioLog, err := kc.kubeCtl.ExecStdin([]string{"apply", "-f", "-"}, &istioYaml)
 		if err != nil {
 			fmt.Printf("%s\n", istioLog)
-			return err
+			return false, err
 		}
 
 		fmt.Print("Istio for riff installed\n\n")
@@ -82,24 +82,24 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) error {
 		if !options.Force {
 			answer, err := confirm("Istio is already installed, do you want to install the Knative components for riff?")
 			if err != nil {
-				return err
+				return false, err
 			}
 			if !answer {
-				return nil
+				return false, nil
 			}
 		}
 	}
 
 	err = waitForIstioComponents(kc)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	fmt.Print("Installing Knative Components\n")
 
 	servingYaml, err := loadRelease(servingRelease)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if options.NodePort {
 		servingYaml = bytes.Replace(servingYaml, []byte("LoadBalancer"), []byte("NodePort"), -1)
@@ -108,7 +108,7 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) error {
 	servingLog, err := kc.kubeCtl.ExecStdin([]string{"apply", "-f", "-"}, &servingYaml)
 	if err != nil {
 		fmt.Printf("%s\n", servingLog)
-		return err
+		return false, err
 	}
 
 	applyResources(kc, eventingRelease)
@@ -116,19 +116,19 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) error {
 	applyResources(kc, stubBusRelease)
 
 	fmt.Print("Knative for riff installed\n\n")
-	return nil
+	return true, nil
 }
 
-func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) error {
+func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, error) {
 
 	err := ensureNotTerminating(kc, allNameSpaces, "This would indicate that the system was already uninstalled.")
 	if err != nil {
-		return err
+		return false, err
 	}
 	knativeNsCount, err := checkNamespacesExists(kc, knativeNamespaces)
 	istioNsCount, err := checkNamespacesExists(kc, []string{istioNamespace})
 	if err != nil {
-		return err
+		return false, err
 	}
 	if knativeNsCount == 0 {
 		fmt.Print("No Knative components for riff found\n")
@@ -136,40 +136,40 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) error {
 		if !options.Force {
 			answer, err := confirm("Are you sure you want to uninstall the riff system?")
 			if err != nil {
-				return err
+				return false, err
 			}
 			if !answer {
-				return nil
+				return false, nil
 			}
 		}
 		fmt.Print("Removing Knative for riff components\n")
 		err = deleteCrds(kc, "knative.dev")
 		if err != nil {
-			return err
+			return false, err
 		}
 		err = deleteClusterResources(kc, "clusterrolebinding", "knative-")
 		if err != nil {
-			return err
+			return false, err
 		}
 		err = deleteClusterResources(kc, "clusterrolebinding", "build-controller-")
 		if err != nil {
-			return err
+			return false, err
 		}
 		err = deleteClusterResources(kc, "clusterrolebinding", "eventing-controller-")
 		if err != nil {
-			return err
+			return false, err
 		}
 		err = deleteClusterResources(kc, "clusterrolebinding", "clusterbus-controller-")
 		if err != nil {
-			return err
+			return false, err
 		}
 		err = deleteClusterResources(kc, "clusterrole", "knative-")
 		if err != nil {
-			return err
+			return false, err
 		}
 		err = deleteNamespaces(kc, knativeNamespaces)
 		if err != nil {
-			return err
+			return false, err
 		}
 	}
 	if istioNsCount == 0 {
@@ -177,35 +177,35 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) error {
 	} else {
 		if !options.Istio {
 			if options.Force {
-				return nil
+				return true, nil
 			}
 			answer, err := confirm("Do you also want to uninstall Istio components?")
 			if err != nil {
-				return err
+				return false, err
 			}
 			if !answer {
-				return nil
+				return false, nil
 			}
 		}
 		fmt.Print("Removing Istio components\n")
 		err = deleteCrds(kc, "istio.io")
 		if err != nil {
-			return err
+			return false, err
 		}
 		err = deleteClusterResources(kc, "clusterrolebinding", "istio-")
 		if err != nil {
-			return err
+			return false, err
 		}
 		err = deleteClusterResources(kc, "clusterrole", "istio-")
 		if err != nil {
-			return err
+			return false, err
 		}
 		err = deleteNamespaces(kc, []string{istioNamespace})
 		if err != nil {
-			return err
+			return false, err
 		}
 	}
-	return nil
+	return true, nil
 }
 
 func resolveReleaseURLs(filename string) (url.URL, error) {
@@ -384,7 +384,7 @@ func getNamespaceStatus(kc *kubectlClient, name string) (string, error) {
 
 func confirm(s string) (bool, error) {
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Printf("%s [y/n]: ", s)
+	fmt.Printf("%s [y/N]: ", s)
 	res, err := reader.ReadString('\n')
 	if err != nil {
 		return false, err
