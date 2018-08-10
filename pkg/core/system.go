@@ -64,7 +64,10 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 	istioStatus, err := getNamespaceStatus(kc, istioNamespace)
 	if istioStatus == "'NotFound'" {
 		fmt.Print("Installing Istio components\n")
-		applyResources(kc, istioCrds)
+		err = applyResources(kc, istioCrds)
+		if err != nil {
+			return false, err
+		}
 		time.Sleep(5 * time.Second) // wait for them to get created
 		istioYaml, err := loadRelease(istioRelease)
 		if err != nil {
@@ -77,6 +80,9 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 		istioLog, err := kc.kubeCtl.ExecStdin([]string{"apply", "-f", "-"}, &istioYaml)
 		if err != nil {
 			fmt.Printf("%s\n", istioLog)
+			if strings.Contains(istioLog, "forbidden") {
+				fmt.Print("It looks like you don't have cluster-admin permissions.\n\n")
+			}
 			return false, err
 		}
 
