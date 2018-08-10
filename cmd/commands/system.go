@@ -20,6 +20,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/projectriff/riff/pkg/core"
 	"errors"
+	"fmt"
 )
 
 func System() *cobra.Command {
@@ -69,6 +70,9 @@ Use the '--node-port' flag when installing on Minikube and other clusters that d
 	}
 
 	command.Flags().BoolVarP(&options.NodePort, "node-port", "", false, "whether to use NodePort instead of LoadBalancer for ingress gateways")
+	command.Flags().BoolVarP(&options.Monitoring, "monitoring", "", false, "install Prometheus and Grafana monitoring components")
+	command.Flags().BoolVarP(&options.Tracing, "tracing", "", false, "install Zipkin tracing components")
+	command.Flags().BoolVarP(&options.Latest, "latest", "", false, "use the latest nightly build snapshot releases for Knative components")
 	command.Flags().BoolVarP(&options.Force, "force", "", false, "force the install of components without getting any prompts")
 
 	return command
@@ -110,7 +114,9 @@ Use the '--istio' flag to also remove Istio components.'
 		},
 	}
 
-	command.Flags().BoolVarP(&options.Istio, "istio", "", false, "include Istio and the istio-system namespace in the removal")
+	command.Flags().BoolVarP(&options.Istio, "istio", "", false, fmt.Sprintf("include Istio components and the %s namespace in the removal", core.IstioNamespace))
+	command.Flags().BoolVarP(&options.Monitoring, "monitoring", "", false, fmt.Sprintf("include Prometheus and Grafana components and the %s namespace in the removal", core.MonitoringNamespace))
+	command.Flags().BoolVarP(&options.Tracing, "tracing", "", false, "remove Zipkin tracing components")
 	command.Flags().BoolVarP(&options.Force, "force", "", false, "force the removal of components without getting any prompts")
 
 	return command

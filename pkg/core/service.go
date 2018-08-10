@@ -134,7 +134,7 @@ type ServiceInvokeOptions struct {
 
 func (c *client) ServiceCoordinates(options ServiceInvokeOptions) (string, string, error) {
 
-	ksvc, err := c.kubeClient.CoreV1().Services(istioNamespace).Get(ingressServiceName, meta_v1.GetOptions{})
+	ksvc, err := c.kubeClient.CoreV1().Services(IstioNamespace).Get(ingressServiceName, meta_v1.GetOptions{})
 	if err != nil {
 		return "", "", err
 	}

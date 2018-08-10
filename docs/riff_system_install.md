@@ -24,9 +24,12 @@ riff system install [flags]
 ### Options
 
 ```
-      --force       force the install of components without getting any prompts
-  -h, --help        help for install
-      --node-port   whether to use NodePort instead of LoadBalancer for ingress gateways
+      --force        force the install of components without getting any prompts
+  -h, --help         help for install
+      --latest       use the latest nightly build snapshot releases for Knative components
+      --monitoring   install Prometheus and Grafana monitoring components
+      --node-port    whether to use NodePort instead of LoadBalancer for ingress gateways
+      --tracing      install Zipkin tracing components
 ```
 
 ### Options inherited from parent commands
