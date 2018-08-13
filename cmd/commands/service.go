@@ -69,7 +69,8 @@ func Service() *cobra.Command {
 
 func ServiceCreate(fcTool *core.Client) *cobra.Command {
 
-	createChannelOptions := core.CreateChannelOptions{}
+	createInputChannelOptions := core.CreateChannelOptions{}
+	createOutputChannelOptions := core.CreateChannelOptions{}
 	createServiceOptions := core.CreateServiceOptions{}
 	createSubscriptionOptions := core.CreateSubscriptionOptions{}
 
@@ -106,12 +107,18 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 
 			var c *v1alpha1.Channel
 			var subscr *v1alpha1.Subscription
-			if createChannelOptions.Name != "" {
-				c, err = (*fcTool).CreateChannel(createChannelOptions)
+			if createInputChannelOptions.Name != "" {
+				c, err = (*fcTool).CreateChannel(createInputChannelOptions)
 				if err != nil {
 					return err
 				}
 
+				if createOutputChannelOptions.Name != "" {
+					c, err = (*fcTool).CreateChannel(createOutputChannelOptions)
+					if err != nil {
+						return err
+					}
+				}
 				createSubscriptionOptions.Name = subscriptionNameFromService(fnName)
 				createSubscriptionOptions.Subscriber = subscriberNameFromService(fnName) // TODO
 				subscr, err = (*fcTool).CreateSubscription(createSubscriptionOptions)
@@ -148,7 +155,8 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 	command.Flags().VarP(
 		BroadcastStringValue("",
 			&createServiceOptions.Namespace,
-			&createChannelOptions.Namespace,
+			&createInputChannelOptions.Namespace,
+			&createOutputChannelOptions.Namespace,
 			&createSubscriptionOptions.Namespace,
 		),
 		"namespace", "n", "the `namespace` of the service and any namespaced resources specified",
@@ -156,23 +164,45 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 
 	command.Flags().VarP(
 		BroadcastStringValue("",
-			&createChannelOptions.Name,
+			&createInputChannelOptions.Name,
 			&createSubscriptionOptions.Channel,
 		),
 		"input", "i", "name of the service's input `channel`, if any",
 	)
 
+	command.Flags().VarP(
+		BroadcastStringValue("",
+			&createOutputChannelOptions.Name,
+			&createSubscriptionOptions.ReplyTo,
+		),
+		"output", "o", "name of the service's output `channel`, if any",
+	)
+
 	command.Flags().VarPF(
 		BroadcastBoolValue(false,
 			&createServiceOptions.DryRun,
-			&createChannelOptions.DryRun,
+			&createInputChannelOptions.DryRun,
+			&createOutputChannelOptions.DryRun,
 			&createSubscriptionOptions.DryRun,
 		),
 		"dry-run", "", dryRunUsage,
 	).NoOptDefVal = "true"
 
-	command.Flags().StringVar(&createChannelOptions.Bus, "bus", "", busUsage)
-	command.Flags().StringVar(&createChannelOptions.ClusterBus, "cluster-bus", "", clusterBusUsage)
+	command.Flags().Var(
+		BroadcastStringValue("",
+			&createInputChannelOptions.Bus,
+			&createOutputChannelOptions.Bus,
+		),
+		"bus", busUsage,
+	)
+
+	command.Flags().Var(
+		BroadcastStringValue("",
+			&createInputChannelOptions.ClusterBus,
+			&createOutputChannelOptions.ClusterBus,
+		),
+		"cluster-bus", clusterBusUsage,
+	)
 
 	command.Flags().StringVar(&createServiceOptions.Image, "image", "", "the `name[:tag]` reference of an image containing the application/function")
 	command.MarkFlagRequired("image")
@@ -376,6 +406,7 @@ func ServiceSubscribe(fcClient *core.Client) *cobra.Command {
 	command.Flags().StringVar(&createSubscriptionOptions.Name, "subscription", "", "`name` of the subscription (default SERVICE_NAME)")
 	command.Flags().StringVarP(&createSubscriptionOptions.Channel, "input", "i", "", "the name of an input `channel` for the service")
 	command.MarkFlagRequired("input")
+	command.Flags().StringVarP(&createSubscriptionOptions.ReplyTo, "output", "o", "", "the name of an output `channel` for the service")
 	command.Flags().StringVarP(&createSubscriptionOptions.Namespace, "namespace", "n", "", "the `namespace` of the subscription, channel, and service")
 	command.Flags().BoolVar(&createSubscriptionOptions.DryRun, "dry-run", false, dryRunUsage)
 
