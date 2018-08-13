@@ -81,7 +81,18 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 		if err != nil {
 			fmt.Printf("%s\n", istioLog)
 			if strings.Contains(istioLog, "forbidden") {
-				fmt.Print("It looks like you don't have cluster-admin permissions.\n\n")
+				fmt.Print(`It looks like you don't have cluster-admin permissions.
+
+To fix this you need to:
+ 1. Delete he current failed installation using:
+      riff system uninstall --istio --force
+ 2. Give the user account used for installation cluster-admin permissions, you can use the following command:
+      kubectl create clusterrolebinding cluster-admin-binding \
+        --clusterrole=cluster-admin \
+        --user=<install-user>
+ 3. Re-install riff
+
+`)
 			}
 			return false, err
 		}
