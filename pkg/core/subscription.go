@@ -17,6 +17,8 @@
 package core
 
 import (
+	"fmt"
+
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -26,12 +28,15 @@ type CreateSubscriptionOptions struct {
 	Name       string
 	Channel    string
 	Subscriber string
+	ReplyTo    string
 	DryRun     bool
 }
 
 func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha1.Subscription, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
-
+	if options.ReplyTo != "" {
+		options.ReplyTo = fmt.Sprintf("%s-channel", options.ReplyTo)
+	}
 	s := v1alpha1.Subscription{
 		TypeMeta: meta_v1.TypeMeta{
 			APIVersion: "channels.knative.dev/v1alpha1",
@@ -44,6 +49,7 @@ func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha
 		Spec: v1alpha1.SubscriptionSpec{
 			Channel:    options.Channel,
 			Subscriber: options.Subscriber,
+			ReplyTo:    options.ReplyTo,
 		},
 	}
 
