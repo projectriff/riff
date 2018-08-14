@@ -41,14 +41,11 @@ func (c *client) ListServices(options ListServiceOptions) (*v1alpha1.ServiceList
 
 type CreateServiceOptions struct {
 	Namespaced
-	Name string
-
-	Image string
-
-	Env []string
+	Name    string
+	Image   string
+	Env     []string
 	EnvFrom []string
-
-	DryRun bool
+	DryRun  bool
 }
 
 func (c *client) CreateService(options CreateServiceOptions) (*v1alpha1.Service, error) {
@@ -93,7 +90,7 @@ func newService(options CreateServiceOptions) (*v1alpha1.Service, error) {
 					RevisionTemplate: v1alpha1.RevisionTemplateSpec{
 						Spec: v1alpha1.RevisionSpec{
 							Container: core_v1.Container{
-								Env: envVars,
+								Env:   envVars,
 								Image: options.Image,
 							},
 						},
@@ -139,11 +136,13 @@ func (c *client) ServiceCoordinates(options ServiceInvokeOptions) (string, strin
 		return "", "", err
 	}
 	var ingress string
-	ingresses := ksvc.Status.LoadBalancer.Ingress
-	if len(ingresses) > 0 {
-		ingress = ingresses[0].IP
-		if ingress == "" {
-			ingress = ingresses[0].Hostname
+	if ksvc.Spec.Type == "LoadBalancer" {
+		ingresses := ksvc.Status.LoadBalancer.Ingress
+		if len(ingresses) > 0 {
+			ingress = ingresses[0].IP
+			if ingress == "" {
+				ingress = ingresses[0].Hostname
+			}
 		}
 	}
 	if ingress == "" {
