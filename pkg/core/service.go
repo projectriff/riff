@@ -144,7 +144,8 @@ func (c *client) ServiceCoordinates(options ServiceInvokeOptions) (string, strin
 				ingress = ingresses[0].Hostname
 			}
 		}
-	} else if ksvc.Spec.Type == "NodePort" {
+	}
+	if ingress == "" {
 		for _, port := range ksvc.Spec.Ports {
 			if port.Name == "http" {
 				config, err := c.clientConfig.ClientConfig()
@@ -156,9 +157,9 @@ func (c *client) ServiceCoordinates(options ServiceInvokeOptions) (string, strin
 				ingress = fmt.Sprintf("%s:%d", host, port.NodePort)
 			}
 		}
-	}
-	if ingress == "" {
-		return "", "", errors.New("Ingress not available")
+		if ingress == "" {
+			return "", "", errors.New("Ingress not available")
+		}
 	}
 
 	s, err := c.service(options.Namespaced, options.Name)
