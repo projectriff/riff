@@ -22,6 +22,7 @@ import (
 
 	channelsv1alpha1 "github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	feedsv1alpha1 "github.com/knative/eventing/pkg/apis/feeds/v1alpha1"
+	"github.com/knative/pkg/apis"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -29,7 +30,8 @@ import (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // Flow connects an event source with an action that processes events produced
-// by the event source.
+// by the event source. The flow controller handles creating the lower-level
+// eventing primitives (Feeds, Channels, Subscriptions) used to implement flows.
 type Flow struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -37,6 +39,11 @@ type Flow struct {
 	Spec   FlowSpec   `json:"spec"`
 	Status FlowStatus `json:"status"`
 }
+
+// Check that Flow can be validated, can be defaulted, and has immutable fields.
+var _ apis.Validatable = (*Flow)(nil)
+var _ apis.Defaultable = (*Flow)(nil)
+var _ apis.Immutable = (*Flow)(nil)
 
 // FlowSpec is the spec for a Flow resource.
 type FlowSpec struct {
@@ -199,6 +206,9 @@ const (
 
 	// FlowConditionSubscriptionReady specifies that the Subscription has been configured successfully.
 	FlowConditionSubscriptionReady FlowConditionType = "SubscriptionReady"
+
+	// FlowConditionActionTargetResolved specifies that the Action Target has been resolved
+	FlowConditionActionTargetResolved FlowConditionType = "ActionTargetResolved"
 )
 
 // FlowCondition defines a readiness condition for a Flow.
@@ -263,6 +273,29 @@ func (fs *FlowStatus) removeCondition(t FlowConditionType) {
 		}
 	}
 	fs.Conditions = conditions
+}
+
+func (fs *FlowStatus) PropagateActionTargetResolved(status corev1.ConditionStatus, reason string, message string) {
+	fs.setCondition(&FlowCondition{
+		Type:    FlowConditionActionTargetResolved,
+		Status:  status,
+		Reason:  reason,
+		Message: message,
+	})
+	fs.checkAndMarkReady()
+}
+
+func (fs *FlowStatus) InitializeConditions() {
+	for _, cond := range []FlowConditionType{
+		FlowConditionReady,
+	} {
+		if fc := fs.GetCondition(cond); fc == nil {
+			fs.setCondition(&FlowCondition{
+				Type:   cond,
+				Status: corev1.ConditionUnknown,
+			})
+		}
+	}
 }
 
 func (fs *FlowStatus) PropagateChannelStatus(cs channelsv1alpha1.ChannelStatus) {
@@ -345,6 +378,7 @@ func (fs *FlowStatus) checkAndMarkReady() {
 		FlowConditionFeedReady,
 		FlowConditionChannelReady,
 		FlowConditionSubscriptionReady,
+		FlowConditionActionTargetResolved,
 	} {
 		c := fs.GetCondition(cond)
 		if c == nil || c.Status != corev1.ConditionTrue {

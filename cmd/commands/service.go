@@ -18,11 +18,9 @@ package commands
 
 import (
 	"fmt"
-
-	"time"
-
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/frioux/shellquote"
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
@@ -205,7 +203,7 @@ func ServiceStatus(fcClient *core.Client) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(cmd.OutOrStdout(), "Last Transition Time:        %s\n", cond.LastTransitionTime.Format(time.RFC3339))
+			fmt.Fprintf(cmd.OutOrStdout(), "Last Transition Time:        %s\n", cond.LastTransitionTime.Inner.Format(time.RFC3339))
 
 			if cond.Reason != "" {
 				fmt.Fprintf(cmd.OutOrStdout(), "Message:                     %s\n", cond.Message)

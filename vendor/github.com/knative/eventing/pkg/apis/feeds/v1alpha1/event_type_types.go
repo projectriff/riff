@@ -17,6 +17,9 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"encoding/json"
+
+	"github.com/knative/pkg/apis"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -33,6 +36,11 @@ type EventType struct {
 	Spec   EventTypeSpec   `json:"spec"`
 	Status EventTypeStatus `json:"status"`
 }
+
+// Check that EventType can be validated, can be defaulted, and has immutable fields.
+var _ apis.Validatable = (*EventType)(nil)
+var _ apis.Defaultable = (*EventType)(nil)
+var _ apis.Immutable = (*EventType)(nil)
 
 // EventTypeSpec specifies information about the EventType, including a schema
 // for the event and information about the parameters needed to create a Feed to
@@ -56,4 +64,8 @@ type EventTypeList struct {
 	metav1.ListMeta `json:"metadata"`
 
 	Items []EventType `json:"items"`
+}
+
+func (et *EventType) GetSpecJSON() ([]byte, error) {
+	return json.Marshal(et.Spec)
 }
