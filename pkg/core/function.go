@@ -32,7 +32,12 @@ import (
 	"io"
 	"github.com/boz/kcache/types/pod"
 	"strings"
+	"errors"
+	"strconv"
 )
+
+const functionLabel = "riff.projectriff.io/function"
+const buildAnnotation = "riff.projectriff.io/build"
 
 type CreateFunctionOptions struct {
 	CreateServiceOptions
@@ -52,6 +57,19 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 	if err != nil {
 		return nil, err
 	}
+
+	labels := s.Spec.RunLatest.Configuration.RevisionTemplate.Labels
+	if labels == nil {
+		labels = map[string]string{}
+	}
+	labels[functionLabel] = options.Name
+	s.Spec.RunLatest.Configuration.RevisionTemplate.SetLabels(labels)
+	annotations := s.Spec.RunLatest.Configuration.RevisionTemplate.Annotations
+	if annotations == nil {
+		annotations = map[string]string{}
+	}
+	annotations[buildAnnotation] = "1"
+	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
 
 	s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
 		ServiceAccountName: "riff-build",
@@ -94,6 +112,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 }
 
 func (c *client) displayFunctionCreationProgress(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}, errChan chan<- error) {
+	time.Sleep(1000 * time.Millisecond) // ToDo: need some time for revision to get created - is there a better way to slow this down?
 	revName, err := c.revisionName(serviceNamespace, serviceName, logWriter, stopChan)
 	if err != nil {
 		errChan <- err
@@ -292,3 +311,54 @@ func (selectorDisjunction) Requirements() (requirements labels.Requirements, sel
 func (selectorDisjunction) String() string {
 	panic("implement me")
 }
+
+type BuildFunctionOptions struct {
+	Namespaced
+	Name string
+	Verbose bool
+}
+
+func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) error {
+	ns := c.explicitOrConfigNamespace(options.Namespaced)
+
+	s, err := c.service(options.Namespaced, options.Name)
+	if err != nil {
+		return err
+	}
+
+	labels := s.Spec.RunLatest.Configuration.RevisionTemplate.Labels
+	if labels[functionLabel] == "" {
+		return errors.New(fmt.Sprintf("the service named \"%s\" is not a riff function", options.Name))
+	}
+
+	annotations := s.Spec.RunLatest.Configuration.RevisionTemplate.Annotations
+	if annotations == nil {
+		annotations = map[string]string{}
+	}
+	build := annotations[buildAnnotation]
+	i, err := strconv.Atoi(build)
+	if err != nil {
+		i = 0
+	}
+	annotations[buildAnnotation] = strconv.Itoa(i + 1)
+	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
+
+	_, err = c.serving.ServingV1alpha1().Services(s.Namespace).Update(s)
+	if err != nil {
+		return err
+	}
+
+	if options.Verbose {
+		stopChan := make(chan struct{})
+		errChan := make(chan error)
+		go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, errChan)
+		err := c.waitForSuccessOrFailure(ns, s.Name, stopChan, errChan)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+

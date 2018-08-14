@@ -31,6 +31,7 @@ import (
 //go:generate mockery -name=Client
 type Client interface {
 	CreateFunction(options CreateFunctionOptions, log io.Writer) (*serving.Service, error)
+	BuildFunction(options BuildFunctionOptions, log io.Writer) error
 
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
 

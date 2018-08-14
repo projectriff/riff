@@ -22,5 +22,6 @@ Interact with function related resources
 ### SEE ALSO
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
+* [riff function build](riff_function_build.md)	 - Trigger a revision build for a function resource
 * [riff function create](riff_function_create.md)	 - Create a new function resource, with optional input and output channels
 
