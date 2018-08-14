@@ -94,6 +94,7 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 			FlagsValidationConjunction(
 				FlagsDependency(Set("input"), exactlyOneOfBusOrClusterBus),
 				FlagsDependency(NotSet("input"), NoneOf("bus", "cluster-bus")),
+				FlagsDependency(NotSet("input"), NoneOf("output")),
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
