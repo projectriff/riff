@@ -24,6 +24,7 @@ import (
 	"time"
 
 	v1alpha12 "github.com/knative/eventing/pkg/apis/channels/v1alpha1"
+	"github.com/knative/pkg/apis"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -93,9 +94,9 @@ var _ = Describe("The riff service create command", func() {
 			sc.SetArgs([]string{"my-service", "--image", "foo/bar", "--namespace", "ns"})
 
 			o := core.CreateServiceOptions{
-				Name:  "my-service",
-				Image: "foo/bar",
-				Env: []string{},
+				Name:    "my-service",
+				Image:   "foo/bar",
+				Env:     []string{},
 				EnvFrom: []string{},
 			}
 			o.Namespace = "ns"
@@ -117,9 +118,9 @@ var _ = Describe("The riff service create command", func() {
 				"--env", "BAZ=qux", "--env-from", "secretKeyRef:foo:bar"})
 
 			o := core.CreateServiceOptions{
-				Name:  "my-service",
-				Image: "foo/bar",
-				Env: []string{"FOO=bar", "BAZ=qux"},
+				Name:    "my-service",
+				Image:   "foo/bar",
+				Env:     []string{"FOO=bar", "BAZ=qux"},
 				EnvFrom: []string{"secretKeyRef:foo:bar"},
 			}
 			o.Namespace = "ns"
@@ -133,11 +134,11 @@ var _ = Describe("The riff service create command", func() {
 				"--input", "my-channel", "--bus", "kafka", "--dry-run"})
 
 			serviceOptions := core.CreateServiceOptions{
-				Name:   "square",
-				Image:  "foo/bar",
-				Env: []string{},
+				Name:    "square",
+				Image:   "foo/bar",
+				Env:     []string{},
 				EnvFrom: []string{},
-				DryRun: true,
+				DryRun:  true,
 			}
 			channelOptions := core.CreateChannelOptions{
 				Name:   "my-channel",
@@ -242,11 +243,13 @@ var _ = Describe("The riff service status command", func() {
 			o.Namespace = "ns"
 
 			sc := &v1alpha1.ServiceCondition{
-				Type:               v1alpha1.ServiceConditionReady,
-				Status:             v1.ConditionFalse,
-				Message:            "punk broke",
-				Reason:             "Becuz",
-				LastTransitionTime: meta_v1.Date(1991, 7, 21, 19, 32, 00, 0, time.FixedZone("Europe", 0)),
+				Type:    v1alpha1.ServiceConditionReady,
+				Status:  v1.ConditionFalse,
+				Message: "punk broke",
+				Reason:  "Becuz",
+				LastTransitionTime: apis.VolatileTime{
+					Inner: meta_v1.Date(1991, 7, 21, 19, 32, 00, 0, time.FixedZone("Europe", 0)),
+				},
 			}
 
 			asMock.On("ServiceStatus", o).Return(sc, nil)
