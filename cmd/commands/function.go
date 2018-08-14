@@ -39,7 +39,8 @@ func Function() *cobra.Command {
 
 func FunctionCreate(fcTool *core.Client) *cobra.Command {
 
-	createChannelOptions := core.CreateChannelOptions{}
+	createInputChannelOptions := core.CreateChannelOptions{}
+	createOutputChannelOptions := core.CreateChannelOptions{}
 	createFunctionOptions := core.CreateFunctionOptions{}
 	createSubscriptionOptions := core.CreateSubscriptionOptions{}
 
@@ -51,7 +52,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new function resource, with optional input binding",
+		Short: "Create a new function resource, with optional input and output channels",
 		Long: `Create a new function resource from the content of the provided Git repo/revision.
 
 The INVOKER arg defines the language invoker that is added to the function code in the build step. The resulting image is 
@@ -73,6 +74,7 @@ From then on you can use the sub-commands for the 'service' command to interact 
 			FlagsValidationConjunction(
 				FlagsDependency(Set("input"), exactlyOneOfBusOrClusterBus),
 				FlagsDependency(NotSet("input"), NoneOf("bus", "cluster-bus")),
+				FlagsDependency(NotSet("input"), NoneOf("output")),
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -93,12 +95,18 @@ From then on you can use the sub-commands for the 'service' command to interact 
 
 			var c *v1alpha1.Channel
 			var subscr *v1alpha1.Subscription
-			if createChannelOptions.Name != "" {
-				c, err = (*fcTool).CreateChannel(createChannelOptions)
+			if createInputChannelOptions.Name != "" {
+				c, err = (*fcTool).CreateChannel(createInputChannelOptions)
 				if err != nil {
 					return err
 				}
 
+				if createOutputChannelOptions.Name != "" {
+					c, err = (*fcTool).CreateChannel(createOutputChannelOptions)
+					if err != nil {
+						return err
+					}
+				}
 				createSubscriptionOptions.Name = subscriptionNameFromService(fnName)
 				createSubscriptionOptions.Subscriber = subscriberNameFromService(fnName)
 				subscr, err = (*fcTool).CreateSubscription(createSubscriptionOptions)
@@ -135,7 +143,8 @@ From then on you can use the sub-commands for the 'service' command to interact 
 	command.Flags().VarP(
 		BroadcastStringValue("",
 			&createFunctionOptions.Namespace,
-			&createChannelOptions.Namespace,
+			&createInputChannelOptions.Namespace,
+			&createOutputChannelOptions.Namespace,
 			&createSubscriptionOptions.Namespace,
 		),
 		"namespace", "n", "the `namespace` of the subscription, channel, and function",
@@ -143,23 +152,45 @@ From then on you can use the sub-commands for the 'service' command to interact 
 
 	command.Flags().VarP(
 		BroadcastStringValue("",
-			&createChannelOptions.Name,
+			&createInputChannelOptions.Name,
 			&createSubscriptionOptions.Channel,
 		),
 		"input", "i", "name of the function's input `channel`, if any",
 	)
 
+	command.Flags().VarP(
+		BroadcastStringValue("",
+			&createOutputChannelOptions.Name,
+			&createSubscriptionOptions.ReplyTo,
+		),
+		"output", "o", "name of the function's output `channel`, if any",
+	)
+
 	command.Flags().VarPF(
 		BroadcastBoolValue(false,
 			&createFunctionOptions.DryRun,
-			&createChannelOptions.DryRun,
+			&createInputChannelOptions.DryRun,
+			&createOutputChannelOptions.DryRun,
 			&createSubscriptionOptions.DryRun,
 		),
 		"dry-run", "", dryRunUsage,
 	).NoOptDefVal = "true"
 
-	command.Flags().StringVar(&createChannelOptions.Bus, "bus", "", busUsage)
-	command.Flags().StringVar(&createChannelOptions.ClusterBus, "cluster-bus", "", clusterBusUsage)
+	command.Flags().Var(
+		BroadcastStringValue("",
+			&createInputChannelOptions.Bus,
+			&createOutputChannelOptions.Bus,
+		),
+		"bus", busUsage,
+	)
+
+	command.Flags().Var(
+		BroadcastStringValue("",
+			&createInputChannelOptions.ClusterBus,
+			&createOutputChannelOptions.ClusterBus,
+		),
+		"cluster-bus", clusterBusUsage,
+	)
 
 	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
 	command.MarkFlagRequired("image")
