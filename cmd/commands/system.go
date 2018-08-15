@@ -115,7 +115,6 @@ Use the '--istio' flag to also remove Istio components.'
 	}
 
 	command.Flags().BoolVarP(&options.Istio, "istio", "", false, fmt.Sprintf("include Istio components and the %s namespace in the removal", core.IstioNamespace))
-	command.Flags().BoolVarP(&options.Monitoring, "monitoring", "", false, fmt.Sprintf("include Prometheus and Grafana components and the %s namespace in the removal", core.MonitoringNamespace))
 	command.Flags().BoolVarP(&options.Tracing, "tracing", "", false, "remove Zipkin tracing components")
 	command.Flags().BoolVarP(&options.Force, "force", "", false, "force the removal of components without getting any prompts")
 

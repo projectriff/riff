@@ -31,19 +31,18 @@ import (
 )
 
 const (
-	IstioNamespace        = "istio-system"
-	MonitoringNamespace   = "monitoring"
-	istioCrds             = "https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-crds.yaml"
-	istioRelease          = "https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-main.yaml"
-	zipkinRelease         = "https://storage.googleapis.com/riff-releases/zipkin/zipkin-2.11.1-riff.yaml"
-	releaseServingPrefix  = "https://storage.googleapis.com/knative-releases/serving/previous/v20180809-6b01d8e/"
-	releaseEventingPrefix = "https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/"
-	latestServingPrefix   = "https://storage.googleapis.com/knative-releases/serving/latest/"
+	IstioNamespace         = "istio-system"
+	istioCrds              = "https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-crds.yaml"
+	istioRelease           = "https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-main.yaml"
+	zipkinRelease          = "https://storage.googleapis.com/riff-releases/zipkin/zipkin-2.11.1-riff.yaml"
+	releaseServingPrefix   = "https://storage.googleapis.com/knative-releases/serving/previous/v20180809-6b01d8e/"
+	releaseEventingPrefix  = "https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/"
+	latestServingPrefix    = "https://storage.googleapis.com/knative-releases/serving/latest/"
 	latestEventingPrefix   = "https://storage.googleapis.com/knative-releases/eventing/latest/"
-	servingNoMonFile      = "release-no-mon.yaml"
-	servingLiteFile       = "release-lite.yaml"
-	eventingFile          = "release.yaml"
-	stubBusFile           = "release-clusterbus-stub.yaml"
+	servingNoMonFile       = "release-no-mon.yaml"
+	servingLiteFile        = "release-lite.yaml"
+	eventingFile           = "release.yaml"
+	stubBusFile            = "release-clusterbus-stub.yaml"
 )
 
 type SystemInstallOptions struct {
@@ -56,13 +55,12 @@ type SystemInstallOptions struct {
 
 type SystemUninstallOptions struct {
 	Istio      bool
-	Monitoring bool
 	Tracing    bool
 	Force      bool
 }
 
 var (
-	knativeNamespaces = []string{"knative-eventing", "knative-serving", "knative-build"}
+	knativeNamespaces = []string{"knative-eventing", "knative-serving", "knative-build", "knative-monitoring"}
 	allNameSpaces     = append(knativeNamespaces, IstioNamespace)
 )
 
@@ -180,10 +178,6 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 	if err != nil {
 		return false, err
 	}
-	monitoringNsCount, err := checkNamespacesExists(kc, []string{MonitoringNamespace})
-	if err != nil {
-		return false, err
-	}
 	if knativeNsCount == 0 {
 		fmt.Print("No Knative components for riff found\n")
 	} else {
@@ -224,28 +218,6 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 		err = deleteNamespaces(kc, knativeNamespaces)
 		if err != nil {
 			return false, err
-		}
-	}
-	if monitoringNsCount > 0 {
-		removeMonitoring := false
-		if options.Monitoring {
-			removeMonitoring = true
-		} else {
-			if !options.Force {
-				answer, err := confirm(fmt.Sprintf("Do you also want to uninstall monitoring components and delete %s namespace?", MonitoringNamespace))
-				if err != nil {
-					return false, err
-				}
-				if answer {
-					removeMonitoring = true
-				}
-			}
-		}
-		if removeMonitoring {
-			err = deleteNamespaces(kc, []string{MonitoringNamespace})
-			if err != nil {
-				return false, err
-			}
 		}
 	}
 	if options.Tracing {
@@ -372,7 +344,11 @@ func deleteNamespaces(kc *kubectlClient, namespaces []string) error {
 		fmt.Printf("Deleting resources defined in: %s\n", namespace)
 		deleteLog, err := kc.kubeCtl.Exec([]string{"delete", "namespace", namespace})
 		if err != nil {
-			fmt.Printf("%s", deleteLog)
+			if strings.Contains(deleteLog, "NotFound") {
+				fmt.Printf("Nothing to do for namespace \"%s\"\n", namespace)
+			} else {
+				return err
+			}
 		}
 	}
 	return nil
@@ -381,8 +357,11 @@ func deleteNamespaces(kc *kubectlClient, namespaces []string) error {
 func deleteResource(kc *kubectlClient, namespace string, resourceType string, name string) error {
 	resourceLog, err := kc.kubeCtl.Exec(append([]string{"delete", "-n", namespace, resourceType, name}))
 	if err != nil {
-		fmt.Printf("%s", resourceLog)
-		return err
+		if strings.Contains(resourceLog, "NotFound") {
+			fmt.Printf("Nothing to do for %s \"%s\"\n", resourceType, name)
+		} else {
+			return err
+		}
 	}
 	return nil
 }
