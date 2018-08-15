@@ -41,6 +41,7 @@ const (
 	latestEventingPrefix   = "https://storage.googleapis.com/knative-releases/eventing/latest/"
 	servingNoMonFile       = "release-no-mon.yaml"
 	servingLiteFile        = "release-lite.yaml"
+	servingAllFile         = "release.yaml"
 	eventingFile           = "release.yaml"
 	stubBusFile            = "release-clusterbus-stub.yaml"
 )
@@ -50,6 +51,7 @@ type SystemInstallOptions struct {
 	Monitoring bool
 	Tracing    bool
 	Latest     bool
+	All        bool
 	Force      bool
 }
 
@@ -116,10 +118,14 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 	} else {
 		servingRelease = releaseServingPrefix
 	}
-	if options.Monitoring {
-		servingRelease = servingRelease + servingLiteFile
+	if options.All {
+		servingRelease = servingRelease + servingAllFile
 	} else {
-		servingRelease = servingRelease + servingNoMonFile
+		if options.Monitoring {
+			servingRelease = servingRelease + servingLiteFile
+		} else {
+			servingRelease = servingRelease + servingNoMonFile
+		}
 	}
 	servingYaml, err := loadRelease(servingRelease)
 	if err != nil {
@@ -153,7 +159,7 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 		return false, err
 	}
 
-	if options.Tracing {
+	if options.Tracing && !options.All {
 		err = applyResources(kc, zipkinRelease)
 		if err != nil {
 			return false, err

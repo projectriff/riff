@@ -46,11 +46,11 @@ Use the '--node-port' flag when installing on Minikube and other clusters that d
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// TODO: implement support for global flags - for now don't allow their use
 			if cmd.Flags().Changed("kubeconfig") {
-				return errors.New("The 'kubeconfig' flag is not yet supported by the 'system install' command")
+				return errors.New("the 'kubeconfig' flag is not yet supported by the 'system install' command")
 			}
 			m, _ := cmd.Flags().GetString("master")
 			if len(m) > 0 {
-				return errors.New("The 'master' flag is not yet supported by the 'system install' command")
+				return errors.New("the 'master' flag is not yet supported by the 'system install' command")
 			}
 			return nil
 		},
@@ -73,6 +73,7 @@ Use the '--node-port' flag when installing on Minikube and other clusters that d
 	command.Flags().BoolVarP(&options.Monitoring, "monitoring", "", false, "install Prometheus and Grafana monitoring components")
 	command.Flags().BoolVarP(&options.Tracing, "tracing", "", false, "install Zipkin tracing components")
 	command.Flags().BoolVarP(&options.Latest, "latest", "", false, "use the latest nightly build snapshot releases for Knative components")
+	command.Flags().BoolVarP(&options.All, "all", "", false, "install the complete set of components including Elasticsearch for logs (requires additional cluster resources)")
 	command.Flags().BoolVarP(&options.Force, "force", "", false, "force the install of components without getting any prompts")
 
 	return command
