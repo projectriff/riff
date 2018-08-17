@@ -31,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"io"
 	"github.com/boz/kcache/types/pod"
+	"strings"
 )
 
 type CreateFunctionOptions struct {
@@ -231,12 +232,30 @@ func (c *client) waitForSuccessOrFailure(namespace string, name string, stopChan
 		case corev1.ConditionTrue:
 			return nil
 		case corev1.ConditionFalse:
-			return fmt.Errorf("function create failed: %s: %s", cond.Reason, cond.Message)
+			var message string
+			conds, err := c.ServiceConditions(serviceStatusOptions)
+			if err != nil {
+				// fall back to a basic message
+				message = cond.Message
+			} else {
+				message = serviceConditionsMessage(conds, cond.Message)
+			}
+			return fmt.Errorf("function create failed: %s: %s", cond.Reason, message)
 		default:
 			// keep going until outcome is known
 		}
 	}
 	return nil
+}
+
+func serviceConditionsMessage(conds []v1alpha1.ServiceCondition,primaryMessage string) string {
+	msg := []string{primaryMessage}
+	for _, cond := range conds {
+		if cond.Status == corev1.ConditionFalse && cond.Type != v1alpha1.ServiceConditionReady && cond.Message != primaryMessage {
+			msg = append(msg, cond.Message)
+		}
+	}
+	return strings.Join(msg, "; ")
 }
 
 func or(disjuncts ...labels.Selector) labels.Selector {

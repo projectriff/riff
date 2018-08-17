@@ -111,18 +111,27 @@ type ServiceStatusOptions struct {
 
 func (c *client) ServiceStatus(options ServiceStatusOptions) (*v1alpha1.ServiceCondition, error) {
 
-	s, err := c.service(options.Namespaced, options.Name)
+	conds, err := c.ServiceConditions(options)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, cond := range s.Status.Conditions {
+	for _, cond := range conds {
 		if cond.Type == v1alpha1.ServiceConditionReady {
 			return &cond, nil
 		}
 	}
 
 	return nil, errors.New("No condition of type ServiceConditionReady found for the service")
+}
+
+func (c *client) ServiceConditions(options ServiceStatusOptions) ([]v1alpha1.ServiceCondition, error) {
+
+	s, err := c.service(options.Namespaced, options.Name)
+	if err != nil {
+		return nil, err
+	}
+	return s.Status.Conditions, nil
 }
 
 type ServiceInvokeOptions struct {
