@@ -38,6 +38,7 @@ riff service create [flags]
       --image name[:tag]       the name[:tag] reference of an image containing the application/function
   -i, --input channel          name of the service's input channel, if any
   -n, --namespace namespace    the namespace of the service and any namespaced resources specified
+  -o, --output channel         name of the service's output channel, if any
 ```
 
 ### Options inherited from parent commands
