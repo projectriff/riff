@@ -1,6 +1,6 @@
 ## riff function create
 
-Create a new function resource, with optional input binding
+Create a new function resource, with optional input and output channels
 
 ### Synopsis
 
@@ -45,6 +45,7 @@ riff function create [flags]
       --image repository/image[:tag]   the name of the image to build; must be a writable repository/image[:tag] with credentials configured
   -i, --input channel                  name of the function's input channel, if any
   -n, --namespace namespace            the namespace of the subscription, channel, and function
+  -o, --output channel                 name of the function's output channel, if any
   -v, --verbose                        print details of command progress
 ```
 
