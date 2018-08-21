@@ -279,8 +279,7 @@ var _ = Describe("The riff function build command", func() {
 			o.Name = "square"
 			o.Namespace = "ns"
 
-			results := "build"
-			asMock.On("BuildFunction", o).Return(&results, nil)
+			asMock.On("BuildFunction", o, mock.Anything).Return(nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -288,7 +287,7 @@ var _ = Describe("The riff function build command", func() {
 			fc.SetArgs([]string{"square", "--namespace", "ns"})
 
 			e := fmt.Errorf("some error")
-			asMock.On("BuildFunction", mock.Anything).Return(nil, e)
+			asMock.On("BuildFunction", mock.Anything, mock.Anything).Return(e)
 			err := fc.Execute()
 			Expect(err).To(MatchError(e))
 		})
