@@ -37,7 +37,7 @@ import (
 )
 
 const functionLabel = "riff.projectriff.io/function"
-const buildAnnotation = "riff.projectriff.io/build"
+const buildAnnotation = "riff.projectriff.io/nonce"
 
 type CreateFunctionOptions struct {
 	CreateServiceOptions
