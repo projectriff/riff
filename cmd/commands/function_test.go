@@ -33,7 +33,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-var _ = Describe("The riff function command", func() {
+var _ = Describe("The riff function create command", func() {
 	Context("when given wrong args or flags", func() {
 		var (
 			mockClient core.Client
@@ -232,3 +232,64 @@ spec:
 status: {}
 ---
 `
+
+var _ = Describe("The riff function build command", func() {
+	Context("when given wrong args or flags", func() {
+		var (
+			mockClient core.Client
+			fc         *cobra.Command
+		)
+		BeforeEach(func() {
+			mockClient = nil
+			fc = commands.FunctionBuild(&mockClient)
+		})
+		It("should fail with no args", func() {
+			fc.SetArgs([]string{})
+			err := fc.Execute()
+			Expect(err).To(MatchError("accepts 1 arg(s), received 0"))
+		})
+		It("should fail with invalid function name", func() {
+			//fc = commands.FunctionBuild(&mockClient)
+			fc.SetArgs([]string{"invålid"})
+			err := fc.Execute()
+			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
+		})
+	})
+
+	Context("when given suitable args", func() {
+		var (
+			client core.Client
+			asMock *mocks.Client
+			fc     *cobra.Command
+		)
+		BeforeEach(func() {
+			client = new(mocks.Client)
+			asMock = client.(*mocks.Client)
+
+			fc = commands.FunctionBuild(&client)
+		})
+		AfterEach(func() {
+			asMock.AssertExpectations(GinkgoT())
+
+		})
+		It("should involve the core.Client", func() {
+			fc.SetArgs([]string{"square", "--namespace", "ns"})
+
+			o := core.BuildFunctionOptions{}
+			o.Name = "square"
+			o.Namespace = "ns"
+
+			asMock.On("BuildFunction", o, mock.Anything).Return(nil)
+			err := fc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		})
+		It("should propagate core.Client errors", func() {
+			fc.SetArgs([]string{"square", "--namespace", "ns"})
+
+			e := fmt.Errorf("some error")
+			asMock.On("BuildFunction", mock.Anything, mock.Anything).Return(e)
+			err := fc.Execute()
+			Expect(err).To(MatchError(e))
+		})
+	})
+})

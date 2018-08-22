@@ -30,6 +30,11 @@ const (
 	functionCreateNumberOfArgs
 )
 
+const (
+	functionBuildFunctionNameIndex = iota
+	functionBuildNumberOfArgs
+)
+
 func Function() *cobra.Command {
 	return &cobra.Command{
 		Use:   "function",
@@ -209,6 +214,53 @@ BroadcastBoolValue(false,
 
 	command.Flags().StringArrayVar(&createFunctionOptions.Env, "env", []string{}, envUsage)
 	command.Flags().StringArrayVar(&createFunctionOptions.EnvFrom, "env-from", []string{}, envFromUsage)
+
+	return command
+}
+
+func FunctionBuild(fcTool *core.Client) *cobra.Command {
+
+	buildFunctionOptions := core.BuildFunctionOptions{}
+
+	command := &cobra.Command{
+		Use:   "build",
+		Short: "Trigger a revision build for a function resource",
+		Example: `  riff function build square`,
+		Args: ArgValidationConjunction(
+			cobra.ExactArgs(functionBuildNumberOfArgs),
+			AtPosition(functionBuildFunctionNameIndex, ValidName()),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+
+			fnName := args[functionBuildFunctionNameIndex]
+
+			buildFunctionOptions.Name = fnName
+			err := (*fcTool).BuildFunction(buildFunctionOptions, cmd.OutOrStdout())
+			if err != nil {
+				return err
+			}
+
+			printSuccessfulCompletion(cmd)
+
+			return nil
+		},
+	}
+
+	LabelArgs(command, "FUNCTION_NAME")
+
+	command.Flags().VarP(
+		BroadcastStringValue("",
+			&buildFunctionOptions.Namespace,
+		),
+		"namespace", "n", "the `namespace` of the function",
+	)
+
+	command.Flags().VarPF(
+		BroadcastBoolValue(false,
+			&buildFunctionOptions.Verbose,
+		),
+		"verbose", "v", verboseUsage,
+	).NoOptDefVal = "true"
 
 	return command
 }

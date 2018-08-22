@@ -113,6 +113,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	function := Function()
 	function.AddCommand(
 		FunctionCreate(&client),
+		FunctionBuild(&client),
 	)
 
 	service := Service()
