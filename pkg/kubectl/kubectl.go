@@ -33,12 +33,12 @@ type processKubeCtl struct {
 }
 
 func (kc *processKubeCtl) Exec(cmdArgs []string) (string, error) {
-	out, err := osutils.Exec("kubectl", cmdArgs, 60*time.Second)
+	out, err := osutils.Exec("kubectl", cmdArgs, 120*time.Second)
 	return string(out), err
 }
 
 func (kc *processKubeCtl) ExecStdin(cmdArgs []string, stdin *[]byte) (string, error) {
-	out, err := osutils.ExecStdin("kubectl", cmdArgs, stdin, 60*time.Second)
+	out, err := osutils.ExecStdin("kubectl", cmdArgs, stdin, 120*time.Second)
 	return string(out), err
 }
 

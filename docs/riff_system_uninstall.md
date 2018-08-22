@@ -22,9 +22,11 @@ riff system uninstall [flags]
 ### Options
 
 ```
-      --force   force the removal of components without getting any prompts
-  -h, --help    help for uninstall
-      --istio   include Istio and the istio-system namespace in the removal
+      --force        force the removal of components without getting any prompts
+  -h, --help         help for uninstall
+      --istio        include Istio components and the istio-system namespace in the removal
+      --monitoring   include Prometheus and Grafana components and the monitoring namespace in the removal
+      --tracing      remove Zipkin tracing components
 ```
 
 ### Options inherited from parent commands
