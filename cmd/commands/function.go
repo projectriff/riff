@@ -137,6 +137,9 @@ From then on you can use the sub-commands for the 'service' command to interact 
 				}
 			} else {
 				printSuccessfulCompletion(cmd)
+				if !createFunctionOptions.Verbose && !createFunctionOptions.Wait {
+					fmt.Fprintf(cmd.OutOrStdout(), "Issue `riff service status %s` to see the status of the function\n", fnName)
+				}
 			}
 
 			return nil
@@ -186,6 +189,13 @@ From then on you can use the sub-commands for the 'service' command to interact 
 			&createFunctionOptions.Verbose,
 		),
 		"verbose", "v", verboseUsage,
+	).NoOptDefVal = "true"
+
+	command.Flags().VarPF(
+		BroadcastBoolValue(false,
+			&createFunctionOptions.Wait,
+		),
+		"wait", "w", waitUsage,
 	).NoOptDefVal = "true"
 
 	command.Flags().Var(

@@ -97,10 +97,12 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 			return nil, err
 		}
 
-		if options.Verbose {
+		if options.Verbose || options.Wait {
 			stopChan := make(chan struct{})
 			errChan := make(chan error)
-			go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, errChan)
+			if options.Verbose {
+				go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, errChan)
+			}
 			err := c.waitForSuccessOrFailure(ns, s.Name, stopChan, errChan)
 			if err != nil {
 				return nil, err
