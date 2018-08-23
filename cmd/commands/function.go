@@ -181,12 +181,12 @@ From then on you can use the sub-commands for the 'service' command to interact 
 		"dry-run", "", dryRunUsage,
 	).NoOptDefVal = "true"
 
-command.Flags().VarPF(
-BroadcastBoolValue(false,
-&createFunctionOptions.Verbose,
-),
-"verbose", "v", verboseUsage,
-).NoOptDefVal = "true"
+	command.Flags().VarPF(
+		BroadcastBoolValue(false,
+			&createFunctionOptions.Verbose,
+		),
+		"verbose", "v", verboseUsage,
+	).NoOptDefVal = "true"
 
 	command.Flags().Var(
 		BroadcastStringValue("",
@@ -223,8 +223,8 @@ func FunctionBuild(fcTool *core.Client) *cobra.Command {
 	buildFunctionOptions := core.BuildFunctionOptions{}
 
 	command := &cobra.Command{
-		Use:   "build",
-		Short: "Trigger a revision build for a function resource",
+		Use:     "build",
+		Short:   "Trigger a revision build for a function resource",
 		Example: `  riff function build square`,
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(functionBuildNumberOfArgs),

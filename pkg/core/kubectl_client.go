@@ -29,8 +29,8 @@ type KubectlClient interface {
 }
 
 type kubectlClient struct {
-	kubeClient	kubernetes.Interface
-	kubeCtl 	kubectl.KubeCtl
+	kubeClient kubernetes.Interface
+	kubeCtl    kubectl.KubeCtl
 }
 
 func NewKubectlClient(kubeClient kubernetes.Interface) KubectlClient {

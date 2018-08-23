@@ -17,9 +17,9 @@
 package core_test
 
 import (
-	"github.com/projectriff/riff/pkg/core"
-	. "github.com/onsi/gomega"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	"github.com/projectriff/riff/pkg/core"
 	"k8s.io/api/core/v1"
 )
 
@@ -75,7 +75,7 @@ var _ = Describe("Environment variable parsing", func() {
 			It("should not fail and produce expected output", func() {
 				expected := []v1.EnvVar{
 					{
-						Name: "FOO",
+						Name:  "FOO",
 						Value: "bar",
 					},
 				}
@@ -92,11 +92,11 @@ var _ = Describe("Environment variable parsing", func() {
 			It("should not fail and produce expected output", func() {
 				expected := []v1.EnvVar{
 					{
-						Name: "FOO",
+						Name:  "FOO",
 						Value: "bar",
 					},
 					{
-						Name: "BAZ",
+						Name:  "BAZ",
 						Value: "foo",
 					},
 				}

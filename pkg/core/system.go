@@ -17,17 +17,17 @@
 package core
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"net/url"
-	"time"
-	"bufio"
 	"os"
 	"strings"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
 )
 
 const (
@@ -41,7 +41,7 @@ const (
 
 type SystemInstallOptions struct {
 	NodePort bool
-	Force bool
+	Force    bool
 }
 
 type SystemUninstallOptions struct {
@@ -61,7 +61,7 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 		return false, err
 	}
 
-	istioStatus, err := getNamespaceStatus(kc,istioNamespace)
+	istioStatus, err := getNamespaceStatus(kc, istioNamespace)
 	if istioStatus == "'NotFound'" {
 		fmt.Print("Installing Istio components\n")
 		applyResources(kc, istioCrds)
@@ -347,7 +347,7 @@ func deleteCrds(kc *kubectlClient, suffix string) error {
 	return nil
 }
 
-func checkNamespacesExists (kc *kubectlClient, names []string) (int, error) {
+func checkNamespacesExists(kc *kubectlClient, names []string) (int, error) {
 	count := 0
 	for _, name := range names {
 		status, err := getNamespaceStatus(kc, name)
@@ -355,13 +355,13 @@ func checkNamespacesExists (kc *kubectlClient, names []string) (int, error) {
 			return count, err
 		}
 		if status != "'NotFound'" {
-			count =+ 1
+			count = +1
 		}
 	}
 	return count, nil
 }
 
-func ensureNotTerminating (kc *kubectlClient, names []string, message string) error {
+func ensureNotTerminating(kc *kubectlClient, names []string, message string) error {
 	for _, name := range names {
 		status, err := getNamespaceStatus(kc, name)
 		if err != nil {

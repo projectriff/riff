@@ -17,8 +17,8 @@
 package commands
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/projectriff/riff/pkg/core"
+	"github.com/spf13/cobra"
 )
 
 func Namespace() *cobra.Command {

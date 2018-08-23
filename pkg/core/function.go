@@ -17,23 +17,23 @@
 package core
 
 import (
+	"context"
+	"errors"
+	"fmt"
+	"github.com/boz/go-logutil"
+	"github.com/boz/kail"
+	"github.com/boz/kcache/types/pod"
 	build "github.com/knative/build/pkg/apis/build/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	"github.com/boz/kail"
-	"k8s.io/apimachinery/pkg/labels"
-	"fmt"
-	"context"
-	"time"
-	"github.com/boz/go-logutil"
-	"log"
+	"io"
 	"io/ioutil"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	"io"
-	"github.com/boz/kcache/types/pod"
-	"strings"
-	"errors"
+	"k8s.io/apimachinery/pkg/labels"
+	"log"
 	"strconv"
+	"strings"
+	"time"
 )
 
 const functionLabel = "riff.projectriff.io/function"
@@ -267,7 +267,7 @@ func (c *client) waitForSuccessOrFailure(namespace string, name string, stopChan
 	return nil
 }
 
-func serviceConditionsMessage(conds []v1alpha1.ServiceCondition,primaryMessage string) string {
+func serviceConditionsMessage(conds []v1alpha1.ServiceCondition, primaryMessage string) string {
 	msg := []string{primaryMessage}
 	for _, cond := range conds {
 		if cond.Status == corev1.ConditionFalse && cond.Type != v1alpha1.ServiceConditionReady && cond.Message != primaryMessage {
@@ -314,7 +314,7 @@ func (selectorDisjunction) String() string {
 
 type BuildFunctionOptions struct {
 	Namespaced
-	Name string
+	Name    string
 	Verbose bool
 }
 
@@ -360,5 +360,3 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 
 	return nil
 }
-
-

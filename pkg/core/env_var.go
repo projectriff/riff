@@ -17,11 +17,11 @@
 package core
 
 import (
-	"k8s.io/api/core/v1"
 	"errors"
 	"fmt"
+	"k8s.io/api/core/v1"
 	"strings"
-		)
+)
 
 func ParseEnvVar(envVars []string) ([]v1.EnvVar, error) {
 	var results []v1.EnvVar

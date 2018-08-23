@@ -17,9 +17,9 @@
 package commands
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/projectriff/riff/pkg/core"
 	"errors"
+	"github.com/projectriff/riff/pkg/core"
+	"github.com/spf13/cobra"
 )
 
 func System() *cobra.Command {
@@ -35,7 +35,7 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "install",
 		Short: "Install riff and Knative system components",
-		Long:  `Install riff and Knative system components
+		Long: `Install riff and Knative system components
 
 If an 'istio-system' namespace isn't found then the it will be created and Istio components will be installed.
 
@@ -80,7 +80,7 @@ func SystemUninstall(kc *core.KubectlClient) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "uninstall",
 		Short: "Remove riff and Knative system components",
-		Long:  `Remove riff and Knative system components
+		Long: `Remove riff and Knative system components
 
 Use the '--istio' flag to also remove Istio components.'
 `,
