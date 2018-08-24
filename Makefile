@@ -4,7 +4,11 @@ OUTPUT = ./riff
 GO_SOURCES = $(shell find cmd pkg -type f -name '*.go' -not -regex '.*/mocks/.*')
 GO_GENERATED_SOURCES = $(shell find cmd pkg -type f -name '*.go' -regex '.*/mocks/.*')
 VERSION ?= $(shell cat VERSION)
-LDFLAGS_VERSION = -X github.com/projectriff/riff/cmd/commands.cli_version=$(VERSION)
+GITSHA = $(shell git rev-parse HEAD)
+GITDIRTY = $(shell git diff-index --quiet HEAD -- || echo "dirty")
+LDFLAGS_VERSION = -X github.com/projectriff/riff/cmd/commands.cli_version=$(VERSION) \
+				  -X github.com/projectriff/riff/cmd/commands.cli_gitsha=$(GITSHA) \
+				  -X github.com/projectriff/riff/cmd/commands.cli_gitdirty=$(GITDIRTY)
 GOBIN ?= $(shell go env GOPATH)/bin
 
 all: test docs
