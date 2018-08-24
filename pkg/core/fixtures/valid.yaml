@@ -1,0 +1,8 @@
+version: 0.1
+istio:
+  - istio-crds
+  - istio-release
+knative:
+  - serving-release
+  - eventing-release
+  - stub-bus-release

@@ -6,9 +6,20 @@ Install riff and Knative system components
 
 Install riff and Knative system components
 
-If an 'istio-system' namespace isn't found then the it will be created and Istio components will be installed.
+If an 'istio-system' namespace isn't found, it will be created and Istio components will be installed.
 
-Use the '--node-port' flag when installing on Minikube and other clusters that don't support an external load balancer.'
+Use the '--node-port' flag when installing on Minikube and other clusters that don't support an external load balancer.
+
+Use the '--manifest' flag to specify the path of a manifest file which provides the URLs of the YAML definitions of the
+components to be installed. The manifest file contents should be of the following form:
+
+version: 0.1
+istio:
+  - https://path/to/istio-release.yaml
+knative:
+  - https://path/to/serving-release.yaml
+  - https://path/to/eventing-release.yaml
+  - https://path/to/stub-bus-release.yaml
 
 
 ```
@@ -24,9 +35,10 @@ riff system install [flags]
 ### Options
 
 ```
-      --force       force the install of components without getting any prompts
-  -h, --help        help for install
-      --node-port   whether to use NodePort instead of LoadBalancer for ingress gateways
+      --force             force the install of components without getting any prompts
+  -h, --help              help for install
+  -m, --manifest string   file path of a manifest file referring to the YAML files to be applied
+      --node-port         whether to use NodePort instead of LoadBalancer for ingress gateways
 ```
 
 ### Options inherited from parent commands
