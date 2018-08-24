@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	istioNamespace  = "istio-system"
+	istioNamespace = "istio-system"
 	istioCrds       = "https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-crds.yaml"
 	istioRelease    = "https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-main.yaml"
 	servingRelease  = "https://storage.googleapis.com/knative-releases/serving/previous/v20180809-6b01d8e/release-no-mon.yaml"
@@ -40,6 +40,7 @@ const (
 )
 
 type SystemInstallOptions struct {
+	Manifest string
 	NodePort bool
 	Force    bool
 }
@@ -55,8 +56,21 @@ var (
 )
 
 func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, error) {
+	var (
+		manifest *Manifest
+		err      error
+	)
 
-	err := ensureNotTerminating(kc, allNameSpaces, "Please try again later.")
+	if options.Manifest != "" {
+		manifest, err = NewManifest(options.Manifest)
+		if err != nil {
+			return false, err
+		}
+	} else {
+		manifest = defaultManifest()
+	}
+
+	err = ensureNotTerminating(kc, allNameSpaces, "Please try again later.")
 	if err != nil {
 		return false, err
 	}
@@ -64,40 +78,16 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 	istioStatus, err := getNamespaceStatus(kc, istioNamespace)
 	if istioStatus == "'NotFound'" {
 		fmt.Print("Installing Istio components\n")
-		err = applyResources(kc, istioCrds)
-		if err != nil {
-			return false, err
-		}
-		time.Sleep(5 * time.Second) // wait for them to get created
-		istioYaml, err := loadRelease(istioRelease)
-		if err != nil {
-			return false, err
-		}
-		if options.NodePort {
-			istioYaml = bytes.Replace(istioYaml, []byte("LoadBalancer"), []byte("NodePort"), -1)
-		}
-		fmt.Printf("Applying resources defined in: %s\n", istioRelease)
-		istioLog, err := kc.kubeCtl.ExecStdin([]string{"apply", "-f", "-"}, &istioYaml)
-		if err != nil {
-			fmt.Printf("%s\n", istioLog)
-			if strings.Contains(istioLog, "forbidden") {
-				fmt.Print(`It looks like you don't have cluster-admin permissions.
-
-To fix this you need to:
- 1. Delete he current failed installation using:
-      riff system uninstall --istio --force
- 2. Give the user account used for installation cluster-admin permissions, you can use the following command:
-      kubectl create clusterrolebinding cluster-admin-binding \
-        --clusterrole=cluster-admin \
-        --user=<install-user>
- 3. Re-install riff
-
-`)
+		for i, release := range manifest.Istio {
+			if i > 0 {
+				time.Sleep(5 * time.Second) // wait for previous resources to be created
 			}
-			return false, err
+			err = kc.applyRelease(release, options)
+			if err != nil {
+				return false, err
+			}
 		}
-
-		fmt.Print("Istio for riff installed\n\n")
+		fmt.Print("Istio components installed\n\n")
 	} else {
 		if !options.Force {
 			answer, err := confirm("Istio is already installed, do you want to install the Knative components for riff?")
@@ -116,27 +106,53 @@ To fix this you need to:
 	}
 
 	fmt.Print("Installing Knative components\n")
+	for _, release := range manifest.Knative {
+		err = kc.applyRelease(release, options)
+		if err != nil {
+			return false, err
+		}
+	}
+	fmt.Print("Knative components installed\n\n")
+	return true, nil
+}
 
-	servingYaml, err := loadRelease(servingRelease)
+func defaultManifest() *Manifest {
+	return &Manifest{
+		Version: MANIFEST_VERSION,
+		Istio:   []string{istioCrds, istioRelease},
+		Knative: []string{servingRelease, eventingRelease, stubBusRelease},
+	}
+}
+
+func (kc *kubectlClient) applyRelease(release string, options SystemInstallOptions) error {
+	yaml, err := loadRelease(release)
 	if err != nil {
-		return false, err
+		return err
 	}
 	if options.NodePort {
-		servingYaml = bytes.Replace(servingYaml, []byte("LoadBalancer"), []byte("NodePort"), -1)
+		yaml = bytes.Replace(yaml, []byte("type: LoadBalancer"), []byte("type: NodePort"), -1)
 	}
-	fmt.Printf("Applying resources defined in: %s\n", servingRelease)
-	servingLog, err := kc.kubeCtl.ExecStdin([]string{"apply", "-f", "-"}, &servingYaml)
+	fmt.Printf("Applying resources defined in: %s\n", release)
+	istioLog, err := kc.kubeCtl.ExecStdin([]string{"apply", "-f", "-"}, &yaml)
 	if err != nil {
-		fmt.Printf("%s\n", servingLog)
-		return false, err
+		fmt.Printf("%s\n", istioLog)
+		if strings.Contains(istioLog, "forbidden") {
+			fmt.Print(`It looks like you don't have cluster-admin permissions.
+
+To fix this you need to:
+ 1. Delete he current failed installation using:
+      riff system uninstall --istio --force
+ 2. Give the user account used for installation cluster-admin permissions, you can use the following command:
+      kubectl create clusterrolebinding cluster-admin-binding \
+        --clusterrole=cluster-admin \
+        --user=<install-user>
+ 3. Re-install riff
+
+`)
+		}
+		return err
 	}
-
-	applyResources(kc, eventingRelease)
-
-	applyResources(kc, stubBusRelease)
-
-	fmt.Print("Knative for riff installed\n\n")
-	return true, nil
+	return nil
 }
 
 func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, error) {
@@ -236,7 +252,7 @@ func resolveReleaseURLs(filename string) (url.URL, error) {
 	if u.Scheme == "http" || u.Scheme == "https" {
 		return *u, nil
 	}
-	return *u, fmt.Errorf("filename must be file, http or https, got %s", u.Scheme)
+	return *u, fmt.Errorf("filename must be http or https, got %s", u.Scheme)
 }
 
 func loadRelease(release string) ([]byte, error) {
