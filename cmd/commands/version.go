@@ -24,13 +24,18 @@ import (
 )
 
 var cli_version = "unknown"
+var cli_gitsha = "unknown sha"
+var cli_gitdirty = ""
 
 func Version() *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
 		Short: "Print version information about riff",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Fprintf(cmd.OutOrStdout(), "Version\n  riff cli: %s\n", cli_version)
+			if cli_gitdirty != "" {
+				cli_gitdirty = ", with local modifications"
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "Version\n  riff cli: %s (%s%s)\n", cli_version, cli_gitsha, cli_gitdirty)
 			return nil
 		},
 	}
