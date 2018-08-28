@@ -103,7 +103,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 			if options.Verbose {
 				go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, errChan)
 			}
-			err := c.waitForSuccessOrFailure(ns, s.Name, stopChan, errChan)
+			err := c.waitForSuccessOrFailure(ns, s.Name, 1, stopChan, errChan)
 			if err != nil {
 				return nil, err
 			}
@@ -114,7 +114,6 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 }
 
 func (c *client) displayFunctionCreationProgress(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}, errChan chan<- error) {
-	time.Sleep(1000 * time.Millisecond) // ToDo: need some time for revision to get created - is there a better way to slow this down?
 	revName, err := c.revisionName(serviceNamespace, serviceName, logWriter, stopChan)
 	if err != nil {
 		errChan <- err
@@ -227,7 +226,7 @@ func streamLogs(log io.Writer, controller kail.Controller, stopChan <-chan struc
 	}
 }
 
-func (c *client) waitForSuccessOrFailure(namespace string, name string, stopChan chan<- struct{}, errChan <-chan error) error {
+func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int64, stopChan chan<- struct{}, errChan <-chan error) error {
 	defer close(stopChan)
 	for i := 0; i >= 0; i++ {
 		select {
@@ -236,16 +235,23 @@ func (c *client) waitForSuccessOrFailure(namespace string, name string, stopChan
 		default:
 		}
 		time.Sleep(500 * time.Millisecond)
+		service, err := c.service( Namespaced{namespace}, name)
+		if err != nil {
+			return fmt.Errorf("waitForSuccessOrFailure failed to obtain service: %v", err)
+		}
+		if service.Status.ObservedGeneration < gen {
+			// allow some time for service status observed generation to show up
+			if i < 20 {
+				continue
+			}
+			return fmt.Errorf("waitForSuccessOrFailure failed to obtain service status for observedGeneration %d: %v", gen, err)
+		}
 		serviceStatusOptions := ServiceStatusOptions{
 			Namespaced: Namespaced{namespace},
 			Name:       name,
 		}
 		cond, err := c.ServiceStatus(serviceStatusOptions)
 		if err != nil {
-			// allow some time for service status to show up
-			if i < 20 {
-				continue
-			}
 			return fmt.Errorf("waitForSuccessOrFailure failed to obtain service status: %v", err)
 		}
 
@@ -253,15 +259,26 @@ func (c *client) waitForSuccessOrFailure(namespace string, name string, stopChan
 		case corev1.ConditionTrue:
 			return nil
 		case corev1.ConditionFalse:
-			var message string
+			someStateIsUnknown := false
 			conds, err := c.ServiceConditions(serviceStatusOptions)
-			if err != nil {
-				// fall back to a basic message
-				message = cond.Message
-			} else {
-				message = serviceConditionsMessage(conds, cond.Message)
+			if err == nil {
+				for _, c := range conds {
+					if c.Status == corev1.ConditionUnknown {
+						someStateIsUnknown = true
+						break
+					}
+				}
 			}
-			return fmt.Errorf("function create failed: %s: %s", cond.Reason, message)
+			if !someStateIsUnknown {
+				var message string
+				if err != nil {
+					// fall back to a basic message
+					message = cond.Message
+				} else {
+					message = serviceConditionsMessage(conds, cond.Message)
+				}
+				return fmt.Errorf("function creation failed: %s: %s", cond.Reason, message)
+			}
 		default:
 			// keep going until outcome is known
 		}
@@ -320,6 +337,14 @@ type BuildFunctionOptions struct {
 	Verbose bool
 }
 
+func (c *client) getServiceSpecGeneration(namespaced Namespaced, name string) (int64, error) {
+	s, err := c.service(namespaced, name)
+	if err != nil {
+		return 0, err
+	}
+	return s.Spec.Generation, nil
+}
+
 func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) error {
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
 
@@ -327,6 +352,8 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 	if err != nil {
 		return err
 	}
+
+	gen := s.Spec.Generation
 
 	labels := s.Spec.RunLatest.Configuration.RevisionTemplate.Labels
 	if labels[functionLabel] == "" {
@@ -353,8 +380,25 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 	if options.Verbose {
 		stopChan := make(chan struct{})
 		errChan := make(chan error)
+		var (
+			nextGen int64
+			err error
+		)
+		for i := 0; i < 10; i++ {
+			if i >= 10 {
+				return fmt.Errorf("build unsuccesful for \"%s\", service resource was never updated", options.Name)
+			}
+			time.Sleep(500 * time.Millisecond)
+			nextGen, err = c.getServiceSpecGeneration(options.Namespaced, options.Name)
+			if err != nil {
+				return err
+			}
+			if nextGen > gen {
+				break
+			}
+		}
 		go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, errChan)
-		err := c.waitForSuccessOrFailure(ns, s.Name, stopChan, errChan)
+		err = c.waitForSuccessOrFailure(ns, s.Name, nextGen, stopChan, errChan)
 		if err != nil {
 			return err
 		}
