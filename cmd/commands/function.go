@@ -184,20 +184,6 @@ From then on you can use the sub-commands for the 'service' command to interact 
 		"dry-run", "", dryRunUsage,
 	).NoOptDefVal = "true"
 
-	command.Flags().VarPF(
-		BroadcastBoolValue(false,
-			&createFunctionOptions.Verbose,
-		),
-		"verbose", "v", verboseUsage,
-	).NoOptDefVal = "true"
-
-	command.Flags().VarPF(
-		BroadcastBoolValue(false,
-			&createFunctionOptions.Wait,
-		),
-		"wait", "w", waitUsage,
-	).NoOptDefVal = "true"
-
 	command.Flags().Var(
 		BroadcastStringValue("",
 			&createInputChannelOptions.Bus,
@@ -221,6 +207,8 @@ From then on you can use the sub-commands for the 'service' command to interact 
 	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` of the function code to use")
 	command.Flags().StringVar(&createFunctionOptions.Handler, "handler", "", "the name of the `method or class` to invoke, depending on the invoker used")
 	command.Flags().StringVar(&createFunctionOptions.Artifact, "artifact", "", "`path` to the function source code or jar file; auto-detected if not specified")
+	command.Flags().BoolVarP(&createFunctionOptions.Verbose, "verbose", "v", false, verboseUsage)
+	command.Flags().BoolVarP(&createFunctionOptions.Wait, "wait", "w", false, waitUsage)
 
 	command.Flags().StringArrayVar(&createFunctionOptions.Env, "env", []string{}, envUsage)
 	command.Flags().StringArrayVar(&createFunctionOptions.EnvFrom, "env-from", []string{}, envFromUsage)
@@ -258,19 +246,8 @@ func FunctionBuild(fcTool *core.Client) *cobra.Command {
 
 	LabelArgs(command, "FUNCTION_NAME")
 
-	command.Flags().VarP(
-		BroadcastStringValue("",
-			&buildFunctionOptions.Namespace,
-		),
-		"namespace", "n", "the `namespace` of the function",
-	)
-
-	command.Flags().VarPF(
-		BroadcastBoolValue(false,
-			&buildFunctionOptions.Verbose,
-		),
-		"verbose", "v", verboseUsage,
-	).NoOptDefVal = "true"
+	command.Flags().StringVarP(&buildFunctionOptions.Namespace, "namespace", "n", "", "the `namespace` of the function")
+	command.Flags().BoolVarP(&buildFunctionOptions.Verbose, "verbose", "v", false, verboseUsage)
 
 	return command
 }
