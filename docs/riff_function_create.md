@@ -47,6 +47,7 @@ riff function create [flags]
   -n, --namespace namespace            the namespace of the subscription, channel, and function
   -o, --output channel                 name of the function's output channel, if any
   -v, --verbose                        print details of command progress
+  -w, --wait                           wait until the created resource reaches either a successful or an error state (automatic with --verbose)
 ```
 
 ### Options inherited from parent commands
