@@ -57,6 +57,29 @@ var manifests = map[string]*Manifest{
 			"https://storage.googleapis.com/knative-releases/eventing/latest/release-clusterbus-stub.yaml",
 		},
 	},
+	"v0.1.1": &Manifest{
+		Version: MANIFEST_VERSION,
+		Istio: []string{
+			"https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-crds.yaml",
+			"https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-main.yaml",
+		},
+		Knative: []string{
+			"https://storage.googleapis.com/knative-releases/serving/previous/v20180809-6b01d8e/release-no-mon.yaml",
+			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/release.yaml",
+			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/release-clusterbus-stub.yaml",
+		},
+	},
+	"v0.1.0": &Manifest{
+		Version: MANIFEST_VERSION,
+		Istio: []string{
+			"https://storage.googleapis.com/riff-releases/istio-riff-0.1.0.yaml",
+		},
+		Knative: []string{
+			"https://storage.googleapis.com/riff-releases/release-no-mon-riff-0.1.0.yaml",
+			"https://storage.googleapis.com/riff-releases/release-eventing-riff-0.1.0.yaml",
+			"https://storage.googleapis.com/riff-releases/release-eventing-clusterbus-stub-riff-0.1.0.yaml",
+		},
+	},
 }
 
 type SystemInstallOptions struct {
