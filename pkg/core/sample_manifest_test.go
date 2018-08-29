@@ -26,6 +26,6 @@ var _ = Describe("SampleManifest: manifest.yaml in root of this repository", fun
 	It("should match the default manifest defined in the code", func() {
 		manifest, err := NewManifest("../../manifest.yaml")
 		Expect(err).NotTo(HaveOccurred())
-		Expect(manifest).To(Equal(defaultManifest()))
+		Expect(manifest).To(Equal(manifests["stable"]))
 	})
 })
