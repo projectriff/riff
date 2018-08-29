@@ -37,7 +37,7 @@ riff system install [flags]
 ```
       --force             force the install of components without getting any prompts
   -h, --help              help for install
-  -m, --manifest string   file path of a manifest file referring to the YAML files to be applied (default "default")
+  -m, --manifest string   manifest of YAML files to be applied; can be a named manifest (stable or latest) or a file path of a manifest file (default "stable")
       --node-port         whether to use NodePort instead of LoadBalancer for ingress gateways
 ```
 

@@ -80,7 +80,7 @@ knative:
 		},
 	}
 
-	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "default", "file path of a manifest file referring to the YAML files to be applied")
+	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", "manifest of YAML files to be applied; can be a named manifest (stable or latest) or a file path of a manifest file")
 	command.Flags().BoolVarP(&options.NodePort, "node-port", "", false, "whether to use NodePort instead of LoadBalancer for ingress gateways")
 	command.Flags().BoolVarP(&options.Force, "force", "", false, "force the install of components without getting any prompts")
 
