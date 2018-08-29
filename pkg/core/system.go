@@ -57,6 +57,17 @@ var manifests = map[string]*Manifest{
 			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/release-clusterbus-stub.yaml",
 		},
 	},
+	"v0.1.2-rc1": &Manifest{
+		Version: MANIFEST_VERSION,
+		Istio: []string{
+			"https://storage.googleapis.com/knative-releases/serving/previous/v20180828-7c20145/istio.yaml",
+		},
+		Knative: []string{
+			"https://storage.googleapis.com/knative-releases/serving/previous/v20180828-7c20145/release-no-mon.yaml",
+			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180829-e9f182a/release.yaml",
+			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180829-e9f182a/release-clusterbus-stub.yaml",
+		},
+	},
 	"v0.1.1": &Manifest{
 		Version: MANIFEST_VERSION,
 		Istio: []string{
