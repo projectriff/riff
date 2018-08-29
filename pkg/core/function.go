@@ -335,6 +335,7 @@ type BuildFunctionOptions struct {
 	Namespaced
 	Name    string
 	Verbose bool
+	Wait    bool
 }
 
 func (c *client) getServiceSpecGeneration(namespaced Namespaced, name string) (int64, error) {
@@ -377,7 +378,7 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 		return err
 	}
 
-	if options.Verbose {
+	if options.Verbose || options.Wait {
 		stopChan := make(chan struct{})
 		errChan := make(chan error)
 		var (
@@ -397,7 +398,9 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 				break
 			}
 		}
-		go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, errChan)
+		if options.Verbose {
+			go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, errChan)
+		}
 		err = c.waitForSuccessOrFailure(ns, s.Name, nextGen, stopChan, errChan)
 		if err != nil {
 			return err

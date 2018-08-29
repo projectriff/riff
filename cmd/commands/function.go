@@ -248,6 +248,7 @@ func FunctionBuild(fcTool *core.Client) *cobra.Command {
 
 	command.Flags().StringVarP(&buildFunctionOptions.Namespace, "namespace", "n", "", "the `namespace` of the function")
 	command.Flags().BoolVarP(&buildFunctionOptions.Verbose, "verbose", "v", false, verboseUsage)
+	command.Flags().BoolVarP(&buildFunctionOptions.Wait, "wait", "w", false, waitUsage)
 
 	return command
 }
