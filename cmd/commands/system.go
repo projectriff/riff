@@ -18,6 +18,7 @@ package commands
 
 import (
 	"errors"
+
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
 )
@@ -79,7 +80,7 @@ knative:
 		},
 	}
 
-	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "", "file path of a manifest file referring to the YAML files to be applied")
+	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "default", "file path of a manifest file referring to the YAML files to be applied")
 	command.Flags().BoolVarP(&options.NodePort, "node-port", "", false, "whether to use NodePort instead of LoadBalancer for ingress gateways")
 	command.Flags().BoolVarP(&options.Force, "force", "", false, "force the install of components without getting any prompts")
 
