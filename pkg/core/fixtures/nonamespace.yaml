@@ -1,4 +1,4 @@
-manifestVersion: "0.0"
+manifestVersion: 0.1
 istio:
   - istio-crds
   - istio-release
@@ -6,5 +6,3 @@ knative:
   - serving-release
   - eventing-release
   - stub-bus-release
-namespace:
-  - buildtemplate-release

@@ -19,8 +19,9 @@ riff namespace init [flags]
 ### Options
 
 ```
-  -h, --help            help for init
-  -s, --secret secret   the name of a secret containing credentials for the image registry
+  -h, --help              help for init
+  -m, --manifest string   manifest of YAML files to be applied; can be a named manifest (stable or latest) or a file path of a manifest file (default "stable")
+  -s, --secret secret     the name of a secret containing credentials for the image registry
 ```
 
 ### Options inherited from parent commands

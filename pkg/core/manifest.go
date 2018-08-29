@@ -21,19 +21,84 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"gopkg.in/yaml.v2"
+	"github.com/ghodss/yaml"
 )
 
-const manifestVersion_0_1 = "0.1"
+const ManifestVersion = "0.1"
+
+var manifests = map[string]*Manifest{
+	"latest": &Manifest{
+		ManifestVersion: ManifestVersion,
+		Istio: []string{
+			"https://storage.googleapis.com/knative-releases/serving/latest/istio.yaml",
+		},
+		Knative: []string{
+			"https://storage.googleapis.com/knative-releases/serving/latest/release-no-mon.yaml",
+			"https://storage.googleapis.com/knative-releases/eventing/latest/release.yaml",
+			"https://storage.googleapis.com/knative-releases/eventing/latest/release-clusterbus-stub.yaml",
+		},
+		Namespace: []string{
+			"https://storage.googleapis.com/riff-releases/previous/riff-build/riff-build-0.1.0.yaml",
+		},
+	},
+	"stable": &Manifest{
+		ManifestVersion: ManifestVersion,
+		Istio: []string{
+			"https://storage.googleapis.com/knative-releases/serving/previous/v20180828-7c20145/istio.yaml",
+		},
+		Knative: []string{
+			"https://storage.googleapis.com/knative-releases/serving/previous/v20180828-7c20145/release-no-mon.yaml",
+			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180830-5d35af5/release.yaml",
+			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180830-5d35af5/release-clusterbus-stub.yaml",
+		},
+		Namespace: []string{
+			"https://storage.googleapis.com/riff-releases/previous/riff-build/riff-build-0.1.0.yaml",
+		},
+	},
+	"v0.1.1": &Manifest{
+		ManifestVersion: ManifestVersion,
+		Istio: []string{
+			"https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-crds.yaml",
+			"https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-main.yaml",
+		},
+		Knative: []string{
+			"https://storage.googleapis.com/knative-releases/serving/previous/v20180809-6b01d8e/release-no-mon.yaml",
+			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/release.yaml",
+			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/release-clusterbus-stub.yaml",
+		},
+		Namespace: []string{
+			"https://storage.googleapis.com/riff-releases/previous/riff-build/riff-build-0.1.0.yaml",
+		},
+	},
+	"v0.1.0": &Manifest{
+		ManifestVersion: ManifestVersion,
+		Istio: []string{
+			"https://storage.googleapis.com/riff-releases/istio-riff-0.1.0.yaml",
+		},
+		Knative: []string{
+			"https://storage.googleapis.com/riff-releases/release-no-mon-riff-0.1.0.yaml",
+			"https://storage.googleapis.com/riff-releases/release-eventing-riff-0.1.0.yaml",
+			"https://storage.googleapis.com/riff-releases/release-eventing-clusterbus-stub-riff-0.1.0.yaml",
+		},
+		Namespace: []string{
+			"https://storage.googleapis.com/riff-releases/previous/riff-build/riff-build-0.1.0.yaml",
+		},
+	},
+}
 
 // Manifest defines the location of YAML files for system components.
 type Manifest struct {
-	ManifestVersion string `yaml:"manifestVersion"`
-	Istio           []string
-	Knative         []string
+	ManifestVersion string   `json:"manifestVersion"`
+	Istio           []string `json:"istio"`
+	Knative         []string `json:"knative"`
+	Namespace       []string `json:"namespace"`
 }
 
 func NewManifest(path string) (*Manifest, error) {
+	if manifest, ok := manifests[path]; ok {
+		return manifest, nil
+	}
+
 	var m Manifest
 	yamlFile, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -45,12 +110,11 @@ func NewManifest(path string) (*Manifest, error) {
 		return nil, fmt.Errorf("Error parsing manifest file: %v", err)
 	}
 
-	if m.ManifestVersion != manifestVersion_0_1 {
+	if m.ManifestVersion != ManifestVersion {
 		return nil, fmt.Errorf("Manifest has unsupported version: %s", m.ManifestVersion)
 	}
 
-	if m.Istio == nil ||
-		m.Knative == nil {
+	if m.Istio == nil || m.Knative == nil || m.Namespace == nil {
 		return nil, fmt.Errorf("Manifest is incomplete: %#v", m)
 	}
 
