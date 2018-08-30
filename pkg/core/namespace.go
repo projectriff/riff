@@ -26,6 +26,7 @@ type Namespaced struct {
 type NamespaceInitOptions struct {
 	NamespaceName string
 	SecretName    string
+	Manifest      string
 }
 
 func (c *client) explicitOrConfigNamespace(namespaced Namespaced) string {
@@ -38,8 +39,10 @@ func (c *client) explicitOrConfigNamespace(namespaced Namespaced) string {
 }
 
 func (kc *kubectlClient) NamespaceInit(options NamespaceInitOptions) error {
-
-	riffBuildRelease := "https://storage.googleapis.com/riff-releases/previous/riff-build/riff-build-0.1.0.yaml"
+	manifest, err := NewManifest(options.Manifest)
+	if err != nil {
+		return err
+	}
 
 	ns := options.NamespaceName
 
@@ -74,15 +77,17 @@ secrets:
 		fmt.Printf("%s\n", saLog)
 	}
 
-	riffBuildUrl, err := resolveReleaseURLs(riffBuildRelease)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Applying riff build resources in namespace %s\n", ns)
-	riffBuildLog, err := kc.kubeCtl.Exec([]string{"apply", "-f", riffBuildUrl.String()})
-	fmt.Printf("%s\n", riffBuildLog)
-	if err != nil {
-		return err
+	for _, release := range manifest.Namespace {
+		url, err := resolveReleaseURLs(release)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Applying %s in namespace %s\n", release, ns)
+		log, err := kc.kubeCtl.Exec([]string{"apply", "-f", url.String()})
+		fmt.Printf("%s\n", log)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -6,3 +6,5 @@ knative:
   - serving-release
   - eventing-release
   - stub-bus-release
+namespace:
+  - buildtemplate-release

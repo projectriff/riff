@@ -90,6 +90,17 @@ var _ = Describe("Manifest", func() {
 			})
 		})
 
+		Context("when the manifest does not specify the namespace array", func() {
+			BeforeEach(func() {
+				manifestPath = "./fixtures/nonamespace.yaml"
+			})
+
+			It("should return a suitable error", func() {
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(HavePrefix("Manifest is incomplete:"))
+			})
+		})
+
 		Context("when the manifest is valid", func() {
 			BeforeEach(func() {
 				manifestPath = "./fixtures/valid.yaml"
@@ -105,6 +116,10 @@ var _ = Describe("Manifest", func() {
 
 			It("should parse the Knative array", func() {
 				Expect(manifest.Knative).To(ConsistOf("serving-release", "eventing-release", "stub-bus-release"))
+			})
+
+			It("should parse the Knative array", func() {
+				Expect(manifest.Namespace).To(ConsistOf("buildtemplate-release"))
 			})
 		})
 	})

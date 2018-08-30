@@ -33,54 +33,6 @@ import (
 
 const istioNamespace = "istio-system"
 
-var manifests = map[string]*Manifest{
-	"latest": &Manifest{
-		ManifestVersion: manifestVersion_0_1,
-		Istio: []string{
-			"https://storage.googleapis.com/knative-releases/serving/latest/istio.yaml",
-		},
-		Knative: []string{
-			"https://storage.googleapis.com/knative-releases/serving/latest/release-no-mon.yaml",
-			"https://storage.googleapis.com/knative-releases/eventing/latest/release.yaml",
-			"https://storage.googleapis.com/knative-releases/eventing/latest/release-clusterbus-stub.yaml",
-		},
-	},
-	"stable": &Manifest{
-		ManifestVersion: manifestVersion_0_1,
-		Istio: []string{
-			"https://storage.googleapis.com/knative-releases/serving/previous/v20180828-7c20145/istio.yaml",
-		},
-		Knative: []string{
-			"https://storage.googleapis.com/knative-releases/serving/previous/v20180828-7c20145/release-no-mon.yaml",
-			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180830-5d35af5/release.yaml",
-			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180830-5d35af5/release-clusterbus-stub.yaml",
-		},
-	},
-	"v0.1.1": &Manifest{
-		ManifestVersion: manifestVersion_0_1,
-		Istio: []string{
-			"https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-crds.yaml",
-			"https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-main.yaml",
-		},
-		Knative: []string{
-			"https://storage.googleapis.com/knative-releases/serving/previous/v20180809-6b01d8e/release-no-mon.yaml",
-			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/release.yaml",
-			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180809-34ab480/release-clusterbus-stub.yaml",
-		},
-	},
-	"v0.1.0": &Manifest{
-		ManifestVersion: manifestVersion_0_1,
-		Istio: []string{
-			"https://storage.googleapis.com/riff-releases/istio-riff-0.1.0.yaml",
-		},
-		Knative: []string{
-			"https://storage.googleapis.com/riff-releases/release-no-mon-riff-0.1.0.yaml",
-			"https://storage.googleapis.com/riff-releases/release-eventing-riff-0.1.0.yaml",
-			"https://storage.googleapis.com/riff-releases/release-eventing-clusterbus-stub-riff-0.1.0.yaml",
-		},
-	},
-}
-
 type SystemInstallOptions struct {
 	Manifest string
 	NodePort bool
@@ -98,18 +50,9 @@ var (
 )
 
 func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, error) {
-	var (
-		manifest *Manifest
-		err      error
-	)
-
-	if m, ok := manifests[options.Manifest]; ok {
-		manifest = m
-	} else {
-		manifest, err = NewManifest(options.Manifest)
-		if err != nil {
-			return false, err
-		}
+	manifest, err := NewManifest(options.Manifest)
+	if err != nil {
+		return false, err
 	}
 
 	err = ensureNotTerminating(kc, allNameSpaces, "Please try again later.")
