@@ -124,7 +124,7 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 			if i > 0 {
 				time.Sleep(5 * time.Second) // wait for previous resources to be created
 			}
-			err = kc.applyRelease(release, options)
+			err = kc.applyReleaseWithRetry(release, options)
 			if err != nil {
 				return false, err
 			}
@@ -149,13 +149,22 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 
 	fmt.Print("Installing Knative components\n")
 	for _, release := range manifest.Knative {
-		err = kc.applyRelease(release, options)
+		err = kc.applyReleaseWithRetry(release, options)
 		if err != nil {
 			return false, err
 		}
 	}
 	fmt.Print("Knative components installed\n\n")
 	return true, nil
+}
+
+func (kc *kubectlClient) applyReleaseWithRetry(release string, options SystemInstallOptions) error {
+	err := kc.applyRelease(release, options)
+	if err != nil {
+		fmt.Printf("Error applying resources, trying again\n")
+		return kc.applyRelease(release, options)
+	}
+	return nil
 }
 
 func (kc *kubectlClient) applyRelease(release string, options SystemInstallOptions) error {
