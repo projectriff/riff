@@ -46,8 +46,10 @@ clean:
 	rm -f riff-windows-amd64.zip
 
 vendor: Gopkg.lock
+	go get -u github.com/golang/dep/cmd/dep
 	dep ensure -vendor-only && touch vendor
 
 Gopkg.lock: Gopkg.toml
+	go get -u github.com/golang/dep/cmd/dep
 	dep ensure -no-vendor && touch Gopkg.lock
 
