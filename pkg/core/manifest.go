@@ -19,11 +19,12 @@ package core
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
+
+	"gopkg.in/yaml.v2"
 )
 
-const MANIFEST_VERSION = "0.1"
+const manifestVersion_0_1 = "0.1"
 
 // Manifest defines the location of YAML files for system components.
 type Manifest struct {
@@ -44,7 +45,7 @@ func NewManifest(path string) (*Manifest, error) {
 		return nil, fmt.Errorf("Error parsing manifest file: %v", err)
 	}
 
-	if m.ManifestVersion != MANIFEST_VERSION {
+	if m.ManifestVersion != manifestVersion_0_1 {
 		return nil, fmt.Errorf("Manifest has unsupported version: %s", m.ManifestVersion)
 	}
 
