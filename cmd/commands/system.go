@@ -45,7 +45,7 @@ Use the '--node-port' flag when installing on Minikube and other clusters that d
 Use the '--manifest' flag to specify the path of a manifest file which provides the URLs of the YAML definitions of the
 components to be installed. The manifest file contents should be of the following form:
 
-version: 0.1
+manifestVersion: 0.1
 istio:
   - https://path/to/istio-release.yaml
 knative:
