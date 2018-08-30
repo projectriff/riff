@@ -52,8 +52,8 @@ var manifests = map[string]*Manifest{
 		},
 		Knative: []string{
 			"https://storage.googleapis.com/knative-releases/serving/previous/v20180828-7c20145/release-no-mon.yaml",
-			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180829-e9f182a/release.yaml",
-			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180829-e9f182a/release-clusterbus-stub.yaml",
+			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180830-5d35af5/release.yaml",
+			"https://storage.googleapis.com/knative-releases/eventing/previous/v20180830-5d35af5/release-clusterbus-stub.yaml",
 		},
 	},
 	"v0.1.1": &Manifest{
