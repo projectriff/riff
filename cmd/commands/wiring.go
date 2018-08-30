@@ -133,6 +133,11 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		ChannelDelete(&client),
 	)
 
+	image := Image()
+	image.AddCommand(
+		ImageRelocate(&client),
+	)
+
 	namespace := Namespace()
 	namespace.AddCommand(
 		NamespaceInit(&kc),
@@ -148,6 +153,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		function,
 		service,
 		channel,
+		image,
 		namespace,
 		system,
 		Docs(rootCmd),

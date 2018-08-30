@@ -193,6 +193,20 @@ func (_m *Client) ListServices(options core.ListServiceOptions) (*servingv1alpha
 	return r0, r1
 }
 
+// RelocateImages provides a mock function with given fields: options
+func (_m *Client) RelocateImages(options core.RelocateImagesOptions) error {
+	ret := _m.Called(options)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(core.RelocateImagesOptions) error); ok {
+		r0 = rf(options)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // ServiceCoordinates provides a mock function with given fields: options
 func (_m *Client) ServiceCoordinates(options core.ServiceInvokeOptions) (string, string, error) {
 	ret := _m.Called(options)
