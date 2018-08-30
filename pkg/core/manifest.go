@@ -27,9 +27,9 @@ const MANIFEST_VERSION = "0.1"
 
 // Manifest defines the location of YAML files for system components.
 type Manifest struct {
-	Version string
-	Istio   []string
-	Knative []string
+	ManifestVersion string `yaml:"manifestVersion"`
+	Istio           []string
+	Knative         []string
 }
 
 func NewManifest(path string) (*Manifest, error) {
@@ -44,8 +44,8 @@ func NewManifest(path string) (*Manifest, error) {
 		return nil, fmt.Errorf("Error parsing manifest file: %v", err)
 	}
 
-	if m.Version != MANIFEST_VERSION {
-		return nil, fmt.Errorf("Manifest has unsupported version: %s", m.Version)
+	if m.ManifestVersion != MANIFEST_VERSION {
+		return nil, fmt.Errorf("Manifest has unsupported version: %s", m.ManifestVersion)
 	}
 
 	if m.Istio == nil ||

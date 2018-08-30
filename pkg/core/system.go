@@ -35,7 +35,7 @@ const istioNamespace = "istio-system"
 
 var manifests = map[string]*Manifest{
 	"latest": &Manifest{
-		Version: MANIFEST_VERSION,
+		ManifestVersion: MANIFEST_VERSION,
 		Istio: []string{
 			"https://storage.googleapis.com/knative-releases/serving/latest/istio.yaml",
 		},
@@ -46,7 +46,7 @@ var manifests = map[string]*Manifest{
 		},
 	},
 	"stable": &Manifest{
-		Version: MANIFEST_VERSION,
+		ManifestVersion: MANIFEST_VERSION,
 		Istio: []string{
 			"https://storage.googleapis.com/knative-releases/serving/previous/v20180828-7c20145/istio.yaml",
 		},
@@ -57,7 +57,7 @@ var manifests = map[string]*Manifest{
 		},
 	},
 	"v0.1.1": &Manifest{
-		Version: MANIFEST_VERSION,
+		ManifestVersion: MANIFEST_VERSION,
 		Istio: []string{
 			"https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-crds.yaml",
 			"https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-main.yaml",
@@ -69,7 +69,7 @@ var manifests = map[string]*Manifest{
 		},
 	},
 	"v0.1.0": &Manifest{
-		Version: MANIFEST_VERSION,
+		ManifestVersion: MANIFEST_VERSION,
 		Istio: []string{
 			"https://storage.googleapis.com/riff-releases/istio-riff-0.1.0.yaml",
 		},

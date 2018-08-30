@@ -1,4 +1,4 @@
-version: 0.1
+manifestVersion: 0.1
 istio:
 - https://storage.googleapis.com/knative-releases/serving/previous/v20180828-7c20145/istio.yaml
 knative:

@@ -1,4 +1,4 @@
-version: 0.1
+manifestVersion: 0.1
 istio:
   - istio-crds
   - istio-release
