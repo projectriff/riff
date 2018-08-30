@@ -24,11 +24,11 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-const ManifestVersion = "0.1"
+const manifestVersion_0_1 = "0.1"
 
 var manifests = map[string]*Manifest{
 	"latest": &Manifest{
-		ManifestVersion: ManifestVersion,
+		ManifestVersion: manifestVersion_0_1,
 		Istio: []string{
 			"https://storage.googleapis.com/knative-releases/serving/latest/istio.yaml",
 		},
@@ -42,7 +42,7 @@ var manifests = map[string]*Manifest{
 		},
 	},
 	"stable": &Manifest{
-		ManifestVersion: ManifestVersion,
+		ManifestVersion: manifestVersion_0_1,
 		Istio: []string{
 			"https://storage.googleapis.com/knative-releases/serving/previous/v20180828-7c20145/istio.yaml",
 		},
@@ -56,7 +56,7 @@ var manifests = map[string]*Manifest{
 		},
 	},
 	"v0.1.1": &Manifest{
-		ManifestVersion: ManifestVersion,
+		ManifestVersion: manifestVersion_0_1,
 		Istio: []string{
 			"https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-crds.yaml",
 			"https://storage.googleapis.com/riff-releases/istio/istio-1.0.0-riff-main.yaml",
@@ -71,7 +71,7 @@ var manifests = map[string]*Manifest{
 		},
 	},
 	"v0.1.0": &Manifest{
-		ManifestVersion: ManifestVersion,
+		ManifestVersion: manifestVersion_0_1,
 		Istio: []string{
 			"https://storage.googleapis.com/riff-releases/istio-riff-0.1.0.yaml",
 		},
@@ -110,7 +110,7 @@ func NewManifest(path string) (*Manifest, error) {
 		return nil, fmt.Errorf("Error parsing manifest file: %v", err)
 	}
 
-	if m.ManifestVersion != ManifestVersion {
+	if m.ManifestVersion != manifestVersion_0_1 {
 		return nil, fmt.Errorf("Manifest has unsupported version: %s", m.ManifestVersion)
 	}
 
