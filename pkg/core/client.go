@@ -18,12 +18,13 @@
 package core
 
 import (
+	"io"
+
 	eventing "github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	eventing_cs "github.com/knative/eventing/pkg/client/clientset/versioned"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	serving_cs "github.com/knative/serving/pkg/client/clientset/versioned"
-	"io"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
