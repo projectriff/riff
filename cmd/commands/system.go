@@ -18,7 +18,6 @@ package commands
 
 import (
 	"errors"
-
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
 )
@@ -56,9 +55,32 @@ knative:
 namespace:
 - https://path/to/riff-buildtemplate-release.yaml
 ` + "```" + `
+
+To map Docker image names to images in a (private or public) registry, specify the registry hostname using the
+'--registry' flag, the user owning the images using the '--registry-user' flag, and a complete list of the images to be
+mapped using the '--images' flag. The '--images' flag contains the file path of an image manifest file with contents of
+the following form:
+` + "```yaml" + `
+manifestVersion: 0.1
+images:
+...
+- docker.io/istio/sidecar_injector
+...
+- gcr.io/knative-releases/github.com/knative/serving/cmd/autoscaler@sha256:76222399addc02454db9837ea3ff54bae29849168586051a9d0180daa2c1a805
+...
+` + "```" + `
 `,
 		Example: `  riff system install`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := FlagsDependency(Set("registry"), AllOf("registry-user", "images"))(cmd); err != nil {
+				return err
+			}
+			if err := FlagsDependency(Set("registry-user"), AllOf("registry", "images"))(cmd); err != nil {
+				return err
+			}
+			if err := FlagsDependency(Set("images"), AllOf("registry-user", "registry"))(cmd); err != nil {
+				return err
+			}
 			// TODO: implement support for global flags - for now don't allow their use
 			if cmd.Flags().Changed("kubeconfig") {
 				return errors.New("The 'kubeconfig' flag is not yet supported by the 'system install' command")
@@ -87,6 +109,10 @@ namespace:
 	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", "manifest of YAML files to be applied; can be a named manifest (stable or latest) or a file path of a manifest file")
 	command.Flags().BoolVarP(&options.NodePort, "node-port", "", false, "whether to use NodePort instead of LoadBalancer for ingress gateways")
 	command.Flags().BoolVarP(&options.Force, "force", "", false, "force the install of components without getting any prompts")
+
+	command.Flags().StringVarP(&options.Registry, "registry", "", "", "hostname of a Docker registry containing mapped images")
+	command.Flags().StringVarP(&options.RegistryUser, "registry-user", "", "", "user owning mapped images")
+	command.Flags().StringVarP(&options.ImageManifest, "images", "", "", "file path of an image manifest of images to be mapped")
 
 	return command
 }
