@@ -221,6 +221,16 @@ func AtMostOneOf(flagNames ...string) FlagsValidator {
 	}
 }
 
+// NotBlank returns a FlagsValidator that asserts that the given flag is not made entirely of space characters.
+func NotBlank(flagName string) FlagsValidator {
+	return func(cmd *cobra.Command) error {
+		if strings.TrimSpace(cmd.Flag(flagName).Value.String()) == "" {
+			return fmt.Errorf("flag --%s cannot be empty", flagName)
+		}
+		return nil
+	}
+}
+
 // NoneOf returns a FlagsValidator that asserts that none of the passed in flags are set.
 func NoneOf(flagNames ...string) FlagsValidator {
 	return func(cmd *cobra.Command) error {

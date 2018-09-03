@@ -47,7 +47,7 @@ func NamespaceInit(kc *core.KubectlClient) *cobra.Command {
 		PreRunE: FlagsValidatorAsCobraRunE(
 			FlagsValidationConjunction(
 				AtMostOneOf("gcr", "dockerhub"),
-				AtLeastOneOf("gcr", "dockerhub", "secret"),
+				NotBlank("secret"),
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -67,7 +67,7 @@ func NamespaceInit(kc *core.KubectlClient) *cobra.Command {
 
 	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", "manifest of YAML files to be applied; can be a named manifest (stable or latest) or a file path of a manifest file")
 
-	command.Flags().StringVarP(&options.SecretName, "secret", "s", "", "the name of a `secret` containing credentials for the image registry")
+	command.Flags().StringVarP(&options.SecretName, "secret", "s", "push-credentials", "the name of a `secret` containing credentials for the image registry")
 	command.Flags().StringVar(&options.GcrTokenPath, "gcr", "", "path to a file containing Google Container Registry credentials")
 	command.Flags().StringVar(&options.DockerHubUsername, "dockerhub", "", "dockerhub username for authentication; password will be read from stdin")
 
