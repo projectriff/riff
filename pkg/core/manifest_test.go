@@ -42,8 +42,7 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(HavePrefix("Error reading manifest file:"))
+				Expect(err).To(MatchError(HavePrefix("Error reading manifest file: ")))
 			})
 		})
 
@@ -53,8 +52,7 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(HavePrefix("Error parsing manifest file:"))
+				Expect(err).To(MatchError(HavePrefix("Error parsing manifest file: ")))
 			})
 		})
 
@@ -74,8 +72,7 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(HavePrefix("Manifest is incomplete:"))
+				Expect(err).To(MatchError(HavePrefix("Manifest is incomplete: istio array missing: ")))
 			})
 		})
 
@@ -85,8 +82,7 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(HavePrefix("Manifest is incomplete:"))
+				Expect(err).To(MatchError(HavePrefix("Manifest is incomplete: knative array missing: ")))
 			})
 		})
 
@@ -96,8 +92,7 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(HavePrefix("Manifest is incomplete:"))
+				Expect(err).To(MatchError(HavePrefix("Manifest is incomplete: namespace array missing: ")))
 			})
 		})
 
