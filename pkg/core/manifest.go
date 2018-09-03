@@ -128,9 +128,24 @@ func NewManifest(path string) (*Manifest, error) {
 		return nil, fmt.Errorf("Manifest has unsupported version: %s", m.ManifestVersion)
 	}
 
-	if m.Istio == nil || m.Knative == nil || m.Namespace == nil {
-		return nil, fmt.Errorf("Manifest is incomplete: %#v", m)
+	err = checkCompleteness(m)
+	if err != nil {
+		return nil, err
 	}
 
 	return &m, nil
+}
+
+func checkCompleteness(m Manifest) error {
+	var omission string
+	if m.Istio == nil {
+		omission = "istio"
+	} else if m.Knative == nil {
+		omission = "knative"
+	} else if m.Namespace == nil {
+		omission = "namespace"
+	} else {
+		return nil
+	}
+	return fmt.Errorf("Manifest is incomplete: %s array missing: %#v", omission, m)
 }
