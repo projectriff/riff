@@ -102,12 +102,13 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 }
 
 func (kc *kubectlClient) applyReleaseWithRetry(release string, options SystemInstallOptions) error {
-	err := kc.applyRelease(release, options)
-	if err != nil {
+	for {
+		err := kc.applyRelease(release, options)
+		if err == nil {
+			return nil
+		}
 		fmt.Printf("Error applying resources, trying again\n")
-		return kc.applyRelease(release, options)
 	}
-	return nil
 }
 
 func (kc *kubectlClient) applyRelease(release string, options SystemInstallOptions) error {
