@@ -296,19 +296,6 @@ func waitForIstioComponents(kc *kubectlClient) error {
 	return errors.New("the Istio components did not start in time")
 }
 
-func applyResources(kc *kubectlClient, release string) error {
-	releaseUrl, err := resolveReleaseURLs(release)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Applying resources defined in: %s\n", releaseUrl.String())
-	releaseLog, err := kc.kubeCtl.Exec([]string{"apply", "-f", releaseUrl.String()})
-	if err != nil {
-		fmt.Printf("%s", releaseLog)
-	}
-	return nil
-}
-
 func deleteNamespaces(kc *kubectlClient, namespaces []string) error {
 	for _, namespace := range namespaces {
 		fmt.Printf("Deleting resources defined in: %s\n", namespace)
