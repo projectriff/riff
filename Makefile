@@ -24,6 +24,11 @@ $(GO_GENERATED_SOURCES): $(GO_SOURCES) vendor VERSION
 	which mockery || go get -u github.com/vektra/mockery/.../
 
 	go generate ./...
+	mockery -name 'Interface' 					-dir vendor/k8s.io/client-go/kubernetes 				-output pkg/core/vendor_mocks -outpkg vendor_mocks
+	mockery -name 'CoreV1Interface' 			-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-output pkg/core/vendor_mocks -outpkg vendor_mocks
+	mockery -name 'NamespaceInterface' 			-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-output pkg/core/vendor_mocks -outpkg vendor_mocks
+	mockery -name 'ServiceAccountInterface' 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-output pkg/core/vendor_mocks -outpkg vendor_mocks
+	mockery -name 'SecretInterface'			 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-output pkg/core/vendor_mocks -outpkg vendor_mocks
 
 install: build
 	cp $(OUTPUT) $(GOBIN)

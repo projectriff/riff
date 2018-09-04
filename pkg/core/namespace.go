@@ -31,6 +31,16 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const serviceAccountName = "riff-build"
+
+type secretType int
+
+const (
+	secretTypeUserProvided secretType = iota
+	secretTypeGcr
+	secretTypeDockerHub
+)
+
 type Namespaced struct {
 	Namespace string
 }
@@ -42,6 +52,17 @@ type NamespaceInitOptions struct {
 
 	GcrTokenPath      string
 	DockerHubUsername string
+}
+
+func (o *NamespaceInitOptions) secretType() secretType {
+	switch {
+	case o.DockerHubUsername != "":
+		return secretTypeDockerHub
+	case o.GcrTokenPath != "":
+		return secretTypeGcr
+	default:
+		return secretTypeUserProvided
+	}
 }
 
 func (c *client) explicitOrConfigNamespace(namespaced Namespaced) string {
@@ -66,6 +87,7 @@ func (c *kubectlClient) NamespaceInit(options NamespaceInitOptions) error {
 	namespace, err := c.kubeClient.CoreV1().Namespaces().Get(ns, v1.GetOptions{})
 	if errors.IsNotFound(err) {
 		fmt.Printf("Creating namespace %q \n", ns)
+		namespace = &corev1.Namespace{}
 		namespace.Name = ns
 		namespace, err = c.kubeClient.CoreV1().Namespaces().Create(namespace)
 		if err != nil {
@@ -76,54 +98,33 @@ func (c *kubectlClient) NamespaceInit(options NamespaceInitOptions) error {
 	}
 
 	secretName := options.SecretName
-	if options.GcrTokenPath != "" {
-		token, err := ioutil.ReadFile(options.GcrTokenPath)
-		if err != nil {
+
+	_, err = c.kubeClient.CoreV1().Secrets(options.NamespaceName).Get(secretName, v1.GetOptions{})
+	if errors.IsNotFound(err) {
+		if options.secretType() == secretTypeUserProvided {
 			return err
 		}
-		secret := &corev1.Secret{
-			ObjectMeta: v1.ObjectMeta{
-				Name:        secretName,
-				Annotations: map[string]string{"build.knative.dev/docker-0": "https://gcr.io"},
-			},
-			Type: corev1.SecretTypeBasicAuth,
-			StringData: map[string]string{
-				"username": "_json_key",
-				"password": string(token),
-			},
+	} else if err != nil {
+		return err
+	} else {
+		if options.secretType() != secretTypeUserProvided {
+			c.kubeClient.CoreV1().Secrets(options.NamespaceName).Delete(secretName, &v1.DeleteOptions{})
 		}
-		fmt.Printf("Creating secret %q with GCR authentication key from file %s\n", secretName, options.GcrTokenPath)
-		_, err = c.kubeClient.CoreV1().Secrets(ns).Create(secret)
-		if err != nil {
+	}
+	if options.GcrTokenPath != "" {
+		if err := c.createGcrSecret(options); err != nil {
 			return err
 		}
 	} else if options.DockerHubUsername != "" {
-		password, err := readPassword(fmt.Sprintf("Enter dockerhub password for user %q", options.DockerHubUsername))
-		if err != nil {
-			return err
-		}
-		secret := &corev1.Secret{
-			ObjectMeta: v1.ObjectMeta{
-				Name:        secretName,
-				Annotations: map[string]string{"build.knative.dev/docker-0": "https://index.docker.io/v1/"},
-			},
-			Type: corev1.SecretTypeBasicAuth,
-			StringData: map[string]string{
-				"username": options.DockerHubUsername,
-				"password": password,
-			},
-		}
-		fmt.Printf("Creating secret %q with DockerHub authentication for user %q\n", secretName, options.DockerHubUsername)
-		_, err = c.kubeClient.CoreV1().Secrets(ns).Create(secret)
-		if err != nil {
+		if err := c.createDockerHubSecret(options); err != nil {
 			return err
 		}
 	}
 
-	sa, err := c.kubeClient.CoreV1().ServiceAccounts(ns).Get("riff-build", v1.GetOptions{})
+	sa, err := c.kubeClient.CoreV1().ServiceAccounts(ns).Get(serviceAccountName, v1.GetOptions{})
 	if errors.IsNotFound(err) {
 		sa = &corev1.ServiceAccount{}
-		sa.Name = "riff-build"
+		sa.Name = serviceAccountName
 		sa.Secrets = append(sa.Secrets, corev1.ObjectReference{Name: secretName})
 		fmt.Printf("Creating serviceaccount %q using secret %q in namespace %q\n", sa.Name, secretName, ns)
 		_, err = c.kubeClient.CoreV1().ServiceAccounts(ns).Create(sa)
@@ -167,6 +168,49 @@ func (c *kubectlClient) NamespaceInit(options NamespaceInitOptions) error {
 	return nil
 }
 
+func (c *kubectlClient) createDockerHubSecret(options NamespaceInitOptions) error {
+	password, err := readPassword(fmt.Sprintf("Enter dockerhub password for user %q", options.DockerHubUsername))
+	if err != nil {
+		return err
+	}
+	secret := &corev1.Secret{
+		ObjectMeta: v1.ObjectMeta{
+			Name:        options.SecretName,
+			Annotations: map[string]string{"build.knative.dev/docker-0": "https://index.docker.io/v1/"},
+		},
+		Type: corev1.SecretTypeBasicAuth,
+		StringData: map[string]string{
+			"username": options.DockerHubUsername,
+			"password": password,
+		},
+	}
+	fmt.Printf("Creating secret %q with DockerHub authentication for user %q\n", options.SecretName, options.DockerHubUsername)
+	_, err = c.kubeClient.CoreV1().Secrets(options.NamespaceName).Create(secret)
+	return err
+}
+
+func (c *kubectlClient) createGcrSecret(options NamespaceInitOptions) error {
+	token, err := ioutil.ReadFile(options.GcrTokenPath)
+	if err != nil {
+		return err
+	}
+	secret := &corev1.Secret{
+		ObjectMeta: v1.ObjectMeta{
+			Name:        options.SecretName,
+			Annotations: map[string]string{"build.knative.dev/docker-0": "https://gcr.io"},
+		},
+		Type: corev1.SecretTypeBasicAuth,
+		StringData: map[string]string{
+			"username": "_json_key",
+			"password": string(token),
+		},
+	}
+	fmt.Printf("Creating secret %q with GCR authentication key from file %s\n", options.SecretName, options.GcrTokenPath)
+	_, err = c.kubeClient.CoreV1().Secrets(options.NamespaceName).Create(secret)
+
+	return err
+}
+
 func readPassword(s string) (string, error) {
 	fmt.Print(s)
 	if terminal.IsTerminal(int(syscall.Stdin)) {
@@ -175,7 +219,7 @@ func readPassword(s string) (string, error) {
 		return string(res), err
 	} else {
 		reader := bufio.NewReader(os.Stdin)
-		res, err := reader.ReadString('\n')
-		return res, err
+		res, err := ioutil.ReadAll(reader)
+		return string(res), err
 	}
 }
