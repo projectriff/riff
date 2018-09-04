@@ -184,6 +184,31 @@ func FlagsDependency(matcher FlagsMatcher, delegate FlagsValidator) FlagsValidat
 	}
 }
 
+// AllOf returns a FlagsValidator that asserts that all of the passed in flags are set.
+func AllOf(flagNames ...string) FlagsValidator {
+	return func(cmd *cobra.Command) error {
+		for _, f := range flagNames {
+			flag := cmd.Flag(f)
+			if flag == nil {
+				panic(fmt.Sprintf("Expected to find flag named %q in command %q", f, cmd.Use))
+			}
+			if !flag.Changed {
+				var quantifier string
+				switch len(flagNames) {
+				case 1:
+					quantifier = ""
+				case 2:
+					quantifier = "both of "
+				default:
+					quantifier = "all of "
+				}
+				return fmt.Errorf("%s--%s must be set", quantifier, strings.Join(flagNames, ", --"))
+			}
+		}
+		return nil
+	}
+}
+
 // AtLeastOneOf returns a FlagsValidator that asserts that at least one of the passed in flags is set.
 func AtLeastOneOf(flagNames ...string) FlagsValidator {
 	return func(cmd *cobra.Command) error {
@@ -340,10 +365,10 @@ func tmpl(w io.Writer, text string, data interface{}) error {
 		"trim":                    strings.TrimSpace,
 		"trimRightSpace":          trimRightSpace,
 		"trimTrailingWhitespaces": trimRightSpace,
-		"rpad":    rpad,
-		"gt":      cobra.Gt,
-		"eq":      cobra.Eq,
-		"useline": useline,
+		"rpad":                    rpad,
+		"gt":                      cobra.Gt,
+		"eq":                      cobra.Eq,
+		"useline":                 useline,
 	}
 	t.Funcs(templateFuncs)
 	template.Must(t.Parse(text))

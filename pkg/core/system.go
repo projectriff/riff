@@ -37,6 +37,10 @@ type SystemInstallOptions struct {
 	Manifest string
 	NodePort bool
 	Force    bool
+
+	Registry      string
+	RegistryUser  string
+	ImageManifest string
 }
 
 type SystemUninstallOptions struct {
@@ -55,6 +59,11 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 		return false, err
 	}
 
+	imageMapper, err := newImageMapping(options.Registry, options.RegistryUser, options.ImageManifest)
+	if err != nil {
+		return false, err
+	}
+
 	err = ensureNotTerminating(kc, allNameSpaces, "Please try again later.")
 	if err != nil {
 		return false, err
@@ -67,7 +76,7 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 			if i > 0 {
 				time.Sleep(5 * time.Second) // wait for previous resources to be created
 			}
-			err = kc.applyReleaseWithRetry(release, options)
+			err = kc.applyReleaseWithRetry(release, options, imageMapper)
 			if err != nil {
 				return false, err
 			}
@@ -92,7 +101,7 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 
 	fmt.Print("Installing Knative components\n")
 	for _, release := range manifest.Knative {
-		err = kc.applyReleaseWithRetry(release, options)
+		err = kc.applyReleaseWithRetry(release, options, imageMapper)
 		if err != nil {
 			return false, err
 		}
@@ -101,20 +110,42 @@ func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, erro
 	return true, nil
 }
 
-func (kc *kubectlClient) applyReleaseWithRetry(release string, options SystemInstallOptions) error {
-	err := kc.applyRelease(release, options)
+func newImageMapping(registry string, user string, imageManifestPath string) (*imageMapper, error) {
+	if registry == "" {
+		return nil, nil
+	}
+
+	imageManifest, err := NewImageManifest(imageManifestPath)
+	if err != nil {
+		return nil, err
+	}
+
+	imageMapper, err := newImageMapper(registry, user, imageManifest.Images)
+	if err != nil {
+		return nil, err
+	}
+
+	return imageMapper, nil
+}
+
+func (kc *kubectlClient) applyReleaseWithRetry(release string, options SystemInstallOptions, imageMapper *imageMapper) error {
+	err := kc.applyRelease(release, options, imageMapper)
 	if err != nil {
 		fmt.Printf("Error applying resources, trying again\n")
-		return kc.applyRelease(release, options)
+		return kc.applyRelease(release, options, imageMapper)
 	}
 	return nil
 }
 
-func (kc *kubectlClient) applyRelease(release string, options SystemInstallOptions) error {
+func (kc *kubectlClient) applyRelease(release string, options SystemInstallOptions, imageMapper *imageMapper) error {
 	yaml, err := loadRelease(release)
 	if err != nil {
 		return err
 	}
+	if imageMapper != nil {
+		yaml = imageMapper.mapImages(yaml)
+	}
+
 	if options.NodePort {
 		yaml = bytes.Replace(yaml, []byte("type: LoadBalancer"), []byte("type: NodePort"), -1)
 	}
