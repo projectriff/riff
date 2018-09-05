@@ -138,7 +138,11 @@ From then on you can use the sub-commands for the 'service' command to interact 
 			} else {
 				printSuccessfulCompletion(cmd)
 				if !createFunctionOptions.Verbose && !createFunctionOptions.Wait {
-					fmt.Fprintf(cmd.OutOrStdout(), "Issue `riff service status %s` to see the status of the function\n", fnName)
+					namespaceOption := ""
+					if createFunctionOptions.Namespace != "" {
+						namespaceOption = fmt.Sprintf(" -n %s", createFunctionOptions.Namespace)
+					}
+					fmt.Fprintf(cmd.OutOrStdout(), "Issue `riff service status %s%s` to see the status of the function\n", fnName, namespaceOption)
 				}
 			}
 
