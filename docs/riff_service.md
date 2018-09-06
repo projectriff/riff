@@ -27,5 +27,5 @@ Interact with service (as in service.serving.knative.dev) related resources.
 * [riff service invoke](riff_service_invoke.md)	 - Invoke a service
 * [riff service list](riff_service_list.md)	 - List service resources
 * [riff service status](riff_service_status.md)	 - Display the status of a service
-* [riff service subscribe](riff_service_subscribe.md)	 - Subscribe a service to an existing input channel
+* [riff service subscribe](riff_service_subscribe.md)	 - Subscribe a service to an existing input or output channel
 
