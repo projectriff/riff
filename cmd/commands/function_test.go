@@ -208,7 +208,7 @@ var _ = Describe("The riff function create command", func() {
 			Expect(stdout.String()).To(Equal(fnCreateDryRun))
 		})
 
-		It("should display the nondefault namespace in status hint", func() {
+		It("should display the status hint", func() {
 			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 			functionOptions := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
@@ -232,7 +232,7 @@ var _ = Describe("The riff function create command", func() {
 			Expect(stdout.String()).To(HaveSuffix("Issue `riff service status square` to see the status of the function\n"))
 		})
 
-		It("should display the nondefault namespace in status hint", func() {
+		It("should include the nondefault namespace in the status hint", func() {
 			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
 				"--namespace", "ns"})
 			functionOptions := core.CreateFunctionOptions{
