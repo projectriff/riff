@@ -17,7 +17,29 @@
 
 package core
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"syscall"
+
+	"golang.org/x/crypto/ssh/terminal"
+
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+const serviceAccountName = "riff-build"
+
+type secretType int
+
+const (
+	secretTypeUserProvided secretType = iota
+	secretTypeGcr
+	secretTypeDockerHub
+)
 
 type Namespaced struct {
 	Namespace string
@@ -27,6 +49,20 @@ type NamespaceInitOptions struct {
 	NamespaceName string
 	SecretName    string
 	Manifest      string
+
+	GcrTokenPath      string
+	DockerHubUsername string
+}
+
+func (o *NamespaceInitOptions) secretType() secretType {
+	switch {
+	case o.DockerHubUsername != "":
+		return secretTypeDockerHub
+	case o.GcrTokenPath != "":
+		return secretTypeGcr
+	default:
+		return secretTypeUserProvided
+	}
 }
 
 func (c *client) explicitOrConfigNamespace(namespaced Namespaced) string {
@@ -38,7 +74,7 @@ func (c *client) explicitOrConfigNamespace(namespaced Namespaced) string {
 	}
 }
 
-func (kc *kubectlClient) NamespaceInit(options NamespaceInitOptions) error {
+func (c *kubectlClient) NamespaceInit(options NamespaceInitOptions) error {
 	manifest, err := NewManifest(options.Manifest)
 	if err != nil {
 		return err
@@ -46,35 +82,75 @@ func (kc *kubectlClient) NamespaceInit(options NamespaceInitOptions) error {
 
 	ns := options.NamespaceName
 
-	fmt.Printf("Initializing %s namespace\n\n", ns)
+	fmt.Printf("Initializing namespace %q\n\n", ns)
 
-	if ns != "default" {
-		nsYaml := []byte(`apiVersion: v1
-kind: Namespace
-metadata:
-  name: ` + ns)
-
-		nsLog, err := kc.kubeCtl.ExecStdin([]string{"apply", "-f", "-"}, &nsYaml)
+	namespace, err := c.kubeClient.CoreV1().Namespaces().Get(ns, v1.GetOptions{})
+	if errors.IsNotFound(err) {
+		fmt.Printf("Creating namespace %q \n", ns)
+		namespace = &corev1.Namespace{}
+		namespace.Name = ns
+		namespace, err = c.kubeClient.CoreV1().Namespaces().Create(namespace)
 		if err != nil {
-			print(nsLog)
-			print(err.Error(), "\n\n")
+			return err
+		}
+	} else if err != nil {
+		return err
+	}
+
+	secretName := options.SecretName
+
+	_, err = c.kubeClient.CoreV1().Secrets(options.NamespaceName).Get(secretName, v1.GetOptions{})
+	if errors.IsNotFound(err) {
+		if options.secretType() == secretTypeUserProvided {
+			return err
+		}
+	} else if err != nil {
+		return err
+	} else {
+		if options.secretType() != secretTypeUserProvided {
+			c.kubeClient.CoreV1().Secrets(options.NamespaceName).Delete(secretName, &v1.DeleteOptions{})
+		}
+	}
+	if options.GcrTokenPath != "" {
+		if err := c.createGcrSecret(options); err != nil {
+			return err
+		}
+	} else if options.DockerHubUsername != "" {
+		if err := c.createDockerHubSecret(options); err != nil {
+			return err
 		}
 	}
 
-	saYaml := []byte(`apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: riff-build
-secrets:
-- name: ` + options.SecretName)
-
-	fmt.Printf("Applying serviceaccount resource riff-build using secret %s in namespace %s\n", options.SecretName, ns)
-	saLog, err := kc.kubeCtl.ExecStdin([]string{"apply", "-n", ns, "-f", "-"}, &saYaml)
-	if err != nil {
-		fmt.Print(saLog)
-		fmt.Printf("%s\n\n", err.Error())
+	sa, err := c.kubeClient.CoreV1().ServiceAccounts(ns).Get(serviceAccountName, v1.GetOptions{})
+	if errors.IsNotFound(err) {
+		sa = &corev1.ServiceAccount{}
+		sa.Name = serviceAccountName
+		sa.Secrets = append(sa.Secrets, corev1.ObjectReference{Name: secretName})
+		fmt.Printf("Creating serviceaccount %q using secret %q in namespace %q\n", sa.Name, secretName, ns)
+		_, err = c.kubeClient.CoreV1().ServiceAccounts(ns).Create(sa)
+		if err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
 	} else {
-		fmt.Printf("%s\n", saLog)
+		secretAlreadyPresent := false
+		for _, s := range sa.Secrets {
+			if s.Name == secretName {
+				secretAlreadyPresent = true
+				break
+			}
+		}
+		if secretAlreadyPresent {
+			fmt.Printf("Serviceaccount %q already exists in namespace %q with secret %q. Skipping.\n", sa.Name, ns, secretName)
+		} else {
+			sa.Secrets = append(sa.Secrets, corev1.ObjectReference{Name: secretName})
+			fmt.Printf("Adding secret %q to serviceaccount %q in namespace %q\n", secretName, sa.Name, ns)
+			_, err = c.kubeClient.CoreV1().ServiceAccounts(ns).Update(sa)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	for _, release := range manifest.Namespace {
@@ -82,13 +158,68 @@ secrets:
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Applying %s in namespace %s\n", release, ns)
-		log, err := kc.kubeCtl.Exec([]string{"apply", "-f", url.String()})
+		fmt.Printf("Applying %s in namespace %q\n", release, ns)
+		log, err := c.kubeCtl.Exec([]string{"apply", "-n", ns, "-f", url.String()})
 		fmt.Printf("%s\n", log)
 		if err != nil {
 			return err
 		}
 	}
-
 	return nil
+}
+
+func (c *kubectlClient) createDockerHubSecret(options NamespaceInitOptions) error {
+	password, err := readPassword(fmt.Sprintf("Enter dockerhub password for user %q", options.DockerHubUsername))
+	if err != nil {
+		return err
+	}
+	secret := &corev1.Secret{
+		ObjectMeta: v1.ObjectMeta{
+			Name:        options.SecretName,
+			Annotations: map[string]string{"build.knative.dev/docker-0": "https://index.docker.io/v1/"},
+		},
+		Type: corev1.SecretTypeBasicAuth,
+		StringData: map[string]string{
+			"username": options.DockerHubUsername,
+			"password": password,
+		},
+	}
+	fmt.Printf("Creating secret %q with DockerHub authentication for user %q\n", options.SecretName, options.DockerHubUsername)
+	_, err = c.kubeClient.CoreV1().Secrets(options.NamespaceName).Create(secret)
+	return err
+}
+
+func (c *kubectlClient) createGcrSecret(options NamespaceInitOptions) error {
+	token, err := ioutil.ReadFile(options.GcrTokenPath)
+	if err != nil {
+		return err
+	}
+	secret := &corev1.Secret{
+		ObjectMeta: v1.ObjectMeta{
+			Name:        options.SecretName,
+			Annotations: map[string]string{"build.knative.dev/docker-0": "https://gcr.io"},
+		},
+		Type: corev1.SecretTypeBasicAuth,
+		StringData: map[string]string{
+			"username": "_json_key",
+			"password": string(token),
+		},
+	}
+	fmt.Printf("Creating secret %q with GCR authentication key from file %s\n", options.SecretName, options.GcrTokenPath)
+	_, err = c.kubeClient.CoreV1().Secrets(options.NamespaceName).Create(secret)
+
+	return err
+}
+
+func readPassword(s string) (string, error) {
+	fmt.Print(s)
+	if terminal.IsTerminal(int(syscall.Stdin)) {
+		res, err := terminal.ReadPassword(int(syscall.Stdin))
+		fmt.Print("\n")
+		return string(res), err
+	} else {
+		reader := bufio.NewReader(os.Stdin)
+		res, err := ioutil.ReadAll(reader)
+		return string(res), err
+	}
 }

@@ -19,9 +19,11 @@ riff namespace init [flags]
 ### Options
 
 ```
-  -h, --help              help for init
-  -m, --manifest string   manifest of YAML files to be applied; can be a named manifest (stable or latest) or a file path of a manifest file (default "stable")
-  -s, --secret secret     the name of a secret containing credentials for the image registry
+      --dockerhub string   dockerhub username for authentication; password will be read from stdin
+      --gcr string         path to a file containing Google Container Registry credentials
+  -h, --help               help for init
+  -m, --manifest string    manifest of YAML files to be applied; can be a named manifest (stable or latest) or a file path of a manifest file (default "stable")
+  -s, --secret secret      the name of a secret containing credentials for the image registry (default "push-credentials")
 ```
 
 ### Options inherited from parent commands
