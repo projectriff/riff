@@ -208,6 +208,57 @@ var _ = Describe("The riff function create command", func() {
 			Expect(stdout.String()).To(Equal(fnCreateDryRun))
 		})
 
+		It("should display the status hint", func() {
+			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
+			functionOptions := core.CreateFunctionOptions{
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+				InvokerURL:  "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
+			}
+			functionOptions.Name = "square"
+			functionOptions.Image = "foo/bar"
+			functionOptions.Env = []string{}
+			functionOptions.EnvFrom = []string{}
+			function := v1alpha1.Service{}
+			function.Name = "square"
+			asMock.On("CreateFunction", functionOptions, mock.Anything).Return(&function, nil)
+			stdout := &strings.Builder{}
+			fc.SetOutput(stdout)
+
+			err := fc.Execute()
+
+			Expect(err).NotTo(HaveOccurred())
+			fmt.Println(stdout.String())
+			Expect(stdout.String()).To(HaveSuffix("Issue `riff service status square` to see the status of the function\n"))
+		})
+
+		It("should include the nondefault namespace in the status hint", func() {
+			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
+				"--namespace", "ns"})
+			functionOptions := core.CreateFunctionOptions{
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+				InvokerURL:  "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
+			}
+			functionOptions.Name = "square"
+			functionOptions.Namespace = "ns"
+			functionOptions.Image = "foo/bar"
+			functionOptions.Env = []string{}
+			functionOptions.EnvFrom = []string{}
+			function := v1alpha1.Service{}
+			function.Name = "square"
+			function.Namespace = "ns"
+			asMock.On("CreateFunction", functionOptions, mock.Anything).Return(&function, nil)
+			stdout := &strings.Builder{}
+			fc.SetOutput(stdout)
+
+			err := fc.Execute()
+
+			Expect(err).NotTo(HaveOccurred())
+			fmt.Println(stdout.String())
+			Expect(stdout.String()).To(HaveSuffix("Issue `riff service status square -n ns` to see the status of the function\n"))
+		})
+
 	})
 })
 
