@@ -231,6 +231,39 @@ func NotBlank(flagName string) FlagsValidator {
 	}
 }
 
+// ExactlyOneOf returns a FlagsValidator that asserts that one and only one of the passed in flags is set.
+func ExactlyOneOf(flagNames ...string) FlagsValidator {
+	return FlagsValidationConjunction(
+		AtLeastOneOf(flagNames...),
+		AtMostOneOf(flagNames...),
+	)
+}
+
+// AllOf returns a FlagsValidator that asserts that all of the passed in flags are set.
+func AllOf(flagNames ...string) FlagsValidator {
+	return func(cmd *cobra.Command) error {
+		for _, f := range flagNames {
+			flag := cmd.Flag(f)
+			if flag == nil {
+				panic(fmt.Sprintf("Expected to find flag named %q in command %q", f, cmd.Use))
+			}
+			if !flag.Changed {
+				var quantifier string
+				switch len(flagNames) {
+				case 1:
+					quantifier = ""
+				case 2:
+					quantifier = "both of "
+				default:
+					quantifier = "all of "
+				}
+				return fmt.Errorf("%s--%s must be set", quantifier, strings.Join(flagNames, ", --"))
+			}
+		}
+		return nil
+	}
+}
+
 // NoneOf returns a FlagsValidator that asserts that none of the passed in flags are set.
 func NoneOf(flagNames ...string) FlagsValidator {
 	return func(cmd *cobra.Command) error {

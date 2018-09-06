@@ -1,0 +1,7 @@
+manifestVersion: 0.1
+istio:
+  - file://istio.yaml
+knative:
+  - file://release.yaml
+namespace:
+  - file://build.yaml

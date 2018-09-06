@@ -44,10 +44,7 @@ const (
 	channelDeleteNumberOfArgs
 )
 
-var exactlyOneOfBusOrClusterBus = FlagsValidationConjunction(
-	AtLeastOneOf("bus", "cluster-bus"),
-	AtMostOneOf("bus", "cluster-bus"),
-)
+var exactlyOneOfBusOrClusterBus = ExactlyOneOf("bus", "cluster-bus")
 
 func ChannelCreate(fcTool *core.Client) *cobra.Command {
 	options := core.CreateChannelOptions{}
