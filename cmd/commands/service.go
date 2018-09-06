@@ -55,6 +55,11 @@ const (
 )
 
 const (
+	serviceUnsubscribeSubscriptionNameIndex = iota
+	serviceUnsubscribeNumberOfArgs
+)
+
+const (
 	serviceDeleteServiceNameIndex = iota
 	serviceDeleteNumberOfArgs
 )
@@ -442,6 +447,34 @@ func ServiceDelete(fcClient *core.Client) *cobra.Command {
 	LabelArgs(command, "SERVICE_NAME")
 
 	command.Flags().StringVarP(&deleteServiceOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
+
+	return command
+}
+
+func ServiceUnsubscribe(fcClient *core.Client) *cobra.Command {
+	deleteSubscriptionOptions := core.DeleteSubscriptionOptions{}
+
+	command := &cobra.Command{
+		Use:     "unsubscribe",
+		Short:   "Unsubscribe a service from an existing subscription",
+		Example: "  riff service unsubscribe my_subscription --namespace joseph-ns",
+		Args: ArgValidationConjunction(
+			cobra.ExactArgs(serviceUnsubscribeNumberOfArgs),
+			AtPosition(serviceUnsubscribeSubscriptionNameIndex, ValidName()),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			deleteSubscriptionOptions.Name = args[serviceUnsubscribeSubscriptionNameIndex]
+			if err := (*fcClient).DeleteSubscription(deleteSubscriptionOptions); err != nil {
+				return err
+			}
+			printSuccessfulCompletion(cmd)
+			return nil
+		},
+	}
+
+	LabelArgs(command, "SUBSCRIPTION_NAME")
+	flags := command.Flags()
+	flags.StringVarP(&deleteSubscriptionOptions.Namespace, "namespace", "n", "", "the namespace of the subscription")
 
 	return command
 }

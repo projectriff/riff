@@ -147,6 +147,20 @@ func (_m *Client) DeleteService(options core.DeleteServiceOptions) error {
 	return r0
 }
 
+// DeleteSubscription provides a mock function with given fields: options
+func (_m *Client) DeleteSubscription(options core.DeleteSubscriptionOptions) error {
+	ret := _m.Called(options)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(core.DeleteSubscriptionOptions) error); ok {
+		r0 = rf(options)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // ListChannels provides a mock function with given fields: options
 func (_m *Client) ListChannels(options core.ListChannelOptions) (*v1alpha1.ChannelList, error) {
 	ret := _m.Called(options)
