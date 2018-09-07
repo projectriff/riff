@@ -375,6 +375,13 @@ var _ = Describe("The riff service subscribe command", func() {
 			mockClient = nil
 			ss = commands.ServiceSubscribe(&mockClient)
 		})
+
+		It("should be documented", func() {
+			Expect(ss.Name()).To(Equal("subscribe"))
+			Expect(ss.Short).NotTo(BeEmpty())
+			Expect(ss.Example).NotTo(BeEmpty())
+		})
+
 		It("should fail with no args", func() {
 			ss.SetArgs([]string{})
 			err := ss.Execute()

@@ -377,7 +377,7 @@ func ServiceSubscribe(fcClient *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:     "subscribe",
-		Short:   "Subscribe a service to an existing input or output channel",
+		Short:   "Subscribe a service to an existing input and an optional output channel",
 		Example: `  riff service subscribe square --input numbers --namespace joseph-ns`,
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(serviceSubscribeNumberOfArgs),
