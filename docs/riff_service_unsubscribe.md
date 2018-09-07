@@ -13,7 +13,7 @@ riff service unsubscribe [flags]
 ### Examples
 
 ```
-  riff service unsubscribe my_subscription --namespace joseph-ns
+  riff service unsubscribe subscription --namespace joseph-ns
 ```
 
 ### Options

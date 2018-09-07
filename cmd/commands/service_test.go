@@ -548,11 +548,8 @@ var _ = Describe("The riff service unsubscribe command", func() {
 
 	It("should be documented", func() {
 		Expect(unsubscribeCommand.Name()).To(Equal("unsubscribe"))
-		Expect(unsubscribeCommand.Short).To(Equal(
-			"Unsubscribe a service from an existing subscription"))
-		Expect(unsubscribeCommand.Example).To(Equal(
-			"  riff service unsubscribe my_subscription --namespace joseph-ns",
-		))
+		Expect(unsubscribeCommand.Short).NotTo(BeEmpty())
+		Expect(unsubscribeCommand.Example).NotTo(BeEmpty())
 	})
 
 	Context("when given wrong args or flags", func() {

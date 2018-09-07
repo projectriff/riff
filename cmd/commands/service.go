@@ -457,7 +457,7 @@ func ServiceUnsubscribe(fcClient *core.Client) *cobra.Command {
 	command := &cobra.Command{
 		Use:     "unsubscribe",
 		Short:   "Unsubscribe a service from an existing subscription",
-		Example: "  riff service unsubscribe my_subscription --namespace joseph-ns",
+		Example: "  riff service unsubscribe subscription --namespace joseph-ns",
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(serviceUnsubscribeNumberOfArgs),
 			AtPosition(serviceUnsubscribeSubscriptionNameIndex, ValidName()),
