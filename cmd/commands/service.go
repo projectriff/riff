@@ -36,6 +36,11 @@ const (
 )
 
 const (
+	serviceReviseServiceNameIndex = iota
+	serviceReviseNumberOfArgs
+)
+
+const (
 	serviceStatusServiceNameIndex = iota
 	serviceStatusNumberOfArgs
 )
@@ -72,7 +77,7 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 
 	createInputChannelOptions := core.CreateChannelOptions{}
 	createOutputChannelOptions := core.CreateChannelOptions{}
-	createServiceOptions := core.CreateServiceOptions{}
+	createServiceOptions := core.CreateOrReviseServiceOptions{}
 	createSubscriptionOptions := core.CreateSubscriptionOptions{}
 
 	command := &cobra.Command{
@@ -211,6 +216,49 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 
 	command.Flags().StringArrayVar(&createServiceOptions.Env, "env", []string{}, envUsage)
 	command.Flags().StringArrayVar(&createServiceOptions.EnvFrom, "env-from", []string{}, envFromUsage)
+
+	return command
+}
+
+func ServiceRevise(client *core.Client) *cobra.Command {
+	reviseServiceOptions := core.CreateOrReviseServiceOptions{}
+
+	command := &cobra.Command{
+		Use:     "revise",
+		Short:   "Create a new revision for a service, with updated attributes",
+		Long:    `Create a new revision for a service, updating the application/function image and/or environment.`,
+		Example: `  riff service revise square --image acme/square:1.1 --namespace joseph-ns`,
+		Args: ArgValidationConjunction(
+			cobra.ExactArgs(serviceReviseNumberOfArgs),
+			AtPosition(serviceReviseServiceNameIndex, ValidName()),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fnName := args[serviceReviseServiceNameIndex]
+			reviseServiceOptions.Name = fnName
+			svc, err := (*client).ReviseService(reviseServiceOptions)
+			if err != nil {
+				return err
+			}
+			if reviseServiceOptions.DryRun {
+				marshaller := NewMarshaller(cmd.OutOrStdout())
+				if err = marshaller.Marshal(svc); err != nil {
+					return err
+				}
+			} else {
+				printSuccessfulCompletion(cmd)
+			}
+
+			return nil
+		},
+	}
+
+	LabelArgs(command, "SERVICE_NAME")
+
+	command.Flags().StringVarP(&reviseServiceOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
+	command.Flags().BoolVar(&reviseServiceOptions.DryRun, "dry-run", false, dryRunUsage)
+	command.Flags().StringVar(&reviseServiceOptions.Image, "image", "", "the `name[:tag]` reference of an image containing the application/function")
+	command.Flags().StringArrayVar(&reviseServiceOptions.Env, "env", []string{}, envUsage)
+	command.Flags().StringArrayVar(&reviseServiceOptions.EnvFrom, "env-from", []string{}, envFromUsage)
 
 	return command
 }

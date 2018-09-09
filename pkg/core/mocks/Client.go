@@ -74,11 +74,11 @@ func (_m *Client) CreateFunction(options core.CreateFunctionOptions, log io.Writ
 }
 
 // CreateService provides a mock function with given fields: options
-func (_m *Client) CreateService(options core.CreateServiceOptions) (*servingv1alpha1.Service, error) {
+func (_m *Client) CreateService(options core.CreateOrReviseServiceOptions) (*servingv1alpha1.Service, error) {
 	ret := _m.Called(options)
 
 	var r0 *servingv1alpha1.Service
-	if rf, ok := ret.Get(0).(func(core.CreateServiceOptions) *servingv1alpha1.Service); ok {
+	if rf, ok := ret.Get(0).(func(core.CreateOrReviseServiceOptions) *servingv1alpha1.Service); ok {
 		r0 = rf(options)
 	} else {
 		if ret.Get(0) != nil {
@@ -87,7 +87,7 @@ func (_m *Client) CreateService(options core.CreateServiceOptions) (*servingv1al
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(core.CreateServiceOptions) error); ok {
+	if rf, ok := ret.Get(1).(func(core.CreateOrReviseServiceOptions) error); ok {
 		r1 = rf(options)
 	} else {
 		r1 = ret.Error(1)
@@ -193,6 +193,7 @@ func (_m *Client) ListServices(options core.ListServiceOptions) (*servingv1alpha
 	return r0, r1
 }
 
+<<<<<<< HEAD
 // RelocateImages provides a mock function with given fields: options
 func (_m *Client) RelocateImages(options core.RelocateImagesOptions) error {
 	ret := _m.Called(options)
@@ -205,6 +206,29 @@ func (_m *Client) RelocateImages(options core.RelocateImagesOptions) error {
 	}
 
 	return r0
+=======
+// ReviseService provides a mock function with given fields: options
+func (_m *Client) ReviseService(options core.CreateOrReviseServiceOptions) (*servingv1alpha1.Service, error) {
+	ret := _m.Called(options)
+
+	var r0 *servingv1alpha1.Service
+	if rf, ok := ret.Get(0).(func(core.CreateOrReviseServiceOptions) *servingv1alpha1.Service); ok {
+		r0 = rf(options)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*servingv1alpha1.Service)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(core.CreateOrReviseServiceOptions) error); ok {
+		r1 = rf(options)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+>>>>>>> Add `riff service revise` command
 }
 
 // ServiceCoordinates provides a mock function with given fields: options

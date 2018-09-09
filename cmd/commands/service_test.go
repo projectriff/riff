@@ -95,7 +95,7 @@ var _ = Describe("The riff service create command", func() {
 		It("should involve the core.Client", func() {
 			sc.SetArgs([]string{"my-service", "--image", "foo/bar", "--namespace", "ns"})
 
-			o := core.CreateServiceOptions{
+			o := core.CreateOrReviseServiceOptions{
 				Name:    "my-service",
 				Image:   "foo/bar",
 				Env:     []string{},
@@ -119,7 +119,7 @@ var _ = Describe("The riff service create command", func() {
 			sc.SetArgs([]string{"my-service", "--image", "foo/bar", "--namespace", "ns", "--env", "FOO=bar",
 				"--env", "BAZ=qux", "--env-from", "secretKeyRef:foo:bar"})
 
-			o := core.CreateServiceOptions{
+			o := core.CreateOrReviseServiceOptions{
 				Name:    "my-service",
 				Image:   "foo/bar",
 				Env:     []string{"FOO=bar", "BAZ=qux"},
@@ -135,7 +135,7 @@ var _ = Describe("The riff service create command", func() {
 			sc.SetArgs([]string{"square", "--image", "foo/bar",
 				"--input", "my-channel", "--bus", "kafka", "--dry-run"})
 
-			serviceOptions := core.CreateServiceOptions{
+			serviceOptions := core.CreateOrReviseServiceOptions{
 				Name:    "square",
 				Image:   "foo/bar",
 				Env:     []string{},
@@ -194,6 +194,142 @@ metadata:
 spec:
   channel: ""
   subscriber: ""
+status: {}
+---
+`
+
+var _ = Describe("The riff service revise command", func() {
+	Context("when given wrong args or flags", func() {
+		var (
+			mockClient core.Client
+			cc         *cobra.Command
+		)
+		BeforeEach(func() {
+			mockClient = nil
+			cc = commands.ServiceRevise(&mockClient)
+		})
+		It("should fail with no args", func() {
+			cc.SetArgs([]string{})
+			err := cc.Execute()
+			Expect(err).To(MatchError("accepts 1 arg(s), received 0"))
+		})
+		It("should fail with invalid service name", func() {
+			cc.SetArgs([]string{".invalid"})
+			err := cc.Execute()
+			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
+		})
+	})
+
+	Context("when given suitable args and flags", func() {
+		var (
+			client core.Client
+			asMock *mocks.Client
+			sc     *cobra.Command
+		)
+		BeforeEach(func() {
+			client = new(mocks.Client)
+			asMock = client.(*mocks.Client)
+
+			sc = commands.ServiceRevise(&client)
+		})
+		AfterEach(func() {
+			asMock.AssertExpectations(GinkgoT())
+		})
+		It("should involve the core.Client", func() {
+			sc.SetArgs([]string{"my-service", "--image", "foo/bar", "--namespace", "ns"})
+
+			o := core.CreateOrReviseServiceOptions{
+				Name:    "my-service",
+				Image:   "foo/bar",
+				Env:     []string{},
+				EnvFrom: []string{},
+			}
+			o.Namespace = "ns"
+
+			asMock.On("ReviseService", o).Return(nil, nil)
+			err := sc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		})
+		It("should propagate core.Client errors", func() {
+			sc.SetArgs([]string{"my-service", "--image", "foo/bar"})
+
+			e := fmt.Errorf("some error")
+			asMock.On("ReviseService", mock.Anything).Return(nil, e)
+			err := sc.Execute()
+			Expect(err).To(MatchError(e))
+		})
+		It("should add env vars when asked to", func() {
+			sc.SetArgs([]string{"my-service", "--image", "foo/bar", "--namespace", "ns", "--env", "FOO=bar",
+				"--env", "BAZ=qux", "--env-from", "secretKeyRef:foo:bar"})
+
+			o := core.CreateOrReviseServiceOptions{
+				Name:    "my-service",
+				Image:   "foo/bar",
+				Env:     []string{"FOO=bar", "BAZ=qux"},
+				EnvFrom: []string{"secretKeyRef:foo:bar"},
+			}
+			o.Namespace = "ns"
+
+			asMock.On("ReviseService", o).Return(nil, nil)
+			err := sc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		})
+		It("should print when --dry-run is set", func() {
+			sc.SetArgs([]string{"square", "--image", "foo/bar", "--dry-run"})
+
+			serviceOptions := core.CreateOrReviseServiceOptions{
+				Name:    "square",
+				Image:   "foo/bar",
+				Env:     []string{},
+				EnvFrom: []string{},
+				DryRun:  true,
+			}
+			svc := v1alpha1.Service{
+				ObjectMeta: meta_v1.ObjectMeta{
+					Name: "square",
+				},
+				Spec: v1alpha1.ServiceSpec{
+					RunLatest: &v1alpha1.RunLatestType{
+						Configuration: v1alpha1.ConfigurationSpec{
+							RevisionTemplate: v1alpha1.RevisionTemplateSpec{
+								Spec: v1alpha1.RevisionSpec{
+									Container: v1.Container{
+										Image: "foo/bar",
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+			asMock.On("ReviseService", serviceOptions).Return(&svc, nil)
+
+			stdout := &strings.Builder{}
+			sc.SetOutput(stdout)
+
+			err := sc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(stdout.String()).To(Equal(serviceReviseDryRun))
+		})
+
+	})
+})
+
+const serviceReviseDryRun = `metadata:
+  creationTimestamp: null
+  name: square
+spec:
+  runLatest:
+    configuration:
+      revisionTemplate:
+        metadata:
+          creationTimestamp: null
+        spec:
+          container:
+            image: foo/bar
+            name: ""
+            resources: {}
 status: {}
 ---
 `

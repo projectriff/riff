@@ -39,7 +39,7 @@ func (c *client) ListServices(options ListServiceOptions) (*v1alpha1.ServiceList
 	return c.serving.ServingV1alpha1().Services(ns).List(meta_v1.ListOptions{})
 }
 
-type CreateServiceOptions struct {
+type CreateOrReviseServiceOptions struct {
 	Namespaced
 	Name    string
 	Image   string
@@ -50,7 +50,7 @@ type CreateServiceOptions struct {
 	Wait    bool
 }
 
-func (c *client) CreateService(options CreateServiceOptions) (*v1alpha1.Service, error) {
+func (c *client) CreateService(options CreateOrReviseServiceOptions) (*v1alpha1.Service, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
 
 	s, err := newService(options)
@@ -67,7 +67,39 @@ func (c *client) CreateService(options CreateServiceOptions) (*v1alpha1.Service,
 
 }
 
-func newService(options CreateServiceOptions) (*v1alpha1.Service, error) {
+func (c *client) ReviseService(options CreateOrReviseServiceOptions) (*v1alpha1.Service, error) {
+	ns := c.explicitOrConfigNamespace(options.Namespaced)
+
+	existingSvc, err := c.serving.ServingV1alpha1().Services(ns).Get(options.Name, meta_v1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	if options.Image != "" {
+		existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Image = options.Image
+	}
+	envVars, err := ParseEnvVar(options.Env)
+	if err != nil {
+		return nil, err
+	}
+	envVarsFrom, err := ParseEnvVarSource(options.EnvFrom)
+	if err != nil {
+		return nil, err
+	}
+	existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env = append(existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env, envVars...)
+	existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env = append(existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env, envVarsFrom...)
+
+	if !options.DryRun {
+		_, err := c.serving.ServingV1alpha1().Services(ns).Update(existingSvc)
+		return existingSvc, err
+	} else {
+		existingSvc.Status = v1alpha1.ServiceStatus{}
+		return existingSvc, nil
+	}
+
+}
+
+func newService(options CreateOrReviseServiceOptions) (*v1alpha1.Service, error) {
 	envVars, err := ParseEnvVar(options.Env)
 	if err != nil {
 		return nil, err
