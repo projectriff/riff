@@ -152,6 +152,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		system,
 		Docs(rootCmd),
 		Version(),
+		Completion(rootCmd),
 	)
 
 	Visit(rootCmd, func(c *cobra.Command) error {
