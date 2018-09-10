@@ -4,7 +4,7 @@ Interact with service related resources
 
 ### Synopsis
 
-Interact with service (as in service.serving.knative.dev) related resources.
+Interact with service (as in `service.serving.knative.dev`) related resources.
 
 ### Options
 

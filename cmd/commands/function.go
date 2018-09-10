@@ -60,8 +60,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 		Short: "Create a new function resource, with optional input and output channels",
 		Long: `Create a new function resource from the content of the provided Git repo/revision.
 
-The INVOKER arg defines the language invoker that is added to the function code in the build step. The resulting image is 
-then used to create a Knative Service (service.serving.knative.dev) instance of the name specified for the function. 
+The INVOKER arg defines the language invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (service.serving.knative.dev) instance of the name specified for the function. 
 From then on you can use the sub-commands for the 'service' command to interact with the service created for the function. 
 
 ` + channelLongDesc + `

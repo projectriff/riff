@@ -8,10 +8,10 @@ Create a new service resource from a given image.
 
 If an input channel and bus are specified, create the channel in the bus and subscribe the service to the channel.
 
-If an env-from flag is specified the source reference can be 'configMapKeyRef' to select a key from a ConfigMap
-or 'secretKeyRef' to select a key from a Secret. The following formats are supported:
-  --env-from configMapKeyRef:{config-map-name}:{key-to-select}
-  --env-from secretKeyRef:{secret-name}:{key-to-select}
+If `--env-from` is specified the source reference can be `configMapKeyRef` to select a key from a ConfigMap or `secretKeyRef` to select a key from a Secret. The following formats are supported:
+
+    --env-from configMapKeyRef:{config-map-name}:{key-to-select}
+    --env-from secretKeyRef:{secret-name}:{key-to-select}
 
 
 ```
