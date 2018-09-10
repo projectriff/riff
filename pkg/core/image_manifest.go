@@ -36,20 +36,20 @@ func NewImageManifest(path string) (*ImageManifest, error) {
 	var m ImageManifest
 	yamlFile, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading image manifest file: %v", err)
+		return nil, fmt.Errorf("error reading image manifest file: %v", err)
 	}
 
 	err = yaml.Unmarshal(yamlFile, &m)
 	if err != nil {
-		return nil, fmt.Errorf("Error parsing image manifest file: %v", err)
+		return nil, fmt.Errorf("error parsing image manifest file: %v", err)
 	}
 
 	if m.ManifestVersion != imageManifestVersion_0_1 {
-		return nil, fmt.Errorf("Image manifest has unsupported version: %s", m.ManifestVersion)
+		return nil, fmt.Errorf("image manifest has unsupported version: %s", m.ManifestVersion)
 	}
 
 	if m.Images == nil {
-		return nil, fmt.Errorf("Image manifest is incomplete: images array is missing: %#v", m)
+		return nil, fmt.Errorf("image manifest is incomplete: images array is missing: %#v", m)
 	}
 
 	return &m, nil

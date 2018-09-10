@@ -61,7 +61,7 @@ image: ` + mappedImage + `
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError("Invalid registry hostname: '/' contains '/'"))
+				Expect(err).To(MatchError("invalid registry hostname: '/' contains '/'"))
 			})
 		})
 
@@ -71,7 +71,7 @@ image: ` + mappedImage + `
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(`Invalid registry hostname: '"' contains '"'`))
+				Expect(err).To(MatchError(`invalid registry hostname: '"' contains '"'`))
 			})
 		})
 
@@ -81,7 +81,7 @@ image: ` + mappedImage + `
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError("Invalid registry hostname: ' ' contains ' '"))
+				Expect(err).To(MatchError("invalid registry hostname: ' ' contains ' '"))
 			})
 		})
 
@@ -91,7 +91,7 @@ image: ` + mappedImage + `
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError("Invalid user: '/' contains '/'"))
+				Expect(err).To(MatchError("invalid user: '/' contains '/'"))
 			})
 		})
 
@@ -101,7 +101,7 @@ image: ` + mappedImage + `
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(`Invalid user: '"' contains '"'`))
+				Expect(err).To(MatchError(`invalid user: '"' contains '"'`))
 			})
 		})
 
@@ -111,7 +111,7 @@ image: ` + mappedImage + `
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError("Invalid user: ' ' contains ' '"))
+				Expect(err).To(MatchError("invalid user: ' ' contains ' '"))
 			})
 		})
 
@@ -121,7 +121,7 @@ image: ` + mappedImage + `
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError("Invalid image: user missing: a"))
+				Expect(err).To(MatchError("invalid image: user missing: a"))
 			})
 		})
 
@@ -141,7 +141,7 @@ image: ` + mappedImage + `
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(`Invalid image: '"' contains '"'`))
+				Expect(err).To(MatchError(`invalid image: '"' contains '"'`))
 			})
 		})
 
@@ -151,7 +151,7 @@ image: ` + mappedImage + `
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError("Invalid image: ' ' contains ' '"))
+				Expect(err).To(MatchError("invalid image: ' ' contains ' '"))
 			})
 		})
 	})

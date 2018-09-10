@@ -42,7 +42,7 @@ var _ = Describe("ImageManifest", func() {
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(HavePrefix("Error reading image manifest file: ")))
+				Expect(err).To(MatchError(HavePrefix("error reading image manifest file: ")))
 			})
 		})
 
@@ -52,7 +52,7 @@ var _ = Describe("ImageManifest", func() {
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(HavePrefix("Error parsing image manifest file: ")))
+				Expect(err).To(MatchError(HavePrefix("error parsing image manifest file: ")))
 			})
 		})
 
@@ -62,7 +62,7 @@ var _ = Describe("ImageManifest", func() {
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError("Image manifest has unsupported version: 0.0"))
+				Expect(err).To(MatchError("image manifest has unsupported version: 0.0"))
 			})
 		})
 
@@ -72,7 +72,7 @@ var _ = Describe("ImageManifest", func() {
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(HavePrefix("Image manifest is incomplete: images array is missing: ")))
+				Expect(err).To(MatchError(HavePrefix("image manifest is incomplete: images array is missing: ")))
 			})
 		})
 

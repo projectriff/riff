@@ -17,7 +17,6 @@
 package core
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 )
@@ -31,18 +30,18 @@ const (
 // It does not understand the full (YAML) syntax of the input string.
 // It certainly does not understand the semantics of the input string.
 type imageMapper struct {
-	mappings map[string]string
+	replacer *strings.Replacer
 }
 
 func newImageMapper(mappedHost string, mappedUser string, images []string) (*imageMapper, error) {
-	if err := contains(mappedHost, "/", `"`, " "); err != nil {
-		return nil, fmt.Errorf("Invalid registry hostname: %v", err)
+	if err := containsAny(mappedHost, "/", `"`, " "); err != nil {
+		return nil, fmt.Errorf("invalid registry hostname: %v", err)
 	}
-	if err := contains(mappedUser, "/", `"`, " "); err != nil {
-		return nil, fmt.Errorf("Invalid user: %v", err)
+	if err := containsAny(mappedUser, "/", `"`, " "); err != nil {
+		return nil, fmt.Errorf("invalid user: %v", err)
 	}
 
-	mappings := make(map[string]string)
+	replacements := []string{}
 	for _, img := range images {
 		imgHost, imgUser, imgRepoPath, err := parseImage(img)
 		if err != nil {
@@ -52,25 +51,25 @@ func newImageMapper(mappedHost string, mappedUser string, images []string) (*ima
 		fullImg := fmt.Sprintf("%s/%s/%s", imgHost, imgUser, imgRepoPath)
 		mapped := fmt.Sprintf("%s/%s/%s", mappedHost, mappedUser, imgRepoPath)
 
-		mappings[quote(fullImg)] = quote(mapped)
-		mappings[spacePrefix(fullImg)] = spacePrefix(mapped)
+		replacements = append(replacements, quote(fullImg), quote(mapped))
+		replacements = append(replacements, spacePrefix(fullImg), spacePrefix(mapped))
 		if imgHost == dockerHubHost {
 			elidedImg := fmt.Sprintf("%s/%s", imgUser, imgRepoPath)
-			mappings[quote(elidedImg)] = quote(mapped)
-			mappings[spacePrefix(elidedImg)] = spacePrefix(mapped)
+			replacements = append(replacements, quote(elidedImg), quote(mapped))
+			replacements = append(replacements, spacePrefix(elidedImg), spacePrefix(mapped))
 
 			fullImg := fmt.Sprintf("%s/%s/%s", fullDockerHubHost, imgUser, imgRepoPath)
-			mappings[quote(fullImg)] = quote(mapped)
-			mappings[spacePrefix(fullImg)] = spacePrefix(mapped)
+			replacements = append(replacements, quote(fullImg), quote(mapped))
+			replacements = append(replacements, spacePrefix(fullImg), spacePrefix(mapped))
 		}
 	}
 
 	return &imageMapper{
-		mappings: mappings,
+		replacer: strings.NewReplacer(replacements...),
 	}, nil
 }
 
-func contains(s string, items ...string) error {
+func containsAny(s string, items ...string) error {
 	for _, i := range items {
 		if strings.Contains(s, i) {
 			return fmt.Errorf("'%s' contains '%s'", s, i)
@@ -80,8 +79,8 @@ func contains(s string, items ...string) error {
 }
 
 func parseImage(img string) (string, string, string, error) {
-	if err := contains(img, `"`, " "); err != nil {
-		return "", "", "", fmt.Errorf("Invalid image: %v", err)
+	if err := containsAny(img, `"`, " "); err != nil {
+		return "", "", "", fmt.Errorf("invalid image: %v", err)
 	}
 
 	s := strings.SplitN(img, "/", 3)
@@ -89,7 +88,7 @@ func parseImage(img string) (string, string, string, error) {
 	case 0:
 		panic("SplitN produced empty array")
 	case 1:
-		return "", "", "", fmt.Errorf("Invalid image: user missing: %s", img)
+		return "", "", "", fmt.Errorf("invalid image: user missing: %s", img)
 	case 2:
 		return dockerHubHost, s[0], s[1], nil
 	default:
@@ -99,7 +98,7 @@ func parseImage(img string) (string, string, string, error) {
 			host = dockerHubHost
 		}
 
-		return host, s[1], strings.Join(s[2:], "/"), nil
+		return host, s[1], s[2], nil
 	}
 }
 
@@ -112,8 +111,5 @@ func spacePrefix(image string) string {
 }
 
 func (m *imageMapper) mapImages(input []byte) []byte {
-	for img, mapped := range m.mappings {
-		input = bytes.Replace(input, []byte(img), []byte(mapped), -1)
-	}
-	return input
+	return []byte(m.replacer.Replace(string(input)))
 }

@@ -193,12 +193,12 @@ func (_m *Client) ListServices(options core.ListServiceOptions) (*servingv1alpha
 	return r0, r1
 }
 
-// RelocateImage provides a mock function with given fields: options
-func (_m *Client) RelocateImage(options core.RelocateImageOptions) error {
+// RelocateImages provides a mock function with given fields: options
+func (_m *Client) RelocateImages(options core.RelocateImagesOptions) error {
 	ret := _m.Called(options)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(core.RelocateImageOptions) error); ok {
+	if rf, ok := ret.Get(0).(func(core.RelocateImagesOptions) error); ok {
 		r0 = rf(options)
 	} else {
 		r0 = ret.Error(0)

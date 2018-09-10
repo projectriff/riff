@@ -27,32 +27,35 @@ import (
 	"path/filepath"
 )
 
-const outputFilePermissions = 0644
+const (
+	outputFilePermissions = 0644
+	outputDirPermissions = 0755
+)
 
-type RelocateImageOptions struct {
-	YAML     string
-	Manifest string
-	Output   string
+type RelocateImagesOptions struct {
+	SingleFile string
+	Manifest   string
+	Output     string
 
 	Registry     string
 	RegistryUser string
 	Images       string
 }
 
-func (c *client) RelocateImage(options RelocateImageOptions) error {
+func (c *client) RelocateImages(options RelocateImagesOptions) error {
 	imageMapper, err := createImageMapper(options)
 	if err != nil {
 		return err
 	}
 
-	if options.YAML != "" {
-		_, err = relocateYAMLFile(options.YAML, imageMapper, "", options.Output)
+	if options.SingleFile != "" {
+		_, err = relocateFile(options.SingleFile, imageMapper, "", options.Output)
 		return err
 	}
 	return relocateManifest(options.Manifest, imageMapper, options.Output)
 }
 
-func createImageMapper(options RelocateImageOptions) (*imageMapper, error) {
+func createImageMapper(options RelocateImagesOptions) (*imageMapper, error) {
 	imageManifest, err := NewImageManifest(options.Images)
 	if err != nil {
 		return nil, err
@@ -66,8 +69,8 @@ func createImageMapper(options RelocateImageOptions) (*imageMapper, error) {
 	return imageMapper, nil
 }
 
-func relocateYAMLFile(yamlFile string, mapper *imageMapper, cwd string, outputPath string) (string, error) {
-	y, err := readYAMLFile(yamlFile, cwd)
+func relocateFile(yamlFile string, mapper *imageMapper, cwd string, outputPath string) (string, error) {
+	y, err := readFile(yamlFile, cwd)
 	if err != nil {
 		return "", err
 	}
@@ -76,7 +79,7 @@ func relocateYAMLFile(yamlFile string, mapper *imageMapper, cwd string, outputPa
 	return filepath.Base(output), ioutil.WriteFile(output, mapper.mapImages(y), outputFilePermissions)
 }
 
-func readYAMLFile(yamlFile string, cwd string) ([]byte, error) {
+func readFile(yamlFile string, cwd string) ([]byte, error) {
 	u, err := url.Parse(yamlFile)
 	if err != nil {
 		return nil, err
@@ -85,7 +88,6 @@ func readYAMLFile(yamlFile string, cwd string) ([]byte, error) {
 		if u.Scheme == "file" {
 			return ioutil.ReadFile(u.Path)
 		}
-		// FIXME: Error: Get https:///storage.googleapis.com/knative-releases/serving/previous/v20180828-7c20145/istio.yaml: http: no Host in request URL
 		return downloadFile(u.String())
 	}
 
@@ -111,8 +113,8 @@ func downloadFile(url string) ([]byte, error) {
 }
 
 func relocateManifest(manifestPath string, mapper *imageMapper, outputPath string) error {
-	if !isDirectory(outputPath) {
-		return fmt.Errorf("Invalid or non-existent output directory '%s'", outputPath)
+	if err := ensureDirectory(outputPath); err != nil {
+		return err
 	}
 
 	manifest, err := NewManifest(manifestPath)
@@ -150,9 +152,7 @@ func relocateManifest(manifestPath string, mapper *imageMapper, outputPath strin
 func relocateYamls(yamls []string, manifestDir string, mapper *imageMapper, outputPath string) ([]string, error) {
 	rel := []string{}
 	for _, y := range yamls {
-		// FIXME so this works for both relative paths and URLs
-		//err := relocateYAMLFile(filepath.Join(manifestDir, y), mapper, outputPath)
-		yRel, err := relocateYAMLFile(y, mapper, manifestDir, outputPath)
+		yRel, err := relocateFile(y, mapper, manifestDir, outputPath)
 		if err != nil {
 			return []string{}, err
 		}
@@ -171,4 +171,19 @@ func outputFile(outputPath string, yamlFile string) string {
 func isDirectory(path string) bool {
 	f, err := os.Stat(path)
 	return err == nil && f.IsDir()
+}
+
+func ensureDirectory(path string) error {
+	f, err := os.Stat(path)
+	if err == nil && f.IsDir() {
+		return nil
+	}
+	if err == nil {
+		return fmt.Errorf("output directory is a file: %s", path)
+	}
+
+	if os.IsNotExist(err) {
+		return os.MkdirAll(path, outputDirPermissions)
+	}
+	return err
 }
