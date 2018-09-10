@@ -4,10 +4,9 @@ Remove riff and Knative system components
 
 ### Synopsis
 
-Remove riff and Knative system components
+Remove riff and Knative system components.
 
-Use the '--istio' flag to also remove Istio components.'
-
+Use the `--istio` flag to also remove Istio components.
 
 ```
 riff system uninstall [flags]
