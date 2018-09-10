@@ -1,10 +1,9 @@
-package core_test
+package core
 
 import (
 	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/projectriff/riff/pkg/core"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -13,13 +12,13 @@ import (
 var _ = Describe("RelocateImages", func() {
 
 	var (
-		client  core.Client
-		options core.RelocateImagesOptions
+		client  Client
+		options RelocateImagesOptions
 		err     error
 	)
 
 	BeforeEach(func() {
-		client = core.NewClient(nil, nil, nil, nil)
+		client = NewClient(nil, nil, nil, nil)
 		options.Registry = "reg"
 		options.RegistryUser = "user"
 	})
@@ -29,66 +28,122 @@ var _ = Describe("RelocateImages", func() {
 	})
 
 	Describe("manifest relocation", func() {
-		AssertSuccess := func() {
-			It("should write the relocated manifest to the output directory", func() {
-				Expect(err).NotTo(HaveOccurred())
+		Context("when there are no collisions in input file names", func() {
+			AssertSuccess := func() {
+				It("should write the relocated manifest to the output directory", func() {
+					Expect(err).NotTo(HaveOccurred())
 
-				// manifest should be unchanged since it contains just a filename
-				actualManifest := readManifest(filepath.Join(options.Output, "manifest.yaml"))
-				expectedManifest := readManifest("./fixtures/image_relocation/manifest.yaml")
-				Expect(actualManifest).To(Equal(expectedManifest))
+					// manifest should be unchanged since it contains just a filename
+					actualManifest := readManifest(filepath.Join(options.Output, "manifest.yaml"))
+					expectedManifest := readManifest("./fixtures/image_relocation/manifest.yaml")
+					Expect(actualManifest).To(Equal(expectedManifest))
 
-				actualYAML := readFile(filepath.Join(options.Output, "istio.yaml"))
-				expectedYAML := readFile("./fixtures/image_relocation/istio_relocated.yaml")
-				Expect(actualYAML).To(Equal(expectedYAML))
+					actualYAML := readFileOk(filepath.Join(options.Output, "istio.yaml"))
+					expectedYAML := readFileOk("./fixtures/image_relocation/istio_relocated.yaml")
+					Expect(actualYAML).To(Equal(expectedYAML))
 
-				actualYAML = readFile(filepath.Join(options.Output, "release.yaml"))
-				expectedYAML = readFile("./fixtures/image_relocation/release_relocated.yaml")
-				Expect(actualYAML).To(Equal(expectedYAML))
+					actualYAML = readFileOk(filepath.Join(options.Output, "release.yaml"))
+					expectedYAML = readFileOk("./fixtures/image_relocation/release_relocated.yaml")
+					Expect(actualYAML).To(Equal(expectedYAML))
 
-				actualYAML = readFile(filepath.Join(options.Output, "build.yaml"))
-				expectedYAML = readFile("./fixtures/image_relocation/build_relocated.yaml")
-				Expect(actualYAML).To(Equal(expectedYAML))
+					actualYAML = readFileOk(filepath.Join(options.Output, "build.yaml"))
+					expectedYAML = readFileOk("./fixtures/image_relocation/build_relocated.yaml")
+					Expect(actualYAML).To(Equal(expectedYAML))
+				})
+			}
+
+			BeforeEach(func() {
+				options.Manifest = "./fixtures/image_relocation/manifest.yaml"
+				options.Images = "./fixtures/image_relocation/image_manifest.yaml"
 			})
-		}
 
-		BeforeEach(func() {
-			options.Manifest = "./fixtures/image_relocation/manifest.yaml"
-			options.Images = "./fixtures/image_relocation/image_manifest.yaml"
+			Context("when the output directory already exists", func() {
+				BeforeEach(func() {
+					dir, err := ioutil.TempDir("", "image-relocation-test")
+					Expect(err).NotTo(HaveOccurred())
+					options.Output = dir
+				})
+
+				AssertSuccess()
+			})
+
+			Context("when the output directory does not exist", func() {
+				BeforeEach(func() {
+					dir, err := ioutil.TempDir("", "image-relocation-test")
+					Expect(err).NotTo(HaveOccurred())
+					options.Output = filepath.Join(dir, "new")
+				})
+
+				AssertSuccess()
+			})
+
+			Context("when the output directory is actually a file", func() {
+				BeforeEach(func() {
+					dir, err := ioutil.TempDir("", "image-relocation-test")
+					Expect(err).NotTo(HaveOccurred())
+					options.Output = filepath.Join(dir, "file")
+					err = ioutil.WriteFile(options.Output, []byte{0}, 0644)
+					Expect(err).NotTo(HaveOccurred())
+				})
+
+				It("should return an appropriate error", func() {
+					Expect(err).To(MatchError(HavePrefix("output directory is a file: ")))
+				})
+			})
 		})
 
-		Context("when the output directory already exists", func() {
+		Context("when there are collisions in input file names", func() {
 			BeforeEach(func() {
+				options.Manifest = "./fixtures/image_relocation/colliding/manifest.yaml"
+				options.Images = "./fixtures/image_relocation/image_manifest.yaml"
+
 				dir, err := ioutil.TempDir("", "image-relocation-test")
 				Expect(err).NotTo(HaveOccurred())
 				options.Output = dir
 			})
 
-			AssertSuccess()
-		})
-
-		Context("when the output directory does not exist", func() {
-			BeforeEach(func() {
-				dir, err := ioutil.TempDir("", "image-relocation-test")
+			It("should avoid unintended collisions in the output manifest", func() {
 				Expect(err).NotTo(HaveOccurred())
-				options.Output = filepath.Join(dir, "new")
+
+				actualManifest := readManifest(filepath.Join(options.Output, "manifest.yaml"))
+				expectedManifest := readManifest("./fixtures/image_relocation/colliding/manifest_with_collisions_relocated.yaml")
+				Expect(actualManifest).To(Equal(expectedManifest))
+
+				istios := actualManifest.Istio
+				Expect(len(istios)).To(Equal(1))
+				actualIstio := readFileOk(filepath.Join(options.Output, istios[0]))
+				expectedIstio := readFileOk("./fixtures/image_relocation/istio_relocated.yaml")
+				Expect(actualIstio).To(Equal(expectedIstio))
+
+				knatives := actualManifest.Knative
+				Expect(len(knatives)).To(Equal(1))
+				actualBuild1 := readFileOk(filepath.Join(options.Output, knatives[0]))
+				expectedBuild := readFileOk("./fixtures/image_relocation/build_relocated.yaml")
+				Expect(actualBuild1).To(Equal(expectedBuild))
+
+				namespaces := actualManifest.Namespace
+				Expect(len(namespaces)).To(Equal(1))
+				actualBuild2 := readFileOk(filepath.Join(options.Output, namespaces[0]))
+				Expect(actualBuild2).To(Equal(expectedBuild))
 			})
 
-			AssertSuccess()
-		})
+			Context("when the flatteners fail to prevent collisions", func() {
+				var oldFlatteners []uriFlattener
+			    BeforeEach(func() {
+			    	oldFlatteners = flatteners
+			        flatteners = []uriFlattener{baseFlattener}
+			    })
 
-		Context("when the output directory is actually a file", func() {
-			BeforeEach(func() {
-				dir, err := ioutil.TempDir("", "image-relocation-test")
-				Expect(err).NotTo(HaveOccurred())
-				options.Output = filepath.Join(dir, "file")
-				err = ioutil.WriteFile(options.Output, []byte{0}, 0644)
-				Expect(err).NotTo(HaveOccurred())
+				AfterEach(func() {
+				    flatteners = oldFlatteners
+				    oldFlatteners = nil
+				})
+
+			    It("should return a suitable error", func() {
+			        Expect(err).To(MatchError("cannot relocate manifest due to collisions in output paths"))
+			    })
 			})
 
-			It("should return an appropriate error", func() {
-			    Expect(err).To(MatchError(HavePrefix("output directory is a file: ")))
-			})
 		})
 	})
 
@@ -109,8 +164,8 @@ var _ = Describe("RelocateImages", func() {
 				It("should write the relocated YAML file to the output directory", func() {
 					Expect(err).NotTo(HaveOccurred())
 
-					actual := readFile(filepath.Join(options.Output, "release.yaml"))
-					expected := readFile("./fixtures/image_relocation/release_relocated.yaml")
+					actual := readFileOk(filepath.Join(options.Output, "release.yaml"))
+					expected := readFileOk("./fixtures/image_relocation/release_relocated.yaml")
 					Expect(actual).To(Equal(expected))
 				})
 			})
@@ -125,8 +180,8 @@ var _ = Describe("RelocateImages", func() {
 				It("should write the relocated YAML file to the output path", func() {
 					Expect(err).NotTo(HaveOccurred())
 
-					actual := readFile(options.Output)
-					expected := readFile("./fixtures/image_relocation/release_relocated.yaml")
+					actual := readFileOk(options.Output)
+					expected := readFileOk("./fixtures/image_relocation/release_relocated.yaml")
 					Expect(actual).To(Equal(expected))
 				})
 			})
@@ -147,22 +202,30 @@ var _ = Describe("RelocateImages", func() {
 			It("should write the relocated YAML file to the output directory", func() {
 				Expect(err).NotTo(HaveOccurred())
 
-				actual := readFile(filepath.Join(options.Output, "release.yaml"))
-				expected := readFile("./fixtures/image_relocation/release_relocated.yaml")
+				actual := readFileOk(filepath.Join(options.Output, "release.yaml"))
+				expected := readFileOk("./fixtures/image_relocation/release_relocated.yaml")
 				Expect(actual).To(Equal(expected))
 			})
 		})
 	})
 
+	Describe("Flatteners", func() {
+	    It("should preserve the normal manifest file name", func() {
+	        for _, f := range flatteners {
+	        	Expect(f("./manifest.yaml")).To(Equal("manifest.yaml"))
+			}
+	    })
+	})
+
 })
 
-func readManifest(manifestPath string) *core.Manifest {
-	manifest, err := core.NewManifest(manifestPath)
+func readManifest(manifestPath string) *Manifest {
+	manifest, err := NewManifest(manifestPath)
 	Expect(err).NotTo(HaveOccurred())
 	return manifest
 }
 
-func readFile(path string) string {
+func readFileOk(path string) string {
 	content, err := ioutil.ReadFile(path)
 	Expect(err).NotTo(HaveOccurred())
 	return string(content)

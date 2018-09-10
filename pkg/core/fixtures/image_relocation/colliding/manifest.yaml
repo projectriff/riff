@@ -1,0 +1,7 @@
+manifestVersion: 0.1
+istio:
+  - a/collision.yaml
+knative:
+  - b/collision.yaml
+namespace:
+  - b/collision.yaml

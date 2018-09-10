@@ -18,6 +18,10 @@ package core
 
 import (
 	"bytes"
+	"crypto/md5"
+	"crypto/sha256"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/ghodss/yaml"
 	"io/ioutil"
@@ -25,11 +29,12 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"reflect"
 )
 
 const (
 	outputFilePermissions = 0644
-	outputDirPermissions = 0755
+	outputDirPermissions  = 0755
 )
 
 type RelocateImagesOptions struct {
@@ -49,7 +54,7 @@ func (c *client) RelocateImages(options RelocateImagesOptions) error {
 	}
 
 	if options.SingleFile != "" {
-		_, err = relocateFile(options.SingleFile, imageMapper, "", options.Output)
+		_, err = relocateFile(options.SingleFile, imageMapper, "", options.Output, baseFlattener)
 		return err
 	}
 	return relocateManifest(options.Manifest, imageMapper, options.Output)
@@ -69,13 +74,13 @@ func createImageMapper(options RelocateImagesOptions) (*imageMapper, error) {
 	return imageMapper, nil
 }
 
-func relocateFile(yamlFile string, mapper *imageMapper, cwd string, outputPath string) (string, error) {
+func relocateFile(yamlFile string, mapper *imageMapper, cwd string, outputPath string, strat uriFlattener) (string, error) {
 	y, err := readFile(yamlFile, cwd)
 	if err != nil {
 		return "", err
 	}
 
-	output := outputFile(outputPath, yamlFile)
+	output := outputFile(outputPath, yamlFile, strat)
 	return filepath.Base(output), ioutil.WriteFile(output, mapper.mapImages(y), outputFilePermissions)
 }
 
@@ -112,6 +117,34 @@ func downloadFile(url string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type uriFlattener func(string) string;
+
+func baseFlattener(input string) string {
+	return filepath.Base(input)
+}
+
+func md5Flattener(input string) string {
+	base := baseFlattener(input)
+	if base == "manifest.yaml" {
+		return base
+	}
+	hasher := md5.New()
+	hasher.Write([]byte(input))
+	return base + "-" + hex.EncodeToString(hasher.Sum(nil))
+}
+
+func sha256Flattener(input string) string {
+	base := baseFlattener(input)
+	if base == "manifest.yaml" {
+		return base
+	}
+	hasher := sha256.New()
+	hasher.Write([]byte(input))
+	return base + "-" + hex.EncodeToString(hasher.Sum(nil))
+}
+
+var flatteners = []uriFlattener{baseFlattener, md5Flattener, sha256Flattener}
+
 func relocateManifest(manifestPath string, mapper *imageMapper, outputPath string) error {
 	if err := ensureDirectory(outputPath); err != nil {
 		return err
@@ -122,26 +155,32 @@ func relocateManifest(manifestPath string, mapper *imageMapper, outputPath strin
 		return err
 	}
 
+	nonCollidingFlattener := findNonCollidingFlattener(manifest)
+
+	if nonCollidingFlattener == nil {
+		return errors.New("cannot relocate manifest due to collisions in output paths")
+	}
+
 	manifestDir := filepath.Dir(manifestPath)
 
 	outputManifest := &Manifest{
 		ManifestVersion: manifest.ManifestVersion,
 	}
 
-	outputManifest.Istio, err = relocateYamls(manifest.Istio, manifestDir, mapper, outputPath)
+	outputManifest.Istio, err = relocateYamls(manifest.Istio, manifestDir, mapper, outputPath, nonCollidingFlattener)
 	if err != nil {
 		return err
 	}
-	outputManifest.Knative, err = relocateYamls(manifest.Knative, manifestDir, mapper, outputPath)
+	outputManifest.Knative, err = relocateYamls(manifest.Knative, manifestDir, mapper, outputPath, nonCollidingFlattener)
 	if err != nil {
 		return err
 	}
-	outputManifest.Namespace, err = relocateYamls(manifest.Namespace, manifestDir, mapper, outputPath)
+	outputManifest.Namespace, err = relocateYamls(manifest.Namespace, manifestDir, mapper, outputPath, nonCollidingFlattener)
 	if err != nil {
 		return err
 	}
 
-	outputManifestPath := filepath.Join(outputPath, "manifest.yaml")
+	outputManifestPath := filepath.Join(outputPath, nonCollidingFlattener("./manifest.yaml"))
 	outputManifestBytes, err := yaml.Marshal(&outputManifest)
 	if err != nil {
 		return err
@@ -149,10 +188,43 @@ func relocateManifest(manifestPath string, mapper *imageMapper, outputPath strin
 	return ioutil.WriteFile(outputManifestPath, outputManifestBytes, outputFilePermissions)
 }
 
-func relocateYamls(yamls []string, manifestDir string, mapper *imageMapper, outputPath string) ([]string, error) {
+func findNonCollidingFlattener(manifest *Manifest) uriFlattener {
+	for _, f := range flatteners {
+		if collisionless(manifest, f) {
+			return f
+		}
+	}
+	return nil
+}
+
+func collisionless(manifest *Manifest, f uriFlattener) bool {
+	// check that no new fields have been added to the manifest to avoid maintainability issues
+	if reflect.Indirect(reflect.ValueOf(manifest)).Type().NumField() != 4 {
+		panic("unexpected number of fields in manifest")
+	}
+
+	unflattened := make(map[string]string) // maps flattened name to original, unflattened name
+
+	// flatten all the input file names and check for collisions. The manifest filename is special-cased since,
+	// regardless of the actual file name of the input manifest, the output file name of the manifest is always
+	// "manifest.yaml" and this is always flattened to "manifest.yaml", regardless of the flattener used.
+	for _, array := range [][]string{manifest.Istio, manifest.Knative, manifest.Namespace, {"./manifest.yaml"}} {
+		for _, input := range array {
+			output := f(input)
+			if collidingInput, ok := unflattened[output]; ok && input != collidingInput {
+				fmt.Printf("Warning: collision between %s and %s. Trying another flattening strategy.\n", collidingInput, input)
+				return false
+			}
+			unflattened[output] = input
+		}
+	}
+	return true
+}
+
+func relocateYamls(yamls []string, manifestDir string, mapper *imageMapper, outputPath string, flattener uriFlattener) ([]string, error) {
 	rel := []string{}
 	for _, y := range yamls {
-		yRel, err := relocateFile(y, mapper, manifestDir, outputPath)
+		yRel, err := relocateFile(y, mapper, manifestDir, outputPath, flattener)
 		if err != nil {
 			return []string{}, err
 		}
@@ -161,9 +233,9 @@ func relocateYamls(yamls []string, manifestDir string, mapper *imageMapper, outp
 	return rel, nil
 }
 
-func outputFile(outputPath string, yamlFile string) string {
+func outputFile(outputPath string, yamlFile string, flattener uriFlattener) string {
 	if isDirectory(outputPath) {
-		return filepath.Join(outputPath, filepath.Base(yamlFile))
+		return filepath.Join(outputPath, flattener(yamlFile))
 	}
 	return outputPath
 }
