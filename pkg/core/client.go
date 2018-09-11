@@ -29,7 +29,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-//go:generate mockery -name=Client
 type Client interface {
 	CreateFunction(options CreateFunctionOptions, log io.Writer) (*serving.Service, error)
 	BuildFunction(options BuildFunctionOptions, log io.Writer) error
