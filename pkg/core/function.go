@@ -20,20 +20,22 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/boz/go-logutil"
-	"github.com/boz/kail"
-	"github.com/boz/kcache/types/pod"
-	build "github.com/knative/build/pkg/apis/build/v1alpha1"
-	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"io"
 	"io/ioutil"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"log"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/boz/go-logutil"
+	"github.com/boz/kail"
+	"github.com/boz/kcache/types/pod"
+	"github.com/buildpack/pack"
+	build "github.com/knative/build/pkg/apis/build/v1alpha1"
+	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 )
 
 const functionLabel = "riff.projectriff.io/function"
@@ -42,12 +44,15 @@ const buildAnnotation = "riff.projectriff.io/nonce"
 type CreateFunctionOptions struct {
 	CreateServiceOptions
 
+	LocalPath   string
 	GitRepo     string
 	GitRevision string
 
-	InvokerURL string
-	Handler    string
-	Artifact   string
+	BuildpackImage string
+	InvokerURL     string
+
+	Handler  string
+	Artifact string
 }
 
 func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
@@ -71,24 +76,45 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 	annotations[buildAnnotation] = "1"
 	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
 
-	s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
-		ServiceAccountName: "riff-build",
-		Source: &build.SourceSpec{
-			Git: &build.GitSourceSpec{
-				Url:      options.GitRepo,
-				Revision: options.GitRevision,
+	if options.LocalPath == "" && options.InvokerURL != "" {
+		// invoker based cluster build
+		s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
+			ServiceAccountName: "riff-build",
+			Source: &build.SourceSpec{
+				Git: &build.GitSourceSpec{
+					Url:      options.GitRepo,
+					Revision: options.GitRevision,
+				},
 			},
-		},
-		Template: &build.TemplateInstantiationSpec{
-			Name: "riff",
-			Arguments: []build.ArgumentSpec{
-				{Name: "IMAGE", Value: options.Image},
-				{Name: "INVOKER_PATH", Value: options.InvokerURL},
-				{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
-				{Name: "FUNCTION_HANDLER", Value: options.Handler},
-				{Name: "FUNCTION_NAME", Value: options.Name},
+			Template: &build.TemplateInstantiationSpec{
+				Name: "riff",
+				Arguments: []build.ArgumentSpec{
+					{Name: "IMAGE", Value: options.Image},
+					{Name: "INVOKER_PATH", Value: options.InvokerURL},
+					{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
+					{Name: "FUNCTION_HANDLER", Value: options.Handler},
+					{Name: "FUNCTION_NAME", Value: options.Name},
+				},
 			},
-		},
+		}
+	} else if options.LocalPath == "" && options.BuildpackImage != "" {
+		// buildpack based cluster build
+		return nil, fmt.Errorf("buildpack builds are not available on cluster, please specify a local source path")
+	} else if options.LocalPath != "" && options.BuildpackImage != "" {
+		// local buildpack build
+
+		appDir := options.LocalPath
+		detectImage := options.BuildpackImage
+		repoName := options.Image
+		publish := strings.Index(options.Image, "dev.local/") != 0 && strings.Index(options.Image, "ko.local/") != 0
+
+		// TODO handle options.DryRun
+		err = pack.Build(appDir, detectImage, repoName, publish)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("unknown build permutation")
 	}
 
 	if !options.DryRun {
@@ -235,7 +261,7 @@ func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int6
 		default:
 		}
 		time.Sleep(500 * time.Millisecond)
-		service, err := c.service( Namespaced{namespace}, name)
+		service, err := c.service(Namespaced{namespace}, name)
 		if err != nil {
 			return fmt.Errorf("waitForSuccessOrFailure failed to obtain service: %v", err)
 		}
@@ -383,7 +409,7 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 		errChan := make(chan error)
 		var (
 			nextGen int64
-			err error
+			err     error
 		)
 		for i := 0; i < 10; i++ {
 			if i >= 10 {

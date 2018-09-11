@@ -6,7 +6,7 @@ Create a new function resource, with optional input and output channels
 
 Create a new function resource from the content of the provided Git repo/revision.
 
-The INVOKER arg defines the language invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function.
+The RUNTIME arg defines the language runtime that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function.
 From then on you can use the sub-commands for the `service` command to interact with the service created for the function.
 
 If an input channel and bus are specified, create the channel in the bus and subscribe the service to the channel.
@@ -39,10 +39,11 @@ riff function create [flags]
       --env-from stringArray           environment variable created from a source reference; see command help for supported formats
       --git-repo URL                   the URL for a git repository hosting the function code
       --git-revision ref-spec          the git ref-spec of the function code to use (default "master")
-      --handler method or class        the name of the method or class to invoke, depending on the invoker used
+      --handler method or class        the name of the method or class to invoke, depending on the runtime used
   -h, --help                           help for create
       --image repository/image[:tag]   the name of the image to build; must be a writable repository/image[:tag] with credentials configured
   -i, --input channel                  name of the function's input channel, if any
+  -l, --local string                   path to local source to build the image from
   -n, --namespace namespace            the namespace of the subscription, channel, and function
   -o, --output channel                 name of the function's output channel, if any
   -v, --verbose                        print details of command progress
