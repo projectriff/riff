@@ -231,6 +231,15 @@ func NotBlank(flagName string) FlagsValidator {
 	}
 }
 
+func FlagValidName(flagName string) FlagsValidator {
+	return func(cmd *cobra.Command) error {
+		if errs := validation.IsDNS1123Subdomain(cmd.Flag(flagName).Value.String()); len(errs) > 0 {
+			return fmt.Errorf("invalid registry hostname: %s", strings.Join(errs, "; "))
+		}
+		return nil
+	}
+}
+
 // ExactlyOneOf returns a FlagsValidator that asserts that one and only one of the passed in flags is set.
 func ExactlyOneOf(flagNames ...string) FlagsValidator {
 	return FlagsValidationConjunction(
@@ -358,10 +367,10 @@ func tmpl(w io.Writer, text string, data interface{}) error {
 		"trim":                    strings.TrimSpace,
 		"trimRightSpace":          trimRightSpace,
 		"trimTrailingWhitespaces": trimRightSpace,
-		"rpad":    rpad,
-		"gt":      cobra.Gt,
-		"eq":      cobra.Eq,
-		"useline": useline,
+		"rpad":                    rpad,
+		"gt":                      cobra.Gt,
+		"eq":                      cobra.Eq,
+		"useline":                 useline,
 	}
 	t.Funcs(templateFuncs)
 	template.Must(t.Parse(text))

@@ -62,6 +62,29 @@ image manifest file with contents of the following form:
 		Example: `  riff image relocate --manifest=/path/to/manifest --registry=hostname --user=username --images=/path/to/image/manifest --output=/path/to/output/dir
   riff image relocate --file=/path/to/file --registry=hostname --user=username --images=/path/to/image/manifest --output=/path/to/output`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) > 0 {
+				return errors.New("the `image relocate` command does not support positional arguments")
+			}
+
+			if err := FlagsValidationConjunction(
+				FlagsDependency(Set("manifest"), NoneOf("file")),
+				FlagsDependency(Set("file"), NoneOf("manifest")),
+			)(cmd); err != nil {
+				return err
+			}
+
+			// validate --registry if it is set, otherwise allow flag omission to be diagnosed as such
+			if cmd.Flags().Changed("registry") {
+				if err := FlagValidName("registry")(cmd); err != nil {
+					return err
+				}
+			}
+
+			// prevent the default value of --manifest from conflicting with --file
+			if cmd.Flags().Changed("file") && !cmd.Flags().Changed("manifest") {
+				options.Manifest = ""
+			}
+
 			// FIXME: these flags should not apply to this command: https://github.com/projectriff/riff/issues/743
 			if cmd.Flags().Changed("kubeconfig") {
 				return errors.New("the 'kubeconfig' flag is not supported by the 'image relocate' command")
@@ -71,7 +94,7 @@ image manifest file with contents of the following form:
 				return errors.New("the 'master' flag is not supported by the 'image relocate' command")
 			}
 
-			return FlagsValidatorAsCobraRunE(ExactlyOneOf("file", "manifest"))(cmd, args)
+			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*c).RelocateImages(options)
