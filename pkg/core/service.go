@@ -89,6 +89,8 @@ func (c *client) ReviseService(options CreateOrReviseServiceOptions) (*v1alpha1.
 	existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env = append(existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env, envVars...)
 	existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env = append(existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env, envVarsFrom...)
 
+	c.bumpNonceAnnotation(existingSvc)
+
 	if !options.DryRun {
 		_, err := c.serving.ServingV1alpha1().Services(ns).Update(existingSvc)
 		return existingSvc, err

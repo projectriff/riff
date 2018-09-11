@@ -23,7 +23,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"strconv"
 	"strings"
 	"time"
 
@@ -362,17 +361,7 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 		return errors.New(fmt.Sprintf("the service named \"%s\" is not a riff function", options.Name))
 	}
 
-	annotations := s.Spec.RunLatest.Configuration.RevisionTemplate.Annotations
-	if annotations == nil {
-		annotations = map[string]string{}
-	}
-	build := annotations[buildAnnotation]
-	i, err := strconv.Atoi(build)
-	if err != nil {
-		i = 0
-	}
-	annotations[buildAnnotation] = strconv.Itoa(i + 1)
-	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
+	c.bumpNonceAnnotation(s)
 
 	_, err = c.serving.ServingV1alpha1().Services(s.Namespace).Update(s)
 	if err != nil {
