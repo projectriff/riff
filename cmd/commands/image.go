@@ -18,6 +18,7 @@ package commands
 
 import (
 	"errors"
+
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
 )
@@ -35,29 +36,29 @@ func ImageRelocate(c *core.Client) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "relocate",
 		Short: "Relocate docker image names to another registry",
-		Long: `Relocate either a single kubernetes configuration file or a riff manifest and its kubernetes
-configuration files so that image names refer to another (private or public) registry.
+		Long: "Relocate either a single kubernetes configuration file or a riff manifest and its kubernetes configuration files so " +
+			"that image names refer to another (private or public) registry.\n" +
 
-To relocate a single kubernetes configuration file, use the '--file' flag to specify the path or URL of the file. Use
-the '--output' flag to specify the path for the relocated file. If '--output' is an existing directory, the relocated
-file will be placed in that directory. Otherwise the relocated file will be written to the path specified in '--output'.
+			"\nTo relocate a single kubernetes configuration file, use the `--file` flag to specify the path or URL of the file. Use " +
+			"the `--output` flag to specify the path for the relocated file. If `--output` is an existing directory, the relocated " +
+			"file will be placed in that directory. Otherwise the relocated file will be written to the path specified in `--output`.\n" +
 
-To relocate a manifest, use the '--manifest' flag to specify the path of a manifest file which provides the paths or
-URLs of the kubernetes configuration files for riff components. Use the '--output' flag to specify the path of a
-directory to contain the relocated manifest and kubernetes configuration files.
+			"\nTo relocate a manifest, use the `--manifest` flag to specify the path of a manifest file which provides the paths or " +
+			"URLs of the kubernetes configuration files for riff components. Use the `--output` flag to specify the path of a " +
+			"directory to contain the relocated manifest and kubernetes configuration files.\n" +
 
-Specify the registry hostname using the '--registry' flag, the user owning the images using the '--registry-user' flag,
-and a complete list of the images to be mapped using the '--images' flag. The '--images' flag contains the path of an
-image manifest file with contents of the following form:
-
+			"\nSpecify the registry hostname using the `--registry` flag, the user owning the images using the `--registry-user` flag, " +
+			"and a complete list of the images to be mapped using the `--images` flag. The `--images` flag contains the path of an " +
+			"image manifest file with contents of the following form:\n" +
+			`
     manifestVersion: 0.1
     images:
     ...
     - docker.io/istio/proxyv2:1.0.1
     ...
     - gcr.io/knative-releases/github.com/knative/serving/cmd/autoscaler@sha256:76222399addc02454db9837ea3ff54bae29849168586051a9d0180daa2c1a805
-    ...
-    
+    ... 
+
 `,
 		Example: `  riff image relocate --manifest=/path/to/manifest --registry=hostname --user=username --images=/path/to/image/manifest --output=/path/to/output/dir
   riff image relocate --file=/path/to/file --registry=hostname --user=username --images=/path/to/image/manifest --output=/path/to/output`,
