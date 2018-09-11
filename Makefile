@@ -1,7 +1,7 @@
 .PHONY: build clean test all release gen-mocks
 
 OUTPUT = ./riff
-GO_SOURCES = $(shell find cmd pkg -type f -name '*.go' -not -regex '.*/mocks/.*' -not -regex '.*/vendor_mocks/.*')
+GO_SOURCES = $(shell find . -type f -name '*.go' -not -regex '.*/mocks/.*' -not -regex '.*/vendor_mocks/.*')
 VERSION ?= $(shell cat VERSION)
 GITSHA = $(shell git rev-parse HEAD)
 GITDIRTY = $(shell git diff-index --quiet HEAD -- || echo "dirty")
@@ -34,10 +34,10 @@ gen-mocks: pkg/core/mocks/Client.go $(wildcard pkg/core/vendor_mocks/*.go)
 install: build
 	cp $(OUTPUT) $(GOBIN)
 
-$(OUTPUT): $(GO_SOURCES) main.go vendor VERSION
+$(OUTPUT): $(GO_SOURCES) vendor VERSION
 	go build -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)" main.go
 
-release: $(GO_SOURCES) main.go vendor VERSION
+release: $(GO_SOURCES) vendor VERSION
 	GOOS=darwin   GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     main.go && tar -czf riff-darwin-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
 	GOOS=linux    GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     main.go && tar -czf riff-linux-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
 	GOOS=windows  GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT).exe main.go && zip -mq riff-windows-amd64.zip $(OUTPUT).exe && rm -f $(OUTPUT).exe
