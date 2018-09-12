@@ -46,7 +46,11 @@ const (
 
 const (
 	serviceInvokeServiceNameIndex = iota
-	serviceInvokeNumberOfArgs
+	serviceInvokeServicePathIndex
+)
+const (
+	serviceInvokeMinNumberOfArgs = 1
+	serviceInvokeMaxNumberOfArgs = 2
 )
 
 const (
@@ -324,19 +328,21 @@ The curl command is printed so it can be copied and extended.
 
 Additional curl arguments and flags may be specified after a double dash (--).`,
 		Example: `  riff service invoke square --namespace joseph-ns
-  riff service invoke square -- --include`,
+  riff service invoke square /foo -- --data 42`,
 		Args: UpToDashDash(ArgValidationConjunction(
-			cobra.ExactArgs(serviceInvokeNumberOfArgs),
+			cobra.MinimumNArgs(serviceInvokeMinNumberOfArgs),
+			cobra.MaximumNArgs(serviceInvokeMaxNumberOfArgs),
 			AtPosition(serviceInvokeServiceNameIndex, ValidName()),
 		)),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			serviceInvokeOptions.Name = args[serviceInvokeServiceNameIndex]
+			path := args[serviceInvokeServicePathIndex]
 			ingress, hostName, err := (*fcClient).ServiceCoordinates(serviceInvokeOptions)
 			if err != nil {
 				return err
 			}
 
-			curlCmd := exec.Command("curl", ingress)
+			curlCmd := exec.Command("curl", ingress + path)
 
 			curlCmd.Stdin = os.Stdin
 			curlCmd.Stdout = cmd.OutOrStdout()
@@ -359,7 +365,7 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 		},
 	}
 
-	LabelArgs(command, "SERVICE_NAME")
+	LabelArgs(command, "SERVICE_NAME", "PATH")
 
 	command.Flags().StringVarP(&serviceInvokeOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
 

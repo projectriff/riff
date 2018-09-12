@@ -18,6 +18,8 @@ package commands_test
 
 import (
 	"fmt"
+	"net"
+	"net/http"
 
 	"strings"
 
@@ -527,3 +529,82 @@ var _ = Describe("The riff service delete command", func() {
 
 	})
 })
+
+var _ = Describe("The riff service invoke command", func() {
+	Context("when given wrong args or flags", func() {
+		var (
+			mockClient    core.Client
+			invokeCommand *cobra.Command
+		)
+		BeforeEach(func() {
+			mockClient = nil
+			invokeCommand = commands.ServiceInvoke(&mockClient)
+		})
+		It("should fail with no args", func() {
+			invokeCommand.SetArgs([]string{})
+			err := invokeCommand.Execute()
+			Expect(err).To(MatchError("requires at least 1 arg(s), only received 0"))
+		})
+		It("should fail with too many args", func() {
+			invokeCommand.SetArgs([]string{"someservice", "/path", "oops-extra-arg"})
+			err := invokeCommand.Execute()
+			Expect(err).To(MatchError("accepts at most 2 arg(s), received 3"))
+		})
+		It("should fail with invalid service name", func() {
+			invokeCommand.SetArgs([]string{".invalid"})
+			err := invokeCommand.Execute()
+			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
+		})
+	})
+
+	Context("when given suitable args and flags", func() {
+		var (
+			client             core.Client
+			clientMock         *mocks.Client
+			invokeCommand      *cobra.Command
+			listener           net.Listener
+			path               string
+			pathMatchedChannel chan bool
+		)
+		BeforeEach(func() {
+			path = "/numbers"
+			client = new(mocks.Client)
+			clientMock = client.(*mocks.Client)
+			pathMatchedChannel = make(chan bool, 1)
+			listener = pathAwareHttpServer(path, pathMatchedChannel)
+
+			invokeCommand = commands.ServiceInvoke(&client)
+		})
+		It("should accept an additional optional path argument", func() {
+			invokeCommand.SetArgs([]string{"correlator", path})
+			options := core.ServiceInvokeOptions{
+				Name: "correlator",
+			}
+			clientMock.On("ServiceCoordinates", options).Return(listener.Addr().String(), "hostname", nil)
+			err := invokeCommand.Execute()
+
+			Expect(err).To(BeNil(), "service invoke should work with a path")
+			Expect(<-pathMatchedChannel).To(BeTrue(), "curl should take the path into account")
+
+		})
+		AfterEach(func() {
+			clientMock.AssertExpectations(GinkgoT())
+			listener.Close()
+		})
+	})
+})
+
+func pathAwareHttpServer(path string, pathMatchedChannel chan bool) net.Listener {
+	listener, _ := net.Listen("tcp", "127.0.0.1:0")
+	go http.Serve(listener, http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		if req.URL.Path != path {
+			resp.WriteHeader(404)
+			pathMatchedChannel <- false
+		} else {
+			resp.WriteHeader(200)
+			pathMatchedChannel <- true
+		}
+		resp.Write([]byte{})
+	}))
+	return listener
+}
