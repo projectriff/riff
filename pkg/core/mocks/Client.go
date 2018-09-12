@@ -193,7 +193,6 @@ func (_m *Client) ListServices(options core.ListServiceOptions) (*servingv1alpha
 	return r0, r1
 }
 
-<<<<<<< HEAD
 // RelocateImages provides a mock function with given fields: options
 func (_m *Client) RelocateImages(options core.RelocateImagesOptions) error {
 	ret := _m.Called(options)
@@ -206,7 +205,8 @@ func (_m *Client) RelocateImages(options core.RelocateImagesOptions) error {
 	}
 
 	return r0
-=======
+}
+
 // ReviseService provides a mock function with given fields: options
 func (_m *Client) ReviseService(options core.CreateOrReviseServiceOptions) (*servingv1alpha1.Service, error) {
 	ret := _m.Called(options)
@@ -228,7 +228,6 @@ func (_m *Client) ReviseService(options core.CreateOrReviseServiceOptions) (*ser
 	}
 
 	return r0, r1
->>>>>>> Add `riff service revise` command
 }
 
 // ServiceCoordinates provides a mock function with given fields: options
