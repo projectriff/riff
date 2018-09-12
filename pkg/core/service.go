@@ -158,7 +158,7 @@ func (c *client) ServiceCoordinates(options ServiceInvokeOptions) (string, strin
 	}
 	if ingress == "" {
 		for _, port := range ksvc.Spec.Ports {
-			if port.Name == "http" {
+			if port.Name == "http" || port.Name == "http2" {
 				config, err := c.clientConfig.ClientConfig()
 				if err != nil {
 					return "", "", err
