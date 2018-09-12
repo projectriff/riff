@@ -126,7 +126,7 @@ func (kc *kubectlClient) applyRelease(release string, options SystemInstallOptio
 			fmt.Print(`It looks like you don't have cluster-admin permissions.
 
 To fix this you need to:
- 1. Delete he current failed installation using:
+ 1. Delete the current failed installation using:
       riff system uninstall --istio --force
  2. Give the user account used for installation cluster-admin permissions, you can use the following command:
       kubectl create clusterrolebinding cluster-admin-binding \
