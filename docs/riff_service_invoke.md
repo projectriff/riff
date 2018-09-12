@@ -18,7 +18,7 @@ riff service invoke [flags]
 
 ```
   riff service invoke square --namespace joseph-ns
-  riff service invoke square -- --include
+  riff service invoke square /foo -- --data 42
 ```
 
 ### Options
