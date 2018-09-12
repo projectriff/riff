@@ -47,10 +47,7 @@ const (
 const (
 	serviceInvokeServiceNameIndex = iota
 	serviceInvokeServicePathIndex
-)
-const (
-	serviceInvokeMinNumberOfArgs = 1
-	serviceInvokeMaxNumberOfArgs = 2
+	serviceInvokeMaxNumberOfArgs
 )
 
 const (
@@ -330,7 +327,7 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 		Example: `  riff service invoke square --namespace joseph-ns
   riff service invoke square /foo -- --data 42`,
 		Args: UpToDashDash(ArgValidationConjunction(
-			cobra.MinimumNArgs(serviceInvokeMinNumberOfArgs),
+			cobra.MinimumNArgs(serviceInvokeMaxNumberOfArgs - 1),
 			cobra.MaximumNArgs(serviceInvokeMaxNumberOfArgs),
 			AtPosition(serviceInvokeServiceNameIndex, ValidName()),
 		)),

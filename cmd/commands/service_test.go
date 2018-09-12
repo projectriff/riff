@@ -584,7 +584,14 @@ var _ = Describe("The riff service invoke command", func() {
 			err := invokeCommand.Execute()
 
 			Expect(err).To(BeNil(), "service invoke should work with a path")
-			Expect(<-pathMatchedChannel).To(BeTrue(), "curl should take the path into account")
+			timeout := 2 * time.Second
+			select {
+				case matchedChannel := <-pathMatchedChannel:
+					Expect(matchedChannel).To(BeTrue(), "curl should take the path into account")
+				case <-time.After(timeout):
+					Fail(fmt.Sprintf("service invoke did not complete within %v", timeout))
+			}
+
 
 		})
 		AfterEach(func() {
@@ -594,7 +601,7 @@ var _ = Describe("The riff service invoke command", func() {
 	})
 })
 
-func pathAwareHttpServer(path string, pathMatchedChannel chan bool) net.Listener {
+func pathAwareHttpServer(path string, pathMatchedChannel chan<- bool) net.Listener {
 	listener, _ := net.Listen("tcp", "127.0.0.1:0")
 	go http.Serve(listener, http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		if req.URL.Path != path {
