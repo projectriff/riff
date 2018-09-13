@@ -332,8 +332,13 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 			AtPosition(serviceInvokeServiceNameIndex, ValidName()),
 		)),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			argsLengthAtDash := cmd.ArgsLenAtDash()
 			serviceInvokeOptions.Name = args[serviceInvokeServiceNameIndex]
-			path := readOptionalParam(args, serviceInvokeServicePathIndex, "/")
+			path := "/"
+			if argsLengthAtDash > serviceInvokeServicePathIndex ||
+				argsLengthAtDash == -1 && len(args) > serviceInvokeServicePathIndex {
+				path = args[serviceInvokeServicePathIndex]
+			}
 			ingress, hostName, err := (*fcClient).ServiceCoordinates(serviceInvokeOptions)
 			if err != nil {
 				return err
@@ -348,8 +353,8 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 			hostHeader := fmt.Sprintf("Host: %s", hostName)
 			curlCmd.Args = append(curlCmd.Args, "-H", hostHeader)
 
-			if cmd.ArgsLenAtDash() > 0 {
-				curlCmd.Args = append(curlCmd.Args, args[cmd.ArgsLenAtDash():]...)
+			if argsLengthAtDash > 0 {
+				curlCmd.Args = append(curlCmd.Args, args[argsLengthAtDash:]...)
 			}
 
 			quoted, err := shellquote.Quote(curlCmd.Args)
@@ -459,12 +464,4 @@ func subscriptionNameFromService(fnName string) string {
 // given a service/function that is being created/subscribed. This has to be the name of the service itself.
 func subscriberNameFromService(fnName string) string {
 	return fnName
-}
-
-func readOptionalParam(args []string, index int, defaultValue string) string {
-	path := defaultValue
-	if len(args) > index {
-		path = args[index]
-	}
-	return path
 }

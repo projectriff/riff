@@ -590,6 +590,23 @@ var _ = Describe("The riff service invoke command", func() {
 				Fail(fmt.Sprintf("service invoke did not complete within %v", timeout))
 			}
 		})
+		It("should invoke the service with curl arguments", func() {
+			listener = pathAwareHttpServer("/", pathMatchedChannel)
+			invokeCommand.SetArgs([]string{"numbers", "--", "-HContent-Type:text/plain", "-d 7"})
+			options := core.ServiceInvokeOptions{
+				Name: "numbers",
+			}
+			clientMock.On("ServiceCoordinates", options).Return(listener.Addr().String(), "hostname", nil)
+			err := invokeCommand.Execute()
+
+			Expect(err).To(BeNil(), "service invoke should work")
+			select {
+			case matchedChannel := <-pathMatchedChannel:
+				Expect(matchedChannel).To(BeTrue(), "curl should reach the service")
+			case <-time.After(timeout):
+				Fail(fmt.Sprintf("service invoke did not complete within %v", timeout))
+			}
+		})
 		It("should accept an additional optional path argument", func() {
 			path := "/numbers"
 			listener = pathAwareHttpServer(path, pathMatchedChannel)
