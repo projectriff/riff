@@ -1,9 +1,9 @@
 manifestVersion: 0.1
 istio:
   - istio-crds
-  - istio-release
+  - /absolute/path/to/istio-release
 knative:
-  - serving-release
+  - https://serving-release
   - eventing-release
   - stub-bus-release
 namespace:
