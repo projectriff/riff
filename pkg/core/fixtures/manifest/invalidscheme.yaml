@@ -1,0 +1,7 @@
+manifestVersion: 0.1
+istio:
+  - file:///x
+knative:
+  - y
+namespace:
+  - y

@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -111,7 +112,7 @@ func (kc *kubectlClient) applyReleaseWithRetry(release string, options SystemIns
 }
 
 func (kc *kubectlClient) applyRelease(release string, options SystemInstallOptions) error {
-	yaml, err := loadRelease(release)
+	yaml, err := loadRelease(release, filepath.Dir(options.Manifest))
 	if err != nil {
 		return err
 	}
@@ -230,32 +231,30 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 	return true, nil
 }
 
-func resolveReleaseURLs(filename string) (url.URL, error) {
-	u, err := url.Parse(filename)
+func loadRelease(release string, baseDir string) ([]byte, error) {
+	releaseUrl, err := url.Parse(release)
 	if err != nil {
-		return url.URL{}, err
+		return nil, err
 	}
-	if u.Scheme == "http" || u.Scheme == "https" {
-		return *u, nil
-	}
-	return *u, fmt.Errorf("filename must be http or https, got %s", u.Scheme)
-}
 
-func loadRelease(release string) ([]byte, error) {
-	releaseUrl, err := resolveReleaseURLs(release)
-	if err != nil {
-		return nil, err
+	var content []byte
+	if releaseUrl.Scheme == "" {
+		content, err = ioutil.ReadFile(filepath.Join(baseDir, releaseUrl.Path))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		resp, err := http.Get(releaseUrl.String())
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		content, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
 	}
-	resp, err := http.Get(releaseUrl.String())
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return body, nil
+	return content, nil
 }
 
 func waitForIstioComponents(kc *kubectlClient) error {

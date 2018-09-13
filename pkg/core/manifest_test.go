@@ -96,6 +96,26 @@ var _ = Describe("Manifest", func() {
 			})
 		})
 
+		Context("when the manifest contains a resource with an absolute path", func() {
+			BeforeEach(func() {
+				manifestPath = "./fixtures/manifest/absolutepath.yaml"
+			})
+
+			It("should return a suitable error", func() {
+				Expect(err).To(MatchError("resources must use a http or https URL or a relative path: absolute path not supported: /x"))
+			})
+		})
+
+		Context("when the manifest contains a resource with unsupported URL scheme", func() {
+			BeforeEach(func() {
+				manifestPath = "./fixtures/manifest/invalidscheme.yaml"
+			})
+
+			It("should return a suitable error", func() {
+				Expect(err).To(MatchError("resources must use a http or https URL or a relative path: scheme file not supported: file:///x"))
+			})
+		})
+
 		Context("when the manifest is valid", func() {
 			BeforeEach(func() {
 				manifestPath = "./fixtures/manifest/valid.yaml"
@@ -106,11 +126,11 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should parse the istio array", func() {
-				Expect(manifest.Istio).To(ConsistOf("istio-crds", "istio-release"))
+				Expect(manifest.Istio).To(ConsistOf("istio-crds", "http://istio-release"))
 			})
 
 			It("should parse the Knative array", func() {
-				Expect(manifest.Knative).To(ConsistOf("serving-release", "eventing-release", "stub-bus-release"))
+				Expect(manifest.Knative).To(ConsistOf("https://serving-release", "eventing-release", "stub-bus-release"))
 			})
 
 			It("should parse the Knative array", func() {

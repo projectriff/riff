@@ -20,6 +20,7 @@ Use the `--manifest` flag to specify the path of a manifest file which provides 
     namespace:
     - https://path/to/riff-buildtemplate-release.yaml
 
+Note: relative file paths or http/https URLs may be used in the manifest.
 
 ```
 riff system install [flags]

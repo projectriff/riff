@@ -52,7 +52,8 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
     - https://path/to/stub-bus-release.yaml
     namespace:
     - https://path/to/riff-buildtemplate-release.yaml
-`,
+`+
+			"\nNote: relative file paths or http/https URLs may be used in the manifest.",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// TODO: implement support for global flags - for now don't allow their use
 			if cmd.Flags().Changed("kubeconfig") {

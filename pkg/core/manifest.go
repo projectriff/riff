@@ -20,6 +20,8 @@ package core
 import (
 	"fmt"
 	"io/ioutil"
+	"net/url"
+	"path/filepath"
 
 	"github.com/ghodss/yaml"
 )
@@ -133,6 +135,15 @@ func NewManifest(path string) (*Manifest, error) {
 		return nil, err
 	}
 
+	for _, resourceArray := range [][]string{m.Istio, m.Knative, m.Namespace} {
+		for _, resource := range resourceArray {
+			err = checkResource(resource)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
 	return &m, nil
 }
 
@@ -148,4 +159,20 @@ func checkCompleteness(m Manifest) error {
 		return nil
 	}
 	return fmt.Errorf("Manifest is incomplete: %s array missing: %#v", omission, m)
+}
+
+func checkResource(resource string) error {
+	u, err := url.Parse(resource)
+	if err != nil {
+		return err
+	}
+	if u.Scheme == "http" || u.Scheme == "https" || (u.Scheme == "" && !filepath.IsAbs(u.Path)) {
+		return nil
+	}
+
+	if u.Scheme == "" {
+		return fmt.Errorf("resources must use a http or https URL or a relative path: absolute path not supported: %s", resource)
+	}
+
+	return fmt.Errorf("resources must use a http or https URL or a relative path: scheme %s not supported: %s", u.Scheme, resource)
 }

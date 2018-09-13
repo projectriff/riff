@@ -21,7 +21,9 @@ import (
 	"bufio"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
+	"path/filepath"
 	"syscall"
 
 	"golang.org/x/crypto/ssh/terminal"
@@ -153,13 +155,23 @@ func (c *kubectlClient) NamespaceInit(options NamespaceInitOptions) error {
 		}
 	}
 
+	baseDir := filepath.Dir(options.Manifest)
+
 	for _, release := range manifest.Namespace {
-		url, err := resolveReleaseURLs(release)
+		u, err := url.Parse(release)
 		if err != nil {
 			return err
 		}
+
+		var resource string
+		if u.Scheme == "" {
+			resource = filepath.Join(baseDir, u.Path)
+		} else {
+			resource = u.String()
+		}
+
 		fmt.Printf("Applying %s in namespace %q\n", release, ns)
-		log, err := c.kubeCtl.Exec([]string{"apply", "-n", ns, "-f", url.String()})
+		log, err := c.kubeCtl.Exec([]string{"apply", "-n", ns, "-f", resource})
 		fmt.Printf("%s\n", log)
 		if err != nil {
 			return err
