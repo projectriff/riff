@@ -327,19 +327,19 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 		Example: `  riff service invoke square --namespace joseph-ns
   riff service invoke square /foo -- --data 42`,
 		Args: UpToDashDash(ArgValidationConjunction(
-			cobra.MinimumNArgs(serviceInvokeMaxNumberOfArgs - 1),
+			cobra.MinimumNArgs(serviceInvokeMaxNumberOfArgs-1),
 			cobra.MaximumNArgs(serviceInvokeMaxNumberOfArgs),
 			AtPosition(serviceInvokeServiceNameIndex, ValidName()),
 		)),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			serviceInvokeOptions.Name = args[serviceInvokeServiceNameIndex]
-			path := args[serviceInvokeServicePathIndex]
+			path := readOptionalParam(args, serviceInvokeServicePathIndex, "/")
 			ingress, hostName, err := (*fcClient).ServiceCoordinates(serviceInvokeOptions)
 			if err != nil {
 				return err
 			}
 
-			curlCmd := exec.Command("curl", ingress + path)
+			curlCmd := exec.Command("curl", ingress+path)
 
 			curlCmd.Stdin = os.Stdin
 			curlCmd.Stdout = cmd.OutOrStdout()
@@ -459,4 +459,12 @@ func subscriptionNameFromService(fnName string) string {
 // given a service/function that is being created/subscribed. This has to be the name of the service itself.
 func subscriberNameFromService(fnName string) string {
 	return fnName
+}
+
+func readOptionalParam(args []string, index int, defaultValue string) string {
+	path := defaultValue
+	if len(args) > index {
+		path = args[index]
+	}
+	return path
 }

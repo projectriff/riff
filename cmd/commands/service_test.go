@@ -563,19 +563,36 @@ var _ = Describe("The riff service invoke command", func() {
 			clientMock         *mocks.Client
 			invokeCommand      *cobra.Command
 			listener           net.Listener
-			path               string
 			pathMatchedChannel chan bool
+			timeout            = 2 * time.Second
 		)
 		BeforeEach(func() {
-			path = "/numbers"
 			client = new(mocks.Client)
 			clientMock = client.(*mocks.Client)
 			pathMatchedChannel = make(chan bool, 1)
-			listener = pathAwareHttpServer(path, pathMatchedChannel)
 
 			invokeCommand = commands.ServiceInvoke(&client)
 		})
+		It("should invoke the service", func() {
+			listener = pathAwareHttpServer("/", pathMatchedChannel)
+			invokeCommand.SetArgs([]string{"correlator"})
+			options := core.ServiceInvokeOptions{
+				Name: "correlator",
+			}
+			clientMock.On("ServiceCoordinates", options).Return(listener.Addr().String(), "hostname", nil)
+			err := invokeCommand.Execute()
+
+			Expect(err).To(BeNil(), "service invoke should work")
+			select {
+			case matchedChannel := <-pathMatchedChannel:
+				Expect(matchedChannel).To(BeTrue(), "curl should reach the service")
+			case <-time.After(timeout):
+				Fail(fmt.Sprintf("service invoke did not complete within %v", timeout))
+			}
+		})
 		It("should accept an additional optional path argument", func() {
+			path := "/numbers"
+			listener = pathAwareHttpServer(path, pathMatchedChannel)
 			invokeCommand.SetArgs([]string{"correlator", path})
 			options := core.ServiceInvokeOptions{
 				Name: "correlator",
@@ -584,19 +601,18 @@ var _ = Describe("The riff service invoke command", func() {
 			err := invokeCommand.Execute()
 
 			Expect(err).To(BeNil(), "service invoke should work with a path")
-			timeout := 2 * time.Second
 			select {
-				case matchedChannel := <-pathMatchedChannel:
-					Expect(matchedChannel).To(BeTrue(), "curl should take the path into account")
-				case <-time.After(timeout):
-					Fail(fmt.Sprintf("service invoke did not complete within %v", timeout))
+			case matchedChannel := <-pathMatchedChannel:
+				Expect(matchedChannel).To(BeTrue(), "curl should take the path into account")
+			case <-time.After(timeout):
+				Fail(fmt.Sprintf("service invoke did not complete within %v", timeout))
 			}
-
-
 		})
 		AfterEach(func() {
 			clientMock.AssertExpectations(GinkgoT())
-			listener.Close()
+			if listener != nil {
+				listener.Close()
+			}
 		})
 	})
 })
