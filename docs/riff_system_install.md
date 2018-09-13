@@ -20,6 +20,7 @@ Use the `--manifest` flag to specify the path of a manifest file which provides 
     namespace:
     - https://path/to/riff-buildtemplate-release.yaml
 
+Note: file paths may be used instead of URLs in the manifest.
 
 ```
 riff system install [flags]
@@ -30,7 +31,7 @@ riff system install [flags]
 ```
       --force             force the install of components without getting any prompts
   -h, --help              help for install
-  -m, --manifest string   manifest of YAML files to be applied; can be a named manifest (stable or latest) or a file path of a manifest file (default "stable")
+  -m, --manifest string   manifest of kubernetes resource files to be installed; can be a named manifest (stable or latest) or a file path of a manifest file (default "stable")
       --node-port         whether to use NodePort instead of LoadBalancer for ingress gateways
 ```
 

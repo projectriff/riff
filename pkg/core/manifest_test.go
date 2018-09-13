@@ -18,9 +18,13 @@
 package core_test
 
 import (
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/core"
+	"os"
+	"path"
+	"path/filepath"
 )
 
 var _ = Describe("Manifest", func() {
@@ -106,17 +110,24 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should parse the istio array", func() {
-				Expect(manifest.Istio).To(ConsistOf("istio-crds", "istio-release"))
+				Expect(manifest.Istio).To(ConsistOf(fixtureURL("manifest/istio-crds"), "file:///absolute/path/to/istio-release"))
 			})
 
 			It("should parse the Knative array", func() {
-				Expect(manifest.Knative).To(ConsistOf("serving-release", "eventing-release", "stub-bus-release"))
+				Expect(manifest.Knative).To(ConsistOf("https://serving-release", fixtureURL("manifest/eventing-release"), fixtureURL("manifest/stub-bus-release")))
 			})
 
 			It("should parse the Knative array", func() {
-				Expect(manifest.Namespace).To(ConsistOf("buildtemplate-release"))
+				Expect(manifest.Namespace).To(ConsistOf(fixtureURL("manifest/buildtemplate-release")))
 			})
 		})
 	})
 
 })
+
+func fixtureURL(fixturePath string) string {
+	wd, err := os.Getwd()
+	Expect(err).NotTo(HaveOccurred())
+	wdSegments := filepath.SplitList(wd)
+	return fmt.Sprintf("file://%s/fixtures/%s", path.Join(wdSegments...), fixturePath)
+}

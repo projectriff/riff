@@ -20,6 +20,9 @@ package core
 import (
 	"fmt"
 	"io/ioutil"
+	"net/url"
+	"os"
+	"path/filepath"
 
 	"github.com/ghodss/yaml"
 )
@@ -133,6 +136,11 @@ func NewManifest(path string) (*Manifest, error) {
 		return nil, err
 	}
 
+	err = convertManifestFilePathsToURLs(&m, filepath.Dir(path))
+	if err != nil {
+		return nil, err
+	}
+
 	return &m, nil
 }
 
@@ -148,4 +156,49 @@ func checkCompleteness(m Manifest) error {
 		return nil
 	}
 	return fmt.Errorf("Manifest is incomplete: %s array missing: %#v", omission, m)
+}
+
+func convertManifestFilePathsToURLs(m *Manifest, baseDir string) error {
+	for _, r := range []*[]string{&m.Istio, &m.Knative, &m.Namespace} {
+		i, err := convertFilePathsToURLs(*r, baseDir)
+		if err != nil {
+			return err
+		}
+		*r = i
+	}
+	return nil
+}
+
+func convertFilePathsToURLs(paths []string, baseDir string) ([]string, error) {
+	urls := []string{}
+	for _, path := range paths {
+		url, err := convertFilePathToURL(path, baseDir)
+		if err != nil {
+			return nil, err
+		}
+		urls = append(urls, url)
+	}
+	return urls, nil
+}
+
+func convertFilePathToURL(path string, baseDir string) (string, error) {
+	u, err := url.Parse(path)
+	if err != nil {
+		return "", err
+	}
+	if u.Scheme == "" {
+		u.Scheme = "file"
+		if !filepath.IsAbs(u.Path) {
+			if !filepath.IsAbs(baseDir) {
+				wd, err := os.Getwd()
+				if err != nil {
+					return "", err
+				}
+				baseDir = filepath.Join(wd, baseDir)
+			}
+			u.Path = fmt.Sprintf("%s/%s", baseDir, u.Path)
+		}
+		return u.String(), nil
+	}
+	return path, nil
 }

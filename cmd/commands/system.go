@@ -52,7 +52,8 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
     - https://path/to/stub-bus-release.yaml
     namespace:
     - https://path/to/riff-buildtemplate-release.yaml
-`,
+`+
+			"\nNote: file paths may be used instead of URLs in the manifest.",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			// TODO: implement support for global flags - for now don't allow their use
 			if cmd.Flags().Changed("kubeconfig") {
@@ -79,7 +80,7 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
 		},
 	}
 
-	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", "manifest of YAML files to be applied; can be a named manifest (stable or latest) or a file path of a manifest file")
+	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", "manifest of kubernetes resource files to be installed; can be a named manifest (stable or latest) or a file path of a manifest file")
 	command.Flags().BoolVarP(&options.NodePort, "node-port", "", false, "whether to use NodePort instead of LoadBalancer for ingress gateways")
 	command.Flags().BoolVarP(&options.Force, "force", "", false, "force the install of components without getting any prompts")
 

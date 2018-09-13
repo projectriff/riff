@@ -235,10 +235,10 @@ func resolveReleaseURLs(filename string) (url.URL, error) {
 	if err != nil {
 		return url.URL{}, err
 	}
-	if u.Scheme == "http" || u.Scheme == "https" {
+	if u.Scheme == "http" || u.Scheme == "https" || u.Scheme == "file" || u.Scheme == "" {
 		return *u, nil
 	}
-	return *u, fmt.Errorf("filename must be http or https, got %s", u.Scheme)
+	return *u, fmt.Errorf("filename must be http, https, or file URL or a file path, found scheme %s", u.Scheme)
 }
 
 func loadRelease(release string) ([]byte, error) {
@@ -246,16 +246,30 @@ func loadRelease(release string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := http.Get(releaseUrl.String())
-	if err != nil {
-		return nil, err
+
+	var content []byte
+	if releaseUrl.Scheme == "" {
+		content, err = ioutil.ReadFile(releaseUrl.Path)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// Support file scheme. See the docs for http.NewFileTransport.
+		t := &http.Transport{}
+		t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+		c := &http.Client{Transport: t}
+
+		resp, err := c.Get(releaseUrl.String())
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		content, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
 	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return body, nil
+	return content, nil
 }
 
 func waitForIstioComponents(kc *kubectlClient) error {

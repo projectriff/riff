@@ -5,6 +5,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 )
@@ -33,20 +35,20 @@ var _ = Describe("RelocateImages", func() {
 				It("should write the relocated manifest to the output directory", func() {
 					Expect(err).NotTo(HaveOccurred())
 
-					// manifest should be unchanged since it contains just a filename
 					actualManifest := readManifest(filepath.Join(options.Output, "manifest.yaml"))
-					expectedManifest := readManifest("./fixtures/image_relocation/manifest.yaml")
-					Expect(actualManifest).To(Equal(expectedManifest))
+					Expect(len(actualManifest.Istio)).To(Equal(1))
 
-					actualYAML := readFileOk(filepath.Join(options.Output, "istio.yaml"))
+					actualYAML := readFileOk(filePath(actualManifest.Istio[0]))
 					expectedYAML := readFileOk("./fixtures/image_relocation/istio_relocated.yaml")
 					Expect(actualYAML).To(Equal(expectedYAML))
 
-					actualYAML = readFileOk(filepath.Join(options.Output, "release.yaml"))
+					Expect(len(actualManifest.Knative)).To(Equal(1))
+					actualYAML = readFileOk(filePath(actualManifest.Knative[0]))
 					expectedYAML = readFileOk("./fixtures/image_relocation/release_relocated.yaml")
 					Expect(actualYAML).To(Equal(expectedYAML))
 
-					actualYAML = readFileOk(filepath.Join(options.Output, "build.yaml"))
+					Expect(len(actualManifest.Namespace)).To(Equal(1))
+					actualYAML = readFileOk(filePath(actualManifest.Namespace[0]))
 					expectedYAML = readFileOk("./fixtures/image_relocation/build_relocated.yaml")
 					Expect(actualYAML).To(Equal(expectedYAML))
 				})
@@ -106,24 +108,22 @@ var _ = Describe("RelocateImages", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				actualManifest := readManifest(filepath.Join(options.Output, "manifest.yaml"))
-				expectedManifest := readManifest("./fixtures/image_relocation/colliding/manifest_with_collisions_relocated.yaml")
-				Expect(actualManifest).To(Equal(expectedManifest))
 
 				istios := actualManifest.Istio
 				Expect(len(istios)).To(Equal(1))
-				actualIstio := readFileOk(filepath.Join(options.Output, istios[0]))
+				actualIstio := readURLOk( istios[0])
 				expectedIstio := readFileOk("./fixtures/image_relocation/istio_relocated.yaml")
 				Expect(actualIstio).To(Equal(expectedIstio))
 
 				knatives := actualManifest.Knative
 				Expect(len(knatives)).To(Equal(1))
-				actualBuild1 := readFileOk(filepath.Join(options.Output, knatives[0]))
+				actualBuild1 := readURLOk(knatives[0])
 				expectedBuild := readFileOk("./fixtures/image_relocation/build_relocated.yaml")
 				Expect(actualBuild1).To(Equal(expectedBuild))
 
 				namespaces := actualManifest.Namespace
 				Expect(len(namespaces)).To(Equal(1))
-				actualBuild2 := readFileOk(filepath.Join(options.Output, namespaces[0]))
+				actualBuild2 := readURLOk(namespaces[0])
 				Expect(actualBuild2).To(Equal(expectedBuild))
 			})
 
@@ -229,4 +229,25 @@ func readFileOk(path string) string {
 	content, err := ioutil.ReadFile(path)
 	Expect(err).NotTo(HaveOccurred())
 	return string(content)
+}
+
+func readURLOk(url string) string {
+	t := &http.Transport{}
+	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+	c := &http.Client{Transport: t}
+
+	resp, err := c.Get(url)
+	Expect(err).NotTo(HaveOccurred())
+	defer resp.Body.Close()
+
+	content, err := ioutil.ReadAll(resp.Body)
+	Expect(err).NotTo(HaveOccurred())
+
+	return string(content)
+}
+
+func filePath(u string) string {
+	parsed, err := url.Parse(u)
+	Expect(err).NotTo(HaveOccurred())
+	return parsed.Path
 }
