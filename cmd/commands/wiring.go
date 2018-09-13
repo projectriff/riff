@@ -18,8 +18,11 @@ package commands
 
 import (
 	"fmt"
+	"os"
 	"os/user"
 	"strings"
+
+	"github.com/projectriff/riff/pkg/docker"
 
 	eventing "github.com/knative/eventing/pkg/client/clientset/versioned"
 	serving "github.com/knative/serving/pkg/client/clientset/versioned"
@@ -82,6 +85,8 @@ func CreateAndWireRootCommand() *cobra.Command {
 	masterURL := ""
 	var client core.Client
 	var kc core.KubectlClient
+	var dockerClient docker.Docker
+	var imageClient core.ImageClient
 
 	rootCmd := &cobra.Command{
 		Use:   "riff",
@@ -101,6 +106,8 @@ See https://projectriff.io and https://github.com/knative/docs`,
 			}
 			client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet)
 			kc = core.NewKubectlClient(kubeClientSet)
+			dockerClient = docker.RealDocker(os.Stdin, cmd.OutOrStdout(), cmd.OutOrStderr())
+			imageClient = core.NewImageClient(dockerClient)
 			return nil
 		},
 	}
@@ -137,6 +144,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	image := Image()
 	image.AddCommand(
 		ImageRelocate(&client),
+		ImagePush(&imageClient),
 	)
 
 	namespace := Namespace()
