@@ -66,12 +66,20 @@ func createImageMapper(options RelocateImagesOptions) (*imageMapper, error) {
 		return nil, err
 	}
 
-	imageMapper, err := newImageMapper(options.Registry, options.RegistryUser, imageManifest.Images)
+	imageMapper, err := newImageMapper(options.Registry, options.RegistryUser, keys(imageManifest.Images))
 	if err != nil {
 		return nil, err
 	}
 
 	return imageMapper, nil
+}
+
+func keys(m map[string]string) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }
 
 func relocateFile(yamlFile string, mapper *imageMapper, cwd string, outputPath string, strat uriFlattener) (string, error) {

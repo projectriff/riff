@@ -29,7 +29,7 @@ const imageManifestVersion_0_1 = "0.1"
 // ImageManifest defines the image names found in YAML files of system components.
 type ImageManifest struct {
 	ManifestVersion string `json:"manifestVersion"`
-	Images          []string
+	Images          map[string]string
 }
 
 func NewImageManifest(path string) (*ImageManifest, error) {
@@ -49,7 +49,7 @@ func NewImageManifest(path string) (*ImageManifest, error) {
 	}
 
 	if m.Images == nil {
-		return nil, fmt.Errorf("image manifest is incomplete: images array is missing: %#v", m)
+		return nil, fmt.Errorf("image manifest is incomplete: images map is missing: %#v", m)
 	}
 
 	return &m, nil

@@ -48,15 +48,15 @@ func ImageRelocate(c *core.Client) *cobra.Command {
 			"directory to contain the relocated manifest and kubernetes configuration files.\n" +
 
 			"\nSpecify the registry hostname using the `--registry` flag, the user owning the images using the `--registry-user` flag, " +
-			"and a complete list of the images to be mapped using the `--images` flag. The `--images` flag contains the path of an " +
+			"and the images to be mapped using the `--images` flag. The `--images` flag contains the path of an " +
 			"image manifest file with contents of the following form:\n" +
 			`
     manifestVersion: 0.1
     images:
     ...
-    - docker.io/istio/proxyv2:1.0.1
+      "docker.io/istio/proxyv2:1.0.1": "sha256:7ae1462913665ac77389087f43d3d3dda86b4a0883b1cafcd105a4eeb648498f"
     ...
-    - gcr.io/knative-releases/github.com/knative/serving/cmd/autoscaler@sha256:76222399addc02454db9837ea3ff54bae29849168586051a9d0180daa2c1a805
+      "gcr.io/knative-releases/github.com/knative/serving/cmd/autoscaler@sha256:76222399addc02454db9837ea3ff54bae29849168586051a9d0180daa2c1a805": "sha256:76222399addc02454db9837ea3ff54bae29849168586051a9d0180daa2c1a805"
     ... 
 
 `,

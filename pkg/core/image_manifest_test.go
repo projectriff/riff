@@ -66,13 +66,13 @@ var _ = Describe("ImageManifest", func() {
 			})
 		})
 
-		Context("when the image manifest does not specify an image array", func() {
+		Context("when the image manifest does not specify an image map", func() {
 			BeforeEach(func() {
 				manifestPath = "./fixtures/image_manifest/noimages.yaml"
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(HavePrefix("image manifest is incomplete: images array is missing: ")))
+				Expect(err).To(MatchError(HavePrefix("image manifest is incomplete: images map is missing: ")))
 			})
 		})
 
@@ -86,9 +86,9 @@ var _ = Describe("ImageManifest", func() {
 			})
 
 			It("should parse the images array", func() {
-				Expect(manifest.Images).To(ConsistOf("gcr.io/cf-spring-funkytown/github.com/knative/serving/cmd/queue",
-					"istio/sidecar_injector",
-					"gcr.io/knative-releases/github.com/knative/eventing/cmd/controller@sha256:367a7a22bc689b794c38fc488b8774a94515727a2c12f2347622e6c40fe9c1e8"))
+				Expect(manifest.Images).To(Equal(map[string]string{"gcr.io/cf-spring-funkytown/github.com/knative/serving/cmd/queue":"",
+					"istio/sidecar_injector":"0123",
+					"gcr.io/knative-releases/github.com/knative/eventing/cmd/controller@sha256:367a7a22bc689b794c38fc488b8774a94515727a2c12f2347622e6c40fe9c1e8":"456"}))
 			})
 		})
 	})
