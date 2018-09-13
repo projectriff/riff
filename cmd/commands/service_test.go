@@ -375,6 +375,13 @@ var _ = Describe("The riff service subscribe command", func() {
 			mockClient = nil
 			ss = commands.ServiceSubscribe(&mockClient)
 		})
+
+		It("should be documented", func() {
+			Expect(ss.Name()).To(Equal("subscribe"))
+			Expect(ss.Short).NotTo(BeEmpty())
+			Expect(ss.Example).NotTo(BeEmpty())
+		})
+
 		It("should fail with no args", func() {
 			ss.SetArgs([]string{})
 			err := ss.Execute()
@@ -526,4 +533,84 @@ var _ = Describe("The riff service delete command", func() {
 		})
 
 	})
+})
+
+var _ = Describe("The riff service unsubscribe command", func() {
+
+	var (
+		client             core.Client
+		clientMock         *mocks.Client
+		unsubscribeCommand *cobra.Command
+	)
+
+	BeforeEach(func() {
+		client = new(mocks.Client)
+		clientMock = client.(*mocks.Client)
+		unsubscribeCommand = commands.ServiceUnsubscribe(&client)
+	})
+
+	AfterEach(func() {
+		clientMock.AssertExpectations(GinkgoT())
+	})
+
+	It("should be documented", func() {
+		Expect(unsubscribeCommand.Name()).To(Equal("unsubscribe"))
+		Expect(unsubscribeCommand.Short).NotTo(BeEmpty())
+		Expect(unsubscribeCommand.Example).NotTo(BeEmpty())
+	})
+
+	Context("when given wrong args or flags", func() {
+		It("should fail if the number of arguments is incorrect", func() {
+			err := unsubscribeCommand.Execute()
+
+			Expect(err).To(MatchError(Equal("accepts 1 arg(s), received 0")))
+		})
+
+		It("should fail if the required argument is invalid", func() {
+			unsubscribeCommand.SetArgs([]string{"&@not.a.dns=label!..~"})
+			err := unsubscribeCommand.Execute()
+
+			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
+		})
+	})
+
+	Context("when given valid args and flags", func() {
+		It("should unsubscribe based on the subscription name", func() {
+			stdout := &strings.Builder{}
+			unsubscribeCommand.SetOutput(stdout)
+			unsubscribeCommand.SetArgs([]string{"subscription-name"})
+			clientMock.On("DeleteSubscription", core.DeleteSubscriptionOptions{
+				Name: "subscription-name",
+			}).Return(nil)
+
+			err := unsubscribeCommand.Execute()
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(stdout.String()).To(Equal("unsubscribe completed successfully\n"))
+		})
+
+		It("should unsubscribe based on the subscription name and namespace", func() {
+			stdout := &strings.Builder{}
+			unsubscribeCommand.SetOutput(stdout)
+			unsubscribeCommand.SetArgs([]string{"subscription-name", "--namespace", "ns"})
+			options := core.DeleteSubscriptionOptions{Name: "subscription-name",}
+			options.Namespace = "ns"
+			clientMock.On("DeleteSubscription", options).Return(nil)
+
+			err := unsubscribeCommand.Execute()
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(stdout.String()).To(Equal("unsubscribe completed successfully\n"))
+		})
+
+		It("should propagate the client error", func() {
+			unsubscribeCommand.SetArgs([]string{"subscription-name"})
+			clientMock.On("DeleteSubscription", mock.Anything).Return(fmt.Errorf("client error"))
+
+			err := unsubscribeCommand.Execute()
+
+			Expect(err).To(MatchError(Equal("client error")))
+		})
+	})
+
 })

@@ -1,10 +1,10 @@
 ## riff service subscribe
 
-Subscribe a service to an existing input channel
+Subscribe a service to an existing input and an optional output channel
 
 ### Synopsis
 
-Subscribe a service to an existing input channel
+Subscribe a service to an existing input and an optional output channel
 
 ```
 riff service subscribe [flags]

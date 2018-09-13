@@ -31,6 +31,10 @@ type CreateSubscriptionOptions struct {
 	ReplyTo    string
 	DryRun     bool
 }
+type DeleteSubscriptionOptions struct {
+	Namespaced
+	Name string
+}
 
 func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha1.Subscription, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
@@ -60,4 +64,9 @@ func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha
 		return &s, nil
 	}
 
+}
+
+func (c *client) DeleteSubscription(options DeleteSubscriptionOptions) error {
+	namespace := c.explicitOrConfigNamespace(options.Namespaced)
+	return c.eventing.ChannelsV1alpha1().Subscriptions(namespace).Delete(options.Name, nil)
 }

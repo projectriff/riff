@@ -34,6 +34,7 @@ type Client interface {
 	BuildFunction(options BuildFunctionOptions, log io.Writer) error
 
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
+	DeleteSubscription(options DeleteSubscriptionOptions) error
 
 	ListChannels(options ListChannelOptions) (*eventing.ChannelList, error)
 	CreateChannel(options CreateChannelOptions) (*eventing.Channel, error)
