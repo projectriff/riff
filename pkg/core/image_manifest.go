@@ -26,10 +26,16 @@ import (
 
 const imageManifestVersion_0_1 = "0.1"
 
+// imageName contains a full image reference in the form [host]/repository/name/parts:tag
+type imageName string
+
+// imageDigest contains a digest of the actual image contents
+type imageDigest string
+
 // ImageManifest defines the image names found in YAML files of system components.
 type ImageManifest struct {
 	ManifestVersion string `json:"manifestVersion"`
-	Images          map[string]string
+	Images          map[imageName]imageDigest
 }
 
 func NewImageManifest(path string) (*ImageManifest, error) {

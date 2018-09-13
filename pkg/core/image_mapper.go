@@ -33,7 +33,7 @@ type imageMapper struct {
 	replacer *strings.Replacer
 }
 
-func newImageMapper(mappedHost string, mappedUser string, images []string) (*imageMapper, error) {
+func newImageMapper(mappedHost string, mappedUser string, images []imageName) (*imageMapper, error) {
 	if err := containsAny(mappedHost, "/", `"`, " "); err != nil {
 		return nil, fmt.Errorf("invalid registry hostname: %v", err)
 	}
@@ -43,7 +43,7 @@ func newImageMapper(mappedHost string, mappedUser string, images []string) (*ima
 
 	replacements := []string{}
 	for _, img := range images {
-		imgHost, imgUser, imgRepoPath, err := parseImage(img)
+		imgHost, imgUser, imgRepoPath, err := img.parseParts()
 		if err != nil {
 			return nil, err
 		}
@@ -78,12 +78,12 @@ func containsAny(s string, items ...string) error {
 	return nil
 }
 
-func parseImage(img string) (string, string, string, error) {
-	if err := containsAny(img, `"`, " "); err != nil {
+func (img imageName) parseParts() (host string, user string, name string, err error) {
+	if err := containsAny(string(img), `"`, " "); err != nil {
 		return "", "", "", fmt.Errorf("invalid image: %v", err)
 	}
 
-	s := strings.SplitN(img, "/", 3)
+	s := strings.SplitN(string(img), "/", 3)
 	switch len(s) {
 	case 0:
 		panic("SplitN produced empty array")
@@ -93,7 +93,7 @@ func parseImage(img string) (string, string, string, error) {
 		return dockerHubHost, s[0], s[1], nil
 	default:
 		// Normalise docker hub hosts to a single form
-		host := s[0]
+		host = s[0]
 		if host == fullDockerHubHost {
 			host = dockerHubHost
 		}

@@ -23,13 +23,14 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/ghodss/yaml"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
+
+	"github.com/ghodss/yaml"
 )
 
 const (
@@ -74,8 +75,8 @@ func createImageMapper(options RelocateImagesOptions) (*imageMapper, error) {
 	return imageMapper, nil
 }
 
-func keys(m map[string]string) []string {
-	keys := make([]string, 0, len(m))
+func keys(m map[imageName]imageDigest) []imageName {
+	keys := make([]imageName, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
 	}
@@ -125,7 +126,7 @@ func downloadFile(url string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-type uriFlattener func(string) string;
+type uriFlattener func(string) string
 
 func baseFlattener(input string) string {
 	return filepath.Base(input)
