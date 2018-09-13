@@ -20,27 +20,27 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/boz/go-logutil"
 	"github.com/boz/kail"
 	"github.com/boz/kcache/types/pod"
 	build "github.com/knative/build/pkg/apis/build/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	"io"
-	"io/ioutil"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"log"
-	"strconv"
-	"strings"
-	"time"
 )
 
 const functionLabel = "riff.projectriff.io/function"
 const buildAnnotation = "riff.projectriff.io/nonce"
 
 type CreateFunctionOptions struct {
-	CreateServiceOptions
+	CreateOrReviseServiceOptions
 
 	GitRepo     string
 	GitRevision string
@@ -53,7 +53,7 @@ type CreateFunctionOptions struct {
 func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
 
-	s, err := newService(options.CreateServiceOptions)
+	s, err := newService(options.CreateOrReviseServiceOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +235,7 @@ func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int6
 		default:
 		}
 		time.Sleep(500 * time.Millisecond)
-		service, err := c.service( Namespaced{namespace}, name)
+		service, err := c.service(Namespaced{namespace}, name)
 		if err != nil {
 			return fmt.Errorf("waitForSuccessOrFailure failed to obtain service: %v", err)
 		}
@@ -361,17 +361,7 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 		return errors.New(fmt.Sprintf("the service named \"%s\" is not a riff function", options.Name))
 	}
 
-	annotations := s.Spec.RunLatest.Configuration.RevisionTemplate.Annotations
-	if annotations == nil {
-		annotations = map[string]string{}
-	}
-	build := annotations[buildAnnotation]
-	i, err := strconv.Atoi(build)
-	if err != nil {
-		i = 0
-	}
-	annotations[buildAnnotation] = strconv.Itoa(i + 1)
-	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
+	c.bumpNonceAnnotation(s)
 
 	_, err = c.serving.ServingV1alpha1().Services(s.Namespace).Update(s)
 	if err != nil {
@@ -383,7 +373,7 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 		errChan := make(chan error)
 		var (
 			nextGen int64
-			err error
+			err     error
 		)
 		for i := 0; i < 10; i++ {
 			if i >= 10 {
