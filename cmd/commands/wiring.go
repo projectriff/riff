@@ -150,6 +150,11 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		SystemUninstall(&kc),
 	)
 
+	subscription := Subscription()
+	subscription.AddCommand(
+		SubscriptionCreate(&client),
+	)
+
 	rootCmd.AddCommand(
 		function,
 		service,
@@ -157,6 +162,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		image,
 		namespace,
 		system,
+		subscription,
 		Docs(rootCmd),
 		Version(),
 		Completion(rootCmd),
