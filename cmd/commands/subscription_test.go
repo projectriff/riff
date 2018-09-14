@@ -164,7 +164,7 @@ var _ = Describe("The riff subscription create command", func() {
 
 			err := createCommand.Execute()
 
-			Expect(err).To(MatchError("client failure"))
+			Expect(err).To(MatchError(expectedError))
 		})
 	})
 

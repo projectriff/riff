@@ -19,7 +19,6 @@ package commands
 import (
 	"fmt"
 
-	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
 )
@@ -43,11 +42,7 @@ func Function() *cobra.Command {
 }
 
 func FunctionCreate(fcTool *core.Client) *cobra.Command {
-
-	createInputChannelOptions := core.CreateChannelOptions{}
-	createOutputChannelOptions := core.CreateChannelOptions{}
 	createFunctionOptions := core.CreateFunctionOptions{}
-	createSubscriptionOptions := core.CreateSubscriptionOptions{}
 
 	invokers := map[string]string{
 		"command": "https://github.com/projectriff/command-function-invoker/raw/v0.0.7/command-invoker.yaml",
@@ -57,7 +52,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new function resource, with optional input and output channels",
+		Short: "Create a new function resource",
 		Long: "Create a new function resource from the content of the provided Git repo/revision.\n" +
 			"\nThe INVOKER arg defines the language invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function." +
 			"\nFrom then on you can use the sub-commands for the `service` command to interact with the service created for the function.\n\n" +
@@ -66,21 +61,13 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 ` + envFromLongDesc + `
 `,
 		Example: `  riff function create node square --git-repo https://github.com/acme/square --image acme/square --namespace joseph-ns
-  riff function create java tweets-logger --git-repo https://github.com/acme/tweets --image acme/tweets-logger:1.0.0 --input tweets --bus kafka`,
+  riff function create java tweets-logger --git-repo https://github.com/acme/tweets --image acme/tweets-logger:1.0.0`,
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(functionCreateNumberOfArgs),
 			AtPosition(functionCreateInvokerIndex, ValidName()),
 			AtPosition(functionCreateFunctionNameIndex, ValidName()),
 		),
-		PreRunE: FlagsValidatorAsCobraRunE(
-			FlagsValidationConjunction(
-				FlagsDependency(Set("input"), exactlyOneOfBusOrClusterBus),
-				FlagsDependency(NotSet("input"), NoneOf("bus", "cluster-bus")),
-				FlagsDependency(NotSet("input"), NoneOf("output")),
-			),
-		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			fnName := args[functionCreateFunctionNameIndex]
 			invoker := args[functionCreateInvokerIndex]
 			invokerURL, exists := invokers[invoker]
@@ -95,42 +82,10 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 				return err
 			}
 
-			var c *v1alpha1.Channel
-			var subscr *v1alpha1.Subscription
-			if createInputChannelOptions.Name != "" {
-				c, err = (*fcTool).CreateChannel(createInputChannelOptions)
-				if err != nil {
-					return err
-				}
-
-				if createOutputChannelOptions.Name != "" {
-					c, err = (*fcTool).CreateChannel(createOutputChannelOptions)
-					if err != nil {
-						return err
-					}
-				}
-				createSubscriptionOptions.Name = subscriptionNameFromService(fnName)
-				createSubscriptionOptions.Subscriber = subscriberNameFromService(fnName)
-				subscr, err = (*fcTool).CreateSubscription(createSubscriptionOptions)
-				if err != nil {
-					return err
-				}
-			}
-
 			if createFunctionOptions.DryRun {
 				marshaller := NewMarshaller(cmd.OutOrStdout())
 				if err = marshaller.Marshal(f); err != nil {
 					return err
-				}
-				if c != nil {
-					if err = marshaller.Marshal(c); err != nil {
-						return err
-					}
-				}
-				if subscr != nil {
-					if err = marshaller.Marshal(subscr); err != nil {
-						return err
-					}
 				}
 			} else {
 				printSuccessfulCompletion(cmd)
@@ -152,54 +107,16 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	command.Flags().VarP(
 		BroadcastStringValue("",
 			&createFunctionOptions.Namespace,
-			&createInputChannelOptions.Namespace,
-			&createOutputChannelOptions.Namespace,
-			&createSubscriptionOptions.Namespace,
 		),
 		"namespace", "n", "the `namespace` of the subscription, channel, and function",
-	)
-
-	command.Flags().VarP(
-		BroadcastStringValue("",
-			&createInputChannelOptions.Name,
-			&createSubscriptionOptions.Channel,
-		),
-		"input", "i", "name of the function's input `channel`, if any",
-	)
-
-	command.Flags().VarP(
-		BroadcastStringValue("",
-			&createOutputChannelOptions.Name,
-			&createSubscriptionOptions.ReplyTo,
-		),
-		"output", "o", "name of the function's output `channel`, if any",
 	)
 
 	command.Flags().VarPF(
 		BroadcastBoolValue(false,
 			&createFunctionOptions.DryRun,
-			&createInputChannelOptions.DryRun,
-			&createOutputChannelOptions.DryRun,
-			&createSubscriptionOptions.DryRun,
 		),
 		"dry-run", "", dryRunUsage,
 	).NoOptDefVal = "true"
-
-	command.Flags().Var(
-		BroadcastStringValue("",
-			&createInputChannelOptions.Bus,
-			&createOutputChannelOptions.Bus,
-		),
-		"bus", busUsage,
-	)
-
-	command.Flags().Var(
-		BroadcastStringValue("",
-			&createInputChannelOptions.ClusterBus,
-			&createOutputChannelOptions.ClusterBus,
-		),
-		"cluster-bus", clusterBusUsage,
-	)
 
 	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
 	command.MarkFlagRequired("image")
