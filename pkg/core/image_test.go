@@ -54,9 +54,8 @@ var _ = Describe("RelocateImages", func() {
 				It("should write a relocated image manifest to the output directory", func() {
 				    Expect(err).NotTo(HaveOccurred())
 
-				    actualImageManifest := readImageManifest(filepath.Join(options.Output, "image_manifest.yaml"))
-				    // FIXME: standard name for image manifest
-					expectedImageManifest := readImageManifest("./fixtures/image_relocation/image_manifest_relocated.yaml")
+				    actualImageManifest := readImageManifest(filepath.Join(options.Output, "image-manifest.yaml"))
+					expectedImageManifest := readImageManifest("./fixtures/image_relocation/image-manifest-relocated.yaml")
 					Expect(actualImageManifest).To(Equal(expectedImageManifest))
 				})
 
@@ -73,7 +72,7 @@ var _ = Describe("RelocateImages", func() {
 
 			BeforeEach(func() {
 				options.Manifest = "./fixtures/image_relocation/manifest.yaml"
-				options.Images = "./fixtures/image_relocation/image_manifest.yaml"
+				options.Images = "./fixtures/image_relocation/image-manifest.yaml"
 			})
 
 			Context("when the output directory already exists", func() {
@@ -114,7 +113,7 @@ var _ = Describe("RelocateImages", func() {
 		Context("when there are collisions in input file names", func() {
 			BeforeEach(func() {
 				options.Manifest = "./fixtures/image_relocation/colliding/manifest.yaml"
-				options.Images = "./fixtures/image_relocation/image_manifest.yaml"
+				options.Images = "./fixtures/image_relocation/image-manifest.yaml"
 
 				dir, err := ioutil.TempDir("", "image-relocation-test")
 				Expect(err).NotTo(HaveOccurred())
@@ -170,7 +169,7 @@ var _ = Describe("RelocateImages", func() {
 		Context("when the resource file is specified using a file path", func() {
 			BeforeEach(func() {
 				options.SingleFile = "./fixtures/image_relocation/release.yaml"
-				options.Images = "./fixtures/image_relocation/image_manifest.yaml"
+				options.Images = "./fixtures/image_relocation/image-manifest.yaml"
 			})
 
 			Context("when the output path is a directory", func() {
@@ -211,7 +210,7 @@ var _ = Describe("RelocateImages", func() {
 				cwd, err := os.Getwd()
 				Expect(err).NotTo(HaveOccurred())
 				options.SingleFile = fmt.Sprintf("file://%s/fixtures/image_relocation/release.yaml", cwd) // local URL so test can run without network
-				options.Images = "./fixtures/image_relocation/image_manifest.yaml"
+				options.Images = "./fixtures/image_relocation/image-manifest.yaml"
 
 				dir, err := ioutil.TempDir("", "image-relocation-test")
 				Expect(err).NotTo(HaveOccurred())
@@ -240,7 +239,7 @@ var _ = Describe("RelocateImages", func() {
 	    Context("when there are no binary images", func() {
 			BeforeEach(func() {
 				options.Manifest = "./fixtures/image_relocation/manifest.yaml"
-				options.Images = "./fixtures/image_relocation/no_binary_images/image_manifest.yaml"
+				options.Images = "./fixtures/image_relocation/no_binary_images/image-manifest.yaml"
 
 				dir, err := ioutil.TempDir("", "image-relocation-test")
 				Expect(err).NotTo(HaveOccurred())

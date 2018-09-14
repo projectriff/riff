@@ -236,7 +236,7 @@ func relocateImageManifest(imageManifestPath string, mapper *imageMapper, output
 		Images:          relocatedImages,
 	}
 
-	outputImageManifestPath := filepath.Join(outputPath, "image_manifest.yaml")
+	outputImageManifestPath := filepath.Join(outputPath, "image-manifest.yaml")
 	outputImageManifestBytes, err := yaml.Marshal(&relocatedImageManifest)
 	if err != nil {
 		return err
