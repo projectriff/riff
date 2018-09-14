@@ -10,9 +10,9 @@ images:
   "reg/user/github.com/knative/serving/cmd/queue@sha256:99c841aa72c2928d1bf333348a848b5afb182715a2a0441da6282c86d4be807e":
   "reg/user/fluentd-elasticsearch:v2.0.4":
   "reg/user/github.com/knative/serving/cmd/controller@sha256:28db335f18cbd2a015fd218b9c7ce30b4366898fa3728a7f6dab6537991de028":
-  "reg/user/github.com/knative/serving/cmd/webhook@sha256:50ea89c48f8890fbe0cee336fc5cbdadcfe6884afbe5977db5d66892095b397d":
+  "reg/user/github.com/knative/serving/cmd/webhook@sha256:50ea89c48f8890fbe0cee336fc5cbdadcfe6884afbe5977db5d66892095b397d": "testshax"
   "reg/user/proxy_init:1.0.1":
-  "reg/user/proxyv2:1.0.1":
+  "reg/user/proxyv2:1.0.1": "testshay"
   "reg/user/hyperkube:v1.7.6_coreos.0":
   "reg/user/statsd-exporter:v0.6.0":
   "reg/user/galley:1.0.1":
