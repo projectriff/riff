@@ -19,10 +19,16 @@ var _ = Describe("`riff` root command", func() {
 			Expect(commandNamesOf(rootCommand.Commands())).To(ContainElement("subscription"))
 		})
 
-		It("should define a create subcommand", func() {
+		It("should define a `create` subcommand", func() {
 			serviceCmd := matchSubcommandByName(rootCommand, "subscription")
 
 			Expect(commandNamesOf(serviceCmd.Commands())).To(ContainElement("create"))
+		})
+
+		It("should define a `delete` subcommand", func() {
+			serviceCmd := matchSubcommandByName(rootCommand, "subscription")
+
+			Expect(commandNamesOf(serviceCmd.Commands())).To(ContainElement("delete"))
 		})
 	})
 

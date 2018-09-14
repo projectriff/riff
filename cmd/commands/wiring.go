@@ -160,6 +160,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	subscription := Subscription()
 	subscription.AddCommand(
 		SubscriptionCreate(&client),
+		SubscriptionDelete(&client),
 	)
 
 	rootCmd.AddCommand(

@@ -1,6 +1,7 @@
 package commands_test
 
 import (
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
@@ -8,6 +9,7 @@ import (
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/core/mocks"
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/mock"
 	"strings"
 )
 
@@ -165,6 +167,87 @@ var _ = Describe("The riff subscription create command", func() {
 			err := createCommand.Execute()
 
 			Expect(err).To(MatchError(expectedError))
+		})
+	})
+
+})
+
+
+var _ = Describe("The riff subscription delete command", func() {
+
+	var (
+		client        core.Client
+		clientMock    *mocks.Client
+		deleteCommand *cobra.Command
+	)
+
+	BeforeEach(func() {
+		client = new(mocks.Client)
+		clientMock = client.(*mocks.Client)
+		deleteCommand = commands.SubscriptionDelete(&client)
+	})
+
+	AfterEach(func() {
+		clientMock.AssertExpectations(GinkgoT())
+	})
+
+	It("should be documented", func() {
+		Expect(deleteCommand.Name()).To(Equal("delete"))
+		Expect(deleteCommand.Short).NotTo(BeEmpty())
+		Expect(deleteCommand.Example).NotTo(BeEmpty())
+	})
+
+	Context("when given wrong args or flags", func() {
+		It("should fail if the number of arguments is incorrect", func() {
+			err := deleteCommand.Execute()
+
+			Expect(err).To(MatchError(Equal("accepts 1 arg(s), received 0")))
+		})
+
+		It("should fail if the required argument is invalid", func() {
+			deleteCommand.SetArgs([]string{"@@invalid@@"})
+			err := deleteCommand.Execute()
+
+			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
+		})
+	})
+
+	Context("when given valid args and flags", func() {
+		It("should unsubscribe based on the subscription name", func() {
+			stdout := &strings.Builder{}
+			deleteCommand.SetOutput(stdout)
+			deleteCommand.SetArgs([]string{"subscription-name"})
+			clientMock.On("DeleteSubscription", core.DeleteSubscriptionOptions{
+				Name: "subscription-name",
+			}).Return(nil)
+
+			err := deleteCommand.Execute()
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(stdout.String()).To(Equal("delete completed successfully\n"))
+		})
+
+		It("should unsubscribe based on the subscription name and namespace", func() {
+			stdout := &strings.Builder{}
+			deleteCommand.SetOutput(stdout)
+			deleteCommand.SetArgs([]string{"subscription-name", "--namespace", "ns"})
+			options := core.DeleteSubscriptionOptions{Name: "subscription-name",}
+			options.Namespace = "ns"
+			clientMock.On("DeleteSubscription", options).Return(nil)
+
+			err := deleteCommand.Execute()
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(stdout.String()).To(Equal("delete completed successfully\n"))
+		})
+
+		It("should propagate the client error", func() {
+			deleteCommand.SetArgs([]string{"subscription-name"})
+			clientMock.On("DeleteSubscription", mock.Anything).Return(fmt.Errorf("client error"))
+
+			err := deleteCommand.Execute()
+
+			Expect(err).To(MatchError(Equal("client error")))
 		})
 	})
 

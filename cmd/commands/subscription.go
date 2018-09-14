@@ -9,6 +9,10 @@ const (
 	subscriptionCreateNameIndex = iota
 	subscriptionCreateMaxNumberOfArgs
 )
+const (
+	subscriptionDeleteNameIndex = iota
+	subscriptionDeleteNumberOfArgs
+)
 
 func Subscription() *Command {
 	return &Command{
@@ -46,6 +50,35 @@ func SubscriptionCreate(client *core.Client) *Command {
 
 	LabelArgs(command, "SUBSCRIPTION_NAME")
 	defineFlags(command, &options)
+	return command
+}
+
+
+func SubscriptionDelete(client *core.Client) *Command {
+	deleteOptions := core.DeleteSubscriptionOptions{}
+
+	command := &Command{
+		Use:     "delete",
+		Short:   "Delete an existing subscription",
+		Example: "  riff subscription delete my-subscription --namespace joseph-ns",
+		Args: ArgValidationConjunction(
+			ExactArgs(subscriptionDeleteNumberOfArgs),
+			AtPosition(subscriptionDeleteNameIndex, ValidName()),
+		),
+		RunE: func(cmd *Command, args []string) error {
+			deleteOptions.Name = args[subscriptionDeleteNameIndex]
+			if err := (*client).DeleteSubscription(deleteOptions); err != nil {
+				return err
+			}
+			PrintSuccessfulCompletion(cmd)
+			return nil
+		},
+	}
+
+	LabelArgs(command, "SUBSCRIPTION_NAME")
+	flags := command.Flags()
+	flags.StringVarP(&deleteOptions.Namespace, "namespace", "n", "", "the namespace of the subscription")
+
 	return command
 }
 
