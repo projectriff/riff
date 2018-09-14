@@ -22,7 +22,7 @@ Interact with service (as in `service.serving.knative.dev`) related resources.
 ### SEE ALSO
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
-* [riff service create](riff_service_create.md)	 - Create a new service resource, with optional input binding
+* [riff service create](riff_service_create.md)	 - Create a new service resource
 * [riff service delete](riff_service_delete.md)	 - Delete an existing service
 * [riff service invoke](riff_service_invoke.md)	 - Invoke a service
 * [riff service list](riff_service_list.md)	 - List service resources

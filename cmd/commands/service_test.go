@@ -64,16 +64,6 @@ var _ = Describe("The riff service create command", func() {
 			err := cc.Execute()
 			Expect(err).To(MatchError(`required flag(s) "image" not set`))
 		})
-		It("should fail when both bus and cluster-bus are set", func() {
-			cc.SetArgs([]string{"my-service", "--bus", "b", "--cluster-bus", "cb", "--input", "c"})
-			err := cc.Execute()
-			Expect(err).To(MatchError("when --input is set, at most one of --bus, --cluster-bus must be set"))
-		})
-		It("should fail when neither bus or cluster-bus is set", func() {
-			cc.SetArgs([]string{"my-service", "--input", "c"})
-			err := cc.Execute()
-			Expect(err).To(MatchError("when --input is set, at least one of --bus, --cluster-bus must be set"))
-		})
 	})
 
 	Context("when given suitable args and flags", func() {
@@ -132,8 +122,7 @@ var _ = Describe("The riff service create command", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should print when --dry-run is set", func() {
-			sc.SetArgs([]string{"square", "--image", "foo/bar",
-				"--input", "my-channel", "--bus", "kafka", "--dry-run"})
+			sc.SetArgs([]string{"square", "--image", "foo/bar", "--dry-run"})
 
 			serviceOptions := core.CreateOrReviseServiceOptions{
 				Name:    "square",
@@ -141,17 +130,6 @@ var _ = Describe("The riff service create command", func() {
 				Env:     []string{},
 				EnvFrom: []string{},
 				DryRun:  true,
-			}
-			channelOptions := core.CreateChannelOptions{
-				Name:   "my-channel",
-				Bus:    "kafka",
-				DryRun: true,
-			}
-			subscriptionOptions := core.CreateSubscriptionOptions{
-				Name:       "square",
-				Channel:    "my-channel",
-				Subscriber: "square",
-				DryRun:     true,
 			}
 
 			svc := v1alpha1.Service{}
@@ -161,8 +139,6 @@ var _ = Describe("The riff service create command", func() {
 			s := v1alpha12.Subscription{}
 			s.Name = "square"
 			asMock.On("CreateService", serviceOptions).Return(&svc, nil)
-			asMock.On("CreateChannel", channelOptions).Return(&c, nil)
-			asMock.On("CreateSubscription", subscriptionOptions).Return(&s, nil)
 
 			stdout := &strings.Builder{}
 			sc.SetOutput(stdout)
@@ -180,20 +156,6 @@ const serviceCreateDryRun = `metadata:
   creationTimestamp: null
   name: square
 spec: {}
-status: {}
----
-metadata:
-  creationTimestamp: null
-  name: my-channel
-spec: {}
-status: {}
----
-metadata:
-  creationTimestamp: null
-  name: square
-spec:
-  channel: ""
-  subscriber: ""
 status: {}
 ---
 `
