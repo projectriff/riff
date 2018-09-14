@@ -123,7 +123,6 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		ServiceRevise(&client),
 		ServiceStatus(&client),
 		ServiceInvoke(&client),
-		ServiceSubscribe(&client),
 		ServiceDelete(&client),
 	)
 

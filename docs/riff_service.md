@@ -28,5 +28,4 @@ Interact with service (as in `service.serving.knative.dev`) related resources.
 * [riff service list](riff_service_list.md)	 - List service resources
 * [riff service revise](riff_service_revise.md)	 - Create a new revision for a service, with updated attributes
 * [riff service status](riff_service_status.md)	 - Display the status of a service
-* [riff service subscribe](riff_service_subscribe.md)	 - Subscribe a service to an existing input channel
 
