@@ -17,9 +17,11 @@
 package commands_test
 
 import (
+	"errors"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/cmd/commands"
+	. "github.com/spf13/cobra"
 )
 
 var _ = Describe("The cobra extensions", func() {
@@ -51,6 +53,23 @@ var _ = Describe("The cobra extensions", func() {
 			Expect(value1).To(Equal("bar"))
 			Expect(value2).To(Equal("bar"))
 
+		})
+
+		It("should not fail if an optional argument to validate is not provided", func() {
+			command := &Command{
+				Use: "some-command",
+				Args: commands.ArgValidationConjunction(
+					MaximumNArgs(1),
+					commands.OptionalAtPosition(1, func(_ *Command, _ string) error {
+						return errors.New("should not be called")
+					}),
+				),
+				RunE: func(cmd *Command, args []string) error {
+					return nil
+				},
+			}
+
+			Expect(command.Execute()).NotTo(HaveOccurred())
 		})
 
 	})

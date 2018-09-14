@@ -22,7 +22,6 @@ import (
 
 	"strings"
 
-	v1alpha12 "github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -64,12 +63,6 @@ var _ = Describe("The riff function create command", func() {
 			Expect(err).To(MatchError(ContainSubstring("required flag(s)")))
 			Expect(err).To(MatchError(ContainSubstring("git-repo")))
 			Expect(err).To(MatchError(ContainSubstring("image")))
-		})
-		It("should fail when input is set w/o bus or cluster-bus", func() {
-			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
-				"--input", "i"})
-			err := fc.Execute()
-			Expect(err).To(MatchError("when --input is set, at least one of --bus, --cluster-bus must be set"))
 		})
 	})
 
@@ -132,39 +125,8 @@ var _ = Describe("The riff function create command", func() {
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
-		It("should create channel/subscription when asked to", func() {
-			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
-				"--input", "my-channel", "--bus", "kafka"})
-
-			functionOptions := core.CreateFunctionOptions{
-				GitRepo:     "https://github.com/repo",
-				GitRevision: "master",
-				InvokerURL:  "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
-			}
-			functionOptions.Name = "square"
-			functionOptions.Image = "foo/bar"
-			functionOptions.Env = []string{}
-			functionOptions.EnvFrom = []string{}
-
-			channelOptions := core.CreateChannelOptions{
-				Name: "my-channel",
-				Bus:  "kafka",
-			}
-			subscriptionOptions := core.CreateSubscriptionOptions{
-				Name:       "square",
-				Channel:    "my-channel",
-				Subscriber: "square",
-			}
-
-			asMock.On("CreateFunction", functionOptions, mock.Anything).Return(nil, nil)
-			asMock.On("CreateChannel", channelOptions).Return(nil, nil)
-			asMock.On("CreateSubscription", subscriptionOptions).Return(nil, nil)
-			err := fc.Execute()
-			Expect(err).NotTo(HaveOccurred())
-		})
 		It("should print when --dry-run is set", func() {
-			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
-				"--input", "my-channel", "--bus", "kafka", "--dry-run"})
+			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo", "--dry-run"})
 
 			functionOptions := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
@@ -177,27 +139,9 @@ var _ = Describe("The riff function create command", func() {
 			functionOptions.EnvFrom = []string{}
 			functionOptions.DryRun = true
 
-			channelOptions := core.CreateChannelOptions{
-				Name:   "my-channel",
-				Bus:    "kafka",
-				DryRun: true,
-			}
-			subscriptionOptions := core.CreateSubscriptionOptions{
-				Name:       "square",
-				Channel:    "my-channel",
-				Subscriber: "square",
-				DryRun:     true,
-			}
-
 			f := v1alpha1.Service{}
 			f.Name = "square"
-			c := v1alpha12.Channel{}
-			c.Name = "my-channel"
-			s := v1alpha12.Subscription{}
-			s.Name = "square"
 			asMock.On("CreateFunction", functionOptions, mock.Anything).Return(&f, nil)
-			asMock.On("CreateChannel", channelOptions).Return(&c, nil)
-			asMock.On("CreateSubscription", subscriptionOptions).Return(&s, nil)
 
 			stdout := &strings.Builder{}
 			fc.SetOutput(stdout)
@@ -266,20 +210,6 @@ const fnCreateDryRun = `metadata:
   creationTimestamp: null
   name: square
 spec: {}
-status: {}
----
-metadata:
-  creationTimestamp: null
-  name: my-channel
-spec: {}
-status: {}
----
-metadata:
-  creationTimestamp: null
-  name: square
-spec:
-  channel: ""
-  subscriber: ""
 status: {}
 ---
 `

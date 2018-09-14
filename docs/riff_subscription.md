@@ -1,15 +1,15 @@
-## riff function
+## riff subscription
 
-Interact with function related resources
+Interact with subscription-related resources
 
 ### Synopsis
 
-Interact with function related resources
+Interact with subscription-related resources
 
 ### Options
 
 ```
-  -h, --help   help for function
+  -h, --help   help for subscription
 ```
 
 ### Options inherited from parent commands
@@ -22,6 +22,5 @@ Interact with function related resources
 ### SEE ALSO
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
-* [riff function build](riff_function_build.md)	 - Trigger a revision build for a function resource
-* [riff function create](riff_function_create.md)	 - Create a new function resource
+* [riff subscription create](riff_subscription_create.md)	 - Create a new subscription, binding a service to an input channel
 
