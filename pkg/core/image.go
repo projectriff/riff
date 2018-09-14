@@ -27,6 +27,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 
@@ -58,7 +59,7 @@ func (c *client) RelocateImages(options RelocateImagesOptions) error {
 		_, err = relocateFile(options.SingleFile, imageMapper, "", options.Output, baseFlattener)
 		return err
 	}
-	return relocateManifest(options.Manifest, imageMapper, options.Output)
+	return relocateManifest(options.Manifest, imageMapper, options.Images, options.Output)
 }
 
 func createImageMapper(options RelocateImagesOptions) (*imageMapper, error) {
@@ -154,7 +155,7 @@ func sha256Flattener(input string) string {
 
 var flatteners = []uriFlattener{baseFlattener, md5Flattener, sha256Flattener}
 
-func relocateManifest(manifestPath string, mapper *imageMapper, outputPath string) error {
+func relocateManifest(manifestPath string, mapper *imageMapper, imageManifestPath string, outputPath string) error {
 	if err := ensureDirectory(outputPath); err != nil {
 		return err
 	}
@@ -194,7 +195,58 @@ func relocateManifest(manifestPath string, mapper *imageMapper, outputPath strin
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(outputManifestPath, outputManifestBytes, outputFilePermissions)
+	err = ioutil.WriteFile(outputManifestPath, outputManifestBytes, outputFilePermissions)
+	if err != nil {
+		return err
+	}
+
+	err = relocateImageManifest(imageManifestPath, mapper, outputPath)
+	if err != nil {
+		return err
+	}
+
+	return copyImages(filepath.Dir(imageManifestPath), outputPath)
+}
+
+func copyImages(inputDir string, outputDir string) error {
+	imagesPath := filepath.Join(inputDir, "images")
+
+	// if there are no binary images, do not attempt to copy them
+	if !isDirectory(imagesPath) {
+		return nil
+	}
+
+	cmd := exec.Command("cp", "-r", imagesPath, outputDir)
+	return cmd.Run()
+}
+
+func relocateImageManifest(imageManifestPath string, mapper *imageMapper, outputPath string) error {
+	imageManifest, err := NewImageManifest(imageManifestPath)
+	if err != nil {
+		return err
+	}
+
+	relocatedImages := make(map[imageName]imageDigest)
+	for n, d := range imageManifest.Images {
+		relocatedImages[applyMapper(n, mapper)] = d
+	}
+
+	relocatedImageManifest := ImageManifest{
+		ManifestVersion: imageManifestVersion_0_1,
+		Images:          relocatedImages,
+	}
+
+	outputImageManifestPath := filepath.Join(outputPath, "image_manifest.yaml")
+	outputImageManifestBytes, err := yaml.Marshal(&relocatedImageManifest)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(outputImageManifestPath, outputImageManifestBytes, outputFilePermissions)
+}
+
+func applyMapper(name imageName, mapper *imageMapper) imageName {
+	quotedName := imageName(mapper.mapImages([]byte(fmt.Sprintf("%q", name))))
+	return quotedName[1 : len(quotedName)-1]
 }
 
 func findNonCollidingFlattener(manifest *Manifest) uriFlattener {
