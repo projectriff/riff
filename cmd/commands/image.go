@@ -36,8 +36,8 @@ func ImageRelocate(c *core.Client) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "relocate",
 		Short: "Relocate docker image names to another registry",
-		Long: "Relocate either a single kubernetes configuration file or a riff manifest and its kubernetes configuration files so " +
-			"that image names refer to another (private or public) registry.\n" +
+		Long: "Relocate either a single kubernetes configuration file or a riff manifest, its kubernetes configuration files, " +
+			"and an image manifest, so that image names refer to another (private or public) registry.\n" +
 
 			"\nTo relocate a single kubernetes configuration file, use the `--file` flag to specify the path or URL of the file. Use " +
 			"the `--output` flag to specify the path for the relocated file. If `--output` is an existing directory, the relocated " +
@@ -45,7 +45,8 @@ func ImageRelocate(c *core.Client) *cobra.Command {
 
 			"\nTo relocate a manifest, use the `--manifest` flag to specify the path of a manifest file which provides the paths or " +
 			"URLs of the kubernetes configuration files for riff components. Use the `--output` flag to specify the path of a " +
-			"directory to contain the relocated manifest and kubernetes configuration files.\n" +
+			"directory to contain the relocated manifest, kubernetes configuration files, and image manifest. Any associated images "+
+			"are copied to the output directory.\n" +
 
 			"\nSpecify the registry hostname using the `--registry` flag, the user owning the images using the `--registry-user` flag, " +
 			"and the images to be mapped using the `--images` flag. The `--images` flag contains the path of an " +
@@ -60,8 +61,8 @@ func ImageRelocate(c *core.Client) *cobra.Command {
     ... 
 
 `,
-		Example: `  riff image relocate --manifest=/path/to/manifest --registry=hostname --user=username --images=/path/to/image/manifest --output=/path/to/output/dir
-  riff image relocate --file=/path/to/file --registry=hostname --user=username --images=/path/to/image/manifest --output=/path/to/output`,
+		Example: `  riff image relocate --manifest=/path/to/manifest.yaml --registry=hostname --user=username --images=/path/to/image-manifest.yaml --output=/path/to/output/dir
+  riff image relocate --file=/path/to/file --registry=hostname --user=username --images=/path/to/image-manifest.yaml --output=/path/to/output`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				return errors.New("the `image relocate` command does not support positional arguments")
