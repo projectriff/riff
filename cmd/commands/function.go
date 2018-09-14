@@ -133,7 +133,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 					}
 				}
 			} else {
-				printSuccessfulCompletion(cmd)
+				PrintSuccessfulCompletion(cmd)
 				if !createFunctionOptions.Verbose && !createFunctionOptions.Wait {
 					namespaceOption := ""
 					if createFunctionOptions.Namespace != "" {
@@ -239,7 +239,7 @@ func FunctionBuild(fcTool *core.Client) *cobra.Command {
 				return err
 			}
 
-			printSuccessfulCompletion(cmd)
+			PrintSuccessfulCompletion(cmd)
 
 			return nil
 		},

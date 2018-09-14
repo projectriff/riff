@@ -34,8 +34,8 @@ type imageDigest string
 
 // ImageManifest defines the image names found in YAML files of system components.
 type ImageManifest struct {
-	ManifestVersion string `json:"manifestVersion"`
-	Images          map[imageName]imageDigest
+	ManifestVersion string                    `json:"manifestVersion"`
+	Images          map[imageName]imageDigest `json:images`
 }
 
 func NewImageManifest(path string) (*ImageManifest, error) {
@@ -59,4 +59,19 @@ func NewImageManifest(path string) (*ImageManifest, error) {
 	}
 
 	return &m, nil
+}
+
+func EmptyImageManifest() *ImageManifest { // Will rename to NewImageManifest once the other is renamed to LoadImageManifest
+	result := &ImageManifest{}
+	result.Images = make(map[imageName]imageDigest)
+	result.ManifestVersion = imageManifestVersion_0_1
+	return result
+}
+
+func (m *ImageManifest) save(path string) error {
+	bytes, err := yaml.Marshal(m)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(path, bytes, outputFilePermissions)
 }

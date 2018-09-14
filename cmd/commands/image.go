@@ -103,7 +103,7 @@ func ImageRelocate(c *core.Client) *cobra.Command {
 				return err
 			}
 
-			printSuccessfulCompletion(cmd)
+			PrintSuccessfulCompletion(cmd)
 			return nil
 		},
 	}
@@ -154,7 +154,7 @@ func ImagePush(c *core.ImageClient) *cobra.Command {
 				return err
 			}
 
-			printSuccessfulCompletion(cmd)
+			PrintSuccessfulCompletion(cmd)
 			return nil
 		},
 	}

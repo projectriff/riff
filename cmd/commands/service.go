@@ -150,7 +150,7 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 					}
 				}
 			} else {
-				printSuccessfulCompletion(cmd)
+				PrintSuccessfulCompletion(cmd)
 			}
 
 			return nil
@@ -245,7 +245,7 @@ func ServiceRevise(client *core.Client) *cobra.Command {
 					return err
 				}
 			} else {
-				printSuccessfulCompletion(cmd)
+				PrintSuccessfulCompletion(cmd)
 			}
 
 			return nil
@@ -452,7 +452,7 @@ func ServiceSubscribe(fcClient *core.Client) *cobra.Command {
 					return err
 				}
 			} else {
-				printSuccessfulCompletion(cmd)
+				PrintSuccessfulCompletion(cmd)
 			}
 			return nil
 		},
@@ -490,7 +490,7 @@ func ServiceDelete(fcClient *core.Client) *cobra.Command {
 				return err
 			}
 
-			printSuccessfulCompletion(cmd)
+			PrintSuccessfulCompletion(cmd)
 			return nil
 		},
 	}

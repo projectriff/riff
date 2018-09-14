@@ -73,7 +73,7 @@ func ChannelCreate(fcTool *core.Client) *cobra.Command {
 					return err
 				}
 			} else {
-				printSuccessfulCompletion(cmd)
+				PrintSuccessfulCompletion(cmd)
 			}
 
 			return nil
@@ -141,7 +141,7 @@ func ChannelDelete(fcTool *core.Client) *cobra.Command {
 				return err
 			}
 
-			printSuccessfulCompletion(cmd)
+			PrintSuccessfulCompletion(cmd)
 			return nil
 		},
 	}

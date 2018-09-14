@@ -58,7 +58,7 @@ func NamespaceInit(kc *core.KubectlClient) *cobra.Command {
 				return err
 			}
 
-			printSuccessfulCompletion(cmd)
+			PrintSuccessfulCompletion(cmd)
 			return nil
 		},
 	}
