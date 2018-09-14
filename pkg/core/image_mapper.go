@@ -49,7 +49,7 @@ func newImageMapper(mappedHost string, mappedUser string, images []imageName) (*
 		}
 
 		fullImg := fmt.Sprintf("%s/%s/%s", imgHost, imgUser, imgRepoPath)
-		mapped := fmt.Sprintf("%s/%s/%s", mappedHost, mappedUser, imgRepoPath)
+		mapped := mapImage(mappedHost, mappedUser, imgRepoPath)
 
 		replacements = append(replacements, quote(fullImg), quote(mapped))
 		replacements = append(replacements, spacePrefix(fullImg), spacePrefix(mapped))
@@ -67,6 +67,15 @@ func newImageMapper(mappedHost string, mappedUser string, images []imageName) (*
 	return &imageMapper{
 		replacer: strings.NewReplacer(replacements...),
 	}, nil
+}
+
+func mapImage(mappedHost string, mappedUser string, imgRepoPath string) string {
+	return fmt.Sprintf("%s/%s/%s", mappedHost, mappedUser, sanitiseRepoPath(imgRepoPath))
+}
+
+func sanitiseRepoPath(repoPath string) string {
+	// Replace "@sha256:" since digests are not allowed as part of a docker tag
+	return strings.Replace(repoPath, "@sha256:", "-", 1)
 }
 
 func containsAny(s string, items ...string) error {

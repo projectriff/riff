@@ -25,13 +25,13 @@ import (
 
 var _ = Describe("imageMapper", func() {
 	const (
-		testImage = "gcr.io/knative-releases/github.com/knative/build/cmd/creds-init@shannn:deadbeef"
+		testImage = "gcr.io/kaniko-project/executor"
 		testYaml  = `image: "` + testImage + `"
 image: ` + testImage + `
 `
 		testRegistry = "testregistry.com"
 		testUser     = "testuser"
-		mappedImage  = "testregistry.com/testuser/github.com/knative/build/cmd/creds-init@shannn:deadbeef"
+		mappedImage  = "testregistry.com/testuser/executor"
 		mappedYaml   = `image: "` + mappedImage + `"
 image: ` + mappedImage + `
 `
@@ -239,6 +239,24 @@ image: "` + fullImage + `"`)
 					Expect(string(output)).To(Equal(string([]byte(fmt.Sprintf(`image: %q
 image: %q
 image: %q`, mappedImage, mappedImage, mappedImage)))))
+				})
+			})
+		})
+
+		Describe("ko image special cases", func() {
+			const (
+				koImage = "gcr.io/knative-releases/github.com/knative/build/cmd/creds-init@sha256:deadbeef"
+			)
+
+			Context("when an image is named by ko", func() {
+				BeforeEach(func() {
+					images = []imageName{koImage}
+					input = []byte(`image: "` + koImage + `"`)
+				})
+
+				It("should perform the mapping", func() {
+					mappedImage := fmt.Sprintf("testregistry.com/testuser/github.com/knative/build/cmd/creds-init-deadbeef") // omits the "@sha256:" piece
+					Expect(string(output)).To(Equal(string([]byte(fmt.Sprintf(`image: %q`, mappedImage)))))
 				})
 			})
 		})
