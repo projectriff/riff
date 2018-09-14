@@ -424,10 +424,10 @@ func Visit(cmd *cobra.Command, f func(c *cobra.Command) error) error {
 	return nil
 }
 
-func printSuccessfulCompletion(cmd *cobra.Command) {
+func PrintSuccessfulCompletion(cmd *cobra.Command) {
 	fmt.Fprintf(cmd.OutOrStdout(), "%s completed successfully\n", cmd.CommandPath())
 }
 
-func printInterruptedCompletion(cmd *cobra.Command) {
+func PrintInterruptedCompletion(cmd *cobra.Command) {
 	fmt.Fprintf(cmd.OutOrStdout(), "%s was interrupted\n", cmd.CommandPath())
 }

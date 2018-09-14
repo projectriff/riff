@@ -19,6 +19,7 @@ package core
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/projectriff/riff/pkg/docker"
@@ -26,10 +27,17 @@ import (
 
 type ImageClient interface {
 	PushImages(options PushImagesOptions) error
+	PullImages(options PullImagesOptions) error
 }
 
 type PushImagesOptions struct {
 	Images string
+}
+
+type PullImagesOptions struct {
+	Images             string
+	Output             string
+	ContinueOnMismatch bool
 }
 
 type imageClient struct {
@@ -50,6 +58,41 @@ func (c *imageClient) PushImages(options PushImagesOptions) error {
 		}
 	}
 	return nil
+}
+
+func (c *imageClient) PullImages(options PullImagesOptions) error {
+	originalManifest, err := NewImageManifest(options.Images)
+	if err != nil {
+		return err
+	}
+	var imagesDir string
+	var newManifestPath string
+	if options.Output == "" {
+		newManifestPath = options.Images
+		imagesDir = filepath.Join(filepath.Dir(options.Images), "images")
+	} else {
+		newManifestPath = filepath.Join(options.Output, "image-manifest.yaml")
+		imagesDir = filepath.Join(options.Output, "images")
+	}
+	if _, err := os.Stat(imagesDir); err != nil && os.IsNotExist(err) {
+		if err2 := os.MkdirAll(imagesDir, outputDirPermissions); err2 != nil {
+			return err2
+		}
+	}
+
+	newManifest := EmptyImageManifest()
+
+	for name, sha := range originalManifest.Images {
+		if newSha, err := c.docker.PullImage(string(name), imagesDir); err != nil {
+			return err
+		} else if newSha != string(sha) && sha != "" && !options.ContinueOnMismatch {
+			return fmt.Errorf("image %q had digest %v in the original manifest, but the pulled version now has digest %s", name, sha, newSha)
+		} else {
+			newManifest.Images[name] = imageDigest(newSha)
+		}
+	}
+
+	return newManifest.save(newManifestPath)
 }
 
 func NewImageClient(docker docker.Docker) ImageClient {

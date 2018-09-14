@@ -18,14 +18,19 @@
 package docker
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"os/exec"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
 type Docker interface {
 	PushImage(name string, digest string, file string) error
+	PullImage(name string, directory string) (digest string, err error)
 }
 
 // processDocker interacts with docker by spawning a process and running the `docker`
@@ -46,15 +51,39 @@ func (pd *processDocker) PushImage(name string, digest string, file string) erro
 	return pd.exec(10*time.Minute, "push", name)
 }
 
-func (pd *processDocker) exec(timeout time.Duration, cmdArgs ...string) error {
+func (pd *processDocker) PullImage(name string, directory string) (digest string, err error) {
+	if err := pd.exec(10*time.Minute, "pull", name); err != nil {
+		return "", err
+	}
+	b := new(bytes.Buffer)
+	if err := pd.execWithStreams(pd.stdin, b, pd.stderr, 1*time.Second, "inspect", "--format='{{.Id}}'", name); err != nil {
+		return "", err
+	}
+	if offset := strings.LastIndex(b.String(), "'sha256:"); offset == -1 {
+		return "", fmt.Errorf("unable to extract digest of image %q. Command output was %q", name, b.String())
+	} else {
+		// chop single quote at start, single quote and \n at end
+		digest = b.String()[offset+len("'") : len(b.String())-len("'\n")]
+		if err := pd.exec(5*time.Minute, "image", "save", "-o", filepath.Join(directory, digest), name); err != nil {
+			return "", err
+		}
+		return digest, nil
+	}
+}
+
+func (pd *processDocker) execWithStreams(stdin io.Reader, stdout io.Writer, stderr io.Writer, timeout time.Duration, cmdArgs ...string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, "docker", cmdArgs...)
-	cmd.Stdin = pd.stdin
-	cmd.Stdout = pd.stdout
-	cmd.Stderr = pd.stderr
+	cmd.Stdin = stdin
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
 	return cmd.Run()
+}
+
+func (pd *processDocker) exec(timeout time.Duration, cmdArgs ...string) error {
+	return pd.execWithStreams(pd.stdin, pd.stdout, pd.stderr, timeout, cmdArgs...)
 }
 
 func RealDocker(stdin io.Reader, stdout io.Writer, stderr io.Writer) Docker {
