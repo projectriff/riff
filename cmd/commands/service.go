@@ -377,6 +377,7 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 		Args: UpToDashDash(ArgValidationConjunction(
 			cobra.MinimumNArgs(serviceInvokeMaxNumberOfArgs-1),
 			cobra.MaximumNArgs(serviceInvokeMaxNumberOfArgs),
+			// TODO validate that at most one content-type flag is set
 			AtPosition(serviceInvokeServiceNameIndex, ValidName()),
 		)),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -401,6 +402,13 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 			hostHeader := fmt.Sprintf("Host: %s", hostName)
 			curlCmd.Args = append(curlCmd.Args, "-H", hostHeader)
 
+			// default Content-Type
+			if serviceInvokeOptions.ContentTypeJson {
+				curlCmd.Args = append(curlCmd.Args, "-H", "Content-Type: application/json")
+			} else if serviceInvokeOptions.ContentTypeText {
+				curlCmd.Args = append(curlCmd.Args, "-H", "Content-Type: text/plain")
+			}
+
 			if argsLengthAtDash > 0 {
 				curlCmd.Args = append(curlCmd.Args, args[argsLengthAtDash:]...)
 			}
@@ -418,6 +426,8 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 	LabelArgs(command, "SERVICE_NAME", "PATH")
 
 	command.Flags().StringVarP(&serviceInvokeOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
+	command.Flags().BoolVar(&serviceInvokeOptions.ContentTypeJson, "json", false, "set the request's content type to `application/json`")
+	command.Flags().BoolVar(&serviceInvokeOptions.ContentTypeText, "text", false, "set the request's content type to `text/plain`")
 
 	return command
 }
