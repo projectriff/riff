@@ -5,7 +5,7 @@ install:
   - "go get -u github.com/vektra/mockery/.../"
 cache:
   directories:
-  - $GOROOT/pkg/mod
+  - $GOPATH/pkg/mod
 matrix:
   include:
   - stage: test
