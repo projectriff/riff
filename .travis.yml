@@ -2,8 +2,10 @@ language: go
 go:
 - '1.11'
 install:
-  - "go get -u github.com/golang/dep/cmd/dep"
   - "go get -u github.com/vektra/mockery/.../"
+cache:
+  directories:
+  - $GOCACHE
 matrix:
   include:
   - stage: test
