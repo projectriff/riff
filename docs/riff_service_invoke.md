@@ -24,8 +24,10 @@ riff service invoke [flags]
 ### Options
 
 ```
-  -h, --help                  help for invoke
-  -n, --namespace namespace   the namespace of the service
+  -h, --help                    help for invoke
+      --json application/json   set the request's content type to application/json
+  -n, --namespace namespace     the namespace of the service
+      --text text/plain         set the request's content type to text/plain
 ```
 
 ### Options inherited from parent commands
