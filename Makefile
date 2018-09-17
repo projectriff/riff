@@ -1,4 +1,4 @@
-.PHONY: build clean test all release
+.PHONY: build clean test all release gen-mocks
 
 OUTPUT = ./riff
 GO_SOURCES = $(shell find . -type f -name '*.go' -not -regex '.*/mocks/.*' -not -regex '.*/vendor_mocks/.*')
@@ -14,35 +14,33 @@ all: test docs
 
 build: $(OUTPUT)
 
-test: build pkg/core/mocks pkg/core/vendor_mocks
-	GO111MODULE=on go test ./...
+test: build gen-mocks
+	go test ./...
 
-pkg/core/mocks: pkg/core/client.go
-	rm -fR pkg/core/mocks && \
-	GO111MODULE=on go mod vendor && \
-	mockery -output pkg/core/mocks -outpkg mocks -dir pkg/core -name Client && \
-	rm -fR vendor/
+pkg/core/mocks/Client.go: pkg/core/client.go
+	mockery -output pkg/core/mocks -outpkg mocks -dir pkg/core -name Client
 
-pkg/core/vendor_mocks: go.sum
-	rm -fR pkg/core/vendor_mocks && \
-	GO111MODULE=on go mod vendor && \
-	mockery -output pkg/core/vendor_mocks -outpkg vendor_mocks -dir vendor/k8s.io/client-go/kubernetes -name Interface && \
-	mockery -output pkg/core/vendor_mocks -outpkg vendor_mocks -dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 -name CoreV1Interface && \
-	mockery -output pkg/core/vendor_mocks -outpkg vendor_mocks -dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 -name NamespaceInterface && \
-	mockery -output pkg/core/vendor_mocks -outpkg vendor_mocks -dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 -name ServiceAccountInterface && \
-	mockery -output pkg/core/vendor_mocks -outpkg vendor_mocks -dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 -name SecretInterface && \
-	rm -fR vendor/
+pkg/core/vendor_mocks/Interface.go: $(shell find vendor/k8s.io/client-go/kubernetes -type f)
+	mockery -output pkg/core/vendor_mocks -outpkg vendor_mocks -dir vendor/k8s.io/client-go/kubernetes -name Interface
+
+pkg/core/vendor_mocks/CoreV1Interface.go \
+pkg/core/vendor_mocks/NamespaceInterface.go \
+pkg/core/vendor_mocks/ServiceAccountInterface.go \
+pkg/core/vendor_mocks/SecretInterface.go : $(shell find vendor/k8s.io/client-go/kubernetes/typed/core/v1 -type f)
+	mockery -output pkg/core/vendor_mocks -outpkg vendor_mocks -dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 -name $(notdir $(basename $@))
+
+gen-mocks: pkg/core/mocks/Client.go $(wildcard pkg/core/vendor_mocks/*.go)
 
 install: build
 	cp $(OUTPUT) $(GOBIN)
 
-$(OUTPUT): $(GO_SOURCES) VERSION
-	GO111MODULE=on go build -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)" main.go
+$(OUTPUT): $(GO_SOURCES) vendor VERSION
+	go build -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)" main.go
 
-release: $(GO_SOURCES) VERSION
-	GO111MODULE=on GOOS=darwin   GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     main.go && tar -czf riff-darwin-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
-	GO111MODULE=on GOOS=linux    GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     main.go && tar -czf riff-linux-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
-	GO111MODULE=on GOOS=windows  GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT).exe main.go && zip -mq riff-windows-amd64.zip $(OUTPUT).exe && rm -f $(OUTPUT).exe
+release: $(GO_SOURCES) vendor VERSION
+	GOOS=darwin   GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     main.go && tar -czf riff-darwin-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
+	GOOS=linux    GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     main.go && tar -czf riff-linux-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
+	GOOS=windows  GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT).exe main.go && zip -mq riff-windows-amd64.zip $(OUTPUT).exe && rm -f $(OUTPUT).exe
 
 docs: $(OUTPUT)
 	rm -fR docs && $(OUTPUT) docs
@@ -52,3 +50,10 @@ clean:
 	rm -f riff-darwin-amd64.tgz
 	rm -f riff-linux-amd64.tgz
 	rm -f riff-windows-amd64.zip
+
+vendor: Gopkg.lock
+	dep ensure -vendor-only && touch vendor
+
+Gopkg.lock: Gopkg.toml
+	dep ensure -no-vendor && touch Gopkg.lock
+
