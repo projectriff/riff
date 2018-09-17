@@ -1,6 +1,6 @@
 ## riff function create
 
-Create a new function resource, with optional input and output channels
+Create a new function resource
 
 ### Synopsis
 
@@ -25,15 +25,13 @@ riff function create [flags]
 
 ```
   riff function create node square --git-repo https://github.com/acme/square --image acme/square --namespace joseph-ns
-  riff function create java tweets-logger --git-repo https://github.com/acme/tweets --image acme/tweets-logger:1.0.0 --input tweets --bus kafka
+  riff function create java tweets-logger --git-repo https://github.com/acme/tweets --image acme/tweets-logger:1.0.0
 ```
 
 ### Options
 
 ```
       --artifact path                  path to the function source code or jar file; auto-detected if not specified
-      --bus name                       the name of the bus to create the channel in.
-      --cluster-bus name               the name of the cluster bus to create the channel in.
       --dry-run                        don't create resources but print yaml representation on stdout
       --env stringArray                environment variable expressed in a 'key=value' format
       --env-from stringArray           environment variable created from a source reference; see command help for supported formats
@@ -42,9 +40,7 @@ riff function create [flags]
       --handler method or class        the name of the method or class to invoke, depending on the invoker used
   -h, --help                           help for create
       --image repository/image[:tag]   the name of the image to build; must be a writable repository/image[:tag] with credentials configured
-  -i, --input channel                  name of the function's input channel, if any
   -n, --namespace namespace            the namespace of the subscription, channel, and function
-  -o, --output channel                 name of the function's output channel, if any
   -v, --verbose                        print details of command progress
   -w, --wait                           wait until the created resource reaches either a successful or an error state (automatic with --verbose)
 ```

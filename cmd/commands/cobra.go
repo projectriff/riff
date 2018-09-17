@@ -70,6 +70,15 @@ func AtPosition(i int, validator PositionalArg) cobra.PositionalArgs {
 	}
 }
 
+func OptionalAtPosition(i int, validator PositionalArg) cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		if len(args) > i {
+			return validator(cmd, args[i])
+		}
+		return nil
+	}
+}
+
 // KubernetesValidation turns a kubernetes-style validation function into a PositionalArg
 func KubernetesValidation(k8s func(string) []string) PositionalArg {
 	return func(cmd *cobra.Command, arg string) error {

@@ -64,16 +64,6 @@ var _ = Describe("The riff service create command", func() {
 			err := cc.Execute()
 			Expect(err).To(MatchError(`required flag(s) "image" not set`))
 		})
-		It("should fail when both bus and cluster-bus are set", func() {
-			cc.SetArgs([]string{"my-service", "--bus", "b", "--cluster-bus", "cb", "--input", "c"})
-			err := cc.Execute()
-			Expect(err).To(MatchError("when --input is set, at most one of --bus, --cluster-bus must be set"))
-		})
-		It("should fail when neither bus or cluster-bus is set", func() {
-			cc.SetArgs([]string{"my-service", "--input", "c"})
-			err := cc.Execute()
-			Expect(err).To(MatchError("when --input is set, at least one of --bus, --cluster-bus must be set"))
-		})
 	})
 
 	Context("when given suitable args and flags", func() {
@@ -132,8 +122,7 @@ var _ = Describe("The riff service create command", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should print when --dry-run is set", func() {
-			sc.SetArgs([]string{"square", "--image", "foo/bar",
-				"--input", "my-channel", "--bus", "kafka", "--dry-run"})
+			sc.SetArgs([]string{"square", "--image", "foo/bar", "--dry-run"})
 
 			serviceOptions := core.CreateOrReviseServiceOptions{
 				Name:    "square",
@@ -141,17 +130,6 @@ var _ = Describe("The riff service create command", func() {
 				Env:     []string{},
 				EnvFrom: []string{},
 				DryRun:  true,
-			}
-			channelOptions := core.CreateChannelOptions{
-				Name:   "my-channel",
-				Bus:    "kafka",
-				DryRun: true,
-			}
-			subscriptionOptions := core.CreateSubscriptionOptions{
-				Name:       "square",
-				Channel:    "my-channel",
-				Subscriber: "square",
-				DryRun:     true,
 			}
 
 			svc := v1alpha1.Service{}
@@ -161,8 +139,6 @@ var _ = Describe("The riff service create command", func() {
 			s := v1alpha12.Subscription{}
 			s.Name = "square"
 			asMock.On("CreateService", serviceOptions).Return(&svc, nil)
-			asMock.On("CreateChannel", channelOptions).Return(&c, nil)
-			asMock.On("CreateSubscription", subscriptionOptions).Return(&s, nil)
 
 			stdout := &strings.Builder{}
 			sc.SetOutput(stdout)
@@ -180,20 +156,6 @@ const serviceCreateDryRun = `metadata:
   creationTimestamp: null
   name: square
 spec: {}
-status: {}
----
-metadata:
-  creationTimestamp: null
-  name: my-channel
-spec: {}
-status: {}
----
-metadata:
-  creationTimestamp: null
-  name: square
-spec:
-  channel: ""
-  subscriber: ""
 status: {}
 ---
 `
@@ -501,108 +463,6 @@ var _ = Describe("The riff service list command", func() {
 const svcListOutput = `NAME  STATUS
 foo   Failed: It's dead, Jim
 wizz  Running
-`
-
-var _ = Describe("The riff service subscribe command", func() {
-	Context("when given wrong args or flags", func() {
-		var (
-			mockClient core.Client
-			ss         *cobra.Command
-		)
-		BeforeEach(func() {
-			mockClient = nil
-			ss = commands.ServiceSubscribe(&mockClient)
-		})
-		It("should fail with no args", func() {
-			ss.SetArgs([]string{})
-			err := ss.Execute()
-			Expect(err).To(MatchError("accepts 1 arg(s), received 0"))
-		})
-		It("should fail with invalid service name", func() {
-			ss.SetArgs([]string{".invalid"})
-			err := ss.Execute()
-			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
-		})
-		It("should fail without required flags", func() {
-			ss.SetArgs([]string{"my-service"})
-			err := ss.Execute()
-			Expect(err).To(MatchError(`required flag(s) "input" not set`))
-		})
-	})
-
-	Context("when given suitable args and flags", func() {
-		var (
-			client core.Client
-			asMock *mocks.Client
-			ss     *cobra.Command
-		)
-		BeforeEach(func() {
-			client = new(mocks.Client)
-			asMock = client.(*mocks.Client)
-
-			ss = commands.ServiceSubscribe(&client)
-		})
-		AfterEach(func() {
-			asMock.AssertExpectations(GinkgoT())
-		})
-		It("should involve the core.Client", func() {
-			ss.SetArgs([]string{"my-service", "--input", "my-channel", "--namespace", "ns"})
-
-			o := core.CreateSubscriptionOptions{
-				Name:       "my-service",
-				Channel:    "my-channel",
-				Subscriber: "my-service",
-			}
-			o.Namespace = "ns"
-
-			asMock.On("CreateSubscription", o).Return(nil, nil)
-			err := ss.Execute()
-			Expect(err).NotTo(HaveOccurred())
-		})
-		It("should propagate core.Client errors", func() {
-			ss.SetArgs([]string{"my-service", "--input", "my-channel"})
-
-			e := fmt.Errorf("some error")
-			asMock.On("CreateSubscription", mock.Anything).Return(nil, e)
-			err := ss.Execute()
-			Expect(err).To(MatchError(e))
-		})
-		It("should print when --dry-run is set", func() {
-			ss.SetArgs([]string{"square", "--input", "my-channel", "--dry-run"})
-
-			subscriptionOptions := core.CreateSubscriptionOptions{
-				Name:       "square",
-				Channel:    "my-channel",
-				Subscriber: "square",
-				DryRun:     true,
-			}
-
-			s := v1alpha12.Subscription{}
-			s.Name = "square"
-			s.Spec.Channel = "my-channel"
-			s.Spec.Subscriber = "square"
-			asMock.On("CreateSubscription", subscriptionOptions).Return(&s, nil)
-
-			stdout := &strings.Builder{}
-			ss.SetOutput(stdout)
-
-			err := ss.Execute()
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(stdout.String()).To(Equal(serviceSubscribeDryRun))
-		})
-
-	})
-})
-
-const serviceSubscribeDryRun = `metadata:
-  creationTimestamp: null
-  name: square
-spec:
-  channel: my-channel
-  subscriber: square
-status: {}
----
 `
 
 var _ = Describe("The riff service delete command", func() {

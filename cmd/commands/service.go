@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/frioux/shellquote"
-	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	v1alpha12 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
@@ -56,11 +55,6 @@ const (
 )
 
 const (
-	serviceSubscribeServiceNameIndex = iota
-	serviceSubscribeNumberOfArgs
-)
-
-const (
 	serviceDeleteServiceNameIndex = iota
 	serviceDeleteNumberOfArgs
 )
@@ -75,33 +69,21 @@ func Service() *cobra.Command {
 
 func ServiceCreate(fcTool *core.Client) *cobra.Command {
 
-	createInputChannelOptions := core.CreateChannelOptions{}
-	createOutputChannelOptions := core.CreateChannelOptions{}
 	createServiceOptions := core.CreateOrReviseServiceOptions{}
-	createSubscriptionOptions := core.CreateSubscriptionOptions{}
 
 	command := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new service resource, with optional input binding",
+		Short: "Create a new service resource",
 		Long: `Create a new service resource from a given image.
-
-` + channelLongDesc + `
 
 ` + envFromLongDesc + `
 `,
 		Example: `  riff service create square --image acme/square:1.0 --namespace joseph-ns
   riff service create greeter --image acme/greeter:1.0 --env FOO=bar --env MESSAGE=Hello
-  riff service create tweets-logger --image acme/tweets-logger:1.0.0 --input tweets --bus kafka`,
+  riff service create tweets-logger --image acme/tweets-logger:1.0.0`,
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(serviceCreateNumberOfArgs),
 			AtPosition(serviceCreateServiceNameIndex, ValidName()),
-		),
-		PreRunE: FlagsValidatorAsCobraRunE(
-			FlagsValidationConjunction(
-				FlagsDependency(Set("input"), exactlyOneOfBusOrClusterBus),
-				FlagsDependency(NotSet("input"), NoneOf("bus", "cluster-bus")),
-				FlagsDependency(NotSet("input"), NoneOf("output")),
-			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -112,42 +94,10 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 				return err
 			}
 
-			var c *v1alpha1.Channel
-			var subscr *v1alpha1.Subscription
-			if createInputChannelOptions.Name != "" {
-				c, err = (*fcTool).CreateChannel(createInputChannelOptions)
-				if err != nil {
-					return err
-				}
-
-				if createOutputChannelOptions.Name != "" {
-					c, err = (*fcTool).CreateChannel(createOutputChannelOptions)
-					if err != nil {
-						return err
-					}
-				}
-				createSubscriptionOptions.Name = subscriptionNameFromService(fnName)
-				createSubscriptionOptions.Subscriber = subscriberNameFromService(fnName) // TODO
-				subscr, err = (*fcTool).CreateSubscription(createSubscriptionOptions)
-				if err != nil {
-					return err
-				}
-			}
-
 			if createServiceOptions.DryRun {
 				marshaller := NewMarshaller(cmd.OutOrStdout())
 				if err = marshaller.Marshal(f); err != nil {
 					return err
-				}
-				if c != nil {
-					if err = marshaller.Marshal(c); err != nil {
-						return err
-					}
-				}
-				if subscr != nil {
-					if err = marshaller.Marshal(subscr); err != nil {
-						return err
-					}
 				}
 			} else {
 				printSuccessfulCompletion(cmd)
@@ -162,54 +112,16 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 	command.Flags().VarP(
 		BroadcastStringValue("",
 			&createServiceOptions.Namespace,
-			&createInputChannelOptions.Namespace,
-			&createOutputChannelOptions.Namespace,
-			&createSubscriptionOptions.Namespace,
 		),
 		"namespace", "n", "the `namespace` of the service and any namespaced resources specified",
-	)
-
-	command.Flags().VarP(
-		BroadcastStringValue("",
-			&createInputChannelOptions.Name,
-			&createSubscriptionOptions.Channel,
-		),
-		"input", "i", "name of the service's input `channel`, if any",
-	)
-
-	command.Flags().VarP(
-		BroadcastStringValue("",
-			&createOutputChannelOptions.Name,
-			&createSubscriptionOptions.ReplyTo,
-		),
-		"output", "o", "name of the service's output `channel`, if any",
 	)
 
 	command.Flags().VarPF(
 		BroadcastBoolValue(false,
 			&createServiceOptions.DryRun,
-			&createInputChannelOptions.DryRun,
-			&createOutputChannelOptions.DryRun,
-			&createSubscriptionOptions.DryRun,
 		),
 		"dry-run", "", dryRunUsage,
 	).NoOptDefVal = "true"
-
-	command.Flags().Var(
-		BroadcastStringValue("",
-			&createInputChannelOptions.Bus,
-			&createOutputChannelOptions.Bus,
-		),
-		"bus", busUsage,
-	)
-
-	command.Flags().Var(
-		BroadcastStringValue("",
-			&createInputChannelOptions.ClusterBus,
-			&createOutputChannelOptions.ClusterBus,
-		),
-		"cluster-bus", clusterBusUsage,
-	)
 
 	command.Flags().StringVar(&createServiceOptions.Image, "image", "", "the `name[:tag]` reference of an image containing the application/function")
 	command.MarkFlagRequired("image")
@@ -422,54 +334,6 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 	return command
 }
 
-func ServiceSubscribe(fcClient *core.Client) *cobra.Command {
-
-	createSubscriptionOptions := core.CreateSubscriptionOptions{}
-
-	command := &cobra.Command{
-		Use:     "subscribe",
-		Short:   "Subscribe a service to an existing input channel",
-		Example: `  riff service subscribe square --input numbers --namespace joseph-ns`,
-		Args: ArgValidationConjunction(
-			cobra.ExactArgs(serviceSubscribeNumberOfArgs),
-			AtPosition(serviceSubscribeServiceNameIndex, ValidName()),
-		),
-		RunE: func(cmd *cobra.Command, args []string) error {
-
-			fnName := args[serviceSubscribeServiceNameIndex]
-
-			if createSubscriptionOptions.Name == "" {
-				createSubscriptionOptions.Name = subscriptionNameFromService(fnName)
-			}
-			createSubscriptionOptions.Subscriber = subscriberNameFromService(fnName)
-			s, err := (*fcClient).CreateSubscription(createSubscriptionOptions)
-			if err != nil {
-				return err
-			}
-			if createSubscriptionOptions.DryRun {
-				marshaller := NewMarshaller(cmd.OutOrStdout())
-				if err = marshaller.Marshal(s); err != nil {
-					return err
-				}
-			} else {
-				printSuccessfulCompletion(cmd)
-			}
-			return nil
-		},
-	}
-
-	LabelArgs(command, "SERVICE_NAME")
-
-	command.Flags().StringVar(&createSubscriptionOptions.Name, "subscription", "", "`name` of the subscription (default SERVICE_NAME)")
-	command.Flags().StringVarP(&createSubscriptionOptions.Channel, "input", "i", "", "the name of an input `channel` for the service")
-	command.MarkFlagRequired("input")
-	command.Flags().StringVarP(&createSubscriptionOptions.ReplyTo, "output", "o", "", "the name of an output `channel` for the service")
-	command.Flags().StringVarP(&createSubscriptionOptions.Namespace, "namespace", "n", "", "the `namespace` of the subscription, channel, and service")
-	command.Flags().BoolVar(&createSubscriptionOptions.DryRun, "dry-run", false, dryRunUsage)
-
-	return command
-}
-
 func ServiceDelete(fcClient *core.Client) *cobra.Command {
 
 	deleteServiceOptions := core.DeleteServiceOptions{}
@@ -500,16 +364,4 @@ func ServiceDelete(fcClient *core.Client) *cobra.Command {
 	command.Flags().StringVarP(&deleteServiceOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
 
 	return command
-}
-
-// subscriptionNameFromService returns the name to use for the subscription being created alongside
-// a service/function. By convention, this is chosen to be the name of the service.
-func subscriptionNameFromService(fnName string) string {
-	return fnName
-}
-
-// subscriberNameFromService returns the name to use for the `subscriber` field of a subscription,
-// given a service/function that is being created/subscribed. This has to be the name of the service itself.
-func subscriberNameFromService(fnName string) string {
-	return fnName
 }
