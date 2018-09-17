@@ -374,6 +374,7 @@ The curl command is printed so it can be copied and extended.
 Additional curl arguments and flags may be specified after a double dash (--).`,
 		Example: `  riff service invoke square --namespace joseph-ns
   riff service invoke square /foo -- --data 42`,
+		PreRunE: FlagsValidatorAsCobraRunE(AtMostOneOf("json", "text")),
 		Args: UpToDashDash(ArgValidationConjunction(
 			cobra.MinimumNArgs(serviceInvokeMaxNumberOfArgs-1),
 			cobra.MaximumNArgs(serviceInvokeMaxNumberOfArgs),
@@ -401,6 +402,12 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 			hostHeader := fmt.Sprintf("Host: %s", hostName)
 			curlCmd.Args = append(curlCmd.Args, "-H", hostHeader)
 
+			if serviceInvokeOptions.ContentTypeJson {
+				curlCmd.Args = append(curlCmd.Args, "-H", "Content-Type: application/json")
+			} else if serviceInvokeOptions.ContentTypeText {
+				curlCmd.Args = append(curlCmd.Args, "-H", "Content-Type: text/plain")
+			}
+
 			if argsLengthAtDash > 0 {
 				curlCmd.Args = append(curlCmd.Args, args[argsLengthAtDash:]...)
 			}
@@ -418,6 +425,8 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 	LabelArgs(command, "SERVICE_NAME", "PATH")
 
 	command.Flags().StringVarP(&serviceInvokeOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
+	command.Flags().BoolVar(&serviceInvokeOptions.ContentTypeJson, "json", false, "set the request's content type to 'application/json'")
+	command.Flags().BoolVar(&serviceInvokeOptions.ContentTypeText, "text", false, "set the request's content type to 'text/plain'")
 
 	return command
 }

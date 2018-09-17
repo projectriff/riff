@@ -171,7 +171,9 @@ func (c *client) ServiceConditions(options ServiceStatusOptions) ([]v1alpha1.Ser
 
 type ServiceInvokeOptions struct {
 	Namespaced
-	Name string
+	Name            string
+	ContentTypeText bool
+	ContentTypeJson bool
 }
 
 func (c *client) ServiceCoordinates(options ServiceInvokeOptions) (string, string, error) {
