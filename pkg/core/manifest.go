@@ -19,7 +19,7 @@ package core
 
 import (
 	"fmt"
-	"io/ioutil"
+	"github.com/projectriff/riff/pkg/fileutils"
 	"net/url"
 	"path/filepath"
 
@@ -116,7 +116,7 @@ func NewManifest(path string) (*Manifest, error) {
 	}
 
 	var m Manifest
-	yamlFile, err := ioutil.ReadFile(path)
+	yamlFile, err := fileutils.Read(path, "")
 	if err != nil {
 		return nil, fmt.Errorf("Error reading manifest file: %v", err)
 	}

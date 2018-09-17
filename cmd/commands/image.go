@@ -43,7 +43,7 @@ func ImageRelocate(c *core.Client) *cobra.Command {
 			"the `--output` flag to specify the path for the relocated file. If `--output` is an existing directory, the relocated " +
 			"file will be placed in that directory. Otherwise the relocated file will be written to the path specified in `--output`.\n" +
 
-			"\nTo relocate a manifest, use the `--manifest` flag to specify the path of a manifest file which provides the paths or " +
+			"\nTo relocate a manifest, use the `--manifest` flag to specify the path or URL of a manifest file which provides the paths or " +
 			"URLs of the kubernetes configuration files for riff components. Use the `--output` flag to specify the path of a " +
 			"directory to contain the relocated manifest, kubernetes configuration files, and image manifest. Any associated images "+
 			"are copied to the output directory.\n" +
@@ -61,8 +61,8 @@ func ImageRelocate(c *core.Client) *cobra.Command {
     ... 
 
 `,
-		Example: `  riff image relocate --manifest=/path/to/manifest.yaml --registry=hostname --user=username --images=/path/to/image-manifest.yaml --output=/path/to/output/dir
-  riff image relocate --file=/path/to/file --registry=hostname --user=username --images=/path/to/image-manifest.yaml --output=/path/to/output`,
+		Example: `  riff image relocate --manifest=path/to/manifest.yaml --registry=hostname --user=username --images=path/to/image-manifest.yaml --output=path/to/output/dir
+  riff image relocate --file=path/to/file --registry=hostname --user=username --images=path/to/image-manifest.yaml --output=path/to/output`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				return errors.New("the `image relocate` command does not support positional arguments")

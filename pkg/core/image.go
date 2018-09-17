@@ -17,15 +17,13 @@
 package core
 
 import (
-	"bytes"
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/projectriff/riff/pkg/fileutils"
 	"io/ioutil"
-	"net/http"
-	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -84,47 +82,14 @@ func keys(m map[imageName]imageDigest) []imageName {
 	return keys
 }
 
-func relocateFile(yamlFile string, mapper *imageMapper, cwd string, outputPath string, strat uriFlattener) (string, error) {
-	y, err := readFile(yamlFile, cwd)
+func relocateFile(yamlFile string, mapper *imageMapper, base string, outputPath string, strat uriFlattener) (string, error) {
+	y, err := fileutils.Read(yamlFile, base)
 	if err != nil {
 		return "", err
 	}
 
 	output := outputFile(outputPath, yamlFile, strat)
 	return filepath.Base(output), ioutil.WriteFile(output, mapper.mapImages(y), outputFilePermissions)
-}
-
-func readFile(yamlFile string, cwd string) ([]byte, error) {
-	u, err := url.Parse(yamlFile)
-	if err != nil {
-		return nil, err
-	}
-	if u.IsAbs() {
-		if u.Scheme == "file" {
-			return ioutil.ReadFile(u.Path)
-		}
-		return downloadFile(u.String())
-	}
-
-	if !filepath.IsAbs(yamlFile) {
-		yamlFile = filepath.Join(cwd, yamlFile)
-	}
-	return ioutil.ReadFile(yamlFile)
-}
-
-func downloadFile(url string) ([]byte, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	buf := new(bytes.Buffer)
-	_, err = buf.ReadFrom(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
 }
 
 type uriFlattener func(string) string
@@ -171,7 +136,10 @@ func relocateManifest(manifestPath string, mapper *imageMapper, imageManifestPat
 		return errors.New("cannot relocate manifest due to collisions in output paths")
 	}
 
-	manifestDir := filepath.Dir(manifestPath)
+	manifestDir, err := fileutils.Dir(manifestPath)
+	if err != nil {
+		return err
+	}
 
 	outputManifest := &Manifest{
 		ManifestVersion: manifest.ManifestVersion,

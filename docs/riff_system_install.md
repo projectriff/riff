@@ -8,7 +8,7 @@ Install riff and Knative system components.
 
 If an `istio-system` namespace isn't found, it will be created and Istio components will be installed. 
 Use the `--node-port` flag when installing on Minikube and other clusters that don't support an external load balancer. 
-Use the `--manifest` flag to specify the path of a manifest file which provides the URLs of the YAML definitions of the components to be installed. The manifest file contents should be of the following form:
+Use the `--manifest` flag to specify the path or URL of a manifest file which provides the URLs of the YAML definitions of the components to be installed. The manifest file contents should be of the following form:
 
     manifestVersion: 0.1
     istio:

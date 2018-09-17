@@ -39,7 +39,7 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
 		Long: "Install riff and Knative system components.\n" +
 			"\nIf an `istio-system` namespace isn't found, it will be created and Istio components will be installed. " +
 			"\nUse the `--node-port` flag when installing on Minikube and other clusters that don't support an external load balancer. " +
-			"\nUse the `--manifest` flag to specify the path of a manifest file which provides the URLs of the YAML definitions of the " +
+			"\nUse the `--manifest` flag to specify the path or URL of a manifest file which provides the URLs of the YAML definitions of the " +
 			"components to be installed. The manifest file contents should be of the following form:" +
 			`
 
