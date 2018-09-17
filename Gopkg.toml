@@ -1,0 +1,68 @@
+# Gopkg.toml example
+#
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+#
+# required = ["github.com/user/thing/cmd/thing"]
+# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
+#
+# [[constraint]]
+#   name = "github.com/user/project"
+#   version = "1.0.0"
+#
+# [[constraint]]
+#   name = "github.com/user/project2"
+#   branch = "dev"
+#   source = "github.com/myfork/project2"
+#
+# [[override]]
+#  name = "github.com/x/y"
+#  version = "2.4.0"
+
+
+[prune]
+  go-tests = true
+  unused-packages = true
+  non-go = true
+
+[[constraint]]
+  name = "github.com/spf13/cobra"
+  version = "v0.0.3"
+
+[[constraint]]
+  name = "github.com/spf13/pflag"
+  version = "v1.0.1"
+
+[[constraint]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.11.0"
+
+[[constraint]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.11.0"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.11.0"
+
+[[override]]
+  name = "github.com/golang/protobuf"
+  version = "v1.1.0"
+
+[[constraint]]
+  name = "github.com/knative/eventing"
+  revision = "f8e956305ed4bc07220d48905b0f1045a0043693" # Awaiting proper tag / blessed sha
+
+[[constraint]]
+  name = "github.com/knative/serving"
+  # this is the latest on master as of 2018-08-14 13:00 EDT
+  revision = "3da9b7a56f155567b15ac46aad16c96a17972e50"
+
+[[constraint]]
+  name = "github.com/knative/build"
+  # this is the version knative/serving depends on
+  revision = "e7a708f4562329a7d2bd51eb9f2a3889145a80a7"
+
+[[constraint]]
+  name = "github.com/ghodss/yaml"
+  version = "v1.0.0"
