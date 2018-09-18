@@ -61,8 +61,8 @@ func ImageRelocate(c *core.Client) *cobra.Command {
     ... 
 
 `,
-		Example: `  riff image relocate --manifest=path/to/manifest.yaml --registry=hostname --user=username --images=path/to/image-manifest.yaml --output=path/to/output/dir
-  riff image relocate --file=path/to/file --registry=hostname --user=username --images=path/to/image-manifest.yaml --output=path/to/output`,
+		Example: `  riff image relocate --manifest=path/to/manifest.yaml --registry=hostname --registry-user=username --images=path/to/image-manifest.yaml --output=path/to/output/dir
+  riff image relocate --file=path/to/file --registry=hostname --registry-user=username --images=path/to/image-manifest.yaml --output=path/to/output`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				return errors.New("the `image relocate` command does not support positional arguments")
