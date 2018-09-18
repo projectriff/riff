@@ -7,3 +7,4 @@ knative:
 - https://storage.googleapis.com/knative-releases/eventing/previous/v20180830-5d35af5/release-clusterbus-stub.yaml
 namespace:
 - https://storage.googleapis.com/riff-releases/previous/riff-build/riff-build-0.1.0.yaml
+- https://storage.googleapis.com/riff-releases/riff-cnb-buildtemplate-0.1.0.pre.2.yaml

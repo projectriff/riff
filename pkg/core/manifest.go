@@ -19,9 +19,10 @@ package core
 
 import (
 	"fmt"
-	"github.com/projectriff/riff/pkg/fileutils"
 	"net/url"
 	"path/filepath"
+
+	"github.com/projectriff/riff/pkg/fileutils"
 
 	"github.com/ghodss/yaml"
 )
@@ -40,7 +41,8 @@ var manifests = map[string]*Manifest{
 			"https://storage.googleapis.com/knative-releases/eventing/latest/release-clusterbus-stub.yaml",
 		},
 		Namespace: []string{
-			"https://storage.googleapis.com/riff-releases/previous/riff-build/riff-build-0.1.0.yaml",
+			"https://storage.googleapis.com/riff-releases/latest/riff-build.yaml",
+			"https://storage.googleapis.com/riff-releases/riff-cnb-buildtemplate-0.1.0.pre.2.yaml",
 		},
 	},
 	"stable": &Manifest{
@@ -55,6 +57,7 @@ var manifests = map[string]*Manifest{
 		},
 		Namespace: []string{
 			"https://storage.googleapis.com/riff-releases/previous/riff-build/riff-build-0.1.0.yaml",
+			"https://storage.googleapis.com/riff-releases/riff-cnb-buildtemplate-0.1.0.pre.2.yaml",
 		},
 	},
 	"v0.1.2": &Manifest{

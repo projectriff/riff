@@ -45,9 +45,11 @@ type CreateFunctionOptions struct {
 	GitRepo     string
 	GitRevision string
 
-	InvokerURL string
-	Handler    string
-	Artifact   string
+	BuildpackImage string
+	InvokerURL     string
+
+	Handler  string
+	Artifact string
 }
 
 func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
@@ -71,24 +73,48 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 	annotations[buildAnnotation] = "1"
 	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
 
-	s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
-		ServiceAccountName: "riff-build",
-		Source: &build.SourceSpec{
-			Git: &build.GitSourceSpec{
-				Url:      options.GitRepo,
-				Revision: options.GitRevision,
+	if options.InvokerURL != "" {
+		// invoker based cluster build
+		s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
+			ServiceAccountName: "riff-build",
+			Source: &build.SourceSpec{
+				Git: &build.GitSourceSpec{
+					Url:      options.GitRepo,
+					Revision: options.GitRevision,
+				},
 			},
-		},
-		Template: &build.TemplateInstantiationSpec{
-			Name: "riff",
-			Arguments: []build.ArgumentSpec{
-				{Name: "IMAGE", Value: options.Image},
-				{Name: "INVOKER_PATH", Value: options.InvokerURL},
-				{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
-				{Name: "FUNCTION_HANDLER", Value: options.Handler},
-				{Name: "FUNCTION_NAME", Value: options.Name},
+			Template: &build.TemplateInstantiationSpec{
+				Name: "riff",
+				Arguments: []build.ArgumentSpec{
+					{Name: "IMAGE", Value: options.Image},
+					{Name: "INVOKER_PATH", Value: options.InvokerURL},
+					{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
+					{Name: "FUNCTION_HANDLER", Value: options.Handler},
+					{Name: "FUNCTION_NAME", Value: options.Name},
+				},
 			},
-		},
+		}
+	} else if options.BuildpackImage != "" {
+		// buildpack based cluster build
+		s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
+			ServiceAccountName: "riff-build",
+			Source: &build.SourceSpec{
+				Git: &build.GitSourceSpec{
+					Url:      options.GitRepo,
+					Revision: options.GitRevision,
+				},
+			},
+			Template: &build.TemplateInstantiationSpec{
+				Name: "cnb",
+				Arguments: []build.ArgumentSpec{
+					{Name: "IMAGE", Value: options.Image},
+					// TODO configure buildtemplate based on buildpack image
+					// {Name: "TBD", Value: options.BuildpackImage},
+				},
+			},
+		}
+	} else {
+		return nil, fmt.Errorf("unknown build permutation")
 	}
 
 	if !options.DryRun {

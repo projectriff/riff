@@ -35,7 +35,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7fc899cacb3ae1c5334923fc52b926f177d2bf95ad822a47e19f1719fec9cf19"
+  digest = "1:46ece04e6a97988df9eaef6c7542cbd69b5afbf7bb85b9b162f2ea9138b69d5c"
   name = "github.com/boz/kcache"
   packages = [
     ".",
@@ -96,7 +96,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:556f22e028349b0c471e93810944e497418feccc75e6cf763cbadbc636ce0882"
+  digest = "1:1b3dd24f14a5280710fc7a3aa2480b6e4d20fdfc905841de9a3aa2aa2f1d4ee9"
   name = "github.com/gogo/protobuf"
   packages = [
     "proto",
@@ -115,7 +115,7 @@
   revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
-  digest = "1:713cc7628304d027a7e9edcb52da888a8912d6405250a8d9c8eff6f41dd54398"
+  digest = "1:03e14cff610a8a58b774e36bd337fa979482be86aab01be81fb8bbd6d0f07fc8"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -137,7 +137,7 @@
   revision = "4030bb1f1f0c35b30ca7009e9ebd06849dd45306"
 
 [[projects]]
-  digest = "1:b787093a6b46cbdb290b2b304d12352eeff1bf7870852c3a0636acf87128c32b"
+  digest = "1:d2754cafcab0d22c13541618a8029a70a8959eb3525ff201fe971637e2274cd0"
   name = "github.com/google/go-cmp"
   packages = [
     "cmp",
@@ -159,7 +159,7 @@
   revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
 
 [[projects]]
-  digest = "1:add738701bd5b2b985c0c37011092c57218bdc46caf1e682a73dc210ad36b03f"
+  digest = "1:06a7dadb7b760767341ffb6c8d377238d68a1226f2b21b5d497d2e3f6ecf6b4e"
   name = "github.com/googleapis/gnostic"
   packages = [
     "OpenAPIv2",
@@ -172,7 +172,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a1db0214936912602a7a8cedc09a2e3211f5c097dc89189fb4b3bc86346c9e89"
+  digest = "1:7fdf3223c7372d1ced0b98bf53457c5e89d89aecbad9a77ba9fcc6e01f9e5621"
   name = "github.com/gregjones/httpcache"
   packages = [
     ".",
@@ -206,7 +206,7 @@
   version = "1.1.4"
 
 [[projects]]
-  digest = "1:401443f610e8914dd23643499fb379d4a084fd812bf33273e0c31d23e7660693"
+  digest = "1:56e5ca4c6ba1f620ada9def804ea4e13bde71d963a43293e2b1d1e299d8b7680"
   name = "github.com/knative/build"
   packages = [
     "pkg/apis/build",
@@ -216,7 +216,7 @@
   revision = "e7a708f4562329a7d2bd51eb9f2a3889145a80a7"
 
 [[projects]]
-  digest = "1:3b4efd11eb6d3f0739b778fd668d73926d59c90d37582e57461522a989e49b75"
+  digest = "1:b3d25afb2b760e4e6b6aef9c553a3a890a24e1ee301e5f0f76d72bb47fd4a5ee"
   name = "github.com/knative/eventing"
   packages = [
     "pkg/apis/channels",
@@ -242,7 +242,7 @@
   revision = "bc264c290f777cc51f53644a1996f5e8887dcba6"
 
 [[projects]]
-  digest = "1:0e2a3356b8ef56c5d26ed5c133cade7a1448740c62abf0b2d1d44572facef00a"
+  digest = "1:bef8975198e19cef26c9855db6c2e705cd9ae4582360da4df451a51cede4b155"
   name = "github.com/knative/serving"
   packages = [
     "pkg/apis/autoscaling",
@@ -290,7 +290,7 @@
   version = "1.0.1"
 
 [[projects]]
-  digest = "1:56283551286baef9d1586e5538f7f179a6ff98b2901b55a19f0eb2ceb58d5c0c"
+  digest = "1:ca8e828bab5a396380d8db6f91b01fe848f91639c3784b9eb5a893ba63815fac"
   name = "github.com/onsi/ginkgo"
   packages = [
     ".",
@@ -317,7 +317,7 @@
   version = "v1.5.0"
 
 [[projects]]
-  digest = "1:25f2dd545acb9437f5cd2036d99e9dba57a1513f05c14fa8f4da959128f1f803"
+  digest = "1:ac6e658516a8b73fdf62b375a93445d4b768548774940dcedd112d5d30e37015"
   name = "github.com/onsi/gomega"
   packages = [
     ".",
@@ -380,7 +380,7 @@
   version = "v1.5.1"
 
 [[projects]]
-  digest = "1:e9d79c7c83750d7a14141c335dd581c7fdeb0a0f7c47aba80a32562e53aff480"
+  digest = "1:f3cd75f81ee2b143bd354d906370261e94fc58e66dd5d632e1d6cde828338741"
   name = "github.com/spf13/cobra"
   packages = [
     ".",
@@ -407,7 +407,7 @@
   version = "v0.1.1"
 
 [[projects]]
-  digest = "1:aa844d56b9832b9717d4b18ce20029795eae169a37f319ac6bc7c9c12a56a669"
+  digest = "1:81d363777b015e85bd42b978b80f4f5ecdaa43e11452ba8ff7ea93db3ce166bd"
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
@@ -427,7 +427,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:618197cc1cf8d6fde825348194672343922ac6f9b06712ef7ca1c16a332b0012"
+  digest = "1:fb2f06fdfff11b3f18465dd0fb811c91fdb5d813777a6dacf0216a12edd6d236"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -445,7 +445,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4182888816989aa2ac1cd1f160bc9c8f32a831d7317d33731616eb27496e6e98"
+  digest = "1:20be1c62ac412f0f743bb5afdf2b3e343cb2f5b6dbcfb5ea09dac0d3d476dc2f"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
@@ -459,7 +459,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:64107e3c8f52f341891a565d117bf263ed396fe0c16bad19634b25be25debfaa"
+  digest = "1:5420733d35e5e562fffc7c5b99660f3587af042b5420f19b17fe0426e6a5259d"
   name = "golang.org/x/sys"
   packages = [
     "unix",
@@ -469,7 +469,7 @@
   revision = "1b2967e3c290b7c545b3db0deeda16e9be4f98a2"
 
 [[projects]]
-  digest = "1:662ba4579f5a6cd02a6d54c8e99517f1166fda9fee60519258e1e2f64d232b78"
+  digest = "1:8a12cbc891b7130d3f660f8a309e5c0b083f831e6ac38cdaa1f12e63c12d6bea"
   name = "golang.org/x/text"
   packages = [
     "collate",
@@ -512,7 +512,7 @@
   revision = "fbb02b2291d28baffd63558aa44b4b56f178d650"
 
 [[projects]]
-  digest = "1:0f41a4605e6df63445a5fc4e6df9262976cb56811b1db33d6c53c44459a91c02"
+  digest = "1:b5aeceb800276be69165a745328380c8a4b6f2edc7a6bac112e22c8596ed8a49"
   name = "google.golang.org/appengine"
   packages = [
     ".",
@@ -547,7 +547,7 @@
   version = "v2.2.1"
 
 [[projects]]
-  digest = "1:8627576fb671ee25455068884d59f8038b67b516db984ef66f8792e953ff3b8a"
+  digest = "1:8960ef753a87391086a307122d23cd5007cee93c28189437e4f1b6ed72bffc50"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1alpha1",
@@ -585,7 +585,7 @@
   version = "kubernetes-1.11.0"
 
 [[projects]]
-  digest = "1:8518064abef6cd5613638763a1b01b323e0616079d0bd0f89f96b01cf2884dd3"
+  digest = "1:45564af5399f7e50a65f77e4150b2c0e5d97969a064fd78d11a04b752331df69"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -630,7 +630,7 @@
   version = "kubernetes-1.11.0"
 
 [[projects]]
-  digest = "1:75e87eb2e820324ae9a7f87702823b0bb89e05abe218019d5462becdd9007e20"
+  digest = "1:bda0ff4fb974da34c256b4db5d01d7351f20cbb9aecf355aeceed922bfb82471"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -711,6 +711,7 @@
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/onsi/gomega/gstruct",
+    "github.com/pkg/errors",
     "github.com/spf13/cobra",
     "github.com/spf13/cobra/doc",
     "github.com/spf13/pflag",
