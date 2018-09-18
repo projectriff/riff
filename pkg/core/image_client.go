@@ -51,9 +51,9 @@ func (c *imageClient) PushImages(options PushImagesOptions) error {
 		return err
 	}
 	distroLocation := filepath.Dir(options.Images)
-	for name, sha := range imManifest.Images {
-		filename := fmt.Sprintf("%s/images/%s", distroLocation, sha)
-		if err := c.docker.PushImage(string(name), string(sha), filename); err != nil {
+	for name, digest := range imManifest.Images {
+		filename := filepath.Join(distroLocation, "images", string(digest))
+		if err := c.docker.PushImage(string(name), string(digest), filename); err != nil {
 			return err
 		}
 	}

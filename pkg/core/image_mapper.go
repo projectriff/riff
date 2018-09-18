@@ -18,6 +18,7 @@ package core
 
 import (
 	"fmt"
+	"path"
 	"strings"
 )
 
@@ -48,17 +49,17 @@ func newImageMapper(mappedHost string, mappedUser string, images []imageName) (*
 			return nil, err
 		}
 
-		fullImg := fmt.Sprintf("%s/%s/%s", imgHost, imgUser, imgRepoPath)
+		fullImg := path.Join(imgHost, imgUser, imgRepoPath)
 		mapped := mapImage(mappedHost, mappedUser, imgRepoPath)
 
 		replacements = append(replacements, quote(fullImg), quote(mapped))
 		replacements = append(replacements, spacePrefix(fullImg), spacePrefix(mapped))
 		if imgHost == dockerHubHost {
-			elidedImg := fmt.Sprintf("%s/%s", imgUser, imgRepoPath)
+			elidedImg := path.Join(imgUser, imgRepoPath)
 			replacements = append(replacements, quote(elidedImg), quote(mapped))
 			replacements = append(replacements, spacePrefix(elidedImg), spacePrefix(mapped))
 
-			fullImg := fmt.Sprintf("%s/%s/%s", fullDockerHubHost, imgUser, imgRepoPath)
+			fullImg := path.Join(fullDockerHubHost, imgUser, imgRepoPath)
 			replacements = append(replacements, quote(fullImg), quote(mapped))
 			replacements = append(replacements, spacePrefix(fullImg), spacePrefix(mapped))
 		}
@@ -70,7 +71,7 @@ func newImageMapper(mappedHost string, mappedUser string, images []imageName) (*
 }
 
 func mapImage(mappedHost string, mappedUser string, imgRepoPath string) string {
-	return fmt.Sprintf("%s/%s/%s", mappedHost, mappedUser, sanitiseRepoPath(imgRepoPath))
+	return path.Join(mappedHost, mappedUser, sanitiseRepoPath(imgRepoPath))
 }
 
 func sanitiseRepoPath(repoPath string) string {
