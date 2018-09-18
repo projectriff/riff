@@ -75,6 +75,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 			AtPosition(functionCreateRuntimeIndex, ValidName()),
 			AtPosition(functionCreateFunctionNameIndex, ValidName()),
 		),
+		PreRunE: FlagsValidatorAsCobraRunE(AtLeastOneOf("git-repo", "local")),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			fnName := args[functionCreateFunctionNameIndex]
 
@@ -132,8 +133,9 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
 	command.MarkFlagRequired("image")
 	command.Flags().StringVar(&createFunctionOptions.GitRepo, "git-repo", "", "the `URL` for a git repository hosting the function code")
-	command.MarkFlagRequired("git-repo")
 	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` of the function code to use")
+	command.Flags().StringVarP(&createFunctionOptions.LocalPath, "local", "l", "", "path to local source to build the image from")
+	command.Flag("local").NoOptDefVal = "."
 	command.Flags().StringVar(&createFunctionOptions.Handler, "handler", "", "the name of the `method or class` to invoke, depending on the runtime used")
 	command.Flags().StringVar(&createFunctionOptions.Artifact, "artifact", "", "`path` to the function source code or jar file; auto-detected if not specified")
 	command.Flags().BoolVarP(&createFunctionOptions.Verbose, "verbose", "v", false, verboseUsage)

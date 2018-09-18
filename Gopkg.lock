@@ -10,6 +10,22 @@
   version = "v0.25.0"
 
 [[projects]]
+  digest = "1:167b6f65a6656de568092189ae791253939f076df60231fdd64588ac703892a1"
+  name = "github.com/BurntSushi/toml"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "b26d9c308763d68093482582cea63d69be07a0f0"
+  version = "v0.3.0"
+
+[[projects]]
+  digest = "1:2be791e7b333ff7c06f8fb3dc18a7d70580e9399dbdffd352621d067ff260b6e"
+  name = "github.com/Microsoft/go-winio"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "97e4973ce50b2ff5f09635a57e2b88a037aae829"
+  version = "v0.4.11"
+
+[[projects]]
   branch = "master"
   digest = "1:2f58db73f93d232ca168a201463c5741f594754b8cfe77f6b969fe3d958595c8"
   name = "github.com/boz/go-lifecycle"
@@ -56,6 +72,33 @@
   revision = "fb1338d323013e9456687dc080038aa0bb211783"
 
 [[projects]]
+  digest = "1:80801b5464a8f5ee7b9c89c01b7eba81b84117b344c2c5cf23a38cc9643fa5ea"
+  name = "github.com/buildpack/lifecycle"
+  packages = [
+    ".",
+    "img",
+  ]
+  pruneopts = "NUT"
+  revision = "5afbc99a71b820aaffc43b148d3fa47b1587e3e3"
+
+[[projects]]
+  digest = "1:ddd939b77855695af818323aabfa2f65c9b27c0277341b61068ff09a5c24a82d"
+  name = "github.com/buildpack/pack"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "978bc025120e857f4d7f4408d3b11aa9ed594d9f"
+
+[[projects]]
+  digest = "1:a7119e9448df7ce93bb1952de22354b41a4529f59f249ba6cc932cd217a2aac3"
+  name = "github.com/buildpack/packs"
+  packages = [
+    ".",
+    "img",
+  ]
+  pruneopts = "NUT"
+  revision = "aa30a412923763df37e83f14a6e4e0fe07e11f25"
+
+[[projects]]
   digest = "1:7cb4fdca4c251b3ef8027c90ea35f70c7b661a593b9eeae34753c65499098bb1"
   name = "github.com/cpuguy83/go-md2man"
   packages = ["md2man"]
@@ -70,6 +113,62 @@
   pruneopts = "NUT"
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
+
+[[projects]]
+  digest = "1:3cabbabc9e0e4aa7e12b882bdc213f41cf8bd2b2ce2a7b5e0aceaf8a6a78049b"
+  name = "github.com/docker/distribution"
+  packages = [
+    "digest",
+    "reference",
+  ]
+  pruneopts = "NUT"
+  revision = "48294d928ced5dd9b378f7fd7c6f5da3ff3f2c89"
+  version = "v2.6.2"
+
+[[projects]]
+  digest = "1:b68599a3121a71063743f22a860c840e13eb3ba7a8dffdb57edb0507b19f5fbe"
+  name = "github.com/docker/docker"
+  packages = [
+    "api/types",
+    "api/types/blkiodev",
+    "api/types/container",
+    "api/types/events",
+    "api/types/filters",
+    "api/types/mount",
+    "api/types/network",
+    "api/types/reference",
+    "api/types/registry",
+    "api/types/strslice",
+    "api/types/swarm",
+    "api/types/time",
+    "api/types/versions",
+    "api/types/volume",
+    "client",
+    "pkg/tlsconfig",
+  ]
+  pruneopts = "NUT"
+  revision = "092cba3727bb9b4a2f0e922cd6c0f93ea270e363"
+  version = "v1.13.1"
+
+[[projects]]
+  digest = "1:2a47f7eb1a2c30428d1ee6808cb66d4deb17e68a3e55d696f03c8068552ba5e8"
+  name = "github.com/docker/go-connections"
+  packages = [
+    "nat",
+    "sockets",
+    "tlsconfig",
+  ]
+  pruneopts = "NUT"
+  revision = "7395e3f8aa162843a74ed6d48e79627d9792ac55"
+  version = "v0.4.0"
+
+[[projects]]
+  digest = "1:4340101f42556a9cb2f7a360a0e95a019bfef6247d92e6c4c46f2433cf86a482"
+  name = "github.com/docker/go-units"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "47565b4f722fb6ceae66b95f853feed578a4a51c"
+  version = "v0.3.3"
 
 [[projects]]
   digest = "1:ade392a843b2035effb4b4a2efa2c3bab3eb29b992e98bacf9c898b0ecb54e45"
@@ -151,12 +250,41 @@
   version = "v0.2.0"
 
 [[projects]]
+  digest = "1:803625ea022516658816e1540990a1a75f4eef57a0799a3f1f97ed20dde8beb2"
+  name = "github.com/google/go-containerregistry"
+  packages = [
+    "pkg/authn",
+    "pkg/name",
+    "pkg/v1",
+    "pkg/v1/daemon",
+    "pkg/v1/empty",
+    "pkg/v1/mutate",
+    "pkg/v1/partial",
+    "pkg/v1/random",
+    "pkg/v1/remote",
+    "pkg/v1/remote/transport",
+    "pkg/v1/tarball",
+    "pkg/v1/types",
+    "pkg/v1/v1util",
+  ]
+  pruneopts = "NUT"
+  revision = "697ee0b3d46eff19ed2b30f86230377061203f79"
+
+[[projects]]
   branch = "master"
   digest = "1:52c5834e2bebac9030c97cc0798ac11c3aa8a39f098aeb419f142533da6cd3cc"
   name = "github.com/google/gofuzz"
   packages = ["."]
   pruneopts = "NUT"
   revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
+
+[[projects]]
+  digest = "1:a1578f7323eca2b88021fdc9a79a99833d40b12c32a5ea4f284e2fad19ea2657"
+  name = "github.com/google/uuid"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "d460ce9f8df2e77fb1ba55ca87fafed96c607494"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:06a7dadb7b760767341ffb6c8d377238d68a1226f2b21b5d497d2e3f6ecf6b4e"
@@ -427,7 +555,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fb2f06fdfff11b3f18465dd0fb811c91fdb5d813777a6dacf0216a12edd6d236"
+  digest = "1:f46a049004f63f3f7d128ce1bc478d14f25ecc6e83ab5dc7be4def08a23c1ef4"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -439,6 +567,8 @@
     "http2",
     "http2/hpack",
     "idna",
+    "internal/socks",
+    "proxy",
   ]
   pruneopts = "NUT"
   revision = "039a4258aec0ad3c79b905677cceeab13b296a77"
@@ -700,6 +830,7 @@
     "github.com/boz/go-logutil",
     "github.com/boz/kail",
     "github.com/boz/kcache/types/pod",
+    "github.com/buildpack/pack",
     "github.com/frioux/shellquote",
     "github.com/ghodss/yaml",
     "github.com/knative/build/pkg/apis/build/v1alpha1",

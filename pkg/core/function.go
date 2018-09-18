@@ -29,6 +29,7 @@ import (
 	"github.com/boz/go-logutil"
 	"github.com/boz/kail"
 	"github.com/boz/kcache/types/pod"
+	"github.com/buildpack/pack"
 	build "github.com/knative/build/pkg/apis/build/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -42,6 +43,7 @@ const buildAnnotation = "riff.projectriff.io/nonce"
 type CreateFunctionOptions struct {
 	CreateOrReviseServiceOptions
 
+	LocalPath   string
 	GitRepo     string
 	GitRevision string
 
@@ -74,6 +76,9 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
 
 	if options.InvokerURL != "" {
+		if options.LocalPath != "" {
+			return nil, fmt.Errorf("invoker build is not available locally")
+		}
 		// invoker based cluster build
 		s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
 			ServiceAccountName: "riff-build",
@@ -95,23 +100,43 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 			},
 		}
 	} else if options.BuildpackImage != "" {
-		// buildpack based cluster build
-		s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
-			ServiceAccountName: "riff-build",
-			Source: &build.SourceSpec{
-				Git: &build.GitSourceSpec{
-					Url:      options.GitRepo,
-					Revision: options.GitRevision,
+		if options.LocalPath != "" {
+			appDir := options.LocalPath
+			buildImage := options.BuildpackImage
+			runImage := "packs/run"
+			repoName := options.Image
+			// publish image unless the name starts with 'dev.local' or 'ko.local'.
+			// These have special meaning within knative and are the only Service
+			// images that will pull from the Docker deamon instead of a registry.
+			publish := strings.Index(options.Image, "dev.local/") != 0 && strings.Index(options.Image, "ko.local/") != 0
+			if options.DryRun {
+				// never publish for a DryRun
+				// TODO should we even build??
+				publish = false
+			}
+			err := pack.Build(appDir, buildImage, runImage, repoName, publish)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			// buildpack based cluster build
+			s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
+				ServiceAccountName: "riff-build",
+				Source: &build.SourceSpec{
+					Git: &build.GitSourceSpec{
+						Url:      options.GitRepo,
+						Revision: options.GitRevision,
+					},
 				},
-			},
-			Template: &build.TemplateInstantiationSpec{
-				Name: "riff-cnb",
-				Arguments: []build.ArgumentSpec{
-					{Name: "IMAGE", Value: options.Image},
-					// TODO configure buildtemplate based on buildpack image
-					// {Name: "TBD", Value: options.BuildpackImage},
+				Template: &build.TemplateInstantiationSpec{
+					Name: "riff-cnb",
+					Arguments: []build.ArgumentSpec{
+						{Name: "IMAGE", Value: options.Image},
+						// TODO configure buildtemplate based on buildpack image
+						// {Name: "TBD", Value: options.BuildpackImage},
+					},
 				},
-			},
+			}
 		}
 	} else {
 		return nil, fmt.Errorf("unknown build permutation")
