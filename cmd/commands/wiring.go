@@ -81,8 +81,6 @@ func resolveHomePath(p string) (string, error) {
 
 func CreateAndWireRootCommand() *cobra.Command {
 
-	kubeconfig := ""
-	masterURL := ""
 	var client core.Client
 	var kc core.KubectlClient
 	var dockerClient docker.Docker
@@ -100,13 +98,6 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		DisableAutoGenTag:          true,
 		SuggestionsMinimumDistance: 2,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			var err error
-			clientConfig, kubeClientSet, eventingClientSet, servingClientSet, err := realClientSetFactory(kubeconfig, masterURL)
-			if err != nil {
-				return err
-			}
-			client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet)
-			kc = core.NewKubectlClient(kubeClientSet)
 			dockerClient = docker.RealDocker(os.Stdin, cmd.OutOrStdout(), cmd.OutOrStderr())
 			imageClient = core.NewImageClient(dockerClient)
 			return nil
@@ -115,16 +106,15 @@ See https://projectriff.io and https://github.com/knative/docs`,
 
 	installAdvancedUsage(rootCmd)
 
-	rootCmd.PersistentFlags().StringVar(&kubeconfig, "kubeconfig", "~/.kube/config", "the `path` of a kubeconfig")
-	rootCmd.PersistentFlags().StringVar(&masterURL, "master", "", "the `address` of the Kubernetes API server; overrides any value in kubeconfig")
-
 	function := Function()
+	installKubeConfigSupport(function, &client, &kc)
 	function.AddCommand(
 		FunctionCreate(&client),
 		FunctionBuild(&client),
 	)
 
 	service := Service()
+	installKubeConfigSupport(service, &client, &kc)
 	service.AddCommand(
 		ServiceList(&client),
 		ServiceCreate(&client),
@@ -135,6 +125,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	)
 
 	channel := Channel()
+	installKubeConfigSupport(channel, &client, &kc)
 	channel.AddCommand(
 		ChannelList(&client),
 		ChannelCreate(&client),
@@ -148,6 +139,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	)
 
 	namespace := Namespace()
+	installKubeConfigSupport(namespace, &client, &kc)
 	namespace.AddCommand(
 		NamespaceInit(&kc),
 	)
@@ -192,4 +184,34 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	})
 
 	return rootCmd
+}
+
+// installKubeConfigSupport is to be applied to commands (or parents of commands) that construct a k8s client thanks
+// to a kubeconfig configuration. It adds two flags and sets up the PersistentPreRunE function so that it reads
+// those configuration files. Hence, when entering the RunE function of the command, the provided clients (passed by
+// reference here and to the command creation helpers) are correctly initialized.
+func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *core.KubectlClient) {
+
+	kubeconfig := ""
+	masterURL := ""
+
+	command.PersistentFlags().StringVar(&kubeconfig, "kubeconfig", "~/.kube/config", "the `path` of a kubeconfig")
+	command.PersistentFlags().StringVar(&masterURL, "master", "", "the `address` of the Kubernetes API server; overrides any value in kubeconfig")
+
+	oldPersistentPreRunE := command.PersistentPreRunE
+	command.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		var err error
+		clientConfig, kubeClientSet, eventingClientSet, servingClientSet, err := realClientSetFactory(kubeconfig, masterURL)
+		if err != nil {
+			return err
+		}
+		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet)
+		*kc = core.NewKubectlClient(kubeClientSet)
+
+		if oldPersistentPreRunE != nil {
+			return oldPersistentPreRunE(cmd, args)
+		}
+		return nil
+	}
+
 }

@@ -25,13 +25,6 @@ riff image push [flags]
   -i, --images string   path of an image manifest of image names to be pushed
 ```
 
-### Options inherited from parent commands
-
-```
-      --kubeconfig path   the path of a kubeconfig (default "~/.kube/config")
-      --master address    the address of the Kubernetes API server; overrides any value in kubeconfig
-```
-
 ### SEE ALSO
 
 * [riff image](riff_image.md)	 - Interact with docker images

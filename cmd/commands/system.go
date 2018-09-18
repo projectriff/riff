@@ -17,8 +17,6 @@
 package commands
 
 import (
-	"errors"
-
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
 )
@@ -54,17 +52,6 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
     - https://path/to/riff-buildtemplate-release.yaml
 ` +
 			"\nNote: relative file paths or http/https URLs may be used in the manifest.",
-		PreRunE: func(cmd *cobra.Command, args []string) error {
-			// TODO: implement support for global flags - for now don't allow their use
-			if cmd.Flags().Changed("kubeconfig") {
-				return errors.New("The 'kubeconfig' flag is not yet supported by the 'system install' command")
-			}
-			m, _ := cmd.Flags().GetString("master")
-			if len(m) > 0 {
-				return errors.New("The 'master' flag is not yet supported by the 'system install' command")
-			}
-			return nil
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			complete, err := (*kc).SystemInstall(options)
 			if err != nil {
@@ -95,17 +82,6 @@ func SystemUninstall(kc *core.KubectlClient) *cobra.Command {
 		Short:   "Remove riff and Knative system components",
 		Long:    "Remove riff and Knative system components.\n\nUse the `--istio` flag to also remove Istio components.",
 		Example: `  riff system uninstall`,
-		PreRunE: func(cmd *cobra.Command, args []string) error {
-			// TODO: implement support for global flags - for now don't allow their use
-			if cmd.Flags().Changed("kubeconfig") {
-				return errors.New("The 'kubeconfig' flag is not yet supported by the 'system install' command")
-			}
-			m, _ := cmd.Flags().GetString("master")
-			if len(m) > 0 {
-				return errors.New("The 'master' flag is not yet supported by the 'system install' command")
-			}
-			return nil
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			complete, err := (*kc).SystemUninstall(options)
 			if err != nil {

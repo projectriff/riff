@@ -12,9 +12,7 @@ See https://projectriff.io and https://github.com/knative/docs
 ### Options
 
 ```
-  -h, --help              help for riff
-      --kubeconfig path   the path of a kubeconfig (default "~/.kube/config")
-      --master address    the address of the Kubernetes API server; overrides any value in kubeconfig
+  -h, --help   help for riff
 ```
 
 ### SEE ALSO

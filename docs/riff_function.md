@@ -9,12 +9,7 @@ Interact with function related resources
 ### Options
 
 ```
-  -h, --help   help for function
-```
-
-### Options inherited from parent commands
-
-```
+  -h, --help              help for function
       --kubeconfig path   the path of a kubeconfig (default "~/.kube/config")
       --master address    the address of the Kubernetes API server; overrides any value in kubeconfig
 ```

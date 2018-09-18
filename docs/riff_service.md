@@ -9,12 +9,7 @@ Interact with service (as in `service.serving.knative.dev`) related resources.
 ### Options
 
 ```
-  -h, --help   help for service
-```
-
-### Options inherited from parent commands
-
-```
+  -h, --help              help for service
       --kubeconfig path   the path of a kubeconfig (default "~/.kube/config")
       --master address    the address of the Kubernetes API server; overrides any value in kubeconfig
 ```
