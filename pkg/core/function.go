@@ -77,17 +77,12 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 
 	if options.InvokerURL != "" {
 		if options.LocalPath != "" {
-			return nil, fmt.Errorf("invoker build is not available locally")
+			return nil, fmt.Errorf("invoker based builds are not available locally")
 		}
 		// invoker based cluster build
 		s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
 			ServiceAccountName: "riff-build",
-			Source: &build.SourceSpec{
-				Git: &build.GitSourceSpec{
-					Url:      options.GitRepo,
-					Revision: options.GitRevision,
-				},
-			},
+			Source:             c.makeBuildSourceSpec(options),
 			Template: &build.TemplateInstantiationSpec{
 				Name: "riff",
 				Arguments: []build.ArgumentSpec{
@@ -100,6 +95,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 			},
 		}
 	} else if options.BuildpackImage != "" {
+		// TODO support options.Artifact and options.Handler
 		if options.LocalPath != "" {
 			appDir := options.LocalPath
 			buildImage := options.BuildpackImage
@@ -122,12 +118,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 			// buildpack based cluster build
 			s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
 				ServiceAccountName: "riff-build",
-				Source: &build.SourceSpec{
-					Git: &build.GitSourceSpec{
-						Url:      options.GitRepo,
-						Revision: options.GitRevision,
-					},
-				},
+				Source:             c.makeBuildSourceSpec(options),
 				Template: &build.TemplateInstantiationSpec{
 					Name: "riff-cnb",
 					Arguments: []build.ArgumentSpec{
@@ -162,6 +153,15 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 	}
 
 	return s, nil
+}
+
+func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.SourceSpec {
+	return &build.SourceSpec{
+		Git: &build.GitSourceSpec{
+			Url:      options.GitRepo,
+			Revision: options.GitRevision,
+		},
+	}
 }
 
 func (c *client) displayFunctionCreationProgress(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}, errChan chan<- error) {
