@@ -105,7 +105,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 				},
 			},
 			Template: &build.TemplateInstantiationSpec{
-				Name: "cnb",
+				Name: "riff-cnb",
 				Arguments: []build.ArgumentSpec{
 					{Name: "IMAGE", Value: options.Image},
 					// TODO configure buildtemplate based on buildpack image
