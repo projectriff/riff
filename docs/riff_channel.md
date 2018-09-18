@@ -9,12 +9,7 @@ Interact with channel related resources
 ### Options
 
 ```
-  -h, --help   help for channel
-```
-
-### Options inherited from parent commands
-
-```
+  -h, --help              help for channel
       --kubeconfig path   the path of a kubeconfig (default "~/.kube/config")
       --master address    the address of the Kubernetes API server; overrides any value in kubeconfig
 ```

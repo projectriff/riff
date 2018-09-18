@@ -9,12 +9,7 @@ Manage namespaces used for riff resources
 ### Options
 
 ```
-  -h, --help   help for namespace
-```
-
-### Options inherited from parent commands
-
-```
+  -h, --help              help for namespace
       --kubeconfig path   the path of a kubeconfig (default "~/.kube/config")
       --master address    the address of the Kubernetes API server; overrides any value in kubeconfig
 ```
