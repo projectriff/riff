@@ -58,7 +58,7 @@ var _ = Describe("The riff function create command", func() {
 			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
 		})
 		It("should fail without required flags", func() {
-			fc.SetArgs([]string{"node", "square", "--local"})
+			fc.SetArgs([]string{"node", "square", "--local-path"})
 			err := fc.Execute()
 			Expect(err).To(MatchError(ContainSubstring("required flag(s)")))
 			Expect(err).To(MatchError(ContainSubstring("image")))
@@ -68,7 +68,7 @@ var _ = Describe("The riff function create command", func() {
 			err := fc.Execute()
 			Expect(err).To(MatchError(ContainSubstring("at least one of")))
 			Expect(err).To(MatchError(ContainSubstring("--git-repo")))
-			Expect(err).To(MatchError(ContainSubstring("--local")))
+			Expect(err).To(MatchError(ContainSubstring("--local-path")))
 		})
 	})
 

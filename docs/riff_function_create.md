@@ -42,7 +42,7 @@ riff function create [flags]
       --handler method or class        the name of the method or class to invoke, depending on the runtime used
   -h, --help                           help for create
       --image repository/image[:tag]   the name of the image to build; must be a writable repository/image[:tag] with credentials configured
-  -l, --local string[="."]             path to local source to build the image from
+  -l, --local-path string[="."]        path to local source to build the image from
   -n, --namespace namespace            the namespace of the subscription, channel, and function
   -v, --verbose                        print details of command progress
   -w, --wait                           wait until the created resource reaches either a successful or an error state (automatic with --verbose)
