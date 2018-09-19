@@ -35,6 +35,7 @@ type Client interface {
 
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
 	DeleteSubscription(options DeleteSubscriptionOptions) error
+	ListSubscriptions(options ListSubscriptionsOptions) (*eventing.SubscriptionList, error)
 
 	ListChannels(options ListChannelOptions) (*eventing.ChannelList, error)
 	CreateChannel(options CreateChannelOptions) (*eventing.Channel, error)
