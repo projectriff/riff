@@ -47,7 +47,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	// runtime definitions
 	buildpacks := map[string]string{
 		"java-buildpack": "projectriff/buildpack",
-		"buildpack":      "projectriff/buildpack",
+		"detect":         "projectriff/buildpack",
 	}
 	invokers := map[string]string{
 		"java":            "https://github.com/projectriff/java-function-invoker/raw/v0.0.7/java-invoker.yaml",
