@@ -106,13 +106,13 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 			// images that will pull from the Docker deamon instead of a registry.
 			publish := strings.Index(options.Image, "dev.local/") != 0 && strings.Index(options.Image, "ko.local/") != 0
 			if options.DryRun {
-				// never publish for a DryRun
-				// TODO should we even build??
-				publish = false
-			}
-			err := pack.Build(appDir, buildImage, runImage, repoName, publish)
-			if err != nil {
-				return nil, err
+				// skip build for a dry run
+				log.Write([]byte("Skipping local build\n"))
+			} else {
+				err := pack.Build(appDir, buildImage, runImage, repoName, publish)
+				if err != nil {
+					return nil, err
+				}
 			}
 		} else {
 			// buildpack based cluster build
