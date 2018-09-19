@@ -179,6 +179,7 @@ func FunctionBuild(fcTool *core.Client) *cobra.Command {
 	LabelArgs(command, "FUNCTION_NAME")
 
 	command.Flags().StringVarP(&buildFunctionOptions.Namespace, "namespace", "n", "", "the `namespace` of the function")
+	command.Flags().StringVarP(&buildFunctionOptions.LocalPath, "local-path", "l", "", "path to local source to build the image from")
 	command.Flags().BoolVarP(&buildFunctionOptions.Verbose, "verbose", "v", false, verboseUsage)
 	command.Flags().BoolVarP(&buildFunctionOptions.Wait, "wait", "w", false, waitUsage)
 
