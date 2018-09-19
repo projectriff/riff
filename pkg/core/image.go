@@ -25,7 +25,6 @@ import (
 	"github.com/projectriff/riff/pkg/fileutils"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 
@@ -173,19 +172,29 @@ func relocateManifest(manifestPath string, mapper *imageMapper, imageManifestPat
 		return err
 	}
 
-	return copyImages(filepath.Dir(imageManifestPath), outputPath)
+	return linkImages(filepath.Dir(imageManifestPath), outputPath)
 }
 
-func copyImages(inputDir string, outputDir string) error {
+func linkImages(inputDir string, outputDir string) error {
 	imagesPath := filepath.Join(inputDir, "images")
 
-	// if there are no binary images, do not attempt to copy them
+	// if there are no binary images, do not attempt to link them
 	if !isDirectory(imagesPath) {
 		return nil
 	}
 
-	cmd := exec.Command("cp", "-r", imagesPath, outputDir)
-	return cmd.Run()
+	outputPath := filepath.Join(outputDir, "images")
+	err := os.MkdirAll(outputPath, outputDirPermissions)
+	if err != nil {
+		return err
+	}
+
+	return filepath.Walk(imagesPath, func(path string, info os.FileInfo, err error) error {
+		if path == imagesPath {
+			return nil
+		}
+		return os.Link(path, filepath.Join(outputPath, info.Name()))
+	})
 }
 
 func relocateImageManifest(imageManifestPath string, mapper *imageMapper, outputPath string) error {

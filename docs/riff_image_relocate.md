@@ -4,11 +4,11 @@ Relocate docker image names to another registry
 
 ### Synopsis
 
-Relocate either a single kubernetes configuration file or a riff manifest, its kubernetes configuration files, and an image manifest, so that image names refer to another (private or public) registry.
+Relocate either a single kubernetes configuration file or a riff manifest, its kubernetes configuration files, an image manifest, and any associated images, so that image names refer to another (private or public) registry.
 
 To relocate a single kubernetes configuration file, use the `--file` flag to specify the path or URL of the file. Use the `--output` flag to specify the path for the relocated file. If `--output` is an existing directory, the relocated file will be placed in that directory. Otherwise the relocated file will be written to the path specified in `--output`.
 
-To relocate a manifest, use the `--manifest` flag to specify the path or URL of a manifest file which provides the paths or URLs of the kubernetes configuration files for riff components. Use the `--output` flag to specify the path of a directory to contain the relocated manifest, kubernetes configuration files, and image manifest. Any associated images are copied to the output directory.
+To relocate a manifest, use the `--manifest` flag to specify the path or URL of a manifest file which provides the paths or URLs of the kubernetes configuration files for riff components. Use the `--output` flag to specify the path of a directory to contain the relocated manifest, kubernetes configuration files, image manifest, and images. Hard links to images are created in the output directory, so the output directory must be on the same file system as the images.
 
 Specify the registry hostname using the `--registry` flag, the user owning the images using the `--registry-user` flag, and the images to be mapped using the `--images` flag. The `--images` flag contains the path of an image manifest file with contents of the following form:
 
