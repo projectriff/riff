@@ -56,10 +56,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 		Long: "Create a new function resource from the content of the provided Git repo/revision.\n" +
 			"\nThe INVOKER arg defines the language invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function." +
 			"\nFrom then on you can use the sub-commands for the `service` command to interact with the service created for the function.\n\n" +
-			channelLongDesc + `
-
-` + envFromLongDesc + `
-`,
+			envFromLongDesc + "\n",
 		Example: `  riff function create node square --git-repo https://github.com/acme/square --image acme/square --namespace joseph-ns
   riff function create java tweets-logger --git-repo https://github.com/acme/tweets --image acme/tweets-logger:1.0.0`,
 		Args: ArgValidationConjunction(

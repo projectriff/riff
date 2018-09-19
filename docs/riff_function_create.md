@@ -9,8 +9,6 @@ Create a new function resource from the content of the provided Git repo/revisio
 The INVOKER arg defines the language invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function.
 From then on you can use the sub-commands for the `service` command to interact with the service created for the function.
 
-If an input channel and bus are specified, create the channel in the bus and subscribe the service to the channel.
-
 If `--env-from` is specified the source reference can be `configMapKeyRef` to select a key from a ConfigMap or `secretKeyRef` to select a key from a Secret. The following formats are supported:
 
     --env-from configMapKeyRef:{config-map-name}:{key-to-select}

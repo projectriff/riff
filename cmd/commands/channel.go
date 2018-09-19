@@ -82,8 +82,8 @@ func ChannelCreate(fcTool *core.Client) *cobra.Command {
 
 	LabelArgs(command, "CHANNEL_NAME")
 
-	command.Flags().StringVar(&options.Bus, "bus", "", busUsage)
-	command.Flags().StringVar(&options.ClusterBus, "cluster-bus", "", clusterBusUsage)
+	command.Flags().StringVar(&options.Bus, "bus", "", "the `name` of the bus to create the channel in.")
+	command.Flags().StringVar(&options.ClusterBus, "cluster-bus", "", "the `name` of the cluster bus to create the channel in.")
 	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", "the `namespace` of the channel and any non-cluster bus")
 
 	command.Flags().BoolVar(&options.DryRun, "dry-run", false, dryRunUsage)
