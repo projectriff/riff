@@ -37,7 +37,7 @@ func ImageRelocate(c *core.Client) *cobra.Command {
 		Use:   "relocate",
 		Short: "Relocate docker image names to another registry",
 		Long: "Relocate either a single kubernetes configuration file or a riff manifest, its kubernetes configuration files, " +
-			"and an image manifest, so that image names refer to another (private or public) registry.\n" +
+			"an image manifest, and any associated images, so that image names refer to another (private or public) registry.\n" +
 
 			"\nTo relocate a single kubernetes configuration file, use the `--file` flag to specify the path or URL of the file. Use " +
 			"the `--output` flag to specify the path for the relocated file. If `--output` is an existing directory, the relocated " +
@@ -45,8 +45,8 @@ func ImageRelocate(c *core.Client) *cobra.Command {
 
 			"\nTo relocate a manifest, use the `--manifest` flag to specify the path or URL of a manifest file which provides the paths or " +
 			"URLs of the kubernetes configuration files for riff components. Use the `--output` flag to specify the path of a " +
-			"directory to contain the relocated manifest, kubernetes configuration files, and image manifest. Any associated images "+
-			"are copied to the output directory.\n" +
+			"directory to contain the relocated manifest, kubernetes configuration files, image manifest, and images. Hard links to images "+
+			"are created in the output directory, so the output directory must be on the same file system as the images.\n" +
 
 			"\nSpecify the registry hostname using the `--registry` flag, the user owning the images using the `--registry-user` flag, " +
 			"and the images to be mapped using the `--images` flag. The `--images` flag contains the path of an " +
