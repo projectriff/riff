@@ -62,9 +62,15 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 		Use:   "create",
 		Short: "Create a new function resource",
 		Long: "Create a new function resource from the content of the provided Git repo/revision or local source.\n" +
-			"\nThe RUNTIME arg defines the language runtime that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function." +
-			"\nClassic riff Invoker runtimes are available in addition to experimental Buildpack runtimes." +
-			"\nBuildpack based runtimes support building from local source in addition to within the cluster. Locally built images prefixed with 'dev.local/' are saved to the local Docker daemon while all other images are pushed to the registry specified in the image name." +
+			"\nThe RUNTIME arg defines the language runtime that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function. The following runtimes are available:\n\n" +
+			// TODO make runtime help data-driven
+			"- 'java': uses riff's java-function-invoker (aliased as java-invoker)\n" +
+			"- 'node': uses riff's node-function-invoker (aliased as node-invoker)\n" +
+			"- 'command': uses riff's command-function-invoker (aliased as command-invoker)\n" +
+			"- 'java-buildpack': uses the riff Buildpack \n" +
+			"- 'detect': uses the riff Buildpack's detection (currently limited to Java functions) \n" +
+			"\nClassic riff Invoker runtimes are available in addition to experimental Buildpack runtimes.\n" +
+			"\nBuildpack based runtimes support building from local source in addition to within the cluster. Locally built images prefixed with 'dev.local/' are saved to the local Docker daemon while all other images are pushed to the registry specified in the image name.\n" +
 			"\nFrom then on you can use the sub-commands for the `service` command to interact with the service created for the function.\n\n" +
 			channelLongDesc + `
 
