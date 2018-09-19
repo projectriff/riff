@@ -96,6 +96,7 @@ func CreateAndWireRootCommand() *cobra.Command {
 riff is a CLI for functions on Knative.
 See https://projectriff.io and https://github.com/knative/docs`,
 		SilenceErrors:              true, // We'll print errors ourselves (after usage rather than before)
+		SilenceUsage:               true, // We'll print the *help* message instead of *usage* ourselves
 		DisableAutoGenTag:          true,
 		SuggestionsMinimumDistance: 2,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {

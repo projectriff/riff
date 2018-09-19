@@ -28,9 +28,12 @@ func main() {
 
 	root := commands.CreateAndWireRootCommand()
 
-	err := root.Execute()
+	sub, err := root.ExecuteC()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		if !sub.SilenceUsage { // May have been switched to true once we're past PreRunE()
+			sub.Help()
+		}
+		fmt.Fprintf(os.Stderr, "\nError: %v\n", err)
 		os.Exit(1)
 	}
 }
