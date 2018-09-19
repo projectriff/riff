@@ -2,34 +2,31 @@ package commands_test
 
 import (
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/cmd/commands"
 	"github.com/spf13/cobra"
 )
 
 var _ = Describe("`riff` root command", func() {
-	Context("subscription", func() {
+	Context("include subcommands", func() {
 		var rootCommand *cobra.Command
 
 		BeforeEach(func() {
 			rootCommand = commands.CreateAndWireRootCommand()
 		})
 
-		It("should be included in riff subcommands", func() {
-			Expect(commandNamesOf(rootCommand.Commands())).To(ContainElement("subscription"))
-		})
+		DescribeTable("which define their own",
+			func(subcommandName string, subsubcommandName string) {
+				serviceCmd := matchSubcommandByName(rootCommand, subcommandName)
 
-		It("should define a `create` subcommand", func() {
-			serviceCmd := matchSubcommandByName(rootCommand, "subscription")
-
-			Expect(commandNamesOf(serviceCmd.Commands())).To(ContainElement("create"))
-		})
-
-		It("should define a `delete` subcommand", func() {
-			serviceCmd := matchSubcommandByName(rootCommand, "subscription")
-
-			Expect(commandNamesOf(serviceCmd.Commands())).To(ContainElement("delete"))
-		})
+				Expect(serviceCmd).NotTo(BeNil(), "root command should include subcommand " + subcommandName)
+				Expect(commandNamesOf(serviceCmd.Commands())).To(ContainElement(subsubcommandName))
+			},
+			Entry("∃ `subscription create`", "subscription", "create"),
+			Entry("∃ `subscription delete`", "subscription", "delete"),
+			Entry("∃ `subscription list`", "subscription", "list"),
+		)
 	})
 
 })

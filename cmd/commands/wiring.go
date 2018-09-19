@@ -162,6 +162,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	subscription.AddCommand(
 		SubscriptionCreate(&client),
 		SubscriptionDelete(&client),
+		SubscriptionList(&client),
 	)
 
 	rootCmd.AddCommand(

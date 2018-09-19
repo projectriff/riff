@@ -23,11 +23,6 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type DeleteSubscriptionOptions struct {
-	Namespaced
-	Name       string
-}
-
 type CreateSubscriptionOptions struct {
 	Namespaced
 	Name       string
@@ -35,6 +30,15 @@ type CreateSubscriptionOptions struct {
 	Subscriber string
 	ReplyTo    string
 	DryRun     bool
+}
+
+type DeleteSubscriptionOptions struct {
+	Namespaced
+	Name       string
+}
+
+type ListSubscriptionsOptions struct {
+	Namespaced
 }
 
 func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha1.Subscription, error) {
@@ -70,4 +74,15 @@ func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha
 func (c *client) DeleteSubscription(options DeleteSubscriptionOptions) error {
 	namespace := c.explicitOrConfigNamespace(options.Namespaced)
 	return c.eventing.ChannelsV1alpha1().Subscriptions(namespace).Delete(options.Name, nil)
+}
+
+
+func (c *client) ListSubscriptions(options ListSubscriptionsOptions) (*v1alpha1.SubscriptionList, error) {
+	ns := c.explicitOrConfigNamespace(options.Namespaced)
+
+	list, err := c.eventing.ChannelsV1alpha1().Subscriptions(ns).List(meta_v1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
 }

@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"fmt"
+	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	"github.com/projectriff/riff/pkg/core"
 	. "github.com/spf13/cobra"
 )
@@ -12,6 +14,10 @@ const (
 const (
 	subscriptionDeleteNameIndex = iota
 	subscriptionDeleteNumberOfArgs
+)
+
+const (
+	subscriptionListNumberOfArgs = iota
 )
 
 func Subscription() *Command {
@@ -27,9 +33,9 @@ func SubscriptionCreate(client *core.Client) *Command {
 	command := &Command{
 		Use:   "create",
 		Short: "Create a new subscription, binding a service to an input channel",
-		Long: "Create a new, optionally named subscription, binding a service to an input channel. "+
-"The default name of the subscription is the provided subscriber name. "+
-"The subscription can optionally be bound to an output channel.",
+		Long: "Create a new, optionally named subscription, binding a service to an input channel. " +
+			"The default name of the subscription is the provided subscriber name. " +
+			"The subscription can optionally be bound to an output channel.",
 		Example: `  riff subscription create --channel tweets --subscriber tweets-logger
   riff subscription create my-subscription --channel tweets --subscriber tweets-logger
   riff subscription create --channel tweets --subscriber tweets-logger --reply-to logged-tweets`,
@@ -49,7 +55,7 @@ func SubscriptionCreate(client *core.Client) *Command {
 	}
 
 	LabelArgs(command, "SUBSCRIPTION_NAME")
-	defineFlags(command, &options)
+	defineFlagsForCreate(command, &options)
 	return command
 }
 
@@ -82,7 +88,35 @@ func SubscriptionDelete(client *core.Client) *Command {
 	return command
 }
 
-func defineFlags(command *Command, options *core.CreateSubscriptionOptions) {
+func SubscriptionList(client *core.Client) *Command {
+	listOptions := core.ListSubscriptionsOptions{}
+
+	command := &Command{
+		Use:   "list",
+		Short: "List existing subscriptions",
+		Example: `  riff subscription list
+  riff subscription list --namespace joseph-ns`,
+		Args: ExactArgs(subscriptionListNumberOfArgs),
+		RunE: func(cmd *Command, args []string) error {
+			subscriptions, err := (*client).ListSubscriptions(listOptions)
+			if err != nil {
+				return err
+			}
+
+			displayList(cmd, subscriptions)
+			PrintSuccessfulCompletion(cmd)
+			return nil
+		},
+	}
+
+
+	flags := command.Flags()
+	flags.StringVarP(&listOptions.Namespace, "namespace", "n", "", "the namespace of the subscriptions")
+
+	return command
+}
+
+func defineFlagsForCreate(command *Command, options *core.CreateSubscriptionOptions) {
 	flags := command.Flags()
 	flags.StringVarP(&options.Subscriber, "subscriber", "s", "", "the subscriber of the subscription")
 	flags.StringVarP(&options.Channel, "channel", "c", "", "the input channel of the subscription")
@@ -98,3 +132,12 @@ func computeSubscriptionName(args []string, options core.CreateSubscriptionOptio
 	}
 	return options.Subscriber
 }
+
+func displayList(cmd *Command, subscriptions *v1alpha1.SubscriptionList) {
+	display := makeSubscriptionDisplay(&subscriptions.Items)
+	stdout := cmd.OutOrStdout()
+	display.showHeaders(stdout)
+	display.showItems(stdout)
+	fmt.Fprintln(stdout)
+}
+

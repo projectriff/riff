@@ -207,6 +207,29 @@ func (_m *Client) ListServices(options core.ListServiceOptions) (*servingv1alpha
 	return r0, r1
 }
 
+// ListSubscriptions provides a mock function with given fields: options
+func (_m *Client) ListSubscriptions(options core.ListSubscriptionsOptions) (*v1alpha1.SubscriptionList, error) {
+	ret := _m.Called(options)
+
+	var r0 *v1alpha1.SubscriptionList
+	if rf, ok := ret.Get(0).(func(core.ListSubscriptionsOptions) *v1alpha1.SubscriptionList); ok {
+		r0 = rf(options)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1alpha1.SubscriptionList)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(core.ListSubscriptionsOptions) error); ok {
+		r1 = rf(options)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // RelocateImages provides a mock function with given fields: options
 func (_m *Client) RelocateImages(options core.RelocateImagesOptions) error {
 	ret := _m.Called(options)
