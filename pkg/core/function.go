@@ -18,7 +18,6 @@ package core
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -29,6 +28,7 @@ import (
 	"github.com/boz/go-logutil"
 	"github.com/boz/kail"
 	"github.com/boz/kcache/types/pod"
+	"github.com/buildpack/pack"
 	build "github.com/knative/build/pkg/apis/build/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -36,18 +36,26 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 )
 
-const functionLabel = "riff.projectriff.io/function"
-const buildAnnotation = "riff.projectriff.io/nonce"
+const (
+	functionLabel   = "riff.projectriff.io/function"
+	buildAnnotation = "riff.projectriff.io/nonce"
+	// annotation names with slashes are rejected :-/
+	buildpackBuildImageAnnotation = "riff.projectriff.io-buildpack-buildImage"
+	buildpackRunImageAnnotation   = "riff.projectriff.io-buildpack-runImage"
+)
 
 type CreateFunctionOptions struct {
 	CreateOrReviseServiceOptions
 
+	LocalPath   string
 	GitRepo     string
 	GitRevision string
 
-	InvokerURL string
-	Handler    string
-	Artifact   string
+	BuildpackImage string
+	InvokerURL     string
+
+	Handler  string
+	Artifact string
 }
 
 func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
@@ -71,24 +79,66 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 	annotations[buildAnnotation] = "1"
 	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
 
-	s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
-		ServiceAccountName: "riff-build",
-		Source: &build.SourceSpec{
-			Git: &build.GitSourceSpec{
-				Url:      options.GitRepo,
-				Revision: options.GitRevision,
+	if options.InvokerURL != "" {
+		if options.LocalPath != "" {
+			return nil, fmt.Errorf("invoker based builds are not available locally")
+		}
+		// invoker based cluster build
+		s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
+			ServiceAccountName: "riff-build",
+			Source:             c.makeBuildSourceSpec(options),
+			Template: &build.TemplateInstantiationSpec{
+				Name: "riff",
+				Arguments: []build.ArgumentSpec{
+					{Name: "IMAGE", Value: options.Image},
+					{Name: "INVOKER_PATH", Value: options.InvokerURL},
+					{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
+					{Name: "FUNCTION_HANDLER", Value: options.Handler},
+					{Name: "FUNCTION_NAME", Value: options.Name},
+				},
 			},
-		},
-		Template: &build.TemplateInstantiationSpec{
-			Name: "riff",
-			Arguments: []build.ArgumentSpec{
-				{Name: "IMAGE", Value: options.Image},
-				{Name: "INVOKER_PATH", Value: options.InvokerURL},
-				{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
-				{Name: "FUNCTION_HANDLER", Value: options.Handler},
-				{Name: "FUNCTION_NAME", Value: options.Name},
-			},
-		},
+		}
+	} else if options.BuildpackImage != "" {
+		// TODO support options.Artifact and options.Handler
+		if options.LocalPath != "" {
+			appDir := options.LocalPath
+			buildImage := options.BuildpackImage
+			runImage := "packs/run"
+			repoName := options.Image
+			publish := publishImage(repoName)
+
+			if s.ObjectMeta.Annotations == nil {
+				s.ObjectMeta.Annotations = make(map[string]string)
+			}
+			s.ObjectMeta.Annotations[buildpackBuildImageAnnotation] = buildImage
+			s.ObjectMeta.Annotations[buildpackRunImageAnnotation] = runImage
+
+			if options.DryRun {
+				// skip build for a dry run
+				log.Write([]byte("Skipping local build\n"))
+			} else {
+				err := pack.Build(appDir, buildImage, runImage, repoName, publish)
+				if err != nil {
+					return nil, err
+				}
+			}
+		} else {
+			// buildpack based cluster build
+			s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
+				ServiceAccountName: "riff-build",
+				Source:             c.makeBuildSourceSpec(options),
+				Template: &build.TemplateInstantiationSpec{
+					Name: "riff-cnb",
+					Arguments: []build.ArgumentSpec{
+						{Name: "IMAGE", Value: options.Image},
+						// TODO configure buildtemplate based on buildpack image
+						// {Name: "TBD", Value: options.BuildpackImage},
+					},
+				},
+			}
+		}
+	} else {
+		return nil, fmt.Errorf("unknown build permutation")
 	}
 
 	if !options.DryRun {
@@ -111,6 +161,15 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 	}
 
 	return s, nil
+}
+
+func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.SourceSpec {
+	return &build.SourceSpec{
+		Git: &build.GitSourceSpec{
+			Url:      options.GitRepo,
+			Revision: options.GitRevision,
+		},
+	}
 }
 
 func (c *client) displayFunctionCreationProgress(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}, errChan chan<- error) {
@@ -333,9 +392,10 @@ func (selectorDisjunction) String() string {
 
 type BuildFunctionOptions struct {
 	Namespaced
-	Name    string
-	Verbose bool
-	Wait    bool
+	Name      string
+	LocalPath string
+	Verbose   bool
+	Wait      bool
 }
 
 func (c *client) getServiceSpecGeneration(namespaced Namespaced, name string) (int64, error) {
@@ -349,21 +409,49 @@ func (c *client) getServiceSpecGeneration(namespaced Namespaced, name string) (i
 func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) error {
 	ns := c.explicitOrConfigNamespace(options.Namespaced)
 
-	s, err := c.service(options.Namespaced, options.Name)
+	service, err := c.service(options.Namespaced, options.Name)
 	if err != nil {
 		return err
 	}
 
-	gen := s.Spec.Generation
+	// create a copy before mutating
+	service = service.DeepCopy()
 
-	labels := s.Spec.RunLatest.Configuration.RevisionTemplate.Labels
+	gen := service.Spec.Generation
+
+	// TODO support non-RunLatest configurations
+	configuration := service.Spec.RunLatest.Configuration
+	build := configuration.Build
+	annotations := service.Annotations
+	labels := configuration.RevisionTemplate.Labels
 	if labels[functionLabel] == "" {
-		return errors.New(fmt.Sprintf("the service named \"%s\" is not a riff function", options.Name))
+		return fmt.Errorf("the service named \"%s\" is not a riff function", options.Name)
 	}
 
-	c.bumpNonceAnnotation(s)
+	c.bumpNonceAnnotation(service)
 
-	_, err = c.serving.ServingV1alpha1().Services(s.Namespace).Update(s)
+	if build == nil {
+		// function was build locally, attempt to reconstruct configuration
+		appDir := options.LocalPath
+		buildImage := annotations[buildpackBuildImageAnnotation]
+		runImage := annotations[buildpackRunImageAnnotation]
+		repoName := configuration.RevisionTemplate.Spec.Container.Image
+		publish := publishImage(repoName)
+
+		if buildImage == "" || runImage == "" {
+			return fmt.Errorf("unable to build function locally not built from a buildpack")
+		}
+		if appDir == "" {
+			return fmt.Errorf("local-path must be specified to rebuild function from source")
+		}
+
+		err := pack.Build(appDir, buildImage, runImage, repoName, publish)
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = c.serving.ServingV1alpha1().Services(service.Namespace).Update(service)
 	if err != nil {
 		return err
 	}
@@ -389,13 +477,20 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 			}
 		}
 		if options.Verbose {
-			go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, errChan)
+			go c.displayFunctionCreationProgress(ns, service.Name, log, stopChan, errChan)
 		}
-		err = c.waitForSuccessOrFailure(ns, s.Name, nextGen, stopChan, errChan)
+		err = c.waitForSuccessOrFailure(ns, service.Name, nextGen, stopChan, errChan)
 		if err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+// publishImage returns true unless the name starts with 'dev.local' or 'ko.local'.
+// These names have special meaning within knative and are the only Service
+// images that will pull from the Docker deamon instead of a registry.
+func publishImage(image string) bool {
+	return strings.Index(image, "dev.local/") != 0 && strings.Index(image, "ko.local/") != 0
 }

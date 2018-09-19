@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	functionCreateInvokerIndex = iota
+	functionCreateRuntimeIndex = iota
 	functionCreateFunctionNameIndex
 	functionCreateNumberOfArgs
 )
@@ -44,36 +44,56 @@ func Function() *cobra.Command {
 func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	createFunctionOptions := core.CreateFunctionOptions{}
 
+	// runtime definitions
+	buildpacks := map[string]string{
+		"java-buildpack": "projectriff/buildpack",
+		"detect":         "projectriff/buildpack",
+	}
 	invokers := map[string]string{
-		"command": "https://github.com/projectriff/command-function-invoker/raw/v0.0.7/command-invoker.yaml",
-		"java":    "https://github.com/projectriff/java-function-invoker/raw/v0.0.7/java-invoker.yaml",
-		"node":    "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
+		"java":            "https://github.com/projectriff/java-function-invoker/raw/v0.0.7/java-invoker.yaml",
+		"java-invoker":    "https://github.com/projectriff/java-function-invoker/raw/v0.0.7/java-invoker.yaml",
+		"command":         "https://github.com/projectriff/command-function-invoker/raw/v0.0.7/command-invoker.yaml",
+		"command-invoker": "https://github.com/projectriff/command-function-invoker/raw/v0.0.7/command-invoker.yaml",
+		"node":            "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
+		"node-invoker":    "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
 	}
 
 	command := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new function resource",
-		Long: "Create a new function resource from the content of the provided Git repo/revision.\n" +
-			"\nThe INVOKER arg defines the language invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function." +
+		Long: "Create a new function resource from the content of the provided Git repo/revision or local source.\n" +
+			"\nThe RUNTIME arg defines the language runtime that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function. The following runtimes are available:\n\n" +
+			// TODO make runtime help data-driven
+			"- 'java': uses riff's java-function-invoker (aliased as java-invoker)\n" +
+			"- 'node': uses riff's node-function-invoker (aliased as node-invoker)\n" +
+			"- 'command': uses riff's command-function-invoker (aliased as command-invoker)\n" +
+			"- 'java-buildpack': uses the riff Buildpack \n" +
+			"- 'detect': uses the riff Buildpack's detection (currently limited to Java functions) \n" +
+			"\nClassic riff Invoker runtimes are available in addition to experimental Buildpack runtimes.\n" +
+			"\nBuildpack based runtimes support building from local source in addition to within the cluster. Locally built images prefixed with 'dev.local/' are saved to the local Docker daemon while all other images are pushed to the registry specified in the image name.\n" +
 			"\nFrom then on you can use the sub-commands for the `service` command to interact with the service created for the function.\n\n" +
 			envFromLongDesc + "\n",
 		Example: `  riff function create node square --git-repo https://github.com/acme/square --image acme/square --namespace joseph-ns
   riff function create java tweets-logger --git-repo https://github.com/acme/tweets --image acme/tweets-logger:1.0.0`,
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(functionCreateNumberOfArgs),
-			AtPosition(functionCreateInvokerIndex, ValidName()),
+			AtPosition(functionCreateRuntimeIndex, ValidName()),
 			AtPosition(functionCreateFunctionNameIndex, ValidName()),
 		),
+		PreRunE: FlagsValidatorAsCobraRunE(AtLeastOneOf("git-repo", "local-path")),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			fnName := args[functionCreateFunctionNameIndex]
-			invoker := args[functionCreateInvokerIndex]
-			invokerURL, exists := invokers[invoker]
-			if !exists {
-				return fmt.Errorf("unknown invoker: %s", invoker)
+
+			runtime := args[functionCreateRuntimeIndex]
+			if buildpack, exists := buildpacks[runtime]; exists {
+				createFunctionOptions.BuildpackImage = buildpack
+			} else if invokerURL, exists := invokers[runtime]; exists {
+				createFunctionOptions.InvokerURL = invokerURL
+			} else {
+				return fmt.Errorf("unknown runtime: %s", runtime)
 			}
 
 			createFunctionOptions.Name = fnName
-			createFunctionOptions.InvokerURL = invokerURL
 			f, err := (*fcTool).CreateFunction(createFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err
@@ -99,7 +119,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 		},
 	}
 
-	LabelArgs(command, "INVOKER", "FUNCTION_NAME")
+	LabelArgs(command, "RUNTIME", "FUNCTION_NAME")
 
 	command.Flags().VarP(
 		BroadcastStringValue("",
@@ -118,9 +138,9 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
 	command.MarkFlagRequired("image")
 	command.Flags().StringVar(&createFunctionOptions.GitRepo, "git-repo", "", "the `URL` for a git repository hosting the function code")
-	command.MarkFlagRequired("git-repo")
 	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` of the function code to use")
-	command.Flags().StringVar(&createFunctionOptions.Handler, "handler", "", "the name of the `method or class` to invoke, depending on the invoker used")
+	command.Flags().StringVarP(&createFunctionOptions.LocalPath, "local-path", "l", "", "path to local source to build the image from")
+	command.Flags().StringVar(&createFunctionOptions.Handler, "handler", "", "the name of the `method or class` to invoke, depending on the runtime used")
 	command.Flags().StringVar(&createFunctionOptions.Artifact, "artifact", "", "`path` to the function source code or jar file; auto-detected if not specified")
 	command.Flags().BoolVarP(&createFunctionOptions.Verbose, "verbose", "v", false, verboseUsage)
 	command.Flags().BoolVarP(&createFunctionOptions.Wait, "wait", "w", false, waitUsage)
@@ -162,6 +182,7 @@ func FunctionBuild(fcTool *core.Client) *cobra.Command {
 	LabelArgs(command, "FUNCTION_NAME")
 
 	command.Flags().StringVarP(&buildFunctionOptions.Namespace, "namespace", "n", "", "the `namespace` of the function")
+	command.Flags().StringVarP(&buildFunctionOptions.LocalPath, "local-path", "l", "", "path to local source to build the image from")
 	command.Flags().BoolVarP(&buildFunctionOptions.Verbose, "verbose", "v", false, verboseUsage)
 	command.Flags().BoolVarP(&buildFunctionOptions.Wait, "wait", "w", false, waitUsage)
 

@@ -66,3 +66,33 @@
 [[constraint]]
   name = "github.com/ghodss/yaml"
   version = "v1.0.0"
+
+# Buildpack build support
+[[constraint]]
+  name = "github.com/buildpack/pack"
+  # this is the latest on master as of 2018-09-18 17:00 EDT
+  revision = "978bc025120e857f4d7f4408d3b11aa9ed594d9f"
+[[override]]
+  name = "github.com/buildpack/lifecycle"
+  revision = "5afbc99a71b820aaffc43b148d3fa47b1587e3e3"
+[[override]]
+  name = "github.com/buildpack/packs"
+  revision = "aa30a412923763df37e83f14a6e4e0fe07e11f25"
+[[override]]
+  name = "github.com/docker/distribution"
+  version = "v2.6.2"
+[[override]]
+  name = "github.com/docker/docker"
+  version = "v1.13.1"
+[[override]]
+  name = "github.com/docker/go-connections"
+  version = "v0.4.0"
+[[override]]
+  name = "github.com/docker/go-units"
+  version = "v0.3.3"
+[[override]]
+  name = "github.com/google/go-containerregistry"
+  revision = "697ee0b3d46eff19ed2b30f86230377061203f79"
+[[override]]
+  name = "github.com/sclevine/spec"
+  revision = "a925ac4bfbc9e5770f1239042559a18443f4d84b"
