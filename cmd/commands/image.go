@@ -45,7 +45,7 @@ func ImageRelocate(c *core.Client) *cobra.Command {
 
 			"\nTo relocate a manifest, use the `--manifest` flag to specify the path or URL of a manifest file which provides the paths or " +
 			"URLs of the kubernetes configuration files for riff components. Use the `--output` flag to specify the path of a " +
-			"directory to contain the relocated manifest, kubernetes configuration files, and image manifest. Any associated images "+
+			"directory to contain the relocated manifest, kubernetes configuration files, and image manifest. Any associated images " +
 			"are copied to the output directory.\n" +
 
 			"\nSpecify the registry hostname using the `--registry` flag, the user owning the images using the `--registry-user` flag, " +
@@ -85,15 +85,6 @@ func ImageRelocate(c *core.Client) *cobra.Command {
 			// prevent the default value of --manifest from conflicting with --file
 			if cmd.Flags().Changed("file") && !cmd.Flags().Changed("manifest") {
 				options.Manifest = ""
-			}
-
-			// FIXME: these flags should not apply to this command: https://github.com/projectriff/riff/issues/743
-			if cmd.Flags().Changed("kubeconfig") {
-				return errors.New("the 'kubeconfig' flag is not supported by the 'image relocate' command")
-			}
-			m, _ := cmd.Flags().GetString("master")
-			if len(m) > 0 {
-				return errors.New("the 'master' flag is not supported by the 'image relocate' command")
 			}
 
 			return nil
@@ -137,18 +128,6 @@ func ImagePush(c *core.ImageClient) *cobra.Command {
 		Long: "Push the set of images identified by the provided image manifest into a remote registry, for later consumption by `riff system install`.\n\n" +
 			"NOTE: This command requires the `docker` command line tool, as well as a (local) docker daemon and will load and tag the images using that daemon.",
 		Example: `  riff image push --images=riff-distro-xx/image-manifest.yaml`,
-		PreRunE: func(cmd *cobra.Command, args []string) error {
-			// FIXME: these flags should not apply to this command: https://github.com/projectriff/riff/issues/743
-			if cmd.Flags().Changed("kubeconfig") {
-				return errors.New("the 'kubeconfig' flag is not supported by the 'image relocate' command")
-			}
-			m, _ := cmd.Flags().GetString("master")
-			if len(m) > 0 {
-				return errors.New("the 'master' flag is not supported by the 'image relocate' command")
-			}
-
-			return nil
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*c).PushImages(options)
 			if err != nil {
