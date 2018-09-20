@@ -23,19 +23,19 @@ type namedExtractor struct {
 	fn   stringExtractor
 }
 
-func (display subscriptionDisplay) showHeaders(stdout io.Writer) {
+func (display subscriptionDisplay) showHeaders(out io.Writer) {
 	for _, header := range *(display.headers) {
-		fmt.Fprintf(stdout, "%-*s", header.padding, header.name)
+		fmt.Fprintf(out, "%-*s", header.padding, header.name)
 	}
-	fmt.Fprintln(stdout)
+	fmt.Fprintln(out)
 }
 
-func (display subscriptionDisplay) showItems(stdout io.Writer) {
+func (display subscriptionDisplay) showItems(out io.Writer) {
 	for _, subscription := range *(display.subscriptions) {
 		for _, header := range *(display.headers) {
-			fmt.Fprintf(stdout, "%-*s", header.padding, header.fn(&subscription))
+			fmt.Fprintf(out, "%-*s", header.padding, header.fn(&subscription))
 		}
-		fmt.Fprintln(stdout)
+		fmt.Fprintln(out)
 	}
 }
 

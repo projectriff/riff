@@ -302,12 +302,12 @@ var _ = Describe("The riff subscription list command", func() {
 	Context("when given valid args and flags", func() {
 
 		var (
-			stdout *strings.Builder
+			out *strings.Builder
 		)
 
 		BeforeEach(func() {
-			stdout = &strings.Builder{}
-			listCommand.SetOutput(stdout)
+			out = &strings.Builder{}
+			listCommand.SetOutput(out)
 		})
 
 		It("should print the list of subscriptions", func() {
@@ -326,7 +326,7 @@ var _ = Describe("The riff subscription list command", func() {
 			err := listCommand.Execute()
 
 			Expect(err).To(BeNil())
-			Expect(stdout.String()).To(Equal(listOutput))
+			Expect(out.String()).To(Equal(listOutput))
 		})
 
 		It("should print the list of subscription in the provided namespace", func() {
@@ -350,7 +350,7 @@ var _ = Describe("The riff subscription list command", func() {
 			err := listCommand.Execute()
 
 			Expect(err).To(BeNil())
-			Expect(stdout.String()).To(Equal(listOutput))
+			Expect(out.String()).To(Equal(listOutput))
 		})
 
 		It("should space out headers when the list is empty", func() {
@@ -360,7 +360,7 @@ var _ = Describe("The riff subscription list command", func() {
 			err := listCommand.Execute()
 
 			Expect(err).To(BeNil())
-			s := stdout.String()
+			s := out.String()
 			Expect(s).To(Equal(emptyListOutput))
 		})
 
