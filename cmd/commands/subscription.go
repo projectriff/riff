@@ -134,10 +134,8 @@ func computeSubscriptionName(args []string, options core.CreateSubscriptionOptio
 }
 
 func displayList(cmd *Command, subscriptions *v1alpha1.SubscriptionList) {
-	display := makeSubscriptionDisplay(&subscriptions.Items)
 	out := cmd.OutOrStdout()
-	display.showHeaders(out)
-	display.showItems(out)
+	display(out, &subscriptions.Items)
 	fmt.Fprintln(out)
 }
 

@@ -6,48 +6,48 @@ import (
 	"io"
 )
 
-type subscriptionDisplay struct {
-	headers       *[]subscriptionHeader
-	subscriptions *[]v1alpha1.Subscription
-}
-
 type stringExtractor func(*v1alpha1.Subscription) string
-
-type subscriptionHeader struct {
-	namedExtractor
-	padding int
-}
 
 type namedExtractor struct {
 	name string
 	fn   stringExtractor
 }
 
-func (display subscriptionDisplay) showHeaders(out io.Writer) {
-	for _, header := range *(display.headers) {
-		fmt.Fprintf(out, "%-*s", header.padding, header.name)
-	}
-	fmt.Fprintln(out)
+type subscriptionTable struct {
+	height  int
+	widths  []int
+	content [][]string
 }
 
-func (display subscriptionDisplay) showItems(out io.Writer) {
-	for _, subscription := range *(display.subscriptions) {
-		for _, header := range *(display.headers) {
-			fmt.Fprintf(out, "%-*s", header.padding, header.fn(&subscription))
+func display(out io.Writer, subscriptions *[]v1alpha1.Subscription) {
+	subscriptionDisplay := makeSubscriptionDisplay(subscriptions)
+	for j := 0; j < subscriptionDisplay.height; j++ {
+		for i, width := range subscriptionDisplay.widths {
+			fmt.Fprintf(out, "%-*s", width, subscriptionDisplay.content[i][j])
 		}
 		fmt.Fprintln(out)
 	}
 }
 
-func makeSubscriptionDisplay(subscriptions *[]v1alpha1.Subscription) subscriptionDisplay {
+func makeSubscriptionDisplay(subscriptions *[]v1alpha1.Subscription) *subscriptionTable {
 	extractors := makeExtractors()
-	headers := make([]subscriptionHeader, len(*extractors))
+	widths := make([]int, len(*extractors))
+	height := 1 + len(*subscriptions)
+	content := make2dArray(len(*extractors), height)
 	for i, extractor := range *extractors {
-		headers[i] = makeSubscriptionHeader(extractor.name, extractor.fn, subscriptions)
+		width := len(extractor.name)
+		content[i][0] = extractor.name
+		for j, subscription := range *subscriptions {
+			value := extractor.fn(&subscription)
+			content[i][j+1] = value
+			width = max(width, len(value))
+		}
+		widths[i] = 1 + width
 	}
-	return subscriptionDisplay{
-		headers:       &headers,
-		subscriptions: subscriptions,
+	return &subscriptionTable{
+		height:  height,
+		widths:  widths,
+		content: content,
 	}
 }
 
@@ -72,21 +72,12 @@ func makeExtractors() *[]namedExtractor {
 	}
 }
 
-func makeSubscriptionHeader(headerName string, extractor stringExtractor, subscriptions *[]v1alpha1.Subscription) subscriptionHeader {
-	result := subscriptionHeader{padding: 1 + max(len(headerName), maxLength(subscriptions, extractor))}
-	result.name = headerName
-	result.fn = extractor
-	return result
-}
-
-func maxLength(subscriptions *[]v1alpha1.Subscription, extractor stringExtractor) int {
-	result := 0
-	for _, subscription := range *subscriptions {
-		if s := extractor(&subscription); len(s) > result {
-			result = len(s)
-		}
+func make2dArray(width int, height int) [][]string {
+	content := make([][]string, width)
+	for i := range content {
+		content[i] = make([]string, height)
 	}
-	return result
+	return content
 }
 
 func max(a int, b int) int {
