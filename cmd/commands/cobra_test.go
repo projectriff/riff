@@ -18,6 +18,7 @@ package commands_test
 
 import (
 	"errors"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/cmd/commands"
@@ -26,34 +27,7 @@ import (
 
 var _ = Describe("The cobra extensions", func() {
 
-	Context("the broadcasting string value", func() {
-		It("should panic when constructed with 0 pointers", func() {
-
-			Expect(func() { commands.BroadcastStringValue("default") }).To(Panic())
-
-		})
-
-		It("should set the default value to all pointers", func() {
-			var value1, value2 string
-
-			commands.BroadcastStringValue("the-default", &value1, &value2)
-
-			Expect(value1).To(Equal("the-default"))
-			Expect(value2).To(Equal("the-default"))
-
-		})
-
-		It("should set the value to all pointers", func() {
-			var value1, value2 string
-
-			v := commands.BroadcastStringValue("the-default", &value1, &value2)
-
-			v.Set("bar")
-
-			Expect(value1).To(Equal("bar"))
-			Expect(value2).To(Equal("bar"))
-
-		})
+	Context("the argument validation framework", func() {
 
 		It("should not fail if an optional argument to validate is not provided", func() {
 			command := &Command{

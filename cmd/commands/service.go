@@ -109,19 +109,8 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 
 	LabelArgs(command, "SERVICE_NAME")
 
-	command.Flags().VarP(
-		BroadcastStringValue("",
-			&createServiceOptions.Namespace,
-		),
-		"namespace", "n", "the `namespace` of the service and any namespaced resources specified",
-	)
-
-	command.Flags().VarPF(
-		BroadcastBoolValue(false,
-			&createServiceOptions.DryRun,
-		),
-		"dry-run", "", dryRunUsage,
-	).NoOptDefVal = "true"
+	command.Flags().StringVarP(&createServiceOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
+	command.Flags().BoolVarP(&createServiceOptions.DryRun, "dry-run", "", false, dryRunUsage)
 
 	command.Flags().StringVar(&createServiceOptions.Image, "image", "", "the `name[:tag]` reference of an image containing the application/function")
 	command.MarkFlagRequired("image")

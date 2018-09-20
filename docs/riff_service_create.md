@@ -32,7 +32,7 @@ riff service create [flags]
       --env-from stringArray   environment variable created from a source reference; see command help for supported formats
   -h, --help                   help for create
       --image name[:tag]       the name[:tag] reference of an image containing the application/function
-  -n, --namespace namespace    the namespace of the service and any namespaced resources specified
+  -n, --namespace namespace    the namespace of the service
 ```
 
 ### Options inherited from parent commands

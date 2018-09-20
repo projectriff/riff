@@ -121,20 +121,8 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 
 	LabelArgs(command, "RUNTIME", "FUNCTION_NAME")
 
-	command.Flags().VarP(
-		BroadcastStringValue("",
-			&createFunctionOptions.Namespace,
-		),
-		"namespace", "n", "the `namespace` of the subscription, channel, and function",
-	)
-
-	command.Flags().VarPF(
-		BroadcastBoolValue(false,
-			&createFunctionOptions.DryRun,
-		),
-		"dry-run", "", dryRunUsage,
-	).NoOptDefVal = "true"
-
+	command.Flags().StringVarP(&createFunctionOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
+	command.Flags().BoolVarP(&createFunctionOptions.DryRun, "dry-run", "", false, dryRunUsage)
 	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
 	command.MarkFlagRequired("image")
 	command.Flags().StringVar(&createFunctionOptions.GitRepo, "git-repo", "", "the `URL` for a git repository hosting the function code")
