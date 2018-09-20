@@ -119,6 +119,33 @@ func ImageRelocate(c *core.ImageClient) *cobra.Command {
 	return command
 }
 
+func ImageLoad(c *core.ImageClient) *cobra.Command {
+	options := core.LoadAndTagImagesOptions{}
+
+	command := &cobra.Command{
+		Use:   "load",
+		Short: "Load and tag docker images",
+		Long: "Load the set of images identified by the provided image manifest into a docker daemon.\n\n" +
+			"NOTE: This command requires the `docker` command line tool, as well as a docker daemon.\n\n" +
+			"SEE ALSO: To load, tag, and push images, use `riff image push`.",
+		Example: `  riff image load --images=riff-distro-xx/image-manifest.yaml`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			err := (*c).LoadAndTagImages(options)
+			if err != nil {
+				return err
+			}
+
+			PrintSuccessfulCompletion(cmd)
+			return nil
+		},
+	}
+	command.Flags().StringVarP(&options.Images, "images", "i", "", "path of an image manifest of image names to be loaded")
+	command.MarkFlagRequired("images")
+	command.MarkFlagFilename("images", "yml", "yaml")
+
+	return command
+}
+
 func ImagePush(c *core.ImageClient) *cobra.Command {
 	options := core.PushImagesOptions{}
 
@@ -126,7 +153,8 @@ func ImagePush(c *core.ImageClient) *cobra.Command {
 		Use:   "push",
 		Short: "Push (relocated) docker image names to an image registry",
 		Long: "Push the set of images identified by the provided image manifest into a remote registry, for later consumption by `riff system install`.\n\n" +
-			"NOTE: This command requires the `docker` command line tool, as well as a (local) docker daemon and will load and tag the images using that daemon.",
+			"NOTE: This command requires the `docker` command line tool, as well as a docker daemon and will load and tag the images using that daemon.\n\n" +
+			"SEE ALSO: To load and tag images, but not push them, use `riff image load`.",
 		Example: `  riff image push --images=riff-distro-xx/image-manifest.yaml`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*c).PushImages(options)

@@ -6,7 +6,9 @@ Push (relocated) docker image names to an image registry
 
 Push the set of images identified by the provided image manifest into a remote registry, for later consumption by `riff system install`.
 
-NOTE: This command requires the `docker` command line tool, as well as a (local) docker daemon and will load and tag the images using that daemon.
+NOTE: This command requires the `docker` command line tool, as well as a docker daemon and will load and tag the images using that daemon.
+
+SEE ALSO: To load and tag images, but not push them, use `riff image load`.
 
 ```
 riff image push [flags]
