@@ -1,0 +1,4 @@
+manifestVersion: 0.1
+images:
+  "a/b": "1"
+  "c/d":
