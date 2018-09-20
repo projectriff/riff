@@ -17,6 +17,8 @@
 package core
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"path"
 	"strings"
@@ -34,13 +36,22 @@ type imageMapper struct {
 	replacer *strings.Replacer
 }
 
-func newImageMapper(mappedHost string, mappedUser string, images []imageName) (*imageMapper, error) {
+func newImageMapper(mappedHost string, mappedUser string, images []imageName, flatten bool) (*imageMapper, error) {
 	if err := containsAny(mappedHost, "/", `"`, " "); err != nil {
 		return nil, fmt.Errorf("invalid registry hostname: %v", err)
 	}
 	if err := containsAny(mappedUser, "/", `"`, " "); err != nil {
 		return nil, fmt.Errorf("invalid user: %v", err)
 	}
+
+	var pathMapping func(string, string) string
+	if flatten {
+		pathMapping = flattenRepoPath
+	} else {
+		pathMapping = sanitiseRepoPath
+	}
+
+	mapImg := mapImage(pathMapping)
 
 	replacements := []string{}
 	for _, img := range images {
@@ -50,7 +61,7 @@ func newImageMapper(mappedHost string, mappedUser string, images []imageName) (*
 		}
 
 		fullImg := path.Join(imgHost, imgUser, imgRepoPath)
-		mapped := mapImage(mappedHost, mappedUser, imgRepoPath)
+		mapped := mapImg(mappedHost, mappedUser, imgRepoPath, fullImg)
 
 		replacements = append(replacements, quote(fullImg), quote(mapped))
 		replacements = append(replacements, spacePrefix(fullImg), spacePrefix(mapped))
@@ -70,13 +81,43 @@ func newImageMapper(mappedHost string, mappedUser string, images []imageName) (*
 	}, nil
 }
 
-func mapImage(mappedHost string, mappedUser string, imgRepoPath string) string {
-	return path.Join(mappedHost, mappedUser, sanitiseRepoPath(imgRepoPath))
+func mapImage(pathMapping func(string, string) string) func(mappedHost string, mappedUser string, imgRepoPath string, originalImage string) string {
+	return func(mappedHost string, mappedUser string, imgRepoPath string, originalImage string) string {
+		// ensure local-only images are tagged (with something other than latest) to prevent docker
+		// later attempting to download from dev.local (which doesn't really exist)
+		mappedPath := pathMapping(imgRepoPath, originalImage)
+		if mappedHost == "dev.local" && !strings.Contains(mappedPath, ":") {
+			mappedPath = mappedPath + ":local"
+		}
+		return path.Join(mappedHost, mappedUser, mappedPath)
+	}
 }
 
-func sanitiseRepoPath(repoPath string) string {
+func sanitiseRepoPath(repoPath string, _ string) string {
 	// Replace "@sha256:" since digests are not allowed as part of a docker tag
 	return strings.Replace(repoPath, "@sha256:", "-", 1)
+}
+
+func flattenRepoPath(repoPath string, originalImage string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(originalImage))
+	return fmt.Sprintf("%s-%s", imageBaseName(repoPath), hex.EncodeToString(hasher.Sum(nil)))
+}
+
+func imageBaseName(repoPath string) string {
+	var base string
+	digestPathComponents := strings.SplitN(repoPath, "@sha256:", 2)
+	if len(digestPathComponents) == 2 {
+		base = path.Base(digestPathComponents[0])
+	} else {
+		taggedPathComponents := strings.SplitN(repoPath, ":", 2)
+		if len(taggedPathComponents) == 2 {
+			base = path.Base(taggedPathComponents[0])
+		} else {
+			base = path.Base(repoPath)
+		}
+	}
+	return base
 }
 
 func containsAny(s string, items ...string) error {
