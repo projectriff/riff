@@ -7,7 +7,7 @@ The riff project builds on top of the link:https://github.com/knative/[Knative] 
 
 == Installation of the latest release
 
-Official binary release are avilable from the link:https://github.com/projectriff/riff/releases[Releases] page.
+Official binary release are available from the link:https://github.com/projectriff/riff/releases[Releases] page.
 
 See link:https://projectriff.io/docs/getting-started-with-knative-riff-on-minikube/[Getting started on Minikube] or
 link:https://projectriff.io/docs/getting-started-with-knative-riff-on-gke/[Getting started on GKE] for how to install the riff CLI and the riff system.
