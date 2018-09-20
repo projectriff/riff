@@ -135,6 +135,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	image := Image()
 	image.AddCommand(
 		ImageRelocate(&client),
+		ImageLoad(&imageClient),
 		ImagePush(&imageClient),
 	)
 
