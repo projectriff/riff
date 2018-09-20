@@ -13,7 +13,7 @@ The INVOKER arg defines the language runtime that is added to the function code 
 - 'node': uses riff's node-function-invoker build
 - 'command': uses riff's command-function-invoker build
 
-Buildpack based builds support building from local source in addition to within the cluster. Locally built images prefixed with 'dev.local/' are saved to the local Docker daemon while all other images are pushed to the registry specified in the image name.
+Buildpack based builds support building from local source or within the cluster. Images will be pushed to the registry specified in the image name, unless prefixed with 'dev.local/' in which case the image will only be available within the local Docker daemon.
 
 From then on you can use the sub-commands for the `service` command to interact with the service created for the function.
 

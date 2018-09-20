@@ -51,6 +51,7 @@ type CreateFunctionOptions struct {
 	GitRepo     string
 	GitRevision string
 
+	Invoker        string
 	BuildpackImage string
 	InvokerURL     string
 
@@ -81,7 +82,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 
 	if options.InvokerURL != "" {
 		if options.LocalPath != "" {
-			return nil, fmt.Errorf("invoker based builds are not available locally")
+			return nil, fmt.Errorf("the selected invoker %q does not support local builds", options.Invoker)
 		}
 		// invoker based cluster build
 		s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
