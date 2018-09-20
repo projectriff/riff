@@ -58,7 +58,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 		Use:   "create",
 		Short: "Create a new function resource",
 		Long: "Create a new function resource from the content of the provided Git repo/revision or local source.\n" +
-			"\nThe INVOKER arg defines the language runtime that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function. The following invokers are available:\n\n" +
+			"\nThe INVOKER arg defines the language runtime and function invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function. The following invokers are available:\n\n" +
 			"- 'java': uses the riff Buildpack to build Maven or Gradle projects from source\n" +
 			"- 'jar': uses riff's java-function-invoker build for a prebuilt JAR file\n" +
 			"- 'node': uses riff's node-function-invoker build\n" +

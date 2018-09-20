@@ -6,7 +6,7 @@ Create a new function resource
 
 Create a new function resource from the content of the provided Git repo/revision or local source.
 
-The INVOKER arg defines the language runtime that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function. The following invokers are available:
+The INVOKER arg defines the language runtime and function invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function. The following invokers are available:
 
 - 'java': uses the riff Buildpack to build Maven or Gradle projects from source
 - 'jar': uses riff's java-function-invoker build for a prebuilt JAR file
