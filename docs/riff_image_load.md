@@ -8,7 +8,7 @@ Load the set of images identified by the provided image manifest into a docker d
 
 NOTE: This command requires the `docker` command line tool, as well as a (local) docker daemon.
 
-SEE ALSO: To load, tag, and push images, use the image push command.
+SEE ALSO: To load, tag, and push images, use `riff image push`.
 
 ```
 riff image load [flags]

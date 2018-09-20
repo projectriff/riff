@@ -25,21 +25,26 @@ import (
 
 var _ = Describe("imageMapper", func() {
 	const (
-		testImage = "gcr.io/kaniko-project/executor"
+		testImage = "some.registry.com/some-user/some/path"
 		testYaml  = `image: "` + testImage + `"
 image: ` + testImage + `
 `
 		testRegistry = "testregistry.com"
 		testUser     = "testuser"
-		mappedImage  = "testregistry.com/testuser/executor"
+		mappedImage  = "testregistry.com/testuser/some/path"
+		flattenedMappedImage  = "testregistry.com/testuser/path-3236c106420c1d0898246e1d2b6ba8b6"
 		mappedYaml   = `image: "` + mappedImage + `"
 image: ` + mappedImage + `
+`
+		flattenedMappedYaml   = `image: "` + flattenedMappedImage + `"
+image: ` + flattenedMappedImage + `
 `
 	)
 	var (
 		registry string
 		user     string
 		images   []imageName
+		flatten  bool
 		mapper   *imageMapper
 		err      error
 		input    []byte
@@ -49,10 +54,11 @@ image: ` + mappedImage + `
 	BeforeEach(func() {
 		registry = testRegistry
 		user = testUser
+		flatten = false
 	})
 
 	JustBeforeEach(func() {
-		mapper, err = newImageMapper(registry, user, images)
+		mapper, err = newImageMapper(registry, user, images, flatten)
 	})
 
 	Describe("newImageMapper", func() {
@@ -184,6 +190,50 @@ image: ` + mappedImage + `
 
 			It("should perform the mappings", func() {
 				Expect(string(output)).To(Equal(string([]byte(mappedYaml))))
+			})
+
+			Context("when the target host is local only", func() {
+				const (
+					mappedImage  = "dev.local/testuser/some/path:local"
+					mappedYaml   = `image: "` + mappedImage + `"
+image: ` + mappedImage + `
+`
+				)
+
+				BeforeEach(func() {
+			        registry = "dev.local"
+			    })
+
+				It("should perform the mappings using flattened image names", func() {
+					Expect(string(output)).To(Equal(string([]byte(mappedYaml))))
+				})
+			})
+
+			Context("when flattening is specified", func() {
+				BeforeEach(func() {
+					flatten = true
+				})
+
+				It("should perform the mappings using flattened image names", func() {
+					Expect(string(output)).To(Equal(string([]byte(flattenedMappedYaml))))
+				})
+
+				Context("when the target host is local only", func() {
+					const (
+						flattenedMappedLocalImage = "dev.local/testuser/path-3236c106420c1d0898246e1d2b6ba8b6:local"
+						flattenedMappedLocalYaml  = `image: "` + flattenedMappedLocalImage + `"
+image: ` + flattenedMappedLocalImage + `
+`
+					)
+
+					BeforeEach(func() {
+						registry = "dev.local"
+					})
+
+					It("should perform the mappings using flattened image names", func() {
+						Expect(string(output)).To(Equal(string([]byte(flattenedMappedLocalYaml))))
+					})
+				})
 			})
 		})
 
