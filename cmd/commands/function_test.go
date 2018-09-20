@@ -94,6 +94,7 @@ var _ = Describe("The riff function create command", func() {
 			o := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
+				Invoker:     "node",
 				InvokerURL:  "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
 			}
 			o.Name = "square"
@@ -120,6 +121,7 @@ var _ = Describe("The riff function create command", func() {
 			o := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
+				Invoker:     "node",
 				InvokerURL:  "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
 			}
 			o.Name = "square"
@@ -137,6 +139,7 @@ var _ = Describe("The riff function create command", func() {
 			functionOptions := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
+				Invoker:     "node",
 				InvokerURL:  "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
 			}
 			functionOptions.Name = "square"
@@ -163,6 +166,7 @@ var _ = Describe("The riff function create command", func() {
 			functionOptions := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
+				Invoker:     "node",
 				InvokerURL:  "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
 			}
 			functionOptions.Name = "square"
@@ -188,6 +192,7 @@ var _ = Describe("The riff function create command", func() {
 			functionOptions := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
+				Invoker:     "node",
 				InvokerURL:  "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
 			}
 			functionOptions.Name = "square"

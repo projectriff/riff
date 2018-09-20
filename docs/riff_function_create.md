@@ -6,17 +6,14 @@ Create a new function resource
 
 Create a new function resource from the content of the provided Git repo/revision or local source.
 
-The RUNTIME arg defines the language runtime that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function. The following runtimes are available:
+The INVOKER arg defines the language runtime and function invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function. The following invokers are available:
 
-- 'java': uses riff's java-function-invoker (aliased as java-invoker)
-- 'node': uses riff's node-function-invoker (aliased as node-invoker)
-- 'command': uses riff's command-function-invoker (aliased as command-invoker)
-- 'java-buildpack': uses the riff Buildpack 
-- 'detect': uses the riff Buildpack's detection (currently limited to Java functions) 
+- 'java': uses the riff Buildpack to build Maven or Gradle projects from source
+- 'jar': uses riff's java-function-invoker build for a prebuilt JAR file
+- 'node': uses riff's node-function-invoker build
+- 'command': uses riff's command-function-invoker build
 
-Classic riff Invoker runtimes are available in addition to experimental Buildpack runtimes.
-
-Buildpack based runtimes support building from local source in addition to within the cluster. Locally built images prefixed with 'dev.local/' are saved to the local Docker daemon while all other images are pushed to the registry specified in the image name.
+Buildpack based builds support building from local source or within the cluster. Images will be pushed to the registry specified in the image name, unless prefixed with 'dev.local/' in which case the image will only be available within the local Docker daemon.
 
 From then on you can use the sub-commands for the `service` command to interact with the service created for the function.
 
@@ -46,7 +43,7 @@ riff function create [flags]
       --env-from stringArray           environment variable created from a source reference; see command help for supported formats
       --git-repo URL                   the URL for a git repository hosting the function code
       --git-revision ref-spec          the git ref-spec of the function code to use (default "master")
-      --handler method or class        the name of the method or class to invoke, depending on the runtime used
+      --handler method or class        the name of the method or class to invoke, depending on the invoker used
   -h, --help                           help for create
       --image repository/image[:tag]   the name of the image to build; must be a writable repository/image[:tag] with credentials configured
   -l, --local-path path                path to local source to build the image from
