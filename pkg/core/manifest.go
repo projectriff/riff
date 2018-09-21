@@ -57,7 +57,7 @@ var manifests = map[string]*Manifest{
 		},
 		Namespace: []string{
 			"https://storage.googleapis.com/riff-releases/previous/riff-build/riff-build-0.1.0.yaml",
-			"https://storage.googleapis.com/riff-releases/riff-cnb-buildtemplate-0.1.0.pre.3.yaml",
+			"https://storage.googleapis.com/riff-releases/riff-cnb-buildtemplate-0.1.0.yaml",
 		},
 	},
 	"v0.1.3": &Manifest{
@@ -72,7 +72,7 @@ var manifests = map[string]*Manifest{
 		},
 		Namespace: []string{
 			"https://storage.googleapis.com/riff-releases/previous/riff-build/riff-build-0.1.0.yaml",
-			"https://storage.googleapis.com/riff-releases/riff-cnb-buildtemplate-0.1.0.pre.3.yaml",
+			"https://storage.googleapis.com/riff-releases/riff-cnb-buildtemplate-0.1.0.yaml",
 		},
 	},
 	"v0.1.2": &Manifest{
