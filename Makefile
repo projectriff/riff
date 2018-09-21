@@ -1,7 +1,7 @@
 .PHONY: build clean test all release gen-mocks
 
 OUTPUT = ./riff
-GO_SOURCES = $(shell find . -type f -name '*.go' -not -regex '.*/mocks/.*' -not -regex '.*/vendor_mocks/.*')
+GO_SOURCES = $(shell find . -type f -name '*.go')
 VERSION ?= $(shell cat VERSION)
 GITSHA = $(shell git rev-parse HEAD)
 GITDIRTY = $(shell git diff-index --quiet HEAD -- || echo "dirty")
@@ -10,26 +10,20 @@ LDFLAGS_VERSION = -X github.com/projectriff/riff/cmd/commands.cli_version=$(VERS
 				  -X github.com/projectriff/riff/cmd/commands.cli_gitdirty=$(GITDIRTY)
 GOBIN ?= $(shell go env GOPATH)/bin
 
-all: test docs
+all: build test docs
 
 build: $(OUTPUT)
 
-test: build gen-mocks
+test:
 	go test ./...
 
-pkg/core/mocks/Client.go: pkg/core/client.go
-	mockery -output pkg/core/mocks -outpkg mocks -dir pkg/core -name Client
-
-pkg/core/vendor_mocks/Interface.go: $(shell find vendor/k8s.io/client-go/kubernetes -type f)
-	mockery -output pkg/core/vendor_mocks -outpkg vendor_mocks -dir vendor/k8s.io/client-go/kubernetes -name Interface
-
-pkg/core/vendor_mocks/CoreV1Interface.go \
-pkg/core/vendor_mocks/NamespaceInterface.go \
-pkg/core/vendor_mocks/ServiceAccountInterface.go \
-pkg/core/vendor_mocks/SecretInterface.go : $(shell find vendor/k8s.io/client-go/kubernetes/typed/core/v1 -type f)
-	mockery -output pkg/core/vendor_mocks -outpkg vendor_mocks -dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 -name $(notdir $(basename $@))
-
-gen-mocks: pkg/core/mocks/Client.go $(wildcard pkg/core/vendor_mocks/*.go)
+gen-mocks:
+	mockery -output pkg/core/mocks 			-outpkg mocks 			-dir pkg/core 											-name Client
+	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes 				-name Interface
+	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-name CoreV1Interface
+	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-name NamespaceInterface
+	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-name ServiceAccountInterface
+	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-name SecretInterface
 
 install: build
 	cp $(OUTPUT) $(GOBIN)

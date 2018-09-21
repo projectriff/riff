@@ -46,6 +46,7 @@ This is the best option if you want to modify the riff CLI.
 You need:
 
 * A working Go environment
+* The `dep` command line tool https://github.com/golang/dep#installation[installed]
 
 === Get the main riff repo
 
