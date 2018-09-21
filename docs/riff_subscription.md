@@ -24,4 +24,5 @@ Interact with subscription-related resources
 * [riff](riff.md)	 - Commands for creating and managing function resources
 * [riff subscription create](riff_subscription_create.md)	 - Create a new subscription, binding a service to an input channel
 * [riff subscription delete](riff_subscription_delete.md)	 - Delete an existing subscription
+* [riff subscription list](riff_subscription_list.md)	 - List existing subscriptions
 

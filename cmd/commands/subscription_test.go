@@ -2,6 +2,7 @@ package commands_test
 
 import (
 	"fmt"
+	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
@@ -10,6 +11,7 @@ import (
 	"github.com/projectriff/riff/pkg/core/mocks"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/mock"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
 )
 
@@ -252,3 +254,130 @@ var _ = Describe("The riff subscription delete command", func() {
 	})
 
 })
+
+const (
+	listOutput = `NAME            CHANNEL SUBSCRIBER REPLY-TO 
+my-subscription channel subscriber reply-to 
+
+list completed successfully
+`
+	emptyListOutput = `NAME CHANNEL SUBSCRIBER REPLY-TO 
+
+list completed successfully
+`
+	)
+
+var _ = Describe("The riff subscription list command", func() {
+	var (
+		client      core.Client
+		clientMock  *mocks.Client
+		listCommand *cobra.Command
+	)
+
+	BeforeEach(func() {
+		client = new(mocks.Client)
+		clientMock = client.(*mocks.Client)
+		listCommand = commands.SubscriptionList(&client)
+	})
+
+	AfterEach(func() {
+		clientMock.AssertExpectations(GinkgoT())
+	})
+
+	It("should be documented", func() {
+		Expect(listCommand.Name()).To(Equal("list"))
+		Expect(listCommand.Short).NotTo(BeEmpty())
+		Expect(listCommand.Example).NotTo(BeEmpty())
+	})
+
+	Context("when given wrong args or flags", func() {
+		It("should fail if extra arguments are passed", func() {
+			listCommand.SetArgs([]string{"extra-arg"})
+			err := listCommand.Execute()
+
+			Expect(err).To(MatchError(Equal("accepts 0 arg(s), received 1")))
+		})
+	})
+
+	Context("when given valid args and flags", func() {
+
+		var (
+			out *strings.Builder
+		)
+
+		BeforeEach(func() {
+			out = &strings.Builder{}
+			listCommand.SetOutput(out)
+		})
+
+		It("should print the list of subscriptions", func() {
+			subscriptions := listOf(v1alpha1.Subscription{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "my-subscription",
+				},
+				Spec: v1alpha1.SubscriptionSpec{
+					Channel:    "channel",
+					Subscriber: "subscriber",
+					ReplyTo:    "reply-to",
+				},
+			})
+			clientMock.On("ListSubscriptions", core.ListSubscriptionsOptions{}).Return(subscriptions, nil)
+
+			err := listCommand.Execute()
+
+			Expect(err).To(BeNil())
+			Expect(out.String()).To(Equal(listOutput))
+		})
+
+		It("should print the list of subscription in the provided namespace", func() {
+			namespace := "ns"
+			listCommand.SetArgs([]string{"--namespace", namespace})
+			subscriptions := listOf(v1alpha1.Subscription{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "my-subscription",
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.SubscriptionSpec{
+					Channel:    "channel",
+					Subscriber: "subscriber",
+					ReplyTo:    "reply-to",
+				},
+			})
+			options := core.ListSubscriptionsOptions{}
+			options.Namespace = namespace
+			clientMock.On("ListSubscriptions", options).Return(subscriptions, nil)
+
+			err := listCommand.Execute()
+
+			Expect(err).To(BeNil())
+			Expect(out.String()).To(Equal(listOutput))
+		})
+
+		It("should space out headers when the list is empty", func() {
+			clientMock.On("ListSubscriptions", core.ListSubscriptionsOptions{}).Return(
+				&v1alpha1.SubscriptionList{}, nil)
+
+			err := listCommand.Execute()
+
+			Expect(err).To(BeNil())
+			s := out.String()
+			Expect(s).To(Equal(emptyListOutput))
+		})
+
+		It("should propagate the client error", func() {
+			clientMock.On("ListSubscriptions", mock.Anything).Return(
+				&v1alpha1.SubscriptionList{},
+				fmt.Errorf("client error"))
+
+			err := listCommand.Execute()
+
+			Expect(err).To(MatchError(Equal("client error")))
+		})
+	})
+})
+
+func listOf(subscriptions ...v1alpha1.Subscription) *v1alpha1.SubscriptionList {
+	clientResult := v1alpha1.SubscriptionList{}
+	clientResult.Items = subscriptions
+	return &clientResult
+}
