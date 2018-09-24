@@ -24,6 +24,12 @@ var _ = Describe("`riff` root command", func() {
 			Expect(find(rootCommand, "subscription", "list")).NotTo(BeNil(), fmt.Sprintf(errMsg, "subscription list"))
 		})
 
+		It("with proper kubeclient init", func() {
+			subscription := find(rootCommand, "subscription")
+			Expect(subscription.Flag("kubeconfig")).NotTo(BeNil())
+			Expect(subscription.Flag("master")).NotTo(BeNil())
+		})
+
 	})
 
 })
