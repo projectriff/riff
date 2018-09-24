@@ -152,6 +152,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	)
 
 	subscription := Subscription()
+	installKubeConfigSupport(subscription, &client, &kc)
 	subscription.AddCommand(
 		SubscriptionCreate(&client),
 		SubscriptionDelete(&client),

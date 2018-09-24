@@ -9,7 +9,9 @@ Interact with subscription-related resources
 ### Options
 
 ```
-  -h, --help   help for subscription
+  -h, --help              help for subscription
+      --kubeconfig path   the path of a kubeconfig (default "~/.kube/config")
+      --master address    the address of the Kubernetes API server; overrides any value in kubeconfig
 ```
 
 ### SEE ALSO
