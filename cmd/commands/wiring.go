@@ -145,6 +145,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	)
 
 	system := System()
+	installKubeConfigSupport(system, &client, &kc)
 	system.AddCommand(
 		SystemInstall(&kc),
 		SystemUninstall(&kc),
