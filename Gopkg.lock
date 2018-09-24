@@ -72,21 +72,25 @@
   revision = "fb1338d323013e9456687dc080038aa0bb211783"
 
 [[projects]]
-  digest = "1:80801b5464a8f5ee7b9c89c01b7eba81b84117b344c2c5cf23a38cc9643fa5ea"
+  digest = "1:e187642dc54c32030831e6dbe8e31be251d47da8d6fc75450c611b6b0f5ed958"
   name = "github.com/buildpack/lifecycle"
   packages = [
     ".",
     "img",
   ]
   pruneopts = "NUT"
-  revision = "5afbc99a71b820aaffc43b148d3fa47b1587e3e3"
+  revision = "1fe614565217b026a0fb5158241bb299b0da1a5e"
 
 [[projects]]
-  digest = "1:ddd939b77855695af818323aabfa2f65c9b27c0277341b61068ff09a5c24a82d"
+  digest = "1:0e47dee51cce06b708258de25303d0e69d2af5304eccb2bfccac3be5f76d5a04"
   name = "github.com/buildpack/pack"
-  packages = ["."]
+  packages = [
+    ".",
+    "docker",
+    "fs",
+  ]
   pruneopts = "NUT"
-  revision = "978bc025120e857f4d7f4408d3b11aa9ed594d9f"
+  revision = "ccfdc4e126923160ed45453e120edae61176d862"
 
 [[projects]]
   digest = "1:a7119e9448df7ce93bb1952de22354b41a4529f59f249ba6cc932cd217a2aac3"
@@ -115,40 +119,39 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:3cabbabc9e0e4aa7e12b882bdc213f41cf8bd2b2ce2a7b5e0aceaf8a6a78049b"
+  digest = "1:4189ee6a3844f555124d9d2656fe7af02fca961c2a9bad9074789df13a0c62e0"
   name = "github.com/docker/distribution"
   packages = [
-    "digest",
+    "digestset",
     "reference",
   ]
   pruneopts = "NUT"
-  revision = "48294d928ced5dd9b378f7fd7c6f5da3ff3f2c89"
-  version = "v2.6.2"
+  revision = "83389a148052d74ac602f5f1d62f86ff2f3c4aa5"
 
 [[projects]]
-  digest = "1:b68599a3121a71063743f22a860c840e13eb3ba7a8dffdb57edb0507b19f5fbe"
+  digest = "1:7726f3bcefa55463a9aa0900290204ad4aad5d8c83fa33017f0378759ce2f857"
   name = "github.com/docker/docker"
   packages = [
+    "api",
     "api/types",
     "api/types/blkiodev",
     "api/types/container",
     "api/types/events",
     "api/types/filters",
+    "api/types/image",
     "api/types/mount",
     "api/types/network",
-    "api/types/reference",
     "api/types/registry",
     "api/types/strslice",
     "api/types/swarm",
+    "api/types/swarm/runtime",
     "api/types/time",
     "api/types/versions",
     "api/types/volume",
     "client",
-    "pkg/tlsconfig",
   ]
   pruneopts = "NUT"
-  revision = "092cba3727bb9b4a2f0e922cd6c0f93ea270e363"
-  version = "v1.13.1"
+  revision = "71cd53e4a197b303c6ba086bd584ffd67a884281"
 
 [[projects]]
   digest = "1:2a47f7eb1a2c30428d1ee6808cb66d4deb17e68a3e55d696f03c8068552ba5e8"
@@ -250,7 +253,7 @@
   version = "v0.2.0"
 
 [[projects]]
-  digest = "1:803625ea022516658816e1540990a1a75f4eef57a0799a3f1f97ed20dde8beb2"
+  digest = "1:1c9a44e8949e6939024f5258af9676b88048315b280f3fda2aff709b78434aab"
   name = "github.com/google/go-containerregistry"
   packages = [
     "pkg/authn",
@@ -268,7 +271,7 @@
     "pkg/v1/v1util",
   ]
   pruneopts = "NUT"
-  revision = "697ee0b3d46eff19ed2b30f86230377061203f79"
+  revision = "74aef1a35cfa25a5a20c951199abd26356e7bead"
 
 [[projects]]
   branch = "master"
@@ -418,12 +421,11 @@
   version = "1.0.1"
 
 [[projects]]
-  digest = "1:0413dd101df90e8a7f0c228b0fd64cc42cd98c7c1e3ec5c0dcf3b2598507052b"
+  digest = "1:ca8e828bab5a396380d8db6f91b01fe848f91639c3784b9eb5a893ba63815fac"
   name = "github.com/onsi/ginkgo"
   packages = [
     ".",
     "config",
-    "extensions/table",
     "internal/codelocation",
     "internal/containernode",
     "internal/failer",
@@ -467,6 +469,25 @@
   pruneopts = "NUT"
   revision = "62bff4df71bdbc266561a0caee19f0594b17c240"
   version = "v1.4.0"
+
+[[projects]]
+  digest = "1:e0cc8395ea893c898ff5eb0850f4d9851c1f57c78c232304a026379a47a552d0"
+  name = "github.com/opencontainers/go-digest"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
+  version = "v1.0.0-rc1"
+
+[[projects]]
+  digest = "1:11db38d694c130c800d0aefb502fb02519e514dc53d9804ce51d1ad25ec27db6"
+  name = "github.com/opencontainers/image-spec"
+  packages = [
+    "specs-go",
+    "specs-go/v1",
+  ]
+  pruneopts = "NUT"
+  revision = "d60099175f88c47cd379c4738d158884749ed235"
+  version = "v1.0.1"
 
 [[projects]]
   branch = "master"
@@ -841,13 +862,11 @@
     "github.com/knative/serving/pkg/apis/serving/v1alpha1",
     "github.com/knative/serving/pkg/client/clientset/versioned",
     "github.com/onsi/ginkgo",
-    "github.com/onsi/ginkgo/extensions/table",
     "github.com/onsi/gomega",
     "github.com/onsi/gomega/gstruct",
     "github.com/pkg/errors",
     "github.com/spf13/cobra",
     "github.com/spf13/cobra/doc",
-    "github.com/spf13/pflag",
     "github.com/stretchr/testify/mock",
     "golang.org/x/crypto/ssh/terminal",
     "k8s.io/api/authentication/v1",

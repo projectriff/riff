@@ -3,7 +3,7 @@ package pack
 import (
 	"github.com/buildpack/packs"
 	"github.com/buildpack/packs/img"
-	v1 "github.com/google/go-containerregistry/pkg/v1"
+	"github.com/google/go-containerregistry/pkg/v1"
 )
 
 func readImage(repoName string, useDaemon bool) (v1.Image, error) {
