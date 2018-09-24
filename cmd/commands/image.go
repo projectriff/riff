@@ -110,6 +110,8 @@ func ImageRelocate(c *core.Client) *cobra.Command {
 	command.Flags().StringVarP(&options.RegistryUser, "registry-user", "u", "", "user name for mapped images")
 	command.MarkFlagRequired("registry-user")
 
+	command.Flags().BoolVar(&options.Flatten, "flatten", false, "flatten image names (for registries that do not support hierarchical names)")
+
 	command.Flags().StringVarP(&options.Images, "images", "i", "", "path of an image manifest of image names to be mapped")
 	command.MarkFlagRequired("images")
 
@@ -126,7 +128,7 @@ func ImageLoad(c *core.ImageClient) *cobra.Command {
 		Use:   "load",
 		Short: "Load and tag docker images",
 		Long: "Load the set of images identified by the provided image manifest into a docker daemon.\n\n" +
-			"NOTE: This command requires the `docker` command line tool, as well as a (local) docker daemon.\n\n"+
+			"NOTE: This command requires the `docker` command line tool, as well as a (local) docker daemon.\n\n" +
 			"SEE ALSO: To load, tag, and push images, use `riff image push`.",
 		Example: `  riff image load --images=riff-distro-xx/image-manifest.yaml`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -158,7 +160,6 @@ func ImageLoad(c *core.ImageClient) *cobra.Command {
 	return command
 }
 
-
 func ImagePush(c *core.ImageClient) *cobra.Command {
 	options := core.PushImagesOptions{}
 
@@ -166,7 +167,7 @@ func ImagePush(c *core.ImageClient) *cobra.Command {
 		Use:   "push",
 		Short: "Push (relocated) docker image names to an image registry",
 		Long: "Push the set of images identified by the provided image manifest into a remote registry, for later consumption by `riff system install`.\n\n" +
-			"NOTE: This command requires the `docker` command line tool, as well as a (local) docker daemon and will load and tag the images using that daemon.\n\n"+
+			"NOTE: This command requires the `docker` command line tool, as well as a (local) docker daemon and will load and tag the images using that daemon.\n\n" +
 			"SEE ALSO: To load and tag images, but not push them, use `riff image load`.",
 		Example: `  riff image push --images=riff-distro-xx/image-manifest.yaml`,
 		RunE: func(cmd *cobra.Command, args []string) error {
