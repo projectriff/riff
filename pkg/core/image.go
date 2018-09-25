@@ -47,6 +47,11 @@ type RelocateImagesOptions struct {
 	Flatten      bool
 }
 
+type DownloadSystemOptions struct {
+	Manifest string
+	Output   string
+}
+
 func (c *imageClient) RelocateImages(options RelocateImagesOptions) error {
 	imageMapper, err := createImageMapper(options)
 	if err != nil {
@@ -58,6 +63,11 @@ func (c *imageClient) RelocateImages(options RelocateImagesOptions) error {
 		return err
 	}
 	return c.relocateManifest(options.Manifest, imageMapper, options.Images, options.Output)
+}
+
+func (c *imageClient) DownloadSystem(options DownloadSystemOptions) error {
+	// relocate the manifest mapping no images and without an image manifest
+	return c.relocateManifest(options.Manifest, newIdentityImageMapper(), "", options.Output)
 }
 
 func createImageMapper(options RelocateImagesOptions) (*imageMapper, error) {
@@ -168,12 +178,20 @@ func (c *imageClient) relocateManifest(manifestPath string, mapper *imageMapper,
 		return err
 	}
 
-	err = relocateImageManifest(imageManifestPath, mapper, outputPath)
-	if err != nil {
-		return err
+	// if there is an image manifest, relocate it and copy any images
+	if imageManifestPath != "" {
+		err = relocateImageManifest(imageManifestPath, mapper, outputPath)
+		if err != nil {
+			return err
+		}
+
+		err = c.copyImages(filepath.Dir(imageManifestPath), outputPath)
+		if err != nil {
+			return err
+		}
 	}
 
-	return c.copyImages(filepath.Dir(imageManifestPath), outputPath)
+	return nil
 }
 
 func (c *imageClient) copyImages(inputDir string, outputDir string) error {
