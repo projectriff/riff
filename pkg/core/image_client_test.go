@@ -22,6 +22,8 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/docker/mocks"
+	mock_fileutils 	"github.com/projectriff/riff/pkg/fileutils/mocks"
+
 	"github.com/stretchr/testify/mock"
 	"io/ioutil"
 	"os"
@@ -32,20 +34,23 @@ var _ = Describe("ImageClient", func() {
 	var (
 		imageClient core.ImageClient
 		mockDocker  *mocks.Docker
+		mockFutils  *mock_fileutils.Utils
 		testError   error
 	)
 
 	BeforeEach(func() {
 		mockDocker = new(mocks.Docker)
+		mockFutils = new(mock_fileutils.Utils)
 		testError = errors.New("test error")
 	})
 
 	JustBeforeEach(func() {
-		imageClient = core.NewImageClient(mockDocker)
+		imageClient = core.NewImageClient(mockDocker, nil)
 	})
 
 	AfterEach(func() {
 		mockDocker.AssertExpectations(GinkgoT())
+		mockFutils.AssertExpectations(GinkgoT())
 	})
 
 	Describe("LoadAndTagImages", func() {

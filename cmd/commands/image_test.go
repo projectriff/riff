@@ -86,7 +86,6 @@ var _ = Describe("The riff image relocate command", func() {
 
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
-
 		})
 
 		Context("when a single file is specified", func() {
