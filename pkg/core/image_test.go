@@ -12,13 +12,13 @@ import (
 var _ = Describe("RelocateImages", func() {
 
 	var (
-		client  Client
+		client  ImageClient
 		options RelocateImagesOptions
 		err     error
 	)
 
 	BeforeEach(func() {
-		client = NewClient(nil, nil, nil, nil)
+		client = NewImageClient(nil)
 		options.Registry = "reg"
 		options.RegistryUser = "user"
 	})

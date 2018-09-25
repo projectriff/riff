@@ -19,11 +19,13 @@ test:
 
 gen-mocks:
 	mockery -output pkg/core/mocks 			-outpkg mocks 			-dir pkg/core 											-name Client
+	mockery -output pkg/core/mocks 			-outpkg mocks 			-dir pkg/core 											-name ImageClient
 	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes 				-name Interface
 	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-name CoreV1Interface
 	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-name NamespaceInterface
 	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-name ServiceAccountInterface
 	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-name SecretInterface
+	mockery -output pkg/docker/mocks        -outpkg mocks           -dir pkg/docker                                         -name Docker
 
 install: build
 	cp $(OUTPUT) $(GOBIN)

@@ -47,7 +47,7 @@ type RelocateImagesOptions struct {
 	Images       string
 }
 
-func (c *client) RelocateImages(options RelocateImagesOptions) error {
+func (c *imageClient) RelocateImages(options RelocateImagesOptions) error {
 	imageMapper, err := createImageMapper(options)
 	if err != nil {
 		return err
