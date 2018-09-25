@@ -18,6 +18,7 @@
 package commands
 
 import (
+	"github.com/projectriff/riff/pkg/fileutils"
 	"os"
 
 	"github.com/projectriff/riff/cmd/commands"
@@ -44,7 +45,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		SuggestionsMinimumDistance: 2,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			dockerClient = docker.RealDocker(os.Stdin, cmd.OutOrStdout(), cmd.OutOrStderr())
-			imageClient = core.NewImageClient(dockerClient)
+			imageClient = core.NewImageClient(dockerClient, fileutils.New(true))
 			return nil
 		},
 	}

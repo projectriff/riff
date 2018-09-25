@@ -25,7 +25,6 @@ import (
 	"github.com/projectriff/riff/pkg/fileutils"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 
@@ -58,7 +57,7 @@ func (c *imageClient) RelocateImages(options RelocateImagesOptions) error {
 		_, err = relocateFile(options.SingleFile, imageMapper, "", options.Output, baseFlattener)
 		return err
 	}
-	return relocateManifest(options.Manifest, imageMapper, options.Images, options.Output)
+	return c.relocateManifest(options.Manifest, imageMapper, options.Images, options.Output)
 }
 
 func createImageMapper(options RelocateImagesOptions) (*imageMapper, error) {
@@ -121,7 +120,7 @@ func sha256Flattener(input string) string {
 
 var flatteners = []uriFlattener{baseFlattener, md5Flattener, sha256Flattener}
 
-func relocateManifest(manifestPath string, mapper *imageMapper, imageManifestPath string, outputPath string) error {
+func (c *imageClient) relocateManifest(manifestPath string, mapper *imageMapper, imageManifestPath string, outputPath string) error {
 	if err := ensureDirectory(outputPath); err != nil {
 		return err
 	}
@@ -174,10 +173,10 @@ func relocateManifest(manifestPath string, mapper *imageMapper, imageManifestPat
 		return err
 	}
 
-	return copyImages(filepath.Dir(imageManifestPath), outputPath)
+	return c.copyImages(filepath.Dir(imageManifestPath), outputPath)
 }
 
-func copyImages(inputDir string, outputDir string) error {
+func (c *imageClient) copyImages(inputDir string, outputDir string) error {
 	imagesPath := filepath.Join(inputDir, "images")
 
 	// if there are no binary images, do not attempt to copy them
@@ -185,8 +184,7 @@ func copyImages(inputDir string, outputDir string) error {
 		return nil
 	}
 
-	cmd := exec.Command("cp", "-r", imagesPath, outputDir)
-	return cmd.Run()
+	return c.futils.Copy(outputDir, imagesPath)
 }
 
 func relocateImageManifest(imageManifestPath string, mapper *imageMapper, outputPath string) error {

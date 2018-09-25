@@ -26,6 +26,7 @@ gen-mocks:
 	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-name ServiceAccountInterface
 	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-name SecretInterface
 	mockery -output pkg/docker/mocks        -outpkg mocks           -dir pkg/docker                                         -name Docker
+	mockery -output pkg/fileutils/mocks     -outpkg mocks           -dir pkg/fileutils                                      -name Utils
 
 install: build
 	cp $(OUTPUT) $(GOBIN)

@@ -19,6 +19,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/projectriff/riff/pkg/fileutils"
 	"os"
 	"path/filepath"
 
@@ -48,6 +49,7 @@ type PullImagesOptions struct {
 
 type imageClient struct {
 	docker docker.Docker
+	futils fileutils.Utils
 }
 
 func (c *imageClient) LoadAndTagImages(options LoadAndTagImagesOptions) error {
@@ -121,6 +123,6 @@ func (c *imageClient) PullImages(options PullImagesOptions) error {
 	return newManifest.save(newManifestPath)
 }
 
-func NewImageClient(docker docker.Docker) ImageClient {
-	return &imageClient{docker: docker}
+func NewImageClient(docker docker.Docker, futils fileutils.Utils) ImageClient {
+	return &imageClient{docker: docker, futils: futils}
 }
