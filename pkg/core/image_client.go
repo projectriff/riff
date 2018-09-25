@@ -28,6 +28,7 @@ import (
 type ImageClient interface {
 	PushImages(options PushImagesOptions) error
 	PullImages(options PullImagesOptions) error
+	RelocateImages(options RelocateImagesOptions) error
 }
 
 type PushImagesOptions struct {

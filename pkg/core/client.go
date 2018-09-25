@@ -47,8 +47,6 @@ type Client interface {
 	DeleteService(options DeleteServiceOptions) error
 	ServiceStatus(options ServiceStatusOptions) (*v1alpha1.ServiceCondition, error)
 	ServiceCoordinates(options ServiceInvokeOptions) (ingressIP string, hostName string, err error)
-
-	RelocateImages(options RelocateImagesOptions) error
 }
 
 type client struct {

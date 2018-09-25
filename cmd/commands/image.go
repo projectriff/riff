@@ -30,7 +30,7 @@ func Image() *cobra.Command {
 	}
 }
 
-func ImageRelocate(c *core.Client) *cobra.Command {
+func ImageRelocate(c *core.ImageClient) *cobra.Command {
 	options := core.RelocateImagesOptions{}
 
 	command := &cobra.Command{

@@ -30,7 +30,7 @@ import (
 var _ = Describe("The riff image relocate command", func() {
 	Context("when given wrong args or flags", func() {
 		var (
-			mockClient core.Client
+			mockClient core.ImageClient
 			cc         *cobra.Command
 		)
 
@@ -67,15 +67,15 @@ var _ = Describe("The riff image relocate command", func() {
 
 	Context("when given suitable flags", func() {
 		var (
-			client core.Client
-			asMock *mocks.Client
+			client core.ImageClient
+			asMock *mocks.ImageClient
 			sc     *cobra.Command
 			err    error
 		)
 
 		BeforeEach(func() {
-			client = new(mocks.Client)
-			asMock = client.(*mocks.Client)
+			client = new(mocks.ImageClient)
+			asMock = client.(*mocks.ImageClient)
 
 			sc = commands.ImageRelocate(&client)
 		})
