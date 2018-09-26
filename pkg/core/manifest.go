@@ -153,16 +153,24 @@ func NewManifest(path string) (*Manifest, error) {
 		return nil, err
 	}
 
-	for _, resourceArray := range [][]string{m.Istio, m.Knative, m.Namespace} {
-		for _, resource := range resourceArray {
-			err = checkResource(resource)
-			if err != nil {
-				return nil, err
-			}
-		}
+	err = m.VisitResources(checkResource)
+	if err != nil {
+		return nil, err
 	}
 
 	return &m, nil
+}
+
+func (m *Manifest) VisitResources(f func(resource string) error) error {
+	for _, resourceArray := range [][]string{m.Istio, m.Knative, m.Namespace} {
+		for _, resource := range resourceArray {
+			err := f(resource)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func checkCompleteness(m Manifest) error {

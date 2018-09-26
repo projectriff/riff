@@ -32,6 +32,7 @@ type ImageClient interface {
 	PullImages(options PullImagesOptions) error
 	RelocateImages(options RelocateImagesOptions) error
 	DownloadSystem(options DownloadSystemOptions) error
+	ListImages(options ListImagesOptions) error
 }
 
 type PushImagesOptions struct {
@@ -48,9 +49,19 @@ type PullImagesOptions struct {
 	ContinueOnMismatch bool
 }
 
+type ListImagesOptions struct {
+	Manifest string
+	Images   string
+	Force    bool
+	Check    bool
+}
+
+type imageLister func(resource string, baseDir string) ([]string, error)
+
 type imageClient struct {
 	docker docker.Docker
 	futils fileutils.Utils
+	listImages imageLister
 }
 
 func (c *imageClient) LoadAndTagImages(options LoadAndTagImagesOptions) error {
@@ -121,9 +132,54 @@ func (c *imageClient) PullImages(options PullImagesOptions) error {
 		}
 	}
 
-	return newManifest.save(newManifestPath)
+	return newManifest.Save(newManifestPath)
 }
 
-func NewImageClient(docker docker.Docker, futils fileutils.Utils) ImageClient {
-	return &imageClient{docker: docker, futils: futils}
+func (c *imageClient) ListImages(options ListImagesOptions) error {
+	m, err := NewManifest(options.Manifest)
+	if err != nil {
+		return err
+	}
+	if !options.Force && c.futils.Exists(options.Images) {
+		return fmt.Errorf("image manifest already exists, use `--force` to overwrite it")
+	}
+
+	baseDir := filepath.Dir(options.Manifest)
+
+	images := []string{}
+
+	// scan the resources for potential images
+	err = m.VisitResources(func(res string) error {
+		i, err := c.listImages(res, baseDir)
+		if err != nil {
+			return err
+		}
+		images = append(images, i...)
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	// populate the image manifest, removing duplicates, and, if checking is enabled, warning about images which appear to be invalid
+	im := EmptyImageManifest()
+	for _, i := range images {
+		if _, ok := im.Images[imageName(i)]; ok {
+			continue
+		}
+		if options.Check {
+			fmt.Printf("Checking image %s\n", i)
+			if !c.docker.ImageExists(i) {
+				fmt.Printf("Warning: omitting image %s which is not known to docker. To include it, re-run with --check=false.\n", i)
+				continue
+			}
+		}
+		im.Images[imageName(i)] = ""
+	}
+
+	return im.Save(options.Images)
+}
+
+func NewImageClient(docker docker.Docker, futils fileutils.Utils, listImages imageLister) ImageClient {
+	return &imageClient{docker: docker, futils: futils, listImages: listImages}
 }

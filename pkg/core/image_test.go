@@ -6,6 +6,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/fileutils/mocks"
+	"github.com/projectriff/riff/pkg/resource"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -23,7 +24,7 @@ var _ = Describe("RelocateImages", func() {
 
 	BeforeEach(func() {
 		mockFutils = new(mocks.Utils)
-		client = NewImageClient(nil, mockFutils)
+		client = NewImageClient(nil, mockFutils, resource.ListImages)
 		options.Registry = "reg"
 		options.RegistryUser = "user"
 		testErr = errors.New("test error")
@@ -289,7 +290,7 @@ var _ = Describe("SystemDownload", func() {
 
 	BeforeEach(func() {
 		mockFutils = new(mocks.Utils)
-		client = NewImageClient(nil, mockFutils)
+		client = NewImageClient(nil, mockFutils, resource.ListImages)
 	})
 
 	JustBeforeEach(func() {

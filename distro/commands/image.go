@@ -38,7 +38,7 @@ func ImagePull(c *core.ImageClient) *cobra.Command {
 		Short: "Pull all docker images referenced in a distribution image-manifest and write them to disk",
 		Long: "Pull the set of images identified by the provided image manifest from remote registries, in preparation of an offline distribution tarball.\n\n" +
 			"NOTE: This command requires the `docker` command line tool, as well as a (local) docker daemon and will load and tag the images using that daemon.",
-		Example: `  riff image pull --images=riff-distro-xx/image-manifest.yaml`,
+		Example: `  riff-distro image pull --images=riff-distro-xx/image-manifest.yaml`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*c).PullImages(options)
 			if err != nil {
@@ -55,5 +55,43 @@ func ImagePull(c *core.ImageClient) *cobra.Command {
 
 	command.Flags().StringVarP(&options.Output, "output", "o", "", "output `directory` for both the new manifest and images; defaults to rewriting the manifest in place with a sibling images/ directory")
 	command.Flags().BoolVarP(&options.ContinueOnMismatch, "continue", "c", false, "whether to continue if an image doesn't have the same digest as stated in the image manifest; fail otherwise")
+	return command
+}
+
+func ImageList(c *core.ImageClient) *cobra.Command {
+	options := core.ListImagesOptions{}
+
+
+	/*
+	searches an input manifest and associated k8s files for image names and creates an image manifest listing the images.
+
+It does not guarantee to find all images referenced by the k8s files and so the resultant list of images needs to be validated by the user, e.g. by manual inspection or testing.
+	 */
+	command := &cobra.Command{
+		Use:   "list",
+		Short: "List some or all of the images for a riff manifest",
+		Long: "Search a riff manifest and associated kubernetes configuration files for image names and create an image manifest listing the images.\n\n" +
+			"It does not guarantee to find all referenced images and so the resultant image manifest needs to be validated, for example by manual inspection or testing.\n\n"+
+			"NOTE: This command requires the `docker` command line tool to check the images.",
+		Example: `  riff-distro image list --manifest=path/to/manifest.yaml --images=path/for/image-manifest.yaml`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			err := (*c).ListImages(options)
+			if err != nil {
+				return err
+			}
+
+			commands.PrintSuccessfulCompletion(cmd)
+			return nil
+		},
+	}
+	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", "manifest to be searched; can be a named manifest (stable or latest) or a path of a manifest file")
+	command.MarkFlagFilename("manifest", "yml", "yaml")
+
+	command.Flags().StringVarP(&options.Images, "images", "i", "image-manifest.yaml", "path of the image manifest to be created")
+	command.MarkFlagFilename("images", "yml", "yaml")
+
+	command.Flags().BoolVarP(&options.Check, "check", "", true, "check the images and omit any which are not known to docker")
+	command.Flags().BoolVarP(&options.Force, "force", "", false, "overwrite the image manifest if it already exists")
+
 	return command
 }

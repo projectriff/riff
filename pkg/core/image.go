@@ -243,6 +243,8 @@ func findNonCollidingFlattener(manifest *Manifest) uriFlattener {
 	return nil
 }
 
+var sentinel = errors.New("sentinel")
+
 func collisionless(manifest *Manifest, f uriFlattener) bool {
 	// check that no new fields have been added to the manifest to avoid maintainability issues
 	if reflect.Indirect(reflect.ValueOf(manifest)).Type().NumField() != 4 {
@@ -251,20 +253,26 @@ func collisionless(manifest *Manifest, f uriFlattener) bool {
 
 	unflattened := make(map[string]string) // maps flattened name to original, unflattened name
 
-	// flatten all the input file names and check for collisions. The manifest filename is special-cased since,
-	// regardless of the actual file name of the input manifest, the output file name of the manifest is always
-	// "manifest.yaml" and this is always flattened to "manifest.yaml", regardless of the flattener used.
-	for _, array := range [][]string{manifest.Istio, manifest.Knative, manifest.Namespace, {"./manifest.yaml"}} {
-		for _, input := range array {
-			output := f(input)
-			if collidingInput, ok := unflattened[output]; ok && input != collidingInput {
-				fmt.Printf("Warning: collision between %s and %s. Trying another flattening strategy.\n", collidingInput, input)
-				return false
-			}
-			unflattened[output] = input
+	checkCollision := func(input string) error {
+		output := f(input)
+		if collidingInput, ok := unflattened[output]; ok && input != collidingInput {
+			fmt.Printf("Warning: collision between %s and %s. Trying another flattening strategy.\n", collidingInput, input)
+			return sentinel
 		}
+		unflattened[output] = input
+		return nil
 	}
-	return true
+
+	// flatten all the input file names and check for collisions
+	err := manifest.VisitResources(checkCollision)
+	if err != nil {
+		return false
+	}
+
+	// the manifest filename is special-cased since, regardless of the actual file name of the input manifest, the
+	// output file name of the manifest is always "manifest.yaml" and this is always flattened to "manifest.yaml",
+	// regardless of the flattener used
+	return checkCollision("./manifest.yaml") == nil
 }
 
 func relocateYamls(yamls []string, manifestDir string, mapper *imageMapper, outputPath string, flattener uriFlattener) ([]string, error) {

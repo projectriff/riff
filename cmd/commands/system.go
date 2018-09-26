@@ -37,7 +37,7 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
 		Long: "Install riff and Knative system components.\n" +
 			"\nIf an `istio-system` namespace isn't found, it will be created and Istio components will be installed. " +
 			"\nUse the `--node-port` flag when installing on Minikube and other clusters that don't support an external load balancer. " +
-			"\nUse the `--manifest` flag to specify the path or URL of a manifest file which provides the URLs of the YAML definitions of the " +
+			"\nUse the `--manifest` flag to specify the path or URL of a manifest file which provides the URLs of the kubernetes configuration files of the " +
 			"components to be installed. The manifest file contents should be of the following form:" +
 			`
 
@@ -67,7 +67,7 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
 		},
 	}
 
-	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", "manifest of YAML files to be applied; can be a named manifest (stable or latest) or a file path of a manifest file")
+	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", "manifest of kubernetes configuration files to be applied; can be a named manifest (stable or latest) or a path of a manifest file")
 	command.Flags().BoolVarP(&options.NodePort, "node-port", "", false, "whether to use NodePort instead of LoadBalancer for ingress gateways")
 	command.Flags().BoolVarP(&options.Force, "force", "", false, "force the install of components without getting any prompts")
 
