@@ -81,6 +81,12 @@ func newImageMapper(mappedHost string, mappedUser string, images []imageName, fl
 	}, nil
 }
 
+func newIdentityImageMapper() *imageMapper {
+	return &imageMapper{
+		replacer: strings.NewReplacer(),
+	}
+}
+
 func mapImage(pathMapping func(string, string) string) func(mappedHost string, mappedUser string, imgRepoPath string, originalImage string) string {
 	return func(mappedHost string, mappedUser string, imgRepoPath string, originalImage string) string {
 		// ensure local-only images are tagged to prevent docker attempting to accessing dev.local

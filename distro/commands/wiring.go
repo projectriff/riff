@@ -55,8 +55,14 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		ImagePull(&imageClient),
 	)
 
+	system := System()
+	system.AddCommand(
+		SystemDownload(&imageClient),
+	)
+
 	rootCmd.AddCommand(
 		image,
+		system,
 		commands.Completion(rootCmd),
 	)
 
