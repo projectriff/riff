@@ -9,6 +9,20 @@ type Docker struct {
 	mock.Mock
 }
 
+// ImageExists provides a mock function with given fields: name
+func (_m *Docker) ImageExists(name string) bool {
+	ret := _m.Called(name)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(string) bool); ok {
+		r0 = rf(name)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
 // LoadAndTagImage provides a mock function with given fields: name, digest, file
 func (_m *Docker) LoadAndTagImage(name string, digest string, file string) error {
 	ret := _m.Called(name, digest, file)

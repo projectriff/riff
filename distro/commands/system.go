@@ -53,7 +53,7 @@ func SystemDownload(c *core.ImageClient) *cobra.Command {
 		},
 	}
 
-	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", "manifest for the download; can be a named manifest (stable or latest) or a file path of a manifest file")
+	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", "manifest for the download; can be a named manifest (stable or latest) or a path of a manifest file")
 
 	command.Flags().StringVarP(&options.Output, "output", "o", "", "path to contain the output file(s)")
 	command.MarkFlagRequired("output")
