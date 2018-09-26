@@ -1,0 +1,10 @@
+{
+  "headerFile": "./license-header.txt",
+  "style": "SlashStar",
+  "includes": ["**/*.go"],
+  "excludes": ["vendor/**/*"],
+  "data": {
+    "Year": "2018",
+    "Owner": "The original author or authors"
+  }
+}

@@ -1,4 +1,4 @@
-.PHONY: build clean test all release gen-mocks
+.PHONY: build clean test all release gen-mocks license
 
 OUTPUT = ./riff
 GO_SOURCES = $(shell find . -type f -name '*.go')
@@ -10,7 +10,7 @@ LDFLAGS_VERSION = -X github.com/projectriff/riff/cmd/commands.cli_version=$(VERS
 				  -X github.com/projectriff/riff/cmd/commands.cli_gitdirty=$(GITDIRTY)
 GOBIN ?= $(shell go env GOPATH)/bin
 
-all: build test docs
+all: build test docs license
 
 build: $(OUTPUT)
 
@@ -39,6 +39,9 @@ release: $(GO_SOURCES) vendor VERSION
 
 docs: $(OUTPUT)
 	rm -fR docs && $(OUTPUT) docs
+
+license:
+	go get github.com/fbiville/header && header
 
 clean:
 	rm -f $(OUTPUT)
