@@ -10,6 +10,20 @@ type ImageClient struct {
 	mock.Mock
 }
 
+// LoadAndTagImages provides a mock function with given fields: options
+func (_m *ImageClient) LoadAndTagImages(options core.LoadAndTagImagesOptions) error {
+	ret := _m.Called(options)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(core.LoadAndTagImagesOptions) error); ok {
+		r0 = rf(options)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // PullImages provides a mock function with given fields: options
 func (_m *ImageClient) PullImages(options core.PullImagesOptions) error {
 	ret := _m.Called(options)

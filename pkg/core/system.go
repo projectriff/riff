@@ -46,7 +46,7 @@ type SystemUninstallOptions struct {
 }
 
 var (
-	knativeNamespaces = []string{"knative-eventing", "knative-serving", "knative-build"}
+	knativeNamespaces = []string{"knative-eventing", "knative-serving", "knative-build", "knative-monitoring"}
 	allNameSpaces     = append(knativeNamespaces, istioNamespace)
 )
 
@@ -300,7 +300,11 @@ func deleteNamespaces(kc *kubectlClient, namespaces []string) error {
 		fmt.Printf("Deleting resources defined in: %s\n", namespace)
 		deleteLog, err := kc.kubeCtl.Exec([]string{"delete", "namespace", namespace})
 		if err != nil {
-			fmt.Printf("%s", deleteLog)
+			if strings.Contains(deleteLog, "NotFound") {
+				fmt.Printf("Namespace \"%s\" was not found\n", namespace)
+			} else {
+				fmt.Printf("%s", deleteLog)
+			}
 		}
 	}
 	return nil

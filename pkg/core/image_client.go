@@ -26,12 +26,17 @@ import (
 )
 
 type ImageClient interface {
+	LoadAndTagImages(options LoadAndTagImagesOptions) error
 	PushImages(options PushImagesOptions) error
 	PullImages(options PullImagesOptions) error
 	RelocateImages(options RelocateImagesOptions) error
 }
 
 type PushImagesOptions struct {
+	Images string
+}
+
+type LoadAndTagImagesOptions struct {
 	Images string
 }
 
@@ -45,20 +50,40 @@ type imageClient struct {
 	docker docker.Docker
 }
 
-// TODO: provide unit test
+func (c *imageClient) LoadAndTagImages(options LoadAndTagImagesOptions) error {
+	_, err := c.loadAndTagImages(options.Images)
+	return err
+}
+
 func (c *imageClient) PushImages(options PushImagesOptions) error {
-	imManifest, err := NewImageManifest(options.Images)
+	imManifest, err := c.loadAndTagImages(options.Images)
 	if err != nil {
 		return err
 	}
-	distroLocation := filepath.Dir(options.Images)
-	for name, digest := range imManifest.Images {
-		filename := filepath.Join(distroLocation, "images", string(digest))
-		if err := c.docker.PushImage(string(name), string(digest), filename); err != nil {
+	for name, _ := range imManifest.Images {
+		if err := c.docker.PushImage(string(name)); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func (c *imageClient) loadAndTagImages(imageManifest string) (*ImageManifest, error) {
+	imManifest, err := NewImageManifest(imageManifest)
+	if err != nil {
+		return nil, err
+	}
+	distroLocation := filepath.Dir(imageManifest)
+	for name, digest := range imManifest.Images {
+		if digest == "" {
+			return nil, fmt.Errorf("image manifest %s does not specify a digest for image %s", imageManifest, name)
+		}
+		filename := filepath.Join(distroLocation, "images", string(digest))
+		if err := c.docker.LoadAndTagImage(string(name), string(digest), filename); err != nil {
+			return nil, err
+		}
+	}
+	return imManifest, nil
 }
 
 func (c *imageClient) PullImages(options PullImagesOptions) error {
@@ -75,7 +100,7 @@ func (c *imageClient) PullImages(options PullImagesOptions) error {
 		newManifestPath = filepath.Join(options.Output, "image-manifest.yaml")
 		imagesDir = filepath.Join(options.Output, "images")
 	}
-	if _, err := os.Stat(imagesDir); err != nil && os.IsNotExist(err) {
+	if _, err := os.Stat(imagesDir); err != nil {
 		if err2 := os.MkdirAll(imagesDir, outputDirPermissions); err2 != nil {
 			return err2
 		}
@@ -87,7 +112,7 @@ func (c *imageClient) PullImages(options PullImagesOptions) error {
 		if newSha, err := c.docker.PullImage(string(name), imagesDir); err != nil {
 			return err
 		} else if newSha != string(sha) && sha != "" && !options.ContinueOnMismatch {
-			return fmt.Errorf("image %q had digest %v in the original manifest, but the pulled version now has digest %s", name, sha, newSha)
+			return fmt.Errorf("image %q had digest %v in the original manifest, but the pulled version has digest %s", name, sha, newSha)
 		} else {
 			newManifest.Images[name] = imageDigest(newSha)
 		}
