@@ -22,7 +22,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/docker/mocks"
-	mock_fileutils 	"github.com/projectriff/riff/pkg/fileutils/mocks"
+	mock_fileutils "github.com/projectriff/riff/pkg/fileutils/mocks"
 
 	"github.com/stretchr/testify/mock"
 	"io/ioutil"
@@ -32,20 +32,22 @@ import (
 
 var _ = Describe("ImageClient", func() {
 	var (
-		imageClient core.ImageClient
-		mockDocker  *mocks.Docker
-		mockFutils  *mock_fileutils.Utils
-		testError   error
+		imageClient     core.ImageClient
+		mockDocker      *mocks.Docker
+		mockFutils      *mock_fileutils.Utils
+		mockImageLister func(resource string, baseDir string) ([]string, error)
+		testError       error
 	)
 
 	BeforeEach(func() {
 		mockDocker = new(mocks.Docker)
 		mockFutils = new(mock_fileutils.Utils)
 		testError = errors.New("test error")
+		mockImageLister = nil
 	})
 
 	JustBeforeEach(func() {
-		imageClient = core.NewImageClient(mockDocker, nil)
+		imageClient = core.NewImageClient(mockDocker, mockFutils, mockImageLister)
 	})
 
 	AfterEach(func() {
@@ -290,6 +292,112 @@ var _ = Describe("ImageClient", func() {
 
 			It("should return a suitable error", func() {
 				Expect(err).To(MatchError("error reading image manifest file: open no/such: no such file or directory"))
+			})
+		})
+	})
+
+	Describe("ListImages", func() {
+		var (
+			options core.ListImagesOptions
+			workDir string
+			listErr error
+			err     error
+			expectedImageManifest *core.ImageManifest
+		)
+
+		BeforeEach(func() {
+			workDir, err = ioutil.TempDir("", "image_client_test")
+			Expect(err).NotTo(HaveOccurred())
+
+			options.Manifest = "fixtures/image_client/image-list-manifest.yaml"
+			options.Images=filepath.Join(workDir, "image-manifest.yaml")
+			options.Check = true
+			options.Force = false
+
+			expectedImageManifest = core.EmptyImageManifest()
+			expectedImageManifest.Images["a/b"] = ""
+			expectedImageManifest.Images["c/d"] = ""
+
+			listErr = nil
+
+			mockImageLister = func(resource string, baseDir string) ([]string, error) {
+				if listErr != nil {
+					return nil, listErr
+				}
+				return []string{"a/b", "c/d"}, nil
+			}
+		})
+
+		JustBeforeEach(func() {
+			err = imageClient.ListImages(options)
+		})
+
+		Context("when the image manifest does not already exist", func() {
+			BeforeEach(func() {
+				mockFutils.On("Exists", options.Images).Return(false)
+			})
+
+			Context("when check is false", func() {
+			    BeforeEach(func() {
+			        options.Check = false
+			    })
+
+				It("should list the images", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(actualImageManifest(options.Images)).To(Equal(expectedImageManifest))
+				})
+
+			    Context("when the image lister returns an error", func() {
+			        BeforeEach(func() {
+			            listErr = testError
+			        })
+
+			        It("should return the error", func() {
+			            Expect(err).To(MatchError(testError))
+			        })
+			    })
+			})
+
+			Context("when check is true", func() {
+			    BeforeEach(func() {
+			        options.Check = true
+			        mockDocker.On("ImageExists", "a/b").Return(true)
+			        mockDocker.On("ImageExists", "c/d").Return(false)
+			        delete(expectedImageManifest.Images, "c/d")
+			    })
+
+				It("should list the valid images", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(actualImageManifest(options.Images)).To(Equal(expectedImageManifest))
+				})
+			})
+
+		})
+
+		Context("when the image manifest already exists", func() {
+			BeforeEach(func() {
+				options.Check = false
+				mockFutils.On("Exists", options.Images).Return(true).Maybe()
+			})
+
+			Context("when force is false", func() {
+			    BeforeEach(func() {
+			        options.Force = false
+			    })
+
+			    It("should return a suitable error", func() {
+			        Expect(err).To(MatchError("image manifest already exists, use `--force` to overwrite it"))
+			    })
+			})
+
+			Context("when force is true", func() {
+			    BeforeEach(func() {
+			        options.Force = true
+			    })
+
+			    It("should succeed", func() {
+			        Expect(err).NotTo(HaveOccurred())
+			    })
 			})
 		})
 	})

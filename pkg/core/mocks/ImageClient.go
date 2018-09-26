@@ -24,6 +24,20 @@ func (_m *ImageClient) DownloadSystem(options core.DownloadSystemOptions) error 
 	return r0
 }
 
+// ListImages provides a mock function with given fields: options
+func (_m *ImageClient) ListImages(options core.ListImagesOptions) error {
+	ret := _m.Called(options)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(core.ListImagesOptions) error); ok {
+		r0 = rf(options)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // LoadAndTagImages provides a mock function with given fields: options
 func (_m *ImageClient) LoadAndTagImages(options core.LoadAndTagImagesOptions) error {
 	ret := _m.Called(options)

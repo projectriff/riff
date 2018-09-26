@@ -32,6 +32,7 @@ type Docker interface {
 	LoadAndTagImage(name string, digest string, file string) error
 	PushImage(name string) error
 	PullImage(name string, directory string) (digest string, err error)
+	ImageExists(name string) bool
 }
 
 // processDocker interacts with docker by spawning a process and running the `docker`
@@ -71,6 +72,14 @@ func (pd *processDocker) PullImage(name string, directory string) (digest string
 		}
 		return digest, nil
 	}
+}
+
+func (pd *processDocker) ImageExists(name string) bool {
+	if err := pd.execWithStreams(nil, nil, nil, 10*time.Minute, "pull", name); err != nil {
+		return false
+	}
+
+	return pd.execWithStreams(nil, nil, nil, 1*time.Second, "inspect", "--type=image", name) == nil
 }
 
 func (pd *processDocker) execWithStreams(stdin io.Reader, stdout io.Writer, stderr io.Writer, timeout time.Duration, cmdArgs ...string) error {

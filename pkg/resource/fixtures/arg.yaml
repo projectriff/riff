@@ -1,0 +1,11 @@
+spec:
+  template:
+     spec:
+      containers:
+      - args:
+        - -stderrthreshold
+        - INFO
+        - -creds-image
+        - gcr.io/knative-releases/a/b
+        - -git-image
+        - gcr.io/knative-releases/c/d

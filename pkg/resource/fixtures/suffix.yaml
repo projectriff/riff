@@ -1,0 +1,8 @@
+data:
+  queueSidecarImage: gcr.io/knative-releases/e/f
+  registriesSkippingTagResolving: ko.local,dev.local
+---
+data:
+  logging.enable-var-log-collection: "false"
+  logging.fluentd-sidecar-image: k8s.gcr.io/fluentd-elasticsearch:v2.0.4
+
