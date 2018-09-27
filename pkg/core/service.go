@@ -31,27 +31,27 @@ const (
 )
 
 type ListServiceOptions struct {
-	Namespaced
+	Namespace string
 }
 
 func (c *client) ListServices(options ListServiceOptions) (*v1alpha1.ServiceList, error) {
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
+	ns := c.explicitOrConfigNamespace(options.Namespace)
 	return c.serving.ServingV1alpha1().Services(ns).List(meta_v1.ListOptions{})
 }
 
 type CreateOrReviseServiceOptions struct {
-	Namespaced
-	Name    string
-	Image   string
-	Env     []string
-	EnvFrom []string
-	DryRun  bool
-	Verbose bool
-	Wait    bool
+	Namespace string
+	Name      string
+	Image     string
+	Env       []string
+	EnvFrom   []string
+	DryRun    bool
+	Verbose   bool
+	Wait      bool
 }
 
 func (c *client) CreateService(options CreateOrReviseServiceOptions) (*v1alpha1.Service, error) {
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
+	ns := c.explicitOrConfigNamespace(options.Namespace)
 
 	s, err := newService(options)
 	if err != nil {
@@ -68,7 +68,7 @@ func (c *client) CreateService(options CreateOrReviseServiceOptions) (*v1alpha1.
 }
 
 func (c *client) ReviseService(options CreateOrReviseServiceOptions) (*v1alpha1.Service, error) {
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
+	ns := c.explicitOrConfigNamespace(options.Namespace)
 
 	existingSvc, err := c.serving.ServingV1alpha1().Services(ns).Get(options.Name, meta_v1.GetOptions{})
 	if err != nil {
@@ -140,8 +140,8 @@ func newService(options CreateOrReviseServiceOptions) (*v1alpha1.Service, error)
 }
 
 type ServiceStatusOptions struct {
-	Namespaced
-	Name string
+	Namespace string
+	Name      string
 }
 
 func (c *client) ServiceStatus(options ServiceStatusOptions) (*v1alpha1.ServiceCondition, error) {
@@ -162,7 +162,7 @@ func (c *client) ServiceStatus(options ServiceStatusOptions) (*v1alpha1.ServiceC
 
 func (c *client) ServiceConditions(options ServiceStatusOptions) ([]v1alpha1.ServiceCondition, error) {
 
-	s, err := c.service(options.Namespaced, options.Name)
+	s, err := c.service(options.Namespace, options.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +170,7 @@ func (c *client) ServiceConditions(options ServiceStatusOptions) ([]v1alpha1.Ser
 }
 
 type ServiceInvokeOptions struct {
-	Namespaced
+	Namespace       string
 	Name            string
 	ContentTypeText bool
 	ContentTypeJson bool
@@ -209,7 +209,7 @@ func (c *client) ServiceCoordinates(options ServiceInvokeOptions) (string, strin
 		}
 	}
 
-	s, err := c.service(options.Namespaced, options.Name)
+	s, err := c.service(options.Namespace, options.Name)
 	if err != nil {
 		return "", "", err
 	}
@@ -217,21 +217,17 @@ func (c *client) ServiceCoordinates(options ServiceInvokeOptions) (string, strin
 	return ingress, s.Status.Domain, nil
 }
 
-func (c *client) service(namespace Namespaced, name string) (*v1alpha1.Service, error) {
-
+func (c *client) service(namespace string, name string) (*v1alpha1.Service, error) {
 	ns := c.explicitOrConfigNamespace(namespace)
-
 	return c.serving.ServingV1alpha1().Services(ns).Get(name, meta_v1.GetOptions{})
 }
 
 type DeleteServiceOptions struct {
-	Namespaced
-	Name string
+	Namespace string
+	Name      string
 }
 
 func (c *client) DeleteService(options DeleteServiceOptions) error {
-
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
-
+	ns := c.explicitOrConfigNamespace(options.Namespace)
 	return c.serving.ServingV1alpha1().Services(ns).Delete(options.Name, nil)
 }

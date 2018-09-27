@@ -24,7 +24,7 @@ import (
 )
 
 type CreateSubscriptionOptions struct {
-	Namespaced
+	Namespace  string
 	Name       string
 	Channel    string
 	Subscriber string
@@ -33,16 +33,16 @@ type CreateSubscriptionOptions struct {
 }
 
 type DeleteSubscriptionOptions struct {
-	Namespaced
-	Name       string
+	Namespace string
+	Name      string
 }
 
 type ListSubscriptionsOptions struct {
-	Namespaced
+	Namespace string
 }
 
 func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha1.Subscription, error) {
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
+	ns := c.explicitOrConfigNamespace(options.Namespace)
 	if options.ReplyTo != "" {
 		options.ReplyTo = fmt.Sprintf("%s-channel", options.ReplyTo)
 	}
@@ -72,13 +72,12 @@ func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha
 }
 
 func (c *client) DeleteSubscription(options DeleteSubscriptionOptions) error {
-	namespace := c.explicitOrConfigNamespace(options.Namespaced)
-	return c.eventing.ChannelsV1alpha1().Subscriptions(namespace).Delete(options.Name, nil)
+	ns := c.explicitOrConfigNamespace(options.Namespace)
+	return c.eventing.ChannelsV1alpha1().Subscriptions(ns).Delete(options.Name, nil)
 }
 
-
 func (c *client) ListSubscriptions(options ListSubscriptionsOptions) (*v1alpha1.SubscriptionList, error) {
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
+	ns := c.explicitOrConfigNamespace(options.Namespace)
 
 	list, err := c.eventing.ChannelsV1alpha1().Subscriptions(ns).List(meta_v1.ListOptions{})
 	if err != nil {

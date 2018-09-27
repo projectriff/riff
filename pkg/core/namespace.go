@@ -43,10 +43,6 @@ const (
 	secretTypeDockerHub
 )
 
-type Namespaced struct {
-	Namespace string
-}
-
 type NamespaceInitOptions struct {
 	NamespaceName string
 	SecretName    string
@@ -67,13 +63,13 @@ func (o *NamespaceInitOptions) secretType() secretType {
 	}
 }
 
-func (c *client) explicitOrConfigNamespace(namespaced Namespaced) string {
-	if namespaced.Namespace != "" {
-		return namespaced.Namespace
-	} else {
-		namespace, _, _ := c.clientConfig.Namespace()
-		return namespace
+func (c *client) explicitOrConfigNamespace(explicitNamespace string) string {
+	if explicitNamespace != "" {
+		return explicitNamespace
 	}
+
+	namespace, _, _ := c.clientConfig.Namespace() // TODO: handle any error
+	return namespace
 }
 
 func (c *kubectlClient) NamespaceInit(options NamespaceInitOptions) error {
