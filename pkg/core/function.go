@@ -60,7 +60,7 @@ type CreateFunctionOptions struct {
 }
 
 func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
+	ns := c.explicitOrConfigNamespace(&options)
 
 	s, err := newService(options.CreateOrReviseServiceOptions)
 	if err != nil {
@@ -295,7 +295,11 @@ func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int6
 		default:
 		}
 		time.Sleep(500 * time.Millisecond)
-		service, err := c.service(Namespaced{namespace}, name)
+		serviceStatusOptions := ServiceStatusOptions{
+			Namespace: namespace,
+			Name:      name,
+		}
+		service, err := c.service(&serviceStatusOptions, name)
 		if err != nil {
 			return fmt.Errorf("waitForSuccessOrFailure failed to obtain service: %v", err)
 		}
@@ -305,10 +309,6 @@ func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int6
 				continue
 			}
 			return fmt.Errorf("waitForSuccessOrFailure failed to obtain service status for observedGeneration %d: %v", gen, err)
-		}
-		serviceStatusOptions := ServiceStatusOptions{
-			Namespaced: Namespaced{namespace},
-			Name:       name,
 		}
 		cond, err := c.ServiceStatus(serviceStatusOptions)
 		if err != nil {
@@ -392,11 +392,15 @@ func (selectorDisjunction) String() string {
 }
 
 type BuildFunctionOptions struct {
-	Namespaced
+	Namespace string
 	Name      string
 	LocalPath string
 	Verbose   bool
 	Wait      bool
+}
+
+func (b *BuildFunctionOptions) GetNamespace() string {
+	return b.Namespace
 }
 
 func (c *client) getServiceSpecGeneration(namespaced Namespaced, name string) (int64, error) {
@@ -408,9 +412,9 @@ func (c *client) getServiceSpecGeneration(namespaced Namespaced, name string) (i
 }
 
 func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) error {
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
+	ns := c.explicitOrConfigNamespace(&options)
 
-	service, err := c.service(options.Namespaced, options.Name)
+	service, err := c.service(&options, options.Name)
 	if err != nil {
 		return err
 	}
@@ -469,7 +473,7 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 				return fmt.Errorf("build unsuccesful for \"%s\", service resource was never updated", options.Name)
 			}
 			time.Sleep(500 * time.Millisecond)
-			nextGen, err = c.getServiceSpecGeneration(options.Namespaced, options.Name)
+			nextGen, err = c.getServiceSpecGeneration(&options, options.Name)
 			if err != nil {
 				return err
 			}

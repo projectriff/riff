@@ -43,8 +43,8 @@ const (
 	secretTypeDockerHub
 )
 
-type Namespaced struct {
-	Namespace string
+type Namespaced interface {
+	GetNamespace() string
 }
 
 type NamespaceInitOptions struct {
@@ -68,8 +68,8 @@ func (o *NamespaceInitOptions) secretType() secretType {
 }
 
 func (c *client) explicitOrConfigNamespace(namespaced Namespaced) string {
-	if namespaced.Namespace != "" {
-		return namespaced.Namespace
+	if namespaced.GetNamespace() != "" {
+		return namespaced.GetNamespace()
 	} else {
 		namespace, _, _ := c.clientConfig.Namespace()
 		return namespace
