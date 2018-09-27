@@ -22,24 +22,32 @@ import (
 )
 
 type ListChannelOptions struct {
-	Namespaced
+	Namespace string
+}
+
+func (l *ListChannelOptions) GetNamespace() string {
+	return l.Namespace
 }
 
 func (c *client) ListChannels(options ListChannelOptions) (*v1alpha1.ChannelList, error) {
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
+	ns := c.explicitOrConfigNamespace(&options)
 	return c.eventing.ChannelsV1alpha1().Channels(ns).List(meta_v1.ListOptions{})
 }
 
 type CreateChannelOptions struct {
-	Namespaced
+	Namespace  string
 	Name       string
 	Bus        string
 	ClusterBus string
 	DryRun     bool
 }
 
+func (c *CreateChannelOptions) GetNamespace() string {
+	return c.Namespace
+}
+
 func (c *client) CreateChannel(options CreateChannelOptions) (*v1alpha1.Channel, error) {
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
+	ns := c.explicitOrConfigNamespace(&options)
 	channel := v1alpha1.Channel{
 		TypeMeta: meta_v1.TypeMeta{
 			APIVersion: "channels.knative.dev/v1alpha1",
@@ -63,12 +71,16 @@ func (c *client) CreateChannel(options CreateChannelOptions) (*v1alpha1.Channel,
 }
 
 type DeleteChannelOptions struct {
-	Namespaced
-	Name string
+	Namespace string
+	Name      string
+}
+
+func (d *DeleteChannelOptions) GetNamespace() string {
+	return d.Namespace
 }
 
 func (c *client) DeleteChannel(options DeleteChannelOptions) error {
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
+	ns := c.explicitOrConfigNamespace(&options)
 
 	err := c.eventing.ChannelsV1alpha1().Channels(ns).Delete(options.Name, nil)
 

@@ -24,7 +24,7 @@ import (
 )
 
 type CreateSubscriptionOptions struct {
-	Namespaced
+	Namespace  string
 	Name       string
 	Channel    string
 	Subscriber string
@@ -32,17 +32,29 @@ type CreateSubscriptionOptions struct {
 	DryRun     bool
 }
 
+func (c *CreateSubscriptionOptions) GetNamespace() string {
+	return c.Namespace
+}
+
 type DeleteSubscriptionOptions struct {
-	Namespaced
-	Name       string
+	Namespace string
+	Name      string
+}
+
+func (d *DeleteSubscriptionOptions) GetNamespace() string {
+	return d.Namespace
 }
 
 type ListSubscriptionsOptions struct {
-	Namespaced
+	Namespace string
+}
+
+func (l *ListSubscriptionsOptions) GetNamespace() string {
+	return l.Namespace
 }
 
 func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha1.Subscription, error) {
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
+	ns := c.explicitOrConfigNamespace(&options)
 	if options.ReplyTo != "" {
 		options.ReplyTo = fmt.Sprintf("%s-channel", options.ReplyTo)
 	}
@@ -72,13 +84,12 @@ func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha
 }
 
 func (c *client) DeleteSubscription(options DeleteSubscriptionOptions) error {
-	namespace := c.explicitOrConfigNamespace(options.Namespaced)
+	namespace := c.explicitOrConfigNamespace(&options)
 	return c.eventing.ChannelsV1alpha1().Subscriptions(namespace).Delete(options.Name, nil)
 }
 
-
 func (c *client) ListSubscriptions(options ListSubscriptionsOptions) (*v1alpha1.SubscriptionList, error) {
-	ns := c.explicitOrConfigNamespace(options.Namespaced)
+	ns := c.explicitOrConfigNamespace(&options)
 
 	list, err := c.eventing.ChannelsV1alpha1().Subscriptions(ns).List(meta_v1.ListOptions{})
 	if err != nil {
