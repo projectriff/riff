@@ -70,6 +70,11 @@ var _ = Describe("The riff function create command", func() {
 			Expect(err).To(MatchError(ContainSubstring("--git-repo")))
 			Expect(err).To(MatchError(ContainSubstring("--local-path")))
 		})
+		It("should fail without invoker url with custom invoker", func() {
+			fc.SetArgs([]string{"custom", "square", "--git-repo", "http://git.com", "--image", "hello/image"})
+			err := fc.Execute()
+			Expect(err).To(MatchError(ContainSubstring("--invoker-url is required with custom invokers")))
+		})
 	})
 
 	Context("when given suitable args and flags", func() {
@@ -104,6 +109,25 @@ var _ = Describe("The riff function create command", func() {
 
 			asMock.On("CreateFunction", o, mock.Anything).Return(nil, nil)
 			err := fc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		})
+		It("should support custom invoker urls", func() {
+			fc.SetArgs([]string{"custom", "square", "--invoker-url", "http://github.com/acmelang/invoker.yaml", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
+
+			o := core.CreateFunctionOptions{
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+				Invoker:     "custom",
+				InvokerURL:  "http://github.com/acmelang/invoker.yaml",
+			}
+			o.Name = "square"
+			o.Image = "foo/bar"
+			o.Env = []string{}
+			o.EnvFrom = []string{}
+
+			asMock.On("CreateFunction", o, mock.Anything).Return(nil, nil)
+			err := fc.Execute()
+			fmt.Print(err)
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should propagate core.Client errors", func() {

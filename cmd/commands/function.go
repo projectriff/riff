@@ -63,6 +63,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 			"- 'jar': uses riff's java-function-invoker build for a prebuilt JAR file\n" +
 			"- 'node': uses riff's node-function-invoker build\n" +
 			"- 'command': uses riff's command-function-invoker build\n" +
+			"- 'custom': use a custom invoker. Specify with --custom-url flag\n" +
 			"\nBuildpack based builds support building from local source or within the cluster. Images will be pushed to the registry specified in the image name, unless prefixed with 'dev.local/' in which case the image will only be available within the local Docker daemon.\n" +
 			"\nFrom then on you can use the sub-commands for the `service` command to interact with the service created for the function.\n\n" +
 			envFromLongDesc + "\n",
@@ -83,6 +84,10 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 				createFunctionOptions.BuildpackImage = buildpack
 			} else if invokerURL, exists := invokers[invoker]; exists {
 				createFunctionOptions.InvokerURL = invokerURL
+			} else if invoker == "custom" && createFunctionOptions.InvokerURL != "" {
+				// custom invoker with an Invoker URL configured
+			} else if invoker == "custom" && createFunctionOptions.InvokerURL == "" {
+				return fmt.Errorf("--invoker-url is required with custom invokers")
 			} else {
 				return fmt.Errorf("unknown invoker: %s", invoker)
 			}
@@ -118,6 +123,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	command.Flags().StringVarP(&createFunctionOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
 	command.Flags().BoolVarP(&createFunctionOptions.DryRun, "dry-run", "", false, dryRunUsage)
 	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
+	command.Flags().StringVar(&createFunctionOptions.InvokerURL, "invoker-url", "", "the path to a custom invoker url. Required if invoker is custom.")
 	command.MarkFlagRequired("image")
 	command.Flags().StringVar(&createFunctionOptions.GitRepo, "git-repo", "", "the `URL` for a git repository hosting the function code")
 	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` of the function code to use")
