@@ -177,19 +177,19 @@ var _ = Describe("The riff channel list command", func() {
 
 			list := &eventing.ChannelList{
 				Items: []eventing.Channel{
-					{ObjectMeta: metav1.ObjectMeta{Name: "foo"}, Status: eventing.ChannelStatus{
+					{ObjectMeta: metav1.ObjectMeta{Name: "foo"}, Spec: eventing.ChannelSpec{Bus: "pubsub"}, Status: eventing.ChannelStatus{
 						Conditions: []eventing.ChannelCondition{
 							{Type: eventing.ChannelReady, Status: v1.ConditionTrue},
 						}}},
-					{ObjectMeta: metav1.ObjectMeta{Name: "bar"}, Status: eventing.ChannelStatus{
+					{ObjectMeta: metav1.ObjectMeta{Name: "bar"}, Spec: eventing.ChannelSpec{Bus: "kafka"}, Status: eventing.ChannelStatus{
 						Conditions: []eventing.ChannelCondition{
 							{Type: eventing.ChannelReady, Status: v1.ConditionFalse, Reason: "RevisionFailed", Message: "oopsie"},
 						}}},
-					{ObjectMeta: metav1.ObjectMeta{Name: "baz"}, Status: eventing.ChannelStatus{
+					{ObjectMeta: metav1.ObjectMeta{Name: "baz"}, Spec: eventing.ChannelSpec{Bus: "stub"}, Status: eventing.ChannelStatus{
 						Conditions: []eventing.ChannelCondition{
 							{Type: eventing.ChannelReady, Status: v1.ConditionUnknown},
 						}}},
-					{ObjectMeta: metav1.ObjectMeta{Name: "foobar"}},
+					{ObjectMeta: metav1.ObjectMeta{Name: "foobar"}, Spec: eventing.ChannelSpec{ClusterBus: "stub"}},
 				},
 			}
 
@@ -213,11 +213,11 @@ var _ = Describe("The riff channel list command", func() {
 	})
 })
 
-const channelListOutput = `NAME   STATUS                 
-foo    Running                
-bar    RevisionFailed: oopsie 
-baz    Unknown                
-foobar Unknown                
+const channelListOutput = `NAME   STATUS                 BUS             
+foo    Running                bus:pubsub      
+bar    RevisionFailed: oopsie bus:kafka       
+baz    Unknown                bus:stub        
+foobar Unknown                clusterbus:stub 
 
 list completed successfully
 `

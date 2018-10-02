@@ -183,5 +183,16 @@ func makeChannelExtractors() []NamedExtractor {
 				}
 			},
 		},
+		{
+			name: "BUS",
+			fn: func(ch interface{}) string {
+				spec := ch.(v1alpha1.Channel).Spec
+				if spec.Bus != "" {
+					return fmt.Sprintf("bus:%s", spec.Bus)
+				} else {
+					return fmt.Sprintf("clusterbus:%s", spec.ClusterBus)
+				}
+			},
+		},
 	}
 }
