@@ -15,9 +15,6 @@
  *
  */
 
-/*
-Package fileutils provides some file manipulation utilities.
-*/
 package fileutils
 
 import (
@@ -28,23 +25,21 @@ import (
 	"strings"
 )
 
-type ErrorId string
-
 const (
-	ErrFileNotFound ErrorId = "file not found"
-	ErrOpeningSourceDir ErrorId = "cannot open source directory"
-	ErrCannotListSourceDir ErrorId = "cannot list source directory"
-	ErrUnexpected ErrorId = "unexpected error"
-	ErrCreatingTargetDir ErrorId = "cannot create target directory"
-	ErrOpeningSourceFile ErrorId = "cannot open source file"
-	ErrOpeningTargetFile ErrorId = "cannot open target file"
-	ErrCopyingFile ErrorId = "file copy failed"
+	ErrOpeningSourceDir     ErrorId = "cannot open source directory"
+	ErrCannotListSourceDir  ErrorId = "cannot list source directory"
+	ErrUnexpected           ErrorId = "unexpected error"
+	ErrCreatingTargetDir    ErrorId = "cannot create target directory"
+	ErrOpeningSourceFile    ErrorId = "cannot open source file"
+	ErrOpeningTargetFile    ErrorId = "cannot open target file"
+	ErrCopyingFile          ErrorId = "file copy failed"
 	ErrReadingSourceSymlink ErrorId = "cannot read symbolic link source"
 	ErrWritingTargetSymlink ErrorId = "cannot write target symbolic link"
-	ErrExternalSymlink ErrorId = "external symbolic link"
+	ErrExternalSymlink      ErrorId = "external symbolic link"
 )
 
-type Utils interface {
+// Copier is a helper interface for copying files and/or directories.
+type Copier interface {
 	/*
 		Copy copies a source file to a destination file. File contents are copied. File mode and permissions
 		(as described in http://golang.org/pkg/os/#FileMode) are copied.
@@ -58,42 +53,30 @@ type Utils interface {
 		always succeeds.
 	*/
 	Copy(destPath string, srcPath string) error
-
-	/*
-		Tests the existence of a file or directory at a given path. Returns true if and only if the file or
-		directory exists.
-	 */
-	Exists(path string) bool
-
-	/*
-		Filemode returns the os.FileMode of the file with the given path. If the file does not exist, returns
-		an error with tag ErrFileNotFound.
-	*/
-	Filemode(path string) (os.FileMode, error)
 }
 
-type futils struct {
-	verbose bool
+type copier struct {
+	log     io.Writer
+	checker Checker
 }
 
-func New(verbose bool) Utils {
-	return &futils{
-		verbose: verbose,
+func NewCopier(log io.Writer, checker Checker) *copier {
+	return &copier{
+		log:     log,
+		checker: checker,
 	}
 }
 
-func (f *futils) Copy(destPath string, srcPath string) error {
-	if f.verbose {
-		fmt.Printf("copying %q to %q\n", srcPath, destPath)
-	}
+func (f *copier) Copy(destPath string, srcPath string) error {
+	fmt.Fprintf(f.log, "copying %q to %q\n", srcPath, destPath)
 	return f.doCopy(destPath, srcPath, srcPath)
 }
 
-func (f *futils) doCopy(destPath string, srcPath string, topSrcPath string) error {
+func (f *copier) doCopy(destPath string, srcPath string, topSrcPath string) error {
 	if f.sameFile(srcPath, destPath) {
 		return nil
 	}
-	srcMode, err := f.Filemode(srcPath)
+	srcMode, err := f.checker.Filemode(srcPath)
 	if err != nil {
 		return err
 	}
@@ -107,7 +90,7 @@ func (f *futils) doCopy(destPath string, srcPath string, topSrcPath string) erro
 	}
 }
 
-func (f *futils) copyDir(destination string, source string, topSource string) error {
+func (f *copier) copyDir(destination string, source string, topSource string) error {
 	finalDestination, err := f.finalDestinationDir(destination, source)
 	if err != nil {
 		return err
@@ -119,9 +102,7 @@ func (f *futils) copyDir(destination string, source string, topSource string) er
 	}
 
 	for _, name := range names {
-		if f.verbose {
-			fmt.Printf("copying %q from %q to %q\n", name, source, finalDestination)
-		}
+		fmt.Fprintf(f.log, "copying %q from %q to %q\n", name, source, finalDestination)
 		err = f.doCopy(filepath.Join(finalDestination, name), filepath.Join(source, name), topSource)
 		if err != nil {
 			return err
@@ -153,8 +134,8 @@ func getNames(dirPath string) (names [] string, err error) {
 /*
 	Determine the final destination directory and return an opened file referring to it.
 */
-func (f *futils) finalDestinationDir(destination string, source string) (finalDestination string, err error) {
-	sourceMode, err := f.Filemode(source)
+func (f *copier) finalDestinationDir(destination string, source string) (finalDestination string, err error) {
+	sourceMode, err := f.checker.Filemode(source)
 	if err != nil {
 		return finalDestination, err
 	}
@@ -173,14 +154,14 @@ func (f *futils) finalDestinationDir(destination string, source string) (finalDe
 	return finalDestination, nil
 }
 
-func (f *futils) copyFile(destination string, source string) error {
+func (f *copier) copyFile(destination string, source string) error {
 	sourceFile, err := os.OpenFile(source, os.O_RDONLY, 0666)
 	if err != nil {
 		return newFileError(ErrOpeningSourceFile, err)
 	}
 	defer sourceFile.Close()
 
-	mode, err := f.Filemode(source)
+	mode, err := f.checker.Filemode(source)
 	if err != nil {
 		return err
 	}
@@ -198,7 +179,7 @@ func (f *futils) copyFile(destination string, source string) error {
 	return nil
 }
 
-func (f *futils) copySymlink(destLinkPath string, srcLinkPath string, topSrcPath string) error {
+func (f *copier) copySymlink(destLinkPath string, srcLinkPath string, topSrcPath string) error {
 	linkTarget, err := os.Readlink(srcLinkPath)
 	if err != nil {
 		return newFileError(ErrReadingSourceSymlink, err)
@@ -225,36 +206,17 @@ func (f *futils) copySymlink(destLinkPath string, srcLinkPath string, topSrcPath
 	if err != nil {
 		return newFileError(ErrUnexpected, err)
 	}
-	if f.verbose {
-		fmt.Printf("symbolic link %q has target %q which has path %q relative to %q (directory containing link)\n",
-			srcLinkPath, linkTarget, relativePath, linkParent)
-	}
+	fmt.Fprintf(f.log, "symbolic link %q has target %q which has path %q relative to %q (directory containing link)\n",
+		srcLinkPath, linkTarget, relativePath, linkParent)
 	err = os.Symlink(relativePath, destLinkPath)
 	if err != nil {
 		return newFileError(ErrWritingTargetSymlink, err)
 	}
-	if f.verbose {
-		fmt.Printf("symbolically linked %q to %q\n", destLinkPath, relativePath)
-	}
+	fmt.Fprintf(f.log, "symbolically linked %q to %q\n", destLinkPath, relativePath)
 	return nil
 }
 
-func (f *futils) Exists(path string) bool {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return false
-	}
-	return true
-}
-
-func (f *futils) Filemode(path string) (os.FileMode, error) {
-	fi, err := os.Lstat(path)
-	if err != nil {
-		return os.FileMode(0), newFileError(ErrFileNotFound, err)
-	}
-	return fi.Mode(), nil
-}
-
-func (f *futils) sameFile(srcPath string, destPath string) bool {
+func (f *copier) sameFile(srcPath string, destPath string) bool {
 	srcFi, err := os.Stat(srcPath)
 	if err == nil {
 		destFi, err := os.Stat(destPath)
@@ -263,27 +225,4 @@ func (f *futils) sameFile(srcPath string, destPath string) bool {
 		}
 	}
 	return false
-}
-
-type FileError struct {
-	ErrorId ErrorId
-	Cause   error
-}
-
-func newFileError(id ErrorId, cause error) FileError {
-	return FileError{
-		ErrorId: id,
-		Cause:   cause,
-	}
-}
-
-func newFileErrorf(tag ErrorId, format string, insert ...interface{}) error {
-	return FileError{
-		ErrorId: tag,
-		Cause:   fmt.Errorf(format, insert...),
-	}
-}
-
-func (fe FileError) Error() string {
-	return fmt.Sprintf("fileutils error: %s: %v", fe.ErrorId, fe.Cause)
 }

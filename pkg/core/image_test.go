@@ -16,15 +16,17 @@ var _ = Describe("RelocateImages", func() {
 
 	var (
 		client     ImageClient
-		mockFutils *mocks.Utils
+		mockFutils *mocks.Copier
+		mockChecker *mocks.Checker
 		options    RelocateImagesOptions
 		err        error
 		testErr    error
 	)
 
 	BeforeEach(func() {
-		mockFutils = new(mocks.Utils)
-		client = NewImageClient(nil, mockFutils, resource.ListImages)
+		mockFutils = new(mocks.Copier)
+		mockChecker = new(mocks.Checker)
+		client = NewImageClient(nil, mockFutils, mockChecker, resource.ListImages)
 		options.Registry = "reg"
 		options.RegistryUser = "user"
 		testErr = errors.New("test error")
@@ -282,15 +284,17 @@ var _ = Describe("RelocateImages", func() {
 var _ = Describe("SystemDownload", func() {
 
 	var (
-		client     ImageClient
-		mockFutils *mocks.Utils
-		options    DownloadSystemOptions
-		err        error
+		client      ImageClient
+		mockCopier  *mocks.Copier
+		mockChecker *mocks.Checker
+		options     DownloadSystemOptions
+		err         error
 	)
 
 	BeforeEach(func() {
-		mockFutils = new(mocks.Utils)
-		client = NewImageClient(nil, mockFutils, resource.ListImages)
+		mockCopier = new(mocks.Copier)
+		mockChecker = new(mocks.Checker)
+		client = NewImageClient(nil, mockCopier, mockChecker, resource.ListImages)
 	})
 
 	JustBeforeEach(func() {
@@ -298,7 +302,7 @@ var _ = Describe("SystemDownload", func() {
 	})
 
 	AfterEach(func() {
-		mockFutils.AssertExpectations(GinkgoT())
+		mockCopier.AssertExpectations(GinkgoT())
 	})
 
 	Describe("system download", func() {

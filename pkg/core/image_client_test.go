@@ -34,25 +34,27 @@ var _ = Describe("ImageClient", func() {
 	var (
 		imageClient     core.ImageClient
 		mockDocker      *mocks.Docker
-		mockFutils      *mock_fileutils.Utils
+		mockCopier      *mock_fileutils.Copier
+		mockChecker     *mock_fileutils.Checker
 		mockImageLister func(resource string, baseDir string) ([]string, error)
 		testError       error
 	)
 
 	BeforeEach(func() {
 		mockDocker = new(mocks.Docker)
-		mockFutils = new(mock_fileutils.Utils)
+		mockCopier = new(mock_fileutils.Copier)
+		mockChecker = new(mock_fileutils.Checker)
 		testError = errors.New("test error")
 		mockImageLister = nil
 	})
 
 	JustBeforeEach(func() {
-		imageClient = core.NewImageClient(mockDocker, mockFutils, mockImageLister)
+		imageClient = core.NewImageClient(mockDocker, mockCopier, mockChecker, mockImageLister)
 	})
 
 	AfterEach(func() {
 		mockDocker.AssertExpectations(GinkgoT())
-		mockFutils.AssertExpectations(GinkgoT())
+		mockCopier.AssertExpectations(GinkgoT())
 	})
 
 	Describe("LoadAndTagImages", func() {
@@ -334,7 +336,7 @@ var _ = Describe("ImageClient", func() {
 
 		Context("when the image manifest does not already exist", func() {
 			BeforeEach(func() {
-				mockFutils.On("Exists", options.Images).Return(false)
+				mockChecker.On("Exists", options.Images).Return(false)
 			})
 
 			Context("when check is false", func() {
@@ -377,7 +379,7 @@ var _ = Describe("ImageClient", func() {
 		Context("when the image manifest already exists", func() {
 			BeforeEach(func() {
 				options.Check = false
-				mockFutils.On("Exists", options.Images).Return(true).Maybe()
+				mockChecker.On("Exists", options.Images).Return(true).Maybe()
 			})
 
 			Context("when force is false", func() {

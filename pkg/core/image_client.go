@@ -61,7 +61,8 @@ type imageLister func(resource string, baseDir string) ([]string, error)
 
 type imageClient struct {
 	docker     docker.Docker
-	futils     fileutils.Utils
+	copier     fileutils.Copier
+	checker    fileutils.Checker
 	listImages imageLister
 }
 
@@ -146,7 +147,7 @@ func (c *imageClient) ListImages(options ListImagesOptions) error {
 	if imPath == "" {
 		imPath = filepath.Join(baseDir, "image-manifest.yaml")
 	}
-	if !options.Force && c.futils.Exists(imPath) {
+	if !options.Force && c.checker.Exists(imPath) {
 		return fmt.Errorf("image manifest already exists, use `--force` to overwrite it")
 	}
 
@@ -184,6 +185,6 @@ func (c *imageClient) ListImages(options ListImagesOptions) error {
 	return im.Save(imPath)
 }
 
-func NewImageClient(docker docker.Docker, futils fileutils.Utils, listImages imageLister) ImageClient {
-	return &imageClient{docker: docker, futils: futils, listImages: listImages}
+func NewImageClient(docker docker.Docker, copier fileutils.Copier, checker fileutils.Checker, listImages imageLister) ImageClient {
+	return &imageClient{docker: docker, copier: copier, checker: checker, listImages: listImages}
 }
