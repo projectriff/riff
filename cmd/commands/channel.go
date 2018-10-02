@@ -18,6 +18,8 @@ package commands
 
 import (
 	"fmt"
+	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
+	"k8s.io/api/core/v1"
 
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
@@ -105,15 +107,11 @@ func ChannelList(fcTool *core.Client) *cobra.Command {
 				return err
 			}
 
-			if len(channels.Items) == 0 {
-				fmt.Fprintln(cmd.OutOrStdout(), "No resources found.")
-			} else {
-				fmt.Fprintln(cmd.OutOrStdout(), "NAME")
-				for _, channel := range channels.Items {
-					fmt.Fprintln(cmd.OutOrStdout(), channel.Name)
-				}
-			}
+			out := cmd.OutOrStdout()
+			Display(out, channelToInterfaceSlice(channels.Items), makeChannelExtractors())
+			fmt.Fprintln(out)
 
+			PrintSuccessfulCompletion(cmd)
 			return nil
 		},
 	}
@@ -150,4 +148,40 @@ func ChannelDelete(fcTool *core.Client) *cobra.Command {
 
 	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", "the `namespace` of the channel")
 	return command
+}
+
+func channelToInterfaceSlice(channels []v1alpha1.Channel) []interface{} {
+	result := make([]interface{}, len(channels))
+	for i := range channels {
+		result[i] = channels[i]
+	}
+	return result
+}
+
+func makeChannelExtractors() []NamedExtractor {
+	return []NamedExtractor{
+		{
+			name: "NAME",
+			fn:   func(ch interface{}) string { return ch.(v1alpha1.Channel).Name },
+		},
+		{
+			name: "STATUS",
+			fn: func(ch interface{}) string {
+				channel := ch.(v1alpha1.Channel)
+				condition := channel.Status.GetCondition(v1alpha1.ChannelReady)
+				if condition == nil {
+					return "Unknown"
+				} else {
+					switch condition.Status {
+					case v1.ConditionTrue:
+						return "Running"
+					case v1.ConditionFalse:
+						return fmt.Sprintf("%s: %s", condition.Reason, condition.Message)
+					default:
+						return "Unknown"
+					}
+				}
+			},
+		},
+	}
 }

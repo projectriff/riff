@@ -59,7 +59,6 @@ func SubscriptionCreate(client *core.Client) *Command {
 	return command
 }
 
-
 func SubscriptionDelete(client *core.Client) *Command {
 	deleteOptions := core.DeleteSubscriptionOptions{}
 
@@ -109,7 +108,6 @@ func SubscriptionList(client *core.Client) *Command {
 		},
 	}
 
-
 	flags := command.Flags()
 	flags.StringVarP(&listOptions.Namespace, "namespace", "n", "", "the namespace of the subscriptions")
 
@@ -135,7 +133,35 @@ func computeSubscriptionName(args []string, options core.CreateSubscriptionOptio
 
 func displayList(cmd *Command, subscriptions *v1alpha1.SubscriptionList) {
 	out := cmd.OutOrStdout()
-	display(out, &subscriptions.Items)
+	Display(out, subscriptionToInterfaceSlice(subscriptions.Items), makeSubscriptionExtractors())
 	fmt.Fprintln(out)
 }
 
+func subscriptionToInterfaceSlice(subscriptions []v1alpha1.Subscription) []interface{} {
+	result := make([]interface{}, len(subscriptions))
+	for i := range subscriptions {
+		result[i] = subscriptions[i]
+	}
+	return result
+}
+
+func makeSubscriptionExtractors() []NamedExtractor {
+	return []NamedExtractor{
+		{
+			name: "NAME",
+			fn:   func(s interface{}) string { return s.(v1alpha1.Subscription).Name },
+		},
+		{
+			name: "CHANNEL",
+			fn:   func(s interface{}) string { return s.(v1alpha1.Subscription).Spec.Channel },
+		},
+		{
+			name: "SUBSCRIBER",
+			fn:   func(s interface{}) string { return s.(v1alpha1.Subscription).Spec.Subscriber },
+		},
+		{
+			name: "REPLY-TO",
+			fn:   func(s interface{}) string { return s.(v1alpha1.Subscription).Spec.ReplyTo },
+		},
+	}
+}

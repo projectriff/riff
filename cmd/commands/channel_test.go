@@ -18,7 +18,7 @@ package commands_test
 
 import (
 	"fmt"
-
+	"k8s.io/api/core/v1"
 	"strings"
 
 	eventing "github.com/knative/eventing/pkg/apis/channels/v1alpha1"
@@ -29,7 +29,7 @@ import (
 	"github.com/projectriff/riff/pkg/core/mocks"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/mock"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var _ = Describe("The riff channel create command", func() {
@@ -177,8 +177,19 @@ var _ = Describe("The riff channel list command", func() {
 
 			list := &eventing.ChannelList{
 				Items: []eventing.Channel{
-					{ObjectMeta: v1.ObjectMeta{Name: "foo"}},
-					{ObjectMeta: v1.ObjectMeta{Name: "bar"}},
+					{ObjectMeta: metav1.ObjectMeta{Name: "foo"}, Status: eventing.ChannelStatus{
+						Conditions: []eventing.ChannelCondition{
+							{Type: eventing.ChannelReady, Status: v1.ConditionTrue},
+						}}},
+					{ObjectMeta: metav1.ObjectMeta{Name: "bar"}, Status: eventing.ChannelStatus{
+						Conditions: []eventing.ChannelCondition{
+							{Type: eventing.ChannelReady, Status: v1.ConditionFalse, Reason: "RevisionFailed", Message: "oopsie"},
+						}}},
+					{ObjectMeta: metav1.ObjectMeta{Name: "baz"}, Status: eventing.ChannelStatus{
+						Conditions: []eventing.ChannelCondition{
+							{Type: eventing.ChannelReady, Status: v1.ConditionUnknown},
+						}}},
+					{ObjectMeta: metav1.ObjectMeta{Name: "foobar"}},
 				},
 			}
 
@@ -202,9 +213,13 @@ var _ = Describe("The riff channel list command", func() {
 	})
 })
 
-const channelListOutput = `NAME
-foo
-bar
+const channelListOutput = `NAME   STATUS                 
+foo    Running                
+bar    RevisionFailed: oopsie 
+baz    Unknown                
+foobar Unknown                
+
+list completed successfully
 `
 
 var _ = Describe("The riff channel delete command", func() {
