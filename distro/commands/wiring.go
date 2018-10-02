@@ -46,7 +46,9 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		SuggestionsMinimumDistance: 2,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			dockerClient = docker.RealDocker(os.Stdin, cmd.OutOrStdout(), cmd.OutOrStderr())
-			imageClient = core.NewImageClient(dockerClient, fileutils.New(true), resource.ListImages)
+			checker := fileutils.NewChecker()
+			copier := fileutils.NewCopier(cmd.OutOrStdout(), checker)
+			imageClient = core.NewImageClient(dockerClient, copier, checker, resource.ListImages)
 			return nil
 		},
 	}

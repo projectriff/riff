@@ -20,20 +20,15 @@ package fileutils_test
 import (
 	"github.com/projectriff/riff/pkg/fileutils"
 	"github.com/projectriff/riff/pkg/test_support"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
 
-func TestErrorIds(t *testing.T) {
-	if fileutils.ErrOpeningSourceDir == fileutils.ErrFileNotFound {
-		t.Fatal("Errors are not distinct")
-	}
-}
-
 func TestCopyFile(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer os.RemoveAll(td)
@@ -48,7 +43,7 @@ func TestCopyFile(t *testing.T) {
 }
 
 func TestCopyNonExistent(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer os.RemoveAll(td)
@@ -62,7 +57,7 @@ func TestCopyNonExistent(t *testing.T) {
 }
 
 func TestCopySameFile(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer test_support.CleanupDirs(t, td)
@@ -76,7 +71,7 @@ func TestCopySameFile(t *testing.T) {
 }
 
 func TestCopyFileMode(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer test_support.CleanupDirs(t, td)
@@ -95,7 +90,7 @@ func TestCopyFileMode(t *testing.T) {
 }
 
 func TestCopyDirectoryToNew(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer test_support.CleanupDirs(t, td)
@@ -119,7 +114,7 @@ func TestCopyDirectoryToNew(t *testing.T) {
 }
 
 func TestCopyDirectoryNestedToNew(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer test_support.CleanupDirs(t, td)
@@ -146,7 +141,7 @@ func TestCopyDirectoryNestedToNew(t *testing.T) {
 }
 
 func TestCopyDirectoryToExisting(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer test_support.CleanupDirs(t, td)
@@ -173,7 +168,7 @@ func TestCopyDirectoryToExisting(t *testing.T) {
 }
 
 func TestCopyDirMode(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer test_support.CleanupDirs(t, td)
@@ -192,7 +187,7 @@ func TestCopyDirMode(t *testing.T) {
 }
 
 func TestCopyDirInternalSymlink(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer test_support.CleanupDirs(t, td)
@@ -238,7 +233,7 @@ func TestCopyDirInternalSymlink(t *testing.T) {
 }
 
 func TestCopyDirInternalFileSymlink(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer test_support.CleanupDirs(t, td)
@@ -281,7 +276,7 @@ func TestCopyDirInternalFileSymlink(t *testing.T) {
 }
 
 func TestCopyDirExternalSymlink(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer test_support.CleanupDirs(t, td)
@@ -308,7 +303,7 @@ func TestCopyDirExternalSymlink(t *testing.T) {
 }
 
 func TestCopyDirInternalRelativeSymlink(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer test_support.CleanupDirs(t, td)
@@ -336,7 +331,7 @@ func TestCopyDirInternalRelativeSymlink(t *testing.T) {
 }
 
 func TestCopyDirExternalRelativeSymlink(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer test_support.CleanupDirs(t, td)
@@ -366,7 +361,7 @@ func TestCopyDirExternalRelativeSymlink(t *testing.T) {
 }
 
 func TestCopyFileSymlink(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer test_support.CleanupDirs(t, td)
@@ -383,7 +378,7 @@ func TestCopyFileSymlink(t *testing.T) {
 }
 
 func TestCopyFileSameSymlink(t *testing.T) {
-	f := createFileutils()
+	f := createCopier()
 
 	td := test_support.CreateTempDir()
 	defer test_support.CleanupDirs(t, td)
@@ -398,40 +393,9 @@ func TestCopyFileSameSymlink(t *testing.T) {
 	}
 }
 
-func TestExistsDir(t *testing.T) {
-	f := createFileutils()
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	exists := f.Exists(td)
-	if !exists {
-		t.Fatalf("Exists failed to find existing directory %s", td)
-	}
-}
-
-func TestExistsFile(t *testing.T) {
-	f := createFileutils()
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	src := test_support.CreateFile(td, "src.file")
-	exists := f.Exists(src)
-	if !exists {
-		t.Fatalf("Exists failed to find existing file %s", src)
-	}
-}
-
-func TestExistsFalse(t *testing.T) {
-	f := createFileutils()
-	path := "/nosuch"
-	exists := f.Exists(path)
-	if exists {
-		t.Fatalf("Exists claimed non-existent path %s exists", path)
-	}
-}
-
-func createFileutils() fileutils.Utils {
-	return fileutils.New(false)
+func createCopier() fileutils.Copier {
+	checker := fileutils.NewChecker() // TODO: replace with mock checker after conversion to Ginkgo
+	return fileutils.NewCopier(ioutil.Discard, checker)
 }
 
 func check(err error) {
