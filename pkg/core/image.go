@@ -22,13 +22,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/ghodss/yaml"
 	"github.com/projectriff/riff/pkg/fileutils"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
-
-	"github.com/ghodss/yaml"
 )
 
 const (
@@ -115,7 +114,8 @@ func md5Flattener(input string) string {
 	}
 	hasher := md5.New()
 	hasher.Write([]byte(input))
-	return base + "-" + hex.EncodeToString(hasher.Sum(nil))
+	base, extension := extractExtension(base)
+	return base + "-" + hex.EncodeToString(hasher.Sum(nil)) + extension
 }
 
 func sha256Flattener(input string) string {
@@ -125,7 +125,13 @@ func sha256Flattener(input string) string {
 	}
 	hasher := sha256.New()
 	hasher.Write([]byte(input))
-	return base + "-" + hex.EncodeToString(hasher.Sum(nil))
+	base, extension := extractExtension(base)
+	return base + "-" + hex.EncodeToString(hasher.Sum(nil)) + extension
+}
+
+func extractExtension(path string) (string, string) {
+	extension := filepath.Ext(path)
+	return path[0:len(path)-len(extension)], extension
 }
 
 var flatteners = []uriFlattener{baseFlattener, md5Flattener, sha256Flattener}
