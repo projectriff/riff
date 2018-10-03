@@ -38,19 +38,33 @@ func (e *Exporter) Export(launchDir string, runImage, origImage v1.Image) (v1.Im
 
 	repoImage, topLayerDigest, err := e.addDirAsLayer(runImage, filepath.Join(e.TmpDir, "app.tgz"), filepath.Join(launchDir, "app"), "workspace/app")
 	if err != nil {
-		return nil, errors.Wrap(err, "append layers to run image")
+		return nil, errors.Wrap(err, "append app layer to run image")
 	}
 	metadata.App.SHA = topLayerDigest
 
 	repoImage, topLayerDigest, err = e.addDirAsLayer(repoImage, filepath.Join(e.TmpDir, "config.tgz"), filepath.Join(launchDir, "config"), "workspace/config")
 	if err != nil {
-		return nil, errors.Wrap(err, "append layers to run image")
+		return nil, errors.Wrap(err, "append config layer to run image")
 	}
 	metadata.Config.SHA = topLayerDigest
 
+	var bpMetadata []BuildpackMetadata
+	if origImage != nil {
+		data, err := e.GetMetadata(origImage)
+		if err != nil {
+			return nil, errors.Wrap(err, "find metadata")
+		}
+		bpMetadata = data.Buildpacks
+	}
 	for _, buildpack := range e.Buildpacks {
+		var origLayers map[string]LayerMetadata
+		for _, md := range bpMetadata {
+			if md.ID == buildpack.ID {
+				origLayers = md.Layers
+			}
+		}
 		bpMetadata := BuildpackMetadata{ID: buildpack.ID, Version: buildpack.Version}
-		repoImage, bpMetadata.Layers, err = e.addBuildpackLayer(buildpack.ID, launchDir, repoImage, origImage)
+		repoImage, bpMetadata.Layers, err = e.addBuildpackLayer(buildpack.ID, launchDir, repoImage, origImage, origLayers)
 		if err != nil {
 			return nil, errors.Wrap(err, "append layers")
 		}
@@ -69,22 +83,8 @@ func (e *Exporter) Export(launchDir string, runImage, origImage v1.Image) (v1.Im
 	return repoImage, nil
 }
 
-func (e *Exporter) addBuildpackLayer(id, launchDir string, repoImage, origImage v1.Image) (v1.Image, map[string]LayerMetadata, error) {
-	metadata := make(map[string]LayerMetadata)
-	origLayers := make(map[string]LayerMetadata)
-	if origImage != nil {
-		// TODO: avoid requesting the same config layer for each buildpack
-		data, err := e.GetMetadata(origImage)
-		if err != nil {
-			return nil, nil, err
-		}
-		for _, bp := range data.Buildpacks {
-			if bp.ID == id {
-				origLayers = bp.Layers
-			}
-		}
-	}
-
+func (e *Exporter) addBuildpackLayer(id, launchDir string, repoImage, origImage v1.Image, origLayers map[string]LayerMetadata) (v1.Image, map[string]LayerMetadata, error) {
+	metadata := map[string]LayerMetadata{}
 	layers, err := filepath.Glob(filepath.Join(launchDir, id, "*.toml"))
 	if err != nil {
 		return nil, nil, err
@@ -98,7 +98,7 @@ func (e *Exporter) addBuildpackLayer(id, launchDir string, repoImage, origImage 
 		layerName := filepath.Base(dir)
 		dirInfo, err := os.Stat(dir)
 		if os.IsNotExist(err) {
-			if origLayers[layerName].SHA == "" {
+			if origImage == nil || origLayers == nil || origLayers[layerName].SHA == "" {
 				return nil, nil, errors.Errorf("layer TOML found, but no available contents for %s %s", id, layerName)
 			}
 			layerDiffID = origLayers[layerName].SHA
