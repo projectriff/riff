@@ -166,7 +166,7 @@ func (f *copier) copyFile(destination string, source string) error {
 		return err
 	}
 
-	destinationFile, err := os.OpenFile(destination, os.O_CREATE|os.O_EXCL|os.O_WRONLY, mode)
+	destinationFile, err := os.OpenFile(destination, os.O_CREATE|os.O_WRONLY, mode)
 	if err != nil {
 		return newFileError(ErrOpeningTargetFile, err)
 	}
