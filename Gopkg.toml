@@ -78,8 +78,7 @@
 # Buildpack build support
 [[constraint]]
   name = "github.com/buildpack/pack"
-  # this is the latest on master as of 2018-09-24 11:00 EDT
-  revision = "ccfdc4e126923160ed45453e120edae61176d862"
+  version = "v0.0.3"
 [[override]]
   name = "github.com/buildpack/lifecycle"
   revision = "1fe614565217b026a0fb5158241bb299b0da1a5e"
