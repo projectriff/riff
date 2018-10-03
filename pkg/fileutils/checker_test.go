@@ -18,43 +18,60 @@
 package fileutils_test
 
 import (
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/fileutils"
 	"github.com/projectriff/riff/pkg/test_support"
-	"testing"
 )
 
-func TestExistsDir(t *testing.T) {
-	f := createChecker()
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
+var _ = Describe("Checker", func() {
+	var (
+		checker fileutils.Checker
+		tempDir string
+		path    string
+		exists  bool
+	)
 
-	exists := f.Exists(td)
-	if !exists {
-		t.Fatalf("Exists failed to find existing directory %s", td)
-	}
-}
+	BeforeEach(func() {
+		checker = fileutils.NewChecker()
+		tempDir = test_support.CreateTempDir()
+	})
 
-func TestExistsFile(t *testing.T) {
-	f := createChecker()
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
+	JustBeforeEach(func() {
+		exists = checker.Exists(path)
+	})
 
-	src := test_support.CreateFile(td, "src.file")
-	exists := f.Exists(src)
-	if !exists {
-		t.Fatalf("Exists failed to find existing file %s", src)
-	}
-}
+	AfterEach(func() {
+		test_support.CleanupDirs(GinkgoT(), tempDir)
+	})
 
-func TestExistsFalse(t *testing.T) {
-	f := createChecker()
-	path := "/nosuch"
-	exists := f.Exists(path)
-	if exists {
-		t.Fatalf("Exists claimed non-existent path %s exists", path)
-	}
-}
+	Context("when the input file is a directory", func() {
+		BeforeEach(func() {
+			path = tempDir
+		})
 
-func createChecker() fileutils.Checker {
-	return fileutils.NewChecker()
-}
+		It("should report that the directory exists", func() {
+			Expect(exists).To(BeTrue())
+		})
+	})
+
+	Context("when the input file is a file", func() {
+		BeforeEach(func() {
+			path = test_support.CreateFile(tempDir, "src.file")
+		})
+
+		It("should report that the file exists", func() {
+			Expect(exists).To(BeTrue())
+		})
+	})
+
+	Context("when the input file does not exist", func() {
+		BeforeEach(func() {
+			path = "nosuch"
+		})
+
+		It("should report that the file does not exist", func() {
+			Expect(exists).To(BeFalse())
+		})
+	})
+})

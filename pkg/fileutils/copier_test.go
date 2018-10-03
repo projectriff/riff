@@ -18,406 +18,390 @@
 package fileutils_test
 
 import (
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/fileutils"
 	"github.com/projectriff/riff/pkg/test_support"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
-	"testing"
 )
 
-func TestCopyFile(t *testing.T) {
-	f := createCopier()
+var _ = Describe("Copier", func() {
+	var (
+		copier  fileutils.Copier
+		tempDir string
+		source  string
+		target  string
+		err     error
+	)
 
-	td := test_support.CreateTempDir()
-	defer os.RemoveAll(td)
+	BeforeEach(func() {
+		checker := fileutils.NewChecker() // use a real checker to avoid mock setup
+		copier = fileutils.NewCopier(ioutil.Discard, checker)
 
-	src := test_support.CreateFile(td, "src.file")
-	target := filepath.Join(td, "target.file")
-	err := f.Copy(target, src)
-	if err != nil {
-		t.Fatalf("Failed: %s", err)
-	}
-	checkFile(target, "test contents", t)
+		tempDir = test_support.CreateTempDir()
+	})
+
+	JustBeforeEach(func() {
+		err = copier.Copy(target, source)
+	})
+
+	AfterEach(func() {
+		test_support.CleanupDirs(GinkgoT(), tempDir)
+	})
+
+	Context("when the source is a file", func() {
+		BeforeEach(func() {
+			source = test_support.CreateFile(tempDir, "src.file")
+			target = filepath.Join(tempDir, "target.file")
+		})
+
+		It("should copy the file", func() {
+			Expect(err).NotTo(HaveOccurred())
+
+			checkFile(target, "test contents")
+		})
+
+		Context("when the target is the same file", func() {
+			BeforeEach(func() {
+				target = source
+			})
+
+			It("should succeed and not corrupt the file contents", func() {
+				Expect(err).NotTo(HaveOccurred())
+
+				checkFile(target, "test contents")
+			})
+		})
+
+		Context("when the target is a different file", func() {
+			BeforeEach(func() {
+				target = test_support.CreateFile(tempDir, "target.file", "different contents")
+			})
+
+			It("should succeed and overwrite the file contents", func() {
+				Expect(err).NotTo(HaveOccurred())
+
+				checkFile(target, "test contents")
+			})
+		})
+	})
+
+	Context("when the source is a file with a specific mode", func() {
+		BeforeEach(func() {
+			source = test_support.CreateFileWithMode(tempDir, "src.file", os.FileMode(0642))
+			target = filepath.Join(tempDir, "target.file")
+		})
+
+		It("should copy the file mode", func() {
+			Expect(err).NotTo(HaveOccurred())
+
+			modeString := test_support.FileMode(target).String()
+			Expect(modeString).To(Equal("-rw-r-----"))
+		})
+	})
+
+	Context("when the target does not exist", func() {
+		BeforeEach(func() {
+			target = filepath.Join(tempDir, "target")
+		})
+
+		Context("when the source is a directory with contents", func() {
+			BeforeEach(func() {
+				source = filepath.Join(tempDir, "source")
+				err := os.Mkdir(source, os.FileMode(0777))
+				Expect(err).NotTo(HaveOccurred())
+
+				test_support.CreateFile(source, "file1")
+				test_support.CreateFile(source, "file2")
+			})
+
+			It("should copy the directory and its contents", func() {
+				Expect(err).NotTo(HaveOccurred())
+
+				checkDirectory(target)
+				checkFile(filepath.Join(target, "file1"), "test contents")
+				checkFile(filepath.Join(target, "file2"), "test contents")
+			})
+		})
+
+		Context("when the source is a directory with nested contents", func() {
+			BeforeEach(func() {
+				source = filepath.Join(tempDir, "source")
+				err := os.Mkdir(source, os.FileMode(0777))
+				Expect(err).NotTo(HaveOccurred())
+
+				subDir := filepath.Join(source, "subdir")
+				err = os.Mkdir(subDir, os.FileMode(0777))
+				Expect(err).NotTo(HaveOccurred())
+
+				test_support.CreateFile(subDir, "file1")
+				test_support.CreateFile(subDir, "file2")
+			})
+
+			It("should copy the directory and its contents", func() {
+				Expect(err).NotTo(HaveOccurred())
+
+				checkDirectory(target)
+				checkFile(filepath.Join(target, "subdir", "file1"), "test contents")
+				checkFile(filepath.Join(target, "subdir", "file2"), "test contents")
+			})
+		})
+
+		Context("when the source is a directory with a specific mode", func() {
+			BeforeEach(func() {
+				source = test_support.CreateDirWithMode(tempDir, "src.dir", os.FileMode(0642))
+			})
+
+			It("should copy the mode", func() {
+				Expect(err).NotTo(HaveOccurred())
+
+				modeString := test_support.FileMode(target).String()
+				Expect(modeString).To(Equal("drw-r-----"))
+			})
+		})
+
+		Context("when the source is a directory containing an internal symbolic link to a directory", func() {
+			BeforeEach(func() {
+				/*
+				   Create a directory structure inside tempDir like this:
+
+					source/ <------+
+						file1      |
+						dir1/      |
+							link --+
+
+				*/
+
+				source = test_support.CreateDir(tempDir, "source")
+
+				test_support.CreateFile(source, "file1")
+				dir1 := test_support.CreateDir(source, "dir1")
+
+				srcLink := filepath.Join(dir1, "link")
+				err := os.Symlink(source, srcLink)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should copy the symbolic link", func() {
+				Expect(err).NotTo(HaveOccurred())
+
+				targetDir1 := filepath.Join(target, "dir1")
+				targetLink := filepath.Join(targetDir1, "link")
+
+				linkTarget, err := os.Readlink(targetLink)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(linkTarget).To(Equal(".."))
+
+				Expect(test_support.SameFile(target, filepath.Join(targetDir1, linkTarget))).To(BeTrue())
+			})
+		})
+
+		Context("when the source is a directory containing an internal symbolic link to a file", func() {
+			BeforeEach(func() {
+				/*
+				   Create a directory structure inside tempDir like this:
+
+					source/
+						file1 <----+
+						link ------+
+
+				*/
+
+				source = test_support.CreateDir(tempDir, "source")
+
+				file1 := test_support.CreateFile(source, "file1")
+				fileLink := filepath.Join(source, "link")
+				err := os.Symlink(file1, fileLink)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should copy the symbolic link", func() {
+				Expect(err).NotTo(HaveOccurred())
+
+				targetFile1 := filepath.Join(target, "file1")
+				targetLink := filepath.Join(target, "link")
+
+				linkTarget, err := os.Readlink(targetLink)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(linkTarget).To(Equal("file1"))
+
+				Expect(test_support.SameFile(targetFile1, filepath.Join(target, linkTarget))).To(BeTrue())
+			})
+		})
+
+		Context("when the source is a directory containing an external symbolic link", func() {
+			BeforeEach(func() {
+				/*
+				   Create a directory structure inside tempDir like this:
+
+					source/
+						  link ----> tempDir
+
+				*/
+
+				source = test_support.CreateDir(tempDir, "source")
+
+				tdLink := filepath.Join(source, "link")
+				err := os.Symlink(tempDir, tdLink)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should return a suitable error", func() {
+				Expect(err).To(MatchError(ContainSubstring("cannot copy symbolic link")))
+			})
+		})
+
+		Context("when the source is a directory containing an internal relative symbolic link", func() {
+			BeforeEach(func() {
+				/*
+				   Create a directory structure inside tempDir like this:
+
+					source/    <---+
+								   | (internal, but via ../source)
+						  link ----+
+
+				*/
+
+				source = test_support.CreateDir(tempDir, "source")
+
+				tdLink := filepath.Join(source, "link")
+				err := os.Symlink(filepath.Join("..", "source"), tdLink)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should copy the symbolic link", func() {
+				Expect(err).NotTo(HaveOccurred())
+
+				targetLink := filepath.Join(target, "link")
+
+				linkTarget, err := os.Readlink(targetLink)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(linkTarget).To(Equal("."))
+			})
+		})
+
+		Context("when the source is a directory containing an external relative symbolic link", func() {
+			BeforeEach(func() {
+				/*
+				   Create a directory structure inside tempDir like this:
+
+					a/             <---+
+						source/        |
+									   | (external via ..)
+							  link ----+
+
+				*/
+
+				aDir := test_support.CreateDir(tempDir, "a")
+				source = test_support.CreateDir(aDir, "source")
+
+				tdLink := filepath.Join(source, "link")
+				err := os.Symlink("..", tdLink)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should return a suitable error", func() {
+				Expect(err).To(MatchError(ContainSubstring("cannot copy symbolic link")))
+			})
+		})
+
+		Context("when source is a symbolic link to a file", func() {
+			BeforeEach(func() {
+				/*
+				   Create a directory structure inside tempDir like this:
+
+					src.file <---+
+					source ------+
+
+				*/
+
+				linkTarget := test_support.CreateFile(tempDir, "src.file")
+				source = filepath.Join(tempDir, "link")
+				err := os.Symlink(linkTarget, source)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should return a suitable error", func() {
+				Expect(err).To(MatchError(ContainSubstring("cannot copy symbolic link")))
+			})
+		})
+
+		Context("when the source does not exist", func() {
+			BeforeEach(func() {
+				source = filepath.Join(tempDir, "src.file")
+			})
+
+			It("should return a suitable error", func() {
+				Expect(err).To(MatchError(ContainSubstring("no such file or directory")))
+			})
+		})
+	})
+
+	Context("when the source and target are directories", func() {
+		BeforeEach(func() {
+			source = filepath.Join(tempDir, "source")
+			err := os.Mkdir(source, os.FileMode(0777))
+			Expect(err).NotTo(HaveOccurred())
+
+			test_support.CreateFile(source, "file1")
+			test_support.CreateFile(source, "file2")
+
+			target = filepath.Join(tempDir, "target")
+			err = os.Mkdir(target, os.FileMode(0777))
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("should copy the source into the target", func() {
+			Expect(err).NotTo(HaveOccurred())
+
+			resultantDir := filepath.Join(target, "source")
+			checkDirectory(resultantDir)
+			checkFile(filepath.Join(resultantDir, "file1"), "test contents")
+			checkFile(filepath.Join(resultantDir, "file2"), "test contents")
+		})
+	})
+
+	Context("when source and target are the same symbolic link", func() {
+		BeforeEach(func() {
+			/*
+			   Create a directory structure inside tempDir like this:
+
+			    src.file <---+
+			    source ------+
+
+			*/
+			linkTarget := test_support.CreateFile(tempDir, "src.file")
+			source = filepath.Join(tempDir, "link")
+			err := os.Symlink(linkTarget, source)
+			Expect(err).NotTo(HaveOccurred())
+			target = source
+		})
+
+		It("should succeed and not corrupt the file contents", func() {
+			Expect(err).NotTo(HaveOccurred())
+
+			linkTarget, err := os.Readlink(target)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(linkTarget).To(Equal(filepath.Join(tempDir, "src.file")))
+
+			checkFile(target, "test contents")
+		})
+	})
+})
+
+func checkDirectory(path string) {
+	Expect(test_support.FileMode(path).IsDir()).To(BeTrue())
 }
 
-func TestCopyNonExistent(t *testing.T) {
-	f := createCopier()
-
-	td := test_support.CreateTempDir()
-	defer os.RemoveAll(td)
-
-	badSrc := filepath.Join(td, "src.file")
-	target := filepath.Join(td, "target.file")
-	err := f.Copy(target, badSrc)
-	if !strings.Contains(err.Error(), "no such file or directory") {
-		t.Fatalf("Unexpected error %v", err)
-	}
-}
-
-func TestCopySameFile(t *testing.T) {
-	f := createCopier()
-
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	src := test_support.CreateFile(td, "src.file")
-	err := f.Copy(src, src)
-	if err != nil {
-		t.Fatalf("Failed: %s", err)
-	}
-	checkFile(src, "test contents", t)
-}
-
-func TestCopyFileMode(t *testing.T) {
-	f := createCopier()
-
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	src := test_support.CreateFileWithMode(td, "src.file", os.FileMode(0642))
-	target := filepath.Join(td, "target.file")
-	err := f.Copy(target, src)
-	if err != nil {
-		t.Fatalf("Failed: %s", err)
-	}
-	modeString := test_support.FileMode(target).String()
-	expModeString := "-rw-r-----"
-	if modeString != expModeString {
-		t.Fatalf("Copied file has incorrect file mode %q, expected %q", modeString, expModeString)
-	}
-}
-
-func TestCopyDirectoryToNew(t *testing.T) {
-	f := createCopier()
-
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	srcDir := filepath.Join(td, "source")
-	err := os.Mkdir(srcDir, os.FileMode(0777))
-	check(err)
-
-	test_support.CreateFile(srcDir, "file1")
-	test_support.CreateFile(srcDir, "file2")
-
-	targetDir := filepath.Join(td, "target")
-	err = f.Copy(targetDir, srcDir)
-	if err != nil {
-		t.Fatalf("Failed: %s", err)
-	}
-	checkDirectory(targetDir, t)
-	checkFile(filepath.Join(targetDir, "file1"), "test contents", t)
-	checkFile(filepath.Join(targetDir, "file2"), "test contents", t)
-
-}
-
-func TestCopyDirectoryNestedToNew(t *testing.T) {
-	f := createCopier()
-
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	srcDir := filepath.Join(td, "source")
-	err := os.Mkdir(srcDir, os.FileMode(0777))
-	check(err)
-
-	subDir := filepath.Join(srcDir, "subdir")
-	err = os.Mkdir(subDir, os.FileMode(0777))
-	check(err)
-
-	test_support.CreateFile(subDir, "file1")
-	test_support.CreateFile(subDir, "file2")
-
-	targetDir := filepath.Join(td, "target")
-	err = f.Copy(targetDir, srcDir)
-	if err != nil {
-		t.Fatalf("Failed: %s", err)
-	}
-	checkDirectory(targetDir, t)
-	checkFile(filepath.Join(targetDir, "subdir", "file1"), "test contents", t)
-	checkFile(filepath.Join(targetDir, "subdir", "file2"), "test contents", t)
-}
-
-func TestCopyDirectoryToExisting(t *testing.T) {
-	f := createCopier()
-
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	srcDir := filepath.Join(td, "source")
-	err := os.Mkdir(srcDir, os.FileMode(0777))
-	check(err)
-
-	test_support.CreateFile(srcDir, "file1")
-	test_support.CreateFile(srcDir, "file2")
-
-	targetDir := filepath.Join(td, "target")
-	err = os.Mkdir(targetDir, os.FileMode(0777))
-	check(err)
-	err = f.Copy(targetDir, srcDir)
-	if err != nil {
-		t.Fatalf("Failed: %s", err)
-	}
-
-	resultantDir := filepath.Join(targetDir, "source")
-	checkDirectory(resultantDir, t)
-	checkFile(filepath.Join(resultantDir, "file1"), "test contents", t)
-	checkFile(filepath.Join(resultantDir, "file2"), "test contents", t)
-}
-
-func TestCopyDirMode(t *testing.T) {
-	f := createCopier()
-
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	src := test_support.CreateDirWithMode(td, "src.dir", os.FileMode(0642))
-	target := filepath.Join(td, "target.dir")
-	err := f.Copy(target, src)
-	if err != nil {
-		t.Fatalf("Failed: %s", err)
-	}
-	modeString := test_support.FileMode(target).String()
-	expModeString := "drw-r-----"
-	if modeString != expModeString {
-		t.Fatalf("Copied directory has incorrect file mode %q, expected %q", modeString, expModeString)
-	}
-}
-
-func TestCopyDirInternalSymlink(t *testing.T) {
-	f := createCopier()
-
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	/*
-	   Create a directory structure inside td like this:
-
-	    source/ <------+
-	        file1      |
-	        dir1/      |
-	            link --+
-
-	*/
-
-	srcDir := test_support.CreateDir(td, "source")
-
-	test_support.CreateFile(srcDir, "file1")
-	dir1 := test_support.CreateDir(srcDir, "dir1")
-
-	srcLink := filepath.Join(dir1, "link")
-	err := os.Symlink(srcDir, srcLink)
-	check(err)
-
-	targetDir := filepath.Join(td, "target")
-	err = f.Copy(targetDir, srcDir)
-	if err != nil {
-		t.Fatalf("Failed: %s", err)
-	}
-
-	targetDir1 := filepath.Join(targetDir, "dir1")
-	targetLink := filepath.Join(targetDir1, "link")
-
-	linkTarget, err := os.Readlink(targetLink)
-	check(err)
-	const expectedLinkTarget = ".."
-	if linkTarget != expectedLinkTarget {
-		t.Fatalf("Unexpected value of symlink %s, expected %s", linkTarget, expectedLinkTarget)
-	}
-
-	if !test_support.SameFile(targetDir, filepath.Join(targetDir1, linkTarget)) {
-		t.Fatalf("Symlink %s does not point to expected file %s", targetLink, targetDir)
-	}
-}
-
-func TestCopyDirInternalFileSymlink(t *testing.T) {
-	f := createCopier()
-
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	/*
-	   Create a directory structure inside td like this:
-
-	    source/ <------+
-	        file1      |
-	        link ------+
-
-	*/
-
-	srcDir := test_support.CreateDir(td, "source")
-
-	file1 := test_support.CreateFile(srcDir, "file1")
-	fileLink := filepath.Join(srcDir, "link")
-	err := os.Symlink(file1, fileLink)
-	check(err)
-
-	targetDir := filepath.Join(td, "target")
-	err = f.Copy(targetDir, srcDir)
-	if err != nil {
-		t.Fatalf("Failed: %s", err)
-	}
-
-	targetFile1 := filepath.Join(targetDir, "file1")
-	targetLink := filepath.Join(targetDir, "link")
-
-	linkTarget, err := os.Readlink(targetLink)
-	check(err)
-	const expectedLinkTarget = "file1"
-	if linkTarget != expectedLinkTarget {
-		t.Fatalf("Unexpected value of symlink %s, expected %s", linkTarget, expectedLinkTarget)
-	}
-
-	if !test_support.SameFile(targetFile1, filepath.Join(targetDir, linkTarget)) {
-		t.Fatalf("Symlink %s does not point to expected file %s", targetLink, targetFile1)
-	}
-}
-
-func TestCopyDirExternalSymlink(t *testing.T) {
-	f := createCopier()
-
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	/*
-	   Create a directory structure inside td like this:
-
-	    source/
-	          link ----> td
-
-	*/
-
-	srcDir := test_support.CreateDir(td, "source")
-
-	tdLink := filepath.Join(srcDir, "link")
-	err := os.Symlink(td, tdLink)
-	check(err)
-
-	targetDir := filepath.Join(td, "target")
-	err = f.Copy(targetDir, srcDir)
-	if err == nil {
-		t.Fatalf("Failed: should not have succeeded in copying external symbolic link")
-	}
-}
-
-func TestCopyDirInternalRelativeSymlink(t *testing.T) {
-	f := createCopier()
-
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	/*
-	   Create a directory structure inside td like this:
-
-	    source/    <---+
-	                   | (internal, but via ../source)
-	          link ----+
-
-	*/
-
-	srcDir := test_support.CreateDir(td, "source")
-
-	tdLink := filepath.Join(srcDir, "link")
-	err := os.Symlink("../source", tdLink)
-	check(err)
-
-	targetDir := filepath.Join(td, "target")
-	err = f.Copy(targetDir, srcDir)
-	if err != nil {
-		t.Fatalf("Failed: %s", err)
-	}
-}
-
-func TestCopyDirExternalRelativeSymlink(t *testing.T) {
-	f := createCopier()
-
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	/*
-	   Create a directory structure inside td like this:
-
-	    a/             <---+
-	        source/        |
-	                       | (external via ..)
-	              link ----+
-
-	*/
-
-	aDir := test_support.CreateDir(td, "a")
-	srcDir := test_support.CreateDir(aDir, "source")
-
-	tdLink := filepath.Join(srcDir, "link")
-	err := os.Symlink("..", tdLink)
-	check(err)
-
-	targetDir := filepath.Join(td, "target")
-	err = f.Copy(targetDir, srcDir)
-	if err == nil {
-		t.Fatalf("Failed: should not have external relative symbolic link")
-	}
-}
-
-func TestCopyFileSymlink(t *testing.T) {
-	f := createCopier()
-
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	src := test_support.CreateFile(td, "src.file")
-	link := filepath.Join(td, "link")
-	err := os.Symlink(src, link)
-	check(err)
-	target := filepath.Join(td, "target.file")
-	err = f.Copy(target, link)
-	if err == nil {
-		t.Fatalf("Failed: should not have succeeded in copying external symbolic link")
-	}
-}
-
-func TestCopyFileSameSymlink(t *testing.T) {
-	f := createCopier()
-
-	td := test_support.CreateTempDir()
-	defer test_support.CleanupDirs(t, td)
-
-	src := test_support.CreateFile(td, "src.file")
-	link := filepath.Join(td, "link")
-	err := os.Symlink(src, link)
-	check(err)
-	err = f.Copy(link, link)
-	if err != nil {
-		t.Fatalf("Failed: %s", err)
-	}
-}
-
-func createCopier() fileutils.Copier {
-	checker := fileutils.NewChecker() // TODO: replace with mock checker after conversion to Ginkgo
-	return fileutils.NewCopier(ioutil.Discard, checker)
-}
-
-func check(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-func checkDirectory(path string, t *testing.T) {
-	if !test_support.FileMode(path).IsDir() {
-		t.Fatalf("Not a directory: %q", path)
-	}
-}
-
-func checkFile(target string, expContents string, t *testing.T) {
+func checkFile(target string, expectedContents string) {
 	f, err := os.Open(target)
-	check(err)
+	Expect(err).NotTo(HaveOccurred())
 	defer f.Close()
-	buf := make([]byte, len(expContents))
+	buf := make([]byte, len(expectedContents))
 	n, err := f.Read(buf)
-	check(err)
-	if actualContents := string(buf[:n]); actualContents != expContents {
-		t.Fatalf("Contents %q not expected value %q", actualContents, expContents)
-	}
+	Expect(err).NotTo(HaveOccurred())
+	actualContents := string(buf[:n])
+	Expect(actualContents).To(Equal(expectedContents))
 }
