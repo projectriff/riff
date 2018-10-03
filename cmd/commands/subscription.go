@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"fmt"
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	"github.com/projectriff/riff/pkg/core"
 	. "github.com/spf13/cobra"
@@ -59,7 +58,6 @@ func SubscriptionCreate(client *core.Client) *Command {
 	return command
 }
 
-
 func SubscriptionDelete(client *core.Client) *Command {
 	deleteOptions := core.DeleteSubscriptionOptions{}
 
@@ -109,7 +107,6 @@ func SubscriptionList(client *core.Client) *Command {
 		},
 	}
 
-
 	flags := command.Flags()
 	flags.StringVarP(&listOptions.Namespace, "namespace", "n", "", "the namespace of the subscriptions")
 
@@ -136,6 +133,4 @@ func computeSubscriptionName(args []string, options core.CreateSubscriptionOptio
 func displayList(cmd *Command, subscriptions *v1alpha1.SubscriptionList) {
 	out := cmd.OutOrStdout()
 	display(out, &subscriptions.Items)
-	fmt.Fprintln(out)
 }
-

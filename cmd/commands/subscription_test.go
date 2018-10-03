@@ -92,7 +92,7 @@ var _ = Describe("The riff subscription create command", func() {
 			err := createCommand.Execute()
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(stdout.String()).To(Equal("create completed successfully\n"))
+			Expect(stdout.String()).To(Equal("\ncreate completed successfully\n"))
 		})
 
 		It("should create the subscription with the service name by default", func() {
@@ -109,7 +109,7 @@ var _ = Describe("The riff subscription create command", func() {
 			err := createCommand.Execute()
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(stdout.String()).To(Equal("create completed successfully\n"))
+			Expect(stdout.String()).To(Equal("\ncreate completed successfully\n"))
 		})
 
 		It("should create the subscription with the output channel binding", func() {
@@ -128,7 +128,7 @@ var _ = Describe("The riff subscription create command", func() {
 			err := createCommand.Execute()
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(stdout.String()).To(Equal("create completed successfully\n"))
+			Expect(stdout.String()).To(Equal("\ncreate completed successfully\n"))
 		})
 
 		It("should create the subscription in the provided namespace", func() {
@@ -152,7 +152,7 @@ var _ = Describe("The riff subscription create command", func() {
 			err := createCommand.Execute()
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(stdout.String()).To(Equal("create completed successfully\n"))
+			Expect(stdout.String()).To(Equal("\ncreate completed successfully\n"))
 		})
 
 		It("should propagate client error", func() {
@@ -226,7 +226,7 @@ var _ = Describe("The riff subscription delete command", func() {
 			err := deleteCommand.Execute()
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(stdout.String()).To(Equal("delete completed successfully\n"))
+			Expect(stdout.String()).To(Equal("\ndelete completed successfully\n"))
 		})
 
 		It("should unsubscribe based on the subscription name and namespace", func() {
@@ -240,7 +240,7 @@ var _ = Describe("The riff subscription delete command", func() {
 			err := deleteCommand.Execute()
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(stdout.String()).To(Equal("delete completed successfully\n"))
+			Expect(stdout.String()).To(Equal("\ndelete completed successfully\n"))
 		})
 
 		It("should propagate the client error", func() {
