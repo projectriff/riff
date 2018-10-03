@@ -208,7 +208,7 @@ func (c *imageClient) copyImages(inputDir string, outputDir string) error {
 		return nil
 	}
 
-	return c.futils.Copy(outputDir, imagesPath)
+	return c.copier.Copy(outputDir, imagesPath)
 }
 
 func relocateImageManifest(imageManifestPath string, mapper *imageMapper, outputPath string) error {

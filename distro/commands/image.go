@@ -61,11 +61,6 @@ func ImagePull(c *core.ImageClient) *cobra.Command {
 func ImageList(c *core.ImageClient) *cobra.Command {
 	options := core.ListImagesOptions{}
 
-	/*
-			searches an input manifest and associated k8s files for image names and creates an image manifest listing the images.
-
-		It does not guarantee to find all images referenced by the k8s files and so the resultant list of images needs to be validated by the user, e.g. by manual inspection or testing.
-	*/
 	command := &cobra.Command{
 		Use:   "list",
 		Short: "List some or all of the images for a riff manifest",
