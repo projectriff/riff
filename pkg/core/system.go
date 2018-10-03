@@ -21,9 +21,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
+	"github.com/projectriff/riff/pkg/resource"
 	"os"
 	"path/filepath"
 	"strings"
@@ -112,7 +110,7 @@ func (kc *kubectlClient) applyReleaseWithRetry(release string, options SystemIns
 }
 
 func (kc *kubectlClient) applyRelease(release string, options SystemInstallOptions) error {
-	yaml, err := loadRelease(release, filepath.Dir(options.Manifest))
+	yaml, err := resource.Load(release, filepath.Dir(options.Manifest))
 	if err != nil {
 		return err
 	}
@@ -229,32 +227,6 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 		}
 	}
 	return true, nil
-}
-
-func loadRelease(release string, baseDir string) ([]byte, error) {
-	releaseUrl, err := url.Parse(release)
-	if err != nil {
-		return nil, err
-	}
-
-	var content []byte
-	if releaseUrl.Scheme == "" {
-		content, err = ioutil.ReadFile(filepath.Join(baseDir, releaseUrl.Path))
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		resp, err := http.Get(releaseUrl.String())
-		if err != nil {
-			return nil, err
-		}
-		defer resp.Body.Close()
-		content, err = ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return content, nil
 }
 
 func waitForIstioComponents(kc *kubectlClient) error {

@@ -1,0 +1,12 @@
+spec:
+  template:
+    spec:
+      containers:
+      - args:
+        - -builder
+        - cluster
+        - -logtostderr
+        - -stderrthreshold
+        - INFO
+        image: gcr.io/knative-releases/x/y
+        name: build-webhook

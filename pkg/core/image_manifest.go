@@ -68,7 +68,7 @@ func EmptyImageManifest() *ImageManifest { // Will rename to NewImageManifest on
 	return result
 }
 
-func (m *ImageManifest) save(path string) error {
+func (m *ImageManifest) Save(path string) error {
 	bytes, err := yaml.Marshal(m)
 	if err != nil {
 		return err
