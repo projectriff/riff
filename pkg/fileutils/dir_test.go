@@ -30,28 +30,28 @@ var _ = Describe("Dir", func() {
 	)
 
 	JustBeforeEach(func() {
-	    dir, err = fileutils.Dir(file)
+		dir, err = fileutils.Dir(file)
 	})
 
 	Context("when file is a URL", func() {
-	    BeforeEach(func() {
-	        file = "file:///dir/file"
-	    })
+		BeforeEach(func() {
+			file = "file:///dir/file"
+		})
 
-	    It("should return the directory of the file", func() {
-	        Expect(err).NotTo(HaveOccurred())
-	        Expect(dir).To(Equal("file:///dir"))
-	    })
+		It("should return the directory of the file", func() {
+			Expect(err).NotTo(HaveOccurred())
+			Expect(dir).To(Equal("file:///dir"))
+		})
 	})
 
 	Context("when file is a path", func() {
-	    BeforeEach(func() {
-	        file = "/dir/file"
-	    })
+		BeforeEach(func() {
+			file = "/dir/file"
+		})
 
-	    It("should return the directory of the file", func() {
-	        Expect(err).NotTo(HaveOccurred())
-	        Expect(dir).To(Equal("/dir"))
-	    })
+		It("should return the directory of the file", func() {
+			Expect(err).NotTo(HaveOccurred())
+			Expect(dir).To(Equal("/dir"))
+		})
 	})
 })

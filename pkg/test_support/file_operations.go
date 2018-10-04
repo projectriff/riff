@@ -29,11 +29,11 @@ func CreateTempDir() string {
 	return tempDir
 }
 
-func CreateFile(path string, fileName string, contents ... string) string {
+func CreateFile(path string, fileName string, contents ...string) string {
 	return CreateFileWithMode(path, fileName, os.FileMode(0666), contents...)
 }
 
-func CreateFileWithMode(path string, fileName string, mode os.FileMode, contents ... string) string {
+func CreateFileWithMode(path string, fileName string, mode os.FileMode, contents ...string) string {
 	fp := filepath.Join(path, fileName)
 	f, err := os.OpenFile(fp, os.O_CREATE|os.O_EXCL|os.O_WRONLY, mode)
 	check(err)
@@ -92,7 +92,7 @@ type ErrorReporter interface {
 	Errorf(format string, args ...interface{})
 }
 
-func CleanupDirs(t ErrorReporter, paths ... string) {
+func CleanupDirs(t ErrorReporter, paths ...string) {
 	for _, path := range paths {
 		if err := os.RemoveAll(path); err != nil {
 			t.Errorf("Could not delete %s", path)

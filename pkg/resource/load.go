@@ -15,7 +15,7 @@
  *
  */
 
- package resource
+package resource
 
 import (
 	"io/ioutil"
@@ -49,4 +49,3 @@ func Load(release string, baseDir string) ([]byte, error) {
 	}
 	return content, nil
 }
-

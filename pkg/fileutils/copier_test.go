@@ -165,12 +165,12 @@ var _ = Describe("Copier", func() {
 		Context("when the source is a directory containing an internal symbolic link to a directory", func() {
 			BeforeEach(func() {
 				/*
-				   Create a directory structure inside tempDir like this:
+					   Create a directory structure inside tempDir like this:
 
-					source/ <------+
-						file1      |
-						dir1/      |
-							link --+
+						source/ <------+
+							file1      |
+							dir1/      |
+								link --+
 
 				*/
 
@@ -201,11 +201,11 @@ var _ = Describe("Copier", func() {
 		Context("when the source is a directory containing an internal symbolic link to a file", func() {
 			BeforeEach(func() {
 				/*
-				   Create a directory structure inside tempDir like this:
+					   Create a directory structure inside tempDir like this:
 
-					source/
-						file1 <----+
-						link ------+
+						source/
+							file1 <----+
+							link ------+
 
 				*/
 
@@ -234,10 +234,10 @@ var _ = Describe("Copier", func() {
 		Context("when the source is a directory containing an external symbolic link", func() {
 			BeforeEach(func() {
 				/*
-				   Create a directory structure inside tempDir like this:
+					   Create a directory structure inside tempDir like this:
 
-					source/
-						  link ----> tempDir
+						source/
+							  link ----> tempDir
 
 				*/
 
@@ -256,11 +256,11 @@ var _ = Describe("Copier", func() {
 		Context("when the source is a directory containing an internal relative symbolic link", func() {
 			BeforeEach(func() {
 				/*
-				   Create a directory structure inside tempDir like this:
+					   Create a directory structure inside tempDir like this:
 
-					source/    <---+
-								   | (internal, but via ../source)
-						  link ----+
+						source/    <---+
+									   | (internal, but via ../source)
+							  link ----+
 
 				*/
 
@@ -285,12 +285,12 @@ var _ = Describe("Copier", func() {
 		Context("when the source is a directory containing an external relative symbolic link", func() {
 			BeforeEach(func() {
 				/*
-				   Create a directory structure inside tempDir like this:
+					   Create a directory structure inside tempDir like this:
 
-					a/             <---+
-						source/        |
-									   | (external via ..)
-							  link ----+
+						a/             <---+
+							source/        |
+										   | (external via ..)
+								  link ----+
 
 				*/
 
@@ -310,10 +310,10 @@ var _ = Describe("Copier", func() {
 		Context("when source is a symbolic link to a file", func() {
 			BeforeEach(func() {
 				/*
-				   Create a directory structure inside tempDir like this:
+					   Create a directory structure inside tempDir like this:
 
-					src.file <---+
-					source ------+
+						src.file <---+
+						source ------+
 
 				*/
 

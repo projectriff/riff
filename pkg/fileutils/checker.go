@@ -28,7 +28,7 @@ type Checker interface {
 	/*
 		Tests the existence of a file or directory at a given path. Returns true if and only if the file or
 		directory exists.
-	 */
+	*/
 	Exists(path string) bool
 
 	/*

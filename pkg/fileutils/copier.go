@@ -112,7 +112,7 @@ func (f *copier) copyDir(destination string, source string, topSource string) er
 	return nil
 }
 
-func getNames(dirPath string) (names [] string, err error) {
+func getNames(dirPath string) (names []string, err error) {
 	src, err := os.Open(dirPath)
 	if err != nil {
 		return names, newFileError(ErrOpeningSourceDir, err)
