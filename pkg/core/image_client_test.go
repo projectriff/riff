@@ -313,7 +313,7 @@ var _ = Describe("ImageClient", func() {
 
 			options.Manifest = "fixtures/image_client/image-list-manifest.yaml"
 			options.Images = filepath.Join(workDir, "image-manifest.yaml")
-			options.Check = true
+			options.NoCheck = false
 			options.Force = false
 
 			expectedImageManifest = core.EmptyImageManifest()
@@ -341,7 +341,7 @@ var _ = Describe("ImageClient", func() {
 
 			Context("when check is false", func() {
 				BeforeEach(func() {
-					options.Check = false
+					options.NoCheck = true
 				})
 
 				It("should list the images", func() {
@@ -362,7 +362,7 @@ var _ = Describe("ImageClient", func() {
 
 			Context("when check is true", func() {
 				BeforeEach(func() {
-					options.Check = true
+					options.NoCheck = false
 					mockDocker.On("ImageExists", "a/b").Return(true)
 					mockDocker.On("ImageExists", "c/d").Return(false)
 					delete(expectedImageManifest.Images, "c/d")
@@ -378,7 +378,7 @@ var _ = Describe("ImageClient", func() {
 
 		Context("when the image manifest already exists", func() {
 			BeforeEach(func() {
-				options.Check = false
+				options.NoCheck = true
 				mockChecker.On("Exists", options.Images).Return(true).Maybe()
 			})
 

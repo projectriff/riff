@@ -25,5 +25,5 @@ import (
 
 func TestCommands(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "riff commands suite")
+	RunSpecs(t, "riff-distro commands suite")
 }

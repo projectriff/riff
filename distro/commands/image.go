@@ -99,7 +99,8 @@ func ImageList(c *core.ImageClient) *cobra.Command {
 	command.Flags().StringVarP(&options.Images, "images", "i", "", "path of the image manifest to be created; defaults to 'image-manifest.yaml' relative to the manifest")
 	command.MarkFlagFilename("images", "yml", "yaml")
 
-	command.Flags().BoolVarP(&options.Check, "check", "", true, "check the images and omit any which are not known to docker")
+	command.Flags().BoolVarP(&options.NoCheck, "no-check", "", false, "skips checking the images, thus not omitting the ones unknown to docker")
+	command.Flag("no-check").NoOptDefVal = "true"
 	command.Flags().BoolVarP(&options.Force, "force", "", false, "overwrite the image manifest if it already exists")
 
 	return command

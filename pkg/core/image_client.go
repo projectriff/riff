@@ -55,7 +55,7 @@ type ListImagesOptions struct {
 	Manifest string
 	Images   string
 	Force    bool
-	Check    bool
+	NoCheck  bool
 }
 
 type imageLister func(resource string, baseDir string) ([]string, error)
@@ -174,10 +174,10 @@ func (c *imageClient) ListImages(options ListImagesOptions) error {
 		if _, ok := im.Images[imageName(i)]; ok {
 			continue
 		}
-		if options.Check {
+		if !options.NoCheck {
 			fmt.Printf("Checking image %s\n", i)
 			if !c.docker.ImageExists(i) {
-				fmt.Printf("Warning: omitting image %s which is not known to docker. To include it, re-run with --check=false.\n", i)
+				fmt.Printf("Warning: omitting image %s which is not known to docker. To include it, re-run with --no-check.\n", i)
 				continue
 			}
 		}
