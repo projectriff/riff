@@ -58,7 +58,7 @@ func (c *imageClient) RelocateImages(options RelocateImagesOptions) error {
 	}
 
 	if options.SingleFile != "" {
-		_, err = relocateFile(options.SingleFile, imageMapper, "", options.Output, baseFlattener)
+		_, err = c.relocateFile(options.SingleFile, imageMapper, "", options.Output, baseFlattener)
 		return err
 	}
 	return c.relocateManifest(options.Manifest, imageMapper, options.Images, options.Output)
@@ -91,7 +91,8 @@ func keys(m map[imageName]imageDigest) []imageName {
 	return keys
 }
 
-func relocateFile(yamlFile string, mapper *imageMapper, base string, outputPath string, strat uriFlattener) (string, error) {
+func (c *imageClient) relocateFile(yamlFile string, mapper *imageMapper, base string, outputPath string, strat uriFlattener) (string, error) {
+	c.printf("relocating kubernetes configuration file %s\n", yamlFile)
 	y, err := fileutils.Read(yamlFile, base)
 	if err != nil {
 		return "", err
@@ -131,7 +132,7 @@ func sha256Flattener(input string) string {
 
 func extractExtension(path string) (string, string) {
 	extension := filepath.Ext(path)
-	return path[0:len(path)-len(extension)], extension
+	return path[0 : len(path)-len(extension)], extension
 }
 
 var flatteners = []uriFlattener{baseFlattener, md5Flattener, sha256Flattener}
@@ -161,19 +162,20 @@ func (c *imageClient) relocateManifest(manifestPath string, mapper *imageMapper,
 		ManifestVersion: manifest.ManifestVersion,
 	}
 
-	outputManifest.Istio, err = relocateYamls(manifest.Istio, manifestDir, mapper, outputPath, nonCollidingFlattener)
+	outputManifest.Istio, err = c.relocateYamls(manifest.Istio, manifestDir, mapper, outputPath, nonCollidingFlattener)
 	if err != nil {
 		return err
 	}
-	outputManifest.Knative, err = relocateYamls(manifest.Knative, manifestDir, mapper, outputPath, nonCollidingFlattener)
+	outputManifest.Knative, err = c.relocateYamls(manifest.Knative, manifestDir, mapper, outputPath, nonCollidingFlattener)
 	if err != nil {
 		return err
 	}
-	outputManifest.Namespace, err = relocateYamls(manifest.Namespace, manifestDir, mapper, outputPath, nonCollidingFlattener)
+	outputManifest.Namespace, err = c.relocateYamls(manifest.Namespace, manifestDir, mapper, outputPath, nonCollidingFlattener)
 	if err != nil {
 		return err
 	}
 
+	c.printf("writing manifest referring to relocated kubernetes configuration files\n")
 	outputManifestPath := filepath.Join(outputPath, nonCollidingFlattener("./manifest.yaml"))
 	outputManifestBytes, err := yaml.Marshal(&outputManifest)
 	if err != nil {
@@ -186,6 +188,7 @@ func (c *imageClient) relocateManifest(manifestPath string, mapper *imageMapper,
 
 	// if there is an image manifest, relocate it and copy any images
 	if imageManifestPath != "" {
+		c.printf("relocating image manifest\n")
 		err = relocateImageManifest(imageManifestPath, mapper, outputPath)
 		if err != nil {
 			return err
@@ -281,10 +284,10 @@ func collisionless(manifest *Manifest, f uriFlattener) bool {
 	return checkCollision("./manifest.yaml") == nil
 }
 
-func relocateYamls(yamls []string, manifestDir string, mapper *imageMapper, outputPath string, flattener uriFlattener) ([]string, error) {
+func (c *imageClient) relocateYamls(yamls []string, manifestDir string, mapper *imageMapper, outputPath string, flattener uriFlattener) ([]string, error) {
 	rel := []string{}
 	for _, y := range yamls {
-		yRel, err := relocateFile(y, mapper, manifestDir, outputPath, flattener)
+		yRel, err := c.relocateFile(y, mapper, manifestDir, outputPath, flattener)
 		if err != nil {
 			return []string{}, err
 		}

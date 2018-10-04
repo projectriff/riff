@@ -19,6 +19,7 @@ package core
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -64,6 +65,7 @@ type imageClient struct {
 	copier     fileutils.Copier
 	checker    fileutils.Checker
 	listImages imageLister
+	log        io.Writer
 }
 
 func (c *imageClient) LoadAndTagImages(options LoadAndTagImagesOptions) error {
@@ -185,6 +187,10 @@ func (c *imageClient) ListImages(options ListImagesOptions) error {
 	return im.Save(imPath)
 }
 
-func NewImageClient(docker docker.Docker, copier fileutils.Copier, checker fileutils.Checker, listImages imageLister) ImageClient {
-	return &imageClient{docker: docker, copier: copier, checker: checker, listImages: listImages}
+func NewImageClient(docker docker.Docker, copier fileutils.Copier, checker fileutils.Checker, listImages imageLister, log io.Writer) ImageClient {
+	return &imageClient{docker: docker, copier: copier, checker: checker, listImages: listImages, log: log}
+}
+
+func (c *imageClient) printf(format string, a ...interface{}) (n int, err error) {
+	return fmt.Fprintf(c.log, format, a...)
 }
