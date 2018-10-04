@@ -42,7 +42,7 @@ var _ = Describe("The riff image relocate command", func() {
 		It("should fail with a positional argument", func() {
 			cc.SetArgs([]string{"a", "--file=x", "--images=x", "--output=x", "--registry=x", "--registry-user=x"})
 			err := cc.Execute()
-			Expect(err).To(MatchError("the `image relocate` command does not support positional arguments"))
+			Expect(err).To(MatchError("accepts 0 arg(s), received 1"))
 		})
 
 		It("should fail with invalid registry hostname", func() {

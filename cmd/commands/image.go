@@ -17,10 +17,20 @@
 package commands
 
 import (
-	"errors"
-
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
+)
+
+const (
+	imageRelocateNumberOfArgs = iota
+)
+
+const (
+	imageLoadNumberOfArgs = iota
+)
+
+const (
+	imagePushNumberOfArgs = iota
 )
 
 func Image() *cobra.Command {
@@ -63,11 +73,8 @@ func ImageRelocate(c *core.ImageClient) *cobra.Command {
 `,
 		Example: `  riff image relocate --manifest=path/to/manifest.yaml --registry=hostname --registry-user=username --images=path/to/image-manifest.yaml --output=path/to/output/dir
   riff image relocate --file=path/to/file --registry=hostname --registry-user=username --images=path/to/image-manifest.yaml --output=path/to/output`,
+		Args: cobra.ExactArgs(imageRelocateNumberOfArgs),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) > 0 {
-				return errors.New("the `image relocate` command does not support positional arguments")
-			}
-
 			if err := FlagsValidationConjunction(
 				FlagsDependency(Set("manifest"), NoneOf("file")),
 				FlagsDependency(Set("file"), NoneOf("manifest")),
@@ -131,6 +138,7 @@ func ImageLoad(c *core.ImageClient) *cobra.Command {
 			"NOTE: This command requires the `docker` command line tool, as well as a docker daemon.\n\n" +
 			"SEE ALSO: To load, tag, and push images, use `riff image push`.",
 		Example: `  riff image load --images=riff-distro-xx/image-manifest.yaml`,
+		Args: cobra.ExactArgs(imageLoadNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*c).LoadAndTagImages(options)
 			if err != nil {
@@ -158,6 +166,7 @@ func ImagePush(c *core.ImageClient) *cobra.Command {
 			"NOTE: This command requires the `docker` command line tool, as well as a docker daemon and will load and tag the images using that daemon.\n\n" +
 			"SEE ALSO: To load and tag images, but not push them, use `riff image load`.",
 		Example: `  riff image push --images=riff-distro-xx/image-manifest.yaml`,
+		Args: cobra.ExactArgs(imagePushNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*c).PushImages(options)
 			if err != nil {

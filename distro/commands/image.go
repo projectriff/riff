@@ -23,6 +23,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	imagePullNumberOfArgs = iota
+)
+
+const (
+	imageListNumberOfArgs = iota
+)
+
 func Image() *cobra.Command {
 	return &cobra.Command{
 		Use:   "image",
@@ -39,6 +47,7 @@ func ImagePull(c *core.ImageClient) *cobra.Command {
 		Long: "Pull the set of images identified by the provided image manifest from remote registries, in preparation of an offline distribution tarball.\n\n" +
 			"NOTE: This command requires the `docker` command line tool, as well as a (local) docker daemon and will load and tag the images using that daemon.",
 		Example: `  riff-distro image pull --images=riff-distro-xx/image-manifest.yaml`,
+		Args: cobra.ExactArgs(imagePullNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*c).PullImages(options)
 			if err != nil {
@@ -73,6 +82,7 @@ func ImageList(c *core.ImageClient) *cobra.Command {
 			"It does not guarantee to find all referenced images and so the resultant image manifest needs to be validated, for example by manual inspection or testing.\n\n" +
 			"NOTE: This command requires the `docker` command line tool to check the images.",
 		Example: `  riff-distro image list --manifest=path/to/manifest.yaml --images=path/for/image-manifest.yaml`,
+		Args: cobra.ExactArgs(imageListNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*c).ListImages(options)
 			if err != nil {

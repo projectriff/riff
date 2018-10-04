@@ -21,6 +21,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	systemInstallNumberOfArgs = iota
+)
+
+const (
+	systemUninstallNumberOfArgs = iota
+)
+
 func System() *cobra.Command {
 	return &cobra.Command{
 		Use:   "system",
@@ -52,6 +60,7 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
     - https://path/to/riff-buildtemplate-release.yaml
 ` +
 			"\nNote: relative file paths or http/https URLs may be used in the manifest.",
+		Args: cobra.ExactArgs(systemInstallNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			complete, err := (*kc).SystemInstall(options)
 			if err != nil {
@@ -82,6 +91,7 @@ func SystemUninstall(kc *core.KubectlClient) *cobra.Command {
 		Short:   "Remove riff and Knative system components",
 		Long:    "Remove riff and Knative system components.\n\nUse the `--istio` flag to also remove Istio components.",
 		Example: `  riff system uninstall`,
+		Args: cobra.ExactArgs(systemUninstallNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			complete, err := (*kc).SystemUninstall(options)
 			if err != nil {

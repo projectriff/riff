@@ -23,6 +23,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	versionNumberOfArgs = iota
+)
+
 var cli_version = "unknown"
 var cli_gitsha = "unknown sha"
 var cli_gitdirty = ""
@@ -31,6 +35,7 @@ func Version() *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
 		Short: "Print version information about riff",
+		Args: cobra.ExactArgs(versionNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if cli_gitdirty != "" {
 				cli_gitdirty = ", with local modifications"
