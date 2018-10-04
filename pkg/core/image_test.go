@@ -15,12 +15,12 @@ import (
 var _ = Describe("RelocateImages", func() {
 
 	var (
-		client     ImageClient
-		mockFutils *mocks.Copier
+		client      ImageClient
+		mockFutils  *mocks.Copier
 		mockChecker *mocks.Checker
-		options    RelocateImagesOptions
-		err        error
-		testErr    error
+		options     RelocateImagesOptions
+		err         error
+		testErr     error
 	)
 
 	BeforeEach(func() {
@@ -126,7 +126,7 @@ var _ = Describe("RelocateImages", func() {
 				})
 
 				It("should return the error", func() {
-				    Expect(err).To(MatchError(testErr))
+					Expect(err).To(MatchError(testErr))
 				})
 			})
 		})

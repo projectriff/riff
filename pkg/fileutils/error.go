@@ -43,4 +43,3 @@ func newFileErrorf(tag ErrorId, format string, insert ...interface{}) error {
 func (fe FileError) Error() string {
 	return fmt.Sprintf("fileutils error: %s: %v", fe.ErrorId, fe.Cause)
 }
-

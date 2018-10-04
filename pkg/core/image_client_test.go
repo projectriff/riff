@@ -300,10 +300,10 @@ var _ = Describe("ImageClient", func() {
 
 	Describe("ListImages", func() {
 		var (
-			options core.ListImagesOptions
-			workDir string
-			listErr error
-			err     error
+			options               core.ListImagesOptions
+			workDir               string
+			listErr               error
+			err                   error
 			expectedImageManifest *core.ImageManifest
 		)
 
@@ -312,7 +312,7 @@ var _ = Describe("ImageClient", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			options.Manifest = "fixtures/image_client/image-list-manifest.yaml"
-			options.Images=filepath.Join(workDir, "image-manifest.yaml")
+			options.Images = filepath.Join(workDir, "image-manifest.yaml")
 			options.Check = true
 			options.Force = false
 
@@ -340,33 +340,33 @@ var _ = Describe("ImageClient", func() {
 			})
 
 			Context("when check is false", func() {
-			    BeforeEach(func() {
-			        options.Check = false
-			    })
+				BeforeEach(func() {
+					options.Check = false
+				})
 
 				It("should list the images", func() {
 					Expect(err).NotTo(HaveOccurred())
 					Expect(actualImageManifest(options.Images)).To(Equal(expectedImageManifest))
 				})
 
-			    Context("when the image lister returns an error", func() {
-			        BeforeEach(func() {
-			            listErr = testError
-			        })
+				Context("when the image lister returns an error", func() {
+					BeforeEach(func() {
+						listErr = testError
+					})
 
-			        It("should return the error", func() {
-			            Expect(err).To(MatchError(testError))
-			        })
-			    })
+					It("should return the error", func() {
+						Expect(err).To(MatchError(testError))
+					})
+				})
 			})
 
 			Context("when check is true", func() {
-			    BeforeEach(func() {
-			        options.Check = true
-			        mockDocker.On("ImageExists", "a/b").Return(true)
-			        mockDocker.On("ImageExists", "c/d").Return(false)
-			        delete(expectedImageManifest.Images, "c/d")
-			    })
+				BeforeEach(func() {
+					options.Check = true
+					mockDocker.On("ImageExists", "a/b").Return(true)
+					mockDocker.On("ImageExists", "c/d").Return(false)
+					delete(expectedImageManifest.Images, "c/d")
+				})
 
 				It("should list the valid images", func() {
 					Expect(err).NotTo(HaveOccurred())
@@ -383,23 +383,23 @@ var _ = Describe("ImageClient", func() {
 			})
 
 			Context("when force is false", func() {
-			    BeforeEach(func() {
-			        options.Force = false
-			    })
+				BeforeEach(func() {
+					options.Force = false
+				})
 
-			    It("should return a suitable error", func() {
-			        Expect(err).To(MatchError("image manifest already exists, use `--force` to overwrite it"))
-			    })
+				It("should return a suitable error", func() {
+					Expect(err).To(MatchError("image manifest already exists, use `--force` to overwrite it"))
+				})
 			})
 
 			Context("when force is true", func() {
-			    BeforeEach(func() {
-			        options.Force = true
-			    })
+				BeforeEach(func() {
+					options.Force = true
+				})
 
-			    It("should succeed", func() {
-			        Expect(err).NotTo(HaveOccurred())
-			    })
+				It("should succeed", func() {
+					Expect(err).NotTo(HaveOccurred())
+				})
 			})
 		})
 	})

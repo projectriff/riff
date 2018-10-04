@@ -76,7 +76,6 @@ var _ = Describe("ListImages", func() {
 		})
 	})
 
-
 	Context("when the resource file contains block scalars containing images", func() {
 		BeforeEach(func() {
 			res = "block.yaml"
@@ -111,22 +110,22 @@ var _ = Describe("ListImages", func() {
 	})
 
 	Context("when the resource file is not found", func() {
-	    BeforeEach(func() {
-	        res = "nosuch.yaml"
-	    })
+		BeforeEach(func() {
+			res = "nosuch.yaml"
+		})
 
-	    It("should return a suitable error", func() {
-	        Expect(err).To(MatchError(HaveSuffix("no such file or directory")))
-	    })
+		It("should return a suitable error", func() {
+			Expect(err).To(MatchError(HaveSuffix("no such file or directory")))
+		})
 	})
 
 	Context("when the resource file contains invalid YAML", func() {
-	    BeforeEach(func() {
-	        res = "invalid.yaml"
-	    })
+		BeforeEach(func() {
+			res = "invalid.yaml"
+		})
 
-	    It("should return a suitable error", func() {
-	        Expect(err).To(MatchError(HavePrefix("error parsing resource file")))
-	    })
+		It("should return a suitable error", func() {
+			Expect(err).To(MatchError(HavePrefix("error parsing resource file")))
+		})
 	})
 })
