@@ -49,7 +49,7 @@ var _ = Describe("ImageClient", func() {
 	})
 
 	JustBeforeEach(func() {
-		imageClient = core.NewImageClient(mockDocker, mockCopier, mockChecker, mockImageLister)
+		imageClient = core.NewImageClient(mockDocker, mockCopier, mockChecker, mockImageLister, ioutil.Discard)
 	})
 
 	AfterEach(func() {

@@ -20,6 +20,7 @@ package commands
 import (
 	"github.com/projectriff/riff/pkg/fileutils"
 	"github.com/projectriff/riff/pkg/resource"
+	"io/ioutil"
 	"os"
 
 	"github.com/projectriff/riff/cmd/commands"
@@ -48,7 +49,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 			dockerClient = docker.RealDocker(os.Stdin, cmd.OutOrStdout(), cmd.OutOrStderr())
 			checker := fileutils.NewChecker()
 			copier := fileutils.NewCopier(cmd.OutOrStdout(), checker)
-			imageClient = core.NewImageClient(dockerClient, copier, checker, resource.ListImages)
+			imageClient = core.NewImageClient(dockerClient, copier, checker, resource.ListImages, ioutil.Discard)
 			return nil
 		},
 	}

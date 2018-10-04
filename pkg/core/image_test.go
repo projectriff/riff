@@ -26,7 +26,7 @@ var _ = Describe("RelocateImages", func() {
 	BeforeEach(func() {
 		mockFutils = new(mocks.Copier)
 		mockChecker = new(mocks.Checker)
-		client = NewImageClient(nil, mockFutils, mockChecker, resource.ListImages)
+		client = NewImageClient(nil, mockFutils, mockChecker, resource.ListImages, ioutil.Discard)
 		options.Registry = "reg"
 		options.RegistryUser = "user"
 		testErr = errors.New("test error")
@@ -294,7 +294,7 @@ var _ = Describe("SystemDownload", func() {
 	BeforeEach(func() {
 		mockCopier = new(mocks.Copier)
 		mockChecker = new(mocks.Checker)
-		client = NewImageClient(nil, mockCopier, mockChecker, resource.ListImages)
+		client = NewImageClient(nil, mockCopier, mockChecker, resource.ListImages, ioutil.Discard)
 	})
 
 	JustBeforeEach(func() {
