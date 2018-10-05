@@ -18,16 +18,20 @@ package core_test
 
 import (
 	"errors"
+
+	"github.com/projectriff/riff/pkg/image_manifest"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/docker/mocks"
 	mock_fileutils "github.com/projectriff/riff/pkg/fileutils/mocks"
 
-	"github.com/stretchr/testify/mock"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/stretchr/testify/mock"
 )
 
 var _ = Describe("ImageClient", func() {
@@ -70,8 +74,8 @@ var _ = Describe("ImageClient", func() {
 		Context("when the manifest has a digest for each image", func() {
 			BeforeEach(func() {
 				options.Images = "fixtures/image_client/complete.yaml"
-				mockDocker.On("LoadAndTagImage", "a/b", "1", "fixtures/image_client/images/1").Return(nil)
-				mockDocker.On("LoadAndTagImage", "c/d", "2", "fixtures/image_client/images/2").Return(nil)
+				mockDocker.On("LoadAndTagImage", "a.org/b", "1", "fixtures/image_client/images/1").Return(nil)
+				mockDocker.On("LoadAndTagImage", "c.org/d", "2", "fixtures/image_client/images/2").Return(nil)
 			})
 
 			It("should succeed", func() {
@@ -82,11 +86,11 @@ var _ = Describe("ImageClient", func() {
 		Context("when the manifest has a missing digest", func() {
 			BeforeEach(func() {
 				options.Images = "fixtures/image_client/incomplete.yaml"
-				mockDocker.On("LoadAndTagImage", "a/b", "1", "fixtures/image_client/images/1").Return(nil).Maybe()
+				mockDocker.On("LoadAndTagImage", "a.org/b", "1", "fixtures/image_client/images/1").Return(nil).Maybe()
 			})
 
 			It("should succeed", func() {
-				Expect(err).To(MatchError("image manifest fixtures/image_client/incomplete.yaml does not specify a digest for image c/d"))
+				Expect(err).To(MatchError("image manifest fixtures/image_client/incomplete.yaml does not specify a digest for image c.org/d"))
 			})
 		})
 
@@ -126,8 +130,8 @@ var _ = Describe("ImageClient", func() {
 			BeforeEach(func() {
 				options.Images = "fixtures/image_client/complete.yaml"
 				mockDocker.On("LoadAndTagImage", mock.Anything, mock.Anything, mock.Anything).Return(nil).Twice()
-				mockDocker.On("PushImage", "a/b").Return(nil)
-				mockDocker.On("PushImage", "c/d").Return(nil)
+				mockDocker.On("PushImage", "a.org/b").Return(nil)
+				mockDocker.On("PushImage", "c.org/d").Return(nil)
 			})
 
 			It("should succeed", func() {
@@ -138,11 +142,11 @@ var _ = Describe("ImageClient", func() {
 		Context("when the manifest has a missing digest", func() {
 			BeforeEach(func() {
 				options.Images = "fixtures/image_client/incomplete.yaml"
-				mockDocker.On("LoadAndTagImage", "a/b", "1", "fixtures/image_client/images/1").Return(nil).Maybe()
+				mockDocker.On("LoadAndTagImage", "a.org/b", "1", "fixtures/image_client/images/1").Return(nil).Maybe()
 			})
 
 			It("should succeed", func() {
-				Expect(err).To(MatchError("image manifest fixtures/image_client/incomplete.yaml does not specify a digest for image c/d"))
+				Expect(err).To(MatchError("image manifest fixtures/image_client/incomplete.yaml does not specify a digest for image c.org/d"))
 			})
 		})
 
@@ -175,7 +179,7 @@ var _ = Describe("ImageClient", func() {
 			workDir               string
 			imagesDir             string
 			err                   error
-			expectedImageManifest *core.ImageManifest
+			expectedImageManifest *image_manifest.ImageManifest
 		)
 
 		BeforeEach(func() {
@@ -188,9 +192,7 @@ var _ = Describe("ImageClient", func() {
 			Expect(err).NotTo(HaveOccurred())
 			options.Images = copyFile("fixtures/image_client/complete.yaml", workDir)
 			imagesDir = filepath.Join(workDir, "images")
-			expectedImageManifest = core.EmptyImageManifest()
-			expectedImageManifest.Images["a/b"] = "1"
-			expectedImageManifest.Images["c/d"] = "2"
+			expectedImageManifest = loadImageManifest("fixtures/image_client/image-manifest.yaml")
 		})
 
 		AfterEach(func() {
@@ -204,8 +206,8 @@ var _ = Describe("ImageClient", func() {
 
 		Context("when the returned digests match those in the manifest", func() {
 			BeforeEach(func() {
-				mockDocker.On("PullImage", "a/b", imagesDir).Return("1", nil)
-				mockDocker.On("PullImage", "c/d", imagesDir).Return("2", nil)
+				mockDocker.On("PullImage", "a.org/b", imagesDir).Return("1", nil)
+				mockDocker.On("PullImage", "c.org/d", imagesDir).Return("2", nil)
 			})
 
 			It("should succeed", func() {
@@ -219,20 +221,20 @@ var _ = Describe("ImageClient", func() {
 
 		Context("when the returned digests conflict with those in the manifest", func() {
 			BeforeEach(func() {
-				mockDocker.On("PullImage", "a/b", imagesDir).Return("1", nil).Maybe()
-				mockDocker.On("PullImage", "c/d", imagesDir).Return("3", nil)
+				mockDocker.On("PullImage", "a.org/b", imagesDir).Return("1", nil).Maybe()
+				mockDocker.On("PullImage", "c.org/d", imagesDir).Return("3", nil)
 			})
 
 			Context("when conflicts are not allowed", func() {
 				It("should fail with a suitable error", func() {
-					Expect(err).To(MatchError(`image "c/d" had digest 2 in the original manifest, but the pulled version has digest 3`))
+					Expect(err).To(MatchError(`image "c.org/d" had digest 2 in the original manifest, but the pulled version has digest 3`))
 				})
 			})
 
 			Context("when conflicts are allowed", func() {
 				BeforeEach(func() {
 					options.ContinueOnMismatch = true
-					expectedImageManifest.Images["c/d"] = "3"
+					expectedImageManifest = loadImageManifest("fixtures/image_client/image-manifest-with-conflicts.yaml")
 				})
 
 				It("should succeed", func() {
@@ -249,8 +251,8 @@ var _ = Describe("ImageClient", func() {
 			BeforeEach(func() {
 				options.Output = filepath.Join(workDir, "image_client_test_output")
 				imagesOutputDir := filepath.Join(options.Output, "images")
-				mockDocker.On("PullImage", "a/b", imagesOutputDir).Return("1", nil)
-				mockDocker.On("PullImage", "c/d", imagesOutputDir).Return("2", nil)
+				mockDocker.On("PullImage", "a.org/b", imagesOutputDir).Return("1", nil)
+				mockDocker.On("PullImage", "c.org/d", imagesOutputDir).Return("2", nil)
 			})
 
 			It("should succeed", func() {
@@ -304,7 +306,7 @@ var _ = Describe("ImageClient", func() {
 			workDir               string
 			listErr               error
 			err                   error
-			expectedImageManifest *core.ImageManifest
+			expectedImageManifest *image_manifest.ImageManifest
 		)
 
 		BeforeEach(func() {
@@ -316,9 +318,7 @@ var _ = Describe("ImageClient", func() {
 			options.NoCheck = false
 			options.Force = false
 
-			expectedImageManifest = core.EmptyImageManifest()
-			expectedImageManifest.Images["a/b"] = ""
-			expectedImageManifest.Images["c/d"] = ""
+			expectedImageManifest = loadImageManifest("fixtures/image_client/image-manifest-without-digests.yaml")
 
 			listErr = nil
 
@@ -326,7 +326,7 @@ var _ = Describe("ImageClient", func() {
 				if listErr != nil {
 					return nil, listErr
 				}
-				return []string{"a/b", "c/d"}, nil
+				return []string{"a.org/b", "c.org/d"}, nil
 			}
 		})
 
@@ -363,9 +363,9 @@ var _ = Describe("ImageClient", func() {
 			Context("when check is true", func() {
 				BeforeEach(func() {
 					options.NoCheck = false
-					mockDocker.On("ImageExists", "a/b").Return(true)
-					mockDocker.On("ImageExists", "c/d").Return(false)
-					delete(expectedImageManifest.Images, "c/d")
+					mockDocker.On("ImageExists", "a.org/b").Return(true)
+					mockDocker.On("ImageExists", "c.org/d").Return(false)
+					expectedImageManifest = loadImageManifest("fixtures/image_client/image-manifest-without-conflicts.yaml")
 				})
 
 				It("should list the valid images", func() {
@@ -405,6 +405,12 @@ var _ = Describe("ImageClient", func() {
 	})
 })
 
+func loadImageManifest(path string) *image_manifest.ImageManifest {
+	expectedImageManifest, err := image_manifest.LoadImageManifest(path)
+	Expect(err).NotTo(HaveOccurred())
+	return expectedImageManifest
+}
+
 func copyFile(src string, destDir string) string {
 	contents, err := ioutil.ReadFile(src)
 	Expect(err).NotTo(HaveOccurred())
@@ -414,8 +420,8 @@ func copyFile(src string, destDir string) string {
 	return dest
 }
 
-func actualImageManifest(path string) *core.ImageManifest {
-	m, err := core.NewImageManifest(path)
+func actualImageManifest(path string) *image_manifest.ImageManifest {
+	m, err := image_manifest.LoadImageManifest(path)
 	Expect(err).NotTo(HaveOccurred())
 	return m
 }

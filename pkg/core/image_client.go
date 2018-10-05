@@ -23,6 +23,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/projectriff/riff/pkg/image_manifest"
+
+	"github.com/projectriff/riff/pkg/image"
+
 	"github.com/projectriff/riff/pkg/fileutils"
 
 	"github.com/projectriff/riff/pkg/docker"
@@ -79,25 +83,25 @@ func (c *imageClient) PushImages(options PushImagesOptions) error {
 		return err
 	}
 	for name, _ := range imManifest.Images {
-		if err := c.docker.PushImage(string(name)); err != nil {
+		if err := c.docker.PushImage(name.String()); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (c *imageClient) loadAndTagImages(imageManifest string) (*ImageManifest, error) {
-	imManifest, err := NewImageManifest(imageManifest)
+func (c *imageClient) loadAndTagImages(imageManifest string) (*image_manifest.ImageManifest, error) {
+	imManifest, err := image_manifest.LoadImageManifest(imageManifest)
 	if err != nil {
 		return nil, err
 	}
 	distroLocation := filepath.Dir(imageManifest)
 	for name, digest := range imManifest.Images {
-		if digest == "" {
+		if digest == image.EmptyDigest {
 			return nil, fmt.Errorf("image manifest %s does not specify a digest for image %s", imageManifest, name)
 		}
-		filename := filepath.Join(distroLocation, "images", string(digest))
-		if err := c.docker.LoadAndTagImage(string(name), string(digest), filename); err != nil {
+		filename := filepath.Join(distroLocation, "images", digest.String())
+		if err := c.docker.LoadAndTagImage(name.String(), digest.String(), filename); err != nil {
 			return nil, err
 		}
 	}
@@ -105,7 +109,7 @@ func (c *imageClient) loadAndTagImages(imageManifest string) (*ImageManifest, er
 }
 
 func (c *imageClient) PullImages(options PullImagesOptions) error {
-	originalManifest, err := NewImageManifest(options.Images)
+	originalManifest, err := image_manifest.LoadImageManifest(options.Images)
 	if err != nil {
 		return err
 	}
@@ -124,16 +128,17 @@ func (c *imageClient) PullImages(options PullImagesOptions) error {
 		}
 	}
 
-	newManifest := EmptyImageManifest()
-
-	for name, sha := range originalManifest.Images {
-		if newSha, err := c.docker.PullImage(string(name), imagesDir); err != nil {
-			return err
-		} else if newSha != string(sha) && sha != "" && !options.ContinueOnMismatch {
-			return fmt.Errorf("image %q had digest %v in the original manifest, but the pulled version has digest %s", name, sha, newSha)
+	newManifest, err := originalManifest.FilterCopy(func(name image.Name, dig image.Digest) (image.Name, image.Digest, error) {
+		if newDig, err := c.docker.PullImage(name.String(), imagesDir); err != nil {
+			return image.EmptyName, image.EmptyDigest, err
+		} else if newDig != dig.String() && dig != image.EmptyDigest && !options.ContinueOnMismatch {
+			return image.EmptyName, image.EmptyDigest, fmt.Errorf("image %q had digest %v in the original manifest, but the pulled version has digest %s", name, dig, newDig)
 		} else {
-			newManifest.Images[name] = imageDigest(newSha)
+			return name, image.NewDigest(newDig), nil
 		}
+	})
+	if err != nil {
+		return err
 	}
 
 	return newManifest.Save(newManifestPath)
@@ -168,12 +173,8 @@ func (c *imageClient) ListImages(options ListImagesOptions) error {
 		return err
 	}
 
-	// populate the image manifest, removing duplicates, and, if checking is enabled, warning about images which appear to be invalid
-	im := EmptyImageManifest()
+	allowedImages := []string{}
 	for _, i := range images {
-		if _, ok := im.Images[imageName(i)]; ok {
-			continue
-		}
 		if !options.NoCheck {
 			fmt.Printf("Checking image %s\n", i)
 			if !c.docker.ImageExists(i) {
@@ -181,7 +182,12 @@ func (c *imageClient) ListImages(options ListImagesOptions) error {
 				continue
 			}
 		}
-		im.Images[imageName(i)] = ""
+		allowedImages = append(allowedImages, i)
+	}
+
+	im, err := image_manifest.PrimeImageManifest(allowedImages)
+	if err != nil {
+		return err
 	}
 
 	return im.Save(imPath)

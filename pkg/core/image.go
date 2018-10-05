@@ -22,12 +22,17 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/ghodss/yaml"
-	"github.com/projectriff/riff/pkg/fileutils"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
+
+	"github.com/projectriff/riff/pkg/image_manifest"
+
+	"github.com/projectriff/riff/pkg/image"
+
+	"github.com/ghodss/yaml"
+	"github.com/projectriff/riff/pkg/fileutils"
 )
 
 const (
@@ -70,7 +75,7 @@ func (c *imageClient) DownloadSystem(options DownloadSystemOptions) error {
 }
 
 func createImageMapper(options RelocateImagesOptions) (*imageMapper, error) {
-	imageManifest, err := NewImageManifest(options.Images)
+	imageManifest, err := image_manifest.LoadImageManifest(options.Images)
 	if err != nil {
 		return nil, err
 	}
@@ -83,8 +88,8 @@ func createImageMapper(options RelocateImagesOptions) (*imageMapper, error) {
 	return imageMapper, nil
 }
 
-func keys(m map[imageName]imageDigest) []imageName {
-	keys := make([]imageName, 0, len(m))
+func keys(m map[image.Name]image.Digest) []image.Name {
+	keys := make([]image.Name, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
 	}
@@ -215,32 +220,29 @@ func (c *imageClient) copyImages(inputDir string, outputDir string) error {
 }
 
 func relocateImageManifest(imageManifestPath string, mapper *imageMapper, outputPath string) error {
-	imageManifest, err := NewImageManifest(imageManifestPath)
+	imageManifest, err := image_manifest.LoadImageManifest(imageManifestPath)
 	if err != nil {
 		return err
 	}
 
-	relocatedImages := make(map[imageName]imageDigest)
-	for n, d := range imageManifest.Images {
-		relocatedImages[applyMapper(n, mapper)] = d
-	}
-
-	relocatedImageManifest := ImageManifest{
-		ManifestVersion: imageManifestVersion_0_1,
-		Images:          relocatedImages,
-	}
-
-	outputImageManifestPath := filepath.Join(outputPath, "image-manifest.yaml")
-	outputImageManifestBytes, err := yaml.Marshal(&relocatedImageManifest)
+	relocatedImageManifest, err := imageManifest.FilterCopy(func(name image.Name, dig image.Digest) (image.Name, image.Digest, error) {
+		mapped, err := applyMapper(name, mapper)
+		if err != nil {
+			return image.EmptyName, image.EmptyDigest, err
+		}
+		return mapped, dig, nil
+	})
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(outputImageManifestPath, outputImageManifestBytes, outputFilePermissions)
+
+	return relocatedImageManifest.Save(filepath.Join(outputPath, "image-manifest.yaml"))
 }
 
-func applyMapper(name imageName, mapper *imageMapper) imageName {
-	quotedName := imageName(mapper.mapImages([]byte(fmt.Sprintf("%q", name))))
-	return quotedName[1 : len(quotedName)-1]
+func applyMapper(name image.Name, mapper *imageMapper) (image.Name, error) {
+	// TODO: rework imageMapper so it can directly map an image.Name without resorting to the use of strings in this case
+	mapped := string(mapper.mapImages([]byte(fmt.Sprintf("%q", name.String()))))
+	return image.NewName(mapped[1 : len(mapped)-1])
 }
 
 func findNonCollidingFlattener(manifest *Manifest) uriFlattener {

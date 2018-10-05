@@ -15,11 +15,13 @@
  *
  */
 
-package core
+package image_manifest_test
 
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/projectriff/riff/pkg/image"
+	"github.com/projectriff/riff/pkg/image_manifest"
 )
 
 var _ = Describe("ImageManifest", func() {
@@ -27,12 +29,12 @@ var _ = Describe("ImageManifest", func() {
 
 		var (
 			manifestPath string
-			manifest     *ImageManifest
+			manifest     *image_manifest.ImageManifest
 			err          error
 		)
 
 		JustBeforeEach(func() {
-			manifest, err = NewImageManifest(manifestPath)
+			manifest, err = image_manifest.LoadImageManifest(manifestPath)
 		})
 
 		Context("when an invalid path is provided", func() {
@@ -85,11 +87,17 @@ var _ = Describe("ImageManifest", func() {
 			})
 
 			It("should parse the images array", func() {
-				Expect(manifest.Images).To(Equal(map[imageName]imageDigest{"gcr.io/cf-spring-funkytown/github.com/knative/serving/cmd/queue": "",
-					"istio/sidecar_injector": "0123",
-					"gcr.io/knative-releases/github.com/knative/eventing/cmd/controller@sha256:367a7a22bc689b794c38fc488b8774a94515727a2c12f2347622e6c40fe9c1e8": "456"}))
+				Expect(manifest.Images).To(Equal(map[image.Name]image.Digest{parseImageNameOk("gcr.io/cf-spring-funkytown/github.com/knative/serving/cmd/queue"): image.EmptyDigest,
+					parseImageNameOk("istio/sidecar_injector"): image.NewDigest("0123"),
+					parseImageNameOk("gcr.io/knative-releases/github.com/knative/eventing/cmd/controller@sha256:367a7a22bc689b794c38fc488b8774a94515727a2c12f2347622e6c40fe9c1e8"): image.NewDigest("456")}))
 			})
 		})
 	})
 
 })
+
+func parseImageNameOk(i string) image.Name {
+	in, err := image.NewName(i)
+	Expect(err).NotTo(HaveOccurred())
+	return in
+}
