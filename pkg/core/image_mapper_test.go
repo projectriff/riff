@@ -19,6 +19,8 @@ package core
 import (
 	"fmt"
 
+	"github.com/projectriff/riff/pkg/image"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -43,7 +45,7 @@ image: ` + flattenedMappedImage + `
 	var (
 		registry string
 		user     string
-		images   []imageName
+		images   []image.Name
 		flatten  bool
 		mapper   *imageMapper
 		err      error
@@ -122,43 +124,13 @@ image: ` + flattenedMappedImage + `
 			})
 		})
 
-		Context("when an image contains no user", func() {
-			BeforeEach(func() {
-				images = []imageName{"a"}
-			})
-
-			It("should return a suitable error", func() {
-				Expect(err).To(MatchError("invalid image: user missing: a"))
-			})
-		})
-
 		Context("when an image omits the host", func() {
 			BeforeEach(func() {
-				images = []imageName{"a/b"}
+				images = imageNames("a/b")
 			})
 
 			It("should default the host", func() {
 				Expect(err).NotTo(HaveOccurred())
-			})
-		})
-
-		Context("when an image contains a double quote", func() {
-			BeforeEach(func() {
-				images = []imageName{`"`}
-			})
-
-			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(`invalid image: '"' contains '"'`))
-			})
-		})
-
-		Context("when an image contains a space", func() {
-			BeforeEach(func() {
-				images = []imageName{" "}
-			})
-
-			It("should return a suitable error", func() {
-				Expect(err).To(MatchError("invalid image: ' ' contains ' '"))
 			})
 		})
 	})
@@ -175,7 +147,7 @@ image: ` + flattenedMappedImage + `
 
 		Context("when the list of images is empty", func() {
 			BeforeEach(func() {
-				images = []imageName{}
+				images = imageNames()
 			})
 
 			It("should not perform any mappings", func() {
@@ -185,7 +157,7 @@ image: ` + flattenedMappedImage + `
 
 		Context("when the list of images is non-empty", func() {
 			BeforeEach(func() {
-				images = []imageName{testImage}
+				images = imageNames(testImage)
 			})
 
 			It("should perform the mappings", func() {
@@ -246,7 +218,7 @@ image: ` + flattenedMappedLocalImage + `
 
 			Context("when an image omits the docker.io host", func() {
 				BeforeEach(func() {
-					images = []imageName{elidedImage}
+					images = imageNames(elidedImage)
 					input = []byte(`image: "` + elidedImage + `"
 image: "` + explicitImage + `"
 image: "` + fullImage + `"`)
@@ -262,7 +234,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 			Context("when an image includes the docker.io host", func() {
 				BeforeEach(func() {
-					images = []imageName{explicitImage}
+					images = imageNames(explicitImage)
 					input = []byte(`image: "` + elidedImage + `"
 image: "` + explicitImage + `"
 image: "` + fullImage + `"`)
@@ -278,7 +250,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 			Context("when an image includes the index.docker.io host", func() {
 				BeforeEach(func() {
-					images = []imageName{fullImage}
+					images = imageNames(fullImage)
 					input = []byte(`image: "` + elidedImage + `"
 image: "` + explicitImage + `"
 image: "` + fullImage + `"`)
@@ -295,17 +267,35 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 		Describe("ko image special cases", func() {
 			const (
-				koImage = "gcr.io/knative-releases/github.com/knative/build/cmd/creds-init@sha256:deadbeef"
+				koImage = "gcr.io/knative-releases/github.com/knative/build/cmd/creds-init@sha256:deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
 			)
 
 			Context("when an image is named by ko", func() {
 				BeforeEach(func() {
-					images = []imageName{koImage}
+					images = imageNames(koImage)
 					input = []byte(`image: "` + koImage + `"`)
 				})
 
 				It("should perform the mapping", func() {
-					mappedImage := fmt.Sprintf("testregistry.com/testuser/github.com/knative/build/cmd/creds-init-deadbeef") // omits the "@sha256:" piece
+					mappedImage := fmt.Sprintf("testregistry.com/testuser/github.com/knative/build/cmd/creds-init-deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef") // omits the "@sha256:" piece
+					Expect(string(output)).To(Equal(string([]byte(fmt.Sprintf(`image: %q`, mappedImage)))))
+				})
+			})
+		})
+
+		Describe("short path special cases", func() {
+			const (
+				shortPathImage = "k8s.gcr.io/fluentd-elasticsearch:v2.0.4"
+			)
+
+			Context("when an image path consists only of a single element", func() {
+				BeforeEach(func() {
+					images = imageNames(shortPathImage)
+					input = []byte(`image: "` + shortPathImage + `"`)
+				})
+
+				It("should perform the mapping", func() {
+					mappedImage := fmt.Sprintf("testregistry.com/testuser/fluentd-elasticsearch-e71ae1e56d9a15bbcf26be734d13b608")
 					Expect(string(output)).To(Equal(string([]byte(fmt.Sprintf(`image: %q`, mappedImage)))))
 				})
 			})
@@ -314,8 +304,8 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 		Describe("detailed parsing", func() {
 			Context("when an image is wrapped in double quotes", func() {
 				BeforeEach(func() {
-					images = []imageName{"x/y/z"}
-					input = []byte(`"x/y/z"`)
+					images = imageNames("x.x/y/z")
+					input = []byte(`"x.x/y/z"`)
 					registry = "r"
 					user = "u"
 				})
@@ -328,8 +318,8 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 			Context("when an image is preceded by a space", func() {
 				Context("when an image is followed by a space", func() {
 					BeforeEach(func() {
-						images = []imageName{"x/y/z"}
-						input = []byte(" x/y/z ")
+						images = imageNames("x.x/y/z")
+						input = []byte(" x.x/y/z ")
 						registry = "r"
 						user = "u"
 					})
@@ -341,8 +331,8 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 				Context("when an image is followed by a newline", func() {
 					BeforeEach(func() {
-						images = []imageName{"x/y/z"}
-						input = []byte(" x/y/z\n")
+						images = imageNames("x.x/y/z")
+						input = []byte(" x.x/y/z\n")
 						registry = "r"
 						user = "u"
 					})
@@ -354,8 +344,8 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 				Context("when an image is at the end of the string", func() {
 					BeforeEach(func() {
-						images = []imageName{"x/y/z"}
-						input = []byte(" x/y/z")
+						images = imageNames("x.x/y/z")
+						input = []byte(" x.x/y/z")
 						registry = "r"
 						user = "u"
 					})
@@ -371,8 +361,8 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 			Context("when one unmapped image is a prefix of another", func() {
 				Context("when the image is wrapped in double quotes", func() {
 					BeforeEach(func() {
-						images = []imageName{"x/y/z", "x/y/z/a"}
-						input = []byte(`image: "x/y/z/a"`)
+						images = imageNames("x.x/y/z", "x.x/y/z/a")
+						input = []byte(`image: "x.x/y/z/a"`)
 						registry = "r"
 						user = "u"
 					})
@@ -384,8 +374,8 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 				Context("when the image is preceded by a space", func() {
 					BeforeEach(func() {
-						images = []imageName{"x/y/z", "x/y/z/a"}
-						input = []byte("image: x/y/z/a")
+						images = imageNames("x.x/y/z", "x.x/y/z/a")
+						input = []byte("image: x.x/y/z/a")
 						registry = "r"
 						user = "u"
 					})
@@ -399,21 +389,21 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 			Context("when an unmapped image is a prefix of an image in the string", func() {
 				Context("when the image is wrapped in double quotes", func() {
 					BeforeEach(func() {
-						images = []imageName{"x/y/z"}
-						input = []byte(`image: "x/y/z/a"`)
+						images = imageNames("x.x/y/z")
+						input = []byte(`image: "x.x/y/z/a"`)
 						registry = "r"
 						user = "u"
 					})
 
 					It("does not map the prefix", func() {
-						Expect(string(output)).To(Equal(string([]byte(`image: "x/y/z/a"`))))
+						Expect(string(output)).To(Equal(string([]byte(`image: "x.x/y/z/a"`))))
 					})
 				})
 
 				Context("when the image is preceded by a space", func() {
 					BeforeEach(func() {
-						images = []imageName{"x/y/z"}
-						input = []byte("image: x/y/z/a")
+						images = imageNames("x.x/y/z")
+						input = []byte("image: x.x/y/z/a")
 						registry = "r"
 						user = "u"
 					})
@@ -426,17 +416,30 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 			Context("when what looks like an image is not preceeded by a double quote or space", func() {
 				BeforeEach(func() {
-					images = []imageName{"x/y/z"}
-					input = []byte("http://x/y/z")
+					images = imageNames("x.x/y/z")
+					input = []byte("http://x.x/y/z")
 					registry = "r"
 					user = "u"
 				})
 
 				It("should not map the apparent image", func() {
-					Expect(string(output)).To(Equal(string([]byte("http://x/y/z"))))
+					Expect(string(output)).To(Equal(string([]byte("http://x.x/y/z"))))
 				})
 			})
 		})
 	})
-
 })
+
+func imageNames(names ...string) []image.Name {
+	in := []image.Name{}
+	for _, i := range names {
+		in = append(in, parseImageNameOk(i))
+	}
+	return in
+}
+
+func parseImageNameOk(i string) image.Name {
+	in, err := image.NewName(i)
+	Expect(err).NotTo(HaveOccurred())
+	return in
+}

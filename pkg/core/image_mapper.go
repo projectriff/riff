@@ -22,11 +22,8 @@ import (
 	"fmt"
 	"path"
 	"strings"
-)
 
-const (
-	dockerHubHost     = "docker.io"
-	fullDockerHubHost = "index.docker.io"
+	"github.com/projectriff/riff/pkg/image"
 )
 
 // imageMapper does substring replacement of images with minimal delimiter checking.
@@ -36,7 +33,7 @@ type imageMapper struct {
 	replacer *strings.Replacer
 }
 
-func newImageMapper(mappedHost string, mappedUser string, images []imageName, flatten bool) (*imageMapper, error) {
+func newImageMapper(mappedHost string, mappedUser string, images []image.Name, flatten bool) (*imageMapper, error) {
 	if err := containsAny(mappedHost, "/", `"`, " "); err != nil {
 		return nil, fmt.Errorf("invalid registry hostname: %v", err)
 	}
@@ -44,7 +41,7 @@ func newImageMapper(mappedHost string, mappedUser string, images []imageName, fl
 		return nil, fmt.Errorf("invalid user: %v", err)
 	}
 
-	var pathMapping func(string, string) string
+	var pathMapping pathMapping
 	if flatten {
 		pathMapping = flattenRepoPath
 	} else {
@@ -55,22 +52,10 @@ func newImageMapper(mappedHost string, mappedUser string, images []imageName, fl
 
 	replacements := []string{}
 	for _, img := range images {
-		imgHost, imgUser, imgRepoPath, err := img.parseParts()
-		if err != nil {
-			return nil, err
-		}
+		mapped := mapImg(mappedHost, mappedUser, img.Path(), img)
 
-		fullImg := path.Join(imgHost, imgUser, imgRepoPath)
-		mapped := mapImg(mappedHost, mappedUser, imgRepoPath, fullImg)
-
-		replacements = append(replacements, quote(fullImg), quote(mapped))
-		replacements = append(replacements, spacePrefix(fullImg), spacePrefix(mapped))
-		if imgHost == dockerHubHost {
-			elidedImg := path.Join(imgUser, imgRepoPath)
-			replacements = append(replacements, quote(elidedImg), quote(mapped))
-			replacements = append(replacements, spacePrefix(elidedImg), spacePrefix(mapped))
-
-			fullImg := path.Join(fullDockerHubHost, imgUser, imgRepoPath)
+		for _, name := range img.Synonyms() {
+			fullImg := name.String()
 			replacements = append(replacements, quote(fullImg), quote(mapped))
 			replacements = append(replacements, spacePrefix(fullImg), spacePrefix(mapped))
 		}
@@ -87,27 +72,44 @@ func newIdentityImageMapper() *imageMapper {
 	}
 }
 
-func mapImage(pathMapping func(string, string) string) func(mappedHost string, mappedUser string, imgRepoPath string, originalImage string) string {
-	return func(mappedHost string, mappedUser string, imgRepoPath string, originalImage string) string {
+type pathMapping func(string, string, image.Name) string
+
+func mapImage(pathMapping pathMapping) func(mappedHost string, mappedUser string, imgRepoPath string, originalImage image.Name) string {
+	return func(mappedHost string, mappedUser string, imgRepoPath string, originalImage image.Name) string {
 		// ensure local-only images are tagged (with something other than latest) to prevent docker
 		// later attempting to download from dev.local (which doesn't really exist)
-		mappedPath := pathMapping(imgRepoPath, originalImage)
+		mappedPath := pathMapping(imgRepoPath, mappedUser, originalImage)
 		if mappedHost == "dev.local" && !strings.Contains(mappedPath, ":") {
 			mappedPath = mappedPath + ":local"
 		}
-		return path.Join(mappedHost, mappedUser, mappedPath)
+		return path.Join(mappedHost, mappedPath)
 	}
 }
 
-func sanitiseRepoPath(repoPath string, _ string) string {
+func sanitiseRepoPath(repoPath string, user string, originalImage image.Name) string {
+	repoPathElements := strings.SplitN(repoPath, "/", 2)
+	var mapped string
+	switch len(repoPathElements) {
+	case 1:
+		// prevent collisions
+		return flattenRepoPath(repoPath, user, originalImage)
+	default:
+		mapped = path.Join(user, repoPathElements[1])
+		if tag := originalImage.Tag(); tag != "" {
+			mapped += ":" + tag
+		}
+		if digest := originalImage.Digest(); digest != image.EmptyDigest {
+			mapped += "@" + digest.String()
+		}
+	}
 	// Replace "@sha256:" since digests are not allowed as part of a docker tag
-	return strings.Replace(repoPath, "@sha256:", "-", 1)
+	return strings.Replace(mapped, "@sha256:", "-", 1)
 }
 
-func flattenRepoPath(repoPath string, originalImage string) string {
+func flattenRepoPath(repoPath string, user string, originalImage image.Name) string {
 	hasher := md5.New()
-	hasher.Write([]byte(originalImage))
-	return fmt.Sprintf("%s-%s", imageBaseName(repoPath), hex.EncodeToString(hasher.Sum(nil)))
+	hasher.Write([]byte(originalImage.String()))
+	return fmt.Sprintf("%s/%s-%s", user, imageBaseName(repoPath), hex.EncodeToString(hasher.Sum(nil)))
 }
 
 func imageBaseName(repoPath string) string {
@@ -133,30 +135,6 @@ func containsAny(s string, items ...string) error {
 		}
 	}
 	return nil
-}
-
-func (img imageName) parseParts() (host string, user string, name string, err error) {
-	if err := containsAny(string(img), `"`, " "); err != nil {
-		return "", "", "", fmt.Errorf("invalid image: %v", err)
-	}
-
-	s := strings.SplitN(string(img), "/", 3)
-	switch len(s) {
-	case 0:
-		panic("SplitN produced empty array")
-	case 1:
-		return "", "", "", fmt.Errorf("invalid image: user missing: %s", img)
-	case 2:
-		return dockerHubHost, s[0], s[1], nil
-	default:
-		// Normalise docker hub hosts to a single form
-		host = s[0]
-		if host == fullDockerHubHost {
-			host = dockerHubHost
-		}
-
-		return host, s[1], s[2], nil
-	}
 }
 
 func quote(image string) string {

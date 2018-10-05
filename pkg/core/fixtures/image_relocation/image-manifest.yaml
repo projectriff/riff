@@ -10,9 +10,9 @@ images:
   "gcr.io/knative-releases/github.com/knative/serving/cmd/queue@sha256:99c841aa72c2928d1bf333348a848b5afb182715a2a0441da6282c86d4be807e":
   "k8s.gcr.io/fluentd-elasticsearch:v2.0.4":
   "gcr.io/knative-releases/github.com/knative/serving/cmd/controller@sha256:28db335f18cbd2a015fd218b9c7ce30b4366898fa3728a7f6dab6537991de028":
-  "gcr.io/knative-releases/github.com/knative/serving/cmd/webhook@sha256:50ea89c48f8890fbe0cee336fc5cbdadcfe6884afbe5977db5d66892095b397d": "testshax"
+  "gcr.io/knative-releases/github.com/knative/serving/cmd/webhook@sha256:50ea89c48f8890fbe0cee336fc5cbdadcfe6884afbe5977db5d66892095b397d": "50ea89c48f8890fbe0cee336fc5cbdadcfe6884afbe5977db5d66892095b397d"
   "docker.io/istio/proxy_init:1.0.1":
-  "docker.io/istio/proxyv2:1.0.1": "testshay"
+  "docker.io/istio/proxyv2:1.0.1": "00ea89c48f8890fbe0cee336fc5cbdadcfe6884afbe5977db5d66892095b3970"
   "quay.io/coreos/hyperkube:v1.7.6_coreos.0":
   "docker.io/prom/statsd-exporter:v0.6.0":
   "docker.io/istio/galley:1.0.1":
