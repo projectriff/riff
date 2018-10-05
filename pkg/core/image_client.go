@@ -23,6 +23,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/docker/distribution/reference"
+
 	"github.com/projectriff/riff/pkg/fileutils"
 
 	"github.com/projectriff/riff/pkg/docker"
@@ -79,7 +81,7 @@ func (c *imageClient) PushImages(options PushImagesOptions) error {
 		return err
 	}
 	for name, _ := range imManifest.Images {
-		if err := c.docker.PushImage(string(name)); err != nil {
+		if err := c.docker.PushImage(name.String()); err != nil {
 			return err
 		}
 	}
@@ -97,7 +99,7 @@ func (c *imageClient) loadAndTagImages(imageManifest string) (*ImageManifest, er
 			return nil, fmt.Errorf("image manifest %s does not specify a digest for image %s", imageManifest, name)
 		}
 		filename := filepath.Join(distroLocation, "images", string(digest))
-		if err := c.docker.LoadAndTagImage(string(name), string(digest), filename); err != nil {
+		if err := c.docker.LoadAndTagImage(name.String(), string(digest), filename); err != nil {
 			return nil, err
 		}
 	}
@@ -127,7 +129,7 @@ func (c *imageClient) PullImages(options PullImagesOptions) error {
 	newManifest := EmptyImageManifest()
 
 	for name, sha := range originalManifest.Images {
-		if newSha, err := c.docker.PullImage(string(name), imagesDir); err != nil {
+		if newSha, err := c.docker.PullImage(name.String(), imagesDir); err != nil {
 			return err
 		} else if newSha != string(sha) && sha != "" && !options.ContinueOnMismatch {
 			return fmt.Errorf("image %q had digest %v in the original manifest, but the pulled version has digest %s", name, sha, newSha)
@@ -171,7 +173,11 @@ func (c *imageClient) ListImages(options ListImagesOptions) error {
 	// populate the image manifest, removing duplicates, and, if checking is enabled, warning about images which appear to be invalid
 	im := EmptyImageManifest()
 	for _, i := range images {
-		if _, ok := im.Images[imageName(i)]; ok {
+		in, err := reference.Parse(i)
+		if err != nil {
+			panic(err) // TODO: handle this more gracefully
+		}
+		if _, ok := im.Images[in]; ok {
 			continue
 		}
 		if !options.NoCheck {
@@ -181,7 +187,7 @@ func (c *imageClient) ListImages(options ListImagesOptions) error {
 				continue
 			}
 		}
-		im.Images[imageName(i)] = ""
+		im.Images[in] = ""
 	}
 
 	return im.Save(imPath)

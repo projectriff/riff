@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"path"
 	"strings"
+
+	"github.com/docker/distribution/reference"
 )
 
 const (
@@ -55,7 +57,7 @@ func newImageMapper(mappedHost string, mappedUser string, images []imageName, fl
 
 	replacements := []string{}
 	for _, img := range images {
-		imgHost, imgUser, imgRepoPath, err := img.parseParts()
+		imgHost, imgUser, imgRepoPath, err := parseParts(img)
 		if err != nil {
 			return nil, err
 		}
@@ -135,27 +137,22 @@ func containsAny(s string, items ...string) error {
 	return nil
 }
 
-func (img imageName) parseParts() (host string, user string, name string, err error) {
-	if err := containsAny(string(img), `"`, " "); err != nil {
+func parseParts(img imageName) (host string, user string, name string, err error) {
+	ref, err := reference.ParseNormalizedNamed(img.String()) // TODO: move this to original source of img
+	if err != nil {
 		return "", "", "", fmt.Errorf("invalid image: %v", err)
 	}
 
-	s := strings.SplitN(string(img), "/", 3)
+	s := strings.SplitN(ref.Name(), "/", 3)
 	switch len(s) {
 	case 0:
 		panic("SplitN produced empty array")
 	case 1:
-		return "", "", "", fmt.Errorf("invalid image: user missing: %s", img)
+		panic(fmt.Sprintf("invalid image: domain missing: %s", img))
 	case 2:
-		return dockerHubHost, s[0], s[1], nil
+		return "", "", "", fmt.Errorf("invalid image: user missing: %s", img)
 	default:
-		// Normalise docker hub hosts to a single form
-		host = s[0]
-		if host == fullDockerHubHost {
-			host = dockerHubHost
-		}
-
-		return host, s[1], s[2], nil
+		return s[0], s[1], s[2], nil
 	}
 }
 
