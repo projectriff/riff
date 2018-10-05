@@ -18,6 +18,7 @@ package commands
 
 import (
 	"fmt"
+	"k8s.io/api/core/v1"
 	"os"
 	"os/exec"
 	"time"
@@ -26,7 +27,6 @@ import (
 	v1alpha12 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
-	"k8s.io/api/core/v1"
 )
 
 const (
@@ -220,38 +220,8 @@ func ServiceList(fcClient *core.Client) *cobra.Command {
 				return err
 			}
 
-			if len(services.Items) == 0 {
-				fmt.Fprintln(cmd.OutOrStdout(), "No resources found.")
-			} else {
-				maxServiceNameLength := len("NAME ") //Make sure column names have enough room, even with short service names
-				for _, service := range services.Items {
-					if len(service.Name) > maxServiceNameLength {
-						maxServiceNameLength = len(service.Name)
-					}
-				}
-				pad := fmt.Sprintf("%%-%ds%%s\n", maxServiceNameLength+1)
-
-				fmt.Fprintf(cmd.OutOrStdout(), pad, "NAME", "STATUS")
-				for _, service := range services.Items {
-					cond := service.Status.GetCondition(v1alpha12.ServiceConditionReady)
-					var status string
-					if cond == nil {
-						status = "Unknown"
-					} else {
-						switch cond.Status {
-						case v1.ConditionTrue:
-							status = "Running"
-						case v1.ConditionFalse:
-							status = fmt.Sprintf("%s: %s", cond.Reason, cond.Message)
-						default:
-							status = "Unknown"
-						}
-					}
-
-					fmt.Fprintf(cmd.OutOrStdout(), pad, service.Name, status)
-				}
-			}
-
+			Display(cmd.OutOrStdout(), serviceToInterfaceSlice(services.Items), makeServiceExtractors())
+			PrintSuccessfulCompletion(cmd)
 			return nil
 		},
 	}
@@ -362,4 +332,39 @@ func ServiceDelete(fcClient *core.Client) *cobra.Command {
 	command.Flags().StringVarP(&deleteServiceOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
 
 	return command
+}
+
+func serviceToInterfaceSlice(subscriptions []v1alpha12.Service) []interface{} {
+	result := make([]interface{}, len(subscriptions))
+	for i := range subscriptions {
+		result[i] = subscriptions[i]
+	}
+	return result
+}
+
+func makeServiceExtractors() []NamedExtractor {
+	return []NamedExtractor{
+		{
+			name: "NAME",
+			fn:   func(s interface{}) string { return s.(v1alpha12.Service).Name },
+		},
+		{
+			name: "STATUS",
+			fn: func(s interface{}) string {
+				service := s.(v1alpha12.Service)
+				cond := service.Status.GetCondition(v1alpha12.ServiceConditionReady)
+				if cond == nil {
+					return "Unknown"
+				}
+				switch cond.Status {
+				case v1.ConditionTrue:
+					return "Running"
+				case v1.ConditionFalse:
+					return fmt.Sprintf("%s: %s", cond.Reason, cond.Message)
+				default:
+					return "Unknown"
+				}
+			},
+		},
+	}
 }

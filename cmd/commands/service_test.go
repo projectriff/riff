@@ -460,9 +460,11 @@ var _ = Describe("The riff service list command", func() {
 	})
 })
 
-const svcListOutput = `NAME  STATUS
-foo   Failed: It's dead, Jim
-wizz  Running
+const svcListOutput = `NAME STATUS                 
+foo  Failed: It's dead, Jim 
+wizz Running                
+
+list completed successfully
 `
 
 var _ = Describe("The riff service delete command", func() {

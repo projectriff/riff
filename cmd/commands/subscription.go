@@ -101,7 +101,7 @@ func SubscriptionList(client *core.Client) *Command {
 				return err
 			}
 
-			displayList(cmd, subscriptions)
+			Display(cmd.OutOrStdout(), subscriptionToInterfaceSlice(subscriptions.Items), makeSubscriptionExtractors())
 			PrintSuccessfulCompletion(cmd)
 			return nil
 		},
@@ -128,11 +128,6 @@ func computeSubscriptionName(args []string, options core.CreateSubscriptionOptio
 		return args[subscriptionCreateNameIndex]
 	}
 	return options.Subscriber
-}
-
-func displayList(cmd *Command, subscriptions *v1alpha1.SubscriptionList) {
-	out := cmd.OutOrStdout()
-	Display(out, subscriptionToInterfaceSlice(subscriptions.Items), makeSubscriptionExtractors())
 }
 
 func subscriptionToInterfaceSlice(subscriptions []v1alpha1.Subscription) []interface{} {
