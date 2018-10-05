@@ -3,13 +3,16 @@ package core
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+
+	"github.com/projectriff/riff/pkg/image_manifest"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/fileutils/mocks"
 	"github.com/projectriff/riff/pkg/resource"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 )
 
 var _ = Describe("RelocateImages", func() {
@@ -27,7 +30,7 @@ var _ = Describe("RelocateImages", func() {
 		mockFutils = new(mocks.Copier)
 		mockChecker = new(mocks.Checker)
 		client = NewImageClient(nil, mockFutils, mockChecker, resource.ListImages, ioutil.Discard)
-		options.Registry = "reg"
+		options.Registry = "reg.org"
 		options.RegistryUser = "user"
 		testErr = errors.New("test error")
 	})
@@ -438,8 +441,8 @@ func readFileOk(path string) string {
 	return string(content)
 }
 
-func readImageManifest(imageManifestPath string) *ImageManifest {
-	imageManifest, err := NewImageManifest(imageManifestPath)
+func readImageManifest(imageManifestPath string) *image_manifest.ImageManifest {
+	imageManifest, err := image_manifest.LoadImageManifest(imageManifestPath)
 	Expect(err).NotTo(HaveOccurred())
 	return imageManifest
 }

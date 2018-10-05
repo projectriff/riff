@@ -30,7 +30,7 @@ spec:
     - --artifact=${FUNCTION_ARTIFACT}
     - --handler=${FUNCTION_HANDLER}
     - --filepath=${FUNCTION_FILE_PATH}
-    image: reg/user/riff-init-a53b8b34598fd723044b9fc6d0471a62-33130595cba42999c2a25dccb2d25b9accd5e2f6745dad75702e9e061a762d72
+    image: reg.org/user/riff-init-a53b8b34598fd723044b9fc6d0471a62-33130595cba42999c2a25dccb2d25b9accd5e2f6745dad75702e9e061a762d72
     name: riff-init
   - args:
     - --dockerfile=/workspace/Dockerfile
