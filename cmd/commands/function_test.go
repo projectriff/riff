@@ -73,7 +73,12 @@ var _ = Describe("The riff function create command", func() {
 		It("should fail without invoker url with custom invoker", func() {
 			fc.SetArgs([]string{"custom", "square", "--git-repo", "http://git.com", "--image", "hello/image"})
 			err := fc.Execute()
-			Expect(err).To(MatchError(ContainSubstring("--invoker-url is required with custom invokers")))
+			Expect(err).To(MatchError(ContainSubstring("--invoker-url is required for the custom invoker")))
+		})
+		It("should fail with invoker url", func() {
+			fc.SetArgs([]string{"node", "square", "--git-repo", "http://git.com", "--image", "hello/image", "--invoker-url", "http://example.com"})
+			err := fc.Execute()
+			Expect(err).To(MatchError(ContainSubstring("--invoker-url is only available for the custom invoker")))
 		})
 	})
 

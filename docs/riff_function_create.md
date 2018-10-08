@@ -12,7 +12,7 @@ The INVOKER arg defines the language runtime and function invoker that is added 
 - 'jar': uses riff's java-function-invoker build for a prebuilt JAR file
 - 'node': uses riff's node-function-invoker build
 - 'command': uses riff's command-function-invoker build
-- 'custom': use a custom invoker. Specify with --custom-url flag
+- 'custom': use a custom invoker. Specify with --invoker-url flag
 
 Buildpack based builds support building from local source or within the cluster. Images will be pushed to the registry specified in the image name, unless prefixed with 'dev.local/' in which case the image will only be available within the local Docker daemon.
 
