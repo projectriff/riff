@@ -1,10 +1,11 @@
 manifestVersion: 0.1
 istio:
-- https://storage.googleapis.com/knative-releases/serving/previous/v20181002-536fa6b/istio.yaml
+- https://storage.googleapis.com/knative-releases/serving/previous/v20181008-d8283a8/istio.yaml
 knative:
-- https://storage.googleapis.com/knative-releases/serving/previous/v20181002-536fa6b/release-no-mon.yaml
-- https://storage.googleapis.com/knative-releases/eventing/previous/v20181002-52cc1aa/release.yaml
-- https://storage.googleapis.com/knative-releases/eventing/previous/v20181002-52cc1aa/release-clusterbus-stub.yaml
+- https://storage.googleapis.com/knative-releases/build/previous/v20181008-9825433/release.yaml
+- https://storage.googleapis.com/knative-releases/serving/previous/v20181008-d8283a8/serving.yaml
+- https://storage.googleapis.com/knative-releases/eventing/previous/v20181008-0fd0e19/release.yaml
+- https://storage.googleapis.com/knative-releases/eventing/previous/v20181008-0fd0e19/release-clusterbus-stub.yaml
 namespace:
 - https://storage.googleapis.com/riff-releases/previous/riff-build/riff-build-0.1.0.yaml
 - https://storage.googleapis.com/riff-releases/riff-cnb-buildtemplate-0.1.0.yaml
