@@ -54,6 +54,8 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 		"node":    "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
 	}
 
+	flagsValidator := AtLeastOneOf("git-repo", "local-path")
+
 	command := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new function resource",
@@ -63,6 +65,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 			"- 'jar': uses riff's java-function-invoker build for a prebuilt JAR file\n" +
 			"- 'node': uses riff's node-function-invoker build\n" +
 			"- 'command': uses riff's command-function-invoker build\n" +
+			"- 'custom': use a custom invoker. Specify with --invoker-url flag\n" +
 			"\nBuildpack based builds support building from local source or within the cluster. Images will be pushed to the registry specified in the image name, unless prefixed with 'dev.local/' in which case the image will only be available within the local Docker daemon.\n" +
 			"\nFrom then on you can use the sub-commands for the `service` command to interact with the service created for the function.\n\n" +
 			envFromLongDesc + "\n",
@@ -73,17 +76,32 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 			AtPosition(functionCreateInvokerIndex, ValidName()),
 			AtPosition(functionCreateFunctionNameIndex, ValidName()),
 		),
-		PreRunE: FlagsValidatorAsCobraRunE(AtLeastOneOf("git-repo", "local-path")),
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			err := flagsValidator(cmd)
+			if err != nil {
+				return err
+			}
+
+			invoker := args[functionCreateInvokerIndex]
+			if invoker != "custom" && createFunctionOptions.InvokerURL != "" {
+				return fmt.Errorf("--invoker-url is only available for the custom invoker")
+			} else if invoker == "custom" && createFunctionOptions.InvokerURL == "" {
+				return fmt.Errorf("--invoker-url is required for the custom invoker")
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			fnName := args[functionCreateFunctionNameIndex]
 
 			invoker := args[functionCreateInvokerIndex]
 			createFunctionOptions.Invoker = invoker
+
 			if buildpack, exists := buildpacks[invoker]; exists {
 				createFunctionOptions.BuildpackImage = buildpack
 			} else if invokerURL, exists := invokers[invoker]; exists {
 				createFunctionOptions.InvokerURL = invokerURL
-			} else {
+			} else if invoker != "custom" {
 				return fmt.Errorf("unknown invoker: %s", invoker)
 			}
 
@@ -118,6 +136,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 	command.Flags().StringVarP(&createFunctionOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
 	command.Flags().BoolVarP(&createFunctionOptions.DryRun, "dry-run", "", false, dryRunUsage)
 	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
+	command.Flags().StringVar(&createFunctionOptions.InvokerURL, "invoker-url", "", "the path to a custom invoker url. Required if invoker is custom.")
 	command.MarkFlagRequired("image")
 	command.Flags().StringVar(&createFunctionOptions.GitRepo, "git-repo", "", "the `URL` for a git repository hosting the function code")
 	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` of the function code to use")
