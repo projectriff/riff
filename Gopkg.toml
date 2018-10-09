@@ -78,7 +78,7 @@
 # Buildpack build support
 [[constraint]]
   name = "github.com/buildpack/pack"
-  version = "v0.0.3"
+  version = "v0.0.4"
 [[override]]
   name = "github.com/buildpack/lifecycle"
   revision = "1fe614565217b026a0fb5158241bb299b0da1a5e"
@@ -88,9 +88,6 @@
 [[override]]
   name = "github.com/docker/docker"
   revision = "71cd53e4a197b303c6ba086bd584ffd67a884281"
-[[override]]
-  name = "github.com/docker/distribution"
-  revision = "83389a148052d74ac602f5f1d62f86ff2f3c4aa5"
 [[override]]
   name = "github.com/google/go-containerregistry"
   revision = "74aef1a35cfa25a5a20c951199abd26356e7bead"

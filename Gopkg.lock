@@ -82,24 +82,23 @@
   revision = "1fe614565217b026a0fb5158241bb299b0da1a5e"
 
 [[projects]]
-  digest = "1:0e47dee51cce06b708258de25303d0e69d2af5304eccb2bfccac3be5f76d5a04"
+  digest = "1:94556f18215d47f9f4e5af9c83a72e1960e0a05188f3ce42ec97e53c17cd15ed"
   name = "github.com/buildpack/pack"
   packages = [
     ".",
+    "config",
     "docker",
     "fs",
+    "image",
   ]
   pruneopts = "NUT"
-  revision = "ccfdc4e126923160ed45453e120edae61176d862"
-  version = "v0.0.3"
+  revision = "2de129897dcae21268e0a1571d37bea49636d966"
+  version = "v0.0.4"
 
 [[projects]]
-  digest = "1:a7119e9448df7ce93bb1952de22354b41a4529f59f249ba6cc932cd217a2aac3"
+  digest = "1:5e6aeea259a70a61658389db09cf74c411f5fd1d0f8db81a952cc3ed911799db"
   name = "github.com/buildpack/packs"
-  packages = [
-    ".",
-    "img",
-  ]
+  packages = ["."]
   pruneopts = "NUT"
   revision = "aa30a412923763df37e83f14a6e4e0fe07e11f25"
 
