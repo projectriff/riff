@@ -23,7 +23,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("imageMapper", func() {
+var _ = FDescribe("imageMapper", func() {
 	const (
 		testImage = "some.registry.com/some-user/some/path"
 		testYaml  = `image: "` + testImage + `"
@@ -124,17 +124,17 @@ image: ` + flattenedMappedImage + `
 
 		Context("when an image contains no user", func() {
 			BeforeEach(func() {
-				images = []imageName{"a"}
+				images = imageNames("a")
 			})
 
-			It("should return a suitable error", func() {
+			FIt("should return a suitable error", func() {
 				Expect(err).To(MatchError("invalid image: user missing: a"))
 			})
 		})
 
 		Context("when an image omits the host", func() {
 			BeforeEach(func() {
-				images = []imageName{"a/b"}
+				images = imageNames("a/b")
 			})
 
 			It("should default the host", func() {
@@ -144,7 +144,7 @@ image: ` + flattenedMappedImage + `
 
 		Context("when an image contains a double quote", func() {
 			BeforeEach(func() {
-				images = []imageName{`"`}
+				images = imageNames(`"`)
 			})
 
 			It("should return a suitable error", func() {
@@ -154,7 +154,7 @@ image: ` + flattenedMappedImage + `
 
 		Context("when an image contains a space", func() {
 			BeforeEach(func() {
-				images = []imageName{" "}
+				images = imageNames(" ")
 			})
 
 			It("should return a suitable error", func() {
@@ -175,7 +175,7 @@ image: ` + flattenedMappedImage + `
 
 		Context("when the list of images is empty", func() {
 			BeforeEach(func() {
-				images = []imageName{}
+				images = imageNames()
 			})
 
 			It("should not perform any mappings", func() {
@@ -185,7 +185,7 @@ image: ` + flattenedMappedImage + `
 
 		Context("when the list of images is non-empty", func() {
 			BeforeEach(func() {
-				images = []imageName{testImage}
+				images = imageNames(testImage)
 			})
 
 			It("should perform the mappings", func() {
@@ -246,7 +246,7 @@ image: ` + flattenedMappedLocalImage + `
 
 			Context("when an image omits the docker.io host", func() {
 				BeforeEach(func() {
-					images = []imageName{elidedImage}
+					images = imageNames(elidedImage)
 					input = []byte(`image: "` + elidedImage + `"
 image: "` + explicitImage + `"
 image: "` + fullImage + `"`)
@@ -262,7 +262,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 			Context("when an image includes the docker.io host", func() {
 				BeforeEach(func() {
-					images = []imageName{explicitImage}
+					images = imageNames(explicitImage)
 					input = []byte(`image: "` + elidedImage + `"
 image: "` + explicitImage + `"
 image: "` + fullImage + `"`)
@@ -278,7 +278,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 			Context("when an image includes the index.docker.io host", func() {
 				BeforeEach(func() {
-					images = []imageName{fullImage}
+					images = imageNames(fullImage)
 					input = []byte(`image: "` + elidedImage + `"
 image: "` + explicitImage + `"
 image: "` + fullImage + `"`)
@@ -300,7 +300,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 			Context("when an image is named by ko", func() {
 				BeforeEach(func() {
-					images = []imageName{koImage}
+					images = imageNames(koImage)
 					input = []byte(`image: "` + koImage + `"`)
 				})
 
@@ -314,7 +314,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 		Describe("detailed parsing", func() {
 			Context("when an image is wrapped in double quotes", func() {
 				BeforeEach(func() {
-					images = []imageName{"x/y/z"}
+					images = imageNames("x/y/z")
 					input = []byte(`"x/y/z"`)
 					registry = "r"
 					user = "u"
@@ -328,7 +328,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 			Context("when an image is preceded by a space", func() {
 				Context("when an image is followed by a space", func() {
 					BeforeEach(func() {
-						images = []imageName{"x/y/z"}
+						images = imageNames("x/y/z")
 						input = []byte(" x/y/z ")
 						registry = "r"
 						user = "u"
@@ -341,7 +341,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 				Context("when an image is followed by a newline", func() {
 					BeforeEach(func() {
-						images = []imageName{"x/y/z"}
+						images = imageNames("x/y/z")
 						input = []byte(" x/y/z\n")
 						registry = "r"
 						user = "u"
@@ -354,7 +354,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 				Context("when an image is at the end of the string", func() {
 					BeforeEach(func() {
-						images = []imageName{"x/y/z"}
+						images = imageNames("x/y/z")
 						input = []byte(" x/y/z")
 						registry = "r"
 						user = "u"
@@ -371,7 +371,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 			Context("when one unmapped image is a prefix of another", func() {
 				Context("when the image is wrapped in double quotes", func() {
 					BeforeEach(func() {
-						images = []imageName{"x/y/z", "x/y/z/a"}
+						images = imageNames("x/y/z", "x/y/z/a")
 						input = []byte(`image: "x/y/z/a"`)
 						registry = "r"
 						user = "u"
@@ -384,7 +384,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 				Context("when the image is preceded by a space", func() {
 					BeforeEach(func() {
-						images = []imageName{"x/y/z", "x/y/z/a"}
+						images = imageNames("x/y/z", "x/y/z/a")
 						input = []byte("image: x/y/z/a")
 						registry = "r"
 						user = "u"
@@ -399,7 +399,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 			Context("when an unmapped image is a prefix of an image in the string", func() {
 				Context("when the image is wrapped in double quotes", func() {
 					BeforeEach(func() {
-						images = []imageName{"x/y/z"}
+						images = imageNames("x/y/z")
 						input = []byte(`image: "x/y/z/a"`)
 						registry = "r"
 						user = "u"
@@ -412,7 +412,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 				Context("when the image is preceded by a space", func() {
 					BeforeEach(func() {
-						images = []imageName{"x/y/z"}
+						images = imageNames("x/y/z")
 						input = []byte("image: x/y/z/a")
 						registry = "r"
 						user = "u"
@@ -426,7 +426,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 
 			Context("when what looks like an image is not preceeded by a double quote or space", func() {
 				BeforeEach(func() {
-					images = []imageName{"x/y/z"}
+					images = imageNames("x/y/z")
 					input = []byte("http://x/y/z")
 					registry = "r"
 					user = "u"
@@ -438,5 +438,12 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 			})
 		})
 	})
-
 })
+
+func imageNames(names ...string) []imageName {
+	in := []imageName{}
+	for _, i := range names {
+		in = append(in, parseImageNameOk(i))
+	}
+	return in
+}

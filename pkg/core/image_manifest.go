@@ -21,16 +21,20 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/opencontainers/go-digest"
+
+	"github.com/docker/distribution/reference"
+
 	"github.com/ghodss/yaml"
 )
 
 const imageManifestVersion_0_1 = "0.1"
 
 // imageName contains a full image reference in the form [host]/repository/name/parts:tag
-type imageName string
+type imageName reference.Reference
 
 // imageDigest contains a digest of the actual image contents
-type imageDigest string
+type imageDigest digest.Digest
 
 // ImageManifest defines the image names found in YAML files of system components.
 type ImageManifest struct {
@@ -74,4 +78,27 @@ func (m *ImageManifest) Save(path string) error {
 		return err
 	}
 	return ioutil.WriteFile(path, bytes, outputFilePermissions)
+}
+
+func (m *ImageManifest) AddImage(i string, d string) error {
+	in, err := parseImageName(i)
+	if err != nil {
+		return err
+	}
+	m.Images[in] = imageDigest(d)
+	return nil
+}
+
+func (m *ImageManifest) RemoveImage(i string) error {
+	in, err := parseImageName(i)
+	if err != nil {
+		return err
+	}
+	delete(m.Images, in)
+	return nil
+}
+
+func parseImageName(i string) (imageName, error) {
+	ref, err := reference.Parse(i)
+	return imageName(ref), err
 }

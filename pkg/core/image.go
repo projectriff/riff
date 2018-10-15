@@ -22,12 +22,14 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/ghodss/yaml"
-	"github.com/projectriff/riff/pkg/fileutils"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
+
+	"github.com/docker/distribution/reference"
+	"github.com/ghodss/yaml"
+	"github.com/projectriff/riff/pkg/fileutils"
 )
 
 const (
@@ -239,8 +241,12 @@ func relocateImageManifest(imageManifestPath string, mapper *imageMapper, output
 }
 
 func applyMapper(name imageName, mapper *imageMapper) imageName {
-	quotedName := imageName(mapper.mapImages([]byte(fmt.Sprintf("%q", name))))
-	return quotedName[1 : len(quotedName)-1]
+	mapped := string(mapper.mapImages([]byte(fmt.Sprintf("%q", name.String()))))
+	ref, err := reference.Parse(mapped[1 : len(mapped)-1])
+	if err != nil {
+		panic(err) // TODO: handle this gracefully
+	}
+	return imageName(ref)
 }
 
 func findNonCollidingFlattener(manifest *Manifest) uriFlattener {

@@ -18,16 +18,18 @@ package core_test
 
 import (
 	"errors"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/docker/mocks"
 	mock_fileutils "github.com/projectriff/riff/pkg/fileutils/mocks"
 
-	"github.com/stretchr/testify/mock"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/stretchr/testify/mock"
 )
 
 var _ = Describe("ImageClient", func() {
@@ -189,8 +191,9 @@ var _ = Describe("ImageClient", func() {
 			options.Images = copyFile("fixtures/image_client/complete.yaml", workDir)
 			imagesDir = filepath.Join(workDir, "images")
 			expectedImageManifest = core.EmptyImageManifest()
-			expectedImageManifest.Images["a/b"] = "1"
-			expectedImageManifest.Images["c/d"] = "2"
+			addImage(expectedImageManifest, "a/b", "1")
+			addImage(expectedImageManifest, "a/b", "1")
+			addImage(expectedImageManifest, "c/d", "2")
 		})
 
 		AfterEach(func() {
@@ -232,7 +235,7 @@ var _ = Describe("ImageClient", func() {
 			Context("when conflicts are allowed", func() {
 				BeforeEach(func() {
 					options.ContinueOnMismatch = true
-					expectedImageManifest.Images["c/d"] = "3"
+					addImage(expectedImageManifest, "c/d", "3")
 				})
 
 				It("should succeed", func() {
@@ -317,8 +320,8 @@ var _ = Describe("ImageClient", func() {
 			options.Force = false
 
 			expectedImageManifest = core.EmptyImageManifest()
-			expectedImageManifest.Images["a/b"] = ""
-			expectedImageManifest.Images["c/d"] = ""
+			addImage(expectedImageManifest, "a/b", "")
+			addImage(expectedImageManifest, "c/d", "")
 
 			listErr = nil
 
@@ -365,7 +368,7 @@ var _ = Describe("ImageClient", func() {
 					options.NoCheck = false
 					mockDocker.On("ImageExists", "a/b").Return(true)
 					mockDocker.On("ImageExists", "c/d").Return(false)
-					delete(expectedImageManifest.Images, "c/d")
+					removeImage(expectedImageManifest, "c/d")
 				})
 
 				It("should list the valid images", func() {
@@ -418,4 +421,12 @@ func actualImageManifest(path string) *core.ImageManifest {
 	m, err := core.NewImageManifest(path)
 	Expect(err).NotTo(HaveOccurred())
 	return m
+}
+
+func addImage(im *core.ImageManifest, i string, d string) {
+	Expect(im.AddImage(i, d)).To(Succeed())
+}
+
+func removeImage(im *core.ImageManifest, i string) {
+	Expect(im.RemoveImage(i)).To(Succeed())
 }
