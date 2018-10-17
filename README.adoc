@@ -8,16 +8,14 @@ It includes commands to install Knative in a Kubernetes cluster, and for managin
 
 == Installation of the latest release
 
-Official binary release are available from the link:https://github.com/projectriff/riff/releases[Releases] page.
-
-See link:https://projectriff.io/docs/getting-started-with-knative-riff-on-minikube/[Getting started on Minikube] or
+Official binary release are available from the link:https://github.com/projectriff/riff/releases[Releases] page. See link:https://projectriff.io/docs/getting-started-with-knative-riff-on-minikube/[Getting started on Minikube] or
 link:https://projectriff.io/docs/getting-started-with-knative-riff-on-gke/[Getting started on GKE] for how to install the riff CLI and the riff system.
 
 See link:Community-Releases.adoc[Community releases] for Mac Homebrew and Debian Apt packages.
 
 == Developer installation of Knative
 
-The code for Knative serving and eventing and build lives in repos under the link:/https://github.com/knative[knative] GitHub organization. Developers can use the riff CLI against their own Knative builds, by following the instructions for installing a link:https://github.com/knative/eventing/blob/master/DEVELOPMENT.md[Knative development environment].
+The code for Knative serving and eventing and build lives in repos under the link:https://github.com/knative[knative] GitHub organization. Developers can use the riff CLI against their own Knative builds, by installing a link:https://github.com/knative/eventing/blob/master/DEVELOPMENT.md[Knative development environment].
 
 == [[manual]] Manual build of the riff CLI
 
