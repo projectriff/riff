@@ -3,7 +3,8 @@
 image::logo.png[riff logo, link=https://projectriff.io/]
 = A FaaS for Kubernetes
 
-The riff project builds on top of the link:https://github.com/knative/[Knative] project's build, serving and eventing features.
+The riff CLI helps developers build and run functions using link:https://github.com/knative/docs[Knative].
+It includes commands to install Knative in a Kubernetes cluster, and for managing functions, services, channels, and subscriptions.
 
 == Installation of the latest release
 
@@ -12,30 +13,11 @@ Official binary release are available from the link:https://github.com/projectri
 See link:https://projectriff.io/docs/getting-started-with-knative-riff-on-minikube/[Getting started on Minikube] or
 link:https://projectriff.io/docs/getting-started-with-knative-riff-on-gke/[Getting started on GKE] for how to install the riff CLI and the riff system.
 
-=== Community releases
-
-NOTE: Community releases are not created, managed or monitored by the riff team.
-
-To install the `riff` CLI for MacOS with Homebrew:
-
-[source, bash]
-----
-brew install starkandwayne/cf/riff
-----
-
-To install the CLI for Debian/Ubuntu Linux:
-
-[source, bash]
-----
-wget -q -O - https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master/public.key | apt-key add -
-echo "deb http://apt.starkandwayne.com stable main" | tee /etc/apt/sources.list.d/starkandwayne.list
-apt-get update
-apt-get install riff
-----
+See link:Community-Releases.adoc[Community releases] for Mac Homebrew and Debian Apt packages.
 
 == Developer installation of Knative
 
-See link:https://github.com/knative/eventing/blob/master/DEVELOPMENT.md[Development] to install the Knative Build, Serving and Eventing projects.
+The code for Knative serving and eventing and build lives in repos under the link:/https://github.com/knative[knative] GitHub organization. Developers can use the riff CLI against their own Knative builds, by following the instructions for installing a link:https://github.com/knative/eventing/blob/master/DEVELOPMENT.md[Knative development environment].
 
 == [[manual]] Manual build of the riff CLI
 
@@ -71,6 +53,11 @@ cd $(go env GOPATH)/src/github.com/projectriff/riff
 make build install
 ----
 NOTE: This installs the CLI in `$GOBIN`, or if that is not set, in the `bin` subdirectory of the directory specified in `$GOPATH`.
+
+
+== [[distro]] riff-distro
+
+A separate link:distro[riff-distro] CLI provides tooling to create distributions of images for on-premise riff installations.
 
 == Contributing to riff
 
