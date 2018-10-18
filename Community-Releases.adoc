@@ -1,0 +1,22 @@
+
+=== Community releases
+
+NOTE: Community releases are not created, managed or monitored by the riff team.
+
+To install the `riff` CLI for MacOS with Homebrew:
+
+[source, bash]
+----
+brew tap starkandwayne/cf
+brew install riff
+----
+
+To install the CLI for Debian/Ubuntu Linux:
+
+[source, bash]
+----
+wget -q -O - https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master/public.key | apt-key add -
+echo "deb http://apt.starkandwayne.com stable main" | tee /etc/apt/sources.list.d/starkandwayne.list
+apt-get update
+apt-get install riff
+----
