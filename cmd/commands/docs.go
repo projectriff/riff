@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra/doc"
 )
 
-func Docs(rootCmd *cobra.Command) *cobra.Command {
+func Docs(rootCmd *cobra.Command, fs Filesystem) *cobra.Command {
 
 	var directory string
 
@@ -34,19 +34,23 @@ func Docs(rootCmd *cobra.Command) *cobra.Command {
 		Short:  "generate riff command documentation",
 		Hidden: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-
-			fi, err := os.Stat(directory)
-			if os.IsNotExist(err) {
-				if err := os.Mkdir(directory, 0744); err != nil {
-					return err
-				}
-			} else if !fi.Mode().IsDir() {
-				return fmt.Errorf("path %q already exists but is not a directory", directory)
-			}
-			return doc.GenMarkdownTree(rootCmd, directory)
-
+			return GenerateDocs(rootCmd, directory, fs)
 		},
 	}
 	docsCmd.Flags().StringVarP(&directory, "dir", "d", "docs", "the output directory for the docs.")
 	return docsCmd
+}
+
+func GenerateDocs(rootCommand *cobra.Command, directory string, fs Filesystem) error {
+	fileinfo, err := fs.Stat(directory)
+	if os.IsNotExist(err) {
+		if err = fs.Mkdir(directory, 0744); err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
+	} else if !fileinfo.Mode().IsDir() {
+		return fmt.Errorf("path %q already exists but is not a directory", directory)
+	}
+	return doc.GenMarkdownTree(rootCommand, directory)
 }

@@ -172,7 +172,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		namespace,
 		system,
 		subscription,
-		Docs(rootCmd),
+		Docs(rootCmd, LocalFs{}),
 		Version(),
 		Completion(rootCmd),
 	)
@@ -220,5 +220,12 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 		}
 		return nil
 	}
+}
 
+func FindSubcommand(command *cobra.Command, names ...string) *cobra.Command {
+	cmd, unmatchedArgs, err := command.Find(names)
+	if err != nil || len(unmatchedArgs) > 0 {
+		return nil
+	}
+	return cmd
 }
