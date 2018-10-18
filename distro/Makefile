@@ -10,7 +10,7 @@ LDFLAGS_VERSION = -X github.com/projectriff/riff/distro/commands.cli_version=$(V
 				  -X github.com/projectriff/riff/distro/commands.cli_gitsha=$(GITSHA) \
 				  -X github.com/projectriff/riff/distro/commands.cli_gitdirty=$(GITDIRTY)
 
-all: build test
+all: build test docs
 
 build: $(OUTPUT)
 
@@ -25,6 +25,10 @@ $(OUTPUT): $(GO_SOURCES) ../vendor ../VERSION
 
 clean:
 	rm -f $(OUTPUT)
+
+
+docs: $(OUTPUT)
+	rm -fR docs && $(OUTPUT) docs
 
 ../vendor: ../Gopkg.lock
 	cd .. && dep ensure -vendor-only && touch vendor

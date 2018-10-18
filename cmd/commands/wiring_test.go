@@ -4,7 +4,7 @@ import (
 	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/projectriff/riff/cmd/commands"
+	. "github.com/projectriff/riff/cmd/commands"
 	"github.com/spf13/cobra"
 )
 
@@ -13,25 +13,17 @@ var _ = Describe("`riff` root command", func() {
 		var rootCommand *cobra.Command
 
 		BeforeEach(func() {
-			rootCommand = commands.CreateAndWireRootCommand()
+			rootCommand = CreateAndWireRootCommand()
 		})
 
 		It("including `riff subscription`", func() {
 			errMsg := "`%s` should be wired to root command"
-			Expect(find(rootCommand, "subscription")).NotTo(BeNil(), fmt.Sprintf(errMsg, "subscription"))
-			Expect(find(rootCommand, "subscription", "create")).NotTo(BeNil(), fmt.Sprintf(errMsg, "subscription create"))
-			Expect(find(rootCommand, "subscription", "delete")).NotTo(BeNil(), fmt.Sprintf(errMsg, "subscription delete"))
-			Expect(find(rootCommand, "subscription", "list")).NotTo(BeNil(), fmt.Sprintf(errMsg, "subscription list"))
+			Expect(FindSubcommand(rootCommand, "subscription")).NotTo(BeNil(), fmt.Sprintf(errMsg, "subscription"))
+			Expect(FindSubcommand(rootCommand, "subscription", "create")).NotTo(BeNil(), fmt.Sprintf(errMsg, "subscription create"))
+			Expect(FindSubcommand(rootCommand, "subscription", "delete")).NotTo(BeNil(), fmt.Sprintf(errMsg, "subscription delete"))
+			Expect(FindSubcommand(rootCommand, "subscription", "list")).NotTo(BeNil(), fmt.Sprintf(errMsg, "subscription list"))
 		})
 
 	})
 
 })
-
-func find(command *cobra.Command, names ...string) *cobra.Command {
-	cmd, unmatchedArgs, err := command.Find(names)
-	if err != nil || len(unmatchedArgs) > 0 {
-		return nil
-	}
-	return cmd
-}

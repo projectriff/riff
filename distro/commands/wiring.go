@@ -69,6 +69,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		image,
 		system,
 		Version(),
+		DistroDocs(rootCmd, commands.LocalFs{}),
 		commands.Completion(rootCmd),
 	)
 
