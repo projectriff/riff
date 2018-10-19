@@ -52,7 +52,7 @@ cd release-from-archive
 tar xzf ../riff-release.tar.gz
 ```
 
-Relocate the images in the release into the `relocated` directory, specifying a new `dev.local` registry and `u` user, and rewriting all the release yaml with the relocated image names/tags.
+Relocate the images in the release into the `relocated` directory, specifying a new `dev.local` registry and `u` user, and rewriting all the release yaml with the relocated image names/tags. Using `--flatten` is required for registries which don't support deep hierarchies of image names.
 ```sh
 riff image relocate -m manifest.yaml -r dev.local -u u -i image-manifest.yaml -o relocated --flatten
 ```
