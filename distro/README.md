@@ -77,10 +77,10 @@ riff image relocate \
 Using `--flatten` is required for registries which don't support deep hierarchies of image names like DockerHub.
 
 Push the relocated images to a registry. This first loads the images from the file system and tags them in your local docker daemon.
-The final push step requires that docker has push credentials for the registry.
+The final `docker push` step requires docker push credentials for the registry.
+
 ```sh
-cd relocated
-riff image push -i image-manifest.yaml
+riff image push -i relocated/image-manifest.yaml
 ```
 
 To install riff locally (e.g. for minikube or Docker Desktop), use `riff image load` instead of `riff image push`.
@@ -88,7 +88,7 @@ This loads and tags images locally without pushing them to a registry.
 
 Install riff and initialize the default namespace using the `relocated/manifest.yaml` and images.
 ```sh
-riff system install -m manifest.yaml --node-port
-riff namespace init default -m manifest.yaml --dockerhub $DOCKER_ID
+riff system install -m relocated/manifest.yaml --node-port
+riff namespace init default -m relocated/manifest.yaml --dockerhub $DOCKER_ID
 ```
-The last command above assumes that you are initializing the namespace for `riff function create` to push to DockerHub.
+The commands above assume that you are installing locally (--node-port) and initializing the namespace for `riff function create` to push to DockerHub.
