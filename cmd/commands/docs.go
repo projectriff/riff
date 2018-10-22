@@ -17,10 +17,6 @@
 package commands
 
 import (
-	"os"
-
-	"fmt"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 )
@@ -42,15 +38,8 @@ func Docs(rootCmd *cobra.Command, fs Filesystem) *cobra.Command {
 }
 
 func GenerateDocs(rootCommand *cobra.Command, directory string, fs Filesystem) error {
-	fileinfo, err := fs.Stat(directory)
-	if os.IsNotExist(err) {
-		if err = fs.Mkdir(directory, 0744); err != nil {
-			return err
-		}
-	} else if err != nil {
+	if err := fs.MkdirAll(directory, 0744); err != nil {
 		return err
-	} else if !fileinfo.Mode().IsDir() {
-		return fmt.Errorf("path %q already exists but is not a directory", directory)
 	}
 	return doc.GenMarkdownTree(rootCommand, directory)
 }

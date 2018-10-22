@@ -11,22 +11,13 @@ import (
 	"path/filepath"
 )
 
-type mkdirKoFs struct{}
+type mkdirAllKoFs struct{}
 
-func (mkdirKoFs) Mkdir(name string, perm os.FileMode) error {
+func (mkdirAllKoFs) MkdirAll(name string, perm os.FileMode) error {
 	return fmt.Errorf("oopsie, Mkdir failed")
 }
-func (mkdirKoFs) Stat(name string) (os.FileInfo, error) {
+func (mkdirAllKoFs) Stat(name string) (os.FileInfo, error) {
 	return os.Stat(name)
-}
-
-type statKoFs struct{}
-
-func (statKoFs) Mkdir(name string, perm os.FileMode) error {
-	return os.Mkdir(name, perm)
-}
-func (statKoFs) Stat(name string) (os.FileInfo, error) {
-	return nil, fmt.Errorf("oopsie, Stat failed")
 }
 
 var _ = Describe("The riff-distro docs command", func() {
@@ -46,28 +37,16 @@ var _ = Describe("The riff-distro docs command", func() {
 
 			err = command.Execute()
 
-			Expect(err).To(MatchError(ContainSubstring("already exists but is not a directory")))
+			Expect(err).NotTo(BeNil())
 		})
 
 		It("should fail when a directory cannot be created from specified path", func() {
-			command = DistroDocs(nil, mkdirKoFs{})
+			command = DistroDocs(nil, mkdirAllKoFs{})
 			command.SetArgs([]string{"--dir", "mkdir-will-fail"})
 
 			err := command.Execute()
 
 			Expect(err).To(MatchError("oopsie, Mkdir failed"))
-		})
-
-		It("should fail when getting file information fails", func() {
-			command = DistroDocs(nil, statKoFs{})
-			dir, err := ioutil.TempDir("", "distro-docs-ko-stat")
-			Expect(err).To(BeNil(), "could not create dir")
-			defer os.Remove(dir)
-			command.SetArgs([]string{"--dir", dir})
-
-			err = command.Execute()
-
-			Expect(err).To(MatchError("oopsie, Stat failed"))
 		})
 	})
 
