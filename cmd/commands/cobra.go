@@ -377,3 +377,12 @@ func PrintSuccessfulCompletion(cmd *cobra.Command) {
 func PrintInterruptedCompletion(cmd *cobra.Command) {
 	fmt.Fprintf(cmd.OutOrStdout(), "\n%s was interrupted\n", cmd.CommandPath())
 }
+
+
+func FindSubcommand(command *cobra.Command, names ...string) *cobra.Command {
+	cmd, unmatchedArgs, err := command.Find(names)
+	if err != nil || len(unmatchedArgs) > 0 {
+		return nil
+	}
+	return cmd
+}
