@@ -39,7 +39,7 @@ riff image relocate [flags]
   -f, --file string            path of a kubernetes configuration file
       --flatten                flatten image names (for registries that do not support hierarchical names)
   -h, --help                   help for relocate
-  -i, --images string          path of an image manifest of image names to be mapped
+  -i, --images string          path of an image manifest
   -m, --manifest string        path of a riff manifest (default "manifest.yaml")
   -o, --output string          path to contain the output file(s)
   -r, --registry string        hostname for mapped images

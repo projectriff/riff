@@ -4,11 +4,13 @@ Load and tag docker images
 
 ### Synopsis
 
-Load the set of images identified by the provided image manifest into a docker daemon.
+Load the images in an image manifest into a docker daemon and tag them.
+
+For details of image manifests, see `riff image relocate -h`.
 
 NOTE: This command requires the `docker` command line tool, as well as a docker daemon.
 
-SEE ALSO: To load, tag, and push images, use `riff image push`.
+SEE ALSO: To load, tag, and push images to a registry, use `riff image push`.
 
 ```
 riff image load [flags]
@@ -24,7 +26,7 @@ riff image load [flags]
 
 ```
   -h, --help            help for load
-  -i, --images string   path of an image manifest of image names to be loaded
+  -i, --images string   path of an image manifest
 ```
 
 ### SEE ALSO
