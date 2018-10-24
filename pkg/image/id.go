@@ -19,21 +19,21 @@ package image
 
 import "github.com/opencontainers/go-digest"
 
-// Digest is a cryptographic digest of the contents of an image
-type Digest struct {
+// Id is an image id, which happens to be represented as a digest
+type Id struct {
 	dig digest.Digest
 }
 
-func NewDigest(dig string) Digest {
-	return Digest{digest.Digest(dig)}
-}
-
-var EmptyDigest Digest
+var EmptyId Id
 
 func init() {
-	EmptyDigest = Digest{""}
+	EmptyId = Id{""}
 }
 
-func (d Digest) String() string {
-	return string(d.dig)
+func NewId(id string) Id {
+	return Id{digest.Digest(id)}
+}
+
+func (id Id) String() string {
+	return string(id.dig)
 }

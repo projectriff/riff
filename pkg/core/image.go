@@ -88,7 +88,7 @@ func createImageMapper(options RelocateImagesOptions) (*imageMapper, error) {
 	return imageMapper, nil
 }
 
-func keys(m map[image.Name]image.Digest) []image.Name {
+func keys(m map[image.Name]image.Id) []image.Name {
 	keys := make([]image.Name, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
@@ -225,12 +225,12 @@ func relocateImageManifest(imageManifestPath string, mapper *imageMapper, output
 		return err
 	}
 
-	relocatedImageManifest, err := imageManifest.FilterCopy(func(name image.Name, dig image.Digest) (image.Name, image.Digest, error) {
+	relocatedImageManifest, err := imageManifest.FilterCopy(func(name image.Name, id image.Id) (image.Name, image.Id, error) {
 		mapped, err := applyMapper(name, mapper)
 		if err != nil {
-			return image.EmptyName, image.EmptyDigest, err
+			return image.EmptyName, image.EmptyId, err
 		}
-		return mapped, dig, nil
+		return mapped, id, nil
 	})
 	if err != nil {
 		return err

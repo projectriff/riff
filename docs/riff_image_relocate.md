@@ -10,7 +10,7 @@ To relocate a single kubernetes configuration file, use the `--file` flag to spe
 
 To relocate a manifest, use the `--manifest` flag to specify the path or URL of a manifest file which provides the paths or URLs of the kubernetes configuration files for riff components. Use the `--output` flag to specify the path of a directory to contain the relocated manifest, kubernetes configuration files, and image manifest. Any associated images are copied to the output directory.
 
-Specify the registry hostname using the `--registry` flag, the user owning the images using the `--registry-user` flag, and the images to be mapped using the `--images` flag. The `--images` flag contains the path of an image manifest file with contents of the following form:
+Specify the registry hostname using the `--registry` flag, the user owning the images using the `--registry-user` flag, and the images to be mapped using the `--images` flag. The `--images` flag contains the path of an image manifest file, mapping image names to image ids, of the following form:
 
     manifestVersion: 0.1
     images:

@@ -15,8 +15,8 @@ const (
 
 // ImageManifest defines the image names found in YAML files of system components.
 type ImageManifest struct {
-	ManifestVersion string                      `json:"manifestVersion"`
-	Images          map[image.Name]image.Digest `json:images`
+	ManifestVersion string
+	Images          map[image.Name]image.Id
 }
 
 // jsonImageManifest is used for (un)marshalling ImageManifest since JSON maps must have string keys and consequently
@@ -29,7 +29,7 @@ type jsonImageManifest struct {
 func NewImageManifest() *ImageManifest {
 	return &ImageManifest{
 		ManifestVersion: imageManifestVersion_0_1,
-		Images:          make(map[image.Name]image.Digest),
+		Images:          make(map[image.Name]image.Id),
 	}
 }
 
@@ -40,7 +40,7 @@ func PrimeImageManifest(images []string) (*ImageManifest, error) {
 		if err != nil {
 			return nil, err
 		}
-		im.Images[ref] = image.EmptyDigest
+		im.Images[ref] = image.EmptyId
 	}
 	return im, nil
 }
@@ -76,7 +76,7 @@ func LoadImageManifest(path string) (*ImageManifest, error) {
 	return m, nil
 }
 
-type Filter func(name image.Name, dig image.Digest) (image.Name, image.Digest, error)
+type Filter func(name image.Name, dig image.Id) (image.Name, image.Id, error)
 
 func (m *ImageManifest) FilterCopy(filter Filter) (*ImageManifest, error) {
 	newManifest := NewImageManifest()
@@ -123,6 +123,6 @@ func (m *ImageManifest) addImage(i string, d string) error {
 	if err != nil {
 		return err
 	}
-	m.Images[in] = image.NewDigest(d)
+	m.Images[in] = image.NewId(d)
 	return nil
 }

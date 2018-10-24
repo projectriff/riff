@@ -96,12 +96,12 @@ func (c *imageClient) loadAndTagImages(imageManifest string) (*image_manifest.Im
 		return nil, err
 	}
 	distroLocation := filepath.Dir(imageManifest)
-	for name, digest := range imManifest.Images {
-		if digest == image.EmptyDigest {
-			return nil, fmt.Errorf("image manifest %s does not specify a digest for image %s", imageManifest, name)
+	for name, id := range imManifest.Images {
+		if id == image.EmptyId {
+			return nil, fmt.Errorf("image manifest %s does not specify an id for image %s", imageManifest, name)
 		}
-		filename := filepath.Join(distroLocation, "images", digest.String())
-		if err := c.docker.LoadAndTagImage(name.String(), digest.String(), filename); err != nil {
+		filename := filepath.Join(distroLocation, "images", id.String())
+		if err := c.docker.LoadAndTagImage(name.String(), id.String(), filename); err != nil {
 			return nil, err
 		}
 	}
@@ -128,13 +128,13 @@ func (c *imageClient) PullImages(options PullImagesOptions) error {
 		}
 	}
 
-	newManifest, err := originalManifest.FilterCopy(func(name image.Name, dig image.Digest) (image.Name, image.Digest, error) {
-		if newDig, err := c.docker.PullImage(name.String(), imagesDir); err != nil {
-			return image.EmptyName, image.EmptyDigest, err
-		} else if newDig != dig.String() && dig != image.EmptyDigest && !options.ContinueOnMismatch {
-			return image.EmptyName, image.EmptyDigest, fmt.Errorf("image %q had digest %v in the original manifest, but the pulled version has digest %s", name, dig, newDig)
+	newManifest, err := originalManifest.FilterCopy(func(name image.Name, id image.Id) (image.Name, image.Id, error) {
+		if newId, err := c.docker.PullImage(name.String(), imagesDir); err != nil {
+			return image.EmptyName, image.EmptyId, err
+		} else if newId != id && id != image.EmptyId && !options.ContinueOnMismatch {
+			return image.EmptyName, image.EmptyId, fmt.Errorf("image %q had id %v in the original manifest, but the pulled version has id %s", name, id, newId)
 		} else {
-			return name, image.NewDigest(newDig), nil
+			return name, newId, nil
 		}
 	})
 	if err != nil {
