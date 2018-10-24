@@ -87,9 +87,9 @@ var _ = Describe("ImageManifest", func() {
 			})
 
 			It("should parse the images array", func() {
-				Expect(manifest.Images).To(Equal(map[image.Name]image.Digest{parseImageNameOk("gcr.io/cf-spring-funkytown/github.com/knative/serving/cmd/queue"): image.EmptyDigest,
-					parseImageNameOk("istio/sidecar_injector"): image.NewDigest("0123"),
-					parseImageNameOk("gcr.io/knative-releases/github.com/knative/eventing/cmd/controller@sha256:367a7a22bc689b794c38fc488b8774a94515727a2c12f2347622e6c40fe9c1e8"): image.NewDigest("456")}))
+				Expect(manifest.Images).To(Equal(map[image.Name]image.Id{parseImageNameOk("gcr.io/cf-spring-funkytown/github.com/knative/serving/cmd/queue"): image.EmptyId,
+					parseImageNameOk("istio/sidecar_injector"): image.NewId("0123"),
+					parseImageNameOk("gcr.io/knative-releases/github.com/knative/eventing/cmd/controller@sha256:367a7a22bc689b794c38fc488b8774a94515727a2c12f2347622e6c40fe9c1e8"): image.NewId("456")}))
 			})
 		})
 	})

@@ -19,6 +19,8 @@ package core_test
 import (
 	"errors"
 
+	"github.com/projectriff/riff/pkg/image"
+
 	"github.com/projectriff/riff/pkg/image_manifest"
 
 	. "github.com/onsi/ginkgo"
@@ -90,7 +92,7 @@ var _ = Describe("ImageClient", func() {
 			})
 
 			It("should succeed", func() {
-				Expect(err).To(MatchError("image manifest fixtures/image_client/incomplete.yaml does not specify a digest for image c.org/d"))
+				Expect(err).To(MatchError("image manifest fixtures/image_client/incomplete.yaml does not specify an id for image c.org/d"))
 			})
 		})
 
@@ -146,7 +148,7 @@ var _ = Describe("ImageClient", func() {
 			})
 
 			It("should succeed", func() {
-				Expect(err).To(MatchError("image manifest fixtures/image_client/incomplete.yaml does not specify a digest for image c.org/d"))
+				Expect(err).To(MatchError("image manifest fixtures/image_client/incomplete.yaml does not specify an id for image c.org/d"))
 			})
 		})
 
@@ -206,8 +208,8 @@ var _ = Describe("ImageClient", func() {
 
 		Context("when the returned digests match those in the manifest", func() {
 			BeforeEach(func() {
-				mockDocker.On("PullImage", "a.org/b", imagesDir).Return("1", nil)
-				mockDocker.On("PullImage", "c.org/d", imagesDir).Return("2", nil)
+				mockDocker.On("PullImage", "a.org/b", imagesDir).Return(image.NewId("1"), nil)
+				mockDocker.On("PullImage", "c.org/d", imagesDir).Return(image.NewId("2"), nil)
 			})
 
 			It("should succeed", func() {
@@ -221,13 +223,13 @@ var _ = Describe("ImageClient", func() {
 
 		Context("when the returned digests conflict with those in the manifest", func() {
 			BeforeEach(func() {
-				mockDocker.On("PullImage", "a.org/b", imagesDir).Return("1", nil).Maybe()
-				mockDocker.On("PullImage", "c.org/d", imagesDir).Return("3", nil)
+				mockDocker.On("PullImage", "a.org/b", imagesDir).Return(image.NewId("1"), nil).Maybe()
+				mockDocker.On("PullImage", "c.org/d", imagesDir).Return(image.NewId("3"), nil)
 			})
 
 			Context("when conflicts are not allowed", func() {
 				It("should fail with a suitable error", func() {
-					Expect(err).To(MatchError(`image "c.org/d" had digest 2 in the original manifest, but the pulled version has digest 3`))
+					Expect(err).To(MatchError(`image "c.org/d" had id 2 in the original manifest, but the pulled version has id 3`))
 				})
 			})
 
@@ -251,8 +253,8 @@ var _ = Describe("ImageClient", func() {
 			BeforeEach(func() {
 				options.Output = filepath.Join(workDir, "image_client_test_output")
 				imagesOutputDir := filepath.Join(options.Output, "images")
-				mockDocker.On("PullImage", "a.org/b", imagesOutputDir).Return("1", nil)
-				mockDocker.On("PullImage", "c.org/d", imagesOutputDir).Return("2", nil)
+				mockDocker.On("PullImage", "a.org/b", imagesOutputDir).Return(image.NewId("1"), nil)
+				mockDocker.On("PullImage", "c.org/d", imagesOutputDir).Return(image.NewId("2"), nil)
 			})
 
 			It("should succeed", func() {
@@ -281,7 +283,7 @@ var _ = Describe("ImageClient", func() {
 
 		Context("when the docker client returns an error", func() {
 			BeforeEach(func() {
-				mockDocker.On("PullImage", mock.Anything, mock.Anything).Return("", testError).Once()
+				mockDocker.On("PullImage", mock.Anything, mock.Anything).Return(image.EmptyId, testError).Once()
 			})
 
 			It("should propagate the error", func() {

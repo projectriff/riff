@@ -26,12 +26,14 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/projectriff/riff/pkg/image"
 )
 
 type Docker interface {
 	LoadAndTagImage(name string, digest string, file string) error
 	PushImage(name string) error
-	PullImage(name string, directory string) (digest string, err error)
+	PullImage(name string, directory string) (digest image.Id, err error)
 	ImageExists(name string) bool
 }
 
@@ -54,21 +56,21 @@ func (pd *processDocker) PushImage(name string) error {
 	return pd.exec(10*time.Minute, "push", name)
 }
 
-func (pd *processDocker) PullImage(name string, directory string) (digest string, err error) {
+func (pd *processDocker) PullImage(name string, directory string) (digest image.Id, err error) {
 	if err := pd.exec(10*time.Minute, "pull", name); err != nil {
-		return "", err
+		return image.EmptyId, err
 	}
 	b := new(bytes.Buffer)
 	if err := pd.execWithStreams(pd.stdin, b, pd.stderr, 1*time.Second, "inspect", "--format='{{.Id}}'", name); err != nil {
-		return "", err
+		return image.EmptyId, err
 	}
 	if offset := strings.LastIndex(b.String(), "'sha256:"); offset == -1 {
-		return "", fmt.Errorf("unable to extract digest of image %q. Command output was %q", name, b.String())
+		return image.EmptyId, fmt.Errorf("unable to extract digest of image %q. Command output was %q", name, b.String())
 	} else {
 		// chop single quote at start, single quote and \n at end
-		digest = b.String()[offset+len("'") : len(b.String())-len("'\n")]
-		if err := pd.exec(5*time.Minute, "image", "save", "-o", filepath.Join(directory, digest), name); err != nil {
-			return "", err
+		digest = image.NewId(b.String()[offset+len("'") : len(b.String())-len("'\n")])
+		if err := pd.exec(5*time.Minute, "image", "save", "-o", filepath.Join(directory, digest.String()), name); err != nil {
+			return image.EmptyId, err
 		}
 		return digest, nil
 	}

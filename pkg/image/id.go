@@ -19,26 +19,22 @@ package image
 
 import "github.com/opencontainers/go-digest"
 
-// Digest allows unique identification of an image, both thru its contents (like Id does)
-// but also by its name. An image with a given binary contents (say Id = abcd) can thus be
-// referenced as two distinct Digests (d1 = 3ebf when tagged foo/bar and d2 = 4a43 when
-// tagged wiz/bot). Still, Digests are more "secure" than named tags, because the latter
-// can be updated. Digests, on the other hand, will change if the contents of the image
-// change.
-type Digest struct {
+// Id is an image id, which happens to be represented as a digest string. An image id
+// is based on the binary contents of an image, but not with its name (see Digest).
+type Id struct {
 	dig digest.Digest
 }
 
-func NewDigest(dig string) Digest {
-	return Digest{digest.Digest(dig)}
-}
-
-var EmptyDigest Digest
+var EmptyId Id
 
 func init() {
-	EmptyDigest = Digest{""}
+	EmptyId = Id{""}
 }
 
-func (d Digest) String() string {
-	return string(d.dig)
+func NewId(id string) Id {
+	return Id{digest.Digest(id)}
+}
+
+func (id Id) String() string {
+	return string(id.dig)
 }

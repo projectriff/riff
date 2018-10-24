@@ -60,7 +60,7 @@ func ImageRelocate(c *core.ImageClient) *cobra.Command {
 
 			"\nSpecify the registry hostname using the `--registry` flag, the user owning the images using the `--registry-user` flag, " +
 			"and the images to be mapped using the `--images` flag. The `--images` flag contains the path of an " +
-			"image manifest file with contents of the following form:\n" +
+			"image manifest file, mapping image names to image ids, of the following form:\n" +
 			`
     manifestVersion: 0.1
     images:
