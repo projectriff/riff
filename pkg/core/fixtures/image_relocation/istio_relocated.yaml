@@ -303,7 +303,7 @@ data:
     template: |-
       initContainers:
       - name: istio-init
-        image: "reg.org/user/proxy_init:1.0.1"
+        image: "reg.org/user/istio-proxy_init-868cfc0d8893f6f807d59493e57adf68:1.0.1"
         args:
         - "-p"
         - [[ .MeshConfig.ProxyListenPort ]]
@@ -346,7 +346,7 @@ data:
         image: [[ if (isset .ObjectMeta.Annotations "sidecar.istio.io/proxyImage") -]]
         "[[ index .ObjectMeta.Annotations "sidecar.istio.io/proxyImage" ]]"
         [[ else -]]
-        reg.org/user/proxyv2:1.0.1
+        reg.org/user/istio-proxyv2-85a6550901d9fcc8baef756fab8b596a:1.0.1
         [[ end -]]
         args:
         - proxy
@@ -595,7 +595,7 @@ spec:
       serviceAccountName: istio-cleanup-secrets-service-account
       containers:
         - name: hyperkube
-          image: "reg.org/user/hyperkube:v1.7.6_coreos.0"
+          image: "reg.org/user/coreos-hyperkube-a3fdb8f1a9ab0ce4818a4c2b1bd35d05:v1.7.6_coreos.0"
           command:
           - /bin/bash
           - -c
@@ -2210,7 +2210,7 @@ spec:
           name: istio-statsd-prom-bridge
       containers:
       - name: statsd-prom-bridge
-        image: "reg.org/user/statsd-exporter:v0.6.0"
+        image: "reg.org/user/prom-statsd-exporter-c8b14ad0def9f2c59788c9906fad64f7:v0.6.0"
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9102
@@ -2318,7 +2318,7 @@ spec:
       serviceAccountName: istio-galley-service-account
       containers:
         - name: validator
-          image: "reg.org/user/galley:1.0.1"
+          image: "reg.org/user/istio-galley-53681e4e55f068cbad6dbbfd7dbcdb33:1.0.1"
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 443
@@ -2432,7 +2432,7 @@ spec:
       serviceAccountName: istio-egressgateway-service-account
       containers:
         - name: istio-proxy
-          image: "reg.org/user/proxyv2:1.0.1"
+          image: "reg.org/user/istio-proxyv2-85a6550901d9fcc8baef756fab8b596a:1.0.1"
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
@@ -2568,7 +2568,7 @@ spec:
       serviceAccountName: istio-ingressgateway-service-account
       containers:
         - name: istio-proxy
-          image: "reg.org/user/proxyv2:1.0.1"
+          image: "reg.org/user/istio-proxyv2-85a6550901d9fcc8baef756fab8b596a:1.0.1"
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
@@ -2753,7 +2753,7 @@ spec:
                 - s390x
       containers:
       - name: mixer
-        image: "reg.org/user/mixer:1.0.1"
+        image: "reg.org/user/istio-mixer-3bfa0237625d076539b152ea48ea8381:1.0.1"
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9093
@@ -2778,7 +2778,7 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 5
       - name: istio-proxy
-        image: "reg.org/user/proxyv2:1.0.1"
+        image: "reg.org/user/istio-proxyv2-85a6550901d9fcc8baef756fab8b596a:1.0.1"
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9091
@@ -2850,7 +2850,7 @@ spec:
         emptyDir: {}
       containers:
       - name: mixer
-        image: "reg.org/user/mixer:1.0.1"
+        image: "reg.org/user/istio-mixer-3bfa0237625d076539b152ea48ea8381:1.0.1"
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9093
@@ -2875,7 +2875,7 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 5
       - name: istio-proxy
-        image: "reg.org/user/proxyv2:1.0.1"
+        image: "reg.org/user/istio-proxyv2-85a6550901d9fcc8baef756fab8b596a:1.0.1"
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9091
@@ -2947,7 +2947,7 @@ spec:
       serviceAccountName: istio-pilot-service-account
       containers:
         - name: discovery
-          image: "reg.org/user/pilot:1.0.1"
+          image: "reg.org/user/istio-pilot-2f303924900423ca1ed0c555001cb274:1.0.1"
           imagePullPolicy: IfNotPresent
           args:
           - "discovery"
@@ -2992,7 +2992,7 @@ spec:
             mountPath: /etc/certs
             readOnly: true
         - name: istio-proxy
-          image: "reg.org/user/proxyv2:1.0.1"
+          image: "reg.org/user/istio-proxyv2-85a6550901d9fcc8baef756fab8b596a:1.0.1"
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 15003
@@ -3100,7 +3100,7 @@ spec:
       serviceAccountName: istio-citadel-service-account
       containers:
         - name: citadel
-          image: "reg.org/user/citadel:1.0.1"
+          image: "reg.org/user/istio-citadel-e0f4cbedb0016f105a9fb667b0657501:1.0.1"
           imagePullPolicy: IfNotPresent
           args:
             - --append-dns-names=true
@@ -3173,7 +3173,7 @@ spec:
       serviceAccountName: istio-sidecar-injector-service-account
       containers:
         - name: sidecar-injector-webhook
-          image: "reg.org/user/sidecar_injector:1.0.1"
+          image: "reg.org/user/istio-sidecar_injector-3f9ffb5b050bdcf3022a5f351cbb2806:1.0.1"
           imagePullPolicy: IfNotPresent
           args:
             - --caCertFile=/etc/istio/certs/root-cert.pem

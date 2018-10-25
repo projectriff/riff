@@ -23,7 +23,7 @@ type ImageManifest struct {
 // Go maps that can be (un)marshalled must have string keys.
 type jsonImageManifest struct {
 	ManifestVersion string            `json:"manifestVersion"`
-	Images          map[string]string `json:images`
+	Images          map[string]string `json:"images"`
 }
 
 func NewImageManifest() *ImageManifest {

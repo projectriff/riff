@@ -300,6 +300,63 @@ var _ = Describe("Name", func() {
 		})
 	})
 
+	Describe("WithTag", func() {
+		var (
+			newRef image.Name
+			tag    string
+			err    error
+		)
+
+		JustBeforeEach(func() {
+			newRef, err = ref.WithTag(tag)
+		})
+
+		Context("when the tag is valid", func() {
+			BeforeEach(func() {
+				tag = "test-tag"
+			})
+
+			Context("when the image name is tagged", func() {
+				BeforeEach(func() {
+					var err error
+					ref, err = image.NewName("ubuntu:some-tag")
+					Expect(err).NotTo(HaveOccurred())
+				})
+
+				It("should replace the tag", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(newRef.Tag()).To(Equal("test-tag"))
+				})
+			})
+
+			Context("when the image name is not tagged", func() {
+				BeforeEach(func() {
+					var err error
+					ref, err = image.NewName("ubuntu")
+					Expect(err).NotTo(HaveOccurred())
+				})
+
+				It("should set the tag", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(newRef.Tag()).To(Equal("test-tag"))
+					Expect(newRef.Path()).To(Equal("library/ubuntu"))
+				})
+			})
+		})
+
+		Context("when the tag is invalid", func() {
+			BeforeEach(func() {
+				tag = "-invalid"
+				var err error
+				ref, err = image.NewName("ubuntu")
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should return a suitable error", func() {
+				Expect(err).To(MatchError("Cannot apply tag -invalid to image.Name docker.io/library/ubuntu: invalid tag format"))
+			})
+		})
+	})
 })
 
 func synonymStrings(ref image.Name) []string {

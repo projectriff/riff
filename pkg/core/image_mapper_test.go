@@ -34,7 +34,7 @@ image: ` + testImage + `
 		testRegistry         = "testregistry.com"
 		testUser             = "testuser"
 		mappedImage          = "testregistry.com/testuser/some/path"
-		flattenedMappedImage = "testregistry.com/testuser/path-3236c106420c1d0898246e1d2b6ba8b6"
+		flattenedMappedImage = "testregistry.com/testuser/some-user-some-path-3236c106420c1d0898246e1d2b6ba8b6"
 		mappedYaml           = `image: "` + mappedImage + `"
 image: ` + mappedImage + `
 `
@@ -46,7 +46,6 @@ image: ` + flattenedMappedImage + `
 		registry string
 		user     string
 		images   []image.Name
-		flatten  bool
 		mapper   *imageMapper
 		err      error
 		input    []byte
@@ -56,11 +55,10 @@ image: ` + flattenedMappedImage + `
 	BeforeEach(func() {
 		registry = testRegistry
 		user = testUser
-		flatten = false
 	})
 
 	JustBeforeEach(func() {
-		mapper, err = newImageMapper(registry, user, images, flatten)
+		mapper, err = newImageMapper(registry, user, images)
 	})
 
 	Describe("newImageMapper", func() {
@@ -160,13 +158,9 @@ image: ` + flattenedMappedImage + `
 				images = imageNames(testImage)
 			})
 
-			It("should perform the mappings", func() {
-				Expect(string(output)).To(Equal(string([]byte(mappedYaml))))
-			})
-
 			Context("when the target host is local only", func() {
 				const (
-					mappedImage = "dev.local/testuser/some/path:local"
+					mappedImage = "dev.local/testuser/some-user-some-path-3236c106420c1d0898246e1d2b6ba8b6:local"
 					mappedYaml  = `image: "` + mappedImage + `"
 image: ` + mappedImage + `
 `
@@ -181,30 +175,24 @@ image: ` + mappedImage + `
 				})
 			})
 
-			Context("when flattening is specified", func() {
+			It("should perform the mappings using flattened image names", func() {
+				Expect(string(output)).To(Equal(string([]byte(flattenedMappedYaml))))
+			})
+
+			Context("when the target host is local only", func() {
+				const (
+					flattenedMappedLocalImage = "dev.local/testuser/some-user-some-path-3236c106420c1d0898246e1d2b6ba8b6:local"
+					flattenedMappedLocalYaml  = `image: "` + flattenedMappedLocalImage + `"
+image: ` + flattenedMappedLocalImage + `
+`
+				)
+
 				BeforeEach(func() {
-					flatten = true
+					registry = "dev.local"
 				})
 
 				It("should perform the mappings using flattened image names", func() {
-					Expect(string(output)).To(Equal(string([]byte(flattenedMappedYaml))))
-				})
-
-				Context("when the target host is local only", func() {
-					const (
-						flattenedMappedLocalImage = "dev.local/testuser/path-3236c106420c1d0898246e1d2b6ba8b6:local"
-						flattenedMappedLocalYaml  = `image: "` + flattenedMappedLocalImage + `"
-image: ` + flattenedMappedLocalImage + `
-`
-					)
-
-					BeforeEach(func() {
-						registry = "dev.local"
-					})
-
-					It("should perform the mappings using flattened image names", func() {
-						Expect(string(output)).To(Equal(string([]byte(flattenedMappedLocalYaml))))
-					})
+					Expect(string(output)).To(Equal(string([]byte(flattenedMappedLocalYaml))))
 				})
 			})
 		})
@@ -225,7 +213,7 @@ image: "` + fullImage + `"`)
 				})
 
 				It("should perform the mapping", func() {
-					mappedImage := fmt.Sprintf("testregistry.com/testuser/sidecar_injector")
+					mappedImage := fmt.Sprintf("testregistry.com/testuser/istio-sidecar_injector-6bad934e7f077e63cae18277203bb414")
 					Expect(string(output)).To(Equal(string([]byte(fmt.Sprintf(`image: %q
 image: %q
 image: %q`, mappedImage, mappedImage, mappedImage)))))
@@ -241,7 +229,7 @@ image: "` + fullImage + `"`)
 				})
 
 				It("should perform the mapping", func() {
-					mappedImage := fmt.Sprintf("testregistry.com/testuser/sidecar_injector")
+					mappedImage := fmt.Sprintf("testregistry.com/testuser/istio-sidecar_injector-6bad934e7f077e63cae18277203bb414")
 					Expect(string(output)).To(Equal(string([]byte(fmt.Sprintf(`image: %q
 image: %q
 image: %q`, mappedImage, mappedImage, mappedImage)))))
@@ -257,7 +245,7 @@ image: "` + fullImage + `"`)
 				})
 
 				It("should perform the mapping", func() {
-					mappedImage := fmt.Sprintf("testregistry.com/testuser/sidecar_injector")
+					mappedImage := fmt.Sprintf("testregistry.com/testuser/istio-sidecar_injector-6bad934e7f077e63cae18277203bb414")
 					Expect(string(output)).To(Equal(string([]byte(fmt.Sprintf(`image: %q
 image: %q
 image: %q`, mappedImage, mappedImage, mappedImage)))))
@@ -277,7 +265,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 				})
 
 				It("should perform the mapping", func() {
-					mappedImage := fmt.Sprintf("testregistry.com/testuser/github.com/knative/build/cmd/creds-init-deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef") // omits the "@sha256:" piece
+					mappedImage := fmt.Sprintf("testregistry.com/testuser/knative-releases-github.com-knative-build-cmd-creds-init-b692cdd35af41412d71a4bc138128dd6") // omits the "@sha256:" piece
 					Expect(string(output)).To(Equal(string([]byte(fmt.Sprintf(`image: %q`, mappedImage)))))
 				})
 			})
@@ -295,7 +283,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 				})
 
 				It("should perform the mapping", func() {
-					mappedImage := fmt.Sprintf("testregistry.com/testuser/fluentd-elasticsearch-e71ae1e56d9a15bbcf26be734d13b608")
+					mappedImage := "testregistry.com/testuser/fluentd-elasticsearch-e71ae1e56d9a15bbcf26be734d13b608:v2.0.4"
 					Expect(string(output)).To(Equal(string([]byte(fmt.Sprintf(`image: %q`, mappedImage)))))
 				})
 			})
@@ -306,12 +294,12 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 				BeforeEach(func() {
 					images = imageNames("x.x/y/z")
 					input = []byte(`"x.x/y/z"`)
-					registry = "r"
+					registry = "r.r"
 					user = "u"
 				})
 
 				It("should map the image", func() {
-					Expect(string(output)).To(Equal(string([]byte(`"r/u/z"`))))
+					Expect(string(output)).To(Equal(string([]byte(`"r.r/u/y-z-622eedc03bbe568ed522e1e4903704b2"`))))
 				})
 			})
 
@@ -320,12 +308,12 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 					BeforeEach(func() {
 						images = imageNames("x.x/y/z")
 						input = []byte(" x.x/y/z ")
-						registry = "r"
+						registry = "r.r"
 						user = "u"
 					})
 
 					It("should map the image", func() {
-						Expect(string(output)).To(Equal(string([]byte(" r/u/z "))))
+						Expect(string(output)).To(Equal(string([]byte(" r.r/u/y-z-622eedc03bbe568ed522e1e4903704b2 "))))
 					})
 				})
 
@@ -333,12 +321,12 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 					BeforeEach(func() {
 						images = imageNames("x.x/y/z")
 						input = []byte(" x.x/y/z\n")
-						registry = "r"
+						registry = "r.r"
 						user = "u"
 					})
 
 					It("should map the image", func() {
-						Expect(string(output)).To(Equal(string([]byte(" r/u/z\n"))))
+						Expect(string(output)).To(Equal(string([]byte(" r.r/u/y-z-622eedc03bbe568ed522e1e4903704b2\n"))))
 					})
 				})
 
@@ -346,12 +334,12 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 					BeforeEach(func() {
 						images = imageNames("x.x/y/z")
 						input = []byte(" x.x/y/z")
-						registry = "r"
+						registry = "r.r"
 						user = "u"
 					})
 
 					It("should map the image", func() {
-						Expect(string(output)).To(Equal(string([]byte(" r/u/z"))))
+						Expect(string(output)).To(Equal(string([]byte(" r.r/u/y-z-622eedc03bbe568ed522e1e4903704b2"))))
 					})
 				})
 			})
@@ -363,12 +351,12 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 					BeforeEach(func() {
 						images = imageNames("x.x/y/z", "x.x/y/z/a")
 						input = []byte(`image: "x.x/y/z/a"`)
-						registry = "r"
+						registry = "r.r"
 						user = "u"
 					})
 
 					It("should map the image rather than the substring", func() {
-						Expect(string(output)).To(Equal(string([]byte(`image: "r/u/z/a"`))))
+						Expect(string(output)).To(Equal(string([]byte(`image: "r.r/u/y-z-a-ab71dcefbbc95badf34dcb58bc9afceb"`))))
 					})
 				})
 
@@ -376,12 +364,12 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 					BeforeEach(func() {
 						images = imageNames("x.x/y/z", "x.x/y/z/a")
 						input = []byte("image: x.x/y/z/a")
-						registry = "r"
+						registry = "r.r"
 						user = "u"
 					})
 
 					It("should map the image rather than the substring", func() {
-						Expect(string(output)).To(Equal(string([]byte("image: r/u/z/a"))))
+						Expect(string(output)).To(Equal(string([]byte("image: r.r/u/y-z-a-ab71dcefbbc95badf34dcb58bc9afceb"))))
 					})
 				})
 			})
@@ -391,7 +379,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 					BeforeEach(func() {
 						images = imageNames("x.x/y/z")
 						input = []byte(`image: "x.x/y/z/a"`)
-						registry = "r"
+						registry = "r.r"
 						user = "u"
 					})
 
@@ -404,12 +392,12 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 					BeforeEach(func() {
 						images = imageNames("x.x/y/z")
 						input = []byte("image: x.x/y/z/a")
-						registry = "r"
+						registry = "r.r"
 						user = "u"
 					})
 
 					It("maps the substring (a known limitation)", func() {
-						Expect(string(output)).To(Equal(string([]byte("image: r/u/z/a"))))
+						Expect(string(output)).To(Equal(string([]byte("image: r.r/u/y-z-622eedc03bbe568ed522e1e4903704b2/a"))))
 					})
 				})
 			})
@@ -418,7 +406,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 				BeforeEach(func() {
 					images = imageNames("x.x/y/z")
 					input = []byte("http://x.x/y/z")
-					registry = "r"
+					registry = "r.r"
 					user = "u"
 				})
 

@@ -17,10 +17,8 @@
 package core
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
-	"path"
+	"sort"
 	"strings"
 
 	"github.com/projectriff/riff/pkg/image"
@@ -33,7 +31,7 @@ type imageMapper struct {
 	replacer *strings.Replacer
 }
 
-func newImageMapper(mappedHost string, mappedUser string, images []image.Name, flatten bool) (*imageMapper, error) {
+func newImageMapper(mappedHost string, mappedUser string, images []image.Name) (*imageMapper, error) {
 	if err := containsAny(mappedHost, "/", `"`, " "); err != nil {
 		return nil, fmt.Errorf("invalid registry hostname: %v", err)
 	}
@@ -41,23 +39,22 @@ func newImageMapper(mappedHost string, mappedUser string, images []image.Name, f
 		return nil, fmt.Errorf("invalid user: %v", err)
 	}
 
-	var pathMapping pathMapping
-	if flatten {
-		pathMapping = flattenRepoPath
-	} else {
-		pathMapping = sanitiseRepoPath
-	}
+	// Sort images so that if one has a path which is a prefix of another's path, the image with the longer path
+	// appears first. This ensures that the correct string replacement is performed first.
+	sort.SliceStable(images, func(i, j int) bool {
+		return strings.HasPrefix(images[i].Path(), images[j].Path())
+	})
 
-	mapImg := mapImage(pathMapping)
+	mapImg := mapImage(flattenRepoPath)
 
 	replacements := []string{}
 	for _, img := range images {
-		mapped := mapImg(mappedHost, mappedUser, img.Path(), img)
+		mapped := mapImg(mappedHost, mappedUser, img)
 
 		for _, name := range img.Synonyms() {
 			fullImg := name.String()
-			replacements = append(replacements, quote(fullImg), quote(mapped))
-			replacements = append(replacements, spacePrefix(fullImg), spacePrefix(mapped))
+			replacements = append(replacements, quote(fullImg), quote(mapped.String()))
+			replacements = append(replacements, spacePrefix(fullImg), spacePrefix(mapped.String()))
 		}
 	}
 
@@ -72,60 +69,31 @@ func newIdentityImageMapper() *imageMapper {
 	}
 }
 
-type pathMapping func(string, string, image.Name) string
+func mapImage(pathMapping pathMapping) pathMapping {
+	name := func(mappedHost string, mappedUser string, originalImage image.Name) image.Name {
+		mappedPath := pathMapping(mappedHost, mappedUser, originalImage)
 
-func mapImage(pathMapping pathMapping) func(mappedHost string, mappedUser string, imgRepoPath string, originalImage image.Name) string {
-	return func(mappedHost string, mappedUser string, imgRepoPath string, originalImage image.Name) string {
-		// ensure local-only images are tagged (with something other than latest) to prevent docker
-		// later attempting to download from dev.local (which doesn't really exist)
-		mappedPath := pathMapping(imgRepoPath, mappedUser, originalImage)
-		if mappedHost == "dev.local" && !strings.Contains(mappedPath, ":") {
-			mappedPath = mappedPath + ":local"
-		}
-		return path.Join(mappedHost, mappedPath)
-	}
-}
-
-func sanitiseRepoPath(repoPath string, user string, originalImage image.Name) string {
-	repoPathElements := strings.SplitN(repoPath, "/", 2)
-	var mapped string
-	switch len(repoPathElements) {
-	case 1:
-		// prevent collisions
-		return flattenRepoPath(repoPath, user, originalImage)
-	default:
-		mapped = path.Join(user, repoPathElements[1])
+		newTag := ""
 		if tag := originalImage.Tag(); tag != "" {
-			mapped += ":" + tag
+			// preserve original tag
+			newTag = tag
+		} else if mappedPath.Host() == "dev.local" {
+			// ensure local-only images are tagged (with something other than latest) to prevent docker
+			// later attempting to download from dev.local (which doesn't really exist)
+			newTag = "local"
 		}
-		if digest := originalImage.Digest(); digest != image.EmptyDigest {
-			mapped += "@" + digest.String()
-		}
-	}
-	// Replace "@sha256:" since digests are not allowed as part of a docker tag
-	return strings.Replace(mapped, "@sha256:", "-", 1)
-}
 
-func flattenRepoPath(repoPath string, user string, originalImage image.Name) string {
-	hasher := md5.New()
-	hasher.Write([]byte(originalImage.String()))
-	return fmt.Sprintf("%s/%s-%s", user, imageBaseName(repoPath), hex.EncodeToString(hasher.Sum(nil)))
-}
-
-func imageBaseName(repoPath string) string {
-	var base string
-	digestPathComponents := strings.SplitN(repoPath, "@sha256:", 2)
-	if len(digestPathComponents) == 2 {
-		base = path.Base(digestPathComponents[0])
-	} else {
-		taggedPathComponents := strings.SplitN(repoPath, ":", 2)
-		if len(taggedPathComponents) == 2 {
-			base = path.Base(taggedPathComponents[0])
-		} else {
-			base = path.Base(repoPath)
+		if newTag != "" {
+			var err error
+			mappedPath, err = mappedPath.WithTag(newTag)
+			if err != nil {
+				panic(err) // should never occur
+			}
 		}
+
+		return mappedPath
 	}
-	return base
+	return name
 }
 
 func containsAny(s string, items ...string) error {
