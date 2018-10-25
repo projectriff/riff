@@ -48,7 +48,6 @@ type RelocateImagesOptions struct {
 	Registry     string
 	RegistryUser string
 	Images       string
-	Flatten      bool
 }
 
 type DownloadSystemOptions struct {
@@ -80,7 +79,7 @@ func createImageMapper(options RelocateImagesOptions) (*imageMapper, error) {
 		return nil, err
 	}
 
-	imageMapper, err := newImageMapper(options.Registry, options.RegistryUser, keys(imageManifest.Images), options.Flatten)
+	imageMapper, err := newImageMapper(options.Registry, options.RegistryUser, keys(imageManifest.Images))
 	if err != nil {
 		return nil, err
 	}

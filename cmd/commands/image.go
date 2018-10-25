@@ -117,8 +117,6 @@ func ImageRelocate(c *core.ImageClient) *cobra.Command {
 	command.Flags().StringVarP(&options.RegistryUser, "registry-user", "u", "", "user name for mapped images")
 	command.MarkFlagRequired("registry-user")
 
-	command.Flags().BoolVar(&options.Flatten, "flatten", false, "flatten image names (for registries that do not support hierarchical names)")
-
 	command.Flags().StringVarP(&options.Images, "images", "i", "", "path of an image manifest")
 	command.MarkFlagRequired("images")
 
