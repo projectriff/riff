@@ -76,7 +76,11 @@ func mapImage(pathMapping pathMapping) func(mappedHost string, mappedUser string
 		// later attempting to download from dev.local (which doesn't really exist)
 		mappedPath := pathMapping(imgRepoPath, mappedUser, originalImage)
 		if mappedHost == "dev.local" && !strings.Contains(mappedPath, ":") {
-			mappedPath = mappedPath + ":local"
+			mappedPath += ":local"
+		} else {
+			if tag := originalImage.Tag(); tag != "" {
+				mappedPath += ":" + tag
+			}
 		}
 		return path.Join(mappedHost, mappedPath)
 	}

@@ -691,7 +691,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        image: reg.org/user/proxyv2-20dc6a94cbee6d31af3259dac5e7d0e0
+        image: reg.org/user/proxyv2-20dc6a94cbee6d31af3259dac5e7d0e0:0.8.0
         imagePullPolicy: IfNotPresent
         name: ingressgateway
         ports:
@@ -1048,7 +1048,7 @@ metadata:
 apiVersion: v1
 data:
   logging.enable-var-log-collection: "false"
-  logging.fluentd-sidecar-image: reg.org/user/fluentd-elasticsearch-e71ae1e56d9a15bbcf26be734d13b608
+  logging.fluentd-sidecar-image: reg.org/user/fluentd-elasticsearch-e71ae1e56d9a15bbcf26be734d13b608:v2.0.4
   logging.fluentd-sidecar-output-config: |
     # Parse json log before sending to Elastic Search
     <filter **>

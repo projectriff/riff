@@ -283,7 +283,7 @@ image: %q`, mappedImage, mappedImage, mappedImage)))))
 				})
 
 				It("should perform the mapping", func() {
-					mappedImage := fmt.Sprintf("testregistry.com/testuser/fluentd-elasticsearch-e71ae1e56d9a15bbcf26be734d13b608")
+					mappedImage := "testregistry.com/testuser/fluentd-elasticsearch-e71ae1e56d9a15bbcf26be734d13b608:v2.0.4"
 					Expect(string(output)).To(Equal(string([]byte(fmt.Sprintf(`image: %q`, mappedImage)))))
 				})
 			})
