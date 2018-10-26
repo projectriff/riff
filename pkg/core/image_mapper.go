@@ -18,7 +18,6 @@ package core
 
 import (
 	"fmt"
-	"path"
 	"sort"
 	"strings"
 
@@ -50,12 +49,12 @@ func newImageMapper(mappedHost string, mappedUser string, images []image.Name) (
 
 	replacements := []string{}
 	for _, img := range images {
-		mapped := mapImg(mappedHost, mappedUser, img.Path(), img)
+		mapped := mapImg(mappedHost, mappedUser, img)
 
 		for _, name := range img.Synonyms() {
 			fullImg := name.String()
-			replacements = append(replacements, quote(fullImg), quote(mapped))
-			replacements = append(replacements, spacePrefix(fullImg), spacePrefix(mapped))
+			replacements = append(replacements, quote(fullImg), quote(mapped.String()))
+			replacements = append(replacements, spacePrefix(fullImg), spacePrefix(mapped.String()))
 		}
 	}
 
@@ -70,20 +69,31 @@ func newIdentityImageMapper() *imageMapper {
 	}
 }
 
-func mapImage(pathMapping pathMapping) func(mappedHost string, mappedUser string, imgRepoPath string, originalImage image.Name) string {
-	return func(mappedHost string, mappedUser string, imgRepoPath string, originalImage image.Name) string {
-		// ensure local-only images are tagged (with something other than latest) to prevent docker
-		// later attempting to download from dev.local (which doesn't really exist)
-		mappedPath := pathMapping(imgRepoPath, mappedUser, originalImage)
-		if mappedHost == "dev.local" && !strings.Contains(mappedPath, ":") {
-			mappedPath += ":local"
-		} else {
-			if tag := originalImage.Tag(); tag != "" {
-				mappedPath += ":" + tag
+func mapImage(pathMapping pathMapping) pathMapping {
+	name := func(mappedHost string, mappedUser string, originalImage image.Name) image.Name {
+		mappedPath := pathMapping(mappedHost, mappedUser, originalImage)
+
+		newTag := ""
+		if tag := originalImage.Tag(); tag != "" {
+			// preserve original tag
+			newTag = tag
+		} else if mappedPath.Host() == "dev.local" {
+			// ensure local-only images are tagged (with something other than latest) to prevent docker
+			// later attempting to download from dev.local (which doesn't really exist)
+			newTag = "local"
+		}
+
+		if newTag != "" {
+			var err error
+			mappedPath, err = mappedPath.WithTag(newTag)
+			if err != nil {
+				panic(err) // should never occur
 			}
 		}
-		return path.Join(mappedHost, mappedPath)
+
+		return mappedPath
 	}
+	return name
 }
 
 func containsAny(s string, items ...string) error {

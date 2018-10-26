@@ -225,10 +225,10 @@ spec:
         - -stderrthreshold
         - INFO
         - -creds-image
-        - reg.org/user/creds-init-e0551882498e6397dbc2e59a99bf3012
+        - reg.org/user/knative-releases-github.com-knative-build-cmd-creds-init-e0551882498e6397dbc2e59a99bf3012
         - -git-image
-        - reg.org/user/git-init-7b7b673684f76173b8ad3d30053c4e53
-        image: reg.org/user/controller-bfad3766247657529a87f0ddf16dbeed
+        - reg.org/user/knative-releases-github.com-knative-build-cmd-git-init-7b7b673684f76173b8ad3d30053c4e53
+        image: reg.org/user/knative-releases-github.com-knative-build-cmd-controller-bfad3766247657529a87f0ddf16dbeed
         name: build-controller
       serviceAccountName: build-controller
 ---
@@ -252,7 +252,7 @@ spec:
         - -logtostderr
         - -stderrthreshold
         - INFO
-        image: reg.org/user/webhook-79fbc83d8e24379b267b66a1ff921ecb
+        image: reg.org/user/knative-releases-github.com-knative-build-cmd-webhook-79fbc83d8e24379b267b66a1ff921ecb
         name: build-webhook
         volumeMounts:
         - mountPath: /etc/config-logging
@@ -691,7 +691,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        image: reg.org/user/proxyv2-20dc6a94cbee6d31af3259dac5e7d0e0:0.8.0
+        image: reg.org/user/istio-proxyv2-20dc6a94cbee6d31af3259dac5e7d0e0:0.8.0
         imagePullPolicy: IfNotPresent
         name: ingressgateway
         ports:
@@ -898,7 +898,7 @@ spec:
       - args:
         - -logtostderr=false
         - -stderrthreshold=FATAL
-        image: reg.org/user/activator-5cc313d653b28219f4e19c493e8bf4c6
+        image: reg.org/user/knative-releases-github.com-knative-serving-cmd-activator-5cc313d653b28219f4e19c493e8bf4c6
         name: activator
         ports:
         - containerPort: 8080
@@ -947,7 +947,7 @@ spec:
         app: autoscaler
     spec:
       containers:
-      - image: reg.org/user/autoscaler-92b6a2e1f9e5f995e90cfa86a7cd039c
+      - image: reg.org/user/knative-releases-github.com-knative-serving-cmd-autoscaler-92b6a2e1f9e5f995e90cfa86a7cd039c
         name: autoscaler
         ports:
         - containerPort: 8080
@@ -989,7 +989,7 @@ metadata:
 ---
 apiVersion: v1
 data:
-  queueSidecarImage: reg.org/user/queue-c1d51575dab2e8084e766e7b4e571a91
+  queueSidecarImage: reg.org/user/knative-releases-github.com-knative-serving-cmd-queue-c1d51575dab2e8084e766e7b4e571a91
   registriesSkippingTagResolving: ko.local,dev.local
 kind: ConfigMap
 metadata:
@@ -1113,7 +1113,7 @@ spec:
         app: controller
     spec:
       containers:
-      - image: reg.org/user/controller-77e8afbbcb188941b5d5c5856dd9b318
+      - image: reg.org/user/knative-releases-github.com-knative-serving-cmd-controller-77e8afbbcb188941b5d5c5856dd9b318
         name: controller
         ports:
         - containerPort: 9090
@@ -1143,7 +1143,7 @@ spec:
         role: webhook
     spec:
       containers:
-      - image: reg.org/user/webhook-cf1afbbf00c53462afd5737fd5f6e9ec
+      - image: reg.org/user/knative-releases-github.com-knative-serving-cmd-webhook-cf1afbbf00c53462afd5737fd5f6e9ec
         name: webhook
         volumeMounts:
         - mountPath: /etc/config-logging

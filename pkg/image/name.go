@@ -18,6 +18,7 @@
 package image
 
 import (
+	"fmt"
 	"path"
 	"strings"
 
@@ -63,6 +64,11 @@ func (img Name) String() string {
 	return img.ref.String()
 }
 
+func (img Name) Host() string {
+	h, _ := img.parseHostPath()
+	return h
+}
+
 func (img Name) Path() string {
 	_, p := img.parseHostPath()
 	return p
@@ -73,6 +79,14 @@ func (img Name) Tag() string {
 		return taggedRef.Tag()
 	}
 	return ""
+}
+
+func (img Name) WithTag(tag string) (Name, error) {
+	namedTagged, err := reference.WithTag(img.ref, tag)
+	if err != nil {
+		return EmptyName, fmt.Errorf("Cannot apply tag %s to image.Name %v: %v", tag, img, err)
+	}
+	return Name{namedTagged}, nil
 }
 
 func (img Name) Digest() Digest {
