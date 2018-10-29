@@ -58,11 +58,11 @@ func (pd *processDocker) PushImage(name string) error {
 
 func (pd *processDocker) PullImage(name string, directory string) (digest image.Id, err error) {
 	if err := pd.exec(10*time.Minute, "pull", name); err != nil {
-		return image.EmptyId, err
+		return image.EmptyId, fmt.Errorf("error pulling image %s: %v", name, err)
 	}
 	b := new(bytes.Buffer)
 	if err := pd.execWithStreams(pd.stdin, b, pd.stderr, 1*time.Second, "inspect", "--format='{{.Id}}'", name); err != nil {
-		return image.EmptyId, err
+		return image.EmptyId, fmt.Errorf("error inspecting image %s: %v", name, err)
 	}
 	if offset := strings.LastIndex(b.String(), "'sha256:"); offset == -1 {
 		return image.EmptyId, fmt.Errorf("unable to extract digest of image %q. Command output was %q", name, b.String())
@@ -70,7 +70,7 @@ func (pd *processDocker) PullImage(name string, directory string) (digest image.
 		// chop single quote at start, single quote and \n at end
 		digest = image.NewId(b.String()[offset+len("'") : len(b.String())-len("'\n")])
 		if err := pd.exec(5*time.Minute, "image", "save", "-o", filepath.Join(directory, digest.String()), name); err != nil {
-			return image.EmptyId, err
+			return image.EmptyId, fmt.Errorf("error saving image %s: %v", name, err)
 		}
 		return digest, nil
 	}

@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 
@@ -38,6 +39,7 @@ import (
 const (
 	outputFilePermissions = 0644
 	outputDirPermissions  = 0755
+	defaultDistroFilename = "distro.tgz"
 )
 
 type RelocateImagesOptions struct {
@@ -51,6 +53,11 @@ type RelocateImagesOptions struct {
 }
 
 type DownloadSystemOptions struct {
+	Manifest string
+	Output   string
+}
+
+type CreateDistroOptions struct {
 	Manifest string
 	Output   string
 }
@@ -69,8 +76,61 @@ func (c *imageClient) RelocateImages(options RelocateImagesOptions) error {
 }
 
 func (c *imageClient) DownloadSystem(options DownloadSystemOptions) error {
-	// relocate the manifest mapping no images and without an image manifest
-	return c.relocateManifest(options.Manifest, newIdentityImageMapper(), "", options.Output)
+	return c.downloadSystem(options.Manifest, options.Output)
+}
+
+func (c *imageClient) downloadSystem(manifest string, output string) error {
+	return c.relocateManifest(manifest, newIdentityImageMapper(), "", output)
+}
+
+func (c *imageClient) CreateDistro(options CreateDistroOptions) error {
+	work, err := ioutil.TempDir("", "create_distro_work")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(work)
+
+	fmt.Println("Downloading manifest and kubernetes configuration files...")
+	err = c.downloadSystem(options.Manifest, work)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("\nScanning kubernetes configuration files for images...")
+	imageManifestPath := filepath.Join(work, "image-manifest.yaml")
+	err = c.ListImages(ListImagesOptions{
+		Manifest: filepath.Join(work, "manifest.yaml"),
+		Images:   imageManifestPath,
+		NoCheck:  true, // downloading images will check they are valid
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("\nDownloading images...")
+	err = c.PullImages(PullImagesOptions{
+		Images: imageManifestPath,
+		Output: work,
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("\nCreating archive...")
+	err = createArchive(work, options.Output)
+	return nil
+}
+
+func createArchive(dirPath string, archivePath string) error {
+	// If archivePath refers to a directory, default the file name. Otherwise create the directory portion of the path
+	// if it doesn't already exist.
+	if fi, err := os.Stat(archivePath); err == nil && fi.IsDir() {
+		archivePath = filepath.Join(archivePath, defaultDistroFilename)
+	} else if err := os.MkdirAll(filepath.Dir(archivePath), outputDirPermissions); err != nil {
+		return err
+	}
+	cmd := exec.Command("tar", "cvzf", archivePath, "-C", dirPath, ".")
+	return cmd.Run()
 }
 
 func createImageMapper(options RelocateImagesOptions) (*imageMapper, error) {

@@ -19,12 +19,13 @@ package resource
 
 import (
 	"fmt"
-	"github.com/ghodss/yaml"
 	"strings"
+
+	"github.com/ghodss/yaml"
 )
 
 func ListImages(resource string, baseDir string) ([]string, error) {
-	fmt.Printf("Searching %s\n", resource)
+	fmt.Printf("Scanning %s\n", resource)
 	contents, err := Load(resource, baseDir)
 	if err != nil {
 		return nil, err

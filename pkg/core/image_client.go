@@ -39,6 +39,7 @@ type ImageClient interface {
 	RelocateImages(options RelocateImagesOptions) error
 	DownloadSystem(options DownloadSystemOptions) error
 	ListImages(options ListImagesOptions) error
+	CreateDistro(options CreateDistroOptions) error
 }
 
 type PushImagesOptions struct {

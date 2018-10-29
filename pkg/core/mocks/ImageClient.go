@@ -10,6 +10,20 @@ type ImageClient struct {
 	mock.Mock
 }
 
+// CreateDistro provides a mock function with given fields: options
+func (_m *ImageClient) CreateDistro(options core.CreateDistroOptions) error {
+	ret := _m.Called(options)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(core.CreateDistroOptions) error); ok {
+		r0 = rf(options)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DownloadSystem provides a mock function with given fields: options
 func (_m *ImageClient) DownloadSystem(options core.DownloadSystemOptions) error {
 	ret := _m.Called(options)

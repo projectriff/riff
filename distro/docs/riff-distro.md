@@ -18,6 +18,7 @@ See https://projectriff.io and https://github.com/knative/docs
 ### SEE ALSO
 
 * [riff-distro completion](riff-distro_completion.md)	 - Generate shell completion scripts
+* [riff-distro create](riff-distro_create.md)	 - Create a riff-distro distribution.
 * [riff-distro image](riff-distro_image.md)	 - Interact with docker images
 * [riff-distro system](riff-distro_system.md)	 - Interact with riff-distro systems
 * [riff-distro version](riff-distro_version.md)	 - Print version information about riff-distro

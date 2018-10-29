@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
+
+	"github.com/projectriff/riff/pkg/test_support"
 
 	"github.com/projectriff/riff/pkg/image_manifest"
 
@@ -426,6 +429,48 @@ var _ = Describe("SystemDownload", func() {
 			})
 
 		})
+	})
+})
+
+var _ = Describe("createArchive", func() {
+	var work string
+
+	BeforeEach(func() {
+		work = test_support.CreateTempDir()
+	})
+
+	AfterEach(func() {
+		test_support.CleanupDirs(GinkgoT(), work)
+	})
+
+	It("should create an archive containing the correct files", func() {
+		tarfile := filepath.Join(work, "test.tgz")
+		err := createArchive(filepath.Join("fixtures", "archive"), tarfile)
+		Expect(err).NotTo(HaveOccurred())
+		cmd := exec.Command("tar", "xzf", tarfile, "-C", work)
+		Expect(cmd.Run()).To(Succeed())
+		_, err = os.Stat(filepath.Join(work, "file"))
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("should create the directory of the archive", func() {
+		tarfile := filepath.Join(work, "newdir", "test.tgz")
+		err := createArchive(filepath.Join("fixtures", "archive"), tarfile)
+		Expect(err).NotTo(HaveOccurred())
+		cmd := exec.Command("tar", "xzf", tarfile, "-C", work)
+		Expect(cmd.Run()).To(Succeed())
+		_, err = os.Stat(filepath.Join(work, "file"))
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("should default the name of the archive", func() {
+		err := createArchive(filepath.Join("fixtures", "archive"), work)
+		Expect(err).NotTo(HaveOccurred())
+		tarfile := filepath.Join(work, "distro.tgz")
+		cmd := exec.Command("tar", "xzf", tarfile, "-C", work)
+		Expect(cmd.Run()).To(Succeed())
+		_, err = os.Stat(filepath.Join(work, "file"))
+		Expect(err).NotTo(HaveOccurred())
 	})
 })
 

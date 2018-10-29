@@ -70,6 +70,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	rootCmd.AddCommand(
 		image,
 		system,
+        DistroCreate(&imageClient),
 		commands.Version(),
 		commands.Docs(rootCmd, commands.LocalFs{}),
 		commands.Completion(rootCmd),
