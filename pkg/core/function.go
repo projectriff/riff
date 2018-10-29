@@ -327,6 +327,11 @@ func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int6
 						someStateIsUnknown = true
 						break
 					}
+					// ignore any "scaled to zero" status messages - wait for the revision to start
+					if strings.Contains(c.Message, "The target is not receiving traffic") {
+						someStateIsUnknown = true
+						break
+					}
 				}
 			}
 			if !someStateIsUnknown {
