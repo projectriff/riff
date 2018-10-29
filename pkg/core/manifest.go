@@ -49,13 +49,13 @@ var manifests = map[string]*Manifest{
 	"stable": &Manifest{
 		ManifestVersion: manifestVersion_0_1,
 		Istio: []string{
-			"https://storage.googleapis.com/knative-releases/serving/previous/v20181009-38c0d50/istio.yaml",
+			"https://storage.googleapis.com/knative-releases/serving/previous/v20181029-1d5c521/istio.yaml",
 		},
 		Knative: []string{
-			"https://storage.googleapis.com/knative-releases/build/previous/v20181009-62d2284/release.yaml",
-			"https://storage.googleapis.com/knative-releases/serving/previous/v20181009-38c0d50/serving.yaml",
-			"https://storage.googleapis.com/knative-releases/eventing/previous/v20181009-95ed4b7/release.yaml",
-			"https://storage.googleapis.com/knative-releases/eventing/previous/v20181009-95ed4b7/release-clusterbus-stub.yaml",
+			"https://storage.googleapis.com/knative-releases/build/previous/v20181029-e9f5b24/release.yaml",
+			"https://storage.googleapis.com/knative-releases/serving/previous/v20181029-1d5c521/serving.yaml",
+			"https://storage.googleapis.com/knative-releases/eventing/previous/v20181029-642bfc1/release.yaml",
+			"https://storage.googleapis.com/knative-releases/eventing/previous/v20181029-642bfc1/release-clusterbus-stub.yaml",
 		},
 		Namespace: []string{
 			"https://storage.googleapis.com/riff-releases/previous/riff-build/riff-build-0.1.0.yaml",
