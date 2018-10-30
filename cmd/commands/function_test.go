@@ -19,7 +19,6 @@ package commands_test
 
 import (
 	"fmt"
-
 	"strings"
 
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
@@ -33,6 +32,18 @@ import (
 )
 
 var _ = Describe("The riff function create command", func() {
+	var (
+		invokers   map[string]string
+		buildpacks map[string]string
+	)
+	BeforeEach(func() {
+		invokers = map[string]string{
+			"node": "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
+		}
+		buildpacks = map[string]string{
+			"java": "projectriff/buildpack",
+		}
+	})
 	Context("when given wrong args or flags", func() {
 		var (
 			mockClient core.Client
@@ -40,7 +51,7 @@ var _ = Describe("The riff function create command", func() {
 		)
 		BeforeEach(func() {
 			mockClient = nil
-			fc = commands.FunctionCreate(&mockClient)
+			fc = commands.FunctionCreate(&mockClient, invokers, buildpacks)
 		})
 		It("should fail with no args", func() {
 			fc.SetArgs([]string{})
@@ -52,7 +63,7 @@ var _ = Describe("The riff function create command", func() {
 			err := fc.Execute()
 			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
 
-			fc = commands.FunctionCreate(&mockClient)
+			fc = commands.FunctionCreate(&mockClient, invokers, buildpacks)
 			fc.SetArgs([]string{"node", "invålid"})
 			err = fc.Execute()
 			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
@@ -92,7 +103,7 @@ var _ = Describe("The riff function create command", func() {
 			client = new(mocks.Client)
 			asMock = client.(*mocks.Client)
 
-			fc = commands.FunctionCreate(&client)
+			fc = commands.FunctionCreate(&client, invokers, buildpacks)
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
