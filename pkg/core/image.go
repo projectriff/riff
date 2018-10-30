@@ -239,9 +239,7 @@ func relocateImageManifest(imageManifestPath string, mapper *imageMapper, output
 }
 
 func applyMapper(name image.Name, mapper *imageMapper) (image.Name, error) {
-	// TODO: rework imageMapper so it can directly map an image.Name without resorting to the use of strings in this case
-	mapped := string(mapper.mapImages([]byte(fmt.Sprintf("%q", name.String()))))
-	return image.NewName(mapped[1 : len(mapped)-1])
+	return mapper.mapImage(name), nil
 }
 
 func findNonCollidingFlattener(manifest *Manifest) uriFlattener {
