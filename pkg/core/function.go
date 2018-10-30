@@ -327,6 +327,12 @@ func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int6
 						someStateIsUnknown = true
 						break
 					}
+					// ignore any "scaled to zero" status messages - wait for the revision to start
+					// TODO: remove this once https://github.com/knative/serving/issues/2346 is resolved
+					if strings.Contains(c.Message, "The target is not receiving traffic") {
+						someStateIsUnknown = true
+						break
+					}
 				}
 			}
 			if !someStateIsUnknown {
