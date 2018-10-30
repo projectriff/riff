@@ -27,7 +27,9 @@ import (
 // imageMapper does substring replacement of images with minimal delimiter checking.
 // It does not understand the full (YAML) syntax of the input string.
 // It certainly does not understand the semantics of the input string.
+// imageMapper also maps individual images without resorting to the use of strings.
 type imageMapper struct {
+	mapping  map[image.Name]image.Name
 	replacer *strings.Replacer
 }
 
@@ -48,8 +50,10 @@ func newImageMapper(mappedHost string, mappedUser string, images []image.Name) (
 	mapImg := mapImage(flattenRepoPath)
 
 	replacements := []string{}
+	mapping := make(map[image.Name]image.Name)
 	for _, img := range images {
 		mapped := mapImg(mappedHost, mappedUser, img)
+		mapping[img] = mapped
 
 		for _, name := range img.Synonyms() {
 			fullImg := name.String()
@@ -59,6 +63,7 @@ func newImageMapper(mappedHost string, mappedUser string, images []image.Name) (
 	}
 
 	return &imageMapper{
+		mapping:  mapping,
 		replacer: strings.NewReplacer(replacements...),
 	}, nil
 }
@@ -115,4 +120,11 @@ func spacePrefix(image string) string {
 
 func (m *imageMapper) mapImages(input []byte) []byte {
 	return []byte(m.replacer.Replace(string(input)))
+}
+
+func (m *imageMapper) mapImage(img image.Name) image.Name {
+	if mapped, ok := m.mapping[img]; ok {
+		return mapped
+	}
+	return img
 }
