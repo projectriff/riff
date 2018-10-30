@@ -20,6 +20,7 @@ package commands
 import (
 	"github.com/projectriff/riff/cmd/commands"
 	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
 )
 
@@ -46,8 +47,8 @@ func ImagePull(c *core.ImageClient) *cobra.Command {
 		Short: "Pull all docker images referenced in a distribution image-manifest and write them to disk",
 		Long: "Pull the set of images identified by the provided image manifest from remote registries, in preparation of an offline distribution tarball.\n\n" +
 			"NOTE: This command requires the `docker` command line tool, as well as a (local) docker daemon and will load and tag the images using that daemon.",
-		Example: `  riff-distro image pull --images=riff-distro-xx/image-manifest.yaml`,
-		Args: cobra.ExactArgs(imagePullNumberOfArgs),
+		Example: `  ` + env.Cli.Name + ` image pull --images=` + env.Cli.Name + `-xx/image-manifest.yaml`,
+		Args:    cobra.ExactArgs(imagePullNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*c).PullImages(options)
 			if err != nil {
@@ -77,12 +78,12 @@ func ImageList(c *core.ImageClient) *cobra.Command {
 	*/
 	command := &cobra.Command{
 		Use:   "list",
-		Short: "List some or all of the images for a riff manifest",
-		Long: "Search a riff manifest and associated kubernetes configuration files for image names and create an image manifest listing the images.\n\n" +
+		Short: "List some or all of the images for a " + env.Cli.Name + " manifest",
+		Long: "Search a " + env.Cli.Name + " manifest and associated kubernetes configuration files for image names and create an image manifest listing the images.\n\n" +
 			"It does not guarantee to find all referenced images and so the resultant image manifest needs to be validated, for example by manual inspection or testing.\n\n" +
 			"NOTE: This command requires the `docker` command line tool to check the images.",
-		Example: `  riff-distro image list --manifest=path/to/manifest.yaml --images=path/for/image-manifest.yaml`,
-		Args: cobra.ExactArgs(imageListNumberOfArgs),
+		Example: `  ` + env.Cli.Name + ` image list --manifest=path/to/manifest.yaml --images=path/for/image-manifest.yaml`,
+		Args:    cobra.ExactArgs(imageListNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*c).ListImages(options)
 			if err != nil {

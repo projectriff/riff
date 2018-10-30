@@ -1,10 +1,10 @@
 ## riff-distro image list
 
-List some or all of the images for a riff manifest
+List some or all of the images for a riff-distro manifest
 
 ### Synopsis
 
-Search a riff manifest and associated kubernetes configuration files for image names and create an image manifest listing the images.
+Search a riff-distro manifest and associated kubernetes configuration files for image names and create an image manifest listing the images.
 
 It does not guarantee to find all referenced images and so the resultant image manifest needs to be validated, for example by manual inspection or testing.
 

@@ -15,31 +15,30 @@
  *
  */
 
-package commands
+package env
 
-import (
-	"fmt"
-
-	"github.com/projectriff/riff/pkg/env"
-	"github.com/spf13/cobra"
+var (
+	cli_name     = "riff"
+	cli_version  = "unknown"
+	cli_gitsha   = "unknown sha"
+	cli_gitdirty = ""
 )
 
-const (
-	versionNumberOfArgs = iota
-)
+type CliEnv struct {
+	Name     string
+	Version  string
+	GitSha   string
+	GitDirty string
+}
 
-func Version() *cobra.Command {
-	return &cobra.Command{
-		Use:   "version",
-		Short: "Print version information about " + env.Cli.Name,
-		Args:  cobra.ExactArgs(versionNumberOfArgs),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			dirtyMsg := ""
-			if env.Cli.GitDirty != "" {
-				dirtyMsg = ", with local modifications"
-			}
-			fmt.Fprintf(cmd.OutOrStdout(), "Version\n  %s cli: %s (%s%s)\n", env.Cli.Name, env.Cli.Version, env.Cli.GitSha, dirtyMsg)
-			return nil
-		},
+var Cli CliEnv
+
+func init() {
+	// must be created inside the init function to pickup build specific params
+	Cli = CliEnv{
+		Name:     cli_name,
+		Version:  cli_version,
+		GitSha:   cli_gitsha,
+		GitDirty: cli_gitdirty,
 	}
 }

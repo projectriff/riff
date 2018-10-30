@@ -1,12 +1,12 @@
 ## riff-distro system download
 
-Download a riff system.
+Download a riff-distro system.
 
 ### Synopsis
 
-Download the kubernetes configuration files for a given riff manifest.
+Download the kubernetes configuration files for a given riff-distro manifest.
 
-Use the `--output` flag to specify the path of a directory to contain the resultant kubernetes configuration files and rewritten riff manifest.The riff manifest is rewritten to refer to the downloaded configuration files.
+Use the `--output` flag to specify the path of a directory to contain the resultant kubernetes configuration files and rewritten riff-distro manifest.The riff-distro manifest is rewritten to refer to the downloaded configuration files.
 
 
 ```
@@ -16,7 +16,7 @@ riff-distro system download [flags]
 ### Examples
 
 ```
-  riff system download --manifest=path/to/manifest.yaml --output=path/to/output/dir
+  riff-distro system download --manifest=path/to/manifest.yaml --output=path/to/output/dir
 ```
 
 ### Options
@@ -29,5 +29,5 @@ riff-distro system download [flags]
 
 ### SEE ALSO
 
-* [riff-distro system](riff-distro_system.md)	 - Interact with riff systems
+* [riff-distro system](riff-distro_system.md)	 - Interact with riff-distro systems
 

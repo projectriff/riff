@@ -5,9 +5,10 @@ GO_SOURCES = $(shell find . -type f -name '*.go')
 VERSION ?= $(shell cat VERSION)
 GITSHA = $(shell git rev-parse HEAD)
 GITDIRTY = $(shell git diff-index --quiet HEAD -- || echo "dirty")
-LDFLAGS_VERSION = -X github.com/projectriff/riff/cmd/commands.cli_version=$(VERSION) \
-				  -X github.com/projectriff/riff/cmd/commands.cli_gitsha=$(GITSHA) \
-				  -X github.com/projectriff/riff/cmd/commands.cli_gitdirty=$(GITDIRTY)
+LDFLAGS_VERSION = -X github.com/projectriff/riff/pkg/env.cli_name=riff \
+				  -X github.com/projectriff/riff/pkg/env.cli_version=$(VERSION) \
+				  -X github.com/projectriff/riff/pkg/env.cli_gitsha=$(GITSHA) \
+				  -X github.com/projectriff/riff/pkg/env.cli_gitdirty=$(GITDIRTY)
 GOBIN ?= $(shell go env GOPATH)/bin
 
 all: build test docs

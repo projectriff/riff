@@ -20,13 +20,14 @@ package commands
 import (
 	"github.com/projectriff/riff/cmd/commands"
 	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
 )
 
 func System() *cobra.Command {
 	return &cobra.Command{
 		Use:   "system",
-		Short: "Interact with riff systems",
+		Short: "Interact with " + env.Cli.Name + " systems",
 	}
 }
 
@@ -35,12 +36,12 @@ func SystemDownload(c *core.ImageClient) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "download",
-		Short: "Download a riff system.",
-		Long: "Download the kubernetes configuration files for a given riff manifest.\n\n" +
+		Short: "Download a " + env.Cli.Name + " system.",
+		Long: "Download the kubernetes configuration files for a given " + env.Cli.Name + " manifest.\n\n" +
 			"Use the `--output` flag to specify the path of a " +
-			"directory to contain the resultant kubernetes configuration files and rewritten riff manifest." +
-			"The riff manifest is rewritten to refer to the downloaded configuration files.\n",
-		Example: `  riff system download --manifest=path/to/manifest.yaml --output=path/to/output/dir`,
+			"directory to contain the resultant kubernetes configuration files and rewritten " + env.Cli.Name + " manifest." +
+			"The " + env.Cli.Name + " manifest is rewritten to refer to the downloaded configuration files.\n",
+		Example: `  ` + env.Cli.Name + ` system download --manifest=path/to/manifest.yaml --output=path/to/output/dir`,
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*c).DownloadSystem(options)

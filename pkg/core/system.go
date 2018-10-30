@@ -21,11 +21,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/projectriff/riff/pkg/resource"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/projectriff/riff/pkg/env"
+	"github.com/projectriff/riff/pkg/resource"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -126,12 +128,12 @@ func (kc *kubectlClient) applyRelease(release string, options SystemInstallOptio
 
 To fix this you need to:
  1. Delete the current failed installation using:
-      riff system uninstall --istio --force
+      ` + env.Cli.Name + ` system uninstall --istio --force
  2. Give the user account used for installation cluster-admin permissions, you can use the following command:
       kubectl create clusterrolebinding cluster-admin-binding \
         --clusterrole=cluster-admin \
         --user=<install-user>
- 3. Re-install riff
+ 3. Re-install ` + env.Cli.Name + `
 
 `)
 		}
@@ -152,10 +154,10 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 		return false, err
 	}
 	if knativeNsCount == 0 {
-		fmt.Print("No Knative components for riff found\n")
+		fmt.Print("No Knative components for " + env.Cli.Name + " found\n")
 	} else {
 		if !options.Force {
-			answer, err := confirm("Are you sure you want to uninstall the riff system?")
+			answer, err := confirm("Are you sure you want to uninstall the " + env.Cli.Name + " system?")
 			if err != nil {
 				return false, err
 			}
@@ -163,7 +165,7 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 				return false, nil
 			}
 		}
-		fmt.Print("Removing Knative for riff components\n")
+		fmt.Print("Removing Knative for " + env.Cli.Name + " components\n")
 		err = deleteCrds(kc, "knative.dev")
 		if err != nil {
 			return false, err

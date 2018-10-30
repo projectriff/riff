@@ -18,11 +18,13 @@ package commands
 
 import (
 	"fmt"
-	"github.com/projectriff/riff/pkg/fileutils"
-	"github.com/projectriff/riff/pkg/resource"
 	"os"
 	"os/user"
 	"strings"
+
+	"github.com/projectriff/riff/pkg/env"
+	"github.com/projectriff/riff/pkg/fileutils"
+	"github.com/projectriff/riff/pkg/resource"
 
 	"github.com/projectriff/riff/pkg/docker"
 
@@ -89,7 +91,7 @@ func CreateAndWireRootCommand() *cobra.Command {
 	var imageClient core.ImageClient
 
 	rootCmd := &cobra.Command{
-		Use:   "riff",
+		Use:   env.Cli.Name,
 		Short: "Commands for creating and managing function resources",
 		Long: `riff is for functions.
 

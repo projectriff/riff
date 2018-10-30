@@ -17,14 +17,17 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
 )
 
 func Namespace() *cobra.Command {
 	return &cobra.Command{
 		Use:   "namespace",
-		Short: "Manage namespaces used for riff resources",
+		Short: fmt.Sprintf("Manage namespaces used for %s resources", env.Cli.Name),
 	}
 }
 
@@ -38,8 +41,8 @@ func NamespaceInit(kc *core.KubectlClient) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:     "init",
-		Short:   "initialize riff resources in the namespace",
-		Example: `  riff namespace init default --secret build-secret`,
+		Short:   "initialize " + env.Cli.Name + " resources in the namespace",
+		Example: `  ` + env.Cli.Name + ` namespace init default --secret build-secret`,
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(namespaceInitNumberOfArgs),
 			AtPosition(namespaceInitNameIndex, ValidName()),
