@@ -15,7 +15,7 @@ riff-distro completion [bash|zsh] [flags]
 ```
 To install completion for bash, assuming you have `bash-completion` installed:
 
-    riff completion bash > /etc/bash_completion.d/riff
+    riff-distro completion bash > /etc/bash_completion.d/riff-distro
 
 or wherever your `bash_completion.d` is, for example `$(brew --prefix)/etc/bash_completion.d` if using homebrew.
 

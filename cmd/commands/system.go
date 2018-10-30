@@ -18,6 +18,7 @@ package commands
 
 import (
 	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
 )
 
@@ -41,8 +42,8 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "install",
-		Short: "Install riff and Knative system components",
-		Long: "Install riff and Knative system components.\n" +
+		Short: "Install " + env.Cli.Name + " and Knative system components",
+		Long: "Install " + env.Cli.Name + " and Knative system components.\n" +
 			"\nIf an `istio-system` namespace isn't found, it will be created and Istio components will be installed. " +
 			"\nUse the `--node-port` flag when installing on Minikube and other clusters that don't support an external load balancer. " +
 			"\nUse the `--manifest` flag to specify the path or URL of a manifest file which provides the URLs of the kubernetes configuration files of the " +
@@ -57,7 +58,7 @@ func SystemInstall(kc *core.KubectlClient) *cobra.Command {
     - https://path/to/eventing-release.yaml
     - https://path/to/stub-bus-release.yaml
     namespace:
-    - https://path/to/riff-buildtemplate-release.yaml
+    - https://path/to/buildtemplate-release.yaml
 ` +
 			"\nNote: relative file paths or http/https URLs may be used in the manifest.",
 		Args: cobra.ExactArgs(systemInstallNumberOfArgs),
@@ -88,10 +89,10 @@ func SystemUninstall(kc *core.KubectlClient) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:     "uninstall",
-		Short:   "Remove riff and Knative system components",
-		Long:    "Remove riff and Knative system components.\n\nUse the `--istio` flag to also remove Istio components.",
-		Example: `  riff system uninstall`,
-		Args: cobra.ExactArgs(systemUninstallNumberOfArgs),
+		Short:   "Remove " + env.Cli.Name + " and Knative system components",
+		Long:    "Remove " + env.Cli.Name + " and Knative system components.\n\nUse the `--istio` flag to also remove Istio components.",
+		Example: `  ` + env.Cli.Name + ` system uninstall`,
+		Args:    cobra.ExactArgs(systemUninstallNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			complete, err := (*kc).SystemUninstall(options)
 			if err != nil {

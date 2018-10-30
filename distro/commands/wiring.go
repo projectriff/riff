@@ -18,10 +18,12 @@
 package commands
 
 import (
-	"github.com/projectriff/riff/pkg/fileutils"
-	"github.com/projectriff/riff/pkg/resource"
 	"io/ioutil"
 	"os"
+
+	"github.com/projectriff/riff/pkg/env"
+	"github.com/projectriff/riff/pkg/fileutils"
+	"github.com/projectriff/riff/pkg/resource"
 
 	"github.com/projectriff/riff/cmd/commands"
 
@@ -36,11 +38,11 @@ func DistroCreateAndWireRootCommand() *cobra.Command {
 	var imageClient core.ImageClient
 
 	rootCmd := &cobra.Command{
-		Use:   "riff-distro",
+		Use:   env.Cli.Name,
 		Short: "Commands for creating a riff distribution",
 		Long: `riff is for functions.
 
-riff is a CLI for functions on Knative.
+` + env.Cli.Name + ` is a CLI for functions on Knative.
 See https://projectriff.io and https://github.com/knative/docs`,
 		SilenceErrors:              true, // We'll print errors ourselves (after usage rather than before)
 		DisableAutoGenTag:          true,
@@ -68,8 +70,8 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	rootCmd.AddCommand(
 		image,
 		system,
-		Version(),
-		DistroDocs(rootCmd, commands.LocalFs{}),
+		commands.Version(),
+		commands.Docs(rootCmd, commands.LocalFs{}),
 		commands.Completion(rootCmd),
 	)
 

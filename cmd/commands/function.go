@@ -18,8 +18,11 @@ package commands
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
 )
 
@@ -56,21 +59,27 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 
 	flagsValidator := AtLeastOneOf("git-repo", "local-path")
 
+	invokerNames := []string{}
+	for n := range buildpacks {
+		invokerNames = append(invokerNames, fmt.Sprintf("- '%s': buildpack based\n", n))
+	}
+	for n := range invokers {
+		invokerNames = append(invokerNames, fmt.Sprintf("- '%s'\n", n))
+	}
+	sort.Strings(invokerNames)
+
 	command := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new function resource",
 		Long: "Create a new function resource from the content of the provided Git repo/revision or local source.\n" +
 			"\nThe INVOKER arg defines the language runtime and function invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function. The following invokers are available:\n\n" +
-			"- 'java': uses the riff Buildpack to build Maven or Gradle projects from source\n" +
-			"- 'jar': uses riff's java-function-invoker build for a prebuilt JAR file\n" +
-			"- 'node': uses riff's node-function-invoker build\n" +
-			"- 'command': uses riff's command-function-invoker build\n" +
+			strings.Join(invokerNames, "") +
 			"- 'custom': use a custom invoker. Specify with --invoker-url flag\n" +
 			"\nBuildpack based builds support building from local source or within the cluster. Images will be pushed to the registry specified in the image name, unless prefixed with 'dev.local/' in which case the image will only be available within the local Docker daemon.\n" +
 			"\nFrom then on you can use the sub-commands for the `service` command to interact with the service created for the function.\n\n" +
 			envFromLongDesc + "\n",
-		Example: `  riff function create node square --git-repo https://github.com/acme/square --image acme/square --namespace joseph-ns
-  riff function create java tweets-logger --git-repo https://github.com/acme/tweets --image acme/tweets-logger:1.0.0`,
+		Example: `  ` + env.Cli.Name + ` function create node square --git-repo https://github.com/acme/square --image acme/square --namespace joseph-ns
+  ` + env.Cli.Name + ` function create java tweets-logger --git-repo https://github.com/acme/tweets --image acme/tweets-logger:1.0.0`,
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(functionCreateNumberOfArgs),
 			AtPosition(functionCreateInvokerIndex, ValidName()),
@@ -123,7 +132,7 @@ func FunctionCreate(fcTool *core.Client) *cobra.Command {
 					if createFunctionOptions.Namespace != "" {
 						namespaceOption = fmt.Sprintf(" -n %s", createFunctionOptions.Namespace)
 					}
-					fmt.Fprintf(cmd.OutOrStdout(), "Issue `riff service status %s%s` to see the status of the function\n", fnName, namespaceOption)
+					fmt.Fprintf(cmd.OutOrStdout(), "Issue `%s service status %s%s` to see the status of the function\n", env.Cli.Name, fnName, namespaceOption)
 				}
 			}
 
@@ -159,7 +168,7 @@ func FunctionBuild(fcTool *core.Client) *cobra.Command {
 	command := &cobra.Command{
 		Use:     "build",
 		Short:   "Trigger a revision build for a function resource",
-		Example: `  riff function build square`,
+		Example: `  ` + env.Cli.Name + ` function build square`,
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(functionBuildNumberOfArgs),
 			AtPosition(functionBuildFunctionNameIndex, ValidName()),

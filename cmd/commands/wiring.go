@@ -18,11 +18,13 @@ package commands
 
 import (
 	"fmt"
-	"github.com/projectriff/riff/pkg/fileutils"
-	"github.com/projectriff/riff/pkg/resource"
 	"os"
 	"os/user"
 	"strings"
+
+	"github.com/projectriff/riff/pkg/env"
+	"github.com/projectriff/riff/pkg/fileutils"
+	"github.com/projectriff/riff/pkg/resource"
 
 	"github.com/projectriff/riff/pkg/docker"
 
@@ -89,11 +91,11 @@ func CreateAndWireRootCommand() *cobra.Command {
 	var imageClient core.ImageClient
 
 	rootCmd := &cobra.Command{
-		Use:   "riff",
+		Use:   env.Cli.Name,
 		Short: "Commands for creating and managing function resources",
 		Long: `riff is for functions.
 
-riff is a CLI for functions on Knative.
+` + env.Cli.Name + ` is a CLI for functions on Knative.
 See https://projectriff.io and https://github.com/knative/docs`,
 		SilenceErrors:              true, // We'll print errors ourselves (after usage rather than before)
 		SilenceUsage:               true, // We'll print the *help* message instead of *usage* ourselves

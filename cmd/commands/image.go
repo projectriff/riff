@@ -18,6 +18,7 @@ package commands
 
 import (
 	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +47,7 @@ func ImageRelocate(c *core.ImageClient) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "relocate",
 		Short: "Relocate docker image names to another registry",
-		Long: "Relocate either a single kubernetes configuration file or a riff manifest, its kubernetes configuration files, " +
+		Long: "Relocate either a single kubernetes configuration file or a " + env.Cli.Name + " manifest, its kubernetes configuration files, " +
 			"and an image manifest, so that image names refer to another (private or public) registry.\n" +
 
 			"\nTo relocate a single kubernetes configuration file, use the `--file` flag to specify the path or URL of the file. Use " +
@@ -54,7 +55,7 @@ func ImageRelocate(c *core.ImageClient) *cobra.Command {
 			"file will be placed in that directory. Otherwise the relocated file will be written to the path specified in `--output`.\n" +
 
 			"\nTo relocate a manifest, use the `--manifest` flag to specify the path or URL of a manifest file which provides the paths or " +
-			"URLs of the kubernetes configuration files for riff components. Use the `--output` flag to specify the path of a " +
+			"URLs of the kubernetes configuration files for " + env.Cli.Name + " components. Use the `--output` flag to specify the path of a " +
 			"directory to contain the relocated manifest, kubernetes configuration files, and image manifest. Any associated images " +
 			"are copied to the output directory.\n" +
 
@@ -71,8 +72,8 @@ func ImageRelocate(c *core.ImageClient) *cobra.Command {
     ... 
 
 `,
-		Example: `  riff image relocate --manifest=path/to/manifest.yaml --registry=hostname --registry-user=username --images=path/to/image-manifest.yaml --output=path/to/output/dir
-  riff image relocate --file=path/to/file --registry=hostname --registry-user=username --images=path/to/image-manifest.yaml --output=path/to/output`,
+		Example: `  ` + env.Cli.Name + ` image relocate --manifest=path/to/manifest.yaml --registry=hostname --registry-user=username --images=path/to/image-manifest.yaml --output=path/to/output/dir
+  ` + env.Cli.Name + ` image relocate --file=path/to/file --registry=hostname --registry-user=username --images=path/to/image-manifest.yaml --output=path/to/output`,
 		Args: cobra.ExactArgs(imageRelocateNumberOfArgs),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := FlagsValidationConjunction(
@@ -109,7 +110,7 @@ func ImageRelocate(c *core.ImageClient) *cobra.Command {
 
 	command.Flags().StringVarP(&options.SingleFile, "file", "f", "", "path of a kubernetes configuration file")
 
-	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "manifest.yaml", "path of a riff manifest")
+	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "manifest.yaml", "path of a "+env.Cli.Name+" manifest")
 
 	command.Flags().StringVarP(&options.Registry, "registry", "r", "", "hostname for mapped images")
 	command.MarkFlagRequired("registry")
@@ -133,10 +134,10 @@ func ImageLoad(c *core.ImageClient) *cobra.Command {
 		Use:   "load",
 		Short: "Load and tag docker images",
 		Long: "Load the images in an image manifest into a docker daemon and tag them.\n\n" +
-			"For details of image manifests, see `riff image relocate -h`.\n\n" +
+			"For details of image manifests, see `" + env.Cli.Name + " image relocate -h`.\n\n" +
 			"NOTE: This command requires the `docker` command line tool, as well as a docker daemon.\n\n" +
-			"SEE ALSO: To load, tag, and push images to a registry, use `riff image push`.",
-		Example: `  riff image load --images=riff-distro-xx/image-manifest.yaml`,
+			"SEE ALSO: To load, tag, and push images to a registry, use `" + env.Cli.Name + " image push`.",
+		Example: `  ` + env.Cli.Name + ` image load --images=` + env.Cli.Name + `-distro-xx/image-manifest.yaml`,
 		Args:    cobra.ExactArgs(imageLoadNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*c).LoadAndTagImages(options)
@@ -161,11 +162,11 @@ func ImagePush(c *core.ImageClient) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "push",
 		Short: "Push docker images to a registry",
-		Long: "Load, tag, and push the images in an image manifest to a registry, for later consumption by `riff system install`.\n\n" +
-			"For details of image manifests, see `riff image relocate -h`.\n\n" +
+		Long: "Load, tag, and push the images in an image manifest to a registry, for later consumption by `" + env.Cli.Name + " system install`.\n\n" +
+			"For details of image manifests, see `" + env.Cli.Name + " image relocate -h`.\n\n" +
 			"NOTE: This command requires the `docker` command line tool, as well as a docker daemon.\n\n" +
-			"SEE ALSO: To load and tag images, but not push them, use `riff image load`.",
-		Example: `  riff image push --images=riff-distro-xx/image-manifest.yaml`,
+			"SEE ALSO: To load and tag images, but not push them, use `" + env.Cli.Name + " image load`.",
+		Example: `  ` + env.Cli.Name + ` image push --images=` + env.Cli.Name + `-distro-xx/image-manifest.yaml`,
 		Args:    cobra.ExactArgs(imagePushNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := (*c).PushImages(options)

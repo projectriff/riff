@@ -23,6 +23,7 @@ import (
 	"k8s.io/api/core/v1"
 
 	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
 )
 
@@ -58,8 +59,8 @@ func ChannelCreate(fcTool *core.Client) *cobra.Command {
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(channelCreateNumberOfArgs),
 			AtPosition(channelCreateNameIndex, ValidName())),
-		Example: `  riff channel create tweets --bus kafka --namespace steve-ns
-  riff channel create orders --cluster-bus global-rabbit`,
+		Example: `  ` + env.Cli.Name + ` channel create tweets --bus kafka --namespace steve-ns
+  ` + env.Cli.Name + ` channel create orders --cluster-bus global-rabbit`,
 		PreRunE: FlagsValidatorAsCobraRunE(exactlyOneOfBusOrClusterBus),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			channelName := args[channelCreateNameIndex]
@@ -99,8 +100,8 @@ func ChannelList(fcTool *core.Client) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "list",
 		Short: "List channels",
-		Example: `  riff channel list
-  riff channel list --namespace joseph-ns`,
+		Example: `  ` + env.Cli.Name + ` channel list
+  ` + env.Cli.Name + ` channel list --namespace joseph-ns`,
 		Args: cobra.ExactArgs(channelListNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			channels, err := (*fcTool).ListChannels(listChannelOptions)
@@ -130,7 +131,7 @@ func ChannelDelete(fcTool *core.Client) *cobra.Command {
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(channelDeleteNumberOfArgs),
 			AtPosition(channelDeleteNameIndex, ValidName())),
-		Example: `  riff channel delete tweets`,
+		Example: `  ` + env.Cli.Name + ` channel delete tweets`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options.Name = args[channelDeleteNameIndex]
 

@@ -19,6 +19,7 @@ package commands
 import (
 	"os"
 
+	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +30,7 @@ func Completion(rootCmd *cobra.Command) *cobra.Command {
 		Short: "Generate shell completion scripts",
 		Long:  "Generate shell completion scripts",
 		Example: "To install completion for bash, assuming you have `bash-completion` installed:\n\n" +
-			"    riff completion bash > /etc/bash_completion.d/riff\n\n" +
+			"    " + env.Cli.Name + " completion bash > /etc/bash_completion.d/" + env.Cli.Name + "\n\n" +
 			"or wherever your `bash_completion.d` is, for example `$(brew --prefix)/etc/bash_completion.d` if using homebrew.\n\n" +
 			"Completion for zsh is a work in progress",
 		Args:      ArgValidationConjunction(cobra.ExactArgs(1), cobra.OnlyValidArgs),

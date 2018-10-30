@@ -6,7 +6,7 @@ Commands for creating a riff distribution
 
 riff is for functions.
 
-riff is a CLI for functions on Knative.
+riff-distro is a CLI for functions on Knative.
 See https://projectriff.io and https://github.com/knative/docs
 
 ### Options
@@ -19,6 +19,6 @@ See https://projectriff.io and https://github.com/knative/docs
 
 * [riff-distro completion](riff-distro_completion.md)	 - Generate shell completion scripts
 * [riff-distro image](riff-distro_image.md)	 - Interact with docker images
-* [riff-distro system](riff-distro_system.md)	 - Interact with riff systems
+* [riff-distro system](riff-distro_system.md)	 - Interact with riff-distro systems
 * [riff-distro version](riff-distro_version.md)	 - Print version information about riff-distro
 

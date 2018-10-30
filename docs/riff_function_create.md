@@ -8,10 +8,10 @@ Create a new function resource from the content of the provided Git repo/revisio
 
 The INVOKER arg defines the language runtime and function invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function. The following invokers are available:
 
-- 'java': uses the riff Buildpack to build Maven or Gradle projects from source
-- 'jar': uses riff's java-function-invoker build for a prebuilt JAR file
-- 'node': uses riff's node-function-invoker build
-- 'command': uses riff's command-function-invoker build
+- 'command'
+- 'jar'
+- 'java': buildpack based
+- 'node'
 - 'custom': use a custom invoker. Specify with --invoker-url flag
 
 Buildpack based builds support building from local source or within the cluster. Images will be pushed to the registry specified in the image name, unless prefixed with 'dev.local/' in which case the image will only be available within the local Docker daemon.

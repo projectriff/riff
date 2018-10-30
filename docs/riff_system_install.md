@@ -18,7 +18,7 @@ Use the `--manifest` flag to specify the path or URL of a manifest file which pr
     - https://path/to/eventing-release.yaml
     - https://path/to/stub-bus-release.yaml
     namespace:
-    - https://path/to/riff-buildtemplate-release.yaml
+    - https://path/to/buildtemplate-release.yaml
 
 Note: relative file paths or http/https URLs may be used in the manifest.
 

@@ -31,6 +31,7 @@ import (
 	"github.com/buildpack/pack"
 	build "github.com/knative/build/pkg/apis/build/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	"github.com/projectriff/riff/pkg/env"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -432,7 +433,7 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 	annotations := service.Annotations
 	labels := configuration.RevisionTemplate.Labels
 	if labels[functionLabel] == "" {
-		return fmt.Errorf("the service named \"%s\" is not a riff function", options.Name)
+		return fmt.Errorf("the service named \"%s\" is not a %s function", options.Name, env.Cli.Name)
 	}
 
 	c.bumpNonceAnnotation(service)

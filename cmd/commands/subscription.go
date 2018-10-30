@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/env"
 	. "github.com/spf13/cobra"
 )
 
@@ -35,9 +36,9 @@ func SubscriptionCreate(client *core.Client) *Command {
 		Long: "Create a new, optionally named subscription, binding a service to an input channel. " +
 			"The default name of the subscription is the provided subscriber name. " +
 			"The subscription can optionally be bound to an output channel.",
-		Example: `  riff subscription create --channel tweets --subscriber tweets-logger
-  riff subscription create my-subscription --channel tweets --subscriber tweets-logger
-  riff subscription create --channel tweets --subscriber tweets-logger --reply-to logged-tweets`,
+		Example: `  ` + env.Cli.Name + ` subscription create --channel tweets --subscriber tweets-logger
+  ` + env.Cli.Name + ` subscription create my-subscription --channel tweets --subscriber tweets-logger
+  ` + env.Cli.Name + ` subscription create --channel tweets --subscriber tweets-logger --reply-to logged-tweets`,
 		Args: ArgValidationConjunction(
 			MaximumNArgs(subscriptionCreateMaxNumberOfArgs),
 			OptionalAtPosition(subscriptionCreateNameIndex, ValidName()),
@@ -64,7 +65,7 @@ func SubscriptionDelete(client *core.Client) *Command {
 	command := &Command{
 		Use:     "delete",
 		Short:   "Delete an existing subscription",
-		Example: "  riff subscription delete my-subscription --namespace joseph-ns",
+		Example: "  " + env.Cli.Name + " subscription delete my-subscription --namespace joseph-ns",
 		Args: ArgValidationConjunction(
 			ExactArgs(subscriptionDeleteNumberOfArgs),
 			AtPosition(subscriptionDeleteNameIndex, ValidName()),
@@ -92,8 +93,8 @@ func SubscriptionList(client *core.Client) *Command {
 	command := &Command{
 		Use:   "list",
 		Short: "List existing subscriptions",
-		Example: `  riff subscription list
-  riff subscription list --namespace joseph-ns`,
+		Example: `  ` + env.Cli.Name + ` subscription list
+  ` + env.Cli.Name + ` subscription list --namespace joseph-ns`,
 		Args: ExactArgs(subscriptionListNumberOfArgs),
 		RunE: func(cmd *Command, args []string) error {
 			subscriptions, err := (*client).ListSubscriptions(listOptions)
