@@ -44,18 +44,8 @@ func Function() *cobra.Command {
 	}
 }
 
-func FunctionCreate(fcTool *core.Client) *cobra.Command {
+func FunctionCreate(fcTool *core.Client, invokers, buildpacks map[string]string) *cobra.Command {
 	createFunctionOptions := core.CreateFunctionOptions{}
-
-	// runtime definitions
-	buildpacks := map[string]string{
-		"java": "projectriff/buildpack",
-	}
-	invokers := map[string]string{
-		"jar":     "https://github.com/projectriff/java-function-invoker/raw/v0.1.1/java-invoker.yaml",
-		"command": "https://github.com/projectriff/command-function-invoker/raw/v0.0.7/command-invoker.yaml",
-		"node":    "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
-	}
 
 	flagsValidator := AtLeastOneOf("git-repo", "local-path")
 

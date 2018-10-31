@@ -50,8 +50,8 @@ var (
 	allNameSpaces     = append(knativeNamespaces, istioNamespace)
 )
 
-func (kc *kubectlClient) SystemInstall(options SystemInstallOptions) (bool, error) {
-	manifest, err := NewManifest(options.Manifest)
+func (kc *kubectlClient) SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error) {
+	manifest, err := ResolveManifest(manifests, options.Manifest)
 	if err != nil {
 		return false, err
 	}

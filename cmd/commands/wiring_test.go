@@ -2,18 +2,25 @@ package commands_test
 
 import (
 	"fmt"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/projectriff/riff/cmd/commands"
+	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
 )
 
 var _ = Describe("`riff` root command", func() {
 	Context("should wire subcommands", func() {
-		var rootCommand *cobra.Command
+		var (
+			rootCommand *cobra.Command
+			manifests   map[string]*core.Manifest
+			invokers    map[string]string
+			buildpacks  map[string]string
+		)
 
 		BeforeEach(func() {
-			rootCommand = CreateAndWireRootCommand()
+			rootCommand = CreateAndWireRootCommand(manifests, invokers, buildpacks)
 		})
 
 		It("including `riff subscription`", func() {

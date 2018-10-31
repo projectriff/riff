@@ -72,8 +72,8 @@ func (c *client) explicitOrConfigNamespace(explicitNamespace string) string {
 	return namespace
 }
 
-func (c *kubectlClient) NamespaceInit(options NamespaceInitOptions) error {
-	manifest, err := NewManifest(options.Manifest)
+func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options NamespaceInitOptions) error {
+	manifest, err := ResolveManifest(manifests, options.Manifest)
 	if err != nil {
 		return err
 	}

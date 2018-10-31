@@ -39,6 +39,7 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockNamespaces      *vendor_mocks.NamespaceInterface
 		mockServiceAccounts *vendor_mocks.ServiceAccountInterface
 		mockSecrets         *vendor_mocks.SecretInterface
+		manifests           map[string]*Manifest
 	)
 
 	JustBeforeEach(func() {
@@ -64,7 +65,7 @@ var _ = Describe("The NamespaceInit function", func() {
 
 	It("should fail on wrong manifest", func() {
 		options := NamespaceInitOptions{Manifest: "wrong"}
-		err := kubectlClient.NamespaceInit(options)
+		err := kubectlClient.NamespaceInit(manifests, options)
 		Expect(err).To(MatchError(ContainSubstring("wrong: no such file")))
 	})
 
@@ -86,7 +87,7 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
 		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(serviceAccount, nil)
 
-		err := kubectlClient.NamespaceInit(options)
+		err := kubectlClient.NamespaceInit(manifests, options)
 		Expect(err).To(Not(HaveOccurred()))
 	})
 
@@ -120,7 +121,7 @@ var _ = Describe("The NamespaceInit function", func() {
 			})))
 		}).Return(serviceAccount, nil)
 
-		err := kubectlClient.NamespaceInit(options)
+		err := kubectlClient.NamespaceInit(manifests, options)
 		Expect(err).To(Not(HaveOccurred()))
 	})
 
@@ -168,7 +169,7 @@ var _ = Describe("The NamespaceInit function", func() {
 				})))
 			}).Return(serviceAccount, nil)
 
-			err := kubectlClient.NamespaceInit(options)
+			err := kubectlClient.NamespaceInit(manifests, options)
 			Expect(err).To(Not(HaveOccurred()))
 		})
 	})
