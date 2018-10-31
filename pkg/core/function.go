@@ -289,6 +289,7 @@ func streamLogs(log io.Writer, controller kail.Controller, stopChan <-chan struc
 
 func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int64, stopChan chan<- struct{}, errChan <-chan error) error {
 	defer close(stopChan)
+	retriedStatus := false
 	for i := 0; i >= 0; i++ {
 		select {
 		case err := <-errChan:
@@ -337,6 +338,10 @@ func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int6
 				}
 			}
 			if !someStateIsUnknown {
+				if !retriedStatus {
+					retriedStatus = true
+					break
+				}
 				var message string
 				if err != nil {
 					// fall back to a basic message
