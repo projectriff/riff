@@ -49,7 +49,7 @@ var manifests = map[string]*Manifest{
 	"stable": &Manifest{
 		ManifestVersion: manifestVersion_0_1,
 		Istio: []string{
-			"https://raw.githubusercontent.com/knative/serving/v0.2.0/third_party/istio-1.0.2/istio.yaml",
+			"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.0/istio.yaml",
 		},
 		Knative: []string{
 			"https://github.com/knative/build/releases/download/v0.2.0/release.yaml",
