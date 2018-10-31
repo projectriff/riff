@@ -52,7 +52,7 @@ var manifests = map[string]*Manifest{
 			"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.0/istio.yaml",
 		},
 		Knative: []string{
-			"https://github.com/knative/build/releases/download/v0.2.0/release.yaml",
+			"https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
 			"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.0/serving.yaml",
 			"https://storage.googleapis.com/knative-releases/eventing/previous/v20181031-a2f9417/release.yaml",
 			"https://storage.googleapis.com/knative-releases/eventing/previous/v20181031-a2f9417/release-clusterbus-stub.yaml",
