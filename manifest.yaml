@@ -1,6 +1,6 @@
 manifestVersion: 0.1
 istio:
-- https://raw.githubusercontent.com/knative/serving/v0.2.0/third_party/istio-1.0.2/istio.yaml
+- https://storage.googleapis.com/knative-releases/serving/previous/v0.2.0/istio.yaml
 knative:
 - https://github.com/knative/build/releases/download/v0.2.0/release.yaml
 - https://github.com/knative/serving/releases/download/v0.2.0/release-no-mon.yaml
