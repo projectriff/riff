@@ -20,7 +20,7 @@ riff function build [flags]
 
 ```
   -h, --help                  help for build
-  -l, --local-path string     path to local source to build the image from
+  -l, --local-path string     path to local source to build the image from; only build-pack builds are supported at this time
   -n, --namespace namespace   the namespace of the function
   -v, --verbose               print details of command progress
   -w, --wait                  wait until the created resource reaches either a successful or an error state (automatic with --verbose)

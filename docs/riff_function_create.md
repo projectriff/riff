@@ -48,7 +48,7 @@ riff function create [flags]
   -h, --help                           help for create
       --image repository/image[:tag]   the name of the image to build; must be a writable repository/image[:tag] with credentials configured
       --invoker-url string             the path to a custom invoker url. Required if invoker is custom.
-  -l, --local-path path                path to local source to build the image from
+  -l, --local-path path                path to local source to build the image from; only build-pack builds are supported at this time
   -n, --namespace namespace            the namespace of the service
   -v, --verbose                        print details of command progress
   -w, --wait                           wait until the created resource reaches either a successful or an error state (automatic with --verbose)
