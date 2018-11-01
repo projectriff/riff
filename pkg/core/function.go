@@ -155,7 +155,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 			if options.Verbose {
 				go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, errChan)
 			}
-			err := c.waitForSuccessOrFailure(ns, s.Name, 1, stopChan, errChan)
+			err := c.waitForSuccessOrFailure(ns, s.Name, 1, stopChan, errChan, options.Verbose)
 			if err != nil {
 				return nil, err
 			}
@@ -287,75 +287,104 @@ func streamLogs(log io.Writer, controller kail.Controller, stopChan <-chan struc
 	}
 }
 
-func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int64, stopChan chan<- struct{}, errChan <-chan error) error {
+func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int64, stopChan chan<- struct{}, errChan <-chan error, verbose bool) error {
 	defer close(stopChan)
-	retriedStatus := false
-	for i := 0; i >= 0; i++ {
+
+	const sleepDuration = 500 * time.Millisecond
+	const timeout = time.Minute
+
+	sleepTime := time.Duration(0)
+	for i := 0; ; i++ {
 		select {
 		case err := <-errChan:
 			return err
 		default:
 		}
-		time.Sleep(500 * time.Millisecond)
-		service, err := c.service(namespace, name)
+
+		transientError, err := checkService(c, namespace, name, gen)
 		if err != nil {
-			return fmt.Errorf("waitForSuccessOrFailure failed to obtain service: %v", err)
-		}
-		if service.Status.ObservedGeneration < gen {
-			// allow some time for service status observed generation to show up
-			if i < 20 {
-				continue
-			}
-			return fmt.Errorf("waitForSuccessOrFailure failed to obtain service status for observedGeneration %d: %v", gen, err)
-		}
-		serviceStatusOptions := ServiceStatusOptions{
-			Namespace: namespace,
-			Name:      name,
-		}
-		cond, err := c.ServiceStatus(serviceStatusOptions)
-		if err != nil {
-			return fmt.Errorf("waitForSuccessOrFailure failed to obtain service status: %v", err)
+			return err
 		}
 
-		switch cond.Status {
-		case corev1.ConditionTrue:
+		if transientError == nil {
 			return nil
-		case corev1.ConditionFalse:
-			someStateIsUnknown := false
-			conds, err := c.ServiceConditions(serviceStatusOptions)
-			if err == nil {
-				for _, c := range conds {
-					if c.Status == corev1.ConditionUnknown {
-						someStateIsUnknown = true
-						break
-					}
-					// ignore any "scaled to zero" status messages - wait for the revision to start
-					// TODO: remove this once https://github.com/knative/serving/issues/2346 is resolved
-					if strings.Contains(c.Message, "The target is not receiving traffic") {
-						someStateIsUnknown = true
-						break
-					}
-				}
-			}
-			if !someStateIsUnknown {
-				if !retriedStatus {
-					retriedStatus = true
-					break
-				}
-				var message string
-				if err != nil {
-					// fall back to a basic message
-					message = cond.Message
-				} else {
-					message = serviceConditionsMessage(conds, cond.Message)
-				}
-				return fmt.Errorf("function creation failed: %s: %s", cond.Reason, message)
-			}
-		default:
-			// keep going until outcome is known
 		}
+
+		if verbose && i%4 == 0 {
+			fmt.Printf("Waiting on function creation: %v\n", transientError)
+		}
+
+		if sleepTime > timeout {
+			return transientError
+		}
+
+		time.Sleep(sleepDuration)
+		sleepTime += sleepDuration
 	}
 	return nil
+}
+
+func checkService(c *client, namespace string, name string, gen int64) (transientErr error, err error) {
+	// TODO: Test this
+	service, err := c.service(namespace, name)
+	if err != nil {
+		return nil, fmt.Errorf("checkService failed to obtain service: %v", err)
+	}
+
+	if service.Status.ObservedGeneration < gen {
+		// allow some time for service status observed generation to show up
+		return fmt.Errorf("checkService failed to obtain service status for observedGeneration %d", gen), nil
+	}
+
+	serviceStatusOptions := ServiceStatusOptions{
+		Namespace: namespace,
+		Name:      name,
+	}
+	cond, err := c.ServiceStatus(serviceStatusOptions)
+	if err != nil {
+		return nil, fmt.Errorf("checkService failed to obtain service status: %v", err)
+	}
+
+	switch cond.Status {
+	case corev1.ConditionTrue:
+		return nil, nil
+	case corev1.ConditionFalse:
+		conds, message, err := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
+		if err == nil {
+			if s := fetchTransientError(cond, conds); s != "" {
+				return fmt.Errorf("%s: %s: %s", s, cond.Reason, message), nil
+			}
+		}
+		return nil, fmt.Errorf("function creation failed: %s: %s", cond.Reason, message)
+	default:
+		_, message, _ := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
+		return fmt.Errorf("function creation incomplete: service status unknown: %s: %s", cond.Reason, message), nil
+	}
+}
+
+func fetchTransientError(cond *v1alpha1.ServiceCondition, conds []v1alpha1.ServiceCondition) string {
+	for _, c := range conds {
+		if c.Status == corev1.ConditionUnknown ||
+		// ignore any "scaled to zero" status messages - wait for the revision to start
+		// TODO: remove this once https://github.com/knative/serving/issues/2346 is resolved
+			strings.Contains(c.Message, "The target is not receiving traffic") {
+			return "function creation incomplete: service status false"
+		}
+	}
+	return ""
+}
+
+func (c *client) serviceConditionsWithMessage(options ServiceStatusOptions, cond *v1alpha1.ServiceCondition) ([]v1alpha1.ServiceCondition, string, error) {
+	conds, err := c.ServiceConditions(options)
+	var message string
+	if err != nil {
+		// fall back to a basic message
+		message = cond.Message
+	} else {
+		message = serviceConditionsMessage(conds, cond.Message)
+	}
+
+	return conds, message, err
 }
 
 func serviceConditionsMessage(conds []v1alpha1.ServiceCondition, primaryMessage string) string {
@@ -492,7 +521,7 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 		if options.Verbose {
 			go c.displayFunctionCreationProgress(ns, service.Name, log, stopChan, errChan)
 		}
-		err = c.waitForSuccessOrFailure(ns, service.Name, nextGen, stopChan, errChan)
+		err = c.waitForSuccessOrFailure(ns, service.Name, nextGen, stopChan, errChan, options.Verbose)
 		if err != nil {
 			return err
 		}
