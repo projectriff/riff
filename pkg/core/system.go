@@ -288,9 +288,7 @@ func deleteSingleResource(kc *kubectlClient, resourceType string, name string) e
 	fmt.Printf("Deleting %s/%s resource\n", resourceType, name)
 	deleteLog, err := kc.kubeCtl.Exec([]string{"delete", resourceType, name})
 	if err != nil {
-		if strings.Contains(deleteLog, "NotFound") {
-			fmt.Printf("Resource \"%s/%s\" was not found\n", resourceType, name)
-		} else {
+		if !strings.Contains(deleteLog, "NotFound") {
 			fmt.Printf("%s", deleteLog)
 		}
 	}
