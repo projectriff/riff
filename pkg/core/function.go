@@ -290,10 +290,11 @@ func streamLogs(log io.Writer, controller kail.Controller, stopChan <-chan struc
 func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int64, stopChan chan<- struct{}, errChan <-chan error, verbose bool) error {
 	defer close(stopChan)
 
-	const sleepDuration = 500 * time.Millisecond
+	const sleepDuration = time.Second
 	const timeout = time.Minute
 
 	sleepTime := time.Duration(0)
+	retry := true
 	for i := 0; ; i++ {
 		select {
 		case err := <-errChan:
@@ -303,19 +304,27 @@ func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int6
 
 		transientError, err := checkService(c, namespace, name, gen)
 		if err != nil {
-			return err
-		}
+			/*
+ 			 A hard error appears to have been detected. This may be because the top level condition has not been
+			recalculated since a lower level condition has cleared. Try again in case the hard error disappears.
+			 */
+			if retry {
+				retry = false
+			} else {
+				return err
+			}
+		} else {
+			if transientError == nil {
+				return nil
+			}
 
-		if transientError == nil {
-			return nil
-		}
+			if verbose && i%2 == 0 {
+				fmt.Printf("Waiting on function creation: %v\n", transientError)
+			}
 
-		if verbose && i%4 == 0 {
-			fmt.Printf("Waiting on function creation: %v\n", transientError)
-		}
-
-		if sleepTime > timeout {
-			return transientError
+			if sleepTime > timeout {
+				return transientError
+			}
 		}
 
 		time.Sleep(sleepDuration)
@@ -349,15 +358,15 @@ func checkService(c *client, namespace string, name string, gen int64) (transien
 	case corev1.ConditionTrue:
 		return nil, nil
 	case corev1.ConditionFalse:
-		conds, message, err := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
-		if err == nil {
+		conds, message := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
+		if conds != nil {
 			if s := fetchTransientError(cond, conds); s != "" {
 				return fmt.Errorf("%s: %s: %s", s, cond.Reason, message), nil
 			}
 		}
 		return nil, fmt.Errorf("function creation failed: %s: %s", cond.Reason, message)
 	default:
-		_, message, _ := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
+		_, message := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
 		return fmt.Errorf("function creation incomplete: service status unknown: %s: %s", cond.Reason, message), nil
 	}
 }
@@ -374,7 +383,7 @@ func fetchTransientError(cond *v1alpha1.ServiceCondition, conds []v1alpha1.Servi
 	return ""
 }
 
-func (c *client) serviceConditionsWithMessage(options ServiceStatusOptions, cond *v1alpha1.ServiceCondition) ([]v1alpha1.ServiceCondition, string, error) {
+func (c *client) serviceConditionsWithMessage(options ServiceStatusOptions, cond *v1alpha1.ServiceCondition) ([]v1alpha1.ServiceCondition, string) {
 	conds, err := c.ServiceConditions(options)
 	var message string
 	if err != nil {
@@ -384,7 +393,7 @@ func (c *client) serviceConditionsWithMessage(options ServiceStatusOptions, cond
 		message = serviceConditionsMessage(conds, cond.Message)
 	}
 
-	return conds, message, err
+	return conds, message
 }
 
 func serviceConditionsMessage(conds []v1alpha1.ServiceCondition, primaryMessage string) string {
