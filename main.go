@@ -54,13 +54,13 @@ var (
 		"stable": &core.Manifest{
 			ManifestVersion: "0.1",
 			Istio: []string{
-				"https://storage.googleapis.com/knative-releases/serving/previous/v20181029-1d5c521/istio.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.0/istio.yaml",
 			},
 			Knative: []string{
-				"https://storage.googleapis.com/knative-releases/build/previous/v20181029-e9f5b24/release.yaml",
-				"https://storage.googleapis.com/knative-releases/serving/previous/v20181029-1d5c521/serving.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181029-642bfc1/release.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181029-642bfc1/release-clusterbus-stub.yaml",
+				"https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.0/serving.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181031-a2f9417/release.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181031-a2f9417/release-clusterbus-stub.yaml",
 			},
 			Namespace: []string{
 				"https://storage.googleapis.com/riff-releases/previous/riff-build/riff-build-0.1.0.yaml",
