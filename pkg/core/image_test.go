@@ -24,6 +24,7 @@ var _ = Describe("RelocateImages", func() {
 		client      ImageClient
 		mockFutils  *mocks.Copier
 		mockChecker *mocks.Checker
+		manifests   map[string]*Manifest
 		options     RelocateImagesOptions
 		err         error
 		testErr     error
@@ -32,7 +33,7 @@ var _ = Describe("RelocateImages", func() {
 	BeforeEach(func() {
 		mockFutils = new(mocks.Copier)
 		mockChecker = new(mocks.Checker)
-		client = NewImageClient(nil, mockFutils, mockChecker, resource.ListImages, ioutil.Discard, Manifests)
+		client = NewImageClient(nil, mockFutils, mockChecker, resource.ListImages, ioutil.Discard, manifests)
 		options.Registry = "reg.org"
 		options.RegistryUser = "user"
 		testErr = errors.New("test error")
@@ -293,6 +294,7 @@ var _ = Describe("SystemDownload", func() {
 		client      ImageClient
 		mockCopier  *mocks.Copier
 		mockChecker *mocks.Checker
+		manifests   map[string]*Manifest
 		options     DownloadSystemOptions
 		err         error
 	)
@@ -300,7 +302,7 @@ var _ = Describe("SystemDownload", func() {
 	BeforeEach(func() {
 		mockCopier = new(mocks.Copier)
 		mockChecker = new(mocks.Checker)
-		client = NewImageClient(nil, mockCopier, mockChecker, resource.ListImages, ioutil.Discard, Manifests)
+		client = NewImageClient(nil, mockCopier, mockChecker, resource.ListImages, ioutil.Discard, manifests)
 	})
 
 	JustBeforeEach(func() {
