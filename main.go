@@ -58,7 +58,7 @@ var (
 			},
 			Knative: []string{
 				"https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
-				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.0/serving.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v20181101-v0.2.0-11-g877523d/serving.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181031-a2f9417/release.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181031-a2f9417/release-clusterbus-stub.yaml",
 			},
