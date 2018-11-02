@@ -32,7 +32,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func DistroCreateAndWireRootCommand() *cobra.Command {
+func DistroCreateAndWireRootCommand(manifests map[string]*core.Manifest) *cobra.Command {
 
 	var dockerClient docker.Docker
 	var imageClient core.ImageClient
@@ -51,7 +51,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 			dockerClient = docker.RealDocker(os.Stdin, cmd.OutOrStdout(), cmd.OutOrStderr())
 			checker := fileutils.NewChecker()
 			copier := fileutils.NewCopier(cmd.OutOrStdout(), checker)
-			imageClient = core.NewImageClient(dockerClient, copier, checker, resource.ListImages, ioutil.Discard, core.Manifests)
+			imageClient = core.NewImageClient(dockerClient, copier, checker, resource.ListImages, ioutil.Discard, manifests)
 			return nil
 		},
 	}
@@ -70,7 +70,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	rootCmd.AddCommand(
 		image,
 		system,
-        DistroCreate(&imageClient),
+		DistroCreate(&imageClient),
 		commands.Version(),
 		commands.Docs(rootCmd, commands.LocalFs{}),
 		commands.Completion(rootCmd),

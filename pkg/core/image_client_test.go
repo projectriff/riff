@@ -43,6 +43,7 @@ var _ = Describe("ImageClient", func() {
 		mockCopier      *mock_fileutils.Copier
 		mockChecker     *mock_fileutils.Checker
 		mockImageLister func(resource string, baseDir string) ([]string, error)
+		manifests       map[string]*core.Manifest
 		testError       error
 	)
 
@@ -55,7 +56,7 @@ var _ = Describe("ImageClient", func() {
 	})
 
 	JustBeforeEach(func() {
-		imageClient = core.NewImageClient(mockDocker, mockCopier, mockChecker, mockImageLister, ioutil.Discard, core.Manifests)
+		imageClient = core.NewImageClient(mockDocker, mockCopier, mockChecker, mockImageLister, ioutil.Discard, manifests)
 	})
 
 	AfterEach(func() {
