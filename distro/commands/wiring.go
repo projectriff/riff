@@ -51,7 +51,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 			dockerClient = docker.RealDocker(os.Stdin, cmd.OutOrStdout(), cmd.OutOrStderr())
 			checker := fileutils.NewChecker()
 			copier := fileutils.NewCopier(cmd.OutOrStdout(), checker)
-			imageClient = core.NewImageClient(dockerClient, copier, checker, resource.ListImages, ioutil.Discard)
+			imageClient = core.NewImageClient(dockerClient, copier, checker, resource.ListImages, ioutil.Discard, core.Manifests)
 			return nil
 		},
 	}

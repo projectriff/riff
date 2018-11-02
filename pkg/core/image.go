@@ -146,7 +146,7 @@ func (c *imageClient) relocateManifest(manifestPath string, mapper *imageMapper,
 		return err
 	}
 
-	manifest, err := NewManifest(manifestPath)
+	manifest, err := ResolveManifest(c.manifests, manifestPath)
 	if err != nil {
 		return err
 	}
