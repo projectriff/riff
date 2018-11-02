@@ -47,6 +47,8 @@ const (
 	// annotation names with slashes are rejected :-/
 	buildpackBuildImageAnnotation = "riff.projectriff.io-buildpack-buildImage"
 	buildpackRunImageAnnotation   = "riff.projectriff.io-buildpack-runImage"
+	pollServiceTimeout            = 10 * time.Minute
+	pollServicePollingInterval    = time.Second
 )
 
 type CreateFunctionOptions struct {
@@ -140,7 +142,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 			if options.Verbose {
 				go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, errChan)
 			}
-			err := c.waitForSuccessOrFailure(ns, s.Name, 1, stopChan, errChan)
+			err := c.waitForSuccessOrFailure(ns, s.Name, 1, stopChan, errChan, options.Verbose)
 			if err != nil {
 				return nil, err
 			}
@@ -212,7 +214,7 @@ func (c *client) displayFunctionCreationProgress(serviceNamespace string, servic
 }
 
 func (c *client) revisionName(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}) (string, error) {
-	fmt.Fprintf(logWriter, "Waiting for LatestCreatedRevisionName:")
+	fmt.Fprintf(logWriter, "Waiting for LatestCreatedRevisionName\n")
 	revName := ""
 	for {
 		serviceObj, err := c.serving.ServingV1alpha1().Services(serviceNamespace).Get(serviceName, v1.GetOptions{})
@@ -224,7 +226,6 @@ func (c *client) revisionName(serviceNamespace string, serviceName string, logWr
 			break
 		}
 		time.Sleep(1000 * time.Millisecond)
-		fmt.Fprintf(logWriter, ".")
 		select {
 		case <-stopChan:
 			return "", nil
@@ -232,7 +233,7 @@ func (c *client) revisionName(serviceNamespace string, serviceName string, logWr
 			// continue
 		}
 	}
-	fmt.Fprintf(logWriter, " %s\n", revName)
+	fmt.Fprintf(logWriter, "LatestCreatedRevisionName available: %s\n", revName)
 	return revName, nil
 }
 
@@ -291,64 +292,122 @@ func streamLogs(log io.Writer, controller kail.Controller, stopChan <-chan struc
 	}
 }
 
-func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int64, stopChan chan<- struct{}, errChan <-chan error) error {
+type serviceChecker func() (transientErr error, err error)
+
+func (c *client) createServiceChecker(namespace string, name string, gen int64) serviceChecker {
+	return func() (transientErr error, err error) {
+		return checkService(c, namespace, name, gen)
+	}
+}
+
+func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int64, stopChan chan<- struct{}, errChan <-chan error, verbose bool) error {
 	defer close(stopChan)
-	for i := 0; i >= 0; i++ {
+
+	var log io.Writer
+	if verbose {
+		log = os.Stdout
+	} else {
+		log = ioutil.Discard
+	}
+
+	check := c.createServiceChecker(namespace, name, gen)
+
+	return pollService(check, errChan, pollServiceTimeout, pollServicePollingInterval, log)
+}
+
+func pollService(check serviceChecker, errChan <-chan error, timeout time.Duration, sleepDuration time.Duration, log io.Writer) error {
+	sleepTime := time.Duration(0)
+	lastTransientErr := ""
+	for {
 		select {
 		case err := <-errChan:
 			return err
 		default:
 		}
-		time.Sleep(500 * time.Millisecond)
-		service, err := c.service(namespace, name)
+
+		transientError, err := check()
 		if err != nil {
-			return fmt.Errorf("waitForSuccessOrFailure failed to obtain service: %v", err)
-		}
-		if service.Status.ObservedGeneration < gen {
-			// allow some time for service status observed generation to show up
-			if i < 20 {
-				continue
-			}
-			return fmt.Errorf("waitForSuccessOrFailure failed to obtain service status for observedGeneration %d: %v", gen, err)
-		}
-		serviceStatusOptions := ServiceStatusOptions{
-			Namespace: namespace,
-			Name:      name,
-		}
-		cond, err := c.ServiceStatus(serviceStatusOptions)
-		if err != nil {
-			return fmt.Errorf("waitForSuccessOrFailure failed to obtain service status: %v", err)
+			return err
 		}
 
-		switch cond.Status {
-		case corev1.ConditionTrue:
+		if transientError == nil {
 			return nil
-		case corev1.ConditionFalse:
-			someStateIsUnknown := false
-			conds, err := c.ServiceConditions(serviceStatusOptions)
-			if err == nil {
-				for _, c := range conds {
-					if c.Status == corev1.ConditionUnknown {
-						someStateIsUnknown = true
-						break
-					}
-				}
-			}
-			if !someStateIsUnknown {
-				var message string
-				if err != nil {
-					// fall back to a basic message
-					message = cond.Message
-				} else {
-					message = serviceConditionsMessage(conds, cond.Message)
-				}
-				return fmt.Errorf("function creation failed: %s: %s", cond.Reason, message)
-			}
-		default:
-			// keep going until outcome is known
 		}
+
+		if sleepTime >= timeout {
+			fmt.Fprintln(log, "Waiting on function creation timed out")
+			return transientError
+		}
+
+		if te := transientError.Error(); te != lastTransientErr {
+			fmt.Fprintf(log, "Waiting on function creation: %v\n", transientError)
+			lastTransientErr = te
+		}
+
+		time.Sleep(sleepDuration)
+		sleepTime += sleepDuration
 	}
 	return nil
+}
+
+func checkService(c *client, namespace string, name string, gen int64) (transientErr error, err error) {
+	// TODO: Test this
+	service, err := c.service(namespace, name)
+	if err != nil {
+		return nil, fmt.Errorf("checkService failed to obtain service: %v", err)
+	}
+
+	if service.Status.ObservedGeneration < gen {
+		// allow some time for service status observed generation to show up
+		return fmt.Errorf("checkService failed to obtain service status for observedGeneration %d", gen), nil
+	}
+
+	serviceStatusOptions := ServiceStatusOptions{
+		Namespace: namespace,
+		Name:      name,
+	}
+	cond, err := c.ServiceStatus(serviceStatusOptions)
+	if err != nil {
+		return nil, fmt.Errorf("checkService failed to obtain service status: %v", err)
+	}
+
+	switch cond.Status {
+	case corev1.ConditionTrue:
+		return nil, nil
+	case corev1.ConditionFalse:
+		conds, message := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
+		if conds != nil {
+			if s := fetchTransientError(cond, conds); s != "" {
+				return fmt.Errorf("%s: %s: %s", s, cond.Reason, message), nil
+			}
+		}
+		return nil, fmt.Errorf("function creation failed: %s: %s", cond.Reason, message)
+	default:
+		_, message := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
+		return fmt.Errorf("function creation incomplete: service status unknown: %s: %s", cond.Reason, message), nil
+	}
+}
+
+func fetchTransientError(cond *v1alpha1.ServiceCondition, conds []v1alpha1.ServiceCondition) string {
+	for _, c := range conds {
+		if c.Status == corev1.ConditionUnknown {
+			return "function creation incomplete: service status false"
+		}
+	}
+	return ""
+}
+
+func (c *client) serviceConditionsWithMessage(options ServiceStatusOptions, cond *v1alpha1.ServiceCondition) ([]v1alpha1.ServiceCondition, string) {
+	conds, err := c.ServiceConditions(options)
+	var message string
+	if err != nil {
+		// fall back to a basic message
+		message = cond.Message
+	} else {
+		message = serviceConditionsMessage(conds, cond.Message)
+	}
+
+	return conds, message
 }
 
 func serviceConditionsMessage(conds []v1alpha1.ServiceCondition, primaryMessage string) string {
@@ -485,7 +544,7 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 		if options.Verbose {
 			go c.displayFunctionCreationProgress(ns, service.Name, log, stopChan, errChan)
 		}
-		err = c.waitForSuccessOrFailure(ns, service.Name, nextGen, stopChan, errChan)
+		err = c.waitForSuccessOrFailure(ns, service.Name, nextGen, stopChan, errChan, options.Verbose)
 		if err != nil {
 			return err
 		}
