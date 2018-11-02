@@ -70,6 +70,7 @@ type imageClient struct {
 	checker    fileutils.Checker
 	listImages imageLister
 	log        io.Writer
+	manifests  map[string]*Manifest
 }
 
 func (c *imageClient) LoadAndTagImages(options LoadAndTagImagesOptions) error {
@@ -193,8 +194,8 @@ func (c *imageClient) ListImages(options ListImagesOptions) error {
 	return im.Save(imPath)
 }
 
-func NewImageClient(docker docker.Docker, copier fileutils.Copier, checker fileutils.Checker, listImages imageLister, log io.Writer) ImageClient {
-	return &imageClient{docker: docker, copier: copier, checker: checker, listImages: listImages, log: log}
+func NewImageClient(docker docker.Docker, copier fileutils.Copier, checker fileutils.Checker, listImages imageLister, log io.Writer, manifests map[string]*Manifest) ImageClient {
+	return &imageClient{docker: docker, copier: copier, checker: checker, listImages: listImages, log: log, manifests: manifests}
 }
 
 func (c *imageClient) printf(format string, a ...interface{}) (n int, err error) {
