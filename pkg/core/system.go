@@ -227,6 +227,8 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 		if err != nil {
 			return false, err
 		}
+		// TODO: remove this once https://github.com/knative/serving/issues/2018 is resolved
+		deleteSingleResource(kc, "horizontalpodautoscaler.autoscaling", "istio-pilot")
 	}
 	return true, nil
 }
@@ -282,6 +284,17 @@ func deleteNamespaces(kc *kubectlClient, namespaces []string) error {
 		}
 	}
 	return nil
+}
+
+func deleteSingleResource(kc *kubectlClient, resourceType string, name string) error {
+	fmt.Printf("Deleting %s/%s resource\n", resourceType, name)
+	deleteLog, err := kc.kubeCtl.Exec([]string{"delete", resourceType, name})
+	if err != nil {
+		if !strings.Contains(deleteLog, "NotFound") {
+			fmt.Printf("%s", deleteLog)
+		}
+	}
+	return err
 }
 
 func deleteClusterResources(kc *kubectlClient, resourceType string, prefix string) error {
