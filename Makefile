@@ -1,4 +1,4 @@
-.PHONY: build clean test all release gen-mocks
+.PHONY: build clean test all release gen-mocks check-mockery
 
 OUTPUT = ./riff
 GO_SOURCES = $(shell find . -type f -name '*.go')
@@ -18,7 +18,10 @@ build: $(OUTPUT)
 test:
 	go test ./...
 
-gen-mocks:
+check-mockery:
+	@which mockery > /dev/null || (echo mockery not found: issue "go get -u github.com/vektra/mockery/.../" && false)
+
+gen-mocks: check-mockery
 	mockery -output pkg/core/mocks 			-outpkg mocks 			-dir pkg/core 											-name Client
 	mockery -output pkg/core/mocks 			-outpkg mocks 			-dir pkg/core 											-name ImageClient
 	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes 				-name Interface
