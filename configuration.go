@@ -34,12 +34,12 @@ This file is defined in the root of this repository and symbolically linked from
 
 var (
 	buildpacks = map[string]string{
-		"java": "projectriff/buildpack",
+		"java":    "projectriff/buildpack",
+		"command": "projectriff/buildpack",
+		"node":    "projectriff/buildpack",
 	}
 	invokers = map[string]string{
-		"jar":     "https://github.com/projectriff/java-function-invoker/raw/v0.1.1/java-invoker.yaml",
-		"command": "https://github.com/projectriff/command-function-invoker/raw/v0.0.7/command-invoker.yaml",
-		"node":    "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
+		"jar": "https://github.com/projectriff/java-function-invoker/raw/v0.1.1/java-invoker.yaml",
 	}
 	manifests = map[string]*core.Manifest{
 		"latest": {
@@ -55,7 +55,7 @@ var (
 			},
 			Namespace: []string{
 				"https://storage.googleapis.com/riff-releases/latest/riff-build.yaml",
-				"https://storage.googleapis.com/riff-releases/riff-cnb-buildtemplate-0.1.0.yaml",
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate-0.0.1-snapshot-ci-64830c3bbc6503beafdae382ead115806fa100ca.yaml",
 			},
 		},
 		"stable": {

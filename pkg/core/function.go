@@ -133,6 +133,8 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 					Name: "riff-cnb",
 					Arguments: []build.ArgumentSpec{
 						{Name: "IMAGE", Value: options.Image},
+						{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
+						{Name: "FUNCTION_HANDLER", Value: options.Handler},
 						// TODO configure buildtemplate based on buildpack image
 						// {Name: "TBD", Value: options.BuildpackImage},
 					},
