@@ -18,11 +18,12 @@
 package resource_test
 
 import (
+	"os"
+	"path/filepath"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/resource"
-	"os"
-	"path/filepath"
 )
 
 var _ = Describe("ListImages", func() {
@@ -105,6 +106,23 @@ var _ = Describe("ListImages", func() {
 				"k8s.gcr.io/fluentd-elasticsearch:v2.0.4",
 				"gcr.io/knative-releases/github.com/knative/serving/cmd/controller@sha256:28db335f18cbd2a015fd218b9c7ce30b4366898fa3728a7f6dab6537991de028",
 				"gcr.io/knative-releases/github.com/knative/serving/cmd/webhook@sha256:50ea89c48f8890fbe0cee336fc5cbdadcfe6884afbe5977db5d66892095b397d",
+			))
+		})
+	})
+
+	Context("when using a parameterized resource file", func() {
+		BeforeEach(func() {
+			res = "parameterized.yaml"
+		})
+
+		It("should list the images in the resource file", func() {
+			Expect(err).NotTo(HaveOccurred())
+			Expect(images).To(ConsistOf("packs/run",
+				"packs/base",
+				"projectriff/buildpack",
+				"projectriff/buildpack",
+				"packs/util",
+				"packs/util",
 			))
 		})
 	})

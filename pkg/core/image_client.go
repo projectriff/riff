@@ -147,7 +147,7 @@ func (c *imageClient) PullImages(options PullImagesOptions) error {
 }
 
 func (c *imageClient) ListImages(options ListImagesOptions) error {
-	m, err := NewManifest(options.Manifest)
+	m, err := ResolveManifest(c.manifests, options.Manifest)
 	if err != nil {
 		return err
 	}

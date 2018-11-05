@@ -61,8 +61,7 @@ func visitImages(y interface{}, visitor func(string)) {
 		}
 
 		if args, ok := v["args"]; ok {
-			switch ar := args.(type) {
-			case []interface{}:
+			if ar, ok := args.([]interface{}); ok {
 				for i, a := range ar {
 					if a, ok := a.(string); ok {
 						if strings.HasPrefix(a, "-") && strings.HasSuffix(a, "-image") && len(ar) > i+1 {
@@ -72,7 +71,6 @@ func visitImages(y interface{}, visitor func(string)) {
 						}
 					}
 				}
-			default:
 			}
 		}
 
@@ -100,6 +98,24 @@ func visitImages(y interface{}, visitor func(string)) {
 			}
 		}
 
+		if parms, ok := v["parameters"]; ok {
+			if pr, ok := parms.([]interface{}); ok {
+				for _, p := range pr {
+					if pmap, ok := p.(map[string]interface{}); ok {
+						// if this parameter map has a "name" key which indicates an image and a "default" key with a
+						// string value, treat the value as a possible image
+						if name, ok := stringMapValue(pmap, "name"); ok {
+							if strings.HasSuffix(name, "IMAGE") {
+								if deflt, ok := stringMapValue(pmap, "default"); ok {
+									visitor(deflt)
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 		for key, val := range v {
 			if strings.HasSuffix(key, "Image") || strings.HasSuffix(key, "-image") {
 				if vs, ok := val.(string); ok {
@@ -118,4 +134,14 @@ func visitImages(y interface{}, visitor func(string)) {
 		}
 	default:
 	}
+}
+
+func stringMapValue(m map[string]interface{}, key string) (string, bool) {
+	if value, ok := m[key]; ok {
+		if valueStr, ok := value.(string); ok {
+			return valueStr, true
+
+		}
+	}
+	return "", false
 }
