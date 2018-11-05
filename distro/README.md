@@ -32,7 +32,7 @@ riff-distro system download -m stable -o .
 Scan the release yaml files to generate a list of images into `image-manifest.yaml`.  In general this list will require additional validation. 
 
 ```sh
-riff-distro image list -m stable --no-check
+riff-distro image list -m manifest.yaml --no-check
 ```
 
 Using ` --no-check` avoids checking each image. Checks are performed by attempting to pull the images using the local docker daemon.
