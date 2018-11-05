@@ -22,7 +22,7 @@ install: build
 	cp $(OUTPUT) $(GOBIN)
 
 $(OUTPUT): $(GO_SOURCES) ../vendor ../VERSION
-	go build -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)" *.go
+	go build -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)"
 
 clean:
 	rm -f $(OUTPUT)
