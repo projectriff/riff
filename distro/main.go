@@ -22,28 +22,6 @@ import (
 	"fmt"
 
 	"github.com/projectriff/riff/distro/commands"
-	"github.com/projectriff/riff/pkg/core"
-)
-
-var (
-	manifests = map[string]*core.Manifest{
-		"latest": &core.Manifest{
-			ManifestVersion: "0.1",
-			Istio: []string{
-				"https://storage.googleapis.com/knative-releases/serving/latest/istio.yaml",
-			},
-			Knative: []string{
-				"https://storage.googleapis.com/knative-releases/build/latest/release.yaml",
-				"https://storage.googleapis.com/knative-releases/serving/latest/serving.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/latest/release.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/latest/release-clusterbus-stub.yaml",
-			},
-			Namespace: []string{
-				"https://storage.googleapis.com/riff-releases/latest/riff-build.yaml",
-				"https://storage.googleapis.com/riff-releases/riff-cnb-buildtemplate-0.1.0.yaml",
-			},
-		},
-	}
 )
 
 func main() {

@@ -37,7 +37,7 @@ install: build
 	cp $(OUTPUT) $(GOBIN)
 
 $(OUTPUT): $(GO_SOURCES) vendor VERSION
-	go build -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)" main.go
+	go build -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)" *.go
 
 release: $(GO_SOURCES) vendor VERSION
 	GOOS=darwin   GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     main.go && tar -czf riff-darwin-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
