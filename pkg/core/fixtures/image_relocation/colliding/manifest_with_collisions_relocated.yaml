@@ -1,7 +1,0 @@
-manifestVersion: 0.1
-istio:
-  - collision-e295733ae7c2ab869d58c96f061b54b8.yaml
-knative:
-  - collision-4f5db84e8b08e0512b468a381f61f7b4.yaml
-namespace:
-  - collision-4f5db84e8b08e0512b468a381f61f7b4.yaml

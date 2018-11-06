@@ -52,11 +52,6 @@ make build install
 ----
 NOTE: This installs the CLI in `$GOBIN`, or if that is not set, in the `bin` subdirectory of the directory specified in `$GOPATH`.
 
-
-== [[distro]] riff-distro
-
-A separate link:distro[riff-distro] CLI provides tooling to create distributions of images for on-premise riff installations.
-
 == Contributing to riff
 
 Please refer to the link:CONTRIBUTING.adoc[Contributors' Guide].

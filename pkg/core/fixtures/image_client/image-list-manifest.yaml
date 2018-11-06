@@ -1,7 +1,0 @@
-manifestVersion: 0.1
-istio:
-- image-list-simple.yaml
-knative:
-- image-list-simple.yaml
-namespace:
-- image-list-simple.yaml

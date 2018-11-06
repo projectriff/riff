@@ -18,15 +18,10 @@ package commands
 
 import (
 	"fmt"
-	"os"
 	"os/user"
 	"strings"
 
 	"github.com/projectriff/riff/pkg/env"
-	"github.com/projectriff/riff/pkg/fileutils"
-	"github.com/projectriff/riff/pkg/resource"
-
-	"github.com/projectriff/riff/pkg/docker"
 
 	eventing "github.com/knative/eventing/pkg/client/clientset/versioned"
 	serving "github.com/knative/serving/pkg/client/clientset/versioned"
@@ -87,8 +82,6 @@ func CreateAndWireRootCommand(manifests map[string]*core.Manifest, invokers, bui
 
 	var client core.Client
 	var kc core.KubectlClient
-	var dockerClient docker.Docker
-	var imageClient core.ImageClient
 
 	rootCmd := &cobra.Command{
 		Use:   env.Cli.Name,
@@ -101,13 +94,6 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		SilenceUsage:               true, // We'll print the *help* message instead of *usage* ourselves
 		DisableAutoGenTag:          true,
 		SuggestionsMinimumDistance: 2,
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			dockerClient = docker.RealDocker(os.Stdin, cmd.OutOrStdout(), cmd.OutOrStderr())
-			checker := fileutils.NewChecker()
-			copier := fileutils.NewCopier(cmd.OutOrStdout(), checker)
-			imageClient = core.NewImageClient(dockerClient, copier, checker, resource.ListImages, cmd.OutOrStdout(), manifests)
-			return nil
-		},
 	}
 
 	installAdvancedUsage(rootCmd)
@@ -138,13 +124,6 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		ChannelDelete(&client),
 	)
 
-	image := Image()
-	image.AddCommand(
-		ImageRelocate(&imageClient),
-		ImageLoad(&imageClient),
-		ImagePush(&imageClient),
-	)
-
 	namespace := Namespace()
 	installKubeConfigSupport(namespace, &client, &kc)
 	namespace.AddCommand(
@@ -170,7 +149,6 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		function,
 		service,
 		channel,
-		image,
 		namespace,
 		system,
 		subscription,
