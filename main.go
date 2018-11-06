@@ -20,7 +20,46 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/projectriff/riff/pkg/core"
+
 	"github.com/projectriff/riff/cmd/commands"
+)
+
+var (
+	builder = "projectriff/builder"
+
+	manifests = map[string]*core.Manifest{
+		"latest": {
+			ManifestVersion: "0.1",
+			Istio: []string{
+				"https://storage.googleapis.com/knative-releases/serving/latest/istio.yaml",
+			},
+			Knative: []string{
+				"https://storage.googleapis.com/knative-releases/build/latest/release.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/latest/serving.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181106-a99376f/release.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181106-a99376f/release-clusterbus-stub.yaml",
+			},
+			Namespace: []string{
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate.yaml",
+			},
+		},
+		"stable": {
+			ManifestVersion: "0.1",
+			Istio: []string{
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.0/istio.yaml",
+			},
+			Knative: []string{
+				"https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v20181101-v0.2.0-11-g877523d/serving.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181031-a2f9417/release.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181031-a2f9417/release-clusterbus-stub.yaml",
+			},
+			Namespace: []string{
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate-0.0.1-snapshot-ci-04852871adf05191969bb3bee8ed65cf7cd31285.yaml",
+			},
+		},
+	}
 )
 
 func main() {

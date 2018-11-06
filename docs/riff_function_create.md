@@ -33,7 +33,7 @@ riff function create [flags]
 
 ```
       --artifact path                    path to the function source code or jar file; auto-detected if not specified
-      --builder repository/image[:tag]   the repository/image[:tag] coordinates of a custom buildpack builder [local builds only] (default "projectriff/buildpack:0.0.1-snapshot-ci-64830c3bbc6503beafdae382ead115806fa100ca")
+      --builder repository/image[:tag]   the repository/image[:tag] coordinates of a custom buildpack builder [local builds only] (default "projectriff/builder")
       --dry-run                          don't create resources but print yaml representation on stdout
       --env stringArray                  environment variable expressed in a 'key=value' format
       --env-from stringArray             environment variable created from a source reference; see command help for supported formats

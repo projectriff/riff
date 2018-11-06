@@ -20,7 +20,6 @@ See https://projectriff.io and https://github.com/knative/docs
 * [riff channel](riff_channel.md)	 - Interact with channel related resources
 * [riff completion](riff_completion.md)	 - Generate shell completion scripts
 * [riff function](riff_function.md)	 - Interact with function related resources
-* [riff image](riff_image.md)	 - Interact with docker images
 * [riff namespace](riff_namespace.md)	 - Manage namespaces used for riff resources
 * [riff service](riff_service.md)	 - Interact with service related resources
 * [riff subscription](riff_subscription.md)	 - Interact with subscription-related resources
