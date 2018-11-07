@@ -32,18 +32,6 @@ import (
 )
 
 var _ = Describe("The riff function create command", func() {
-	var (
-		invokers   map[string]string
-		buildpacks map[string]string
-	)
-	BeforeEach(func() {
-		invokers = map[string]string{
-			"node": "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
-		}
-		buildpacks = map[string]string{
-			"java": "projectriff/buildpack",
-		}
-	})
 	Context("when given wrong args or flags", func() {
 		var (
 			mockClient core.Client
@@ -51,45 +39,30 @@ var _ = Describe("The riff function create command", func() {
 		)
 		BeforeEach(func() {
 			mockClient = nil
-			fc = commands.FunctionCreate(&mockClient, invokers, buildpacks)
+			fc = commands.FunctionCreate(&mockClient, "")
 		})
 		It("should fail with no args", func() {
 			fc.SetArgs([]string{})
 			err := fc.Execute()
-			Expect(err).To(MatchError("accepts 2 arg(s), received 0"))
+			Expect(err).To(MatchError("accepts 1 arg(s), received 0"))
 		})
-		It("should fail with invalid invoker or function name", func() {
-			fc.SetArgs([]string{".invalid", "fn-name"})
+		It("should fail with invalid function name", func() {
+			fc.SetArgs([]string{".invalid"})
 			err := fc.Execute()
-			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
-
-			fc = commands.FunctionCreate(&mockClient, invokers, buildpacks)
-			fc.SetArgs([]string{"node", "invålid"})
-			err = fc.Execute()
 			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
 		})
 		It("should fail without required flags", func() {
-			fc.SetArgs([]string{"node", "square", "--local-path", "."})
+			fc.SetArgs([]string{"square", "--local-path", "."})
 			err := fc.Execute()
 			Expect(err).To(MatchError(ContainSubstring("required flag(s)")))
 			Expect(err).To(MatchError(ContainSubstring("image")))
 		})
 		It("should fail without required source location flags", func() {
-			fc.SetArgs([]string{"node", "square"})
+			fc.SetArgs([]string{"square"})
 			err := fc.Execute()
 			Expect(err).To(MatchError(ContainSubstring("at least one of")))
 			Expect(err).To(MatchError(ContainSubstring("--git-repo")))
 			Expect(err).To(MatchError(ContainSubstring("--local-path")))
-		})
-		It("should fail without invoker url with custom invoker", func() {
-			fc.SetArgs([]string{"custom", "square", "--git-repo", "http://git.com", "--image", "hello/image"})
-			err := fc.Execute()
-			Expect(err).To(MatchError(ContainSubstring("--invoker-url is required for the custom invoker")))
-		})
-		It("should fail with invoker url", func() {
-			fc.SetArgs([]string{"node", "square", "--git-repo", "http://git.com", "--image", "hello/image", "--invoker-url", "http://example.com"})
-			err := fc.Execute()
-			Expect(err).To(MatchError(ContainSubstring("--invoker-url is only available for the custom invoker")))
 		})
 	})
 
@@ -103,20 +76,19 @@ var _ = Describe("The riff function create command", func() {
 			client = new(mocks.Client)
 			asMock = client.(*mocks.Client)
 
-			fc = commands.FunctionCreate(&client, invokers, buildpacks)
+			fc = commands.FunctionCreate(&client, "")
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
 
 		})
 		It("should involve the core.Client", func() {
-			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
+			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 
 			o := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
-				Invoker:     "node",
-				InvokerURL:  "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
+				Invoker:     "",
 			}
 			o.Name = "square"
 			o.Image = "foo/bar"
@@ -127,14 +99,14 @@ var _ = Describe("The riff function create command", func() {
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
-		It("should support custom invoker urls", func() {
-			fc.SetArgs([]string{"custom", "square", "--invoker-url", "http://github.com/acmelang/invoker.yaml", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
+		It("should pass correct options from flags", func() {
+			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo", "--invoker", "pascal", "--builder", "wizz/mot"})
 
 			o := core.CreateFunctionOptions{
-				GitRepo:     "https://github.com/repo",
-				GitRevision: "master",
-				Invoker:     "custom",
-				InvokerURL:  "http://github.com/acmelang/invoker.yaml",
+				GitRepo:        "https://github.com/repo",
+				GitRevision:    "master",
+				Invoker:        "pascal",
+				BuildpackImage: "wizz/mot",
 			}
 			o.Name = "square"
 			o.Image = "foo/bar"
@@ -143,11 +115,10 @@ var _ = Describe("The riff function create command", func() {
 
 			asMock.On("CreateFunction", o, mock.Anything).Return(nil, nil)
 			err := fc.Execute()
-			fmt.Print(err)
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should propagate core.Client errors", func() {
-			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
+			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 
 			e := fmt.Errorf("some error")
 			asMock.On("CreateFunction", mock.Anything, mock.Anything).Return(nil, e)
@@ -155,14 +126,12 @@ var _ = Describe("The riff function create command", func() {
 			Expect(err).To(MatchError(e))
 		})
 		It("should add env vars when asked to", func() {
-			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
+			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
 				"--env", "FOO=bar", "--env", "BAZ=qux", "--env-from", "secretKeyRef:foo:bar"})
 
 			o := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
-				Invoker:     "node",
-				InvokerURL:  "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
 			}
 			o.Name = "square"
 			o.Image = "foo/bar"
@@ -174,13 +143,11 @@ var _ = Describe("The riff function create command", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should print when --dry-run is set", func() {
-			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo", "--dry-run"})
+			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo", "--dry-run"})
 
 			functionOptions := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
-				Invoker:     "node",
-				InvokerURL:  "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
 			}
 			functionOptions.Name = "square"
 			functionOptions.Image = "foo/bar"
@@ -202,12 +169,10 @@ var _ = Describe("The riff function create command", func() {
 		})
 
 		It("should display the status hint", func() {
-			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
+			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 			functionOptions := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
-				Invoker:     "node",
-				InvokerURL:  "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
 			}
 			functionOptions.Name = "square"
 			functionOptions.Image = "foo/bar"
@@ -227,13 +192,11 @@ var _ = Describe("The riff function create command", func() {
 		})
 
 		It("should include the nondefault namespace in the status hint", func() {
-			fc.SetArgs([]string{"node", "square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
+			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
 				"--namespace", "ns"})
 			functionOptions := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
-				Invoker:     "node",
-				InvokerURL:  "https://github.com/projectriff/node-function-invoker/raw/v0.0.8/node-invoker.yaml",
 			}
 			functionOptions.Name = "square"
 			functionOptions.Namespace = "ns"

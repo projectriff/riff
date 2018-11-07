@@ -25,7 +25,7 @@ import (
 
 func main() {
 
-	root := commands.CreateAndWireRootCommand(manifests, invokers, buildpacks)
+	root := commands.CreateAndWireRootCommand(manifests, builder)
 
 	sub, err := root.ExecuteC()
 	if err != nil {
