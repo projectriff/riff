@@ -33,14 +33,8 @@ This file is defined in the root of this repository and symbolically linked from
 */
 
 var (
-	buildpacks = map[string]string{
-		"java":    "projectriff/buildpack",
-		"command": "projectriff/buildpack",
-		"node":    "projectriff/buildpack",
-	}
-	invokers = map[string]string{
-		"jar": "https://github.com/projectriff/java-function-invoker/raw/v0.1.1/java-invoker.yaml",
-	}
+	builder = "projectriff/buildpack:0.0.1-snapshot-ci-64830c3bbc6503beafdae382ead115806fa100ca"
+
 	manifests = map[string]*core.Manifest{
 		"latest": {
 			ManifestVersion: "0.1",

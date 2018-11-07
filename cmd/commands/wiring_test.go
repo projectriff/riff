@@ -15,12 +15,10 @@ var _ = Describe("`riff` root command", func() {
 		var (
 			rootCommand *cobra.Command
 			manifests   map[string]*core.Manifest
-			invokers    map[string]string
-			buildpacks  map[string]string
 		)
 
 		BeforeEach(func() {
-			rootCommand = CreateAndWireRootCommand(manifests, invokers, buildpacks)
+			rootCommand = CreateAndWireRootCommand(manifests, "")
 		})
 
 		It("including `riff subscription`", func() {

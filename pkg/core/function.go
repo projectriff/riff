@@ -22,8 +22,12 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/BurntSushi/toml"
 
 	"github.com/boz/go-logutil"
 	"github.com/boz/kail"
@@ -54,7 +58,6 @@ type CreateFunctionOptions struct {
 
 	Invoker        string
 	BuildpackImage string
-	InvokerURL     string
 
 	Handler  string
 	Artifact string
@@ -81,68 +84,48 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 	annotations[buildAnnotation] = "1"
 	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
 
-	if options.InvokerURL != "" {
-		if options.LocalPath != "" {
-			return nil, fmt.Errorf("the selected invoker %q does not support local builds", options.Invoker)
+	if options.LocalPath != "" {
+		appDir := options.LocalPath
+		buildImage := options.BuildpackImage
+		runImage := "packs/run"
+		repoName := options.Image
+		publish := publishImage(repoName)
+
+		if s.ObjectMeta.Annotations == nil {
+			s.ObjectMeta.Annotations = make(map[string]string)
 		}
-		// invoker based cluster build
+		s.ObjectMeta.Annotations[buildpackBuildImageAnnotation] = buildImage
+		s.ObjectMeta.Annotations[buildpackRunImageAnnotation] = runImage
+
+		if options.DryRun {
+			// skip build for a dry run
+			log.Write([]byte("Skipping local build\n"))
+		} else {
+			if err := c.writeRiffToml(options); err != nil {
+				return nil, err
+			}
+			err := pack.Build(appDir, buildImage, runImage, repoName, publish)
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		// buildpack based cluster build
 		s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
 			ServiceAccountName: "riff-build",
 			Source:             c.makeBuildSourceSpec(options),
 			Template: &build.TemplateInstantiationSpec{
-				Name: "riff",
+				Name: "riff-cnb",
 				Arguments: []build.ArgumentSpec{
 					{Name: "IMAGE", Value: options.Image},
-					{Name: "INVOKER_PATH", Value: options.InvokerURL},
 					{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
 					{Name: "FUNCTION_HANDLER", Value: options.Handler},
-					{Name: "FUNCTION_NAME", Value: options.Name},
+					{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
+					// TODO configure buildtemplate based on buildpack image
+					// {Name: "TBD", Value: options.BuildpackImage},
 				},
 			},
 		}
-	} else if options.BuildpackImage != "" {
-		// TODO support options.Artifact and options.Handler
-		if options.LocalPath != "" {
-			appDir := options.LocalPath
-			buildImage := options.BuildpackImage
-			runImage := "packs/run"
-			repoName := options.Image
-			publish := publishImage(repoName)
-
-			if s.ObjectMeta.Annotations == nil {
-				s.ObjectMeta.Annotations = make(map[string]string)
-			}
-			s.ObjectMeta.Annotations[buildpackBuildImageAnnotation] = buildImage
-			s.ObjectMeta.Annotations[buildpackRunImageAnnotation] = runImage
-
-			if options.DryRun {
-				// skip build for a dry run
-				log.Write([]byte("Skipping local build\n"))
-			} else {
-				err := pack.Build(appDir, buildImage, runImage, repoName, publish)
-				if err != nil {
-					return nil, err
-				}
-			}
-		} else {
-			// buildpack based cluster build
-			s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
-				ServiceAccountName: "riff-build",
-				Source:             c.makeBuildSourceSpec(options),
-				Template: &build.TemplateInstantiationSpec{
-					Name: "riff-cnb",
-					Arguments: []build.ArgumentSpec{
-						{Name: "IMAGE", Value: options.Image},
-						{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
-						{Name: "FUNCTION_HANDLER", Value: options.Handler},
-						// TODO configure buildtemplate based on buildpack image
-						// {Name: "TBD", Value: options.BuildpackImage},
-					},
-				},
-			}
-		}
-	} else {
-		return nil, fmt.Errorf("unknown build permutation")
 	}
 
 	if !options.DryRun {
@@ -165,6 +148,25 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 	}
 
 	return s, nil
+}
+
+func (c *client) writeRiffToml(options CreateFunctionOptions) error {
+	t := struct {
+		Override string `toml:"override"`
+		Handler  string `toml:"handler"`
+		Artifact string `toml:"artifact"`
+	}{
+		Override: options.Invoker,
+		Handler:  options.Handler,
+		Artifact: options.Artifact,
+	}
+	path := filepath.Join(options.LocalPath, "riff.toml")
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return toml.NewEncoder(f).Encode(t)
 }
 
 func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.SourceSpec {
