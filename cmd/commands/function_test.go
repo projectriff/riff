@@ -76,7 +76,7 @@ var _ = Describe("The riff function create command", func() {
 			client = new(mocks.Client)
 			asMock = client.(*mocks.Client)
 
-			fc = commands.FunctionCreate(&client, "")
+			fc = commands.FunctionCreate(&client, "projectriff/builder")
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
@@ -86,9 +86,10 @@ var _ = Describe("The riff function create command", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 
 			o := core.CreateFunctionOptions{
-				GitRepo:     "https://github.com/repo",
-				GitRevision: "master",
-				Invoker:     "",
+				GitRepo:        "https://github.com/repo",
+				GitRevision:    "master",
+				Invoker:        "",
+				BuildpackImage: "projectriff/builder",
 			}
 			o.Name = "square"
 			o.Image = "foo/bar"
@@ -130,8 +131,9 @@ var _ = Describe("The riff function create command", func() {
 				"--env", "FOO=bar", "--env", "BAZ=qux", "--env-from", "secretKeyRef:foo:bar"})
 
 			o := core.CreateFunctionOptions{
-				GitRepo:     "https://github.com/repo",
-				GitRevision: "master",
+				GitRepo:        "https://github.com/repo",
+				GitRevision:    "master",
+				BuildpackImage: "projectriff/builder",
 			}
 			o.Name = "square"
 			o.Image = "foo/bar"
@@ -146,8 +148,9 @@ var _ = Describe("The riff function create command", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo", "--dry-run"})
 
 			functionOptions := core.CreateFunctionOptions{
-				GitRepo:     "https://github.com/repo",
-				GitRevision: "master",
+				GitRepo:        "https://github.com/repo",
+				GitRevision:    "master",
+				BuildpackImage: "projectriff/builder",
 			}
 			functionOptions.Name = "square"
 			functionOptions.Image = "foo/bar"
@@ -171,8 +174,9 @@ var _ = Describe("The riff function create command", func() {
 		It("should display the status hint", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 			functionOptions := core.CreateFunctionOptions{
-				GitRepo:     "https://github.com/repo",
-				GitRevision: "master",
+				GitRepo:        "https://github.com/repo",
+				GitRevision:    "master",
+				BuildpackImage: "projectriff/builder",
 			}
 			functionOptions.Name = "square"
 			functionOptions.Image = "foo/bar"
@@ -195,8 +199,9 @@ var _ = Describe("The riff function create command", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
 				"--namespace", "ns"})
 			functionOptions := core.CreateFunctionOptions{
-				GitRepo:     "https://github.com/repo",
-				GitRevision: "master",
+				GitRepo:        "https://github.com/repo",
+				GitRevision:    "master",
+				BuildpackImage: "projectriff/builder",
 			}
 			functionOptions.Name = "square"
 			functionOptions.Namespace = "ns"

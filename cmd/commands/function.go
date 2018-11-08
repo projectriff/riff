@@ -41,7 +41,7 @@ func Function() *cobra.Command {
 	}
 }
 
-func FunctionCreate(fcTool *core.Client, builder string) *cobra.Command {
+func FunctionCreate(fcTool *core.Client, defaultBuilder string) *cobra.Command {
 	createFunctionOptions := core.CreateFunctionOptions{}
 
 	command := &cobra.Command{
@@ -95,7 +95,10 @@ func FunctionCreate(fcTool *core.Client, builder string) *cobra.Command {
 	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
 	command.MarkFlagRequired("image")
 	command.Flags().StringVar(&createFunctionOptions.Invoker, "invoker", "", "invoker runtime to override `language` detected by buildpack")
-	command.Flags().StringVar(&createFunctionOptions.BuildpackImage, "builder", builder, "the `repository/image[:tag]` coordinates of a custom buildpack builder [local builds only]")
+	command.Flags().StringVar(&createFunctionOptions.BuildpackImage, "builder", defaultBuilder, "the `repository/image[:tag]` coordinates of a custom buildpack builder [local builds only]")
+	if defaultBuilder == "" {
+		command.MarkFlagRequired("builder")
+	}
 	command.Flags().StringVar(&createFunctionOptions.GitRepo, "git-repo", "", "the `URL` for a git repository hosting the function code")
 	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` of the function code to use")
 	command.Flags().StringVarP(&createFunctionOptions.LocalPath, "local-path", "l", "", "`path` to local source to build the image from; only build-pack builds are supported at this time")
