@@ -39,7 +39,7 @@ var _ = Describe("The riff function create command", func() {
 		)
 		BeforeEach(func() {
 			mockClient = nil
-			fc = commands.FunctionCreate(&mockClient, "")
+			fc = commands.FunctionCreate(&mockClient, "projectriff/builder")
 		})
 		It("should fail with no args", func() {
 			fc.SetArgs([]string{})
