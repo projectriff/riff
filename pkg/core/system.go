@@ -106,6 +106,7 @@ func (kc *kubectlClient) applyReleaseWithRetry(release string, options SystemIns
 	err := kc.applyRelease(release, options)
 	if err != nil {
 		fmt.Printf("Error applying resources, trying again\n")
+		time.Sleep(5 * time.Second) // wait for previous resources to be created
 		return kc.applyRelease(release, options)
 	}
 	return nil
