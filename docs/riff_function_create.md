@@ -32,21 +32,20 @@ riff function create [flags]
 ### Options
 
 ```
-      --artifact path                    path to the function source code or jar file; auto-detected if not specified
-      --builder repository/image[:tag]   the repository/image[:tag] coordinates of a custom buildpack builder [local builds only] (default "projectriff/builder")
-      --dry-run                          don't create resources but print yaml representation on stdout
-      --env stringArray                  environment variable expressed in a 'key=value' format
-      --env-from stringArray             environment variable created from a source reference; see command help for supported formats
-      --git-repo URL                     the URL for a git repository hosting the function code
-      --git-revision ref-spec            the git ref-spec of the function code to use (default "master")
-      --handler method or class          the name of the method or class to invoke, depending on the invoker used
-  -h, --help                             help for create
-      --image repository/image[:tag]     the name of the image to build; must be a writable repository/image[:tag] with credentials configured
-      --invoker language                 invoker runtime to override language detected by buildpack
-  -l, --local-path path                  path to local source to build the image from; only build-pack builds are supported at this time
-  -n, --namespace namespace              the namespace of the service
-  -v, --verbose                          print details of command progress
-  -w, --wait                             wait until the created resource reaches either a successful or an error state (automatic with --verbose)
+      --artifact path                  path to the function source code or jar file; auto-detected if not specified
+      --dry-run                        don't create resources but print yaml representation on stdout
+      --env stringArray                environment variable expressed in a 'key=value' format
+      --env-from stringArray           environment variable created from a source reference; see command help for supported formats
+      --git-repo URL                   the URL for a git repository hosting the function code
+      --git-revision ref-spec          the git ref-spec of the function code to use (default "master")
+      --handler method or class        the name of the method or class to invoke, depending on the invoker used
+  -h, --help                           help for create
+      --image repository/image[:tag]   the name of the image to build; must be a writable repository/image[:tag] with credentials configured
+      --invoker language               invoker runtime to override language detected by buildpack
+  -l, --local-path path                path to local source to build the image from; only build-pack builds are supported at this time
+  -n, --namespace namespace            the namespace of the service
+  -v, --verbose                        print details of command progress
+  -w, --wait                           wait until the created resource reaches either a successful or an error state (automatic with --verbose)
 ```
 
 ### Options inherited from parent commands
