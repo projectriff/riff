@@ -137,16 +137,8 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 			ServiceAccountName: "riff-build",
 			Source:             c.makeBuildSourceSpec(options),
 			Template: &build.TemplateInstantiationSpec{
-				Name: "riff-cnb",
-				Arguments: []build.ArgumentSpec{
-					{Name: "IMAGE", Value: options.Image},
-					{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
-					{Name: "FUNCTION_HANDLER", Value: options.Handler},
-					{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
-					{Name: "RUN_IMAGE", Value: options.RunImage},
-					// TODO configure buildtemplate based on buildpack image
-					// {Name: "TBD", Value: options.BuildpackImage},
-				},
+				Name:      "riff-cnb",
+				Arguments: c.makeBuildArguments(options),
 			},
 		}
 	}
@@ -199,6 +191,22 @@ func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.Sourc
 			Revision: options.GitRevision,
 		},
 	}
+}
+
+func (c *client) makeBuildArguments(options CreateFunctionOptions) []build.ArgumentSpec {
+	args := []build.ArgumentSpec{
+		{Name: "IMAGE", Value: options.Image},
+		{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
+		{Name: "FUNCTION_HANDLER", Value: options.Handler},
+		{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
+		// TODO configure buildtemplate based on buildpack image
+		// {Name: "TBD", Value: options.BuildpackImage},
+	}
+	if options.RunImage != "" {
+		// don't overwrite the default with an empty value
+		args = append(args, build.ArgumentSpec{Name: "RUN_IMAGE", Value: options.RunImage})
+	}
+	return args
 }
 
 func (c *client) displayFunctionCreationProgress(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}, errChan chan<- error) {
