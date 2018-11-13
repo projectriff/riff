@@ -159,19 +159,6 @@ func Set(name string) FlagsMatcher {
 	}
 }
 
-func NotSet(name string) FlagsMatcher {
-	return flagsMatcher{
-		eval: func(cmd *cobra.Command) bool {
-			f := cmd.Flag(name)
-			if f == nil {
-				panic(fmt.Sprintf("Expected to find flag named %q in command %q", name, cmd.Use))
-			}
-			return !f.Changed
-		},
-		desc: fmt.Sprintf("--%s is not set", name),
-	}
-}
-
 // FlagsDependency returns a validator that will evaluate the given delegate if the provided flag matcher returns true.
 // Use to enforce scenarios such as "if --foo is set, then --bar must be set as well".
 func FlagsDependency(matcher FlagsMatcher, delegate FlagsValidator) FlagsValidator {
@@ -237,37 +224,12 @@ func NotBlank(flagName string) FlagsValidator {
 	}
 }
 
-func FlagValidName(flagName string) FlagsValidator {
-	return func(cmd *cobra.Command) error {
-		if errs := validation.IsDNS1123Subdomain(cmd.Flag(flagName).Value.String()); len(errs) > 0 {
-			return fmt.Errorf("invalid registry hostname: %s", strings.Join(errs, "; "))
-		}
-		return nil
-	}
-}
-
 // ExactlyOneOf returns a FlagsValidator that asserts that one and only one of the passed in flags is set.
 func ExactlyOneOf(flagNames ...string) FlagsValidator {
 	return FlagsValidationConjunction(
 		AtLeastOneOf(flagNames...),
 		AtMostOneOf(flagNames...),
 	)
-}
-
-// NoneOf returns a FlagsValidator that asserts that none of the passed in flags are set.
-func NoneOf(flagNames ...string) FlagsValidator {
-	return func(cmd *cobra.Command) error {
-		for _, f := range flagNames {
-			flag := cmd.Flag(f)
-			if flag == nil {
-				panic(fmt.Sprintf("Expected to find flag named %q in command %q", f, cmd.Use))
-			}
-			if flag.Changed {
-				return fmt.Errorf("--%s should not be set", f)
-			}
-		}
-		return nil
-	}
 }
 
 // =========================================== Usage related functions =================================================
@@ -325,8 +287,8 @@ func tmpl(w io.Writer, text string, data interface{}) error {
 
 // rpad adds padding to the right of a string.
 func rpad(s string, padding int) string {
-	template := fmt.Sprintf("%%-%ds", padding)
-	return fmt.Sprintf(template, s)
+	format := fmt.Sprintf("%%-%ds", padding)
+	return fmt.Sprintf(format, s)
 }
 
 func trimRightSpace(s string) string {
