@@ -39,7 +39,8 @@ var _ = Describe("The riff function create command", func() {
 		)
 		BeforeEach(func() {
 			mockClient = nil
-			fc = commands.FunctionCreate(&mockClient, "projectriff/builder")
+			defaults := commands.FunctionCreateDefaults{LocalBuilder: "projectriff/builder", DefaultRunImage: "packs/run"}
+			fc = commands.FunctionCreate(&mockClient, defaults)
 		})
 		It("should fail with no args", func() {
 			fc.SetArgs([]string{})
@@ -75,8 +76,9 @@ var _ = Describe("The riff function create command", func() {
 		BeforeEach(func() {
 			client = new(mocks.Client)
 			asMock = client.(*mocks.Client)
+			defaults := commands.FunctionCreateDefaults{LocalBuilder: "projectriff/builder", DefaultRunImage: "packs/run"}
 
-			fc = commands.FunctionCreate(&client, "projectriff/builder")
+			fc = commands.FunctionCreate(&client, defaults)
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
@@ -90,6 +92,7 @@ var _ = Describe("The riff function create command", func() {
 				GitRevision:    "master",
 				Invoker:        "",
 				BuildpackImage: "projectriff/builder",
+				RunImage:       "packs/run",
 			}
 			o.Name = "square"
 			o.Image = "foo/bar"
@@ -108,6 +111,7 @@ var _ = Describe("The riff function create command", func() {
 				GitRevision:    "master",
 				Invoker:        "pascal",
 				BuildpackImage: "projectriff/builder",
+				RunImage:       "packs/run",
 			}
 			o.Name = "square"
 			o.Image = "foo/bar"
@@ -134,6 +138,7 @@ var _ = Describe("The riff function create command", func() {
 				GitRepo:        "https://github.com/repo",
 				GitRevision:    "master",
 				BuildpackImage: "projectriff/builder",
+				RunImage:       "packs/run",
 			}
 			o.Name = "square"
 			o.Image = "foo/bar"
@@ -151,6 +156,7 @@ var _ = Describe("The riff function create command", func() {
 				GitRepo:        "https://github.com/repo",
 				GitRevision:    "master",
 				BuildpackImage: "projectriff/builder",
+				RunImage:       "packs/run",
 			}
 			functionOptions.Name = "square"
 			functionOptions.Image = "foo/bar"
@@ -177,6 +183,7 @@ var _ = Describe("The riff function create command", func() {
 				GitRepo:        "https://github.com/repo",
 				GitRevision:    "master",
 				BuildpackImage: "projectriff/builder",
+				RunImage:       "packs/run",
 			}
 			functionOptions.Name = "square"
 			functionOptions.Image = "foo/bar"
@@ -202,6 +209,7 @@ var _ = Describe("The riff function create command", func() {
 				GitRepo:        "https://github.com/repo",
 				GitRevision:    "master",
 				BuildpackImage: "projectriff/builder",
+				RunImage:       "packs/run",
 			}
 			functionOptions.Name = "square"
 			functionOptions.Namespace = "ns"

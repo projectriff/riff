@@ -41,9 +41,17 @@ func Function() *cobra.Command {
 	}
 }
 
-func FunctionCreate(fcTool *core.Client, defaultBuilder string) *cobra.Command {
+// FunctionCreateDefaults contains values for "defaults" or "constants" that
+// can be overridden depending on the actual CLI tool being built.
+type FunctionCreateDefaults struct {
+	LocalBuilder    string // the image for the builder used when building locally
+	DefaultRunImage string // the default for the --run-image flag.
+}
+
+func FunctionCreate(fcTool *core.Client, defaults FunctionCreateDefaults) *cobra.Command {
 	createFunctionOptions := core.CreateFunctionOptions{
-		BuildpackImage: defaultBuilder,
+		BuildpackImage: defaults.LocalBuilder,
+		RunImage:       defaults.DefaultRunImage,
 	}
 
 	command := &cobra.Command{
@@ -62,7 +70,7 @@ func FunctionCreate(fcTool *core.Client, defaultBuilder string) *cobra.Command {
 			AtPosition(functionCreateFunctionNameIndex, ValidName()),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if defaultBuilder == "" && createFunctionOptions.LocalPath != "" {
+			if defaults.LocalBuilder == "" && createFunctionOptions.LocalPath != "" {
 				return fmt.Errorf("building from a local path requires that the builder be set. " +
 					"Refer to documentation to set the value in your environment")
 			}

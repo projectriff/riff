@@ -78,7 +78,7 @@ func resolveHomePath(p string) (string, error) {
 
 }
 
-func CreateAndWireRootCommand(manifests map[string]*core.Manifest, builder string) *cobra.Command {
+func CreateAndWireRootCommand(manifests map[string]*core.Manifest, localBuilder string, defaulRunImage string) *cobra.Command {
 
 	var client core.Client
 	var kc core.KubectlClient
@@ -101,7 +101,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	function := Function()
 	installKubeConfigSupport(function, &client, &kc)
 	function.AddCommand(
-		FunctionCreate(&client, builder),
+		FunctionCreate(&client, FunctionCreateDefaults{LocalBuilder: localBuilder, DefaultRunImage: defaulRunImage}),
 		FunctionBuild(&client),
 	)
 

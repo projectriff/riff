@@ -26,7 +26,8 @@ import (
 )
 
 var (
-	builder = "projectriff/builder"
+	builder         = "projectriff/builder"
+	defaultRunImage = "packs/run"
 
 	manifests = map[string]*core.Manifest{
 		"latest": {
@@ -64,7 +65,7 @@ var (
 
 func main() {
 
-	root := commands.CreateAndWireRootCommand(manifests, builder)
+	root := commands.CreateAndWireRootCommand(manifests, builder, defaultRunImage)
 
 	sub, err := root.ExecuteC()
 	if err != nil {

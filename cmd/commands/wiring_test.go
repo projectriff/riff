@@ -18,7 +18,7 @@ var _ = Describe("`riff` root command", func() {
 		)
 
 		BeforeEach(func() {
-			rootCommand = CreateAndWireRootCommand(manifests, "")
+			rootCommand = CreateAndWireRootCommand(manifests, "projectriff/builder", "packs/run")
 		})
 
 		It("including `riff subscription`", func() {
