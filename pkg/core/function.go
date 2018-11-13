@@ -60,6 +60,7 @@ type CreateFunctionOptions struct {
 
 	Invoker        string
 	BuildpackImage string
+	RunImage       string
 
 	Handler  string
 	Artifact string
@@ -89,7 +90,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 	if options.LocalPath != "" {
 		appDir := options.LocalPath
 		buildImage := options.BuildpackImage
-		runImage := "packs/run"
+		runImage := options.RunImage
 		repoName := options.Image
 		publish := publishImage(repoName)
 
@@ -106,7 +107,26 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 			if err := c.writeRiffToml(options); err != nil {
 				return nil, err
 			}
-			err := pack.Build(appDir, buildImage, runImage, repoName, publish)
+			bf, err := pack.DefaultBuildFactory()
+			if err != nil {
+				return nil, err
+			}
+			noPull := false
+			if strings.HasPrefix(buildImage, "dev.local") && strings.HasPrefix(runImage, "dev.local") {
+				noPull = true
+			}
+			b, err := bf.BuildConfigFromFlags(&pack.BuildFlags{
+				AppDir:   appDir,
+				Builder:  buildImage,
+				RunImage: runImage,
+				RepoName: repoName,
+				Publish:  publish,
+				NoPull:   noPull,
+			})
+			if err != nil {
+				return nil, err
+			}
+			err = b.Run()
 			if err != nil {
 				return nil, err
 			}
@@ -123,6 +143,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 					{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
 					{Name: "FUNCTION_HANDLER", Value: options.Handler},
 					{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
+					{Name: "RUN_IMAGE", Value: options.RunImage},
 					// TODO configure buildtemplate based on buildpack image
 					// {Name: "TBD", Value: options.BuildpackImage},
 				},
