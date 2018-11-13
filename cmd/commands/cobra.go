@@ -18,6 +18,7 @@ package commands
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"unicode"
@@ -237,10 +238,24 @@ func NotBlank(flagName string) FlagsValidator {
 	}
 }
 
-func FlagValidName(flagName string) FlagsValidator {
+func FlagValidRegistryName(flagName string) FlagsValidator {
 	return func(cmd *cobra.Command) error {
-		if errs := validation.IsDNS1123Subdomain(cmd.Flag(flagName).Value.String()); len(errs) > 0 {
+		registryNameValue := cmd.Flag(flagName).Value.String()
+		registryParts := strings.Split(registryNameValue, ":")
+
+		if len(registryParts) > 2 {
+			return fmt.Errorf("invalid registry name: %s", registryNameValue)
+		}
+
+		if errs := validation.IsDNS1123Subdomain(registryParts[0]); len(errs) > 0 {
 			return fmt.Errorf("invalid registry hostname: %s", strings.Join(errs, "; "))
+		}
+
+		if len(registryParts) == 2 {
+			portNumber, _ := strconv.Atoi(registryParts[1])
+			if errs := validation.IsValidPortNum(portNumber); len(errs) > 0 {
+				return fmt.Errorf("invalid registry port number: %s", strings.Join(errs, "; "))
+			}
 		}
 		return nil
 	}
