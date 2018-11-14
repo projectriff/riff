@@ -48,11 +48,11 @@ var (
 		"stable": {
 			ManifestVersion: "0.1",
 			Istio: []string{
-				"https://storage.googleapis.com/knative-releases/serving/previous/v20181106-v0.2.0-26-g91cd00d/istio.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.2/istio.yaml",
 			},
 			Knative: []string{
 				"https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
-				"https://storage.googleapis.com/knative-releases/serving/previous/v20181106-v0.2.0-26-g91cd00d/serving.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.2/serving.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181031-a2f9417/release.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181031-a2f9417/release-clusterbus-stub.yaml",
 			},
