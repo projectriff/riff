@@ -30,8 +30,8 @@ const (
 )
 
 const (
-	functionBuildFunctionNameIndex = iota
-	functionBuildNumberOfArgs
+	functionUpdateFunctionNameIndex = iota
+	functionUpdateNumberOfArgs
 )
 
 func Function() *cobra.Command {
@@ -123,24 +123,24 @@ func FunctionCreate(fcTool *core.Client, defaults FunctionCreateDefaults) *cobra
 	return command
 }
 
-func FunctionBuild(fcTool *core.Client) *cobra.Command {
+func FunctionUpdate(fcTool *core.Client) *cobra.Command {
 
-	buildFunctionOptions := core.BuildFunctionOptions{}
+	updateFunctionOptions := core.UpdateFunctionOptions{}
 
 	command := &cobra.Command{
-		Use:     "build",
-		Short:   "Trigger a revision build for a function resource",
-		Example: `  ` + env.Cli.Name + ` function build square`,
+		Use:     "update",
+		Short:   "Trigger a build to generate a new revision for a function resource",
+		Example: `  ` + env.Cli.Name + ` function update square`,
 		Args: ArgValidationConjunction(
-			cobra.ExactArgs(functionBuildNumberOfArgs),
-			AtPosition(functionBuildFunctionNameIndex, ValidName()),
+			cobra.ExactArgs(functionUpdateNumberOfArgs),
+			AtPosition(functionUpdateFunctionNameIndex, ValidName()),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			fnName := args[functionBuildFunctionNameIndex]
+			fnName := args[functionUpdateFunctionNameIndex]
 
-			buildFunctionOptions.Name = fnName
-			err := (*fcTool).BuildFunction(buildFunctionOptions, cmd.OutOrStdout())
+			updateFunctionOptions.Name = fnName
+			err := (*fcTool).UpdateFunction(updateFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err
 			}
@@ -153,10 +153,10 @@ func FunctionBuild(fcTool *core.Client) *cobra.Command {
 
 	LabelArgs(command, "FUNCTION_NAME")
 
-	command.Flags().StringVarP(&buildFunctionOptions.Namespace, "namespace", "n", "", "the `namespace` of the function")
-	command.Flags().StringVarP(&buildFunctionOptions.LocalPath, "local-path", "l", "", "path to local source to build the image from; only build-pack builds are supported at this time")
-	command.Flags().BoolVarP(&buildFunctionOptions.Verbose, "verbose", "v", false, verboseUsage)
-	command.Flags().BoolVarP(&buildFunctionOptions.Wait, "wait", "w", false, waitUsage)
+	command.Flags().StringVarP(&updateFunctionOptions.Namespace, "namespace", "n", "", "the `namespace` of the function")
+	command.Flags().StringVarP(&updateFunctionOptions.LocalPath, "local-path", "l", "", "path to local source to build the image from; only build-pack builds are supported at this time")
+	command.Flags().BoolVarP(&updateFunctionOptions.Verbose, "verbose", "v", false, verboseUsage)
+	command.Flags().BoolVarP(&updateFunctionOptions.Wait, "wait", "w", false, waitUsage)
 
 	return command
 }

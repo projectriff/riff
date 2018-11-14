@@ -484,7 +484,7 @@ func (selectorDisjunction) String() string {
 	panic("implement me")
 }
 
-type BuildFunctionOptions struct {
+type UpdateFunctionOptions struct {
 	Namespace string
 	Name      string
 	LocalPath string
@@ -500,7 +500,7 @@ func (c *client) getServiceSpecGeneration(namespace string, name string) (int64,
 	return s.Spec.Generation, nil
 }
 
-func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) error {
+func (c *client) UpdateFunction(options UpdateFunctionOptions, log io.Writer) error {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 
 	service, err := c.service(options.Namespace, options.Name)
@@ -525,7 +525,7 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 	c.bumpNonceAnnotation(service)
 
 	if build == nil {
-		// function was build locally, attempt to reconstruct configuration
+		// function was built locally, attempt to reconstruct configuration
 		appDir := options.LocalPath
 		buildImage := annotations[buildpackBuildImageAnnotation]
 		runImage := annotations[buildpackRunImageAnnotation]
@@ -559,7 +559,7 @@ func (c *client) BuildFunction(options BuildFunctionOptions, log io.Writer) erro
 		)
 		for i := 0; i < 10; i++ {
 			if i >= 10 {
-				return fmt.Errorf("build unsuccesful for \"%s\", service resource was never updated", options.Name)
+				return fmt.Errorf("update unsuccesful for \"%s\", service resource was never updated", options.Name)
 			}
 			time.Sleep(500 * time.Millisecond)
 			nextGen, err = c.getServiceSpecGeneration(options.Namespace, options.Name)

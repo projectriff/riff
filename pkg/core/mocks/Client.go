@@ -13,20 +13,6 @@ type Client struct {
 	mock.Mock
 }
 
-// BuildFunction provides a mock function with given fields: options, log
-func (_m *Client) BuildFunction(options core.BuildFunctionOptions, log io.Writer) error {
-	ret := _m.Called(options, log)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(core.BuildFunctionOptions, io.Writer) error); ok {
-		r0 = rf(options, log)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // CreateChannel provides a mock function with given fields: options
 func (_m *Client) CreateChannel(options core.CreateChannelOptions) (*v1alpha1.Channel, error) {
 	ret := _m.Called(options)
@@ -302,4 +288,18 @@ func (_m *Client) ServiceStatus(options core.ServiceStatusOptions) (*servingv1al
 	}
 
 	return r0, r1
+}
+
+// UpdateFunction provides a mock function with given fields: options, log
+func (_m *Client) UpdateFunction(options core.UpdateFunctionOptions, log io.Writer) error {
+	ret := _m.Called(options, log)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(core.UpdateFunctionOptions, io.Writer) error); ok {
+		r0 = rf(options, log)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }

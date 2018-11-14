@@ -31,7 +31,7 @@ import (
 
 type Client interface {
 	CreateFunction(options CreateFunctionOptions, log io.Writer) (*serving.Service, error)
-	BuildFunction(options BuildFunctionOptions, log io.Writer) error
+	UpdateFunction(options UpdateFunctionOptions, log io.Writer) error
 
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
 	DeleteSubscription(options DeleteSubscriptionOptions) error
