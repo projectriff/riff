@@ -85,7 +85,7 @@ var _ = Describe("The riff service create command", func() {
 		It("should involve the core.Client", func() {
 			sc.SetArgs([]string{"my-service", "--image", "foo/bar", "--namespace", "ns"})
 
-			o := core.CreateOrReviseServiceOptions{
+			o := core.CreateOrUpdateServiceOptions{
 				Name:    "my-service",
 				Image:   "foo/bar",
 				Env:     []string{},
@@ -109,7 +109,7 @@ var _ = Describe("The riff service create command", func() {
 			sc.SetArgs([]string{"my-service", "--image", "foo/bar", "--namespace", "ns", "--env", "FOO=bar",
 				"--env", "BAZ=qux", "--env-from", "secretKeyRef:foo:bar"})
 
-			o := core.CreateOrReviseServiceOptions{
+			o := core.CreateOrUpdateServiceOptions{
 				Name:    "my-service",
 				Image:   "foo/bar",
 				Env:     []string{"FOO=bar", "BAZ=qux"},
@@ -124,7 +124,7 @@ var _ = Describe("The riff service create command", func() {
 		It("should print when --dry-run is set", func() {
 			sc.SetArgs([]string{"square", "--image", "foo/bar", "--dry-run"})
 
-			serviceOptions := core.CreateOrReviseServiceOptions{
+			serviceOptions := core.CreateOrUpdateServiceOptions{
 				Name:    "square",
 				Image:   "foo/bar",
 				Env:     []string{},
@@ -160,7 +160,7 @@ status: {}
 ---
 `
 
-var _ = Describe("The riff service revise command", func() {
+var _ = Describe("The riff service update command", func() {
 	Context("when given wrong args or flags", func() {
 		var (
 			mockClient core.Client
@@ -168,7 +168,7 @@ var _ = Describe("The riff service revise command", func() {
 		)
 		BeforeEach(func() {
 			mockClient = nil
-			cc = commands.ServiceRevise(&mockClient)
+			cc = commands.ServiceUpdate(&mockClient)
 		})
 		It("should fail with no args", func() {
 			cc.SetArgs([]string{})
@@ -192,7 +192,7 @@ var _ = Describe("The riff service revise command", func() {
 			client = new(mocks.Client)
 			asMock = client.(*mocks.Client)
 
-			sc = commands.ServiceRevise(&client)
+			sc = commands.ServiceUpdate(&client)
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
@@ -200,7 +200,7 @@ var _ = Describe("The riff service revise command", func() {
 		It("should involve the core.Client", func() {
 			sc.SetArgs([]string{"my-service", "--image", "foo/bar", "--namespace", "ns"})
 
-			o := core.CreateOrReviseServiceOptions{
+			o := core.CreateOrUpdateServiceOptions{
 				Name:    "my-service",
 				Image:   "foo/bar",
 				Env:     []string{},
@@ -208,7 +208,7 @@ var _ = Describe("The riff service revise command", func() {
 			}
 			o.Namespace = "ns"
 
-			asMock.On("ReviseService", o).Return(nil, nil)
+			asMock.On("UpdateService", o).Return(nil, nil)
 			err := sc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -216,7 +216,7 @@ var _ = Describe("The riff service revise command", func() {
 			sc.SetArgs([]string{"my-service", "--image", "foo/bar"})
 
 			e := fmt.Errorf("some error")
-			asMock.On("ReviseService", mock.Anything).Return(nil, e)
+			asMock.On("UpdateService", mock.Anything).Return(nil, e)
 			err := sc.Execute()
 			Expect(err).To(MatchError(e))
 		})
@@ -224,7 +224,7 @@ var _ = Describe("The riff service revise command", func() {
 			sc.SetArgs([]string{"my-service", "--image", "foo/bar", "--namespace", "ns", "--env", "FOO=bar",
 				"--env", "BAZ=qux", "--env-from", "secretKeyRef:foo:bar"})
 
-			o := core.CreateOrReviseServiceOptions{
+			o := core.CreateOrUpdateServiceOptions{
 				Name:    "my-service",
 				Image:   "foo/bar",
 				Env:     []string{"FOO=bar", "BAZ=qux"},
@@ -232,14 +232,14 @@ var _ = Describe("The riff service revise command", func() {
 			}
 			o.Namespace = "ns"
 
-			asMock.On("ReviseService", o).Return(nil, nil)
+			asMock.On("UpdateService", o).Return(nil, nil)
 			err := sc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should print when --dry-run is set", func() {
 			sc.SetArgs([]string{"square", "--image", "foo/bar", "--dry-run"})
 
-			serviceOptions := core.CreateOrReviseServiceOptions{
+			serviceOptions := core.CreateOrUpdateServiceOptions{
 				Name:    "square",
 				Image:   "foo/bar",
 				Env:     []string{},
@@ -264,7 +264,7 @@ var _ = Describe("The riff service revise command", func() {
 					},
 				},
 			}
-			asMock.On("ReviseService", serviceOptions).Return(&svc, nil)
+			asMock.On("UpdateService", serviceOptions).Return(&svc, nil)
 
 			stdout := &strings.Builder{}
 			sc.SetOutput(stdout)
@@ -272,13 +272,13 @@ var _ = Describe("The riff service revise command", func() {
 			err := sc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout.String()).To(Equal(serviceReviseDryRun))
+			Expect(stdout.String()).To(Equal(serviceUpdateDryRun))
 		})
 
 	})
 })
 
-const serviceReviseDryRun = `metadata:
+const serviceUpdateDryRun = `metadata:
   creationTimestamp: null
   name: square
 spec:

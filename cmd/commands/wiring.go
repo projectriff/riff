@@ -110,7 +110,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	service.AddCommand(
 		ServiceList(&client),
 		ServiceCreate(&client),
-		ServiceRevise(&client),
+		ServiceUpdate(&client),
 		ServiceStatus(&client),
 		ServiceInvoke(&client),
 		ServiceDelete(&client),
