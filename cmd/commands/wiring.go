@@ -102,7 +102,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	installKubeConfigSupport(function, &client, &kc)
 	function.AddCommand(
 		FunctionCreate(&client, FunctionCreateDefaults{LocalBuilder: localBuilder, DefaultRunImage: defaultRunImage}),
-		FunctionBuild(&client),
+		FunctionUpdate(&client),
 	)
 
 	service := Service()

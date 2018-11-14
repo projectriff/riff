@@ -241,7 +241,7 @@ status: {}
 ---
 `
 
-var _ = Describe("The riff function build command", func() {
+var _ = Describe("The riff function update command", func() {
 	Context("when given wrong args or flags", func() {
 		var (
 			mockClient core.Client
@@ -249,7 +249,7 @@ var _ = Describe("The riff function build command", func() {
 		)
 		BeforeEach(func() {
 			mockClient = nil
-			fc = commands.FunctionBuild(&mockClient)
+			fc = commands.FunctionUpdate(&mockClient)
 		})
 		It("should fail with no args", func() {
 			fc.SetArgs([]string{})
@@ -257,7 +257,7 @@ var _ = Describe("The riff function build command", func() {
 			Expect(err).To(MatchError("accepts 1 arg(s), received 0"))
 		})
 		It("should fail with invalid function name", func() {
-			//fc = commands.FunctionBuild(&mockClient)
+			//fc = commands.FunctionUpdate(&mockClient)
 			fc.SetArgs([]string{"invålid"})
 			err := fc.Execute()
 			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
@@ -274,7 +274,7 @@ var _ = Describe("The riff function build command", func() {
 			client = new(mocks.Client)
 			asMock = client.(*mocks.Client)
 
-			fc = commands.FunctionBuild(&client)
+			fc = commands.FunctionUpdate(&client)
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
@@ -283,11 +283,11 @@ var _ = Describe("The riff function build command", func() {
 		It("should involve the core.Client", func() {
 			fc.SetArgs([]string{"square", "--namespace", "ns"})
 
-			o := core.BuildFunctionOptions{}
+			o := core.UpdateFunctionOptions{}
 			o.Name = "square"
 			o.Namespace = "ns"
 
-			asMock.On("BuildFunction", o, mock.Anything).Return(nil)
+			asMock.On("UpdateFunction", o, mock.Anything).Return(nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -295,7 +295,7 @@ var _ = Describe("The riff function build command", func() {
 			fc.SetArgs([]string{"square", "--namespace", "ns"})
 
 			e := fmt.Errorf("some error")
-			asMock.On("BuildFunction", mock.Anything, mock.Anything).Return(e)
+			asMock.On("UpdateFunction", mock.Anything, mock.Anything).Return(e)
 			err := fc.Execute()
 			Expect(err).To(MatchError(e))
 		})

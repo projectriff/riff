@@ -1,25 +1,25 @@
-## riff function build
+## riff function update
 
-Trigger a revision build for a function resource
+Trigger a build to generate a new revision for a function resource
 
 ### Synopsis
 
-Trigger a revision build for a function resource
+Trigger a build to generate a new revision for a function resource
 
 ```
-riff function build [flags]
+riff function update [flags]
 ```
 
 ### Examples
 
 ```
-  riff function build square
+  riff function update square
 ```
 
 ### Options
 
 ```
-  -h, --help                  help for build
+  -h, --help                  help for update
   -l, --local-path string     path to local source to build the image from; only build-pack builds are supported at this time
   -n, --namespace namespace   the namespace of the function
   -v, --verbose               print details of command progress
