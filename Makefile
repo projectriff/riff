@@ -4,7 +4,7 @@ OUTPUT = ./riff
 GO_SOURCES = $(shell find . -type f -name '*.go')
 VERSION ?= $(shell cat VERSION)
 GITSHA = $(shell git rev-parse HEAD)
-GITDIRTY = $(shell git diff-index --quiet HEAD -- || echo "dirty")
+GITDIRTY = $(shell git diff --quiet HEAD || echo "dirty")
 LDFLAGS_VERSION = -X github.com/projectriff/riff/pkg/env.cli_name=riff \
 				  -X github.com/projectriff/riff/pkg/env.cli_version=$(VERSION) \
 				  -X github.com/projectriff/riff/pkg/env.cli_gitsha=$(GITSHA) \
