@@ -37,8 +37,8 @@ const (
 )
 
 const (
-	serviceReviseServiceNameIndex = iota
-	serviceReviseNumberOfArgs
+	serviceUpdateServiceNameIndex = iota
+	serviceUpdateNumberOfArgs
 )
 
 const (
@@ -71,7 +71,7 @@ func Service() *cobra.Command {
 
 func ServiceCreate(fcTool *core.Client) *cobra.Command {
 
-	createServiceOptions := core.CreateOrReviseServiceOptions{}
+	createServiceOptions := core.CreateOrUpdateServiceOptions{}
 
 	command := &cobra.Command{
 		Use:   "create",
@@ -123,26 +123,26 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 	return command
 }
 
-func ServiceRevise(client *core.Client) *cobra.Command {
-	reviseServiceOptions := core.CreateOrReviseServiceOptions{}
+func ServiceUpdate(client *core.Client) *cobra.Command {
+	updateServiceOptions := core.CreateOrUpdateServiceOptions{}
 
 	command := &cobra.Command{
-		Use:     "revise",
+		Use:     "update",
 		Short:   "Create a new revision for a service, with updated attributes",
 		Long:    `Create a new revision for a service, updating the application/function image and/or environment.`,
-		Example: `  ` + env.Cli.Name + ` service revise square --image acme/square:1.1 --namespace joseph-ns`,
+		Example: `  ` + env.Cli.Name + ` service update square --image acme/square:1.1 --namespace joseph-ns`,
 		Args: ArgValidationConjunction(
-			cobra.ExactArgs(serviceReviseNumberOfArgs),
-			AtPosition(serviceReviseServiceNameIndex, ValidName()),
+			cobra.ExactArgs(serviceUpdateNumberOfArgs),
+			AtPosition(serviceUpdateServiceNameIndex, ValidName()),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fnName := args[serviceReviseServiceNameIndex]
-			reviseServiceOptions.Name = fnName
-			svc, err := (*client).ReviseService(reviseServiceOptions)
+			fnName := args[serviceUpdateServiceNameIndex]
+			updateServiceOptions.Name = fnName
+			svc, err := (*client).UpdateService(updateServiceOptions)
 			if err != nil {
 				return err
 			}
-			if reviseServiceOptions.DryRun {
+			if updateServiceOptions.DryRun {
 				marshaller := NewMarshaller(cmd.OutOrStdout())
 				if err = marshaller.Marshal(svc); err != nil {
 					return err
@@ -157,11 +157,11 @@ func ServiceRevise(client *core.Client) *cobra.Command {
 
 	LabelArgs(command, "SERVICE_NAME")
 
-	command.Flags().StringVarP(&reviseServiceOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
-	command.Flags().BoolVar(&reviseServiceOptions.DryRun, "dry-run", false, dryRunUsage)
-	command.Flags().StringVar(&reviseServiceOptions.Image, "image", "", "the `name[:tag]` reference of an image containing the application/function")
-	command.Flags().StringArrayVar(&reviseServiceOptions.Env, "env", []string{}, envUsage)
-	command.Flags().StringArrayVar(&reviseServiceOptions.EnvFrom, "env-from", []string{}, envFromUsage)
+	command.Flags().StringVarP(&updateServiceOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
+	command.Flags().BoolVar(&updateServiceOptions.DryRun, "dry-run", false, dryRunUsage)
+	command.Flags().StringVar(&updateServiceOptions.Image, "image", "", "the `name[:tag]` reference of an image containing the application/function")
+	command.Flags().StringArrayVar(&updateServiceOptions.Env, "env", []string{}, envUsage)
+	command.Flags().StringArrayVar(&updateServiceOptions.EnvFrom, "env-from", []string{}, envFromUsage)
 
 	return command
 }

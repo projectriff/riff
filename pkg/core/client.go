@@ -42,8 +42,8 @@ type Client interface {
 	DeleteChannel(options DeleteChannelOptions) error
 
 	ListServices(options ListServiceOptions) (*serving.ServiceList, error)
-	CreateService(options CreateOrReviseServiceOptions) (*serving.Service, error)
-	ReviseService(options CreateOrReviseServiceOptions) (*serving.Service, error)
+	CreateService(options CreateOrUpdateServiceOptions) (*serving.Service, error)
+	UpdateService(options CreateOrUpdateServiceOptions) (*serving.Service, error)
 	DeleteService(options DeleteServiceOptions) error
 	ServiceStatus(options ServiceStatusOptions) (*v1alpha1.ServiceCondition, error)
 	ServiceCoordinates(options ServiceInvokeOptions) (ingressIP string, hostName string, err error)

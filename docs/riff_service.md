@@ -21,6 +21,6 @@ Interact with service (as in `service.serving.knative.dev`) related resources.
 * [riff service delete](riff_service_delete.md)	 - Delete an existing service
 * [riff service invoke](riff_service_invoke.md)	 - Invoke a service
 * [riff service list](riff_service_list.md)	 - List service resources
-* [riff service revise](riff_service_revise.md)	 - Create a new revision for a service, with updated attributes
 * [riff service status](riff_service_status.md)	 - Display the status of a service
+* [riff service update](riff_service_update.md)	 - Create a new revision for a service, with updated attributes
 

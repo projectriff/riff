@@ -60,11 +60,11 @@ func (_m *Client) CreateFunction(options core.CreateFunctionOptions, log io.Writ
 }
 
 // CreateService provides a mock function with given fields: options
-func (_m *Client) CreateService(options core.CreateOrReviseServiceOptions) (*servingv1alpha1.Service, error) {
+func (_m *Client) CreateService(options core.CreateOrUpdateServiceOptions) (*servingv1alpha1.Service, error) {
 	ret := _m.Called(options)
 
 	var r0 *servingv1alpha1.Service
-	if rf, ok := ret.Get(0).(func(core.CreateOrReviseServiceOptions) *servingv1alpha1.Service); ok {
+	if rf, ok := ret.Get(0).(func(core.CreateOrUpdateServiceOptions) *servingv1alpha1.Service); ok {
 		r0 = rf(options)
 	} else {
 		if ret.Get(0) != nil {
@@ -73,7 +73,7 @@ func (_m *Client) CreateService(options core.CreateOrReviseServiceOptions) (*ser
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(core.CreateOrReviseServiceOptions) error); ok {
+	if rf, ok := ret.Get(1).(func(core.CreateOrUpdateServiceOptions) error); ok {
 		r1 = rf(options)
 	} else {
 		r1 = ret.Error(1)
@@ -216,29 +216,6 @@ func (_m *Client) ListSubscriptions(options core.ListSubscriptionsOptions) (*v1a
 	return r0, r1
 }
 
-// ReviseService provides a mock function with given fields: options
-func (_m *Client) ReviseService(options core.CreateOrReviseServiceOptions) (*servingv1alpha1.Service, error) {
-	ret := _m.Called(options)
-
-	var r0 *servingv1alpha1.Service
-	if rf, ok := ret.Get(0).(func(core.CreateOrReviseServiceOptions) *servingv1alpha1.Service); ok {
-		r0 = rf(options)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*servingv1alpha1.Service)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(core.CreateOrReviseServiceOptions) error); ok {
-		r1 = rf(options)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // ServiceCoordinates provides a mock function with given fields: options
 func (_m *Client) ServiceCoordinates(options core.ServiceInvokeOptions) (string, string, error) {
 	ret := _m.Called(options)
@@ -302,4 +279,27 @@ func (_m *Client) UpdateFunction(options core.UpdateFunctionOptions, log io.Writ
 	}
 
 	return r0
+}
+
+// UpdateService provides a mock function with given fields: options
+func (_m *Client) UpdateService(options core.CreateOrUpdateServiceOptions) (*servingv1alpha1.Service, error) {
+	ret := _m.Called(options)
+
+	var r0 *servingv1alpha1.Service
+	if rf, ok := ret.Get(0).(func(core.CreateOrUpdateServiceOptions) *servingv1alpha1.Service); ok {
+		r0 = rf(options)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*servingv1alpha1.Service)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(core.CreateOrUpdateServiceOptions) error); ok {
+		r1 = rf(options)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }

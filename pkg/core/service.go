@@ -39,7 +39,7 @@ func (c *client) ListServices(options ListServiceOptions) (*v1alpha1.ServiceList
 	return c.serving.ServingV1alpha1().Services(ns).List(meta_v1.ListOptions{})
 }
 
-type CreateOrReviseServiceOptions struct {
+type CreateOrUpdateServiceOptions struct {
 	Namespace string
 	Name      string
 	Image     string
@@ -50,7 +50,7 @@ type CreateOrReviseServiceOptions struct {
 	Wait      bool
 }
 
-func (c *client) CreateService(options CreateOrReviseServiceOptions) (*v1alpha1.Service, error) {
+func (c *client) CreateService(options CreateOrUpdateServiceOptions) (*v1alpha1.Service, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 
 	s, err := newService(options)
@@ -67,7 +67,7 @@ func (c *client) CreateService(options CreateOrReviseServiceOptions) (*v1alpha1.
 
 }
 
-func (c *client) ReviseService(options CreateOrReviseServiceOptions) (*v1alpha1.Service, error) {
+func (c *client) UpdateService(options CreateOrUpdateServiceOptions) (*v1alpha1.Service, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 
 	existingSvc, err := c.serving.ServingV1alpha1().Services(ns).Get(options.Name, meta_v1.GetOptions{})
@@ -101,7 +101,7 @@ func (c *client) ReviseService(options CreateOrReviseServiceOptions) (*v1alpha1.
 
 }
 
-func newService(options CreateOrReviseServiceOptions) (*v1alpha1.Service, error) {
+func newService(options CreateOrUpdateServiceOptions) (*v1alpha1.Service, error) {
 	envVars, err := ParseEnvVar(options.Env)
 	if err != nil {
 		return nil, err

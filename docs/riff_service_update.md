@@ -1,4 +1,4 @@
-## riff service revise
+## riff service update
 
 Create a new revision for a service, with updated attributes
 
@@ -7,13 +7,13 @@ Create a new revision for a service, with updated attributes
 Create a new revision for a service, updating the application/function image and/or environment.
 
 ```
-riff service revise [flags]
+riff service update [flags]
 ```
 
 ### Examples
 
 ```
-  riff service revise square --image acme/square:1.1 --namespace joseph-ns
+  riff service update square --image acme/square:1.1 --namespace joseph-ns
 ```
 
 ### Options
@@ -22,7 +22,7 @@ riff service revise [flags]
       --dry-run                don't create resources but print yaml representation on stdout
       --env stringArray        environment variable expressed in a 'key=value' format
       --env-from stringArray   environment variable created from a source reference; see command help for supported formats
-  -h, --help                   help for revise
+  -h, --help                   help for update
       --image name[:tag]       the name[:tag] reference of an image containing the application/function
   -n, --namespace namespace    the namespace of the service
 ```

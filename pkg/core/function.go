@@ -52,7 +52,7 @@ const (
 )
 
 type CreateFunctionOptions struct {
-	CreateOrReviseServiceOptions
+	CreateOrUpdateServiceOptions
 
 	LocalPath   string
 	GitRepo     string
@@ -69,7 +69,7 @@ type CreateFunctionOptions struct {
 func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 
-	s, err := newService(options.CreateOrReviseServiceOptions)
+	s, err := newService(options.CreateOrUpdateServiceOptions)
 	if err != nil {
 		return nil, err
 	}
