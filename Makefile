@@ -1,4 +1,4 @@
-.PHONY: build clean test all release gen-mocks check-mockery
+.PHONY: build clean test all release gen-mocks check-mockery verify-docs clean-docs
 
 OUTPUT = ./riff
 GO_SOURCES = $(shell find . -type f -name '*.go')
@@ -42,8 +42,14 @@ release: $(GO_SOURCES) vendor VERSION
 	GOOS=linux    GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     && tar -czf riff-linux-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
 	GOOS=windows  GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT).exe && zip -mq riff-windows-amd64.zip $(OUTPUT).exe && rm -f $(OUTPUT).exe
 
-docs: $(OUTPUT)
-	rm -fR docs && $(OUTPUT) docs
+docs: $(OUTPUT) clean-docs
+	$(OUTPUT) docs
+
+verify-docs: docs
+	git diff --exit-code docs
+
+clean-docs:
+	rm -fR docs
 
 clean:
 	rm -f $(OUTPUT)

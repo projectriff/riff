@@ -7,7 +7,7 @@ install:
 matrix:
   include:
   - stage: test
-    script: make test
+    script: make build test verify-docs
   - stage: fats
     script: "curl -s -L https://github.com/projectriff/fats/raw/master/.travis.fats-trigger.sh | bash"
 stages:
