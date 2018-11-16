@@ -22,14 +22,20 @@ check-mockery:
 	@which mockery > /dev/null || (echo mockery not found: issue "go get -u github.com/vektra/mockery/.../" && false)
 
 gen-mocks: check-mockery
-	mockery -output pkg/core/mocks 			-outpkg mocks 			-dir pkg/core 											-name Client
-	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes 				-name Interface
-	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-name CoreV1Interface
-	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-name NamespaceInterface
-	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-name ServiceAccountInterface
-	mockery -output pkg/core/vendor_mocks 	-outpkg vendor_mocks 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 	-name SecretInterface
-	mockery -output pkg/fileutils/mocks     -outpkg mocks           -dir pkg/fileutils                                      -name Checker
-	mockery -output pkg/fileutils/mocks     -outpkg mocks           -dir pkg/fileutils                                      -name Copier
+	mockery -output pkg/core/mocks/mockbuildfactory		-outpkg mockbuildfactory	-dir pkg/core 																					-name BuildFactory
+	mockery -output pkg/core/mocks/mockbuildfactory		-outpkg mockbuildfactory	-dir pkg/core 																					-name Build
+	mockery -output pkg/core/mocks						-outpkg mocks 				-dir pkg/core 																					-name Client
+	mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks 		-dir vendor/k8s.io/client-go/kubernetes 														-name Interface
+	mockery -output pkg/core/vendor_mocks/mockserving	-outpkg mockserving 		-dir vendor/github.com/knative/serving/pkg/client/clientset/versioned							-name Interface
+	mockery -output pkg/core/vendor_mocks/mockserving	-outpkg mockserving 		-dir vendor/github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1	-name ServingV1alpha1Interface
+	mockery -output pkg/core/vendor_mocks/mockserving	-outpkg mockserving 		-dir vendor/github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1	-name ServiceInterface
+	mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks	 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 											-name CoreV1Interface
+	mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks 		-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 											-name NamespaceInterface
+	mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks	 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 											-name ServiceAccountInterface
+	mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks 		-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 											-name SecretInterface
+	mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks	 	-dir vendor/k8s.io/client-go/tools/clientcmd     	   											-name ClientConfig
+	mockery -output pkg/fileutils/mocks					-outpkg mocks           	-dir pkg/fileutils                                    											-name Checker
+	mockery -output pkg/fileutils/mocks					-outpkg mocks				-dir pkg/fileutils																				-name Copier
 
 install: build
 	cp $(OUTPUT) $(GOBIN)

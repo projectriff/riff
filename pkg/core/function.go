@@ -108,7 +108,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 				return nil, err
 			}
 
-			err = buildLocally(appDir, buildImage, runImage, repoName, publish)
+			err = c.buildLocally(appDir, buildImage, runImage, repoName, publish)
 			if err != nil {
 				return nil, err
 			}
@@ -147,15 +147,17 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 	return s, nil
 }
 
-func buildLocally(appDir string, buildImage string, runImage string, repoName string, publish bool) error {
-	bf, err := pack.DefaultBuildFactory()
-	if err != nil {
-		return err
+func (c *client) buildLocally(appDir string, buildImage string, runImage string, repoName string, publish bool) error {
+	if buildImage == "" {
+		return fmt.Errorf("unable to build function locally: buildpack image not specified")
+	}
+	if runImage == "" {
+		return fmt.Errorf("unable to build function locally: run image not specified")
 	}
 
 	noPull := strings.HasPrefix(buildImage, "dev.local") && strings.HasPrefix(runImage, "dev.local")
 
-	b, err := bf.BuildConfigFromFlags(&pack.BuildFlags{
+	b, err := c.buildFactory.BuildConfigFromFlags(&pack.BuildFlags{
 		AppDir:   appDir,
 		Builder:  buildImage,
 		RunImage: runImage,
@@ -536,14 +538,11 @@ func (c *client) UpdateFunction(options UpdateFunctionOptions, log io.Writer) er
 		repoName := configuration.RevisionTemplate.Spec.Container.Image
 		publish := publishImage(repoName)
 
-		if buildImage == "" || runImage == "" {
-			return fmt.Errorf("unable to build function locally not built from a buildpack")
-		}
 		if appDir == "" {
 			return fmt.Errorf("local-path must be specified to rebuild function from source")
 		}
 
-		err := buildLocally(appDir, buildImage, runImage, repoName, publish)
+		err := c.buildLocally(appDir, buildImage, runImage, repoName, publish)
 		if err != nil {
 			return err
 		}

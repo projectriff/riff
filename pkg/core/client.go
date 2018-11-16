@@ -20,6 +20,8 @@ package core
 import (
 	"io"
 
+	"github.com/buildpack/pack"
+
 	eventing "github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	eventing_cs "github.com/knative/eventing/pkg/client/clientset/versioned"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
@@ -49,13 +51,22 @@ type Client interface {
 	ServiceCoordinates(options ServiceInvokeOptions) (ingressIP string, hostName string, err error)
 }
 
+type BuildFactory interface {
+	BuildConfigFromFlags(flags *pack.BuildFlags) (Build, error) // return an interface to allow the value to be mocked
+}
+
+type Build interface {
+	Run() error
+}
+
 type client struct {
 	kubeClient   kubernetes.Interface
 	eventing     eventing_cs.Interface
 	serving      serving_cs.Interface
 	clientConfig clientcmd.ClientConfig
+	buildFactory BuildFactory
 }
 
-func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface) Client {
-	return &client{clientConfig: clientConfig, kubeClient: kubeClient, eventing: eventing, serving: serving}
+func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface, buildFactory BuildFactory) Client {
+	return &client{clientConfig: clientConfig, kubeClient: kubeClient, eventing: eventing, serving: serving, buildFactory: buildFactory}
 }

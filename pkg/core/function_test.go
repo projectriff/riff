@@ -14,106 +14,187 @@
  * limitations under the License.
  */
 
-package core
+package core_test
 
 import (
-	"io"
-	"io/ioutil"
-	"time"
-
+	"github.com/buildpack/pack"
+	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/pkg/errors"
+	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/core/mocks/mockbuildfactory"
+	"github.com/projectriff/riff/pkg/core/vendor_mocks"
+	"github.com/projectriff/riff/pkg/core/vendor_mocks/mockserving"
+	"github.com/projectriff/riff/pkg/test_support"
+	"github.com/stretchr/testify/mock"
+	"io/ioutil"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var _ = Describe("pollService", func() {
-	const sleepsBeforeTimeout = 50
+var _ = Describe("Function", func() {
 
 	var (
-		errChan       = make(chan error, 1)
-		timeout       = sleepsBeforeTimeout * time.Microsecond
-		sleepDuration = time.Microsecond
-		log           io.Writer
-		err           error
-
-		hardErr                         = errors.New("hard error")
-		transientErr                    = errors.New("transient error")
-		transientErrCount, hardErrCount int
-		transientErrors, hardErrors     int
-
-		check = func() (error, error) {
-			transientErrCount++
-			if transientErrCount <= transientErrors {
-				return transientErr, nil
-			}
-			hardErrCount++
-			if hardErrCount <= hardErrors {
-				return nil, hardErr
-			}
-			return nil, nil
-		}
+		client               core.Client
+		mockClientConfig     *vendor_mocks.ClientConfig
+		mockBuildFactory     *mockbuildfactory.BuildFactory
+		mockBuild            *mockbuildfactory.Build
+		mockServing          *mockserving.Interface
+		mockServingV1alpha1  *mockserving.ServingV1alpha1Interface
+		mockServiceInterface *mockserving.ServiceInterface
+		workDir              string
+		service              *v1alpha1.Service
+		testService          *v1alpha1.Service
+		err                  error
 	)
 
 	BeforeEach(func() {
-		log = ioutil.Discard
-		transientErrCount = 0
-		hardErrCount = 0
-		transientErrors = 0
-		hardErrors = 0
+		mockClientConfig = &vendor_mocks.ClientConfig{}
+		mockBuildFactory = &mockbuildfactory.BuildFactory{}
+		mockBuild = &mockbuildfactory.Build{}
+		mockServing = &mockserving.Interface{}
+		mockServingV1alpha1 = &mockserving.ServingV1alpha1Interface{}
+		mockServiceInterface = &mockserving.ServiceInterface{}
+		mockServing.On("ServingV1alpha1").Return(mockServingV1alpha1)
+		mockServingV1alpha1.On("Services", mock.Anything).Return(mockServiceInterface)
+		testService = &v1alpha1.Service{}
+		workDir = test_support.CreateTempDir()
+		mockClientConfig.On("Namespace").Return("default", false, nil)
+		client = core.NewClient(mockClientConfig, nil, nil, mockServing, mockBuildFactory)
 	})
 
-	JustBeforeEach(func() {
-		err = pollService(check, errChan, timeout, sleepDuration, log)
+	AfterEach(func() {
+		test_support.CleanupDirs(GinkgoT(), workDir)
 	})
 
-	Context("when an error is sent to the error channel", func() {
+	Describe("CreateFunction", func() {
+		var (
+			createFunctionOptions core.CreateFunctionOptions
+			createdService        *v1alpha1.Service
+		)
+
 		BeforeEach(func() {
-			errChan <- errors.New("channel error")
+			mockServiceInterface.On("Create", mock.Anything).Run(func(args mock.Arguments) {
+				createdService = args.Get(0).(*v1alpha1.Service)
+			}).Return(testService, nil)
 		})
 
-		It("should stop polling and return the error", func() {
-			Expect(err).To(MatchError("channel error"))
+		JustBeforeEach(func() {
+			service, err = client.CreateFunction(createFunctionOptions, ioutil.Discard)
+		})
+
+		Context("when building locally", func() {
+			var buildConfig *pack.BuildFlags
+
+			BeforeEach(func() {
+				createFunctionOptions.LocalPath = workDir
+				mockBuildFactory.On("BuildConfigFromFlags", mock.Anything).Return(mockBuild, nil).Run(func(args mock.Arguments) {
+					buildConfig = args.Get(0).(*pack.BuildFlags)
+				})
+				mockBuild.On("Run").Return(nil)
+			})
+
+			Context("when buildpack and run images are not both located on dev.local", func() {
+				BeforeEach(func() {
+					createFunctionOptions.BuildpackImage = "dev.local/buildpack"
+					createFunctionOptions.RunImage = "some/run"
+				})
+
+				It("should succeed", func() {
+					Expect(err).NotTo(HaveOccurred())
+					// The returned service should be the input to service create, not the output.
+					Expect(service).To(Equal(createdService))
+				})
+
+				It("should build not specifying 'no pull'", func() {
+					Expect(buildConfig.NoPull).To(BeFalse())
+				})
+			})
+
+			Context("when buildpack and run images are located on dev.local", func() {
+				BeforeEach(func() {
+					createFunctionOptions.BuildpackImage = "dev.local/buildpack"
+					createFunctionOptions.RunImage = "dev.local/run"
+				})
+
+				It("should succeed", func() {
+					Expect(err).NotTo(HaveOccurred())
+					// The returned service should be the input to service create, not the output.
+					Expect(service).To(Equal(createdService))
+				})
+
+				It("should build specifying 'no pull'", func() {
+					Expect(buildConfig.NoPull).To(BeTrue())
+				})
+			})
 		})
 	})
 
-	Context("when a hard error occurs", func() {
+	Describe("UpdateFunction", func() {
+		var (
+			updateFunctionOptions core.UpdateFunctionOptions
+		)
+
 		BeforeEach(func() {
-			hardErrors = 1
+			mockServiceInterface.On("Get", mock.Anything, mock.Anything).Return(testService, nil)
+			testService.Spec = v1alpha1.ServiceSpec{
+				RunLatest: &v1alpha1.RunLatestType{
+					Configuration: v1alpha1.ConfigurationSpec{
+						Build: nil,
+						RevisionTemplate: v1alpha1.RevisionTemplateSpec{
+							ObjectMeta: v1.ObjectMeta{
+								Labels: map[string]string{"riff.projectriff.io/function": "somefun"},
+							},
+						},
+					},
+				},
+			}
+			mockServiceInterface.On("Update", mock.Anything).Return(testService, nil)
 		})
 
-		It("should stop polling and return the error", func() {
-			Expect(err).To(MatchError(hardErr))
-		})
-	})
-
-	Context("when a transient error occurs temporarily", func() {
-		BeforeEach(func() {
-			transientErrors = 1
+		JustBeforeEach(func() {
+			err = client.UpdateFunction(updateFunctionOptions, ioutil.Discard)
 		})
 
-		It("should stop polling and return successfully", func() {
-			Expect(err).NotTo(HaveOccurred())
-		})
-	})
+		Context("when building locally", func() {
+			var buildConfig *pack.BuildFlags
 
-	Context("when a transient error persists beyond the timeout", func() {
-		BeforeEach(func() {
-			transientErrors = sleepsBeforeTimeout + 1
-		})
+			BeforeEach(func() {
+				updateFunctionOptions.LocalPath = workDir
+				mockBuildFactory.On("BuildConfigFromFlags", mock.Anything).Return(mockBuild, nil).Run(func(args mock.Arguments) {
+					buildConfig = args.Get(0).(*pack.BuildFlags)
+				})
+				mockBuild.On("Run").Return(nil)
+			})
 
-		It("should time out and return the transient error", func() {
-			Expect(err).To(MatchError(transientErr))
-		})
-	})
+			Context("when buildpack and run images are not both located on dev.local", func() {
+				BeforeEach(func() {
+					testService.Annotations = map[string]string{"riff.projectriff.io-buildpack-buildImage": "dev.local/buildpack",
+						"riff.projectriff.io-buildpack-runImage": "some/run"}
+				})
 
-	Context("when a transient error is followed by a hard error", func() {
-		BeforeEach(func() {
-			transientErrors = sleepsBeforeTimeout
-			hardErrors = 1
-		})
+				It("should succeed", func() {
+					Expect(err).NotTo(HaveOccurred())
+				})
 
-		It("should stop polling and return successfully", func() {
-			Expect(err).To(MatchError(hardErr))
+				It("should build not specifying 'no pull'", func() {
+					Expect(buildConfig.NoPull).To(BeFalse())
+				})
+			})
+
+			Context("when buildpack and run images are located on dev.local", func() {
+				BeforeEach(func() {
+					testService.Annotations = map[string]string{"riff.projectriff.io-buildpack-buildImage": "dev.local/buildpack",
+						"riff.projectriff.io-buildpack-runImage": "dev.local/run"}
+				})
+
+				It("should succeed", func() {
+					Expect(err).NotTo(HaveOccurred())
+				})
+
+				It("should build specifying 'no pull'", func() {
+					Expect(buildConfig.NoPull).To(BeTrue())
+				})
+			})
 		})
 	})
 })

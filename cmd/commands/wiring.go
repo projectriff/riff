@@ -21,6 +21,8 @@ import (
 	"os/user"
 	"strings"
 
+	"github.com/buildpack/pack"
+
 	"github.com/projectriff/riff/pkg/env"
 
 	eventing "github.com/knative/eventing/pkg/client/clientset/versioned"
@@ -192,7 +194,14 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 		if err != nil {
 			return err
 		}
-		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet)
+		defaultBuildFactory, err := pack.DefaultBuildFactory()
+		if err != nil {
+			return err
+		}
+		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, &buildFactory{defaultBuildFactory})
+		if err != nil {
+			return err
+		}
 		*kc = core.NewKubectlClient(kubeClientSet)
 
 		if oldPersistentPreRunE != nil {
@@ -200,4 +209,12 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 		}
 		return nil
 	}
+}
+
+type buildFactory struct {
+	bf *pack.BuildFactory
+}
+
+func (bf *buildFactory) BuildConfigFromFlags(f *pack.BuildFlags) (core.Build, error) {
+	return bf.bf.BuildConfigFromFlags(f)
 }

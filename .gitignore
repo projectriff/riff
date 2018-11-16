@@ -1,3 +1,7 @@
+# Allow Go modules in other projects to depend on this repo for local builds without accidentally checking in the wrong files
+go.mod
+go.sum
+
 debug
 
 ### STS ###
