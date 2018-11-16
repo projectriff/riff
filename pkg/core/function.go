@@ -107,26 +107,8 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 			if err := c.writeRiffToml(options); err != nil {
 				return nil, err
 			}
-			bf, err := pack.DefaultBuildFactory()
-			if err != nil {
-				return nil, err
-			}
-			noPull := false
-			if strings.HasPrefix(buildImage, "dev.local") && strings.HasPrefix(runImage, "dev.local") {
-				noPull = true
-			}
-			b, err := bf.BuildConfigFromFlags(&pack.BuildFlags{
-				AppDir:   appDir,
-				Builder:  buildImage,
-				RunImage: runImage,
-				RepoName: repoName,
-				Publish:  publish,
-				NoPull:   noPull,
-			})
-			if err != nil {
-				return nil, err
-			}
-			err = b.Run()
+
+			err = buildLocally(appDir, buildImage, runImage, repoName, publish)
 			if err != nil {
 				return nil, err
 			}
@@ -163,6 +145,28 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 	}
 
 	return s, nil
+}
+
+func buildLocally(appDir string, buildImage string, runImage string, repoName string, publish bool) error {
+	bf, err := pack.DefaultBuildFactory()
+	if err != nil {
+		return err
+	}
+
+	noPull := strings.HasPrefix(buildImage, "dev.local") && strings.HasPrefix(runImage, "dev.local")
+
+	b, err := bf.BuildConfigFromFlags(&pack.BuildFlags{
+		AppDir:   appDir,
+		Builder:  buildImage,
+		RunImage: runImage,
+		RepoName: repoName,
+		Publish:  publish,
+		NoPull:   noPull,
+	})
+	if err != nil {
+		return err
+	}
+	return b.Run()
 }
 
 func (c *client) writeRiffToml(options CreateFunctionOptions) error {
@@ -539,7 +543,7 @@ func (c *client) UpdateFunction(options UpdateFunctionOptions, log io.Writer) er
 			return fmt.Errorf("local-path must be specified to rebuild function from source")
 		}
 
-		err := pack.Build(appDir, buildImage, runImage, repoName, publish)
+		err := buildLocally(appDir, buildImage, runImage, repoName, publish)
 		if err != nil {
 			return err
 		}
