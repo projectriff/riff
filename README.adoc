@@ -21,6 +21,9 @@ The code for Knative serving and eventing and build lives in repos under the lin
 
 This is the best option if you want to modify the riff CLI.
 
+NOTE: Changes since the last release mean that the riff CLI built from the master branch will behave slightly differently from the released version. Please refer to the CLI link:https://github.com/projectriff/riff/blob/master/docs/riff.md[documentation] or use `--help` for more details.  
+`riff function create` no longer uses an invoker argument. Use an `--invoker` flag instead to override language detection in the buildpack. All builds now use our link:https://github.com/projectriff/riff-buildpack-group[buildpacks v3] builder.
+
 === Prerequisites
 
 You need:
