@@ -237,11 +237,16 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 func waitForIstioComponents(kc *kubectlClient) error {
 	fmt.Print("Waiting for the Istio components to start ")
 	for i := 0; i < 36; i++ {
+		time.Sleep(10 * time.Second) // wait for them to start
 		fmt.Print(".")
 		pods := kc.kubeClient.CoreV1().Pods(istioNamespace)
 		podList, err := pods.List(metav1.ListOptions{})
 		if err != nil {
 			return err
+		}
+		if len(podList.Items) < 3 {
+			// make sure we found pods and not that the system is slow to create pods
+			continue
 		}
 		waitLonger := false
 		for _, pod := range podList.Items {
@@ -267,7 +272,6 @@ func waitForIstioComponents(kc *kubectlClient) error {
 			fmt.Print(" all components are 'Running'\n\n")
 			return nil
 		}
-		time.Sleep(10 * time.Second) // wait for them to start
 	}
 	return errors.New("the Istio components did not start in time")
 }
