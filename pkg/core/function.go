@@ -92,8 +92,6 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 		buildImage := options.BuildpackImage
 		runImage := options.RunImage
 		repoName := options.Image
-		publish := publishImage(repoName)
-
 		if s.ObjectMeta.Annotations == nil {
 			s.ObjectMeta.Annotations = make(map[string]string)
 		}
@@ -108,7 +106,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 				return nil, err
 			}
 
-			err = c.buildLocally(appDir, buildImage, runImage, repoName, publish)
+			err = c.buildLocally(appDir, buildImage, runImage, repoName)
 			if err != nil {
 				return nil, err
 			}
@@ -147,7 +145,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 	return s, nil
 }
 
-func (c *client) buildLocally(appDir string, buildImage string, runImage string, repoName string, publish bool) error {
+func (c *client) buildLocally(appDir string, buildImage string, runImage string, repoName string) error {
 	if buildImage == "" {
 		return fmt.Errorf("unable to build function locally: buildpack image not specified")
 	}
@@ -155,15 +153,13 @@ func (c *client) buildLocally(appDir string, buildImage string, runImage string,
 		return fmt.Errorf("unable to build function locally: run image not specified")
 	}
 
-	noPull := strings.HasPrefix(buildImage, "dev.local") && strings.HasPrefix(runImage, "dev.local")
-
 	b, err := c.buildFactory.BuildConfigFromFlags(&pack.BuildFlags{
 		AppDir:   appDir,
 		Builder:  buildImage,
 		RunImage: runImage,
 		RepoName: repoName,
-		Publish:  publish,
-		NoPull:   noPull,
+		Publish:  true,
+		NoPull:   false,
 	})
 	if err != nil {
 		return err
@@ -536,13 +532,11 @@ func (c *client) UpdateFunction(options UpdateFunctionOptions, log io.Writer) er
 		buildImage := annotations[buildpackBuildImageAnnotation]
 		runImage := annotations[buildpackRunImageAnnotation]
 		repoName := configuration.RevisionTemplate.Spec.Container.Image
-		publish := publishImage(repoName)
-
 		if appDir == "" {
 			return fmt.Errorf("local-path must be specified to rebuild function from source")
 		}
 
-		err := c.buildLocally(appDir, buildImage, runImage, repoName, publish)
+		err := c.buildLocally(appDir, buildImage, runImage, repoName)
 		if err != nil {
 			return err
 		}
@@ -583,11 +577,4 @@ func (c *client) UpdateFunction(options UpdateFunctionOptions, log io.Writer) er
 	}
 
 	return nil
-}
-
-// publishImage returns true unless the name starts with 'dev.local' or 'ko.local'.
-// These names have special meaning within knative and are the only Service
-// images that will pull from the Docker deamon instead of a registry.
-func publishImage(image string) bool {
-	return strings.Index(image, "dev.local/") != 0 && strings.Index(image, "ko.local/") != 0
 }

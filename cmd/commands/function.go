@@ -59,7 +59,7 @@ func FunctionCreate(fcTool *core.Client, defaults FunctionCreateDefaults) *cobra
 		Short: "Create a new function resource",
 		Long: "Create a new function resource from the content of the provided Git repo/revision or local source.\n\n" +
 			"The --invoker flag can be used to force the language runtime and function invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function.\n\n" +
-			"Images will be pushed to the registry specified in the image name, unless prefixed with 'dev.local/' in which case the image will only be available within the local Docker daemon.\n\n" +
+			"Images will be pushed to the registry specified in the image name.\n\n" +
 			"From then on you can use the sub-commands for the `service` command to interact with the service created for the function.\n\n" +
 			envFromLongDesc + "\n",
 		Example: `  ` + env.Cli.Name + ` function create square --git-repo https://github.com/acme/square --artifact square.js --image acme/square --invoker node --namespace joseph-ns

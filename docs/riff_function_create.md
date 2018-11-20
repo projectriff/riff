@@ -8,7 +8,7 @@ Create a new function resource from the content of the provided Git repo/revisio
 
 The --invoker flag can be used to force the language runtime and function invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function.
 
-Images will be pushed to the registry specified in the image name, unless prefixed with 'dev.local/' in which case the image will only be available within the local Docker daemon.
+Images will be pushed to the registry specified in the image name.
 
 From then on you can use the sub-commands for the `service` command to interact with the service created for the function.
 

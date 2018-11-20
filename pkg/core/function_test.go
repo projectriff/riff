@@ -17,7 +17,6 @@
 package core_test
 
 import (
-	"github.com/buildpack/pack"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -83,19 +82,15 @@ var _ = Describe("Function", func() {
 		})
 
 		Context("when building locally", func() {
-			var buildConfig *pack.BuildFlags
-
 			BeforeEach(func() {
 				createFunctionOptions.LocalPath = workDir
-				mockBuildFactory.On("BuildConfigFromFlags", mock.Anything).Return(mockBuild, nil).Run(func(args mock.Arguments) {
-					buildConfig = args.Get(0).(*pack.BuildFlags)
-				})
+				mockBuildFactory.On("BuildConfigFromFlags", mock.Anything).Return(mockBuild, nil)
 				mockBuild.On("Run").Return(nil)
 			})
 
-			Context("when buildpack and run images are not both located on dev.local", func() {
+			Context("when buildpack and run images are provided", func() {
 				BeforeEach(func() {
-					createFunctionOptions.BuildpackImage = "dev.local/buildpack"
+					createFunctionOptions.BuildpackImage = "some/buildpack"
 					createFunctionOptions.RunImage = "some/run"
 				})
 
@@ -104,26 +99,27 @@ var _ = Describe("Function", func() {
 					// The returned service should be the input to service create, not the output.
 					Expect(service).To(Equal(createdService))
 				})
+			})
 
-				It("should build not specifying 'no pull'", func() {
-					Expect(buildConfig.NoPull).To(BeFalse())
+			Context("when buildpack image is omitted", func() {
+				BeforeEach(func() {
+					createFunctionOptions.BuildpackImage = ""
+					createFunctionOptions.RunImage = "some/run"
+				})
+
+				It("should return a suitable error", func() {
+					Expect(err).To(MatchError("unable to build function locally: buildpack image not specified"))
 				})
 			})
 
-			Context("when buildpack and run images are located on dev.local", func() {
+			Context("when run image is omitted", func() {
 				BeforeEach(func() {
-					createFunctionOptions.BuildpackImage = "dev.local/buildpack"
-					createFunctionOptions.RunImage = "dev.local/run"
+					createFunctionOptions.BuildpackImage = "some/buildpack"
+					createFunctionOptions.RunImage = ""
 				})
 
-				It("should succeed", func() {
-					Expect(err).NotTo(HaveOccurred())
-					// The returned service should be the input to service create, not the output.
-					Expect(service).To(Equal(createdService))
-				})
-
-				It("should build specifying 'no pull'", func() {
-					Expect(buildConfig.NoPull).To(BeTrue())
+				It("should return a suitable error", func() {
+					Expect(err).To(MatchError("unable to build function locally: run image not specified"))
 				})
 			})
 		})
@@ -156,43 +152,40 @@ var _ = Describe("Function", func() {
 		})
 
 		Context("when building locally", func() {
-			var buildConfig *pack.BuildFlags
-
 			BeforeEach(func() {
 				updateFunctionOptions.LocalPath = workDir
-				mockBuildFactory.On("BuildConfigFromFlags", mock.Anything).Return(mockBuild, nil).Run(func(args mock.Arguments) {
-					buildConfig = args.Get(0).(*pack.BuildFlags)
-				})
+				mockBuildFactory.On("BuildConfigFromFlags", mock.Anything).Return(mockBuild, nil)
 				mockBuild.On("Run").Return(nil)
 			})
 
-			Context("when buildpack and run images are not both located on dev.local", func() {
+			Context("when buildpack and run images are provided", func() {
 				BeforeEach(func() {
-					testService.Annotations = map[string]string{"riff.projectriff.io-buildpack-buildImage": "dev.local/buildpack",
+					testService.Annotations = map[string]string{"riff.projectriff.io-buildpack-buildImage": "some/buildpack",
 						"riff.projectriff.io-buildpack-runImage": "some/run"}
 				})
 
 				It("should succeed", func() {
 					Expect(err).NotTo(HaveOccurred())
 				})
+			})
 
-				It("should build not specifying 'no pull'", func() {
-					Expect(buildConfig.NoPull).To(BeFalse())
+			Context("when buildpack image is omitted", func() {
+				BeforeEach(func() {
+					testService.Annotations = map[string]string{"riff.projectriff.io-buildpack-runImage": "some/run"}
+				})
+
+				It("should return a suitable error", func() {
+					Expect(err).To(MatchError("unable to build function locally: buildpack image not specified"))
 				})
 			})
 
-			Context("when buildpack and run images are located on dev.local", func() {
+			Context("when run image is omitted", func() {
 				BeforeEach(func() {
-					testService.Annotations = map[string]string{"riff.projectriff.io-buildpack-buildImage": "dev.local/buildpack",
-						"riff.projectriff.io-buildpack-runImage": "dev.local/run"}
+					testService.Annotations = map[string]string{"riff.projectriff.io-buildpack-buildImage": "some/buildpack"}
 				})
 
-				It("should succeed", func() {
-					Expect(err).NotTo(HaveOccurred())
-				})
-
-				It("should build specifying 'no pull'", func() {
-					Expect(buildConfig.NoPull).To(BeTrue())
+				It("should return a suitable error", func() {
+					Expect(err).To(MatchError("unable to build function locally: run image not specified"))
 				})
 			})
 		})
