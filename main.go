@@ -57,7 +57,7 @@ var (
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181031-a2f9417/release-clusterbus-stub.yaml",
 			},
 			Namespace: []string{
-				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate-0.0.1-snapshot-ci-9e5b731f8c36.yaml",
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate-0.0.1-snapshot-ci-31a4547a8f07.yaml",
 			},
 		},
 	}
