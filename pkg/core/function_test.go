@@ -21,7 +21,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/core"
-	"github.com/projectriff/riff/pkg/core/mocks/mockbuildfactory"
+	"github.com/projectriff/riff/pkg/core/mocks/mockbuilder"
 	"github.com/projectriff/riff/pkg/core/vendor_mocks"
 	"github.com/projectriff/riff/pkg/core/vendor_mocks/mockserving"
 	"github.com/projectriff/riff/pkg/test_support"
@@ -35,8 +35,7 @@ var _ = Describe("Function", func() {
 	var (
 		client               core.Client
 		mockClientConfig     *vendor_mocks.ClientConfig
-		mockBuildFactory     *mockbuildfactory.BuildFactory
-		mockBuild            *mockbuildfactory.Build
+		mockBuilder          *mockbuilder.Builder
 		mockServing          *mockserving.Interface
 		mockServingV1alpha1  *mockserving.ServingV1alpha1Interface
 		mockServiceInterface *mockserving.ServiceInterface
@@ -48,8 +47,7 @@ var _ = Describe("Function", func() {
 
 	BeforeEach(func() {
 		mockClientConfig = &vendor_mocks.ClientConfig{}
-		mockBuildFactory = &mockbuildfactory.BuildFactory{}
-		mockBuild = &mockbuildfactory.Build{}
+		mockBuilder = &mockbuilder.Builder{}
 		mockServing = &mockserving.Interface{}
 		mockServingV1alpha1 = &mockserving.ServingV1alpha1Interface{}
 		mockServiceInterface = &mockserving.ServiceInterface{}
@@ -58,7 +56,7 @@ var _ = Describe("Function", func() {
 		testService = &v1alpha1.Service{}
 		workDir = test_support.CreateTempDir()
 		mockClientConfig.On("Namespace").Return("default", false, nil)
-		client = core.NewClient(mockClientConfig, nil, nil, mockServing, mockBuildFactory)
+		client = core.NewClient(mockClientConfig, nil, nil, mockServing, mockBuilder)
 	})
 
 	AfterEach(func() {
@@ -84,8 +82,7 @@ var _ = Describe("Function", func() {
 		Context("when building locally", func() {
 			BeforeEach(func() {
 				createFunctionOptions.LocalPath = workDir
-				mockBuildFactory.On("BuildConfigFromFlags", mock.Anything).Return(mockBuild, nil)
-				mockBuild.On("Run").Return(nil)
+				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			})
 
 			Context("when buildpack and run images are provided", func() {
@@ -154,8 +151,7 @@ var _ = Describe("Function", func() {
 		Context("when building locally", func() {
 			BeforeEach(func() {
 				updateFunctionOptions.LocalPath = workDir
-				mockBuildFactory.On("BuildConfigFromFlags", mock.Anything).Return(mockBuild, nil)
-				mockBuild.On("Run").Return(nil)
+				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			})
 
 			Context("when buildpack and run images are provided", func() {

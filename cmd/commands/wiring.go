@@ -194,11 +194,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 		if err != nil {
 			return err
 		}
-		defaultBuildFactory, err := pack.DefaultBuildFactory()
-		if err != nil {
-			return err
-		}
-		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, &buildFactory{defaultBuildFactory})
+		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, &builder{})
 		if err != nil {
 			return err
 		}
@@ -211,10 +207,8 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 	}
 }
 
-type buildFactory struct {
-	bf *pack.BuildFactory
-}
+type builder struct{}
 
-func (bf *buildFactory) BuildConfigFromFlags(f *pack.BuildFlags) (core.Build, error) {
-	return bf.bf.BuildConfigFromFlags(f)
+func (*builder) Build(appDir, buildImage, runImage, repoName string) error {
+	return pack.Build(appDir, buildImage, runImage, repoName, true)
 }

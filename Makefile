@@ -22,8 +22,7 @@ check-mockery:
 	@which mockery > /dev/null || (echo mockery not found: issue "go get -u github.com/vektra/mockery/.../" && false)
 
 gen-mocks: check-mockery
-	mockery -output pkg/core/mocks/mockbuildfactory		-outpkg mockbuildfactory	-dir pkg/core 																					-name BuildFactory
-	mockery -output pkg/core/mocks/mockbuildfactory		-outpkg mockbuildfactory	-dir pkg/core 																					-name Build
+	mockery -output pkg/core/mocks/mockbuilder			-outpkg mockbuilder			-dir pkg/core 																					-name Builder
 	mockery -output pkg/core/mocks						-outpkg mocks 				-dir pkg/core 																					-name Client
 	mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks 		-dir vendor/k8s.io/client-go/kubernetes 														-name Interface
 	mockery -output pkg/core/vendor_mocks/mockserving	-outpkg mockserving 		-dir vendor/github.com/knative/serving/pkg/client/clientset/versioned							-name Interface

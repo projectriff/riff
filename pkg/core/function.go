@@ -32,7 +32,6 @@ import (
 	"github.com/boz/go-logutil"
 	"github.com/boz/kail"
 	"github.com/boz/kcache/types/pod"
-	"github.com/buildpack/pack"
 	build "github.com/knative/build/pkg/apis/build/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/projectriff/riff/pkg/env"
@@ -152,19 +151,7 @@ func (c *client) buildLocally(appDir string, buildImage string, runImage string,
 	if runImage == "" {
 		return fmt.Errorf("unable to build function locally: run image not specified")
 	}
-
-	b, err := c.buildFactory.BuildConfigFromFlags(&pack.BuildFlags{
-		AppDir:   appDir,
-		Builder:  buildImage,
-		RunImage: runImage,
-		RepoName: repoName,
-		Publish:  true,
-		NoPull:   false,
-	})
-	if err != nil {
-		return err
-	}
-	return b.Run()
+	return c.builder.Build(appDir, buildImage, runImage, repoName)
 }
 
 func (c *client) writeRiffToml(options CreateFunctionOptions) error {
