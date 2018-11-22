@@ -20,6 +20,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/fileutils"
+	"github.com/projectriff/riff/pkg/test_support"
+	"path/filepath"
 )
 
 var _ = Describe("Dir", func() {
@@ -44,14 +46,31 @@ var _ = Describe("Dir", func() {
 		})
 	})
 
-	Context("when file is a path", func() {
+	Context("when file is a relative path", func() {
 		BeforeEach(func() {
-			file = "/dir/file"
+			file = filepath.Join("dir", "file")
 		})
 
 		It("should return the directory of the file", func() {
 			Expect(err).NotTo(HaveOccurred())
-			Expect(dir).To(Equal("/dir"))
+			Expect(dir).To(Equal("dir"))
+		})
+	})
+
+	Context("when file is an absolute path", func() {
+		var work string
+		BeforeEach(func() {
+			work = test_support.CreateTempDir()
+			file = filepath.Join(work, "file")
+		})
+
+		AfterEach(func() {
+			test_support.CleanupDirs(GinkgoT(), work)
+		})
+
+		It("should return the directory of the file", func() {
+			Expect(err).NotTo(HaveOccurred())
+			Expect(dir).To(Equal(work))
 		})
 	})
 })

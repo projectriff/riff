@@ -25,6 +25,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 )
 
 // Read reads the contents of the specified file. If the file is a relative path, it is relative to base.
@@ -38,29 +39,29 @@ func Read(file string, base string) ([]byte, error) {
 }
 
 func absFile(file string, base string) (string, error) {
+	if filepath.IsAbs(file) {
+		return file, nil
+	}
+
 	u, err := url.Parse(file)
 	if err != nil {
 		return "", err
 	}
-	if u.IsAbs() {
+	if u.IsAbs() && (u.Scheme == "http" || u.Scheme == "https" || u.Scheme == "file") {
 		return u.String(), nil
 	}
 
-	if filepath.IsAbs(file) {
-		return file, nil
+	if filepath.IsAbs(base) {
+		return filepath.Join(base, file), nil
 	}
 
 	b, err := url.Parse(base)
 	if err != nil {
 		return "", err
 	}
-	if b.IsAbs() {
-		b.Path = path.Join(b.Path, file)
+	if b.IsAbs() && (b.Scheme == "http" || b.Scheme == "https" || b.Scheme == "file") {
+		b.Path = path.Join(b.Path, filepath.ToSlash(file))
 		return b.String(), nil
-	}
-
-	if filepath.IsAbs(base) {
-		return filepath.Join(base, file), nil
 	}
 
 	wd, err := os.Getwd()
@@ -75,8 +76,16 @@ func readAbsFile(file string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if u.IsAbs() {
+	if u.IsAbs() && (u.Scheme == "http" || u.Scheme == "https") {
 		return downloadFile(u.String())
+	}
+	if u.Scheme == "file" {
+		file = u.Path
+
+		// Sanitise path on Windows. See https://github.com/golang/go/issues/6027
+		if runtime.GOOS == "windows" && file[0] == '/' {
+			file = file[1:]
+		}
 	}
 
 	if !filepath.IsAbs(file) {
@@ -87,10 +96,7 @@ func readAbsFile(file string) ([]byte, error) {
 }
 
 func downloadFile(url string) ([]byte, error) {
-	t := &http.Transport{}
-	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-	c := &http.Client{Transport: t}
-	resp, err := c.Get(url)
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}

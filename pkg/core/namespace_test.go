@@ -66,7 +66,7 @@ var _ = Describe("The NamespaceInit function", func() {
 	It("should fail on wrong manifest", func() {
 		options := NamespaceInitOptions{Manifest: "wrong"}
 		err := kubectlClient.NamespaceInit(manifests, options)
-		Expect(err).To(MatchError(ContainSubstring("wrong: no such file")))
+		Expect(err).To(MatchError(ContainSubstring("wrong: "))) // error message is quite different on Windows and macOS
 	})
 
 	It("should create namespace and sa if needed", func() {

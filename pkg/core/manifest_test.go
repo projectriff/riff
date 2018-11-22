@@ -20,6 +20,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/core"
+	"path/filepath"
+	"runtime"
 )
 
 var _ = Describe("Manifest", func() {
@@ -97,11 +99,16 @@ var _ = Describe("Manifest", func() {
 
 		Context("when the manifest contains a resource with an absolute path", func() {
 			BeforeEach(func() {
-				manifestPath = "./fixtures/manifest/absolutepath.yaml"
+				manifestPath = filepath.Join("fixtures", "manifest")
+				if runtime.GOOS == "windows" {
+					manifestPath = filepath.Join(manifestPath, "absolutepath.windows.yaml")
+				} else {
+					manifestPath = filepath.Join(manifestPath, "absolutepath.yaml")
+				}
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError("resources must use a http or https URL or a relative path: absolute path not supported: /x"))
+				Expect(err).To(MatchError(ContainSubstring("resources must use a http or https URL or a relative path: absolute path not supported: ")))
 			})
 		})
 
