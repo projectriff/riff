@@ -24,6 +24,9 @@ import (
 
 // Dir returns the directory portion of the given file.
 func Dir(file string) (string, error) {
+	if filepath.IsAbs(file) {
+		return filepath.Dir(file), nil
+	}
 	u, err := url.Parse(file)
 	if err != nil {
 		return "", err

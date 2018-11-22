@@ -23,7 +23,7 @@ import (
 )
 
 func CreateTempDir() string {
-	tempDir, err := ioutil.TempDir("/tmp", "riff-test-")
+	tempDir, err := ioutil.TempDir("", "riff-test-")
 	check(err)
 	return tempDir
 }

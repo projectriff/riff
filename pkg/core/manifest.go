@@ -99,6 +99,10 @@ func checkCompleteness(m Manifest) error {
 }
 
 func checkResource(resource string) error {
+	if filepath.IsAbs(resource) {
+		return fmt.Errorf("resources must use a http or https URL or a relative path: absolute path not supported: %s", resource)
+	}
+
 	u, err := url.Parse(resource)
 	if err != nil {
 		return err

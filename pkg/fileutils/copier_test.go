@@ -28,12 +28,20 @@ import (
 
 var _ = Describe("Copier", func() {
 	var (
-		copier  fileutils.Copier
-		tempDir string
-		source  string
-		target  string
-		err     error
+		symlinkSupported bool
+		copier           fileutils.Copier
+		tempDir          string
+		source           string
+		target           string
+		err              error
 	)
+
+	// Detect whether symlinks can be created in order to determine which tests to run.
+	{
+		tempDir := test_support.CreateTempDir()
+		err := os.Symlink("a", filepath.Join(tempDir, "symlink"))
+		symlinkSupported = err == nil
+	}
 
 	BeforeEach(func() {
 		checker := fileutils.NewChecker() // use a real checker to avoid mock setup
@@ -88,8 +96,12 @@ var _ = Describe("Copier", func() {
 	})
 
 	Context("when the source is a file with a specific mode", func() {
+		var expectedPermissions string
+
 		BeforeEach(func() {
 			source = test_support.CreateFileWithMode(tempDir, "src.file", os.FileMode(0642))
+			expectedPermissions = test_support.FileMode(source).String() // the permissions are surprising on Windows
+
 			target = filepath.Join(tempDir, "target.file")
 		})
 
@@ -97,7 +109,7 @@ var _ = Describe("Copier", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			modeString := test_support.FileMode(target).String()
-			Expect(modeString).To(Equal("-rw-r-----"))
+			Expect(modeString).To(Equal(expectedPermissions))
 		})
 	})
 
@@ -149,191 +161,223 @@ var _ = Describe("Copier", func() {
 		})
 
 		Context("when the source is a directory with a specific mode", func() {
+			var expectedPermissions string
 			BeforeEach(func() {
 				source = test_support.CreateDirWithMode(tempDir, "src.dir", os.FileMode(0642))
+
+				expectedPermissions = test_support.FileMode(source).String() // the permissions are surprising on Windows
 			})
 
 			It("should copy the mode", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				modeString := test_support.FileMode(target).String()
-				Expect(modeString).To(Equal("drw-r-----"))
+				Expect(modeString).To(Equal(expectedPermissions))
 			})
 		})
 
-		Context("when the source is a directory containing an internal symbolic link to a directory", func() {
-			BeforeEach(func() {
-				/*
-					   Create a directory structure inside tempDir like this:
+		if symlinkSupported {
+			Context("when the source is a directory containing an internal symbolic link to a directory", func() {
+				BeforeEach(func() {
+					/*
+						   Create a directory structure inside tempDir like this:
 
-						source/ <------+
-							file1      |
-							dir1/      |
-								link --+
+							source/ <------+
+								file1      |
+								dir1/      |
+									link --+
 
-				*/
+					*/
 
-				source = test_support.CreateDir(tempDir, "source")
+					source = test_support.CreateDir(tempDir, "source")
 
-				test_support.CreateFile(source, "file1")
-				dir1 := test_support.CreateDir(source, "dir1")
+					test_support.CreateFile(source, "file1")
+					dir1 := test_support.CreateDir(source, "dir1")
 
-				srcLink := filepath.Join(dir1, "link")
-				err := os.Symlink(source, srcLink)
-				Expect(err).NotTo(HaveOccurred())
+					srcLink := filepath.Join(dir1, "link")
+					err := os.Symlink(source, srcLink)
+					Expect(err).NotTo(HaveOccurred())
+				})
+
+				It("should copy the symbolic link", func() {
+					Expect(err).NotTo(HaveOccurred())
+
+					targetDir1 := filepath.Join(target, "dir1")
+					targetLink := filepath.Join(targetDir1, "link")
+
+					linkTarget, err := os.Readlink(targetLink)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(linkTarget).To(Equal(".."))
+
+					Expect(test_support.SameFile(target, filepath.Join(targetDir1, linkTarget))).To(BeTrue())
+				})
 			})
 
-			It("should copy the symbolic link", func() {
-				Expect(err).NotTo(HaveOccurred())
+			Context("when the source is a directory containing an internal symbolic link to a file", func() {
+				BeforeEach(func() {
+					/*
+						   Create a directory structure inside tempDir like this:
 
-				targetDir1 := filepath.Join(target, "dir1")
-				targetLink := filepath.Join(targetDir1, "link")
+							source/
+								file1 <----+
+								link ------+
 
-				linkTarget, err := os.Readlink(targetLink)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(linkTarget).To(Equal(".."))
+					*/
 
-				Expect(test_support.SameFile(target, filepath.Join(targetDir1, linkTarget))).To(BeTrue())
-			})
-		})
+					source = test_support.CreateDir(tempDir, "source")
 
-		Context("when the source is a directory containing an internal symbolic link to a file", func() {
-			BeforeEach(func() {
-				/*
-					   Create a directory structure inside tempDir like this:
+					file1 := test_support.CreateFile(source, "file1")
+					fileLink := filepath.Join(source, "link")
+					err := os.Symlink(file1, fileLink)
+					Expect(err).NotTo(HaveOccurred())
+				})
 
-						source/
-							file1 <----+
-							link ------+
+				It("should copy the symbolic link", func() {
+					Expect(err).NotTo(HaveOccurred())
 
-				*/
+					targetFile1 := filepath.Join(target, "file1")
+					targetLink := filepath.Join(target, "link")
 
-				source = test_support.CreateDir(tempDir, "source")
+					linkTarget, err := os.Readlink(targetLink)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(linkTarget).To(Equal("file1"))
 
-				file1 := test_support.CreateFile(source, "file1")
-				fileLink := filepath.Join(source, "link")
-				err := os.Symlink(file1, fileLink)
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-			It("should copy the symbolic link", func() {
-				Expect(err).NotTo(HaveOccurred())
-
-				targetFile1 := filepath.Join(target, "file1")
-				targetLink := filepath.Join(target, "link")
-
-				linkTarget, err := os.Readlink(targetLink)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(linkTarget).To(Equal("file1"))
-
-				Expect(test_support.SameFile(targetFile1, filepath.Join(target, linkTarget))).To(BeTrue())
-			})
-		})
-
-		Context("when the source is a directory containing an external symbolic link", func() {
-			BeforeEach(func() {
-				/*
-					   Create a directory structure inside tempDir like this:
-
-						source/
-							  link ----> tempDir
-
-				*/
-
-				source = test_support.CreateDir(tempDir, "source")
-
-				tdLink := filepath.Join(source, "link")
-				err := os.Symlink(tempDir, tdLink)
-				Expect(err).NotTo(HaveOccurred())
+					Expect(test_support.SameFile(targetFile1, filepath.Join(target, linkTarget))).To(BeTrue())
+				})
 			})
 
-			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(ContainSubstring("cannot copy symbolic link")))
+			Context("when the source is a directory containing an external symbolic link", func() {
+				BeforeEach(func() {
+					/*
+						   Create a directory structure inside tempDir like this:
+
+							source/
+								  link ----> tempDir
+
+					*/
+
+					source = test_support.CreateDir(tempDir, "source")
+
+					tdLink := filepath.Join(source, "link")
+					err := os.Symlink(tempDir, tdLink)
+					Expect(err).NotTo(HaveOccurred())
+				})
+
+				It("should return a suitable error", func() {
+					Expect(err).To(MatchError(ContainSubstring("cannot copy symbolic link")))
+				})
 			})
-		})
 
-		Context("when the source is a directory containing an internal relative symbolic link", func() {
-			BeforeEach(func() {
-				/*
-					   Create a directory structure inside tempDir like this:
+			Context("when the source is a directory containing an internal relative symbolic link", func() {
+				BeforeEach(func() {
+					/*
+						   Create a directory structure inside tempDir like this:
 
-						source/    <---+
-									   | (internal, but via ../source)
-							  link ----+
-
-				*/
-
-				source = test_support.CreateDir(tempDir, "source")
-
-				tdLink := filepath.Join(source, "link")
-				err := os.Symlink(filepath.Join("..", "source"), tdLink)
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-			It("should copy the symbolic link", func() {
-				Expect(err).NotTo(HaveOccurred())
-
-				targetLink := filepath.Join(target, "link")
-
-				linkTarget, err := os.Readlink(targetLink)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(linkTarget).To(Equal("."))
-			})
-		})
-
-		Context("when the source is a directory containing an external relative symbolic link", func() {
-			BeforeEach(func() {
-				/*
-					   Create a directory structure inside tempDir like this:
-
-						a/             <---+
-							source/        |
-										   | (external via ..)
+							source/    <---+
+										   | (internal, but via ../source)
 								  link ----+
 
-				*/
+					*/
 
-				aDir := test_support.CreateDir(tempDir, "a")
-				source = test_support.CreateDir(aDir, "source")
+					source = test_support.CreateDir(tempDir, "source")
 
-				tdLink := filepath.Join(source, "link")
-				err := os.Symlink("..", tdLink)
-				Expect(err).NotTo(HaveOccurred())
+					tdLink := filepath.Join(source, "link")
+					err := os.Symlink(filepath.Join("..", "source"), tdLink)
+					Expect(err).NotTo(HaveOccurred())
+				})
+
+				It("should copy the symbolic link", func() {
+					Expect(err).NotTo(HaveOccurred())
+
+					targetLink := filepath.Join(target, "link")
+
+					linkTarget, err := os.Readlink(targetLink)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(linkTarget).To(Equal("."))
+				})
 			})
 
-			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(ContainSubstring("cannot copy symbolic link")))
-			})
-		})
+			Context("when the source is a directory containing an external relative symbolic link", func() {
+				BeforeEach(func() {
+					/*
+						   Create a directory structure inside tempDir like this:
 
-		Context("when source is a symbolic link to a file", func() {
-			BeforeEach(func() {
-				/*
+							a/             <---+
+								source/        |
+											   | (external via ..)
+									  link ----+
+
+					*/
+
+					aDir := test_support.CreateDir(tempDir, "a")
+					source = test_support.CreateDir(aDir, "source")
+
+					tdLink := filepath.Join(source, "link")
+					err := os.Symlink("..", tdLink)
+					Expect(err).NotTo(HaveOccurred())
+				})
+
+				It("should return a suitable error", func() {
+					Expect(err).To(MatchError(ContainSubstring("cannot copy symbolic link")))
+				})
+			})
+
+			Context("when source is a symbolic link to a file", func() {
+				BeforeEach(func() {
+					/*
+						   Create a directory structure inside tempDir like this:
+
+							src.file <---+
+							source ------+
+
+					*/
+
+					linkTarget := test_support.CreateFile(tempDir, "src.file")
+					source = filepath.Join(tempDir, "link")
+					err := os.Symlink(linkTarget, source)
+					Expect(err).NotTo(HaveOccurred())
+				})
+
+				It("should return a suitable error", func() {
+					Expect(err).To(MatchError(ContainSubstring("cannot copy symbolic link")))
+				})
+			})
+			Context("when source and target are the same symbolic link", func() {
+				BeforeEach(func() {
+					/*
 					   Create a directory structure inside tempDir like this:
 
 						src.file <---+
 						source ------+
 
-				*/
+					*/
+					linkTarget := test_support.CreateFile(tempDir, "src.file")
+					source = filepath.Join(tempDir, "link")
+					err := os.Symlink(linkTarget, source)
+					Expect(err).NotTo(HaveOccurred())
+					target = source
+				})
 
-				linkTarget := test_support.CreateFile(tempDir, "src.file")
-				source = filepath.Join(tempDir, "link")
-				err := os.Symlink(linkTarget, source)
-				Expect(err).NotTo(HaveOccurred())
+				It("should succeed and not corrupt the file contents", func() {
+					Expect(err).NotTo(HaveOccurred())
+
+					linkTarget, err := os.Readlink(target)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(linkTarget).To(Equal(filepath.Join(tempDir, "src.file")))
+
+					checkFile(target, "test contents")
+				})
 			})
-
-			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(ContainSubstring("cannot copy symbolic link")))
-			})
-		})
-
+		}
 		Context("when the source does not exist", func() {
 			BeforeEach(func() {
 				source = filepath.Join(tempDir, "src.file")
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(ContainSubstring("no such file or directory")))
+				err, ok := err.(fileutils.FileError)
+				Expect(ok).To(BeTrue())
+				Expect(err.ErrorId).To(Equal(fileutils.ErrFileNotFound))
 			})
 		})
 	})
@@ -359,33 +403,6 @@ var _ = Describe("Copier", func() {
 			checkDirectory(resultantDir)
 			checkFile(filepath.Join(resultantDir, "file1"), "test contents")
 			checkFile(filepath.Join(resultantDir, "file2"), "test contents")
-		})
-	})
-
-	Context("when source and target are the same symbolic link", func() {
-		BeforeEach(func() {
-			/*
-			   Create a directory structure inside tempDir like this:
-
-			    src.file <---+
-			    source ------+
-
-			*/
-			linkTarget := test_support.CreateFile(tempDir, "src.file")
-			source = filepath.Join(tempDir, "link")
-			err := os.Symlink(linkTarget, source)
-			Expect(err).NotTo(HaveOccurred())
-			target = source
-		})
-
-		It("should succeed and not corrupt the file contents", func() {
-			Expect(err).NotTo(HaveOccurred())
-
-			linkTarget, err := os.Readlink(target)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(linkTarget).To(Equal(filepath.Join(tempDir, "src.file")))
-
-			checkFile(target, "test contents")
 		})
 	})
 })

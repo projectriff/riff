@@ -139,5 +139,5 @@ var _ = Describe("Read", func() {
 func getwdAsURL() string {
 	cwd, err := os.Getwd()
 	Expect(err).NotTo(HaveOccurred())
-	return "file://" + filepath.ToSlash(cwd) // TODO: make this work on Windows
+	return "file:///" + filepath.ToSlash(cwd)
 }
