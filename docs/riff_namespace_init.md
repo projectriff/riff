@@ -23,6 +23,7 @@ riff namespace init [flags]
       --gcr string         path to a file containing Google Container Registry credentials
   -h, --help               help for init
   -m, --manifest string    manifest of YAML files to be applied; can be a named manifest (stable or latest) or a path or URL of a manifest file (default "stable")
+      --no-secret          no secret required for the image registry
   -s, --secret secret      the name of a secret containing credentials for the image registry (default "push-credentials")
 ```
 
