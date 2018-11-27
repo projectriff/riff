@@ -49,7 +49,8 @@ func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 		),
 		PreRunE: FlagsValidatorAsCobraRunE(
 			FlagsValidationConjunction(
-				AtMostOneOf("gcr", "dockerhub"),
+				AtMostOneOf("gcr", "dockerhub", "no-secret"),
+				AtMostOneOf("secret", "no-secret"),
 				NotBlank("secret"),
 			),
 		),
@@ -70,6 +71,7 @@ func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 
 	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", "manifest of YAML files to be applied; can be a named manifest (stable or latest) or a path or URL of a manifest file")
 
+	command.Flags().BoolVarP(&options.NoSecret, "no-secret", "", false, "no secret required for the image registry")
 	command.Flags().StringVarP(&options.SecretName, "secret", "s", "push-credentials", "the name of a `secret` containing credentials for the image registry")
 	command.Flags().StringVar(&options.GcrTokenPath, "gcr", "", "path to a file containing Google Container Registry credentials")
 	command.Flags().StringVar(&options.DockerHubUsername, "dockerhub", "", "dockerhub username for authentication; password will be read from stdin")

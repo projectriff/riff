@@ -38,22 +38,26 @@ const serviceAccountName = "riff-build"
 type secretType int
 
 const (
-	secretTypeUserProvided secretType = iota
+	secretTypeNone secretType = iota
+	secretTypeUserProvided
 	secretTypeGcr
 	secretTypeDockerHub
 )
 
 type NamespaceInitOptions struct {
 	NamespaceName string
-	SecretName    string
 	Manifest      string
 
+	NoSecret          bool
+	SecretName        string
 	GcrTokenPath      string
 	DockerHubUsername string
 }
 
 func (o *NamespaceInitOptions) secretType() secretType {
 	switch {
+	case o.NoSecret:
+		return secretTypeNone
 	case o.DockerHubUsername != "":
 		return secretTypeDockerHub
 	case o.GcrTokenPath != "":
@@ -95,26 +99,16 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 		return err
 	}
 
-	secretName := options.SecretName
-
-	_, err = c.kubeClient.CoreV1().Secrets(options.NamespaceName).Get(secretName, v1.GetOptions{})
-	if errors.IsNotFound(err) {
-		if options.secretType() == secretTypeUserProvided {
-			return err
-		}
-	} else if err != nil {
-		return err
-	} else {
-		if options.secretType() != secretTypeUserProvided {
-			c.kubeClient.CoreV1().Secrets(options.NamespaceName).Delete(secretName, &v1.DeleteOptions{})
-		}
-	}
-	if options.GcrTokenPath != "" {
-		if err := c.createGcrSecret(options); err != nil {
-			return err
-		}
-	} else if options.DockerHubUsername != "" {
-		if err := c.createDockerHubSecret(options); err != nil {
+	if options.secretType() != secretTypeNone {
+		if options.GcrTokenPath != "" {
+			if err := c.createGcrSecret(options); err != nil {
+				return err
+			}
+		} else if options.DockerHubUsername != "" {
+			if err := c.createDockerHubSecret(options); err != nil {
+				return err
+			}
+		} else if err = c.checkSecretExists(options); err != nil {
 			return err
 		}
 	}
@@ -123,15 +117,21 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 	if errors.IsNotFound(err) {
 		sa = &corev1.ServiceAccount{}
 		sa.Name = serviceAccountName
-		sa.Secrets = append(sa.Secrets, corev1.ObjectReference{Name: secretName})
-		fmt.Printf("Creating serviceaccount %q using secret %q in namespace %q\n", sa.Name, secretName, ns)
+		if options.secretType() != secretTypeNone {
+			secretName := options.SecretName
+			sa.Secrets = append(sa.Secrets, corev1.ObjectReference{Name: secretName})
+			fmt.Printf("Creating serviceaccount %q using secret %q in namespace %q\n", sa.Name, secretName, ns)
+		} else {
+			fmt.Printf("Creating unauthenticated serviceaccount %q in namespace %q\n", sa.Name, ns)
+		}
 		_, err = c.kubeClient.CoreV1().ServiceAccounts(ns).Create(sa)
 		if err != nil {
 			return err
 		}
 	} else if err != nil {
 		return err
-	} else {
+	} else if options.secretType() != secretTypeNone {
+		secretName := options.SecretName
 		secretAlreadyPresent := false
 		for _, s := range sa.Secrets {
 			if s.Name == secretName {
@@ -176,7 +176,14 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 	return nil
 }
 
+func (c *kubectlClient) checkSecretExists(options NamespaceInitOptions) error {
+	_, err := c.kubeClient.CoreV1().Secrets(options.NamespaceName).Get(options.SecretName, v1.GetOptions{})
+	return err
+}
+
 func (c *kubectlClient) createDockerHubSecret(options NamespaceInitOptions) error {
+	c.kubeClient.CoreV1().Secrets(options.NamespaceName).Delete(options.SecretName, &v1.DeleteOptions{})
+
 	password, err := readPassword(fmt.Sprintf("Enter dockerhub password for user %q", options.DockerHubUsername))
 	if err != nil {
 		return err
@@ -198,6 +205,8 @@ func (c *kubectlClient) createDockerHubSecret(options NamespaceInitOptions) erro
 }
 
 func (c *kubectlClient) createGcrSecret(options NamespaceInitOptions) error {
+	c.kubeClient.CoreV1().Secrets(options.NamespaceName).Delete(options.SecretName, &v1.DeleteOptions{})
+
 	token, err := ioutil.ReadFile(options.GcrTokenPath)
 	if err != nil {
 		return err
