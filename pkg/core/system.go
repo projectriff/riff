@@ -32,7 +32,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const istioNamespace = "istio-system"
+const (
+	istioNamespace = "istio-system"
+
+	retryDuration = 5 * time.Second
+	retrySteps    = 5
+)
 
 type SystemInstallOptions struct {
 	Manifest string
@@ -103,23 +108,41 @@ func (kc *kubectlClient) SystemInstall(manifests map[string]*Manifest, options S
 }
 
 func (kc *kubectlClient) applyReleaseWithRetry(release string, options SystemInstallOptions) error {
-	err := kc.applyRelease(release, options)
+	err := retry(retryDuration, retrySteps, func() (bool, error) {
+		return kc.applyRelease(release, options, true)
+	})
+
 	if err != nil {
-		fmt.Printf("Error applying resources, trying again\n")
-		time.Sleep(5 * time.Second) // wait for previous resources to be created
-		return kc.applyRelease(release, options)
+		// Try again and return the true failure or success.
+		_, err = kc.applyRelease(release, options, false)
+		return err
 	}
+
 	return nil
 }
 
-func (kc *kubectlClient) applyRelease(release string, options SystemInstallOptions) error {
+var errTimeout = errors.New("timed out")
+
+func retry(duration time.Duration, steps int, condition func() (done bool, err error)) error {
+	for i := 0; i < steps; i++ {
+		if i != 0 {
+			time.Sleep(duration)
+		}
+		if ok, err := condition(); err != nil || ok {
+			return err
+		}
+	}
+	return errTimeout
+}
+
+func (kc *kubectlClient) applyRelease(release string, options SystemInstallOptions, willRetry bool) (bool, error) {
 	dir, err := fileutils.Dir(options.Manifest)
 	if err != nil {
-		return err
+		return false, err // hard error
 	}
 	yaml, err := fileutils.Read(release, dir)
 	if err != nil {
-		return err
+		return false, err // hard error
 	}
 	if options.NodePort {
 		yaml = bytes.Replace(yaml, []byte("type: LoadBalancer"), []byte("type: NodePort"), -1)
@@ -141,10 +164,14 @@ To fix this you need to:
  3. Re-install ` + env.Cli.Name + `
 
 `)
+			return false, err // hard error
 		}
-		return err
+		if willRetry {
+			return false, nil // retriable error
+		}
+		return false, err // not retrying, so treat as hard error
 	}
-	return nil
+	return true, nil // success
 }
 
 func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, error) {
