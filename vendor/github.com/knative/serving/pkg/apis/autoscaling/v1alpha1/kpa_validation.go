@@ -1,5 +1,5 @@
 /*
-Copyright 2017 The Knative Authors
+Copyright 2018 The Knative Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,47 +18,48 @@ package v1alpha1
 
 import (
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 
 	"github.com/knative/pkg/apis"
+	servingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 )
 
 func (rt *PodAutoscaler) Validate() *apis.FieldError {
-	return rt.Spec.Validate().ViaField("spec")
+	return servingv1alpha1.ValidateObjectMetadata(rt.GetObjectMeta()).ViaField("metadata").Also(rt.Spec.Validate().ViaField("spec"))
 }
 
 func (rs *PodAutoscalerSpec) Validate() *apis.FieldError {
 	if equality.Semantic.DeepEqual(rs, &PodAutoscalerSpec{}) {
 		return apis.ErrMissingField(apis.CurrentField)
 	}
-	if err := validateReference(rs.ScaleTargetRef); err != nil {
-		return err.ViaField("scaleTargetRef")
-	}
+	errs := validateReference(rs.ScaleTargetRef).ViaField("scaleTargetRef")
 	if rs.ServiceName == "" {
-		return apis.ErrMissingField("serviceName")
+		errs = errs.Also(apis.ErrMissingField("serviceName"))
 	}
-	if err := rs.ServingState.Validate(); err != nil {
-		return err.ViaField("servingState")
+	if err := rs.ConcurrencyModel.Validate(); err != nil {
+		errs = errs.Also(err.ViaField("concurrencyModel"))
+	} else if err := servingv1alpha1.ValidateContainerConcurrency(rs.ContainerConcurrency, rs.ConcurrencyModel); err != nil {
+		errs = errs.Also(err)
 	}
-	return rs.ConcurrencyModel.Validate().ViaField("concurrencyModel")
+	return errs
 }
 
 func validateReference(ref autoscalingv1.CrossVersionObjectReference) *apis.FieldError {
 	if equality.Semantic.DeepEqual(ref, autoscalingv1.CrossVersionObjectReference{}) {
 		return apis.ErrMissingField(apis.CurrentField)
 	}
+	var errs *apis.FieldError
 	if ref.Kind == "" {
-		return apis.ErrMissingField("kind")
+		errs = errs.Also(apis.ErrMissingField("kind"))
 	}
 	if ref.Name == "" {
-		return apis.ErrMissingField("name")
+		errs = errs.Also(apis.ErrMissingField("name"))
 	}
 	if ref.APIVersion == "" {
-		return apis.ErrMissingField("apiVersion")
+		errs = errs.Also(apis.ErrMissingField("apiVersion"))
 	}
-	return nil
+	return errs
 }
 
 func (current *PodAutoscaler) CheckImmutableFields(og apis.Immutable) *apis.FieldError {
@@ -67,9 +68,7 @@ func (current *PodAutoscaler) CheckImmutableFields(og apis.Immutable) *apis.Fiel
 		return &apis.FieldError{Message: "The provided original was not a PodAutoscaler"}
 	}
 
-	// The autoscaler is allowed to change ServingState, but consider the rest.
-	ignoreServingState := cmpopts.IgnoreFields(PodAutoscalerSpec{}, "ServingState")
-	if diff := cmp.Diff(original.Spec, current.Spec, ignoreServingState); diff != "" {
+	if diff := cmp.Diff(original.Spec, current.Spec); diff != "" {
 		return &apis.FieldError{
 			Message: "Immutable fields changed (-old +new)",
 			Paths:   []string{"spec"},

@@ -18,10 +18,13 @@ package commands_test
 
 import (
 	"fmt"
-	"k8s.io/api/core/v1"
 	"strings"
 
-	eventing "github.com/knative/eventing/pkg/apis/channels/v1alpha1"
+	v1 "k8s.io/api/core/v1"
+
+	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/cmd/commands"
@@ -55,12 +58,7 @@ var _ = Describe("The riff channel create command", func() {
 		It("should fail without required flags", func() {
 			cc.SetArgs([]string{"my-channel"})
 			err := cc.Execute()
-			Expect(err).To(MatchError("at least one of --bus, --cluster-bus must be set"))
-		})
-		It("should fail when both bus and cluster-bus are set", func() {
-			cc.SetArgs([]string{"my-channel", "--bus", "b", "--cluster-bus", "cb"})
-			err := cc.Execute()
-			Expect(err).To(MatchError("at most one of --bus, --cluster-bus must be set"))
+			Expect(err).To(MatchError("at least one of --cluster-provisioner must be set"))
 		})
 	})
 
@@ -81,11 +79,11 @@ var _ = Describe("The riff channel create command", func() {
 
 		})
 		It("should involve the core.Client", func() {
-			cc.SetArgs([]string{"my-channel", "--cluster-bus", "cb", "--namespace", "ns"})
+			cc.SetArgs([]string{"my-channel", "--cluster-provisioner", "ccp", "--namespace", "ns"})
 
 			o := core.CreateChannelOptions{
-				Name:       "my-channel",
-				ClusterBus: "cb",
+				Name:                      "my-channel",
+				ClusterChannelProvisioner: "ccp",
 			}
 			o.Namespace = "ns"
 
@@ -94,7 +92,7 @@ var _ = Describe("The riff channel create command", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should propagate core.Client errors", func() {
-			cc.SetArgs([]string{"my-channel", "--cluster-bus", "cb", "--namespace", "ns"})
+			cc.SetArgs([]string{"my-channel", "--cluster-provisioner", "ccp", "--namespace", "ns"})
 
 			e := fmt.Errorf("some error")
 			asMock.On("CreateChannel", mock.Anything).Return(nil, e)
@@ -102,18 +100,22 @@ var _ = Describe("The riff channel create command", func() {
 			Expect(err).To(MatchError(e))
 		})
 		It("should print when --dry-run is set", func() {
-			cc.SetArgs([]string{"my-channel", "--cluster-bus", "cb", "--namespace", "ns", "--dry-run"})
+			cc.SetArgs([]string{"my-channel", "--cluster-provisioner", "ccp", "--namespace", "ns", "--dry-run"})
 
 			o := core.CreateChannelOptions{
-				Name:       "my-channel",
-				ClusterBus: "cb",
-				DryRun:     true,
+				Name:                      "my-channel",
+				ClusterChannelProvisioner: "ccp",
+				DryRun:                    true,
 			}
 			o.Namespace = "ns"
 
 			c := eventing.Channel{}
 			c.Name = "my-channel"
-			c.Spec.ClusterBus = "cb"
+			c.Spec.Provisioner = &v1.ObjectReference{
+				APIVersion: "eventing.knative.dev/v1alpha1",
+				Kind:       "ClusterChannelProvisioner",
+				Name:       "ccp",
+			}
 			asMock.On("CreateChannel", o).Return(&c, nil)
 
 			stdout := &strings.Builder{}
@@ -132,8 +134,12 @@ const channelCreateDryRun = `metadata:
   creationTimestamp: null
   name: my-channel
 spec:
-  clusterBus: cb
-status: {}
+  provisioner:
+    apiVersion: eventing.knative.dev/v1alpha1
+    kind: ClusterChannelProvisioner
+    name: ccp
+status:
+  address: {}
 ---
 `
 
@@ -177,19 +183,45 @@ var _ = Describe("The riff channel list command", func() {
 
 			list := &eventing.ChannelList{
 				Items: []eventing.Channel{
-					{ObjectMeta: metav1.ObjectMeta{Name: "foo"}, Spec: eventing.ChannelSpec{Bus: "pubsub"}, Status: eventing.ChannelStatus{
-						Conditions: []eventing.ChannelCondition{
-							{Type: eventing.ChannelReady, Status: v1.ConditionTrue},
-						}}},
-					{ObjectMeta: metav1.ObjectMeta{Name: "bar"}, Spec: eventing.ChannelSpec{Bus: "kafka"}, Status: eventing.ChannelStatus{
-						Conditions: []eventing.ChannelCondition{
-							{Type: eventing.ChannelReady, Status: v1.ConditionFalse, Reason: "RevisionFailed", Message: "oopsie"},
-						}}},
-					{ObjectMeta: metav1.ObjectMeta{Name: "baz"}, Spec: eventing.ChannelSpec{Bus: "stub"}, Status: eventing.ChannelStatus{
-						Conditions: []eventing.ChannelCondition{
-							{Type: eventing.ChannelReady, Status: v1.ConditionUnknown},
-						}}},
-					{ObjectMeta: metav1.ObjectMeta{Name: "foobar"}, Spec: eventing.ChannelSpec{ClusterBus: "stub"}},
+					{
+						ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+						Spec: eventing.ChannelSpec{
+							Provisioner: &v1.ObjectReference{APIVersion: "eventing.knative.dev/v1alpha1", Kind: "ClusterChannelProvisioner", Name: "pubsub"},
+						},
+						Status: eventing.ChannelStatus{
+							Conditions: duckv1alpha1.Conditions{
+								{Type: v1alpha1.ChannelConditionReady, Status: v1.ConditionTrue},
+							},
+						},
+					},
+					{
+						ObjectMeta: metav1.ObjectMeta{Name: "bar"},
+						Spec: eventing.ChannelSpec{
+							Provisioner: &v1.ObjectReference{APIVersion: "eventing.knative.dev/v1alpha1", Kind: "ClusterChannelProvisioner", Name: "kafka"},
+						},
+						Status: eventing.ChannelStatus{
+							Conditions: duckv1alpha1.Conditions{
+								{Type: v1alpha1.ChannelConditionReady, Status: v1.ConditionFalse, Reason: "RevisionFailed", Message: "oopsie"},
+							},
+						},
+					},
+					{
+						ObjectMeta: metav1.ObjectMeta{Name: "baz"},
+						Spec: eventing.ChannelSpec{
+							Provisioner: &v1.ObjectReference{APIVersion: "eventing.knative.dev/v1alpha1", Kind: "ClusterChannelProvisioner", Name: "stub"},
+						},
+						Status: eventing.ChannelStatus{
+							Conditions: duckv1alpha1.Conditions{
+								{Type: v1alpha1.ChannelConditionReady, Status: v1.ConditionUnknown},
+							},
+						},
+					},
+					{
+						ObjectMeta: metav1.ObjectMeta{Name: "foobar"},
+						Spec: eventing.ChannelSpec{
+							Provisioner: &v1.ObjectReference{APIVersion: "eventing.knative.dev/v1alpha1", Kind: "ClusterChannelProvisioner", Name: "stub"},
+						},
+					},
 				},
 			}
 
@@ -213,11 +245,11 @@ var _ = Describe("The riff channel list command", func() {
 	})
 })
 
-const channelListOutput = `NAME   STATUS                 BUS             
-foo    Running                bus:pubsub      
-bar    RevisionFailed: oopsie bus:kafka       
-baz    Unknown                bus:stub        
-foobar Unknown                clusterbus:stub 
+const channelListOutput = `NAME   STATUS                 PROVISIONER    
+foo    Running                cluster:pubsub 
+bar    RevisionFailed: oopsie cluster:kafka  
+baz    Unknown                cluster:stub   
+foobar Unknown                cluster:stub   
 
 list completed successfully
 `

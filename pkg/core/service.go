@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	core_v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -144,7 +145,7 @@ type ServiceStatusOptions struct {
 	Name      string
 }
 
-func (c *client) ServiceStatus(options ServiceStatusOptions) (*v1alpha1.ServiceCondition, error) {
+func (c *client) ServiceStatus(options ServiceStatusOptions) (*duckv1alpha1.Condition, error) {
 
 	conds, err := c.ServiceConditions(options)
 	if err != nil {
@@ -160,7 +161,7 @@ func (c *client) ServiceStatus(options ServiceStatusOptions) (*v1alpha1.ServiceC
 	return nil, errors.New("No condition of type ServiceConditionReady found for the service")
 }
 
-func (c *client) ServiceConditions(options ServiceStatusOptions) ([]v1alpha1.ServiceCondition, error) {
+func (c *client) ServiceConditions(options ServiceStatusOptions) (duckv1alpha1.Conditions, error) {
 
 	s, err := c.service(options.Namespace, options.Name)
 	if err != nil {

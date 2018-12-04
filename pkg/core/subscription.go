@@ -17,9 +17,8 @@
 package core
 
 import (
-	"fmt"
-
-	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
+	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -28,7 +27,7 @@ type CreateSubscriptionOptions struct {
 	Name       string
 	Channel    string
 	Subscriber string
-	ReplyTo    string
+	Reply      string
 	DryRun     bool
 }
 
@@ -43,12 +42,9 @@ type ListSubscriptionsOptions struct {
 
 func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha1.Subscription, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
-	if options.ReplyTo != "" {
-		options.ReplyTo = fmt.Sprintf("%s-channel", options.ReplyTo)
-	}
 	s := v1alpha1.Subscription{
 		TypeMeta: meta_v1.TypeMeta{
-			APIVersion: "channels.knative.dev/v1alpha1",
+			APIVersion: "eventing.knative.dev/v1alpha1",
 			Kind:       "Subscription",
 		},
 
@@ -56,14 +52,18 @@ func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha
 			Name: options.Name,
 		},
 		Spec: v1alpha1.SubscriptionSpec{
-			Channel:    options.Channel,
-			Subscriber: options.Subscriber,
-			ReplyTo:    options.ReplyTo,
+			Channel: corev1.ObjectReference{
+				APIVersion: "eventing.knative.dev/v1alpha1",
+				Kind:       "Channel",
+				Name:       options.Channel,
+			},
+			Subscriber: c.makeSubscriptionSubscriber(options.Subscriber),
+			Reply:      c.makeSubscriptionReplyStrategy(options.Reply),
 		},
 	}
 
 	if !options.DryRun {
-		_, e := c.eventing.ChannelsV1alpha1().Subscriptions(ns).Create(&s)
+		_, e := c.eventing.EventingV1alpha1().Subscriptions(ns).Create(&s)
 		return &s, e
 	} else {
 		return &s, nil
@@ -73,15 +73,42 @@ func (c *client) CreateSubscription(options CreateSubscriptionOptions) (*v1alpha
 
 func (c *client) DeleteSubscription(options DeleteSubscriptionOptions) error {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
-	return c.eventing.ChannelsV1alpha1().Subscriptions(ns).Delete(options.Name, nil)
+	return c.eventing.EventingV1alpha1().Subscriptions(ns).Delete(options.Name, nil)
 }
 
 func (c *client) ListSubscriptions(options ListSubscriptionsOptions) (*v1alpha1.SubscriptionList, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 
-	list, err := c.eventing.ChannelsV1alpha1().Subscriptions(ns).List(meta_v1.ListOptions{})
+	list, err := c.eventing.EventingV1alpha1().Subscriptions(ns).List(meta_v1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
 	return list, nil
+}
+
+func (c *client) makeSubscriptionSubscriber(subscriber string) *v1alpha1.SubscriberSpec {
+	if subscriber == "" {
+		return nil
+	}
+	// TODO add support for DNSName as alternative to Ref
+	return &v1alpha1.SubscriberSpec{
+		Ref: &corev1.ObjectReference{
+			APIVersion: "serving.knative.dev/v1alpha1",
+			Kind:       "Service",
+			Name:       subscriber,
+		},
+	}
+}
+
+func (c *client) makeSubscriptionReplyStrategy(reply string) *v1alpha1.ReplyStrategy {
+	if reply == "" {
+		return nil
+	}
+	return &v1alpha1.ReplyStrategy{
+		Channel: &corev1.ObjectReference{
+			APIVersion: "eventing.knative.dev/v1alpha1",
+			Kind:       "Channel",
+			Name:       reply,
+		},
+	}
 }

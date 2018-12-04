@@ -15,7 +15,7 @@ riff subscription create [flags]
 ```
   riff subscription create --channel tweets --subscriber tweets-logger
   riff subscription create my-subscription --channel tweets --subscriber tweets-logger
-  riff subscription create --channel tweets --subscriber tweets-logger --reply-to logged-tweets
+  riff subscription create --channel tweets --subscriber tweets-logger --reply logged-tweets
 ```
 
 ### Options
@@ -24,7 +24,7 @@ riff subscription create [flags]
   -c, --channel string      the input channel of the subscription
   -h, --help                help for create
   -n, --namespace string    the namespace of the subscription
-  -r, --reply-to string     the optional output channel of the subscription
+  -r, --reply string        the optional output channel of the subscription
   -s, --subscriber string   the subscriber of the subscription
 ```
 

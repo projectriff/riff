@@ -4,6 +4,7 @@ package mockserving
 
 import discovery "k8s.io/client-go/discovery"
 import mock "github.com/stretchr/testify/mock"
+import networkingv1alpha1 "github.com/knative/serving/pkg/client/clientset/versioned/typed/networking/v1alpha1"
 import servingv1alpha1 "github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
 import v1alpha1 "github.com/knative/serving/pkg/client/clientset/versioned/typed/autoscaling/v1alpha1"
 
@@ -54,6 +55,38 @@ func (_m *Interface) Discovery() discovery.DiscoveryInterface {
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(discovery.DiscoveryInterface)
+		}
+	}
+
+	return r0
+}
+
+// Networking provides a mock function with given fields:
+func (_m *Interface) Networking() networkingv1alpha1.NetworkingV1alpha1Interface {
+	ret := _m.Called()
+
+	var r0 networkingv1alpha1.NetworkingV1alpha1Interface
+	if rf, ok := ret.Get(0).(func() networkingv1alpha1.NetworkingV1alpha1Interface); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(networkingv1alpha1.NetworkingV1alpha1Interface)
+		}
+	}
+
+	return r0
+}
+
+// NetworkingV1alpha1 provides a mock function with given fields:
+func (_m *Interface) NetworkingV1alpha1() networkingv1alpha1.NetworkingV1alpha1Interface {
+	ret := _m.Called()
+
+	var r0 networkingv1alpha1.NetworkingV1alpha1Interface
+	if rf, ok := ret.Get(0).(func() networkingv1alpha1.NetworkingV1alpha1Interface); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(networkingv1alpha1.NetworkingV1alpha1Interface)
 		}
 	}
 

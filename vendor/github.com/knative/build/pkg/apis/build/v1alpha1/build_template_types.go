@@ -17,11 +17,19 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"encoding/json"
-
+	"github.com/knative/pkg/apis"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/knative/pkg/kmeta"
 )
+
+// Template is an interface for accessing the BuildTemplateSpec
+// from various forms of template (namespace-/cluster-scoped).
+type Template interface {
+	TemplateSpec() BuildTemplateSpec
+}
 
 // +genclient
 // +genclient:noStatus
@@ -34,6 +42,15 @@ type BuildTemplate struct {
 
 	Spec BuildTemplateSpec `json:"spec"`
 }
+
+// Check that our resource implements several interfaces.
+var _ kmeta.OwnerRefable = (*BuildTemplate)(nil)
+var _ Template = (*BuildTemplate)(nil)
+var _ BuildTemplateInterface = (*BuildTemplate)(nil)
+
+// Check that BuildTemplate may be validated and defaulted.
+var _ apis.Validatable = (*BuildTemplate)(nil)
+var _ apis.Defaultable = (*BuildTemplate)(nil)
 
 // BuildTemplateSpec is the spec for a BuildTemplate.
 type BuildTemplateSpec struct {
@@ -80,11 +97,20 @@ type BuildTemplateList struct {
 	Items []BuildTemplate `json:"items"`
 }
 
-// GetGeneration returns the generation number of this object.
-func (bt *BuildTemplate) GetGeneration() int64 { return bt.Spec.Generation }
+// TemplateSpec returnes the Spec used by the template
+func (bt *BuildTemplate) TemplateSpec() BuildTemplateSpec {
+	return bt.Spec
+}
 
-// SetGeneration sets the generation number of this object.
-func (bt *BuildTemplate) SetGeneration(generation int64) { bt.Spec.Generation = generation }
+// Copy performes a deep copy
+func (bt *BuildTemplate) Copy() BuildTemplateInterface {
+	return bt.DeepCopy()
+}
 
-// GetSpecJSON returns the JSON serialization of this build template's Spec.
-func (bt *BuildTemplate) GetSpecJSON() ([]byte, error) { return json.Marshal(bt.Spec) }
+// GetGroupVersionKind gives kind
+func (bt *BuildTemplate) GetGroupVersionKind() schema.GroupVersionKind {
+	return SchemeGroupVersion.WithKind("BuildTemplate")
+}
+
+// SetDefaults for build template
+func (bt *BuildTemplate) SetDefaults() {}

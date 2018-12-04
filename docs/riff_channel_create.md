@@ -1,10 +1,10 @@
 ## riff channel create
 
-Create a new channel on a bus or a cluster bus
+Create a new channel
 
 ### Synopsis
 
-Create a new channel on a bus or a cluster bus
+Create a new channel
 
 ```
 riff channel create [flags]
@@ -13,18 +13,17 @@ riff channel create [flags]
 ### Examples
 
 ```
-  riff channel create tweets --bus kafka --namespace steve-ns
-  riff channel create orders --cluster-bus global-rabbit
+  riff channel create tweets --cluster-provisioner kafka --namespace steve-ns
+  riff channel create orders --cluster-provisioner global-rabbit
 ```
 
 ### Options
 
 ```
-      --bus name              the name of the bus to create the channel in.
-      --cluster-bus name      the name of the cluster bus to create the channel in.
-      --dry-run               don't create resources but print yaml representation on stdout
-  -h, --help                  help for create
-  -n, --namespace namespace   the namespace of the channel and any non-cluster bus
+      --cluster-provisioner name   the name of the cluster channel provisioner to provision the channel with.
+      --dry-run                    don't create resources but print yaml representation on stdout
+  -h, --help                       help for create
+  -n, --namespace namespace        the namespace of the channel
 ```
 
 ### Options inherited from parent commands

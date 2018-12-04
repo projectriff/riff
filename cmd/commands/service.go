@@ -22,10 +22,10 @@ import (
 	"os/exec"
 	"time"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 
 	"github.com/frioux/shellquote"
-	v1alpha12 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	servingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
@@ -336,7 +336,7 @@ func ServiceDelete(fcClient *core.Client) *cobra.Command {
 	return command
 }
 
-func serviceToInterfaceSlice(subscriptions []v1alpha12.Service) []interface{} {
+func serviceToInterfaceSlice(subscriptions []servingv1alpha1.Service) []interface{} {
 	result := make([]interface{}, len(subscriptions))
 	for i := range subscriptions {
 		result[i] = subscriptions[i]
@@ -348,13 +348,13 @@ func makeServiceExtractors() []NamedExtractor {
 	return []NamedExtractor{
 		{
 			name: "NAME",
-			fn:   func(s interface{}) string { return s.(v1alpha12.Service).Name },
+			fn:   func(s interface{}) string { return s.(servingv1alpha1.Service).Name },
 		},
 		{
 			name: "STATUS",
 			fn: func(s interface{}) string {
-				service := s.(v1alpha12.Service)
-				cond := service.Status.GetCondition(v1alpha12.ServiceConditionReady)
+				service := s.(servingv1alpha1.Service)
+				cond := service.Status.GetCondition(servingv1alpha1.ServiceConditionReady)
 				if cond == nil {
 					return "Unknown"
 				}

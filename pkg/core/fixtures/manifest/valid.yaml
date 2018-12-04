@@ -3,8 +3,8 @@ istio:
   - istio-crds
   - http://istio-release
 knative:
+  - build-release
   - https://serving-release
   - eventing-release
-  - stub-bus-release
 namespace:
   - buildtemplate-release

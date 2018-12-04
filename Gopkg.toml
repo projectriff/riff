@@ -29,21 +29,21 @@
   name = "github.com/spf13/cobra"
   version = "v0.0.3"
 
-[[constraint]]
+[[override]]
   name = "github.com/spf13/pflag"
   version = "v1.0.1"
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.11.0"
+  version = "kubernetes-1.11.3"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.11.0"
+  version = "kubernetes-1.11.3"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.11.0"
+  version = "kubernetes-1.11.3"
 
 [[override]]
   name = "github.com/golang/protobuf"
@@ -51,17 +51,15 @@
 
 [[constraint]]
   name = "github.com/knative/eventing"
-  revision = "f8e956305ed4bc07220d48905b0f1045a0043693" # Awaiting proper tag / blessed sha
+  version = "v0.2.1"
 
 [[constraint]]
   name = "github.com/knative/serving"
-  # this is the latest on master as of 2018-08-14 13:00 EDT
-  revision = "3da9b7a56f155567b15ac46aad16c96a17972e50"
+  version = "v0.2.2"
 
 [[constraint]]
   name = "github.com/knative/build"
-  # this is the version knative/serving depends on
-  revision = "e7a708f4562329a7d2bd51eb9f2a3889145a80a7"
+  version = "v0.2.0"
 
 [[constraint]]
   name = "github.com/ghodss/yaml"

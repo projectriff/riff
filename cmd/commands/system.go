@@ -54,9 +54,9 @@ func SystemInstall(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
     istio:
     - https://path/to/istio-release.yaml
     knative:
+    - https://path/to/build-release.yaml
     - https://path/to/serving-release.yaml
     - https://path/to/eventing-release.yaml
-    - https://path/to/stub-bus-release.yaml
     namespace:
     - https://path/to/buildtemplate-release.yaml
 ` +

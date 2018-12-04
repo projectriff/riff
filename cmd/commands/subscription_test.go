@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
+	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
@@ -13,6 +13,7 @@ import (
 	"github.com/projectriff/riff/pkg/core/mocks"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -44,7 +45,7 @@ var _ = Describe("The riff subscription create command", func() {
 	It("should define flags", func() {
 		Expect(createCommand.Flag("subscriber")).NotTo(BeNil())
 		Expect(createCommand.Flag("channel")).NotTo(BeNil())
-		Expect(createCommand.Flag("reply-to")).NotTo(BeNil())
+		Expect(createCommand.Flag("reply")).NotTo(BeNil())
 		Expect(createCommand.Flag("namespace")).NotTo(BeNil())
 	})
 
@@ -117,12 +118,12 @@ var _ = Describe("The riff subscription create command", func() {
 			createCommand.SetOutput(stdout)
 			createCommand.SetArgs([]string{
 				"subscription-name", "--channel", "coco-chanel", "--subscriber", "my-service",
-				"--reply-to", "chanel-number-five"})
+				"--reply", "chanel-number-five"})
 			clientMock.On("CreateSubscription", core.CreateSubscriptionOptions{
 				Name:       "subscription-name",
 				Subscriber: "my-service",
 				Channel:    "coco-chanel",
-				ReplyTo:    "chanel-number-five",
+				Reply:      "chanel-number-five",
 			}).Return(nil, nil)
 
 			err := createCommand.Execute()
@@ -138,13 +139,13 @@ var _ = Describe("The riff subscription create command", func() {
 				"subscription-name",
 				"--channel", "coco-chanel",
 				"--subscriber", "my-service",
-				"--reply-to", "chanel-number-five",
+				"--reply", "chanel-number-five",
 				"--namespace", "myspace"})
 			expectedOptions := core.CreateSubscriptionOptions{
 				Name:       "subscription-name",
 				Subscriber: "my-service",
 				Channel:    "coco-chanel",
-				ReplyTo:    "chanel-number-five",
+				Reply:      "chanel-number-five",
 			}
 			expectedOptions.Namespace = "myspace"
 			clientMock.On("CreateSubscription", expectedOptions).Return(nil, nil)
@@ -256,8 +257,8 @@ var _ = Describe("The riff subscription delete command", func() {
 })
 
 const (
-	listOutput = `NAME            CHANNEL SUBSCRIBER REPLY-TO 
-my-subscription channel subscriber reply-to 
+	listOutput = `NAME            CHANNEL SUBSCRIBER REPLY 
+my-subscription channel subscriber reply 
 
 list completed successfully
 `
@@ -316,9 +317,25 @@ var _ = Describe("The riff subscription list command", func() {
 					Name: "my-subscription",
 				},
 				Spec: v1alpha1.SubscriptionSpec{
-					Channel:    "channel",
-					Subscriber: "subscriber",
-					ReplyTo:    "reply-to",
+					Channel: corev1.ObjectReference{
+						APIVersion: "eventing.knative.dev/v1alpha1",
+						Kind:       "Channel",
+						Name:       "channel",
+					},
+					Subscriber: &v1alpha1.SubscriberSpec{
+						Ref: &corev1.ObjectReference{
+							APIVersion: "serving.knative.dev/v1alpha1",
+							Kind:       "Service",
+							Name:       "subscriber",
+						},
+					},
+					Reply: &v1alpha1.ReplyStrategy{
+						Channel: &corev1.ObjectReference{
+							APIVersion: "eventing.knative.dev/v1alpha1",
+							Kind:       "Channel",
+							Name:       "reply",
+						},
+					},
 				},
 			})
 			clientMock.On("ListSubscriptions", core.ListSubscriptionsOptions{}).Return(subscriptions, nil)
@@ -338,9 +355,25 @@ var _ = Describe("The riff subscription list command", func() {
 					Namespace: namespace,
 				},
 				Spec: v1alpha1.SubscriptionSpec{
-					Channel:    "channel",
-					Subscriber: "subscriber",
-					ReplyTo:    "reply-to",
+					Channel: corev1.ObjectReference{
+						APIVersion: "eventing.knative.dev/v1alpha1",
+						Kind:       "Channel",
+						Name:       "channel",
+					},
+					Subscriber: &v1alpha1.SubscriberSpec{
+						Ref: &corev1.ObjectReference{
+							APIVersion: "serving.knative.dev/v1alpha1",
+							Kind:       "Service",
+							Name:       "subscriber",
+						},
+					},
+					Reply: &v1alpha1.ReplyStrategy{
+						Channel: &corev1.ObjectReference{
+							APIVersion: "eventing.knative.dev/v1alpha1",
+							Kind:       "Channel",
+							Name:       "reply",
+						},
+					},
 				},
 			})
 			options := core.ListSubscriptionsOptions{}

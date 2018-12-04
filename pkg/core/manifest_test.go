@@ -130,7 +130,7 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should parse the Knative array", func() {
-				Expect(manifest.Knative).To(ConsistOf("https://serving-release", "eventing-release", "stub-bus-release"))
+				Expect(manifest.Knative).To(ConsistOf("build-release", "https://serving-release", "eventing-release"))
 			})
 
 			It("should parse the Knative array", func() {
