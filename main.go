@@ -38,8 +38,8 @@ var (
 			Knative: []string{
 				"https://storage.googleapis.com/knative-releases/build/latest/release.yaml",
 				"https://storage.googleapis.com/knative-releases/serving/latest/serving.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181106-a99376f/release.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181106-a99376f/release-clusterbus-stub.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/latest/eventing.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/latest/in-memory-channel.yaml",
 			},
 			Namespace: []string{
 				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate.yaml",
@@ -53,8 +53,8 @@ var (
 			Knative: []string{
 				"https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
 				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.2/serving.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181031-a2f9417/release.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v20181031-a2f9417/release-clusterbus-stub.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/eventing.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/in-memory-channel.yaml",
 			},
 			Namespace: []string{
 				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate-0.1.0.yaml",

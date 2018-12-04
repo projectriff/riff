@@ -19,8 +19,8 @@ package commands
 import (
 	"fmt"
 
-	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
-	"k8s.io/api/core/v1"
+	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	v1 "k8s.io/api/core/v1"
 
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/env"
@@ -48,20 +48,20 @@ const (
 	channelDeleteNumberOfArgs
 )
 
-var exactlyOneOfBusOrClusterBus = ExactlyOneOf("bus", "cluster-bus")
+var exactlyOneProvisioner = ExactlyOneOf("cluster-provisioner")
 
 func ChannelCreate(fcTool *core.Client) *cobra.Command {
 	options := core.CreateChannelOptions{}
 
 	command := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new channel on a bus or a cluster bus",
+		Short: "Create a new channel",
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(channelCreateNumberOfArgs),
 			AtPosition(channelCreateNameIndex, ValidName())),
-		Example: `  ` + env.Cli.Name + ` channel create tweets --bus kafka --namespace steve-ns
-  ` + env.Cli.Name + ` channel create orders --cluster-bus global-rabbit`,
-		PreRunE: FlagsValidatorAsCobraRunE(exactlyOneOfBusOrClusterBus),
+		Example: `  ` + env.Cli.Name + ` channel create tweets --cluster-provisioner kafka --namespace steve-ns
+  ` + env.Cli.Name + ` channel create orders --cluster-provisioner global-rabbit`,
+		PreRunE: FlagsValidatorAsCobraRunE(exactlyOneProvisioner),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			channelName := args[channelCreateNameIndex]
 			options.Name = channelName
@@ -86,9 +86,8 @@ func ChannelCreate(fcTool *core.Client) *cobra.Command {
 
 	LabelArgs(command, "CHANNEL_NAME")
 
-	command.Flags().StringVar(&options.Bus, "bus", "", "the `name` of the bus to create the channel in.")
-	command.Flags().StringVar(&options.ClusterBus, "cluster-bus", "", "the `name` of the cluster bus to create the channel in.")
-	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", "the `namespace` of the channel and any non-cluster bus")
+	command.Flags().StringVar(&options.ClusterChannelProvisioner, "cluster-provisioner", "", "the `name` of the cluster channel provisioner to provision the channel with.")
+	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", "the `namespace` of the channel")
 
 	command.Flags().BoolVar(&options.DryRun, "dry-run", false, dryRunUsage)
 	return command
@@ -169,7 +168,7 @@ func makeChannelExtractors() []NamedExtractor {
 			name: "STATUS",
 			fn: func(ch interface{}) string {
 				channel := ch.(v1alpha1.Channel)
-				condition := channel.Status.GetCondition(v1alpha1.ChannelReady)
+				condition := channel.Status.GetCondition(v1alpha1.ChannelConditionReady)
 				if condition == nil {
 					return "Unknown"
 				} else {
@@ -185,14 +184,10 @@ func makeChannelExtractors() []NamedExtractor {
 			},
 		},
 		{
-			name: "BUS",
+			name: "PROVISIONER",
 			fn: func(ch interface{}) string {
 				spec := ch.(v1alpha1.Channel).Spec
-				if spec.Bus != "" {
-					return fmt.Sprintf("bus:%s", spec.Bus)
-				} else {
-					return fmt.Sprintf("clusterbus:%s", spec.ClusterBus)
-				}
+				return fmt.Sprintf("cluster:%s", spec.Provisioner.Name)
 			},
 		},
 	}

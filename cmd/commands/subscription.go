@@ -22,7 +22,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
+	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/env"
 	. "github.com/spf13/cobra"
@@ -59,7 +59,7 @@ func SubscriptionCreate(client *core.Client) *Command {
 			"The subscription can optionally be bound to an output channel.",
 		Example: `  ` + env.Cli.Name + ` subscription create --channel tweets --subscriber tweets-logger
   ` + env.Cli.Name + ` subscription create my-subscription --channel tweets --subscriber tweets-logger
-  ` + env.Cli.Name + ` subscription create --channel tweets --subscriber tweets-logger --reply-to logged-tweets`,
+  ` + env.Cli.Name + ` subscription create --channel tweets --subscriber tweets-logger --reply logged-tweets`,
 		Args: ArgValidationConjunction(
 			MaximumNArgs(subscriptionCreateMaxNumberOfArgs),
 			OptionalAtPosition(subscriptionCreateNameIndex, ValidName()),
@@ -176,7 +176,7 @@ func defineFlagsForCreate(command *Command, options *core.CreateSubscriptionOpti
 	flags := command.Flags()
 	flags.StringVarP(&options.Subscriber, "subscriber", "s", "", "the subscriber of the subscription")
 	flags.StringVarP(&options.Channel, "channel", "c", "", "the input channel of the subscription")
-	flags.StringVarP(&options.ReplyTo, "reply-to", "r", "", "the optional output channel of the subscription")
+	flags.StringVarP(&options.Reply, "reply", "r", "", "the optional output channel of the subscription")
 	flags.StringVarP(&options.Namespace, "namespace", "n", "", "the namespace of the subscription")
 	command.MarkFlagRequired("subscriber")
 	command.MarkFlagRequired("channel")
@@ -205,15 +205,33 @@ func makeSubscriptionExtractors() []NamedExtractor {
 		},
 		{
 			name: "CHANNEL",
-			fn:   func(s interface{}) string { return s.(v1alpha1.Subscription).Spec.Channel },
+			fn:   func(s interface{}) string { return s.(v1alpha1.Subscription).Spec.Channel.Name },
 		},
 		{
 			name: "SUBSCRIBER",
-			fn:   func(s interface{}) string { return s.(v1alpha1.Subscription).Spec.Subscriber },
+			fn: func(s interface{}) string {
+				ss := s.(v1alpha1.Subscription).Spec.Subscriber
+				if ss == nil {
+					return ""
+				}
+				if ss.Ref != nil {
+					return ss.Ref.Name
+				}
+				if ss.DNSName != nil {
+					return *ss.DNSName
+				}
+				return "<invalid>"
+			},
 		},
 		{
-			name: "REPLY-TO",
-			fn:   func(s interface{}) string { return s.(v1alpha1.Subscription).Spec.ReplyTo },
+			name: "REPLY",
+			fn: func(s interface{}) string {
+				r := s.(v1alpha1.Subscription).Spec.Reply
+				if r == nil {
+					return ""
+				}
+				return r.Channel.Name
+			},
 		},
 	}
 }

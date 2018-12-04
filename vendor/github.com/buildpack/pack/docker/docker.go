@@ -2,6 +2,7 @@ package docker
 
 import (
 	"context"
+	"encoding/binary"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -9,7 +10,6 @@ import (
 	dockertypes "github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	dockercli "github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/pkg/errors"
 )
 
@@ -18,7 +18,7 @@ type Client struct {
 }
 
 func New() (*Client, error) {
-	cli, err := dockercli.NewClientWithOpts(dockercli.FromEnv, dockercli.WithVersion("1.38"))
+	cli, err := dockercli.NewEnvClient()
 	if err != nil {
 		return nil, errors.Wrap(err, "new docker client")
 	}
@@ -31,19 +31,41 @@ func (d *Client) RunContainer(ctx context.Context, id string, stdout io.Writer, 
 	if err := d.ContainerStart(ctx, id, dockertypes.ContainerStartOptions{}); err != nil {
 		return errors.Wrap(err, "container start")
 	}
-	logs, err := d.ContainerLogs(ctx, id, dockertypes.ContainerLogsOptions{
+	stdout2, err := d.ContainerLogs(ctx, id, dockertypes.ContainerLogsOptions{
 		ShowStdout: true,
-		ShowStderr: true,
 		Follow:     true,
 	})
 	if err != nil {
 		return errors.Wrap(err, "container logs stdout")
 	}
-
-	copyErr := make(chan error)
 	go func() {
-		_, err := stdcopy.StdCopy(stdout, stderr, logs)
-		copyErr <- err
+		for {
+			header := make([]byte, 8)
+			if n, err := stdout2.Read(header); err != nil || n != 8 {
+				continue
+			}
+			if _, err := io.CopyN(stdout, stdout2, int64(binary.BigEndian.Uint32(header[4:]))); err != nil {
+				break
+			}
+		}
+	}()
+	stderr2, err := d.ContainerLogs(ctx, id, dockertypes.ContainerLogsOptions{
+		ShowStderr: true,
+		Follow:     true,
+	})
+	if err != nil {
+		return errors.Wrap(err, "container logs stderr")
+	}
+	go func() {
+		for {
+			header := make([]byte, 8)
+			if n, err := stderr2.Read(header); err != nil || n != 8 {
+				continue
+			}
+			if _, err := io.CopyN(stderr, stderr2, int64(binary.BigEndian.Uint32(header[4:]))); err != nil {
+				break
+			}
+		}
 	}()
 
 	select {
@@ -55,17 +77,13 @@ func (d *Client) RunContainer(ctx context.Context, id string, stdout io.Writer, 
 		fmt.Printf("ERR: %#v\n", err)
 		return err
 	}
-	return <-copyErr
+	return nil
 }
 
 func (d *Client) PullImage(ref string) error {
 	rc, err := d.ImagePull(context.Background(), ref, dockertypes.ImagePullOptions{})
 	if err != nil {
-		// Retry
-		rc, err = d.ImagePull(context.Background(), ref, dockertypes.ImagePullOptions{})
-		if err != nil {
-			return err
-		}
+		return err
 	}
 	if _, err := io.Copy(ioutil.Discard, rc); err != nil {
 		return err

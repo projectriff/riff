@@ -173,17 +173,10 @@ func WithTLSClientConfig(cacertPath, certPath, keyPath string) func(*Client) err
 
 // WithDialer applies the dialer.DialContext to the client transport. This can be
 // used to set the Timeout and KeepAlive settings of the client.
-// Deprecated: use WithDialContext
 func WithDialer(dialer *net.Dialer) func(*Client) error {
-	return WithDialContext(dialer.DialContext)
-}
-
-// WithDialContext applies the dialer to the client transport. This can be
-// used to set the Timeout and KeepAlive settings of the client.
-func WithDialContext(dialContext func(ctx context.Context, network, addr string) (net.Conn, error)) func(*Client) error {
 	return func(c *Client) error {
 		if transport, ok := c.client.Transport.(*http.Transport); ok {
-			transport.DialContext = dialContext
+			transport.DialContext = dialer.DialContext
 			return nil
 		}
 		return errors.Errorf("cannot apply dialer to transport: %T", c.client.Transport)
@@ -406,17 +399,4 @@ func (cli *Client) CustomHTTPHeaders() map[string]string {
 // Deprecated: use WithHTTPHeaders when creating the client.
 func (cli *Client) SetCustomHTTPHeaders(headers map[string]string) {
 	cli.customHTTPHeaders = headers
-}
-
-// Dialer returns a dialer for a raw stream connection, with HTTP/1.1 header, that can be used for proxying the daemon connection.
-// Used by `docker dial-stdio` (docker/cli#889).
-func (cli *Client) Dialer() func(context.Context) (net.Conn, error) {
-	return func(ctx context.Context) (net.Conn, error) {
-		if transport, ok := cli.client.Transport.(*http.Transport); ok {
-			if transport.DialContext != nil && transport.TLSClientConfig == nil {
-				return transport.DialContext(ctx, cli.proto, cli.addr)
-			}
-		}
-		return fallbackDial(cli.proto, cli.addr, resolveTLSConfig(cli.client.Transport))
-	}
 }

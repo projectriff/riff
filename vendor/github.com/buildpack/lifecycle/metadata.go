@@ -2,15 +2,13 @@ package lifecycle
 
 const (
 	MetadataLabel = "io.buildpacks.lifecycle.metadata"
-	EnvLaunchDir  = "PACK_LAUNCH_DIR"
-	EnvAppDir     = "PACK_APP_DIR"
 )
 
 type AppImageMetadata struct {
 	App        AppMetadata         `json:"app"`
 	Config     ConfigMetadata      `json:"config"`
 	Buildpacks []BuildpackMetadata `json:"buildpacks"`
-	RunImage   RunImageMetadata    `json:"runImage"`
+	RunImage   RunImageMetadata    `json:"runimage"`
 }
 
 type AppMetadata struct {
@@ -33,6 +31,6 @@ type LayerMetadata struct {
 }
 
 type RunImageMetadata struct {
-	TopLayer string `json:"topLayer"`
-	SHA      string `json:"sha"`
+	Name string `json:"name"`
+	SHA  string `json:"sha"`
 }

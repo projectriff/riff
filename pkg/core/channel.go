@@ -17,7 +17,8 @@
 package core
 
 import (
-	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
+	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -27,35 +28,37 @@ type ListChannelOptions struct {
 
 func (c *client) ListChannels(options ListChannelOptions) (*v1alpha1.ChannelList, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
-	return c.eventing.ChannelsV1alpha1().Channels(ns).List(meta_v1.ListOptions{})
+	return c.eventing.EventingV1alpha1().Channels(ns).List(meta_v1.ListOptions{})
 }
 
 type CreateChannelOptions struct {
-	Namespace  string
-	Name       string
-	Bus        string
-	ClusterBus string
-	DryRun     bool
+	Namespace                 string
+	Name                      string
+	ClusterChannelProvisioner string
+	DryRun                    bool
 }
 
 func (c *client) CreateChannel(options CreateChannelOptions) (*v1alpha1.Channel, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 	channel := v1alpha1.Channel{
 		TypeMeta: meta_v1.TypeMeta{
-			APIVersion: "channels.knative.dev/v1alpha1",
+			APIVersion: "eventing.knative.dev/v1alpha1",
 			Kind:       "Channel",
 		},
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name: options.Name,
 		},
 		Spec: v1alpha1.ChannelSpec{
-			ClusterBus: options.ClusterBus,
-			Bus:        options.Bus,
+			Provisioner: &corev1.ObjectReference{
+				APIVersion: "eventing.knative.dev/v1alpha1",
+				Kind:       "ClusterChannelProvisioner",
+				Name:       options.ClusterChannelProvisioner,
+			},
 		},
 	}
 
 	if !options.DryRun {
-		_, err := c.eventing.ChannelsV1alpha1().Channels(ns).Create(&channel)
+		_, err := c.eventing.EventingV1alpha1().Channels(ns).Create(&channel)
 		return &channel, err
 	} else {
 		return &channel, nil
@@ -70,7 +73,7 @@ type DeleteChannelOptions struct {
 func (c *client) DeleteChannel(options DeleteChannelOptions) error {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 
-	err := c.eventing.ChannelsV1alpha1().Channels(ns).Delete(options.Name, nil)
+	err := c.eventing.EventingV1alpha1().Channels(ns).Delete(options.Name, nil)
 
 	return err
 }

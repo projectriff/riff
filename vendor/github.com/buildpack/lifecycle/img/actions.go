@@ -2,11 +2,9 @@ package img
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
-	"strings"
 
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1"
@@ -44,14 +42,6 @@ func Rebase(orig v1.Image, newBase v1.Image, oldBaseFinder ImageFinder) (v1.Imag
 	return image, nil
 }
 
-func TopLayerDiffID(image v1.Image) (v1.Hash, error) {
-	layers, err := image.Layers()
-	if err != nil {
-		return v1.Hash{}, err
-	}
-	return layers[len(layers)-1].DiffID()
-}
-
 func Label(image v1.Image, k, v string) (v1.Image, error) {
 	configFile, err := image.ConfigFile()
 	if err != nil {
@@ -62,23 +52,6 @@ func Label(image v1.Image, k, v string) (v1.Image, error) {
 		config.Labels = map[string]string{}
 	}
 	config.Labels[k] = v
-	return mutate.Config(image, config)
-}
-
-func Env(image v1.Image, k, v string) (v1.Image, error) {
-	configFile, err := image.ConfigFile()
-	if err != nil {
-		return nil, err
-	}
-	config := *configFile.Config.DeepCopy()
-	for i, e := range config.Env {
-		parts := strings.Split(e, "=")
-		if parts[0] == k {
-			config.Env[i] = fmt.Sprintf("%s=%s", k, v)
-			return mutate.Config(image, config)
-		}
-	}
-	config.Env = append(config.Env, fmt.Sprintf("%s=%s", k, v))
 	return mutate.Config(image, config)
 }
 

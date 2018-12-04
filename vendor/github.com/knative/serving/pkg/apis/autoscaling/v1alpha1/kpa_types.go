@@ -17,9 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"encoding/json"
-	"reflect"
-	"sort"
+	"strconv"
 	"time"
 
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
@@ -27,6 +25,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/knative/pkg/apis"
+	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
+	"github.com/knative/serving/pkg/apis/autoscaling"
 	servingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 )
 
@@ -56,6 +56,9 @@ var _ apis.Validatable = (*PodAutoscaler)(nil)
 var _ apis.Defaultable = (*PodAutoscaler)(nil)
 var _ apis.Immutable = (*PodAutoscaler)(nil)
 
+// Check that ConfigurationStatus may have its conditions managed.
+var _ duckv1alpha1.ConditionsAccessor = (*PodAutoscalerStatus)(nil)
+
 // PodAutoscalerSpec holds the desired state of the PodAutoscaler (from the client).
 type PodAutoscalerSpec struct {
 	// TODO: Generation does not work correctly with CRD. They are scrubbed
@@ -65,16 +68,19 @@ type PodAutoscalerSpec struct {
 	// +optional
 	Generation int64 `json:"generation,omitempty"`
 
-	// ServingState holds a value describing the desired state the Kubernetes
-	// resources should be in for this PodAutoscaler.
-	// TODO(josephburnett): Remove this when the metrics pipeline is sufficient.
-	// +optional
-	ServingState servingv1alpha1.RevisionServingStateType `json:"servingState,omitempty"`
-
 	// ConcurrencyModel specifies the desired concurrency model
 	// (Single or Multi) for the scale target. Defaults to Multi.
+	// Deprecated in favor of ContainerConcurrency.
 	// +optional
 	ConcurrencyModel servingv1alpha1.RevisionRequestConcurrencyModelType `json:"concurrencyModel,omitempty"`
+
+	// ContainerConcurrency specifies the maximum allowed
+	// in-flight (concurrent) requests per container of the Revision.
+	// Defaults to `0` which means unlimited concurrency.
+	// This field replaces ConcurrencyModel. A value of `1`
+	// is equivalent to `Single` and `0` is equivalent to `Multi`.
+	// +optional
+	ContainerConcurrency servingv1alpha1.RevisionContainerConcurrencyType `json:"containerConcurrency,omitempty"`
 
 	// ScaleTargetRef defines the /scale-able resource that this PodAutoscaler
 	// is responsible for quickly right-sizing.
@@ -85,35 +91,15 @@ type PodAutoscalerSpec struct {
 	ServiceName string `json:"serviceName"`
 }
 
-// PodAutoscalerConditionType is used to communicate the status of the reconciliation process.
-type PodAutoscalerConditionType string
-
 const (
 	// PodAutoscalerConditionReady is set when the revision is starting to materialize
 	// runtime resources, and becomes true when those resources are ready.
-	PodAutoscalerConditionReady PodAutoscalerConditionType = "Ready"
+	PodAutoscalerConditionReady = duckv1alpha1.ConditionReady
 	// PodAutoscalerConditionActive is set when the PodAutoscaler's ScaleTargetRef is receiving traffic.
-	PodAutoscalerConditionActive PodAutoscalerConditionType = "Active"
+	PodAutoscalerConditionActive duckv1alpha1.ConditionType = "Active"
 )
 
-// PodAutoscalerCondition defines a readiness condition for a PodAutoscaler.
-// See: https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#typical-status-properties
-type PodAutoscalerCondition struct {
-	Type PodAutoscalerConditionType `json:"type" description:"type of PodAutoscaler condition"`
-
-	Status corev1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
-
-	// +optional
-	// We use VolatileTime in place of metav1.Time to exclude this from creating equality.Semantic
-	// differences (all other things held constant).
-	LastTransitionTime apis.VolatileTime `json:"lastTransitionTime,omitempty" description:"last time the condition transit from one status to another"`
-
-	// +optional
-	Reason string `json:"reason,omitempty" description:"one-word CamelCase reason for the condition's last transition"`
-
-	// +optional
-	Message string `json:"message,omitempty" description:"human-readable message indicating details about last transition"`
-}
+var podCondSet = duckv1alpha1.NewLivingConditionSet(PodAutoscalerConditionActive)
 
 // PodAutoscalerStatus communicates the observed state of the PodAutoscaler (from the controller).
 type PodAutoscalerStatus struct {
@@ -121,7 +107,7 @@ type PodAutoscalerStatus struct {
 	// reconciliation processes that bring the "spec" inline with the observed
 	// state of the world.
 	// +optional
-	Conditions []PodAutoscalerCondition `json:"conditions,omitempty"`
+	Conditions duckv1alpha1.Conditions `json:"conditions,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -134,125 +120,72 @@ type PodAutoscalerList struct {
 	Items []PodAutoscaler `json:"items"`
 }
 
-func (r *PodAutoscaler) GetGeneration() int64 {
-	return r.Spec.Generation
+func (kpa *PodAutoscaler) scaleBoundInt32(key string) int32 {
+	if s, ok := kpa.Annotations[key]; ok {
+		// no error check: relying on validation
+		i, _ := strconv.ParseInt(s, 10, 32)
+		return int32(i)
+	}
+	return 0
 }
 
-func (r *PodAutoscaler) SetGeneration(generation int64) {
-	r.Spec.Generation = generation
-}
-
-func (r *PodAutoscaler) GetSpecJSON() ([]byte, error) {
-	return json.Marshal(r.Spec)
+// ScaleBounds returns scale bounds annotations values as a tuple:
+// `(min, max int32)`. The value of 0 for any of min or max means the bound is
+// not set
+func (kpa *PodAutoscaler) ScaleBounds() (min, max int32) {
+	min = kpa.scaleBoundInt32(autoscaling.MinScaleAnnotationKey)
+	max = kpa.scaleBoundInt32(autoscaling.MaxScaleAnnotationKey)
+	return
 }
 
 // IsReady looks at the conditions and if the Status has a condition
 // PodAutoscalerConditionReady returns true if ConditionStatus is True
 func (rs *PodAutoscalerStatus) IsReady() bool {
-	if c := rs.GetCondition(PodAutoscalerConditionReady); c != nil {
-		return c.Status == corev1.ConditionTrue
+	return podCondSet.Manage(rs).IsHappy()
+}
+
+func (rs *PodAutoscalerStatus) GetCondition(t duckv1alpha1.ConditionType) *duckv1alpha1.Condition {
+	return podCondSet.Manage(rs).GetCondition(t)
+}
+
+func (rs *PodAutoscalerStatus) InitializeConditions() {
+	podCondSet.Manage(rs).InitializeConditions()
+}
+
+func (rs *PodAutoscalerStatus) MarkActive() {
+	podCondSet.Manage(rs).MarkTrue(PodAutoscalerConditionActive)
+}
+
+func (rs *PodAutoscalerStatus) MarkActivating(reason, message string) {
+	podCondSet.Manage(rs).MarkUnknown(PodAutoscalerConditionActive, reason, message)
+}
+
+func (rs *PodAutoscalerStatus) MarkInactive(reason, message string) {
+	podCondSet.Manage(rs).MarkFalse(PodAutoscalerConditionActive, reason, message)
+}
+
+// CanScaleToZero checks whether the pod autoscaler has been in an inactive state
+// for at least the specified grace period.
+func (rs *PodAutoscalerStatus) CanScaleToZero(gracePeriod time.Duration) bool {
+	if cond := rs.GetCondition(PodAutoscalerConditionActive); cond != nil {
+		switch cond.Status {
+		case corev1.ConditionFalse:
+			// Check that this PodAutoscaler has been inactive for
+			// at least the grace period.
+			return time.Now().After(cond.LastTransitionTime.Inner.Add(gracePeriod))
+		}
 	}
 	return false
 }
 
-func (rs *PodAutoscalerStatus) GetCondition(t PodAutoscalerConditionType) *PodAutoscalerCondition {
-	for _, cond := range rs.Conditions {
-		if cond.Type == t {
-			return &cond
-		}
-	}
-	return nil
+// GetConditions returns the Conditions array. This enables generic handling of
+// conditions by implementing the duckv1alpha1.Conditions interface.
+func (rs *PodAutoscalerStatus) GetConditions() duckv1alpha1.Conditions {
+	return rs.Conditions
 }
 
-func (rs *PodAutoscalerStatus) setCondition(new *PodAutoscalerCondition) {
-	if new == nil {
-		return
-	}
-
-	t := new.Type
-	var conditions []PodAutoscalerCondition
-	for _, cond := range rs.Conditions {
-		if cond.Type != t {
-			conditions = append(conditions, cond)
-		} else {
-			// If we'd only update the LastTransitionTime, then return.
-			new.LastTransitionTime = cond.LastTransitionTime
-			if reflect.DeepEqual(new, &cond) {
-				return
-			}
-		}
-	}
-	new.LastTransitionTime = apis.VolatileTime{metav1.NewTime(time.Now())}
-	conditions = append(conditions, *new)
-	sort.Slice(conditions, func(i, j int) bool { return conditions[i].Type < conditions[j].Type })
+// SetConditions sets the Conditions array. This enables generic handling of
+// conditions by implementing the duckv1alpha1.Conditions interface.
+func (rs *PodAutoscalerStatus) SetConditions(conditions duckv1alpha1.Conditions) {
 	rs.Conditions = conditions
-}
-
-func (rs *PodAutoscalerStatus) InitializeConditions() {
-	for _, cond := range []PodAutoscalerConditionType{
-		PodAutoscalerConditionActive,
-		PodAutoscalerConditionReady,
-	} {
-		if rc := rs.GetCondition(cond); rc == nil {
-			rs.setCondition(&PodAutoscalerCondition{
-				Type:   cond,
-				Status: corev1.ConditionUnknown,
-			})
-		}
-	}
-}
-
-func (rs *PodAutoscalerStatus) MarkActive() {
-	rs.setCondition(&PodAutoscalerCondition{
-		Type:   PodAutoscalerConditionActive,
-		Status: corev1.ConditionTrue,
-	})
-	rs.checkAndMarkReady()
-}
-
-func (rs *PodAutoscalerStatus) MarkActivating(reason, message string) {
-	for _, cond := range []PodAutoscalerConditionType{
-		PodAutoscalerConditionActive,
-		PodAutoscalerConditionReady,
-	} {
-		rs.setCondition(&PodAutoscalerCondition{
-			Type:    cond,
-			Status:  corev1.ConditionUnknown,
-			Reason:  reason,
-			Message: message,
-		})
-	}
-}
-
-func (rs *PodAutoscalerStatus) MarkInactive(reason, message string) {
-	for _, cond := range []PodAutoscalerConditionType{
-		PodAutoscalerConditionActive,
-		PodAutoscalerConditionReady,
-	} {
-		rs.setCondition(&PodAutoscalerCondition{
-			Type:    cond,
-			Status:  corev1.ConditionFalse,
-			Reason:  reason,
-			Message: message,
-		})
-	}
-}
-
-func (rs *PodAutoscalerStatus) checkAndMarkReady() {
-	for _, cond := range []PodAutoscalerConditionType{
-		PodAutoscalerConditionActive,
-	} {
-		c := rs.GetCondition(cond)
-		if c == nil || c.Status != corev1.ConditionTrue {
-			return
-		}
-	}
-	rs.markReady()
-}
-
-func (rs *PodAutoscalerStatus) markReady() {
-	rs.setCondition(&PodAutoscalerCondition{
-		Type:   PodAutoscalerConditionReady,
-		Status: corev1.ConditionTrue,
-	})
 }

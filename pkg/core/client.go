@@ -19,9 +19,9 @@ package core
 import (
 	"io"
 
-	eventing "github.com/knative/eventing/pkg/apis/channels/v1alpha1"
+	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	eventing_cs "github.com/knative/eventing/pkg/client/clientset/versioned"
-	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	serving_cs "github.com/knative/serving/pkg/client/clientset/versioned"
 	"k8s.io/client-go/kubernetes"
@@ -44,7 +44,7 @@ type Client interface {
 	CreateService(options CreateOrUpdateServiceOptions) (*serving.Service, error)
 	UpdateService(options CreateOrUpdateServiceOptions) (*serving.Service, error)
 	DeleteService(options DeleteServiceOptions) error
-	ServiceStatus(options ServiceStatusOptions) (*v1alpha1.ServiceCondition, error)
+	ServiceStatus(options ServiceStatusOptions) (*duckv1alpha1.Condition, error)
 	ServiceCoordinates(options ServiceInvokeOptions) (ingressIP string, hostName string, err error)
 }
 

@@ -29,14 +29,15 @@ import (
 
 	"github.com/BurntSushi/toml"
 
-	"github.com/boz/go-logutil"
+	logutil "github.com/boz/go-logutil"
 	"github.com/boz/kail"
 	"github.com/boz/kcache/types/pod"
 	build "github.com/knative/build/pkg/apis/build/v1alpha1"
+	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/projectriff/riff/pkg/env"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 )
 
@@ -112,12 +113,14 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 		}
 	} else {
 		// buildpack based cluster build
-		s.Spec.RunLatest.Configuration.Build = &build.BuildSpec{
-			ServiceAccountName: "riff-build",
-			Source:             c.makeBuildSourceSpec(options),
-			Template: &build.TemplateInstantiationSpec{
-				Name:      "riff-cnb",
-				Arguments: c.makeBuildArguments(options),
+		s.Spec.RunLatest.Configuration.Build = &v1alpha1.RawExtension{
+			BuildSpec: &build.BuildSpec{
+				ServiceAccountName: "riff-build",
+				Source:             c.makeBuildSourceSpec(options),
+				Template: &build.TemplateInstantiationSpec{
+					Name:      "riff-cnb",
+					Arguments: c.makeBuildArguments(options),
+				},
 			},
 		}
 	}
@@ -395,7 +398,7 @@ func checkService(c *client, namespace string, name string, gen int64) (transien
 	case corev1.ConditionFalse:
 		conds, message := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
 		if conds != nil {
-			if s := fetchTransientError(cond, conds); s != "" {
+			if s := fetchTransientError(conds); s != "" {
 				return fmt.Errorf("%s: %s: %s", s, cond.Reason, message), nil
 			}
 		}
@@ -406,16 +409,16 @@ func checkService(c *client, namespace string, name string, gen int64) (transien
 	}
 }
 
-func fetchTransientError(cond *v1alpha1.ServiceCondition, conds []v1alpha1.ServiceCondition) string {
+func fetchTransientError(conds duckv1alpha1.Conditions) string {
 	for _, c := range conds {
-		if c.Status == corev1.ConditionUnknown {
+		if c.IsUnknown() {
 			return "function creation incomplete: service status false"
 		}
 	}
 	return ""
 }
 
-func (c *client) serviceConditionsWithMessage(options ServiceStatusOptions, cond *v1alpha1.ServiceCondition) ([]v1alpha1.ServiceCondition, string) {
+func (c *client) serviceConditionsWithMessage(options ServiceStatusOptions, cond *duckv1alpha1.Condition) (duckv1alpha1.Conditions, string) {
 	conds, err := c.ServiceConditions(options)
 	var message string
 	if err != nil {
@@ -428,10 +431,10 @@ func (c *client) serviceConditionsWithMessage(options ServiceStatusOptions, cond
 	return conds, message
 }
 
-func serviceConditionsMessage(conds []v1alpha1.ServiceCondition, primaryMessage string) string {
+func serviceConditionsMessage(conds duckv1alpha1.Conditions, primaryMessage string) string {
 	msg := []string{primaryMessage}
 	for _, cond := range conds {
-		if cond.Status == corev1.ConditionFalse && cond.Type != v1alpha1.ServiceConditionReady && cond.Message != primaryMessage {
+		if cond.IsFalse() && cond.Type != v1alpha1.ServiceConditionReady && cond.Message != primaryMessage {
 			msg = append(msg, cond.Message)
 		}
 	}

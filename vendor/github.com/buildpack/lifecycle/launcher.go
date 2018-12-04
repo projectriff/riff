@@ -12,8 +12,7 @@ import (
 
 type Launcher struct {
 	DefaultProcessType string
-	LaunchDir          string
-	AppDir             string
+	DefaultLaunchDir   string
 	Processes          []Process
 	Buildpacks         []string
 	Exec               func(argv0 string, argv []string, envv []string) error
@@ -26,18 +25,18 @@ func (l *Launcher) Launch(executable, startCommand string) error {
 		Environ: os.Environ,
 		Map:     POSIXLaunchEnv,
 	}
-	if err := l.eachDir(l.LaunchDir, func(bp string) error {
-		if filepath.Clean(l.AppDir) == filepath.Join(l.LaunchDir, bp) {
+	if err := l.eachDir(l.DefaultLaunchDir, func(bp string) error {
+		if bp == "app" {
 			return nil
 		}
-		bpPath := filepath.Join(l.LaunchDir, bp)
+		bpPath := filepath.Join(l.DefaultLaunchDir, bp)
 		return l.eachDir(bpPath, func(layer string) error {
 			return env.AddRootDir(filepath.Join(bpPath, layer))
 		})
 	}); err != nil {
 		return errors.Wrap(err, "modify env")
 	}
-	if err := os.Chdir(l.AppDir); err != nil {
+	if err := os.Chdir(filepath.Join(l.DefaultLaunchDir, "app")); err != nil {
 		return errors.Wrap(err, "change to app directory")
 	}
 
@@ -79,7 +78,7 @@ func (l *Launcher) profileD() (string, error) {
 	}
 
 	for _, bp := range l.Buildpacks {
-		scripts, err := filepath.Glob(filepath.Join(l.LaunchDir, bp, "*", "profile.d", "*"))
+		scripts, err := filepath.Glob(filepath.Join(l.DefaultLaunchDir, bp, "*", "profile.d", "*"))
 		if err != nil {
 			return "", err
 		}
@@ -90,7 +89,7 @@ func (l *Launcher) profileD() (string, error) {
 		}
 	}
 
-	if err := appendIfFile(filepath.Join(l.AppDir, ".profile")); err != nil {
+	if err := appendIfFile(filepath.Join(l.DefaultLaunchDir, "app", ".profile")); err != nil {
 		return "", err
 	}
 

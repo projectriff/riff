@@ -183,7 +183,11 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 		if err != nil {
 			return false, err
 		}
-		err = deleteClusterResources(kc, "clusterrolebinding", "clusterbus-controller-")
+		err = deleteClusterResources(kc, "clusterrolebinding", "in-memory-channel-")
+		if err != nil {
+			return false, err
+		}
+		err = deleteClusterResources(kc, "clusterrole", "in-memory-channel-")
 		if err != nil {
 			return false, err
 		}
