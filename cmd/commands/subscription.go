@@ -1,6 +1,11 @@
 package commands
 
 import (
+	"fmt"
+	"io"
+	"strings"
+	"text/template"
+
 	"github.com/knative/eventing/pkg/apis/channels/v1alpha1"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/env"
@@ -90,6 +95,8 @@ func SubscriptionDelete(client *core.Client) *Command {
 func SubscriptionList(client *core.Client) *Command {
 	listOptions := core.ListSubscriptionsOptions{}
 
+	displayFormat := ""
+
 	command := &Command{
 		Use:   "list",
 		Short: "List existing subscriptions",
@@ -102,16 +109,51 @@ func SubscriptionList(client *core.Client) *Command {
 				return err
 			}
 
-			Display(cmd.OutOrStdout(), subscriptionToInterfaceSlice(subscriptions.Items), makeSubscriptionExtractors())
-			PrintSuccessfulCompletion(cmd)
-			return nil
+			if displayFormat == "" {
+				Display(cmd.OutOrStdout(), subscriptionToInterfaceSlice(subscriptions.Items), makeSubscriptionExtractors())
+				PrintSuccessfulCompletion(cmd)
+				return nil
+			} else if displayFormat == "dot" {
+				return displayAsDot(cmd.OutOrStdout(), subscriptions.Items)
+			} else {
+				return fmt.Errorf("unsupported output format %q", displayFormat)
+			}
 		},
 	}
 
 	flags := command.Flags()
 	flags.StringVarP(&listOptions.Namespace, "namespace", "n", "", "the namespace of the subscriptions")
+	flags.StringVarP(&displayFormat, "output", "o", "", "the custom output format to use. Use 'dot' to output graphviz representation")
 
 	return command
+}
+
+func displayAsDot(out io.Writer, subscriptions []v1alpha1.Subscription) error {
+	tmpl := template.New("dot")
+	tmpl.Funcs(map[string]interface{}{"chop": chop})
+	tmpl, err := tmpl.Parse(`digraph finite_state_machine {
+	rankdir=LR;
+	size="8,5"
+    node [shape = "box"] {{range .}}{{.Spec.Subscriber}}; {{end}}
+    node [shape = "diamond", style = "rounded"] {{range .}}{{.Spec.Channel}}; {{end}}
+{{range . -}}
+    "{{.Spec.Channel}}" -> "{{.Spec.Subscriber}}";
+    {{if ne .Spec.ReplyTo ""}}"{{.Spec.Subscriber}}" -> "{{chop .Spec.ReplyTo }}";{{end}}
+{{- end}}
+}`)
+	if err != nil {
+		return err
+	}
+	return tmpl.Execute(out, subscriptions)
+}
+
+// chop removes the '-channel' suffix from the reply-to
+func chop(channelName string) (string, error) {
+	if strings.HasSuffix(channelName, "-channel") {
+		return channelName[0 : len(channelName)-len("-channel")], nil
+	} else {
+		return "", fmt.Errorf("%q does not end with %q", channelName, "-channel")
+	}
 }
 
 func defineFlagsForCreate(command *Command, options *core.CreateSubscriptionOptions) {
