@@ -22,6 +22,7 @@ riff subscription list [flags]
 ```
   -h, --help               help for list
   -n, --namespace string   the namespace of the subscriptions
+  -o, --output string      the custom output format to use. Use 'dot' to output graphviz representation
 ```
 
 ### Options inherited from parent commands
