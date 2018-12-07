@@ -50,7 +50,7 @@ source `dirname "${BASH_SOURCE[0]}"`/../functions/helpers.sh
 
 # uppercase
 for test in java java-boot java-local node npm command; do
-  path=`dirname "${BASH_SOURCE[0]}"`/../functions/uppercase/${test}
+  path=${fats_dir}/functions/uppercase/${test}
   function_name=fats-uppercase-${test}
   image=${IMAGE_REPOSITORY_PREFIX}/fats-uppercase-${test}:${CLUSTER_NAME}
   input_data=riff
