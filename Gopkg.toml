@@ -78,19 +78,21 @@
 # Buildpack build support
 [[constraint]]
   name = "github.com/buildpack/pack"
-  version = "v0.0.4"
+  version = "v0.0.7"
 [[override]]
   name = "github.com/buildpack/lifecycle"
-  revision = "1fe614565217b026a0fb5158241bb299b0da1a5e"
+  revision = "fa66d9071434462f2b9c0a0d6668be36c165fd73"
 [[override]]
   name = "github.com/buildpack/packs"
   revision = "aa30a412923763df37e83f14a6e4e0fe07e11f25"
 [[override]]
   name = "github.com/docker/docker"
-  revision = "71cd53e4a197b303c6ba086bd584ffd67a884281"
+  revision = "b8e87cfdad8daa6ef782ddb90691a259483bc8e4"
 [[override]]
   name = "github.com/google/go-containerregistry"
-  revision = "74aef1a35cfa25a5a20c951199abd26356e7bead"
+#  revision = "eb57122f1bf944d0584c387c62c1a759c953684d" # This is what pack@0.0.7 references, but doesn't compile here
+  revision = "74aef1a35cfa25a5a20c951199abd26356e7bead"  # This is what lifecyle@fa66d9 references
 [[override]]
   name = "github.com/sclevine/spec"
   version = "v1.0.0"
+# /end of buildpack/pack induced overrides
