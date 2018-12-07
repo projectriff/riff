@@ -44,10 +44,6 @@ riff namespace init $NAMESPACE $NAMESPACE_INIT_FLAGS
 echo "Run functions"
 source $fats_dir/functions/helpers.sh
 
-# run test functions
-echo "Run functions"
-source `dirname "${BASH_SOURCE[0]}"`/../functions/helpers.sh
-
 # uppercase
 for test in java java-boot java-local node npm command; do
   path=${fats_dir}/functions/uppercase/${test}
