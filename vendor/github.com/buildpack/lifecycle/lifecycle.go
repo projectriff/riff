@@ -1,11 +1,5 @@
 package lifecycle
 
-const (
-	DefaultPlatformDir = "/platform"
-	DefaultCacheDir    = "/cache"
-	DefaultLaunchDir   = "/workspace"
-)
-
 var POSIXBuildEnv = map[string][]string{
 	"bin": {
 		"PATH",
