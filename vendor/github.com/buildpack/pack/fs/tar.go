@@ -3,25 +3,24 @@ package fs
 import (
 	"archive/tar"
 	"bytes"
-	"compress/gzip"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 )
 
 type FS struct {
 }
 
-func (*FS) CreateTGZFile(tarFile, srcDir, tarDir string, uid, gid int) error {
+func (*FS) CreateTarFile(tarFile, srcDir, tarDir string, uid, gid int) error {
 	fh, err := os.Create(tarFile)
 	if err != nil {
 		return fmt.Errorf("create file for tar: %s", err)
 	}
 	defer fh.Close()
-	gzw := gzip.NewWriter(fh)
-	defer gzw.Close()
-	return writeTarArchive(gzw, srcDir, tarDir, uid, gid)
+	return writeTarArchive(fh, srcDir, tarDir, uid, gid)
 }
 
 func (*FS) CreateTarReader(srcDir, tarDir string, uid, gid int) (io.Reader, chan error) {
@@ -85,6 +84,9 @@ func writeTarArchive(w io.Writer, srcDir, tarDir string, uid, gid int) error {
 			}
 		}
 		header.Name = filepath.Join(tarDir, relPath)
+		if runtime.GOOS == "windows" {
+			header.Name = strings.Replace(header.Name, "\\", "/", -1)
+		}
 		header.Uid = uid
 		header.Gid = gid
 
@@ -103,6 +105,28 @@ func writeTarArchive(w io.Writer, srcDir, tarDir string, uid, gid int) error {
 		}
 		return nil
 	})
+}
+
+func (*FS) AddTextToTar(tw *tar.Writer, name string, contents []byte) error {
+	hdr := &tar.Header{Name: name, Mode: 0644, Size: int64(len(contents))}
+	if err := tw.WriteHeader(hdr); err != nil {
+		return err
+	}
+	_, err := tw.Write(contents)
+	return err
+}
+
+func (*FS) AddFileToTar(tw *tar.Writer, name string, contents *os.File) error {
+	fi, err := contents.Stat()
+	if err != nil {
+		return err
+	}
+	hdr := &tar.Header{Name: name, Mode: 0644, Size: int64(fi.Size())}
+	if err := tw.WriteHeader(hdr); err != nil {
+		return err
+	}
+	_, err = io.Copy(tw, contents)
+	return err
 }
 
 func (*FS) Untar(r io.Reader, dest string) error {
@@ -125,6 +149,13 @@ func (*FS) Untar(r io.Reader, dest string) error {
 				return err
 			}
 		case tar.TypeReg, tar.TypeRegA:
+			_, err := os.Stat(filepath.Dir(path))
+			if os.IsNotExist(err) {
+				if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+					return err
+				}
+			}
+
 			fh, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, hdr.FileInfo().Mode())
 			if err != nil {
 				return err

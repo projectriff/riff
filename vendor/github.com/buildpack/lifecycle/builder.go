@@ -39,7 +39,7 @@ type BuildMetadata struct {
 	Buildpacks []string  `toml:"buildpacks"`
 }
 
-func (b *Builder) Build(cacheDir, launchDir string, env BuildEnv) (*BuildMetadata, error) {
+func (b *Builder) Build(cacheDir, launchDir string, appDir string, env BuildEnv) (*BuildMetadata, error) {
 	procMap := processMap{}
 	var buildpackIDs []string
 	for _, bp := range b.Buildpacks {
@@ -58,7 +58,7 @@ func (b *Builder) Build(cacheDir, launchDir string, env BuildEnv) (*BuildMetadat
 		}
 		cmd := exec.Command(buildPath, b.PlatformDir, bpCacheDir, bpLaunchDir)
 		cmd.Env = env.List()
-		cmd.Dir = filepath.Join(launchDir, "app")
+		cmd.Dir = filepath.Join(appDir)
 		cmd.Stdin = bytes.NewBuffer(b.In)
 		cmd.Stdout = b.Out
 		cmd.Stderr = b.Err
