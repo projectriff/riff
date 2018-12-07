@@ -782,7 +782,7 @@
   version = "kubernetes-1.11.0"
 
 [[projects]]
-  digest = "1:bda0ff4fb974da34c256b4db5d01d7351f20cbb9aecf355aeceed922bfb82471"
+  digest = "1:68494e21d2a21dd411d85c6b34bd4660b0fc082d10985f791f4dede778716a91"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -823,6 +823,7 @@
     "pkg/version",
     "plugin/pkg/client/auth/exec",
     "plugin/pkg/client/auth/gcp",
+    "plugin/pkg/client/auth/oidc",
     "rest",
     "rest/watch",
     "third_party/forked/golang/template",
@@ -849,6 +850,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/BurntSushi/toml",
     "github.com/boz/go-logutil",
     "github.com/boz/kail",
     "github.com/boz/kcache/types/pod",
@@ -861,6 +863,8 @@
     "github.com/knative/pkg/apis",
     "github.com/knative/serving/pkg/apis/serving/v1alpha1",
     "github.com/knative/serving/pkg/client/clientset/versioned",
+    "github.com/knative/serving/pkg/client/clientset/versioned/typed/autoscaling/v1alpha1",
+    "github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/onsi/gomega/gstruct",
@@ -910,6 +914,7 @@
     "k8s.io/client-go/kubernetes/typed/storage/v1alpha1",
     "k8s.io/client-go/kubernetes/typed/storage/v1beta1",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
+    "k8s.io/client-go/plugin/pkg/client/auth/oidc",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
     "k8s.io/client-go/tools/clientcmd/api",
