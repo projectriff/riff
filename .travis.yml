@@ -2,6 +2,10 @@ language: go
 go:
 - '1.11'
 dist: xenial
+env:
+  global:
+    - CLUSTER_NAME="riff-${TRAVIS_JOB_NUMBER//./-}"
+    - NAMESPACE="riff-${TRAVIS_JOB_NUMBER//./-}"
 install: true
 matrix:
   include:
