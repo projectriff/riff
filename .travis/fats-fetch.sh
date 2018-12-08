@@ -1,7 +1,7 @@
 #!/bin/bash
 
 dir=${1}
-refspec=${2:-22f666f5b63662f92bdf4b46e175e22981ceed37} # projectriff/fats fats2 as of 2018-12-07
+refspec=${2:-3c0fa2533d4fcbc93cba485274562f4c37f3d015} # projectriff/fats fats2 as of 2018-12-08
 
 if [ ! -f $dir ]; then
   mkdir -p $dir
