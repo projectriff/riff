@@ -10,7 +10,17 @@ install: true
 matrix:
   include:
   - stage: test
+    name: "Test on Linux"
+    os: linux
     install:
+    - "go get -u github.com/golang/dep/cmd/dep"
+    - "go get -u github.com/vektra/mockery/.../"
+    script: make build test verify-docs
+  - stage: test
+    name: "Test on Windows (Git Bash)"
+    os: windows
+    install:
+    - "choco install make"
     - "go get -u github.com/golang/dep/cmd/dep"
     - "go get -u github.com/vektra/mockery/.../"
     script: make build test verify-docs
