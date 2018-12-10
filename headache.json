@@ -1,0 +1,9 @@
+{
+  "headerFile": "./license-header.txt",
+  "style": "SlashStar",
+  "includes": ["**/*.go"],
+  "excludes": ["**/vendor/**/*", "**/mocks/**/*", "**/vendor_mocks/**/*"],
+  "data": {
+    "Owner": "The original author or authors"
+  }
+}
