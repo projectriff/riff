@@ -195,6 +195,9 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 		if err != nil {
 			return false, err
 		}
+		deleteNamespaceResource(kc, "istio-system", "service", "knative-ingressgateway")
+		deleteNamespaceResource(kc, "istio-system", "horizontalpodautoscaler", "knative-ingressgateway")
+		deleteNamespaceResource(kc, "istio-system", "deployment", "knative-ingressgateway")
 		err = deleteNamespaces(kc, knativeNamespaces)
 		if err != nil {
 			return false, err
@@ -293,6 +296,17 @@ func deleteNamespaces(kc *kubectlClient, namespaces []string) error {
 		}
 	}
 	return nil
+}
+
+func deleteNamespaceResource(kc *kubectlClient, namespace string, resourceType string, name string) error {
+	fmt.Printf("Deleting %s/%s resource in %s\n", resourceType, name, namespace)
+	deleteLog, err := kc.kubeCtl.Exec([]string{"delete", "-n", namespace, resourceType, name})
+	if err != nil {
+		if !strings.Contains(deleteLog, "NotFound") {
+			fmt.Printf("%s", deleteLog)
+		}
+	}
+	return err
 }
 
 func deleteSingleResource(kc *kubectlClient, resourceType string, name string) error {
