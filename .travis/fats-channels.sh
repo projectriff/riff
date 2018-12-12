@@ -17,7 +17,6 @@ riff subscription create $test_name --channel $test_name --subscriber correlator
 
 wait_channel_ready $test_name $NAMESPACE
 wait_subscription_ready $test_name $NAMESPACE
-sleep 5
 
 input_data=riff
 riff service invoke correlator /$NAMESPACE/$test_name --namespace $NAMESPACE --text -- \
