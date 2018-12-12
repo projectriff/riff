@@ -31,7 +31,8 @@ wait_pod_selector_ready 'app=build-controller' 'knative-build'
 wait_pod_selector_ready 'app=build-webhook' 'knative-build'
 wait_pod_selector_ready 'app=eventing-controller' 'knative-eventing'
 wait_pod_selector_ready 'app=webhook' 'knative-eventing'
-wait_pod_selector_ready 'clusterBus=stub' 'knative-eventing'
+wait_pod_selector_ready 'clusterChannelProvisioner=in-memory-channel,role=controller' 'knative-eventing'
+wait_pod_selector_ready 'clusterChannelProvisioner=in-memory-channel,role=dispatcher' 'knative-eventing'
 echo "Checking for ready ingress"
 wait_for_ingress_ready 'knative-ingressgateway' 'istio-system'
 
