@@ -191,9 +191,9 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 		if err != nil {
 			return false, err
 		}
-		deleteNamespaceResource(kc, "istio-system", "service", "knative-ingressgateway")
-		deleteNamespaceResource(kc, "istio-system", "horizontalpodautoscaler", "knative-ingressgateway")
-		deleteNamespaceResource(kc, "istio-system", "deployment", "knative-ingressgateway")
+		deleteSingleResource(kc, "service", "knative-ingressgateway", "istio-system")
+		deleteSingleResource(kc, "horizontalpodautoscaler", "knative-ingressgateway", "istio-system")
+		deleteSingleResource(kc, "deployment", "knative-ingressgateway", "istio-system")
 		err = deleteNamespaces(kc, knativeNamespaces)
 		if err != nil {
 			return false, err
@@ -232,7 +232,7 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 			return false, err
 		}
 		// TODO: remove this once https://github.com/knative/serving/issues/2018 is resolved
-		deleteSingleResource(kc, "horizontalpodautoscaler.autoscaling", "istio-pilot")
+		deleteSingleResource(kc, "horizontalpodautoscaler.autoscaling", "istio-pilot", "")
 	}
 	return true, nil
 }
@@ -294,20 +294,16 @@ func deleteNamespaces(kc *kubectlClient, namespaces []string) error {
 	return nil
 }
 
-func deleteNamespaceResource(kc *kubectlClient, namespace string, resourceType string, name string) error {
-	fmt.Printf("Deleting %s/%s resource in %s\n", resourceType, name, namespace)
-	deleteLog, err := kc.kubeCtl.Exec([]string{"delete", "-n", namespace, resourceType, name})
-	if err != nil {
-		if !strings.Contains(deleteLog, "NotFound") {
-			fmt.Printf("%s", deleteLog)
-		}
+func deleteSingleResource(kc *kubectlClient, resourceType string, name string, namespace string) error {
+	var err error
+	var deleteLog string
+	if namespace == "" {
+		fmt.Printf("Deleting %s/%s resource\n", resourceType, name)
+		deleteLog, err = kc.kubeCtl.Exec([]string{"delete", resourceType, name})
+	} else {
+		fmt.Printf("Deleting %s/%s resource in %s\n", resourceType, name, namespace)
+		deleteLog, err = kc.kubeCtl.Exec([]string{"delete", "-n", namespace, resourceType, name})
 	}
-	return err
-}
-
-func deleteSingleResource(kc *kubectlClient, resourceType string, name string) error {
-	fmt.Printf("Deleting %s/%s resource\n", resourceType, name)
-	deleteLog, err := kc.kubeCtl.Exec([]string{"delete", resourceType, name})
 	if err != nil {
 		if !strings.Contains(deleteLog, "NotFound") {
 			fmt.Printf("%s", deleteLog)
