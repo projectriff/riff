@@ -16,7 +16,7 @@ riff channel create $test_name --cluster-provisioner in-memory-channel --namespa
 riff subscription create $test_name --channel $test_name --subscriber correlator --namespace $NAMESPACE
 
 wait_channel_ready $test_name $NAMESPACE
-# wait_subscription_ready echo $NAMESPACE
+wait_subscription_ready $test_name $NAMESPACE
 sleep 5
 
 input_data=riff
