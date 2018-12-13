@@ -12,11 +12,11 @@ kail_controller_pid=$!
 riff service create correlator --image projectriff/correlator:fats --namespace $NAMESPACE
 wait_kservice_ready correlator $NAMESPACE
 
-riff channel create $test_name --cluster-bus stub --namespace $NAMESPACE
+riff channel create $test_name --cluster-provisioner in-memory-channel --namespace $NAMESPACE
 riff subscription create $test_name --channel $test_name --subscriber correlator --namespace $NAMESPACE
 
 wait_channel_ready $test_name $NAMESPACE
-# wait_subscription_ready echo $NAMESPACE
+wait_subscription_ready $test_name $NAMESPACE
 sleep 5
 
 input_data=riff

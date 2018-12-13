@@ -31,7 +31,8 @@ wait_pod_selector_ready 'app=build-controller' 'knative-build'
 wait_pod_selector_ready 'app=build-webhook' 'knative-build'
 wait_pod_selector_ready 'app=eventing-controller' 'knative-eventing'
 wait_pod_selector_ready 'app=webhook' 'knative-eventing'
-wait_pod_selector_ready 'clusterBus=stub' 'knative-eventing'
+wait_pod_selector_ready 'clusterChannelProvisioner=in-memory-channel,role=controller' 'knative-eventing'
+wait_pod_selector_ready 'clusterChannelProvisioner=in-memory-channel,role=dispatcher' 'knative-eventing'
 echo "Checking for ready ingress"
 wait_for_ingress_ready 'knative-ingressgateway' 'istio-system'
 
@@ -55,4 +56,5 @@ for test in java java-boot java-local node npm command; do
   run_function $path $function_name $image $input_data $expected_data
 done
 
-source `dirname "${BASH_SOURCE[0]}"`/fats-channels.sh
+# TODO restore once the correlator works with Knative Eventing
+# source `dirname "${BASH_SOURCE[0]}"`/fats-channels.sh
