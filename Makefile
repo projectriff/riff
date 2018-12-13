@@ -24,6 +24,7 @@ check-mockery:
 gen-mocks: check-mockery
 	mockery -output pkg/core/mocks/mockbuilder			-outpkg mockbuilder			-dir pkg/core 																					-name Builder
 	mockery -output pkg/core/mocks						-outpkg mocks 				-dir pkg/core 																					-name Client
+	mockery -output pkg/core/mocks						-outpkg mocks 				-dir pkg/core 																					-name KubectlClient
 	mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks 		-dir vendor/k8s.io/client-go/kubernetes 														-name Interface
 	mockery -output pkg/core/vendor_mocks/mockserving	-outpkg mockserving 		-dir vendor/github.com/knative/serving/pkg/client/clientset/versioned							-name Interface
 	mockery -output pkg/core/vendor_mocks/mockserving	-outpkg mockserving 		-dir vendor/github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1	-name ServingV1alpha1Interface
