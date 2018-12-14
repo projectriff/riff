@@ -141,7 +141,7 @@ var _ = Describe("Function", func() {
 				testService.Spec = v1alpha1.ServiceSpec{
 					RunLatest: &v1alpha1.RunLatestType{
 						Configuration: v1alpha1.ConfigurationSpec{
-							Build: nil, // null build === local build
+							Build: nil, // nil build === local build
 							RevisionTemplate: v1alpha1.RevisionTemplateSpec{
 								ObjectMeta: v1.ObjectMeta{
 									Labels: map[string]string{"riff.projectriff.io/function": "somefun"},
@@ -193,7 +193,7 @@ var _ = Describe("Function", func() {
 				testService.Spec = v1alpha1.ServiceSpec{
 					RunLatest: &v1alpha1.RunLatestType{
 						Configuration: v1alpha1.ConfigurationSpec{
-							Build: &v1alpha1.RawExtension{}, // non-null build === cluster-built
+							Build: &v1alpha1.RawExtension{}, // non-nil build === cluster-built
 							RevisionTemplate: v1alpha1.RevisionTemplateSpec{
 								ObjectMeta: v1.ObjectMeta{
 									Labels: map[string]string{"riff.projectriff.io/function": functionName},
