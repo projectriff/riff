@@ -506,9 +506,13 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 
 	c.bumpNonceAnnotation(service)
 
+	appDir := options.LocalPath
+	if build != nil && appDir != "" {
+		return fmt.Errorf("unable to proceed: local path specified for cluster-built service named \"%s\"", options.Name)
+	}
+
 	if build == nil {
 		// function was built locally, attempt to reconstruct configuration
-		appDir := options.LocalPath
 		buildImage := annotations[buildpackBuildImageAnnotation]
 		runImage := annotations[buildpackRunImageAnnotation]
 		repoName := configuration.RevisionTemplate.Spec.Container.Image

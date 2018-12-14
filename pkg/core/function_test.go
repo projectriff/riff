@@ -128,19 +128,6 @@ var _ = Describe("Function", func() {
 		)
 
 		BeforeEach(func() {
-			mockServiceInterface.On("Get", mock.Anything, mock.Anything).Return(testService, nil)
-			testService.Spec = v1alpha1.ServiceSpec{
-				RunLatest: &v1alpha1.RunLatestType{
-					Configuration: v1alpha1.ConfigurationSpec{
-						Build: nil,
-						RevisionTemplate: v1alpha1.RevisionTemplateSpec{
-							ObjectMeta: v1.ObjectMeta{
-								Labels: map[string]string{"riff.projectriff.io/function": "somefun"},
-							},
-						},
-					},
-				},
-			}
 			mockServiceInterface.On("Update", mock.Anything).Return(testService, nil)
 		})
 
@@ -150,6 +137,19 @@ var _ = Describe("Function", func() {
 
 		Context("when building locally", func() {
 			BeforeEach(func() {
+				mockServiceInterface.On("Get", mock.Anything, mock.Anything).Return(testService, nil)
+				testService.Spec = v1alpha1.ServiceSpec{
+					RunLatest: &v1alpha1.RunLatestType{
+						Configuration: v1alpha1.ConfigurationSpec{
+							Build: nil, // nil build === local build
+							RevisionTemplate: v1alpha1.RevisionTemplateSpec{
+								ObjectMeta: v1.ObjectMeta{
+									Labels: map[string]string{"riff.projectriff.io/function": "somefun"},
+								},
+							},
+						},
+					},
+				}
 				updateFunctionOptions.LocalPath = workDir
 				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			})
@@ -183,6 +183,31 @@ var _ = Describe("Function", func() {
 				It("should return a suitable error", func() {
 					Expect(err).To(MatchError("unable to build function locally: run image not specified"))
 				})
+			})
+		})
+
+		Context("when building in cluster", func() {
+			BeforeEach(func() {
+				functionName := "somefun"
+				mockServiceInterface.On("Get", mock.Anything, mock.Anything).Return(testService, nil)
+				testService.Spec = v1alpha1.ServiceSpec{
+					RunLatest: &v1alpha1.RunLatestType{
+						Configuration: v1alpha1.ConfigurationSpec{
+							Build: &v1alpha1.RawExtension{}, // non-nil build === cluster-built
+							RevisionTemplate: v1alpha1.RevisionTemplateSpec{
+								ObjectMeta: v1.ObjectMeta{
+									Labels: map[string]string{"riff.projectriff.io/function": functionName},
+								},
+							},
+						},
+					},
+				}
+				updateFunctionOptions.LocalPath = "should-trigger-failure"
+				updateFunctionOptions.Name = functionName
+			})
+
+			It("should fail if a local path is provided", func() {
+				Expect(err).To(MatchError(`unable to proceed: local path specified for cluster-built service named "somefun"`))
 			})
 		})
 	})
