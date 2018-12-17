@@ -48,7 +48,7 @@ type FunctionCreateDefaults struct {
 	DefaultRunImage string // the default for the --run-image flag.
 }
 
-func FunctionCreate(fcTool *core.Client, defaults FunctionCreateDefaults) *cobra.Command {
+func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults FunctionCreateDefaults) *cobra.Command {
 	createFunctionOptions := core.CreateFunctionOptions{
 		BuildpackImage: defaults.LocalBuilder,
 		RunImage:       defaults.DefaultRunImage,
@@ -77,7 +77,7 @@ func FunctionCreate(fcTool *core.Client, defaults FunctionCreateDefaults) *cobra
 			fnName := args[functionCreateFunctionNameIndex]
 
 			createFunctionOptions.Name = fnName
-			f, err := (*fcTool).CreateFunction(createFunctionOptions, cmd.OutOrStdout())
+			f, err := (*fcTool).CreateFunction(buildpackBuilder, createFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err
 			}
@@ -123,7 +123,7 @@ func FunctionCreate(fcTool *core.Client, defaults FunctionCreateDefaults) *cobra
 	return command
 }
 
-func FunctionUpdate(fcTool *core.Client) *cobra.Command {
+func FunctionUpdate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.Command {
 
 	updateFunctionOptions := core.UpdateFunctionOptions{}
 
@@ -140,7 +140,7 @@ func FunctionUpdate(fcTool *core.Client) *cobra.Command {
 			fnName := args[functionUpdateFunctionNameIndex]
 
 			updateFunctionOptions.Name = fnName
-			err := (*fcTool).UpdateFunction(updateFunctionOptions, cmd.OutOrStdout())
+			err := (*fcTool).UpdateFunction(buildpackBuilder, updateFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err
 			}

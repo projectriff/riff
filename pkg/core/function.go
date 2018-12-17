@@ -29,7 +29,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 
-	logutil "github.com/boz/go-logutil"
+	"github.com/boz/go-logutil"
 	"github.com/boz/kail"
 	"github.com/boz/kcache/types/pod"
 	build "github.com/knative/build/pkg/apis/build/v1alpha1"
@@ -37,7 +37,7 @@ import (
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/projectriff/riff/pkg/env"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 )
 
@@ -66,7 +66,7 @@ type CreateFunctionOptions struct {
 	Artifact string
 }
 
-func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
+func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 
 	s, err := newService(options.CreateOrUpdateServiceOptions)
@@ -106,7 +106,7 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 				return nil, err
 			}
 
-			err = c.buildLocally(appDir, buildImage, runImage, repoName)
+			err = buildLocally(buildpackBuilder, appDir, buildImage, runImage, repoName)
 			if err != nil {
 				return nil, err
 			}
@@ -145,16 +145,6 @@ func (c *client) CreateFunction(options CreateFunctionOptions, log io.Writer) (*
 	}
 
 	return s, nil
-}
-
-func (c *client) buildLocally(appDir string, buildImage string, runImage string, repoName string) error {
-	if buildImage == "" {
-		return fmt.Errorf("unable to build function locally: buildpack image not specified")
-	}
-	if runImage == "" {
-		return fmt.Errorf("unable to build function locally: run image not specified")
-	}
-	return c.builder.Build(appDir, buildImage, runImage, repoName)
 }
 
 func (c *client) writeRiffToml(options CreateFunctionOptions) error {
@@ -492,7 +482,7 @@ func (c *client) getServiceSpecGeneration(namespace string, name string) (int64,
 	return s.Spec.Generation, nil
 }
 
-func (c *client) UpdateFunction(options UpdateFunctionOptions, log io.Writer) error {
+func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunctionOptions, log io.Writer) error {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 
 	service, err := c.service(options.Namespace, options.Name)
@@ -526,7 +516,7 @@ func (c *client) UpdateFunction(options UpdateFunctionOptions, log io.Writer) er
 			return fmt.Errorf("local-path must be specified to rebuild function from source")
 		}
 
-		err := c.buildLocally(appDir, buildImage, runImage, repoName)
+		err := buildLocally(buildpackBuilder, appDir, buildImage, runImage, repoName)
 		if err != nil {
 			return err
 		}
@@ -567,4 +557,14 @@ func (c *client) UpdateFunction(options UpdateFunctionOptions, log io.Writer) er
 	}
 
 	return nil
+}
+
+func buildLocally(builder Builder, appDir string, buildImage string, runImage string, repoName string) error {
+	if buildImage == "" {
+		return fmt.Errorf("unable to build function locally: buildpack image not specified")
+	}
+	if runImage == "" {
+		return fmt.Errorf("unable to build function locally: run image not specified")
+	}
+	return builder.Build(appDir, buildImage, runImage, repoName)
 }

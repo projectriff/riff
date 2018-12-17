@@ -29,8 +29,8 @@ import (
 )
 
 type Client interface {
-	CreateFunction(options CreateFunctionOptions, log io.Writer) (*serving.Service, error)
-	UpdateFunction(options UpdateFunctionOptions, log io.Writer) error
+	CreateFunction(builder Builder, options CreateFunctionOptions, log io.Writer) (*serving.Service, error)
+	UpdateFunction(builder Builder, options UpdateFunctionOptions, log io.Writer) error
 
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
 	DeleteSubscription(options DeleteSubscriptionOptions) error
@@ -57,9 +57,8 @@ type client struct {
 	eventing     eventing_cs.Interface
 	serving      serving_cs.Interface
 	clientConfig clientcmd.ClientConfig
-	builder      Builder
 }
 
-func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface, builder Builder) Client {
-	return &client{clientConfig: clientConfig, kubeClient: kubeClient, eventing: eventing, serving: serving, builder: builder}
+func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface) Client {
+	return &client{clientConfig: clientConfig, kubeClient: kubeClient, eventing: eventing, serving: serving}
 }

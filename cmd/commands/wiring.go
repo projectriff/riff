@@ -100,11 +100,12 @@ See https://projectriff.io and https://github.com/knative/docs`,
 
 	installAdvancedUsage(rootCmd)
 
+	buildpackBuilder := &buildpackBuilder{}
 	function := Function()
 	installKubeConfigSupport(function, &client, &kc)
 	function.AddCommand(
-		FunctionCreate(&client, FunctionCreateDefaults{LocalBuilder: localBuilder, DefaultRunImage: defaultRunImage}),
-		FunctionUpdate(&client),
+		FunctionCreate(buildpackBuilder, &client, FunctionCreateDefaults{LocalBuilder: localBuilder, DefaultRunImage: defaultRunImage}),
+		FunctionUpdate(buildpackBuilder, &client),
 	)
 
 	service := Service()
@@ -194,7 +195,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 		if err != nil {
 			return err
 		}
-		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, &builder{})
+		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet)
 		if err != nil {
 			return err
 		}
@@ -207,8 +208,8 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 	}
 }
 
-type builder struct{}
+type buildpackBuilder struct{}
 
-func (*builder) Build(appDir, buildImage, runImage, repoName string) error {
+func (*buildpackBuilder) Build(appDir, buildImage, runImage, repoName string) error {
 	return pack.Build(appDir, buildImage, runImage, repoName, true)
 }

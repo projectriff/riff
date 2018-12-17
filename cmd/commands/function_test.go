@@ -18,6 +18,7 @@ package commands_test
 
 import (
 	"fmt"
+	"github.com/projectriff/riff/pkg/core/mocks/mockbuilder"
 	"strings"
 
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
@@ -33,13 +34,15 @@ import (
 var _ = Describe("The riff function create command", func() {
 	Context("when given wrong args or flags", func() {
 		var (
-			mockClient core.Client
-			fc         *cobra.Command
+			mockBuilder core.Builder
+			mockClient  core.Client
+			fc          *cobra.Command
 		)
 		BeforeEach(func() {
 			mockClient = nil
+			mockBuilder = nil
 			defaults := commands.FunctionCreateDefaults{LocalBuilder: "projectriff/builder", DefaultRunImage: "packs/run"}
-			fc = commands.FunctionCreate(&mockClient, defaults)
+			fc = commands.FunctionCreate(mockBuilder, &mockClient, defaults)
 		})
 		It("should fail with no args", func() {
 			fc.SetArgs([]string{})
@@ -68,16 +71,18 @@ var _ = Describe("The riff function create command", func() {
 
 	Context("when given suitable args and flags", func() {
 		var (
-			client core.Client
-			asMock *mocks.Client
-			fc     *cobra.Command
+			builder core.Builder
+			client  core.Client
+			asMock  *mocks.Client
+			fc      *cobra.Command
 		)
 		BeforeEach(func() {
+			builder = new(mockbuilder.Builder)
 			client = new(mocks.Client)
 			asMock = client.(*mocks.Client)
 			defaults := commands.FunctionCreateDefaults{LocalBuilder: "projectriff/builder", DefaultRunImage: "packs/run"}
 
-			fc = commands.FunctionCreate(&client, defaults)
+			fc = commands.FunctionCreate(builder, &client, defaults)
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
@@ -86,38 +91,38 @@ var _ = Describe("The riff function create command", func() {
 		It("should involve the core.Client", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 
-			o := core.CreateFunctionOptions{
+			options := core.CreateFunctionOptions{
 				GitRepo:        "https://github.com/repo",
 				GitRevision:    "master",
 				Invoker:        "",
 				BuildpackImage: "projectriff/builder",
 				RunImage:       "packs/run",
 			}
-			o.Name = "square"
-			o.Image = "foo/bar"
-			o.Env = []string{}
-			o.EnvFrom = []string{}
+			options.Name = "square"
+			options.Image = "foo/bar"
+			options.Env = []string{}
+			options.EnvFrom = []string{}
 
-			asMock.On("CreateFunction", o, mock.Anything).Return(nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should pass correct options from flags", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo", "--invoker", "pascal"})
 
-			o := core.CreateFunctionOptions{
+			options := core.CreateFunctionOptions{
 				GitRepo:        "https://github.com/repo",
 				GitRevision:    "master",
 				Invoker:        "pascal",
 				BuildpackImage: "projectriff/builder",
 				RunImage:       "packs/run",
 			}
-			o.Name = "square"
-			o.Image = "foo/bar"
-			o.Env = []string{}
-			o.EnvFrom = []string{}
+			options.Name = "square"
+			options.Image = "foo/bar"
+			options.Env = []string{}
+			options.EnvFrom = []string{}
 
-			asMock.On("CreateFunction", o, mock.Anything).Return(nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -125,7 +130,7 @@ var _ = Describe("The riff function create command", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 
 			e := fmt.Errorf("some error")
-			asMock.On("CreateFunction", mock.Anything, mock.Anything).Return(nil, e)
+			asMock.On("CreateFunction", mock.Anything, mock.Anything, mock.Anything).Return(nil, e)
 			err := fc.Execute()
 			Expect(err).To(MatchError(e))
 		})
@@ -133,39 +138,39 @@ var _ = Describe("The riff function create command", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
 				"--env", "FOO=bar", "--env", "BAZ=qux", "--env-from", "secretKeyRef:foo:bar"})
 
-			o := core.CreateFunctionOptions{
+			options := core.CreateFunctionOptions{
 				GitRepo:        "https://github.com/repo",
 				GitRevision:    "master",
 				BuildpackImage: "projectriff/builder",
 				RunImage:       "packs/run",
 			}
-			o.Name = "square"
-			o.Image = "foo/bar"
-			o.Env = []string{"FOO=bar", "BAZ=qux"}
-			o.EnvFrom = []string{"secretKeyRef:foo:bar"}
+			options.Name = "square"
+			options.Image = "foo/bar"
+			options.Env = []string{"FOO=bar", "BAZ=qux"}
+			options.EnvFrom = []string{"secretKeyRef:foo:bar"}
 
-			asMock.On("CreateFunction", o, mock.Anything).Return(nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should print when --dry-run is set", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo", "--dry-run"})
 
-			functionOptions := core.CreateFunctionOptions{
+			options := core.CreateFunctionOptions{
 				GitRepo:        "https://github.com/repo",
 				GitRevision:    "master",
 				BuildpackImage: "projectriff/builder",
 				RunImage:       "packs/run",
 			}
-			functionOptions.Name = "square"
-			functionOptions.Image = "foo/bar"
-			functionOptions.Env = []string{}
-			functionOptions.EnvFrom = []string{}
-			functionOptions.DryRun = true
+			options.Name = "square"
+			options.Image = "foo/bar"
+			options.Env = []string{}
+			options.EnvFrom = []string{}
+			options.DryRun = true
 
 			f := v1alpha1.Service{}
 			f.Name = "square"
-			asMock.On("CreateFunction", functionOptions, mock.Anything).Return(&f, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&f, nil)
 
 			stdout := &strings.Builder{}
 			fc.SetOutput(stdout)
@@ -178,19 +183,19 @@ var _ = Describe("The riff function create command", func() {
 
 		It("should display the status hint", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
-			functionOptions := core.CreateFunctionOptions{
+			options := core.CreateFunctionOptions{
 				GitRepo:        "https://github.com/repo",
 				GitRevision:    "master",
 				BuildpackImage: "projectriff/builder",
 				RunImage:       "packs/run",
 			}
-			functionOptions.Name = "square"
-			functionOptions.Image = "foo/bar"
-			functionOptions.Env = []string{}
-			functionOptions.EnvFrom = []string{}
+			options.Name = "square"
+			options.Image = "foo/bar"
+			options.Env = []string{}
+			options.EnvFrom = []string{}
 			function := v1alpha1.Service{}
 			function.Name = "square"
-			asMock.On("CreateFunction", functionOptions, mock.Anything).Return(&function, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&function, nil)
 			stdout := &strings.Builder{}
 			fc.SetOutput(stdout)
 
@@ -204,21 +209,21 @@ var _ = Describe("The riff function create command", func() {
 		It("should include the nondefault namespace in the status hint", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
 				"--namespace", "ns"})
-			functionOptions := core.CreateFunctionOptions{
+			options := core.CreateFunctionOptions{
 				GitRepo:        "https://github.com/repo",
 				GitRevision:    "master",
 				BuildpackImage: "projectriff/builder",
 				RunImage:       "packs/run",
 			}
-			functionOptions.Name = "square"
-			functionOptions.Namespace = "ns"
-			functionOptions.Image = "foo/bar"
-			functionOptions.Env = []string{}
-			functionOptions.EnvFrom = []string{}
+			options.Name = "square"
+			options.Namespace = "ns"
+			options.Image = "foo/bar"
+			options.Env = []string{}
+			options.EnvFrom = []string{}
 			function := v1alpha1.Service{}
 			function.Name = "square"
 			function.Namespace = "ns"
-			asMock.On("CreateFunction", functionOptions, mock.Anything).Return(&function, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&function, nil)
 			stdout := &strings.Builder{}
 			fc.SetOutput(stdout)
 
@@ -243,12 +248,14 @@ status: {}
 var _ = Describe("The riff function update command", func() {
 	Context("when given wrong args or flags", func() {
 		var (
-			mockClient core.Client
-			fc         *cobra.Command
+			mockBuilder core.Builder
+			mockClient  core.Client
+			fc          *cobra.Command
 		)
 		BeforeEach(func() {
+			mockBuilder = nil
 			mockClient = nil
-			fc = commands.FunctionUpdate(&mockClient)
+			fc = commands.FunctionUpdate(mockBuilder, &mockClient)
 		})
 		It("should fail with no args", func() {
 			fc.SetArgs([]string{})
@@ -265,28 +272,30 @@ var _ = Describe("The riff function update command", func() {
 
 	Context("when given suitable args", func() {
 		var (
-			client core.Client
-			asMock *mocks.Client
-			fc     *cobra.Command
+			builder     core.Builder
+			client      core.Client
+			clientMock  *mocks.Client
+			fc          *cobra.Command
 		)
 		BeforeEach(func() {
+			builder = new(mockbuilder.Builder)
 			client = new(mocks.Client)
-			asMock = client.(*mocks.Client)
+			clientMock = client.(*mocks.Client)
 
-			fc = commands.FunctionUpdate(&client)
+			fc = commands.FunctionUpdate(builder, &client)
 		})
 		AfterEach(func() {
-			asMock.AssertExpectations(GinkgoT())
+			clientMock.AssertExpectations(GinkgoT())
 
 		})
 		It("should involve the core.Client", func() {
 			fc.SetArgs([]string{"square", "--namespace", "ns"})
 
-			o := core.UpdateFunctionOptions{}
-			o.Name = "square"
-			o.Namespace = "ns"
+			options := core.UpdateFunctionOptions{}
+			options.Name = "square"
+			options.Namespace = "ns"
 
-			asMock.On("UpdateFunction", o, mock.Anything).Return(nil)
+			clientMock.On("UpdateFunction", builder, options, mock.Anything).Return(nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -294,7 +303,7 @@ var _ = Describe("The riff function update command", func() {
 			fc.SetArgs([]string{"square", "--namespace", "ns"})
 
 			e := fmt.Errorf("some error")
-			asMock.On("UpdateFunction", mock.Anything, mock.Anything).Return(e)
+			clientMock.On("UpdateFunction", mock.Anything, mock.Anything, mock.Anything).Return(e)
 			err := fc.Execute()
 			Expect(err).To(MatchError(e))
 		})

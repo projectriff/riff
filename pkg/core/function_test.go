@@ -56,7 +56,7 @@ var _ = Describe("Function", func() {
 		testService = &v1alpha1.Service{}
 		workDir = test_support.CreateTempDir()
 		mockClientConfig.On("Namespace").Return("default", false, nil)
-		client = core.NewClient(mockClientConfig, nil, nil, mockServing, mockBuilder)
+		client = core.NewClient(mockClientConfig, nil, nil, mockServing)
 	})
 
 	AfterEach(func() {
@@ -76,7 +76,7 @@ var _ = Describe("Function", func() {
 		})
 
 		JustBeforeEach(func() {
-			service, err = client.CreateFunction(createFunctionOptions, ioutil.Discard)
+			service, err = client.CreateFunction(mockBuilder, createFunctionOptions, ioutil.Discard)
 		})
 
 		Context("when building locally", func() {
@@ -145,7 +145,7 @@ var _ = Describe("Function", func() {
 		})
 
 		JustBeforeEach(func() {
-			err = client.UpdateFunction(updateFunctionOptions, ioutil.Discard)
+			err = client.UpdateFunction(mockBuilder, updateFunctionOptions, ioutil.Discard)
 		})
 
 		Context("when building locally", func() {

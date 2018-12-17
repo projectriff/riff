@@ -37,13 +37,13 @@ func (_m *Client) CreateChannel(options core.CreateChannelOptions) (*v1alpha1.Ch
 	return r0, r1
 }
 
-// CreateFunction provides a mock function with given fields: options, log
-func (_m *Client) CreateFunction(options core.CreateFunctionOptions, log io.Writer) (*servingv1alpha1.Service, error) {
-	ret := _m.Called(options, log)
+// CreateFunction provides a mock function with given fields: builder, options, log
+func (_m *Client) CreateFunction(builder core.Builder, options core.CreateFunctionOptions, log io.Writer) (*servingv1alpha1.Service, error) {
+	ret := _m.Called(builder, options, log)
 
 	var r0 *servingv1alpha1.Service
-	if rf, ok := ret.Get(0).(func(core.CreateFunctionOptions, io.Writer) *servingv1alpha1.Service); ok {
-		r0 = rf(options, log)
+	if rf, ok := ret.Get(0).(func(core.Builder, core.CreateFunctionOptions, io.Writer) *servingv1alpha1.Service); ok {
+		r0 = rf(builder, options, log)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*servingv1alpha1.Service)
@@ -51,8 +51,8 @@ func (_m *Client) CreateFunction(options core.CreateFunctionOptions, log io.Writ
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(core.CreateFunctionOptions, io.Writer) error); ok {
-		r1 = rf(options, log)
+	if rf, ok := ret.Get(1).(func(core.Builder, core.CreateFunctionOptions, io.Writer) error); ok {
+		r1 = rf(builder, options, log)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -268,13 +268,13 @@ func (_m *Client) ServiceStatus(options core.ServiceStatusOptions) (*duckv1alpha
 	return r0, r1
 }
 
-// UpdateFunction provides a mock function with given fields: options, log
-func (_m *Client) UpdateFunction(options core.UpdateFunctionOptions, log io.Writer) error {
-	ret := _m.Called(options, log)
+// UpdateFunction provides a mock function with given fields: builder, options, log
+func (_m *Client) UpdateFunction(builder core.Builder, options core.UpdateFunctionOptions, log io.Writer) error {
+	ret := _m.Called(builder, options, log)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(core.UpdateFunctionOptions, io.Writer) error); ok {
-		r0 = rf(options, log)
+	if rf, ok := ret.Get(0).(func(core.Builder, core.UpdateFunctionOptions, io.Writer) error); ok {
+		r0 = rf(builder, options, log)
 	} else {
 		r0 = ret.Error(0)
 	}
