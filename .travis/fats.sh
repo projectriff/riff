@@ -46,7 +46,7 @@ echo "Run functions"
 source $fats_dir/functions/helpers.sh
 
 # uppercase
-for test in java java-boot java-local node npm command; do
+for test in java java-boot node npm command; do
   path=${fats_dir}/functions/uppercase/${test}
   function_name=fats-uppercase-${test}
   image=${IMAGE_REPOSITORY_PREFIX}/fats-uppercase-${test}:${CLUSTER_NAME}
