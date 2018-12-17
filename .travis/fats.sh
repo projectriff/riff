@@ -46,7 +46,7 @@ echo "Run functions"
 source $fats_dir/functions/helpers.sh
 
 # uppercase
-for test in java java-boot java-local node npm command; do
+for test in java java-boot node npm command; do
   path=${fats_dir}/functions/uppercase/${test}
   function_name=fats-uppercase-${test}
   image=${IMAGE_REPOSITORY_PREFIX}/fats-uppercase-${test}:${CLUSTER_NAME}
@@ -56,5 +56,5 @@ for test in java java-boot java-local node npm command; do
   run_function $path $function_name $image $input_data $expected_data
 done
 
-# TODO restore once the correlator works with Knative Eventing
-# source `dirname "${BASH_SOURCE[0]}"`/fats-channels.sh
+# Knative Eventing tests
+source `dirname "${BASH_SOURCE[0]}"`/fats-channels.sh

@@ -9,7 +9,7 @@ kail_test_pid=$!
 kail --ns knative-serving --ns knative-eventing > $test_name.controller.logs &
 kail_controller_pid=$!
 
-riff service create correlator --image projectriff/correlator:fats --namespace $NAMESPACE
+riff service create correlator --image projectriff/correlator:fats-20181214 --namespace $NAMESPACE
 wait_kservice_ready correlator $NAMESPACE
 
 riff channel create $test_name --cluster-provisioner in-memory-channel --namespace $NAMESPACE
