@@ -16,7 +16,7 @@ matrix:
     script: make build test verify-docs
   - &test-windows
     stage: test
-    os: windows
+    os: windows # GitBash
     install:
     - "choco install make"
     - "go get -u github.com/golang/dep/cmd/dep"
