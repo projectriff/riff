@@ -24,6 +24,8 @@ For example, when deploying images from a private Google Container Registry to t
 
 3. Use the JSON key file to create the Secret
 
+    > NOTE: If your moved the JSON key file to a different location make sure to use that location when setting the PULL_IMAGE_JSON_KEY environment variable below.
+
         export PULL_IMAGE_JSON_KEY=$HOME/$GCP_PROJECT-pull-image.json
         kubectl create secret docker-registry "gcr" \
           --docker-server=gcr.io \
