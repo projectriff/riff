@@ -33,6 +33,7 @@ import (
 )
 
 const serviceAccountName = "riff-build"
+const defaultServiceAccountName = "default"
 
 type secretType int
 
@@ -47,10 +48,11 @@ type NamespaceInitOptions struct {
 	NamespaceName string
 	Manifest      string
 
-	NoSecret          bool
-	SecretName        string
-	GcrTokenPath      string
-	DockerHubUsername string
+	NoSecret            bool
+	SecretName          string
+	GcrTokenPath        string
+	DockerHubUsername   string
+	ImagePullSecretName string
 }
 
 func (o *NamespaceInitOptions) secretType() secretType {
@@ -150,6 +152,11 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 		}
 	}
 
+	if err = addImagePullSecret(c, ns, options.ImagePullSecretName);
+		err != nil {
+		return err
+	}
+
 	baseDir := filepath.Dir(options.Manifest)
 
 	for _, release := range manifest.Namespace {
@@ -171,6 +178,37 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func addImagePullSecret(client *kubectlClient, namespace string, imagePullSecretName string) error {
+	if imagePullSecretName == "" {
+		return nil
+	}
+
+	serviceAccounts := client.kubeClient.CoreV1().ServiceAccounts(namespace)
+	defaultServiceAccount, err := serviceAccounts.Get(defaultServiceAccountName, v1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	reference := corev1.LocalObjectReference{Name: imagePullSecretName}
+	if defaultServiceAccount.ImagePullSecrets == nil {
+		defaultServiceAccount.ImagePullSecrets = make([]corev1.LocalObjectReference, 0)
+	}
+	for _, pullSecret := range defaultServiceAccount.ImagePullSecrets {
+		if pullSecret.Name == imagePullSecretName {
+			fmt.Printf("Image pull secret %q already exists for serviceaccount %q in namespace %q. Skipping.\n",
+				imagePullSecretName, defaultServiceAccountName, namespace)
+			return nil
+		}
+	}
+	defaultServiceAccount.ImagePullSecrets = append(defaultServiceAccount.ImagePullSecrets, reference)
+
+	_, err = serviceAccounts.Update(defaultServiceAccount)
+	if err != nil {
+		return err
 	}
 	return nil
 }

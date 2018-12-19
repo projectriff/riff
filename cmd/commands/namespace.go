@@ -75,6 +75,7 @@ func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 	command.Flags().StringVarP(&options.SecretName, "secret", "s", "push-credentials", "the name of a `secret` containing credentials for the image registry")
 	command.Flags().StringVar(&options.GcrTokenPath, "gcr", "", "path to a file containing Google Container Registry credentials")
 	command.Flags().StringVar(&options.DockerHubUsername, "dockerhub", "", "dockerhub username for authentication; password will be read from stdin")
+	command.Flags().StringVar(&options.ImagePullSecretName, "image-pull-secret", "", "image pull secret name for the namespace default service account; this secret is used by Knative serving to pull images from private registries and serve them")
 
 	return command
 }

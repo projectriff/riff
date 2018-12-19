@@ -17,6 +17,7 @@
 package core
 
 import (
+	"fmt"
 	"os"
 
 	. "github.com/onsi/ginkgo"
@@ -67,6 +68,55 @@ var _ = Describe("The NamespaceInit function", func() {
 		options := NamespaceInitOptions{Manifest: "wrong"}
 		err := kubectlClient.NamespaceInit(manifests, options)
 		Expect(err).To(MatchError(ContainSubstring("wrong: "))) // error message is quite different on Windows and macOS
+	})
+
+	It("should fail to add an image pull secret if the default service account is not found", func() {
+		namespaceName := "foo"
+		pullSecretName := "pullitzer-prize"
+		options := NamespaceInitOptions{
+			Manifest:            "fixtures/empty.yaml",
+			NamespaceName:       namespaceName,
+			ImagePullSecretName: pullSecretName,
+			NoSecret:            true,
+		}
+		namespace := &v1.Namespace{ObjectMeta: meta_v1.ObjectMeta{Name: namespaceName}}
+		mockNamespaces.On("Get", namespaceName, mock.Anything).Return(namespace, nil)
+
+		riffBuildServiceAccount := &v1.ServiceAccount{}
+		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
+		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(riffBuildServiceAccount, nil)
+		serviceAccountNotFound := notFound()
+		mockServiceAccounts.On("Get", "default", mock.Anything).Return(nil, serviceAccountNotFound)
+
+		err := kubectlClient.NamespaceInit(manifests, options)
+
+		Expect(err).To(MatchError(serviceAccountNotFound))
+	})
+
+	It("should fail to add an image pull secret if the default service account update fails", func() {
+		namespaceName := "foo"
+		pullSecretName := "pullitzer-prize"
+		options := NamespaceInitOptions{
+			Manifest:            "fixtures/empty.yaml",
+			NamespaceName:       namespaceName,
+			ImagePullSecretName: pullSecretName,
+			NoSecret:            true,
+		}
+		namespace := &v1.Namespace{ObjectMeta: meta_v1.ObjectMeta{Name: namespaceName}}
+		mockNamespaces.On("Get", namespaceName, mock.Anything).Return(namespace, nil)
+
+		riffBuildServiceAccount := &v1.ServiceAccount{}
+		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
+		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(riffBuildServiceAccount, nil)
+		defaultServiceAccount := &v1.ServiceAccount{}
+		mockServiceAccounts.On("Get", "default", mock.Anything).Return(defaultServiceAccount, nil)
+		updateFailed := fmt.Errorf("default service account update failed")
+		mockServiceAccounts.On("Update", defaultServiceAccount).
+			Return(nil, updateFailed)
+
+		err := kubectlClient.NamespaceInit(manifests, options)
+
+		Expect(err).To(MatchError(updateFailed))
 	})
 
 	It("should create namespace and sa if needed", func() {
@@ -190,6 +240,35 @@ var _ = Describe("The NamespaceInit function", func() {
 
 		err := kubectlClient.NamespaceInit(manifests, options)
 		Expect(err).To(Not(HaveOccurred()))
+	})
+
+	It("should update the namespace default service account with the specified image pull secret", func() {
+		namespaceName := "foo"
+		pullSecretName := "pullitzer-prize"
+		options := NamespaceInitOptions{
+			Manifest:            "fixtures/empty.yaml",
+			NamespaceName:       namespaceName,
+			ImagePullSecretName: pullSecretName,
+			NoSecret:            true,
+		}
+		namespace := &v1.Namespace{ObjectMeta: meta_v1.ObjectMeta{Name: namespaceName}}
+		mockNamespaces.On("Get", namespaceName, mock.Anything).Return(namespace, nil)
+
+		riffBuildServiceAccount := &v1.ServiceAccount{}
+		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
+		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(riffBuildServiceAccount, nil)
+		defaultServiceAccount := &v1.ServiceAccount{}
+		mockServiceAccounts.On("Get", defaultServiceAccountName, mock.Anything).Return(defaultServiceAccount, nil)
+		mockServiceAccounts.On("Update", defaultServiceAccount).Return(defaultServiceAccount, nil)
+
+		err := kubectlClient.NamespaceInit(manifests, options)
+
+		Expect(err).To(Not(HaveOccurred()))
+		imagePullSecrets := defaultServiceAccount.ImagePullSecrets
+		Expect(imagePullSecrets).To(HaveLen(1))
+		Expect(imagePullSecrets).To(ContainElement(v1.LocalObjectReference{
+			Name: pullSecretName,
+		}))
 	})
 
 })
