@@ -16,37 +16,40 @@ all: build test docs
 build: $(OUTPUT)
 
 test:
-	go test ./...
+	GO111MODULE=on go test ./...
 
 check-mockery:
-	@which mockery > /dev/null || (echo mockery not found: issue "go get -u github.com/vektra/mockery/.../" && false)
+	@which mockery > /dev/null || (echo mockery not found: issue \"go get -u github.com/vektra/mockery/.../\" && false)
 
-gen-mocks: check-mockery
-	mockery -output pkg/core/mocks/mockbuilder			-outpkg mockbuilder			-dir pkg/core 																					-name Builder
-	mockery -output pkg/core/mocks						-outpkg mocks 				-dir pkg/core 																					-name Client
-	mockery -output pkg/core/mocks						-outpkg mocks 				-dir pkg/core 																					-name KubectlClient
-	mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks 		-dir vendor/k8s.io/client-go/kubernetes 														-name Interface
-	mockery -output pkg/core/vendor_mocks/mockserving	-outpkg mockserving 		-dir vendor/github.com/knative/serving/pkg/client/clientset/versioned							-name Interface
-	mockery -output pkg/core/vendor_mocks/mockserving	-outpkg mockserving 		-dir vendor/github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1	-name ServingV1alpha1Interface
-	mockery -output pkg/core/vendor_mocks/mockserving	-outpkg mockserving 		-dir vendor/github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1	-name ServiceInterface
-	mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks	 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 											-name CoreV1Interface
-	mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks 		-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 											-name NamespaceInterface
-	mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks	 	-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 											-name ServiceAccountInterface
-	mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks 		-dir vendor/k8s.io/client-go/kubernetes/typed/core/v1 											-name SecretInterface
-	mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks	 	-dir vendor/k8s.io/client-go/tools/clientcmd     	   											-name ClientConfig
-	mockery -output pkg/fileutils/mocks					-outpkg mocks           	-dir pkg/fileutils                                    											-name Checker
-	mockery -output pkg/fileutils/mocks					-outpkg mocks				-dir pkg/fileutils																				-name Copier
+check-jq:
+	@which jq > /dev/null || (echo jq not found: please install jq, eg \"brew install jq\" && false)
+
+gen-mocks: check-mockery check-jq
+	GO111MODULE=on mockery -output pkg/core/mocks/mockbuilder			-outpkg mockbuilder			-dir pkg/core 																					-name Builder
+	GO111MODULE=on mockery -output pkg/core/mocks						-outpkg mocks 				-dir pkg/core 																					-name Client
+	GO111MODULE=on mockery -output pkg/core/mocks						-outpkg mocks 				-dir pkg/core 																					-name KubectlClient
+	GO111MODULE=on mockery -output pkg/core/vendor_mocks/mockserving	-outpkg mockserving 		-dir $(call source_of,github.com/knative/serving)/pkg/client/clientset/versioned							-name Interface
+	GO111MODULE=on mockery -output pkg/core/vendor_mocks/mockserving	-outpkg mockserving 		-dir $(call source_of,github.com/knative/serving)/pkg/client/clientset/versioned/typed/serving/v1alpha1	-name ServingV1alpha1Interface
+	GO111MODULE=on mockery -output pkg/core/vendor_mocks/mockserving	-outpkg mockserving 		-dir $(call source_of,github.com/knative/serving)/pkg/client/clientset/versioned/typed/serving/v1alpha1	-name ServiceInterface
+	GO111MODULE=on mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks	 	-dir $(call source_of,k8s.io/client-go)/kubernetes/typed/core/v1 											-name CoreV1Interface
+	GO111MODULE=on mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks 		-dir $(call source_of,k8s.io/client-go)/kubernetes/typed/core/v1 											-name NamespaceInterface
+	GO111MODULE=on mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks	 	-dir $(call source_of,k8s.io/client-go)/kubernetes/typed/core/v1 											-name ServiceAccountInterface
+	GO111MODULE=on mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks 		-dir $(call source_of,k8s.io/client-go)/kubernetes/typed/core/v1 											-name SecretInterface
+	GO111MODULE=on mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks 		-dir $(call source_of,k8s.io/client-go)/kubernetes 														-name Interface
+	GO111MODULE=on mockery -output pkg/core/vendor_mocks				-outpkg vendor_mocks	 	-dir $(call source_of,k8s.io/client-go)/tools/clientcmd     	   											-name ClientConfig
+	GO111MODULE=on mockery -output pkg/fileutils/mocks					-outpkg mocks           	-dir pkg/fileutils                                    											-name Checker
+	GO111MODULE=on mockery -output pkg/fileutils/mocks					-outpkg mocks				-dir pkg/fileutils																				-name Copier
 
 install: build
 	cp $(OUTPUT) $(GOBIN)
 
-$(OUTPUT): $(GO_SOURCES) vendor VERSION
-	go build -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)"
+$(OUTPUT): $(GO_SOURCES) VERSION
+	GO111MODULE=on go build -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)"
 
-release: $(GO_SOURCES) vendor VERSION
-	GOOS=darwin   GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     && tar -czf riff-darwin-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
-	GOOS=linux    GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     && tar -czf riff-linux-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
-	GOOS=windows  GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT).exe && zip -mq riff-windows-amd64.zip $(OUTPUT).exe && rm -f $(OUTPUT).exe
+release: $(GO_SOURCES) VERSION
+	GOOS=darwin   GOARCH=amd64 GO111MODULE=on go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     && tar -czf riff-darwin-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
+	GOOS=linux    GOARCH=amd64 GO111MODULE=on go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     && tar -czf riff-linux-amd64.tgz $(OUTPUT) && rm -f $(OUTPUT)
+	GOOS=windows  GOARCH=amd64 GO111MODULE=on go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT).exe && zip -mq riff-windows-amd64.zip $(OUTPUT).exe && rm -f $(OUTPUT).exe
 
 docs: $(OUTPUT) clean-docs
 	$(OUTPUT) docs
@@ -63,9 +66,6 @@ clean:
 	rm -f riff-linux-amd64.tgz
 	rm -f riff-windows-amd64.zip
 
-vendor: Gopkg.lock
-	dep ensure -vendor-only && touch vendor
-
-Gopkg.lock: Gopkg.toml
-	dep ensure -no-vendor && touch Gopkg.lock
-
+define source_of
+	$(shell GO111MODULE=on go mod download -json | jq -r 'select(.Path == "$(1)").Dir')
+endef
