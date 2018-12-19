@@ -11,7 +11,7 @@ gcloud auth activate-service-account --key-file <(echo $GCLOUD_CLIENT_SECRET | b
 
 bucket=gs://projectriff/riff-cli/releases
 
-gsutil rsync -d ${bucket}/builds/v${version}-${commit} ${bucket}/v${version}
+gsutil rsync -a public-read -d ${bucket}/builds/v${version}-${commit} ${bucket}/v${version}
 if [[ "$TRAVIS_BRANCH" == "master" ]]; then
-  gsutil rsync -d ${bucket}/builds/v${version}-${commit} ${bucket}/latest
+  gsutil rsync -a public-read -d ${bucket}/builds/v${version}-${commit} ${bucket}/latest
 fi
