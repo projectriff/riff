@@ -68,6 +68,11 @@ type CreateFunctionOptions struct {
 
 func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
+	functionName := options.Name
+	service, _ := c.serving.ServingV1alpha1().Services(ns).Get(functionName, v1.GetOptions{})
+	if service != nil {
+		return nil, fmt.Errorf("service '%s' already exists in namespace '%s'", functionName, ns)
+	}
 
 	s, err := newService(options.CreateOrUpdateServiceOptions)
 	if err != nil {
@@ -78,7 +83,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 	if labels == nil {
 		labels = map[string]string{}
 	}
-	labels[functionLabel] = options.Name
+	labels[functionLabel] = functionName
 	s.Spec.RunLatest.Configuration.RevisionTemplate.SetLabels(labels)
 	annotations := s.Spec.RunLatest.Configuration.RevisionTemplate.Annotations
 	if annotations == nil {
