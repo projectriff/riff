@@ -1,6 +1,9 @@
 language: go
 go:
 - '1.11.4'
+cache:
+  directories:
+  - $GOPATH/pkg/mod
 dist: xenial
 env:
   global:
