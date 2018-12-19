@@ -14,15 +14,13 @@ matrix:
   include:
   - stage: test
     install:
-    - "go get -u github.com/golang/dep/cmd/dep"
     - "go get -u github.com/vektra/mockery/.../"
     script: make build test verify-docs
   - &test-windows
     stage: test
-    os: windows # GitBash
+    os: windows # Git Bash
     install:
     - "choco install make"
-    - "go get -u github.com/golang/dep/cmd/dep"
     - "go get -u github.com/vektra/mockery/.../"
     script: make build test verify-docs
   - stage: fats-lite
