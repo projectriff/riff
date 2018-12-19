@@ -26,11 +26,13 @@ matrix:
     - "go get -u github.com/vektra/mockery/.../"
     script: make build test verify-docs
   - stage: fats-lite
-    script: .travis/fats.sh
+    script: .travis/fats.sh lite
     after_script: .travis/fats-cleanup.sh
     env:
     - CLUSTER=minikube
     - REGISTRY=minikube
+  - stage: stage
+    script: .travis/stage.sh
   - stage: fats
     script: .travis/fats.sh
     after_script: .travis/fats-cleanup.sh
@@ -43,14 +45,20 @@ matrix:
     env:
     - CLUSTER=gke
     - REGISTRY=gcr
+  - stage: publish
+    script: .travis/publish.sh
   allow_failures:
   - *test-windows
 stages:
 - test
 - name: fats-lite
   if: (branch != master AND branch !~ ^v(?:[0-9]+\.)+x$ AND branch !~ fats) OR type = pull_request
+- name: stage
+  if: (branch = master OR branch =~ ^v(?:[0-9]+\.)+x$ OR branch =~ fats) AND type != pull_request
 - name: fats
   if: (branch = master OR branch =~ ^v(?:[0-9]+\.)+x$ OR branch =~ fats) AND type != pull_request
+- name: publish
+  if: (branch = master OR branch =~ ^v(?:[0-9]+\.)+x$) AND type != pull_request
 notifications:
   slack:
     secure: jLnQxf4jQJu//9YETPUQx+haEXZPahOb7VeQmBmOP9A7cPh1j/tFwJFf4ZX5C+cjBEsVeUz7PHHu439v8jxvZ/kZXxC6y957qyangGo2SoFe/BWdfKSH5zHjrjSQ0Yl948mdRYo6PrSfb2XBlAbH+DWOWAELiSQU69LVpv3jaWk5BQDTF0QIchyRqWaLoVEFArCRhGBzj7w0dCeZYC4cBp7AHNLsUWcbBr4CRWq7aVPIPF+mFNjiwdU4cuVNLszqn46o2ECsofpc/39yrDOL4FYfeynX4f8Ssg8AHHEPSmrMvSMIWXYzaw80kwKx9xw0KsdnUoESCP42YTVC4WEz8zJJJlKUAPJxlUjEb7lSB6LzckfSErJv4TCI7yXUIB8s1PvkGRc0w5DQrzw7WXisQzefgbjzvjxs7Wc2oFJ0jbNAFzeyWT5qaalgj+S8MzDOmgrm6RVdH8SRs3dJsuntLsPtU2C/bzdzvo90Q7kjzKsJdJvPmVnqvw7mN6i20EReLJREIFSap78LdItZSPRF2NqWUbN2zD8xmnZwLis2XquhB9jJu8X9kX6iLGRDqgB3u8HgG2fK37dGci5edqw/3XFNcJk9TDHSCV0ZqT873Q49Rd4HPK0eAnI63c444tEhtUl9fGssDRObRKyU0zw3plaXVy+T7Bao19gUnPUsBEA=
