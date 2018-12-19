@@ -69,8 +69,8 @@ type CreateFunctionOptions struct {
 func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 	functionName := options.Name
-	service, _ := c.serving.ServingV1alpha1().Services(ns).Get(functionName, v1.GetOptions{})
-	if service != nil {
+	_, err := c.serving.ServingV1alpha1().Services(ns).Get(functionName, v1.GetOptions{})
+	if err == nil {
 		return nil, fmt.Errorf("service '%s' already exists in namespace '%s'", functionName, ns)
 	}
 
