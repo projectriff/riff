@@ -4,6 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+mode=${1:-full}
 version=`cat VERSION`
 commit=$(git rev-parse HEAD)
 
@@ -11,8 +12,13 @@ commit=$(git rev-parse HEAD)
 fats_dir=`dirname "${BASH_SOURCE[0]}"`/fats
 source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $fats_dir
 
-# build riff
-make build
+# install riff-cli
+if [ "$mode" = "full" ]; then
+  gsutil cat gs://projectriff/riff-cli/releases/builds/v${version}-${commit}/riff-linux-amd64.tgz | tar xz
+  chmod +x riff
+else
+  make build
+fi
 sudo cp riff /usr/local/bin/riff
 
 # start FATS
