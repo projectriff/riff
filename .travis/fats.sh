@@ -11,8 +11,11 @@ commit=$(git rev-parse HEAD)
 # fetch FATS scripts
 fats_dir=`dirname "${BASH_SOURCE[0]}"`/fats
 source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $fats_dir
+source $fats_dir/.util.sh
 
 # install riff-cli
+travis_fold start install-riff
+echo "Installing riff"
 if [ "$mode" = "full" ]; then
   gsutil cat gs://projectriff/riff-cli/releases/builds/v${version}-${commit}/riff-linux-amd64.tgz | tar xz
   chmod +x riff
@@ -20,12 +23,14 @@ else
   make build
 fi
 sudo cp riff /usr/local/bin/riff
+travis_fold end install-riff
 
 # start FATS
 source $fats_dir/start.sh
 
-# install riff
-echo "Installing riff"
+# install riff system
+travis_fold start system-install
+echo "Installing riff system"
 riff system install $SYSTEM_INSTALL_FLAGS
 
 # health checks
@@ -46,12 +51,11 @@ wait_for_ingress_ready 'knative-ingressgateway' 'istio-system'
 kubectl create namespace $NAMESPACE
 fats_create_push_credentials $NAMESPACE
 riff namespace init $NAMESPACE $NAMESPACE_INIT_FLAGS
+travis_fold end system-install
 
 # run test functions
-echo "Run functions"
 source $fats_dir/functions/helpers.sh
 
-# uppercase
 for test in java java-boot node npm command; do
   path=${fats_dir}/functions/uppercase/${test}
   function_name=fats-uppercase-${test}
@@ -61,6 +65,15 @@ for test in java java-boot node npm command; do
 
   run_function $path $function_name $image $input_data $expected_data
 done
+for test in java-local; do
+  path=${fats_dir}/functions/uppercase/${test}
+  function_name=fats-uppercase-${test}
+  image=${IMAGE_REPOSITORY_PREFIX}/fats-uppercase-${test}:${CLUSTER_NAME}
+  input_data=riff
+  expected_data=RIFF
 
-# Knative Eventing tests
+  # TODO reenable local builds, once they are working again
+  # run_function $path $function_name $image $input_data $expected_data
+done
+
 source `dirname "${BASH_SOURCE[0]}"`/fats-channels.sh

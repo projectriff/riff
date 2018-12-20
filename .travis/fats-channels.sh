@@ -1,6 +1,10 @@
 #!/bin/bash
 
 # TODO make FATS channel tests modular enough to use here
+
+travis_fold start eventing
+echo "Eventing"
+
 test_name=echo
 
 kail --ns $NAMESPACE > $test_name.logs &
@@ -44,3 +48,5 @@ if [[ "$actual_data" != "$expected_data" ]]; then
   echo "   actual data: $actual_data"
   exit 1
 fi
+
+travis_fold end eventing
