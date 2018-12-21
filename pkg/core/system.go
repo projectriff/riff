@@ -22,12 +22,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/projectriff/riff/pkg/fileutils"
+
 	"github.com/projectriff/riff/pkg/env"
-	"github.com/projectriff/riff/pkg/resource"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -113,7 +113,11 @@ func (kc *kubectlClient) applyReleaseWithRetry(release string, options SystemIns
 }
 
 func (kc *kubectlClient) applyRelease(release string, options SystemInstallOptions) error {
-	yaml, err := resource.Load(release, filepath.Dir(options.Manifest))
+	dir, err := fileutils.Dir(options.Manifest)
+	if err != nil {
+		return err
+	}
+	yaml, err := fileutils.Read(release, dir)
 	if err != nil {
 		return err
 	}
