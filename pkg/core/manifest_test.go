@@ -17,11 +17,12 @@
 package core_test
 
 import (
+	"path/filepath"
+	"runtime"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/core"
-	"path/filepath"
-	"runtime"
 )
 
 var _ = Describe("Manifest", func() {
@@ -144,5 +145,4 @@ var _ = Describe("Manifest", func() {
 			})
 		})
 	})
-
 })
