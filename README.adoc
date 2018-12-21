@@ -25,7 +25,7 @@ This is the best option if you want to modify the riff CLI.
 
 You need:
 
-* A working Go 1.11 environment
+* A working Go 1.11.4 (or later) environment
 
 === Get the main riff repo
 
