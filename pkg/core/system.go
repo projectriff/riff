@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/projectriff/riff/pkg/crd"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,7 +29,6 @@ import (
 
 	"github.com/projectriff/riff/pkg/env"
 	"github.com/projectriff/riff/pkg/resource"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -51,6 +51,14 @@ var (
 )
 
 func (kc *kubectlClient) SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error) {
+	err := crd.CreateCRD(kc.kubeApiExt)
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("Could not create riff CRD: %s ", err))
+	}
+	return true, err
+}
+
+func (kc *kubectlClient) oldSystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error) {
 	manifest, err := ResolveManifest(manifests, options.Manifest)
 	if err != nil {
 		return false, err

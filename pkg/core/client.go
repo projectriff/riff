@@ -18,6 +18,7 @@ package core
 
 import (
 	"io"
+	apiextension_cs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 
 	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	eventing_cs "github.com/knative/eventing/pkg/client/clientset/versioned"
@@ -57,8 +58,9 @@ type client struct {
 	eventing     eventing_cs.Interface
 	serving      serving_cs.Interface
 	clientConfig clientcmd.ClientConfig
+	apiExtension apiextension_cs.Interface
 }
 
-func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface) Client {
-	return &client{clientConfig: clientConfig, kubeClient: kubeClient, eventing: eventing, serving: serving}
+func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface, ext apiextension_cs.Interface) Client {
+	return &client{clientConfig: clientConfig, kubeClient: kubeClient, eventing: eventing, serving: serving, apiExtension: ext}
 }

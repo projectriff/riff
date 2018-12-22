@@ -19,6 +19,8 @@ package core
 import (
 	"github.com/projectriff/riff/pkg/kubectl"
 	"k8s.io/client-go/kubernetes"
+	apiextension "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+
 )
 
 type KubectlClient interface {
@@ -30,8 +32,9 @@ type KubectlClient interface {
 type kubectlClient struct {
 	kubeClient kubernetes.Interface
 	kubeCtl    kubectl.KubeCtl
+	kubeApiExt apiextension.Interface
 }
 
-func NewKubectlClient(kubeClient kubernetes.Interface) KubectlClient {
+func NewKubectlClient(kubeClient kubernetes.Interface, extClient apiextension.Interface) KubectlClient {
 	return &kubectlClient{kubeClient: kubeClient, kubeCtl: kubectl.RealKubeCtl()}
 }

@@ -30,17 +30,18 @@ import (
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
+	apiextensions "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.ClientConfig, kubernetes.Interface, eventing.Interface, serving.Interface, error) {
+var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.ClientConfig, kubernetes.Interface, eventing.Interface, serving.Interface, apiextensions.Interface, error) {
 
 	kubeconfig, err := resolveHomePath(kubeconfig)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 
 	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
@@ -49,19 +50,25 @@ var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.
 
 	cfg, err := clientConfig.ClientConfig()
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 	kubeClientSet, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 	eventingClientSet, err := eventing.NewForConfig(cfg)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 	servingClientSet, err := serving.NewForConfig(cfg)
-
-	return clientConfig, kubeClientSet, eventingClientSet, servingClientSet, err
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
+	}
+	extClientSet, err := apiextensions.NewForConfig(cfg)
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
+	}
+	return clientConfig, kubeClientSet, eventingClientSet, servingClientSet, extClientSet, err
 }
 
 func resolveHomePath(p string) (string, error) {
@@ -192,15 +199,15 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 	oldPersistentPreRunE := command.PersistentPreRunE
 	command.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		var err error
-		clientConfig, kubeClientSet, eventingClientSet, servingClientSet, err := realClientSetFactory(kubeconfig, masterURL)
+		clientConfig, kubeClientSet, eventingClientSet, servingClientSet, extClientSet, err := realClientSetFactory(kubeconfig, masterURL)
 		if err != nil {
 			return err
 		}
-		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet)
+		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, extClientSet)
 		if err != nil {
 			return err
 		}
-		*kc = core.NewKubectlClient(kubeClientSet)
+		*kc = core.NewKubectlClient(kubeClientSet, extClientSet)
 
 		if oldPersistentPreRunE != nil {
 			return oldPersistentPreRunE(cmd, args)
