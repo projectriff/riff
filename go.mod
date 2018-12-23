@@ -11,10 +11,13 @@ require (
 	github.com/buildpack/pack v0.0.4
 	github.com/buildpack/packs v0.0.0-20180824112413-aa30a4129237 // indirect
 	github.com/cpuguy83/go-md2man v1.0.8 // indirect
+	github.com/emicklei/go-restful v2.8.0+incompatible // indirect
 	github.com/evanphx/json-patch v4.1.0+incompatible // indirect
+	github.com/fatih/camelcase v1.0.0 // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/frioux/shellquote v0.0.1
 	github.com/ghodss/yaml v1.0.0
+	github.com/go-openapi/spec v0.18.0 // indirect
 	github.com/go-yaml/yaml v2.1.0+incompatible // indirect
 	github.com/gobuffalo/envy v1.6.10 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
@@ -52,8 +55,14 @@ require (
 	golang.org/x/time v0.0.0-20180412165947-fbb02b2291d2 // indirect
 	google.golang.org/appengine v1.2.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	k8s.io/api v0.0.0-20180904230853-4e7be11eab3f
-	k8s.io/apimachinery v0.0.0-20180904193909-def12e63c512
-	k8s.io/client-go v0.0.0-20180910083459-2cefa64ff137
+	k8s.io/api v0.0.0-20181221193117-173ce66c1e39
+	k8s.io/apiextensions-apiserver v0.0.0-20181221201254-261a947e2c38
+	k8s.io/apimachinery v0.0.0-20181222072933-b814ad55d7c5
+	k8s.io/cli-runtime v0.0.0-20181221202950-8abb1aeb8307 // indirect
+	k8s.io/client-go v10.0.0+incompatible
+	k8s.io/klog v0.1.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20181114233023-0317810137be // indirect
+	k8s.io/kubernetes v1.13.1
+	sigs.k8s.io/kustomize v1.0.11 // indirect
+	sigs.k8s.io/yaml v1.1.0 // indirect
 )
