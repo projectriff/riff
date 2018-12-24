@@ -36,5 +36,5 @@ type kubectlClient struct {
 }
 
 func NewKubectlClient(kubeClient kubernetes.Interface, extClient apiextension.Interface) KubectlClient {
-	return &kubectlClient{kubeClient: kubeClient, kubeCtl: kubectl.RealKubeCtl()}
+	return &kubectlClient{kubeClient: kubeClient, kubeCtl: kubectl.RealKubeCtl(), kubeApiExt: extClient}
 }

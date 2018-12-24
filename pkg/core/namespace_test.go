@@ -23,6 +23,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	"github.com/projectriff/riff/pkg/core/vendor_mocks"
+	ext "github.com/projectriff/riff/pkg/core/vendor_mocks/extensions"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -35,6 +36,7 @@ var _ = Describe("The NamespaceInit function", func() {
 	var (
 		kubectlClient       KubectlClient
 		kubeClient          *vendor_mocks.Interface
+		extClient           *ext.Interface
 		mockCore            *vendor_mocks.CoreV1Interface
 		mockNamespaces      *vendor_mocks.NamespaceInterface
 		mockServiceAccounts *vendor_mocks.ServiceAccountInterface
@@ -44,6 +46,7 @@ var _ = Describe("The NamespaceInit function", func() {
 
 	JustBeforeEach(func() {
 		kubeClient = new(vendor_mocks.Interface)
+		extClient = new(ext.Interface)
 		mockCore = new(vendor_mocks.CoreV1Interface)
 		mockNamespaces = new(vendor_mocks.NamespaceInterface)
 		mockServiceAccounts = new(vendor_mocks.ServiceAccountInterface)
@@ -54,7 +57,7 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockCore.On("ServiceAccounts", mock.Anything).Return(mockServiceAccounts)
 		mockCore.On("Secrets", mock.Anything).Return(mockSecrets)
 
-		kubectlClient = NewKubectlClient(kubeClient)
+		kubectlClient = NewKubectlClient(kubeClient, extClient)
 	})
 
 	AfterEach(func() {
