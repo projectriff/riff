@@ -47,14 +47,14 @@ var _ = Describe("The riff subscription system command", func() {
 var _ = Describe("The riff system install subcommand", func() {
 
 	var (
-		client               core.KubectlClient
-		clientMock           *mocks.KubectlClient
+		client               core.Client
+		clientMock           *mocks.Client
 		systemInstallCommand *cobra.Command
 	)
 
 	BeforeEach(func() {
-		client = new(mocks.KubectlClient)
-		clientMock = client.(*mocks.KubectlClient)
+		client = new(mocks.Client)
+		clientMock = client.(*mocks.Client)
 		systemInstallCommand = commands.SystemInstall(map[string]*core.Manifest{}, &client)
 	})
 

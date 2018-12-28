@@ -23,17 +23,22 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
+const (
+	Group = "projectriff.io"
+	Version = "v1alpha1"
+)
+
 func CreateCRD(clientset extClientset.Interface) error {
 	_, err := clientset.ApiextensionsV1beta1().CustomResourceDefinitions().Create(
 		&extApi.CustomResourceDefinition{
 			ObjectMeta: meta_v1.ObjectMeta{
-				Name: "riffsystem.projectriff.io",
+				Name: "riff-system.projectriff.io",
 			},
 			Spec: extApi.CustomResourceDefinitionSpec{
-				Group: "projectriff.io",
+				Group: Group,
 				Versions: []extApi.CustomResourceDefinitionVersion {
 					{
-						Name:    "v1alpha1",
+						Name:    Version,
 						Served:  true,
 						Storage: true,
 					},
@@ -41,6 +46,7 @@ func CreateCRD(clientset extClientset.Interface) error {
 				Scope: extApi.ClusterScoped,
 				Names: extApi.CustomResourceDefinitionNames{
 					Singular: "riff-system",
+					Plural: "riff-system",
 					Kind: "RiffSystem",
 					ShortNames: []string{
 						"riff",

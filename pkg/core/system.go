@@ -50,12 +50,139 @@ var (
 	allNameSpaces     = append(knativeNamespaces, istioNamespace)
 )
 
-func (kc *kubectlClient) SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error) {
-	err := crd.CreateCRD(kc.kubeApiExt)
+func (c *client) SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error) {
+	//time.Sleep(20 * time.Second)
+	err := crd.CreateCRD(c.apiExtension)
 	if err != nil {
 		return false, errors.New(fmt.Sprintf("Could not create riff CRD: %s ", err))
 	}
+	fmt.Println("CRD created")
+	riffManifest, err := c.createCRDObject()
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("Could not install riff: %s ", err))
+	}
+	fmt.Println("CRD object created")
+	err = c.installAndCheckResources(riffManifest, options)
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("Could not install riff: %s ", err))
+	}
+	fmt.Println("resources created")
 	return true, err
+}
+
+func (c *client) createCRDObject() (*crd.RiffManifest, error) {
+	rc, err := crd.NewRiffCRDClient(c.clientConfig)
+	if err != nil {
+		return nil, err
+	}
+	manifest := &crd.RiffManifest{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   "riff-install",
+			Labels: map[string]string{"riff-install": "true"},
+		},
+		Spec: crd.RiffSpec{
+			Resources: []crd.RiffResources{
+				{
+					Path: "https://storage.googleapis.com/knative-releases/serving/previous/v0.2.2/istio.yaml",
+					Name: "istio",
+					Checks: []crd.ResourceChecks{
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio": "citadel"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+					},
+				},
+			},
+		},
+	}
+	_, err = rc.Create(manifest)
+	return manifest, err
+}
+
+func (c *client) installAndCheckResources(manifest *crd.RiffManifest, options SystemInstallOptions) error {
+	for _,resource := range manifest.Spec.Resources {
+		err := c.installResource(resource, options)
+		if err != nil {
+			return err
+		}
+		err = c.checkResource(resource)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *client) installResource(res crd.RiffResources, options SystemInstallOptions) error {
+	if res.Path == "" {
+		return errors.New("cannot install anything other than a url yet")
+	}
+	fmt.Println("installing", res.Name)
+	yaml, err := resource.Load(res.Path, filepath.Dir(options.Manifest))
+	if err != nil {
+		return err
+	}
+	return c.kubeClient.CoreV1().RESTClient().Put().Body(yaml).Do().Error()
+}
+
+// TODO this only supports checking Pods for phases
+func (c *client) checkResource(resource crd.RiffResources) error {
+	fmt.Printf("waiting for %s to be ready .", resource.Name)
+	cnt := 1
+	for _, check := range resource.Checks {
+		for i := 0; i< 36; i++ {
+			if strings.EqualFold(check.Kind, "Pod") {
+				ready, err := c.isPodReady(check)
+				if err != nil {
+					return err
+				}
+				if ready {
+					break
+				}
+			} else {
+				return errors.New("only Kind:Pod supported for resource checks")
+			}
+			time.Sleep(1 * time.Second)
+			cnt++
+			if cnt % 10 == 0 {
+				fmt.Print(".")
+			}
+		}
+	}
+	fmt.Println("done")
+	return errors.New(fmt.Sprintf("The resource %s did not initialize", resource.Name))
+}
+
+func (c *client) isPodReady(check crd.ResourceChecks) (bool, error) {
+	pods := c.kubeClient.CoreV1().Pods(check.Namespace)
+	podList, err := pods.List(metav1.ListOptions{
+		LabelSelector: convertMapToString(check.Selector.MatchLabels),
+	})
+	if err != nil {
+		return false, err
+	}
+	for _, pod := range podList.Items {
+		if strings.EqualFold(string(pod.Status.Phase), check.Pattern) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func convertMapToString(m map[string]string) string {
+	var s string
+	for k,v := range m {
+		s += k + "=" + v + ","
+	}
+	if last := len(s) - 1; last >= 0 && s[last] == ',' {
+		s = s[:last]
+	}
+	return s
 }
 
 func (kc *kubectlClient) oldSystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error) {
