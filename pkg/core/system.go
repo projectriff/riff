@@ -80,6 +80,10 @@ func (c *client) createCRDObject() (*crd.RiffManifest, error) {
 			Name:   "riff-install",
 			Labels: map[string]string{"riff-install": "true"},
 		},
+		TypeMeta: metav1.TypeMeta{
+			Kind: crd.Kind,
+			APIVersion: "projectriff.io/" + crd.Version,
+		},
 		Spec: crd.RiffSpec{
 			Resources: []crd.RiffResources{
 				{

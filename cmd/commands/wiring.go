@@ -18,10 +18,9 @@ package commands
 
 import (
 	"fmt"
+	"github.com/buildpack/pack"
 	"os/user"
 	"strings"
-
-	"github.com/buildpack/pack"
 
 	"github.com/projectriff/riff/pkg/env"
 
@@ -29,8 +28,8 @@ import (
 	serving "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
-	"k8s.io/client-go/kubernetes"
 	apiextensions "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 	"k8s.io/client-go/tools/clientcmd"

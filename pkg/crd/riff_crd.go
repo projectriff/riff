@@ -17,15 +17,16 @@
 package crd
 
 import (
-	extClientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	extApi "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	extClientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
 	Group = "projectriff.io"
 	Version = "v1alpha1"
+	Kind = "RiffSystem"
 )
 
 func CreateCRD(clientset extClientset.Interface) error {
@@ -33,6 +34,10 @@ func CreateCRD(clientset extClientset.Interface) error {
 		&extApi.CustomResourceDefinition{
 			ObjectMeta: meta_v1.ObjectMeta{
 				Name: "riff-system.projectriff.io",
+			},
+			TypeMeta: meta_v1.TypeMeta{
+				APIVersion: "apiextensions.k8s.io/v1beta1",
+				Kind: "CustomResourceDefinition",
 			},
 			Spec: extApi.CustomResourceDefinitionSpec{
 				Group: Group,
@@ -47,7 +52,7 @@ func CreateCRD(clientset extClientset.Interface) error {
 				Names: extApi.CustomResourceDefinitionNames{
 					Singular: "riff-system",
 					Plural: "riff-system",
-					Kind: "RiffSystem",
+					Kind: Kind,
 					ShortNames: []string{
 						"riff",
 					},
