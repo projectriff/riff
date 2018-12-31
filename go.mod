@@ -30,7 +30,7 @@ require (
 	github.com/knative/build v0.2.0
 	github.com/knative/eventing v0.2.1
 	github.com/knative/pkg v0.0.0-20181204010225-102237ce9b67
-	github.com/knative/serving v0.2.2
+	github.com/knative/serving v0.2.3
 	github.com/markbates/inflect v1.0.4 // indirect
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
 	github.com/mattn/go-colorable v0.0.9 // indirect
