@@ -30,6 +30,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"os"
+	"path/filepath"
 )
 
 var _ = Describe("Function", func() {
@@ -121,6 +123,33 @@ var _ = Describe("Function", func() {
 
 				It("should return a suitable error", func() {
 					Expect(err).To(MatchError("unable to build function locally: run image not specified"))
+				})
+			})
+
+			Context("when riff.toml is already present", func() {
+				BeforeEach(func() {
+					if err := ioutil.WriteFile(filepath.Join(workDir, "riff.toml"), []byte{}, os.FileMode(0400));
+						err != nil {
+						panic(err)
+					}
+				})
+
+				It("should fail", func() {
+					msg := "found riff.toml file in local path. Please delete this file and let the CLI create it from flags"
+					Expect(err).To(MatchError(msg))
+				})
+			})
+
+			Context("when riff.toml is not initially present", func() {
+				BeforeEach(func() {
+					createFunctionOptions.BuildpackImage = "some/buildpack"
+					createFunctionOptions.RunImage = "some/run"
+				})
+
+				It("should clean up created riff.toml upon function creation", func() {
+					Expect(err).To(Not(HaveOccurred()))
+					Expect(test_support.FileExists(filepath.Join(workDir, "riff.toml"))).To(BeFalse(),
+						"expected riff.toml to be deleted upon function creation completion")
 				})
 			})
 		})
