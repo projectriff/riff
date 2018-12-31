@@ -27,7 +27,9 @@ import (
 	"github.com/projectriff/riff/pkg/test_support"
 	"github.com/stretchr/testify/mock"
 	"io/ioutil"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 var _ = Describe("Function", func() {
@@ -69,17 +71,19 @@ var _ = Describe("Function", func() {
 			createdService        *v1alpha1.Service
 		)
 
-		BeforeEach(func() {
-			mockServiceInterface.On("Create", mock.Anything).Run(func(args mock.Arguments) {
-				createdService = args.Get(0).(*v1alpha1.Service)
-			}).Return(testService, nil)
-		})
-
 		JustBeforeEach(func() {
 			service, err = client.CreateFunction(mockBuilder, createFunctionOptions, ioutil.Discard)
 		})
 
 		Context("when building locally", func() {
+			BeforeEach(func() {
+				mockServiceInterface.On("Create", mock.Anything).Run(func(args mock.Arguments) {
+					createdService = args.Get(0).(*v1alpha1.Service)
+				}).Return(testService, nil)
+				mockServiceInterface.On("Get", mock.Anything, mock.Anything).
+					Return(nil, notFound())
+			})
+
 			BeforeEach(func() {
 				createFunctionOptions.LocalPath = workDir
 				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
@@ -118,6 +122,21 @@ var _ = Describe("Function", func() {
 				It("should return a suitable error", func() {
 					Expect(err).To(MatchError("unable to build function locally: run image not specified"))
 				})
+			})
+		})
+
+		Context("when a service with the same name already exists", func() {
+			BeforeEach(func() {
+				functionName := "notAvailable"
+				createFunctionOptions.Name = functionName
+				existingService := &v1alpha1.Service{}
+				existingService.Name = functionName
+				mockServiceInterface.On("Get", "notAvailable", mock.Anything).
+					Return(existingService, nil)
+			})
+
+			It("should fail early", func() {
+				Expect(err).To(MatchError(`service 'notAvailable' already exists in namespace 'default'`))
 			})
 		})
 	})
@@ -212,3 +231,7 @@ var _ = Describe("Function", func() {
 		})
 	})
 })
+
+func notFound() *errors.StatusError {
+	return errors.NewNotFound(schema.GroupResource{}, "")
+}
