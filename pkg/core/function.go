@@ -29,7 +29,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 
-	"github.com/boz/go-logutil"
+	logutil "github.com/boz/go-logutil"
 	"github.com/boz/kail"
 	"github.com/boz/kcache/types/pod"
 	build "github.com/knative/build/pkg/apis/build/v1alpha1"
@@ -105,6 +105,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			if err := c.writeRiffToml(options); err != nil {
 				return nil, err
 			}
+			defer func() { _ = c.deleteRiffToml(options) }()
 
 			err = buildLocally(buildpackBuilder, appDir, buildImage, runImage, repoName)
 			if err != nil {
@@ -158,12 +159,23 @@ func (c *client) writeRiffToml(options CreateFunctionOptions) error {
 		Artifact: options.Artifact,
 	}
 	path := filepath.Join(options.LocalPath, "riff.toml")
+	if _, err := os.Stat(path); err != nil && !os.IsNotExist(err) {
+		return err
+	} else if err == nil {
+		return fmt.Errorf("found riff.toml file in local path. Please delete this file and let the CLI create it from flags")
+	}
+
 	f, err := os.Create(path)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 	return toml.NewEncoder(f).Encode(t)
+}
+
+func (c *client) deleteRiffToml(options CreateFunctionOptions) error {
+	path := filepath.Join(options.LocalPath, "riff.toml")
+	return os.Remove(path)
 }
 
 func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.SourceSpec {
