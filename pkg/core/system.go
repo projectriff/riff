@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/projectriff/riff/pkg/crd"
+	"github.com/projectriff/riff/pkg/kubectl"
 	"os"
 	"path/filepath"
 	"strings"
@@ -136,7 +137,31 @@ func (c *client) installResource(res crd.RiffResources, options SystemInstallOpt
 	if err != nil {
 		return err
 	}
-	return c.kubeClient.CoreV1().RESTClient().Put().Body(yaml).Do().Error()
+	if options.NodePort {
+		yaml = bytes.Replace(yaml, []byte("type: LoadBalancer"), []byte("type: NodePort"), -1)
+	}
+	// TODO HACK: use the RESTClient to do this
+	kubectl := kubectl.RealKubeCtl()
+	istioLog, err := kubectl.ExecStdin([]string{"apply", "-f", "-"}, &yaml)
+	if err != nil {
+		fmt.Printf("%s\n", istioLog)
+		if strings.Contains(istioLog, "forbidden") {
+			fmt.Print(`It looks like you don't have cluster-admin permissions.
+
+To fix this you need to:
+ 1. Delete the current failed installation using:
+      ` + env.Cli.Name + ` system uninstall --istio --force
+ 2. Give the user account used for installation cluster-admin permissions, you can use the following command:
+      kubectl create clusterrolebinding cluster-admin-binding \
+        --clusterrole=cluster-admin \
+        --user=<install-user>
+ 3. Re-install ` + env.Cli.Name + `
+
+`)
+		}
+		return err
+	}
+	return nil
 }
 
 // TODO this only supports checking Pods for phases
