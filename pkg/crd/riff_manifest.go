@@ -164,6 +164,124 @@ func NewManifest() *RiffManifest {
 						},
 					},
 				},
+				{
+					Path: "https://storage.googleapis.com/knative-releases/build/latest/release.yaml",
+					Name: "build",
+					Checks: []ResourceChecks{
+						{
+							Kind: "Pod",
+							Namespace: "knative-build",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"app": "build-controller"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "knative-build",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"app": "build-webhook"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+					},
+				},
+				{
+					Path: "https://storage.googleapis.com/knative-releases/serving/latest/serving.yaml",
+					Name: "serving",
+					Checks: []ResourceChecks{
+						{
+							Kind: "Pod",
+							Namespace: "knative-serving",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"app": "activator"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "knative-serving",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"app": "autoscaler"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "knative-serving",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"app": "controller"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "knative-serving",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"app": "webhook"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+					},
+				},
+				{
+					Path: "https://storage.googleapis.com/knative-releases/eventing/latest/eventing.yaml",
+					Name: "eventing",
+					Checks: []ResourceChecks{
+						{
+							Kind: "Pod",
+							Namespace: "knative-eventing",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"app": "eventing-controller"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "knative-eventing",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"app": "webhook"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+					},
+				},
+				{
+					Path: "https://storage.googleapis.com/knative-releases/eventing/latest/in-memory-channel.yaml",
+					Name: "eventing-in-memory-channel",
+					Checks: []ResourceChecks{
+						{
+							Kind: "Pod",
+							Namespace: "knative-eventing",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"role": "dispatcher", "clusterChannelProvisioner":"in-memory-channel"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "knative-eventing",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"role": "controller", "clusterChannelProvisioner":"in-memory-channel"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+					},
+				},
+				{
+					Path: "https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate.yaml",
+					Name: "riff-build-template",
+				},
 			},
 		},
 	}
