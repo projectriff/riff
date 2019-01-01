@@ -28,11 +28,11 @@ import (
 )
 
 type ResourceChecks struct {
-	Kind       string
-	Namespace  string
-	Selector   metav1.LabelSelector
-	JsonPath   string
-	Pattern    string
+	Kind       string               `json:"kind,omitempty"`
+	Namespace  string               `json:"namespace,omitempty"`
+	Selector   metav1.LabelSelector `json:"selector,omitempty"`
+	JsonPath   string               `json:"jsonpath,omitempty"`
+	Pattern    string               `json:"pattern,omitempty"`
 }
 
 type RiffResources struct {
@@ -117,7 +117,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 
 func (client *riffCRDClient) Create(obj *RiffManifest) (*RiffManifest, error) {
 	result := &RiffManifest{}
-	err := client.restClient.Post().Body(obj).Do().Into(result)
+	err := client.restClient.Post().Resource("riff-system").Name("riff-install").
+		Body(obj).Do().Into(result)
 	return result, err
 }
 
@@ -130,5 +131,10 @@ func (client *riffCRDClient) Delete(obj *RiffManifest) (*RiffManifest, error) {
 }
 
 func (client *riffCRDClient) Get() (*RiffManifest, error) {
-	panic("not implemented")
+	result := &RiffManifest{}
+	err := client.restClient.Get().Resource("riff-system").Name("riff-install").Do().Into(result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

@@ -104,7 +104,12 @@ func (c *client) createCRDObject() (*crd.RiffManifest, error) {
 			},
 		},
 	}
-	_, err = rc.Create(manifest)
+	old, err := rc.Get()
+	if old == nil {
+		_, err = rc.Create(manifest)
+	} else {
+		fmt.Println("riff crd already installed")
+	}
 	return manifest, err
 }
 

@@ -21,6 +21,7 @@ import (
 	extClientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"reflect"
 )
 
 const (
@@ -52,10 +53,7 @@ func CreateCRD(clientset extClientset.Interface) error {
 				Names: extApi.CustomResourceDefinitionNames{
 					Singular: "riff-system",
 					Plural: "riff-system",
-					Kind: Kind,
-					ShortNames: []string{
-						"riff",
-					},
+					Kind: reflect.TypeOf(RiffManifest{}).Name(),
 				},
 			},
 		})
