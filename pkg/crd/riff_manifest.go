@@ -64,3 +64,108 @@ var schemeGroupVersion = schema.GroupVersion{
 	Group:    Group,
 	Version:  Version,
 }
+
+func NewManifest() *RiffManifest {
+	manifest := &RiffManifest{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   "riff-install",
+			Labels: map[string]string{"riff-install": "true"},
+		},
+		TypeMeta: metav1.TypeMeta{
+			Kind: Kind,
+			APIVersion: "projectriff.io/" + Version,
+		},
+		Spec: RiffSpec{
+			Resources: []RiffResources{
+				{
+					Path: "https://storage.googleapis.com/knative-releases/serving/previous/v0.2.2/istio.yaml",
+					Name: "istio",
+					Checks: []ResourceChecks{
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio": "citadel"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio": "egressgateway"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio": "galley"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio": "ingressgateway"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio": "pilot"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio-mixer-type": "policy"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio": "sidecar-injector"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio": "statsd-prom-bridge"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio-mixer-type": "telemetry"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+					},
+				},
+			},
+		},
+	}
+	return manifest
+}
