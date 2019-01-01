@@ -100,6 +100,78 @@ func (c *client) createCRDObject() (*crd.RiffManifest, error) {
 							JsonPath: ".status.phase",
 							Pattern:  "Running",
 						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio": "egressgateway"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio": "galley"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio": "ingressgateway"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio": "pilot"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio-mixer-type": "policy"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio": "sidecar-injector"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio": "statsd-prom-bridge"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
+						{
+							Kind: "Pod",
+							Namespace: "istio-system",
+							Selector: metav1.LabelSelector{
+								MatchLabels: map[string]string{"istio-mixer-type": "telemetry"},
+							},
+							JsonPath: ".status.phase",
+							Pattern:  "Running",
+						},
 					},
 				},
 			},
@@ -169,9 +241,11 @@ func (c *client) checkResource(resource crd.RiffResources) error {
 	fmt.Printf("waiting for %s to be ready .", resource.Name)
 	cnt := 1
 	for _, check := range resource.Checks {
-		for i := 0; i< 36; i++ {
+		var ready bool
+		var err error
+		for i := 0; i< 360; i++ {
 			if strings.EqualFold(check.Kind, "Pod") {
-				ready, err := c.isPodReady(check)
+				ready, err = c.isPodReady(check)
 				if err != nil {
 					return err
 				}
@@ -187,9 +261,12 @@ func (c *client) checkResource(resource crd.RiffResources) error {
 				fmt.Print(".")
 			}
 		}
+		if !ready {
+			return errors.New(fmt.Sprintf("The resource %s did not initialize", resource.Name))
+		}
 	}
 	fmt.Println("done")
-	return errors.New(fmt.Sprintf("The resource %s did not initialize", resource.Name))
+	return nil
 }
 
 func (c *client) isPodReady(check crd.ResourceChecks) (bool, error) {
