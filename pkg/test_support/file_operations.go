@@ -17,9 +17,13 @@
 package test_support
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
+
+	. "github.com/onsi/gomega"
 )
 
 func CreateTempDir() string {
@@ -97,4 +101,13 @@ func CleanupDirs(t ErrorReporter, paths ...string) {
 			t.Errorf("Could not delete %s", path)
 		}
 	}
+}
+
+func FileURL(absolutePath string) string {
+	Expect(filepath.IsAbs(absolutePath)).To(BeTrue(), fmt.Sprintf("FileURL called with relative path: %s", absolutePath))
+	extra := ""
+	if runtime.GOOS == "windows" {
+		extra = "/"
+	}
+	return fmt.Sprintf("file://%s%s", extra, absolutePath)
 }

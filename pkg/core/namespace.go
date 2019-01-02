@@ -19,10 +19,9 @@ package core
 import (
 	"bufio"
 	"fmt"
+	"github.com/projectriff/riff/pkg/fileutils"
 	"io/ioutil"
-	"net/url"
 	"os"
-	"path/filepath"
 	"syscall"
 
 	"golang.org/x/crypto/ssh/terminal"
@@ -150,19 +149,19 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 		}
 	}
 
-	baseDir := filepath.Dir(options.Manifest)
-
 	for _, release := range manifest.Namespace {
-		u, err := url.Parse(release)
+		res, err := manifest.ResourceAbsolutePath(release)
 		if err != nil {
 			return err
 		}
 
-		var resource string
-		if u.Scheme == "" {
-			resource = filepath.Join(baseDir, u.Path)
-		} else {
-			resource = u.String()
+		// Replace any file URL with the corresponding absolute file path.
+		absolute, resource, err := fileutils.IsAbsFile(res)
+		if err != nil {
+			return err
+		}
+		if !absolute {
+			panic(fmt.Sprintf("manifest.ResourceAbsolutePath returned a non-absolute path: %s", res))
 		}
 
 		fmt.Printf("Applying %s in namespace %q\n", release, ns)
