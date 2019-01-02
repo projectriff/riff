@@ -44,8 +44,16 @@ riff namespace init $NAMESPACE $NAMESPACE_INIT_FLAGS
 echo "Run functions"
 source $fats_dir/functions/helpers.sh
 
-# uppercase
 for test in java java-boot node npm command; do
+  path=${fats_dir}/functions/uppercase/${test}
+  function_name=fats-uppercase-${test}
+  image=${IMAGE_REPOSITORY_PREFIX}/fats-uppercase-${test}:${CLUSTER_NAME}
+  input_data=riff
+  expected_data=RIFF
+
+  run_function $path $function_name $image $input_data $expected_data
+done
+for test in java-local; do
   path=${fats_dir}/functions/uppercase/${test}
   function_name=fats-uppercase-${test}
   image=${IMAGE_REPOSITORY_PREFIX}/fats-uppercase-${test}:${CLUSTER_NAME}
