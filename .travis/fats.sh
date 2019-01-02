@@ -72,8 +72,7 @@ for test in java-local; do
   input_data=riff
   expected_data=RIFF
 
-  # TODO reenable local builds, once they are working again
-  # run_function $path $function_name $image $input_data $expected_data
+  run_function $path $function_name $image $input_data $expected_data
 done
 
 source `dirname "${BASH_SOURCE[0]}"`/fats-channels.sh
