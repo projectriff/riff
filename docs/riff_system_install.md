@@ -31,7 +31,7 @@ riff system install [flags]
 ```
       --force             force the install of components without getting any prompts
   -h, --help              help for install
-  -m, --manifest string   manifest of kubernetes configuration files to be applied; can be a named manifest (stable or latest) or a path of a manifest file (default "stable")
+  -m, --manifest string   manifest of kubernetes configuration files to be applied; can be a named manifest (latest, stable) or a path of a manifest file (default "stable")
       --node-port         whether to use NodePort instead of LoadBalancer for ingress gateways
 ```
 

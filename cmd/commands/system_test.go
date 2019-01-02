@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The original author or authors
+ * Copyright 2018-2019 The original author or authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,17 @@ package commands_test
 
 import (
 	"errors"
+	"strings"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/cmd/commands"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/core/mocks"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
-var _ = Describe("The riff subscription system command", func() {
+var _ = Describe("The riff system command", func() {
 
 	var (
 		systemCommand *cobra.Command
@@ -92,10 +93,11 @@ var _ = Describe("The riff system install subcommand", func() {
 			clientMock.On("SystemInstall",
 				map[string]*core.Manifest{},
 				core.SystemInstallOptions{
-					Manifest: "stable",
+					Manifest: "some/path.yaml",
 				}).
 				Return(completed, nil)
 
+			systemInstallCommand.SetArgs([]string{"-m", "some/path.yaml"})
 			err := systemInstallCommand.Execute()
 
 			Expect(err).NotTo(HaveOccurred())
@@ -109,10 +111,11 @@ var _ = Describe("The riff system install subcommand", func() {
 			clientMock.On("SystemInstall",
 				map[string]*core.Manifest{},
 				core.SystemInstallOptions{
-					Manifest: "stable",
+					Manifest: "some/path.yaml",
 				}).
 				Return(completed, nil)
 
+			systemInstallCommand.SetArgs([]string{"-m", "some/path.yaml"})
 			err := systemInstallCommand.Execute()
 
 			Expect(err).NotTo(HaveOccurred())
@@ -124,10 +127,11 @@ var _ = Describe("The riff system install subcommand", func() {
 			clientMock.On("SystemInstall",
 				map[string]*core.Manifest{},
 				core.SystemInstallOptions{
-					Manifest: "stable",
+					Manifest: "some/path.yaml",
 				}).
 				Return(false, expectedError)
 
+			systemInstallCommand.SetArgs([]string{"-m", "some/path.yaml"})
 			err := systemInstallCommand.Execute()
 
 			Expect(err).To(MatchError(expectedError))
