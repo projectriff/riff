@@ -17,6 +17,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"path/filepath"
@@ -34,6 +35,7 @@ type Manifest struct {
 	Istio           []string `json:"istio"`
 	Knative         []string `json:"knative"`
 	Namespace       []string `json:"namespace"`
+	manifestDir     string
 }
 
 func ResolveManifest(manifests map[string]*Manifest, path string) (*Manifest, error) {
@@ -69,6 +71,11 @@ func NewManifest(path string) (*Manifest, error) {
 		return nil, err
 	}
 
+	m.manifestDir, err = fileutils.Dir(path)
+	if err != nil {
+		return nil, err
+	}
+
 	return &m, nil
 }
 
@@ -84,6 +91,29 @@ func (m *Manifest) VisitResources(f func(resource string) error) error {
 	return nil
 }
 
+// ResourceAbsolutePath takes a path to a resource and returns an equivalent absolute path.
+// If the input path is a http(s) URL or is an absolute file path, it is returned without modification.
+// If the input path is a file URL, the corresponding absolute file path is returned.
+// If the input path is a relative file path, it is interpreted to be relative to the directory from which the
+// manifest was read (and if the manifest was not read from a directory, an error is returned) and the corresponding
+// absolute file path is returned.
+func (m *Manifest) ResourceAbsolutePath(path string) (string, error) {
+	absolute, canonicalPath, err := fileutils.IsAbsFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	if absolute {
+		return canonicalPath, nil
+	}
+
+	if m.manifestDir == "" {
+		return "", errors.New("relative path undefined since manifest was not read from a directory")
+	}
+
+	return fileutils.AbsFile(path, m.manifestDir)
+}
+
 func checkCompleteness(m Manifest) error {
 	var omission string
 	if m.Istio == nil {
@@ -95,7 +125,7 @@ func checkCompleteness(m Manifest) error {
 	} else {
 		return nil
 	}
-	return fmt.Errorf("Manifest is incomplete: %s array missing: %#v", omission, m)
+	return fmt.Errorf("manifest is incomplete: %s array missing: %#v", omission, m)
 }
 
 func checkResource(resource string) error {
