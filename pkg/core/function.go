@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The original author or authors
+ * Copyright 2018-2019 The original author or authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,10 @@ import (
 	"strings"
 	"time"
 
+	logutil "github.com/boz/go-logutil"
+
 	"github.com/BurntSushi/toml"
 
-	"github.com/boz/go-logutil"
 	"github.com/boz/kail"
 	"github.com/boz/kcache/types/pod"
 	build "github.com/knative/build/pkg/apis/build/v1alpha1"

@@ -17,6 +17,10 @@
 package commands
 
 import (
+	"fmt"
+	"sort"
+	"strings"
+
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
@@ -39,6 +43,12 @@ func System() *cobra.Command {
 
 func SystemInstall(manifests map[string]*core.Manifest, kc *core.KubectlClient) *cobra.Command {
 	options := core.SystemInstallOptions{}
+
+	var namedManifests []string
+	for k, _ := range manifests {
+		namedManifests = append(namedManifests, k)
+	}
+	sort.Strings(namedManifests)
 
 	command := &cobra.Command{
 		Use:   "install",
@@ -77,7 +87,13 @@ func SystemInstall(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 		},
 	}
 
-	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", "manifest of kubernetes configuration files to be applied; can be a named manifest (stable or latest) or a path of a manifest file")
+	if len(namedManifests) > 0 {
+		desc := fmt.Sprintf("manifest of kubernetes configuration files to be applied; can be a named manifest (%s) or a path of a manifest file", strings.Join(namedManifests, ", "))
+		command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", desc)
+	} else {
+		command.Flags().StringVarP(&options.Manifest, "manifest", "m", "", "path to a manifest of kubernetes configuration files to be applied")
+	}
+
 	command.Flags().BoolVarP(&options.NodePort, "node-port", "", false, "whether to use NodePort instead of LoadBalancer for ingress gateways")
 	command.Flags().BoolVarP(&options.Force, "force", "", false, "force the install of components without getting any prompts")
 
