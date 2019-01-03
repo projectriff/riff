@@ -18,6 +18,8 @@ package commands
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/env"
@@ -38,6 +40,12 @@ const (
 
 func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) *cobra.Command {
 	options := core.NamespaceInitOptions{}
+
+	var namedManifests []string
+	for k, _ := range manifests {
+		namedManifests = append(namedManifests, k)
+	}
+	sort.Strings(namedManifests)
 
 	command := &cobra.Command{
 		Use:     "init",
@@ -69,7 +77,12 @@ func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 
 	LabelArgs(command, "NAME")
 
-	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", "manifest of YAML files to be applied; can be a named manifest (stable or latest) or a path or URL of a manifest file")
+	if len(namedManifests) > 0 {
+		desc := fmt.Sprintf("manifest of kubernetes configuration files to be applied; can be a named manifest (%s) or a path of a manifest file", strings.Join(namedManifests, ", "))
+		command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", desc)
+	} else {
+		command.Flags().StringVarP(&options.Manifest, "manifest", "m", "", "path to a manifest of kubernetes configuration files to be applied")
+	}
 
 	command.Flags().BoolVarP(&options.NoSecret, "no-secret", "", false, "no secret required for the image registry")
 	command.Flags().StringVarP(&options.SecretName, "secret", "s", "push-credentials", "the name of a `secret` containing credentials for the image registry")
