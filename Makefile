@@ -27,6 +27,7 @@ check-jq:
 gen-mocks: check-mockery check-jq
 	GO111MODULE=on mockery -output pkg/core/mocks/mockbuilder        -outpkg mockbuilder  -dir pkg/core                                                                                           -name Builder
 	GO111MODULE=on mockery -output pkg/core/mocks                    -outpkg mocks        -dir pkg/core                                                                                           -name Client
+	GO111MODULE=on mockery -output pkg/crd/mocks                     -outpkg mocks        -dir pkg/crd                                                                                            -name Client
 	GO111MODULE=on mockery -output pkg/core/mocks                    -outpkg mocks        -dir pkg/core                                                                                           -name KubectlClient
 	GO111MODULE=on mockery -output pkg/core/vendor_mocks/mockserving -outpkg mockserving  -dir $(call source_of,github.com/knative/serving)/pkg/client/clientset/versioned                        -name Interface
 	GO111MODULE=on mockery -output pkg/core/vendor_mocks/mockserving -outpkg mockserving  -dir $(call source_of,github.com/knative/serving)/pkg/client/clientset/versioned/typed/serving/v1alpha1 -name ServingV1alpha1Interface

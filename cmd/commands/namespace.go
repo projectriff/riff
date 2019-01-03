@@ -36,7 +36,7 @@ const (
 	namespaceInitNumberOfArgs
 )
 
-func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) *cobra.Command {
+func NamespaceInit(manifests map[string]*core.Manifest, c *core.Client) *cobra.Command {
 	options := core.NamespaceInitOptions{}
 
 	command := &cobra.Command{
@@ -57,7 +57,7 @@ func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			nsName := args[channelCreateNameIndex]
 			options.NamespaceName = nsName
-			err := (*kc).NamespaceInit(manifests, options)
+			err := (*c).NamespaceInit(manifests, options)
 			if err != nil {
 				return err
 			}

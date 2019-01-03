@@ -19,6 +19,7 @@ package commands
 import (
 	"fmt"
 	"github.com/buildpack/pack"
+	"github.com/projectriff/riff/pkg/crd"
 	"os/user"
 	"strings"
 
@@ -137,7 +138,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	namespace := Namespace()
 	installKubeConfigSupport(namespace, &client, &kc)
 	namespace.AddCommand(
-		NamespaceInit(manifests, &kc),
+		NamespaceInit(manifests, &client),
 	)
 
 	system := System()
@@ -202,7 +203,11 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 		if err != nil {
 			return err
 		}
-		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, extClientSet)
+		crdClient, err := crd.NewRiffCRDClient(clientConfig)
+		if err != nil {
+			return err
+		}
+		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, extClientSet, crdClient)
 		if err != nil {
 			return err
 		}

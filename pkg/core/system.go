@@ -72,14 +72,11 @@ func (c *client) SystemInstall(manifests map[string]*Manifest, options SystemIns
 }
 
 func (c *client) createCRDObject() (*crd.RiffManifest, error) {
-	rc, err := crd.NewRiffCRDClient(c.clientConfig)
-	if err != nil {
-		return nil, err
-	}
 	manifest := crd.NewManifest()
-	old, err := rc.Get()
+
+	old, err := c.crdClient.Get()
 	if old == nil {
-		_, err = rc.Create(manifest)
+		_, err = c.crdClient.Create(manifest)
 	} else {
 		fmt.Println("riff crd already installed")
 	}

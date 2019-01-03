@@ -18,11 +18,14 @@ package core
 
 import (
 	"bufio"
+	e "errors"
 	"fmt"
+	"github.com/projectriff/riff/pkg/kubectl"
 	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"syscall"
 
 	"golang.org/x/crypto/ssh/terminal"
@@ -75,12 +78,7 @@ func (c *client) explicitOrConfigNamespace(explicitNamespace string) string {
 	return namespace
 }
 
-func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options NamespaceInitOptions) error {
-	manifest, err := ResolveManifest(manifests, options.Manifest)
-	if err != nil {
-		return err
-	}
-
+func (c *client) NamespaceInit(manifests map[string]*Manifest, options NamespaceInitOptions) error {
 	ns := options.NamespaceName
 
 	fmt.Printf("Initializing namespace %q\n\n", ns)
@@ -150,37 +148,44 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 		}
 	}
 
-	baseDir := filepath.Dir(options.Manifest)
+	mf, err := c.crdClient.Get()
+	if err != nil {
+		return err
+	}
+	for _, res := range mf.Spec.Resources {
+		if strings.EqualFold(res.Name, "riff-build-template") {
+			path := res.Path
+			u, err := url.Parse(path)
+			if err != nil {
+				return err
+			}
 
-	for _, release := range manifest.Namespace {
-		u, err := url.Parse(release)
-		if err != nil {
-			return err
-		}
+			var resource string
+			if u.Scheme == "" {
+				resource = filepath.Join(filepath.Base(""), u.Path)
+			} else {
+				resource = u.String()
+			}
 
-		var resource string
-		if u.Scheme == "" {
-			resource = filepath.Join(baseDir, u.Path)
-		} else {
-			resource = u.String()
-		}
-
-		fmt.Printf("Applying %s in namespace %q\n", release, ns)
-		log, err := c.kubeCtl.Exec([]string{"apply", "-n", ns, "-f", resource})
-		fmt.Printf("%s\n", log)
-		if err != nil {
-			return err
+			fmt.Printf("Applying %s in namespace %q\n", path, ns)
+			kubectl := kubectl.RealKubeCtl()
+			log, err := kubectl.Exec([]string{"apply", "-n", ns, "-f", resource})
+			fmt.Printf("%s\n", log)
+			if err != nil {
+				return e.New(log)
+			}
+			break
 		}
 	}
 	return nil
 }
 
-func (c *kubectlClient) checkSecretExists(options NamespaceInitOptions) error {
+func (c *client) checkSecretExists(options NamespaceInitOptions) error {
 	_, err := c.kubeClient.CoreV1().Secrets(options.NamespaceName).Get(options.SecretName, v1.GetOptions{})
 	return err
 }
 
-func (c *kubectlClient) createDockerHubSecret(options NamespaceInitOptions) error {
+func (c *client) createDockerHubSecret(options NamespaceInitOptions) error {
 	c.kubeClient.CoreV1().Secrets(options.NamespaceName).Delete(options.SecretName, &v1.DeleteOptions{})
 
 	password, err := readPassword(fmt.Sprintf("Enter dockerhub password for user %q", options.DockerHubUsername))
@@ -203,7 +208,7 @@ func (c *kubectlClient) createDockerHubSecret(options NamespaceInitOptions) erro
 	return err
 }
 
-func (c *kubectlClient) createGcrSecret(options NamespaceInitOptions) error {
+func (c *client) createGcrSecret(options NamespaceInitOptions) error {
 	c.kubeClient.CoreV1().Secrets(options.NamespaceName).Delete(options.SecretName, &v1.DeleteOptions{})
 
 	token, err := ioutil.ReadFile(options.GcrTokenPath)

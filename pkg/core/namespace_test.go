@@ -17,6 +17,8 @@
 package core
 
 import (
+	"github.com/projectriff/riff/pkg/crd"
+	crdmocks "github.com/projectriff/riff/pkg/crd/mocks"
 	"os"
 
 	. "github.com/onsi/ginkgo"
@@ -34,7 +36,8 @@ import (
 var _ = Describe("The NamespaceInit function", func() {
 
 	var (
-		kubectlClient       KubectlClient
+		client              Client
+		crdClient           *crdmocks.Client
 		kubeClient          *vendor_mocks.Interface
 		extClient           *ext.Interface
 		mockCore            *vendor_mocks.CoreV1Interface
@@ -51,13 +54,14 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockNamespaces = new(vendor_mocks.NamespaceInterface)
 		mockServiceAccounts = new(vendor_mocks.ServiceAccountInterface)
 		mockSecrets = new(vendor_mocks.SecretInterface)
+		crdClient = new(crdmocks.Client)
 
 		kubeClient.On("CoreV1").Return(mockCore)
 		mockCore.On("Namespaces").Return(mockNamespaces)
 		mockCore.On("ServiceAccounts", mock.Anything).Return(mockServiceAccounts)
 		mockCore.On("Secrets", mock.Anything).Return(mockSecrets)
 
-		kubectlClient = NewKubectlClient(kubeClient, extClient)
+		client = NewClient(nil, kubeClient, nil, nil, extClient, crdClient)
 	})
 
 	AfterEach(func() {
@@ -67,9 +71,24 @@ var _ = Describe("The NamespaceInit function", func() {
 	})
 
 	It("should fail on wrong manifest", func() {
-		options := NamespaceInitOptions{Manifest: "wrong"}
-		err := kubectlClient.NamespaceInit(manifests, options)
-		Expect(err).To(MatchError(ContainSubstring("wrong: "))) // error message is quite different on Windows and macOS
+		options := NamespaceInitOptions{Manifest: "wrong", NoSecret: true}
+
+		namespace := &v1.Namespace{ObjectMeta: meta_v1.ObjectMeta{Name: "foo"}}
+		mockNamespaces.On("Get", "", meta_v1.GetOptions{}).Return(namespace, nil)
+		mockServiceAccounts.On("Get", mock.Anything, meta_v1.GetOptions{}).Return(nil, nil)
+		mockManifest := &crd.RiffManifest{
+			Spec: crd.RiffSpec{
+				Resources: []crd.RiffResources{
+					{
+						Path: "wrong",
+						Name: "riff-build-template",
+					},
+				},
+			},
+		}
+		crdClient.On("Get").Return(mockManifest, nil)
+		err := client.NamespaceInit(manifests, options)
+		Expect(err).To(MatchError(ContainSubstring("does not exist"))) // error message is quite different on Windows and macOS
 	})
 
 	It("should create namespace and sa if needed", func() {
@@ -90,7 +109,10 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
 		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(serviceAccount, nil)
 
-		err := kubectlClient.NamespaceInit(manifests, options)
+		mockManifest := &crd.RiffManifest{}
+		crdClient.On("Get").Return(mockManifest, nil)
+
+		err := client.NamespaceInit(manifests, options)
 		Expect(err).To(Not(HaveOccurred()))
 	})
 
@@ -124,7 +146,10 @@ var _ = Describe("The NamespaceInit function", func() {
 			})))
 		}).Return(serviceAccount, nil)
 
-		err := kubectlClient.NamespaceInit(manifests, options)
+		mockManifest := &crd.RiffManifest{}
+		crdClient.On("Get").Return(mockManifest, nil)
+
+		err := client.NamespaceInit(manifests, options)
 		Expect(err).To(Not(HaveOccurred()))
 	})
 
@@ -172,7 +197,10 @@ var _ = Describe("The NamespaceInit function", func() {
 				})))
 			}).Return(serviceAccount, nil)
 
-			err := kubectlClient.NamespaceInit(manifests, options)
+			mockManifest := &crd.RiffManifest{}
+			crdClient.On("Get").Return(mockManifest, nil)
+
+			err := client.NamespaceInit(manifests, options)
 			Expect(err).To(Not(HaveOccurred()))
 		})
 	})
@@ -191,7 +219,10 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
 		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(serviceAccount, nil)
 
-		err := kubectlClient.NamespaceInit(manifests, options)
+		mockManifest := &crd.RiffManifest{}
+		crdClient.On("Get").Return(mockManifest, nil)
+
+		err := client.NamespaceInit(manifests, options)
 		Expect(err).To(Not(HaveOccurred()))
 	})
 
