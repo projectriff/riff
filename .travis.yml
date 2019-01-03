@@ -16,10 +16,10 @@ matrix:
     install:
     - "go get -u github.com/vektra/mockery/.../"
     script: make build test verify-docs
-  - &test-windows
-    stage: test
+  - stage: test
     os: windows # Git Bash
     install:
+    - "source .travis/windows-set-failures.sh"
     - "choco install make"
     - "go get -u github.com/vektra/mockery/.../"
     script: make build test verify-docs
@@ -45,8 +45,6 @@ matrix:
     - REGISTRY=gcr
   - stage: publish
     script: .travis/publish.sh
-  allow_failures:
-  - *test-windows
 stages:
 - test
 - name: fats-lite
