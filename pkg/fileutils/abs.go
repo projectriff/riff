@@ -17,6 +17,7 @@
 package fileutils
 
 import (
+	"fmt"
 	"net/url"
 	"os"
 	"path"
@@ -44,9 +45,12 @@ func AbsFile(file string, base string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if b.IsAbs() && (b.Scheme == "http" || b.Scheme == "https" || b.Scheme == "file") {
+	if b.Scheme == "http" || b.Scheme == "https" || b.Scheme == "file" {
 		b.Path = path.Join(b.Path, filepath.ToSlash(file))
 		return b.String(), nil
+	}
+	if b.IsAbs() {
+		return "", fmt.Errorf("unsupported URL scheme %s in %s", b.Scheme, base)
 	}
 
 	wd, err := os.Getwd()
@@ -69,12 +73,16 @@ func IsAbsFile(file string) (bool, string, error) {
 		return false, "", err
 	}
 
-	if u.IsAbs() && (u.Scheme == "http" || u.Scheme == "https") {
+	if u.Scheme == "http" || u.Scheme == "https" {
 		return true, file, nil
 	}
 
-	if u.IsAbs() && u.Scheme == "file" {
+	if u.Scheme == "file" {
 		return true, fileURLPath(u), nil
+	}
+
+	if u.IsAbs() {
+		return false, "", fmt.Errorf("unsupported URL scheme %s in %s", u.Scheme, file)
 	}
 
 	return false, "", nil

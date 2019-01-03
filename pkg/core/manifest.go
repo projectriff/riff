@@ -93,7 +93,7 @@ func (m *Manifest) VisitResources(f func(resource string) error) error {
 
 // ResourceAbsolutePath takes a path to a resource and returns an equivalent absolute path.
 // If the input path is a http(s) URL or is an absolute file path, it is returned without modification.
-// If the input path is a file URL, the corresponding absolute file path is returned.
+// If the input path is a file URL, the corresponding (absolute) file path is returned.
 // If the input path is a relative file path, it is interpreted to be relative to the directory from which the
 // manifest was read (and if the manifest was not read from a directory, an error is returned) and the corresponding
 // absolute file path is returned.

@@ -70,6 +70,16 @@ var _ = Describe("IsAbsFile", func() {
 		checkAbsolute()
 	})
 
+	Context("when the input path is a URL with an unsupported scheme", func() {
+		BeforeEach(func() {
+			path = "ftp://projectriff.io"
+		})
+
+		It("should return a suitable error", func() {
+			Expect(err).To(MatchError("unsupported URL scheme ftp in ftp://projectriff.io"))
+		})
+	})
+
 	Context("when the input path is an absolute file path", func() {
 		BeforeEach(func() {
 			var err error
@@ -163,6 +173,16 @@ var _ = Describe("AbsFile", func() {
 		checkAbsolute()
 	})
 
+	Context("when the input path is a URL with an unsupported scheme", func() {
+		BeforeEach(func() {
+			path = "ftp://projectriff.io"
+		})
+
+		It("should return a suitable error", func() {
+			Expect(err).To(MatchError("unsupported URL scheme ftp in ftp://projectriff.io"))
+		})
+	})
+
 	Context("when the input path is an absolute file path", func() {
 		BeforeEach(func() {
 			var err error
@@ -200,5 +220,4 @@ var _ = Describe("AbsFile", func() {
 			Expect(absFile).To(Equal(filepath.Join(baseDir, "a", "b")))
 		})
 	})
-
 })

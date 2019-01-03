@@ -41,7 +41,7 @@ func readAbsFile(file string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if u.IsAbs() && (u.Scheme == "http" || u.Scheme == "https") {
+	if u.Scheme == "http" || u.Scheme == "https" {
 		return downloadFile(u.String())
 	}
 	if u.Scheme == "file" {
@@ -59,7 +59,7 @@ func fileURLPath(u *url.URL) string {
 	file := u.Path
 
 	// Sanitise path on Windows. See https://github.com/golang/go/issues/6027
-	if runtime.GOOS == "windows" && file[0] == '/' {
+	if runtime.GOOS == "windows" && len(file) > 0 && file[0] == '/' {
 		file = file[1:]
 	}
 
