@@ -32,7 +32,7 @@ import (
 
 type Client interface {
 	SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error)
-	NamespaceInit(manifests map[string]*Manifest, options NamespaceInitOptions) error
+	NamespaceInit(options NamespaceInitOptions) error
 
 	CreateFunction(builder Builder, options CreateFunctionOptions, log io.Writer) (*serving.Service, error)
 	UpdateFunction(builder Builder, options UpdateFunctionOptions, log io.Writer) error

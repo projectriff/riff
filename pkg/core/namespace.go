@@ -48,7 +48,6 @@ const (
 
 type NamespaceInitOptions struct {
 	NamespaceName string
-	Manifest      string
 
 	NoSecret          bool
 	SecretName        string
@@ -78,7 +77,7 @@ func (c *client) explicitOrConfigNamespace(explicitNamespace string) string {
 	return namespace
 }
 
-func (c *client) NamespaceInit(manifests map[string]*Manifest, options NamespaceInitOptions) error {
+func (c *client) NamespaceInit(options NamespaceInitOptions) error {
 	ns := options.NamespaceName
 
 	fmt.Printf("Initializing namespace %q\n\n", ns)

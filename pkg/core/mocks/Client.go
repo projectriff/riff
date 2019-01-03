@@ -217,13 +217,13 @@ func (_m *Client) ListSubscriptions(options core.ListSubscriptionsOptions) (*v1a
 	return r0, r1
 }
 
-// NamespaceInit provides a mock function with given fields: manifests, options
-func (_m *Client) NamespaceInit(manifests map[string]*core.Manifest, options core.NamespaceInitOptions) error {
-	ret := _m.Called(manifests, options)
+// NamespaceInit provides a mock function with given fields: options
+func (_m *Client) NamespaceInit(options core.NamespaceInitOptions) error {
+	ret := _m.Called(options)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(map[string]*core.Manifest, core.NamespaceInitOptions) error); ok {
-		r0 = rf(manifests, options)
+	if rf, ok := ret.Get(0).(func(core.NamespaceInitOptions) error); ok {
+		r0 = rf(options)
 	} else {
 		r0 = ret.Error(0)
 	}

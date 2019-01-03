@@ -36,7 +36,7 @@ const (
 	namespaceInitNumberOfArgs
 )
 
-func NamespaceInit(manifests map[string]*core.Manifest, c *core.Client) *cobra.Command {
+func NamespaceInit(c *core.Client) *cobra.Command {
 	options := core.NamespaceInitOptions{}
 
 	command := &cobra.Command{
@@ -57,7 +57,7 @@ func NamespaceInit(manifests map[string]*core.Manifest, c *core.Client) *cobra.C
 		RunE: func(cmd *cobra.Command, args []string) error {
 			nsName := args[channelCreateNameIndex]
 			options.NamespaceName = nsName
-			err := (*c).NamespaceInit(manifests, options)
+			err := (*c).NamespaceInit(options)
 			if err != nil {
 				return err
 			}
@@ -68,8 +68,6 @@ func NamespaceInit(manifests map[string]*core.Manifest, c *core.Client) *cobra.C
 	}
 
 	LabelArgs(command, "NAME")
-
-	command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", "manifest of YAML files to be applied; can be a named manifest (stable or latest) or a path or URL of a manifest file")
 
 	command.Flags().BoolVarP(&options.NoSecret, "no-secret", "", false, "no secret required for the image registry")
 	command.Flags().StringVarP(&options.SecretName, "secret", "s", "push-credentials", "the name of a `secret` containing credentials for the image registry")

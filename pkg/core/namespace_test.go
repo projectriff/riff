@@ -44,7 +44,6 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockNamespaces      *vendor_mocks.NamespaceInterface
 		mockServiceAccounts *vendor_mocks.ServiceAccountInterface
 		mockSecrets         *vendor_mocks.SecretInterface
-		manifests           map[string]*Manifest
 	)
 
 	JustBeforeEach(func() {
@@ -71,7 +70,7 @@ var _ = Describe("The NamespaceInit function", func() {
 	})
 
 	It("should fail on wrong manifest", func() {
-		options := NamespaceInitOptions{Manifest: "wrong", NoSecret: true}
+		options := NamespaceInitOptions{NoSecret: true}
 
 		namespace := &v1.Namespace{ObjectMeta: meta_v1.ObjectMeta{Name: "foo"}}
 		mockNamespaces.On("Get", "", meta_v1.GetOptions{}).Return(namespace, nil)
@@ -87,14 +86,13 @@ var _ = Describe("The NamespaceInit function", func() {
 			},
 		}
 		crdClient.On("Get").Return(mockManifest, nil)
-		err := client.NamespaceInit(manifests, options)
+		err := client.NamespaceInit(options)
 		Expect(err).To(MatchError(ContainSubstring("does not exist"))) // error message is quite different on Windows and macOS
 	})
 
 	It("should create namespace and sa if needed", func() {
 
 		options := NamespaceInitOptions{
-			Manifest:      "fixtures/empty.yaml",
 			NamespaceName: "foo",
 			SecretName:    "push-credentials",
 		}
@@ -112,14 +110,13 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockManifest := &crd.RiffManifest{}
 		crdClient.On("Get").Return(mockManifest, nil)
 
-		err := client.NamespaceInit(manifests, options)
+		err := client.NamespaceInit(options)
 		Expect(err).To(Not(HaveOccurred()))
 	})
 
 	It("should create secret for gcr", func() {
 
 		options := NamespaceInitOptions{
-			Manifest:      "fixtures/empty.yaml",
 			NamespaceName: "foo",
 			GcrTokenPath:  "fixtures/gcr-creds",
 			SecretName:    "push-credentials",
@@ -149,7 +146,7 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockManifest := &crd.RiffManifest{}
 		crdClient.On("Get").Return(mockManifest, nil)
 
-		err := client.NamespaceInit(manifests, options)
+		err := client.NamespaceInit(options)
 		Expect(err).To(Not(HaveOccurred()))
 	})
 
@@ -170,7 +167,6 @@ var _ = Describe("The NamespaceInit function", func() {
 		It("should create secret for dockerhub", func() {
 
 			options := NamespaceInitOptions{
-				Manifest:          "fixtures/empty.yaml",
 				NamespaceName:     "foo",
 				DockerHubUsername: "roger",
 				SecretName:        "push-credentials",
@@ -200,14 +196,13 @@ var _ = Describe("The NamespaceInit function", func() {
 			mockManifest := &crd.RiffManifest{}
 			crdClient.On("Get").Return(mockManifest, nil)
 
-			err := client.NamespaceInit(manifests, options)
+			err := client.NamespaceInit(options)
 			Expect(err).To(Not(HaveOccurred()))
 		})
 	})
 
 	It("should run unauthenticated and still create a service account", func() {
 		options := NamespaceInitOptions{
-			Manifest:      "fixtures/empty.yaml",
 			NamespaceName: "foo",
 			NoSecret:      true,
 		}
@@ -222,7 +217,7 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockManifest := &crd.RiffManifest{}
 		crdClient.On("Get").Return(mockManifest, nil)
 
-		err := client.NamespaceInit(manifests, options)
+		err := client.NamespaceInit(options)
 		Expect(err).To(Not(HaveOccurred()))
 	})
 
