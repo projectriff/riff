@@ -163,6 +163,9 @@ func (c *client) NamespaceInit(manifests map[string]*Manifest, options Namespace
 			var resource string
 			if u.Scheme == "" {
 				resource = filepath.Join(filepath.Base(""), u.Path)
+				if _,err = os.Stat(resource); os.IsNotExist(err) {
+					return e.New(fmt.Sprintf("Path: %s does not exist", resource))
+				}
 			} else {
 				resource = u.String()
 			}
