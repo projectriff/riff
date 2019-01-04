@@ -49,16 +49,26 @@ func SystemInstall(manifests map[string]*core.Manifest, c *core.Client) *cobra.C
 			"\nUse the `--manifest` flag to specify the path or URL of a manifest file which provides the URLs of the kubernetes configuration files of the " +
 			"components to be installed. The manifest file contents should be of the following form:" +
 			`
-
-    manifestVersion: 0.1
-    istio:
-    - https://path/to/istio-release.yaml
-    knative:
-    - https://path/to/build-release.yaml
-    - https://path/to/serving-release.yaml
-    - https://path/to/eventing-release.yaml
-    namespace:
-    - https://path/to/buildtemplate-release.yaml
+    kind: RiffSystem
+    apiVersion: projectriff.io/v1alpha1
+    metadata:
+      name: riff-install
+      creationTimestamp:
+      labels:
+        riff-install: 'true'
+    spec:
+      resources:
+      - path: https://storage.googleapis.com/knative-releases/serving/previous/v0.2.2/istio.yaml
+        name: istio
+        checks:
+        - kind: Pod
+          namespace: istio-system
+          selector:
+            matchLabels:
+              istio: citadel
+          jsonPath: ".status.phase"
+          pattern: Running
+    status: {}
 ` +
 			"\nNote: relative file paths or http/https URLs may be used in the manifest.",
 		Args: cobra.ExactArgs(systemInstallNumberOfArgs),
