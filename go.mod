@@ -18,7 +18,7 @@ require (
 	github.com/frioux/shellquote v0.0.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/spec v0.18.0 // indirect
-	github.com/go-yaml/yaml v2.1.0+incompatible // indirect
+	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/gobuffalo/envy v1.6.10 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/golang/groupcache v0.0.0-20181024230925-c65c006176ff // indirect

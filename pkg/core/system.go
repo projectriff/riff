@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	yaml2 "github.com/go-yaml/yaml"
 	"github.com/projectriff/riff/pkg/crd"
 	"github.com/projectriff/riff/pkg/kubectl"
 	"os"
@@ -58,7 +59,7 @@ func (c *client) SystemInstall(manifests map[string]*Manifest, options SystemIns
 		return false, errors.New(fmt.Sprintf("Could not create riff CRD: %s ", err))
 	}
 	fmt.Println("CRD created")
-	riffManifest, err := c.createCRDObject()
+	riffManifest, err := c.createCRDObject(options)
 	if err != nil {
 		return false, errors.New(fmt.Sprintf("Could not install riff: %s ", err))
 	}
@@ -71,8 +72,21 @@ func (c *client) SystemInstall(manifests map[string]*Manifest, options SystemIns
 	return true, err
 }
 
-func (c *client) createCRDObject() (*crd.RiffManifest, error) {
-	manifest := crd.NewManifest()
+func (c *client) createCRDObject(options SystemInstallOptions) (*crd.RiffManifest, error) {
+	manifest := &crd.RiffManifest{}
+
+	if options.Manifest != "" {
+		yaml, err := resource.Load(options.Manifest, "")
+		if err != nil {
+			return nil, err
+		}
+		err = yaml2.Unmarshal(yaml, manifest)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		manifest = crd.NewManifest()
+	}
 
 	old, err := c.crdClient.Get()
 	if old == nil {
