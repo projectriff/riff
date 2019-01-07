@@ -18,6 +18,7 @@ package crd
 
 import (
 	"github.com/jinzhu/copier"
+	"github.com/projectriff/riff/pkg/env"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -68,8 +69,8 @@ var schemeGroupVersion = schema.GroupVersion{
 func NewManifest() *RiffManifest {
 	manifest := &RiffManifest{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   "riff-install",
-			Labels: map[string]string{"riff-install": "true"},
+			Name:   env.Cli.Name + "-install",
+			Labels: map[string]string{env.Cli.Name + "-install": "true"},
 		},
 		TypeMeta: metav1.TypeMeta{
 			Kind: Kind,
