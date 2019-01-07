@@ -59,7 +59,7 @@ source $fats_dir/functions/helpers.sh
 for test in java java-boot node npm command; do
   path=${fats_dir}/functions/uppercase/${test}
   function_name=fats-uppercase-${test}
-  image=${IMAGE_REPOSITORY_PREFIX}/fats-uppercase-${test}:${CLUSTER_NAME}
+  image=$(fats_image_repo ${function_name})
   input_data=riff
   expected_data=RIFF
 
@@ -68,7 +68,7 @@ done
 for test in java-local; do
   path=${fats_dir}/functions/uppercase/${test}
   function_name=fats-uppercase-${test}
-  image=${IMAGE_REPOSITORY_PREFIX}/fats-uppercase-${test}:${CLUSTER_NAME}
+  image=$(fats_image_repo ${function_name})
   input_data=riff
   expected_data=RIFF
 
