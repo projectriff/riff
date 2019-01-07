@@ -149,15 +149,6 @@ func NewManifest() *RiffManifest {
 							Kind: "Pod",
 							Namespace: "istio-system",
 							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"istio": "statsd-prom-bridge"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-						{
-							Kind: "Pod",
-							Namespace: "istio-system",
-							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"istio-mixer-type": "telemetry"},
 							},
 							JsonPath: ".status.phase",
