@@ -199,7 +199,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 	oldPersistentPreRunE := command.PersistentPreRunE
 	command.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		var err error
-		client, kc, err = NewCoreAndKubectlClient(kubeconfig, masterURL)
+		*client, *kc, err = NewCoreAndKubectlClient(kubeconfig, masterURL)
 		if err != nil {
 			return err
 		}
@@ -210,7 +210,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 	}
 }
 
-func NewCoreAndKubectlClient(kubeconfig, masterURL string) (*core.Client, *core.KubectlClient, error) {
+func NewCoreAndKubectlClient(kubeconfig, masterURL string) (core.Client, core.KubectlClient, error) {
 	clientConfig, kubeClientSet, eventingClientSet, servingClientSet, extClientSet, err := realClientSetFactory(kubeconfig, masterURL)
 	if err != nil {
 		return nil, nil, err
@@ -225,7 +225,7 @@ func NewCoreAndKubectlClient(kubeconfig, masterURL string) (*core.Client, *core.
 	}
 	kc := core.NewKubectlClient(kubeClientSet, extClientSet)
 
-	return &client, &kc, nil
+	return client, kc, nil
 }
 
 type buildpackBuilder struct{}
