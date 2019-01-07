@@ -199,25 +199,33 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 	oldPersistentPreRunE := command.PersistentPreRunE
 	command.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		var err error
-		clientConfig, kubeClientSet, eventingClientSet, servingClientSet, extClientSet, err := realClientSetFactory(kubeconfig, masterURL)
+		client, kc, err = NewCoreAndKubectlClient(kubeconfig, masterURL)
 		if err != nil {
 			return err
 		}
-		crdClient, err := crd.NewRiffCRDClient(clientConfig)
-		if err != nil {
-			return err
-		}
-		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, extClientSet, crdClient)
-		if err != nil {
-			return err
-		}
-		*kc = core.NewKubectlClient(kubeClientSet, extClientSet)
-
 		if oldPersistentPreRunE != nil {
 			return oldPersistentPreRunE(cmd, args)
 		}
 		return nil
 	}
+}
+
+func NewCoreAndKubectlClient(kubeconfig, masterURL string) (*core.Client, *core.KubectlClient, error) {
+	clientConfig, kubeClientSet, eventingClientSet, servingClientSet, extClientSet, err := realClientSetFactory(kubeconfig, masterURL)
+	if err != nil {
+		return nil, nil, err
+	}
+	crdClient, err := crd.NewRiffCRDClient(clientConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+	client := core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, extClientSet, crdClient)
+	if err != nil {
+		return nil, nil, err
+	}
+	kc := core.NewKubectlClient(kubeClientSet, extClientSet)
+
+	return &client, &kc, nil
 }
 
 type buildpackBuilder struct{}
