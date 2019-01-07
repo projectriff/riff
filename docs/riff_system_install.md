@@ -9,16 +9,26 @@ Install riff and Knative system components.
 If an `istio-system` namespace isn't found, it will be created and Istio components will be installed. 
 Use the `--node-port` flag when installing on Minikube and other clusters that don't support an external load balancer. 
 Use the `--manifest` flag to specify the path or URL of a manifest file which provides the URLs of the kubernetes configuration files of the components to be installed. The manifest file contents should be of the following form:
-
-    manifestVersion: 0.1
-    istio:
-    - https://path/to/istio-release.yaml
-    knative:
-    - https://path/to/build-release.yaml
-    - https://path/to/serving-release.yaml
-    - https://path/to/eventing-release.yaml
-    namespace:
-    - https://path/to/buildtemplate-release.yaml
+    kind: RiffSystem
+    apiVersion: projectriff.io/v1alpha1
+    metadata:
+      name: riff-install
+      creationTimestamp:
+      labels:
+        riff-install: 'true'
+    spec:
+      resources:
+      - path: https://storage.googleapis.com/knative-releases/serving/previous/v0.2.2/istio.yaml
+        name: istio
+        checks:
+        - kind: Pod
+          namespace: istio-system
+          selector:
+            matchLabels:
+              istio: citadel
+          jsonPath: ".status.phase"
+          pattern: Running
+    status: {}
 
 Note: relative file paths or http/https URLs may be used in the manifest.
 
