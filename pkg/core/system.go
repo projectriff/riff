@@ -75,7 +75,11 @@ func (c *client) SystemInstall(manifests map[string]*Manifest, options SystemIns
 func (c *client) createCRDObject(options SystemInstallOptions) (*crd.RiffManifest, error) {
 	manifest := &crd.RiffManifest{}
 
-	if options.Manifest != "" {
+	if options.Manifest == "stable" {
+		manifest = crd.NewManifest()
+	} else if options.Manifest == "latest" {
+		return nil, errors.New("latest manifest not yet supported")
+	} else {
 		yaml, err := resource.Load(options.Manifest, "")
 		if err != nil {
 			return nil, err
@@ -84,8 +88,6 @@ func (c *client) createCRDObject(options SystemInstallOptions) (*crd.RiffManifes
 		if err != nil {
 			return nil, err
 		}
-	} else {
-		manifest = crd.NewManifest()
 	}
 
 	old, err := c.crdClient.Get()
