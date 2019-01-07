@@ -92,6 +92,7 @@ func SystemInstall(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 		command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", desc)
 	} else {
 		command.Flags().StringVarP(&options.Manifest, "manifest", "m", "", "path to a manifest of kubernetes configuration files to be applied")
+		command.MarkFlagRequired("manifest")
 	}
 
 	command.Flags().BoolVarP(&options.NodePort, "node-port", "", false, "whether to use NodePort instead of LoadBalancer for ingress gateways")
