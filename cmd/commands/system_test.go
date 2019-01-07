@@ -75,6 +75,16 @@ var _ = Describe("The riff system install subcommand", func() {
 		Expect(systemInstallCommand.Flag("force")).NotTo(BeNil())
 	})
 
+	Context("when given no args or flags", func() {
+		It("should fail", func() {
+			systemInstallCommand.SetArgs([]string{})
+
+			err := systemInstallCommand.Execute()
+
+			Expect(err).To(MatchError("required flag(s) \"manifest\" not set"))
+		})
+	})
+
 	Context("when given wrong args or flags", func() {
 		It("should fail with any argument", func() {
 			systemInstallCommand.SetArgs([]string{"extraneous-arg"})
