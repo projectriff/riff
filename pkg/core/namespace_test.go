@@ -87,7 +87,7 @@ var _ = Describe("The NamespaceInit function", func() {
 		}
 		crdClient.On("Get").Return(mockManifest, nil)
 		err := client.NamespaceInit(options)
-		Expect(err).To(MatchError(ContainSubstring("does not exist"))) // error message is quite different on Windows and macOS
+		Expect(err).To(MatchError(ContainSubstring("wrong"))) // error message is quite different on Windows and macOS
 	})
 
 	It("should create namespace and sa if needed", func() {

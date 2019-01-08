@@ -21,10 +21,9 @@ import (
 	e "errors"
 	"fmt"
 	"github.com/projectriff/riff/pkg/kubectl"
+	resource2 "github.com/projectriff/riff/pkg/resource"
 	"io/ioutil"
-	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -153,25 +152,20 @@ func (c *client) NamespaceInit(options NamespaceInitOptions) error {
 	}
 	for _, res := range mf.Spec.Resources {
 		if strings.EqualFold(res.Name, "riff-build-template") {
-			path := res.Path
-			u, err := url.Parse(path)
-			if err != nil {
-				return err
-			}
-
-			var resource string
-			if u.Scheme == "" {
-				resource = filepath.Join(filepath.Base(""), u.Path)
-				if _,err = os.Stat(resource); os.IsNotExist(err) {
-					return e.New(fmt.Sprintf("Path: %s does not exist", resource))
-				}
+			var content string
+			if res.Content != "" {
+				content = res.Content
 			} else {
-				resource = u.String()
+				byteContent, err := resource2.Load(res.Path, "")
+				if err != nil {
+					return err
+				}
+				content = string(byteContent)
 			}
 
-			fmt.Printf("Applying %s in namespace %q\n", path, ns)
+			fmt.Printf("Preparing namespace: %s for functions\n", ns)
 			kubectl := kubectl.RealKubeCtl()
-			log, err := kubectl.Exec([]string{"apply", "-n", ns, "-f", resource})
+			log, err := kubectl.Exec([]string{"apply", "-n", ns, "-f", "-", content})
 			fmt.Printf("%s\n", log)
 			if err != nil {
 				return e.New(log)
