@@ -49,7 +49,7 @@ func readAbsFile(file string) ([]byte, error) {
 	}
 
 	if !filepath.IsAbs(file) {
-		panic(fmt.Sprintf("readAbsFile called with relative file path: %s", file))
+		return nil, fmt.Errorf("absolute path expected instead of relative path: %s", file)
 	}
 
 	return ioutil.ReadFile(file)
