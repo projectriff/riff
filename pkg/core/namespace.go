@@ -152,20 +152,19 @@ func (c *client) NamespaceInit(options NamespaceInitOptions) error {
 	}
 	for _, res := range mf.Spec.Resources {
 		if strings.EqualFold(res.Name, "riff-build-template") {
-			var content string
+			var byteContent []byte
 			if res.Content != "" {
-				content = res.Content
+				byteContent = []byte(res.Content)
 			} else {
-				byteContent, err := resource2.Load(res.Path, "")
+				byteContent, err = resource2.Load(res.Path, "")
 				if err != nil {
 					return err
 				}
-				content = string(byteContent)
 			}
 
 			fmt.Printf("Preparing namespace: %s for functions\n", ns)
 			kubectl := kubectl.RealKubeCtl()
-			log, err := kubectl.Exec([]string{"apply", "-n", ns, "-f", "-", content})
+			log, err := kubectl.ExecStdin([]string{"apply", "-n", ns, "-f", "-"}, &byteContent)
 			fmt.Printf("%s\n", log)
 			if err != nil {
 				return e.New(log)
