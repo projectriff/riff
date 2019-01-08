@@ -18,6 +18,7 @@ package crd
 
 import (
 	"fmt"
+	"github.com/projectriff/riff/pkg/env"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
@@ -72,7 +73,7 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 
 func (client *riffCRDClient) Create(obj *RiffManifest) (*RiffManifest, error) {
 	result := &RiffManifest{}
-	err := client.restClient.Post().Resource("riff-system").Name("riff-install").
+	err := client.restClient.Post().Resource( "riff-system").Name(env.Cli.Name + "-install").
 		Body(obj).Do().Into(result)
 	return result, err
 }
@@ -87,7 +88,7 @@ func (client *riffCRDClient) Delete(obj *RiffManifest) (*RiffManifest, error) {
 
 func (client *riffCRDClient) Get() (*RiffManifest, error) {
 	result := &RiffManifest{}
-	err := client.restClient.Get().Resource("riff-system").Name("riff-install").Do().Into(result)
+	err := client.restClient.Get().Resource("riff-system").Name(env.Cli.Name + "-install").Do().Into(result)
 	if err != nil {
 		return nil, err
 	}
