@@ -34,6 +34,7 @@ type ResourceChecks struct {
 
 type RiffResources struct {
 	Path       string           `json:"path,omitempty"`
+	Content    string           `json:"content,omitempty"`
 	Name       string           `json:"name,omitempty"`
 	Checks     []ResourceChecks `json:"checks,omitempty"`
 }
