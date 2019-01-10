@@ -33,8 +33,8 @@ const (
 	subscriptionCreateMaxNumberOfArgs
 )
 const (
-	subscriptionDeleteNameIndex = iota
-	subscriptionDeleteNumberOfArgs
+	subscriptionDeleteNameStartIndex = iota
+	subscriptionDeleteMinNumberOfArgs
 )
 
 const (
@@ -80,20 +80,25 @@ func SubscriptionCreate(client *core.Client) *Command {
 	return command
 }
 
-func SubscriptionDelete(client *core.Client) *Command {
-	deleteOptions := core.DeleteSubscriptionOptions{}
+func SubscriptionDelete(riffClient *core.Client) *Command {
+	cliOptions := DeleteSubscriptionsCliOptions{}
 
 	command := &Command{
-		Use:     "delete",
-		Short:   "Delete an existing subscription",
-		Example: "  " + env.Cli.Name + " subscription delete my-subscription --namespace joseph-ns",
+		Use:   "delete",
+		Short: "Delete existing subscriptions",
+		Example: "  " + env.Cli.Name + " subscription delete my-subscription --namespace joseph-ns\n" +
+			"  " + env.Cli.Name + " subscription delete my-subscription-1 my-subscription-2",
 		Args: ArgValidationConjunction(
-			ExactArgs(subscriptionDeleteNumberOfArgs),
-			AtPosition(subscriptionDeleteNameIndex, ValidName()),
+			MinimumNArgs(subscriptionDeleteMinNumberOfArgs),
+			StartingAtPosition(subscriptionDeleteNameStartIndex, ValidName()),
 		),
 		RunE: func(cmd *Command, args []string) error {
-			deleteOptions.Name = args[subscriptionDeleteNameIndex]
-			if err := (*client).DeleteSubscription(deleteOptions); err != nil {
+			names := args[subscriptionDeleteNameStartIndex:]
+			err := MergeResults(ApplyInParallel(names, func(name string) error {
+				options := core.DeleteSubscriptionOptions{Namespace: cliOptions.Namespace, Name: name}
+				return (*riffClient).DeleteSubscription(options)
+			}))
+			if err != nil {
 				return err
 			}
 			PrintSuccessfulCompletion(cmd)
@@ -103,7 +108,7 @@ func SubscriptionDelete(client *core.Client) *Command {
 
 	LabelArgs(command, "SUBSCRIPTION_NAME")
 	flags := command.Flags()
-	flags.StringVarP(&deleteOptions.Namespace, "namespace", "n", "", "the namespace of the subscription")
+	flags.StringVarP(&cliOptions.Namespace, "namespace", "n", "", "the namespace of the subscription")
 
 	return command
 }
@@ -234,4 +239,8 @@ func makeSubscriptionExtractors() []NamedExtractor {
 			},
 		},
 	}
+}
+
+type DeleteSubscriptionsCliOptions struct {
+	Namespace string
 }
