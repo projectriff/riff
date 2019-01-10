@@ -18,6 +18,8 @@ package commands_test
 
 import (
 	"errors"
+	"fmt"
+	"strconv"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -46,5 +48,33 @@ var _ = Describe("The cobra extensions", func() {
 			Expect(command.Execute()).NotTo(HaveOccurred())
 		})
 
+		It("should fail if one argument is invalid", func() {
+			command := &Command{
+				Use: "some-command",
+				Args: commands.ArgValidationConjunction(
+					MinimumNArgs(1),
+					commands.StartingAtPosition(0, evenNumberValidator),
+				),
+				RunE: func(cmd *Command, args []string) error {
+					return nil
+				},
+			}
+
+			command.SetArgs([]string{"2", "3", "7", "6"})
+
+			Expect(command.Execute()).To(MatchError("3 should be even\n7 should be even\n"))
+		})
+
 	})
 })
+
+func evenNumberValidator(_ *Command, s string) error {
+	integer, err := strconv.Atoi(s)
+	if err != nil {
+		return err
+	}
+	if integer%2 != 0 {
+		return fmt.Errorf("%d should be even", integer)
+	}
+	return nil
+}

@@ -18,6 +18,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"strings"
 
 	"unicode"
@@ -64,6 +65,23 @@ type PositionalArg func(cmd *cobra.Command, arg string) error
 func AtPosition(i int, validator PositionalArg) cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		return validator(cmd, args[i])
+	}
+}
+// StartingAtPosition returns a PositionalArgs that applies the single valued validator start at the i-th argument till the last one.
+func StartingAtPosition(position int, validator PositionalArg) cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		errorBuilder := strings.Builder{}
+		for i := position ; i < len(args) ; i++  {
+			err := validator(cmd, args[i])
+			if err != nil {
+				errorBuilder.WriteString(err.Error() + "\n")
+			}
+		}
+		message := errorBuilder.String()
+		if message != "" {
+			return errors.New(message)
+		}
+		return nil
 	}
 }
 

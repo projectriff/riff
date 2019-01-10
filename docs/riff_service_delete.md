@@ -1,10 +1,10 @@
 ## riff service delete
 
-Delete an existing service
+Delete existing services
 
 ### Synopsis
 
-Delete an existing service
+Delete existing services
 
 ```
 riff service delete [flags]
@@ -14,6 +14,7 @@ riff service delete [flags]
 
 ```
   riff service delete square --namespace joseph-ns
+  riff service delete service-1 service-2
 ```
 
 ### Options

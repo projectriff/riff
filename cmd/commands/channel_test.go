@@ -273,7 +273,12 @@ var _ = Describe("The riff channel delete command", func() {
 		It("should fail with no args", func() {
 			cd.SetArgs([]string{})
 			err := cd.Execute()
-			Expect(err).To(MatchError("accepts 1 arg(s), received 0"))
+			Expect(err).To(MatchError("requires at least 1 arg(s), only received 0"))
+		})
+		It("should fail with invalid channel names", func() {
+			cd.SetArgs([]string{"valid", "(*&^%invalid@#$%^&*", "still-valid"})
+			err := cd.Execute()
+			Expect(err.Error()).To(HavePrefix("a DNS-1123 subdomain must consist of"))
 		})
 	})
 
@@ -305,6 +310,17 @@ var _ = Describe("The riff channel delete command", func() {
 			err := cd.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
+		It("should involve the core.Client with several channel names", func() {
+			cd.SetArgs([]string{"my-channel-1", "my-channel-2", "--namespace", "ns"})
+
+			asMock.On("DeleteChannel", deleteChannelOption("my-channel-1", "ns")).
+				Return(nil, nil)
+			asMock.On("DeleteChannel", deleteChannelOption("my-channel-2", "ns")).
+				Return(nil, nil)
+
+			err := cd.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		})
 		It("should propagate core.Client errors", func() {
 			cd.SetArgs([]string{"my-channel"})
 
@@ -315,3 +331,9 @@ var _ = Describe("The riff channel delete command", func() {
 		})
 	})
 })
+
+func deleteChannelOption(channelName, namespace string) core.DeleteChannelOptions {
+	options := core.DeleteChannelOptions{Name: channelName}
+	options.Namespace = namespace
+	return options
+}

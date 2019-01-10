@@ -36,7 +36,7 @@ import (
 	"github.com/projectriff/riff/pkg/core/mocks"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/mock"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -481,10 +481,10 @@ var _ = Describe("The riff service delete command", func() {
 		It("should fail with no args", func() {
 			sd.SetArgs([]string{})
 			err := sd.Execute()
-			Expect(err).To(MatchError("accepts 1 arg(s), received 0"))
+			Expect(err).To(MatchError("requires at least 1 arg(s), only received 0"))
 		})
-		It("should fail with invalid service name", func() {
-			sd.SetArgs([]string{".invalid"})
+		It("should fail with invalid service names", func() {
+			sd.SetArgs([]string{"valid", ".invalid", "still-valid"})
 			err := sd.Execute()
 			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
 		})
@@ -514,6 +514,22 @@ var _ = Describe("The riff service delete command", func() {
 			o.Namespace = "ns"
 
 			asMock.On("DeleteService", o).Return(nil)
+			err := sd.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		})
+		It("should involve the core.Client with several service names", func() {
+			sd.SetArgs([]string{"my-service-1", "my-service-2", "--namespace", "ns"})
+
+			asMock.On("DeleteService", core.DeleteServiceOptions{
+				Name:      "my-service-1",
+				Namespace: "ns",
+			}).Return(nil)
+
+			asMock.On("DeleteService", core.DeleteServiceOptions{
+				Name:      "my-service-2",
+				Namespace: "ns",
+			}).Return(nil)
+
 			err := sd.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})

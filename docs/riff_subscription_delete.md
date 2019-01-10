@@ -1,10 +1,10 @@
 ## riff subscription delete
 
-Delete an existing subscription
+Delete existing subscriptions
 
 ### Synopsis
 
-Delete an existing subscription
+Delete existing subscriptions
 
 ```
 riff subscription delete [flags]
@@ -14,6 +14,7 @@ riff subscription delete [flags]
 
 ```
   riff subscription delete my-subscription --namespace joseph-ns
+  riff subscription delete my-subscription-1 my-subscription-2
 ```
 
 ### Options

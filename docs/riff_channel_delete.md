@@ -1,10 +1,10 @@
 ## riff channel delete
 
-Delete an existing channel
+Delete existing channels
 
 ### Synopsis
 
-Delete an existing channel
+Delete existing channels
 
 ```
 riff channel delete [flags]
@@ -14,6 +14,7 @@ riff channel delete [flags]
 
 ```
   riff channel delete tweets
+  riff channel delete channel-1 channel-2
 ```
 
 ### Options

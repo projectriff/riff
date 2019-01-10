@@ -18,6 +18,6 @@ Interact with channel related resources
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
 * [riff channel create](riff_channel_create.md)	 - Create a new channel
-* [riff channel delete](riff_channel_delete.md)	 - Delete an existing channel
+* [riff channel delete](riff_channel_delete.md)	 - Delete existing channels
 * [riff channel list](riff_channel_list.md)	 - List channels
 

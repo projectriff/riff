@@ -18,7 +18,7 @@ Interact with service (as in `service.serving.knative.dev`) related resources.
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
 * [riff service create](riff_service_create.md)	 - Create a new service resource
-* [riff service delete](riff_service_delete.md)	 - Delete an existing service
+* [riff service delete](riff_service_delete.md)	 - Delete existing services
 * [riff service invoke](riff_service_invoke.md)	 - Invoke a service
 * [riff service list](riff_service_list.md)	 - List service resources
 * [riff service status](riff_service_status.md)	 - Display the status of a service
