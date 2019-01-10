@@ -37,8 +37,10 @@ import (
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/projectriff/riff/pkg/env"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 const (
@@ -70,6 +72,7 @@ type CreateFunctionOptions struct {
 }
 
 func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
+	var buildCache *corev1.PersistentVolumeClaim
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 	functionName := options.Name
 	_, err := c.serving.ServingV1alpha1().Services(ns).Get(functionName, v1.GetOptions{})
@@ -114,24 +117,72 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			}
 		}
 	} else {
+		// create build cache for service
+		buildCache = &corev1.PersistentVolumeClaim{
+			ObjectMeta: v1.ObjectMeta{
+				Name:      fmt.Sprintf("%s-build-cache", options.Name),
+				Namespace: ns,
+			},
+			Spec: corev1.PersistentVolumeClaimSpec{
+				AccessModes: []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
+				Resources: corev1.ResourceRequirements{
+					Requests: corev1.ResourceList{
+						corev1.ResourceStorage: resource.MustParse("8Gi"),
+					},
+				},
+			},
+		}
+
 		// buildpack based cluster build
 		s.Spec.RunLatest.Configuration.Build = &v1alpha1.RawExtension{
 			BuildSpec: &build.BuildSpec{
 				ServiceAccountName: "riff-build",
 				Source:             c.makeBuildSourceSpec(options),
 				Template: &build.TemplateInstantiationSpec{
-					Name:      "riff-cnb",
-					Kind:      "ClusterBuildTemplate",
-					Arguments: c.makeBuildArguments(options),
+					Name: "riff-cnb",
+					Kind: "ClusterBuildTemplate",
+					Arguments: []build.ArgumentSpec{
+						{Name: "IMAGE", Value: options.Image},
+						{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
+						{Name: "FUNCTION_HANDLER", Value: options.Handler},
+						{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
+						{Name: "CACHE_VOLUME", Value: buildCache.Name},
+					},
 				},
 			},
 		}
 	}
 
 	if !options.DryRun {
-		_, err := c.serving.ServingV1alpha1().Services(ns).Create(s)
+		if buildCache != nil {
+			buildCache, err = c.kubeClient.CoreV1().PersistentVolumeClaims(ns).Create(buildCache)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		s, err := c.serving.ServingV1alpha1().Services(ns).Create(s)
 		if err != nil {
 			return nil, err
+		}
+
+		if buildCache != nil {
+			// add service as owner of build cache so that deleting the service, deletes the cache
+			buildCache, err = c.kubeClient.CoreV1().PersistentVolumeClaims(ns).Get(buildCache.Name, v1.GetOptions{})
+			if err != nil {
+				return nil, err
+			}
+			buildCache.ObjectMeta.OwnerReferences = []v1.OwnerReference{
+				*v1.NewControllerRef(s, schema.GroupVersionKind{
+					Group:   v1alpha1.SchemeGroupVersion.Group,
+					Version: v1alpha1.SchemeGroupVersion.Version,
+					Kind:    "Service",
+				}),
+			}
+			_, err = c.kubeClient.CoreV1().PersistentVolumeClaims(ns).Update(buildCache)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		if options.Verbose || options.Wait {
@@ -157,18 +208,6 @@ func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.Sourc
 			Revision: options.GitRevision,
 		},
 	}
-}
-
-func (c *client) makeBuildArguments(options CreateFunctionOptions) []build.ArgumentSpec {
-	args := []build.ArgumentSpec{
-		{Name: "IMAGE", Value: options.Image},
-		{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
-		{Name: "FUNCTION_HANDLER", Value: options.Handler},
-		{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
-		// TODO configure buildtemplate based on buildpack image
-		// {Name: "TBD", Value: options.BuildpackImage},
-	}
-	return args
 }
 
 func (c *client) displayFunctionCreationProgress(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}, errChan chan<- error) {
@@ -449,7 +488,7 @@ func (c *client) getServiceSpecGeneration(namespace string, name string) (int64,
 func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunctionOptions, log io.Writer) error {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 
-	service, err := c.service(options.Namespace, options.Name)
+	service, err := c.service(ns, options.Name)
 	if err != nil {
 		return err
 	}
@@ -510,10 +549,10 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 		)
 		for i := 0; i < 10; i++ {
 			if i >= 10 {
-				return fmt.Errorf("update unsuccesful for \"%s\", service resource was never updated", options.Name)
+				return fmt.Errorf("update unsuccessful for \"%s\", service resource was never updated", options.Name)
 			}
 			time.Sleep(500 * time.Millisecond)
-			nextGen, err = c.getServiceSpecGeneration(options.Namespace, options.Name)
+			nextGen, err = c.getServiceSpecGeneration(ns, options.Name)
 			if err != nil {
 				return err
 			}

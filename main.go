@@ -47,9 +47,6 @@ var (
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/in-memory-channel.yaml",
 				fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-%s.yaml", builderVersion),
 			},
-			Namespace: []string{
-				fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache-%s.yaml", builderVersion),
-			},
 		},
 		// most recent release of Knative. This manifest is not tested
 		"latest": {
@@ -65,9 +62,6 @@ var (
 				"https://storage.googleapis.com/knative-releases/eventing/latest/in-memory-channel.yaml",
 				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate.yaml",
 			},
-			Namespace: []string{
-				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache.yaml",
-			},
 		},
 		// most recent build of Knative from master. This manifest is not tested
 		"nightly": {
@@ -82,9 +76,6 @@ var (
 				"https://storage.googleapis.com/knative-nightly/eventing/latest/eventing.yaml",
 				"https://storage.googleapis.com/knative-nightly/eventing/latest/in-memory-channel.yaml",
 				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate.yaml",
-			},
-			Namespace: []string{
-				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache.yaml",
 			},
 		},
 	}
