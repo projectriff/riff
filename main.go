@@ -30,6 +30,23 @@ var (
 	defaultRunImage = "packs/run"
 
 	manifests = map[string]*core.Manifest{
+		// validated, compatible versions of Knative. This manifest is not tested
+		"stable": {
+			ManifestVersion: "0.1",
+			Istio: []string{
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.3/istio.yaml",
+			},
+			Knative: []string{
+				"https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.3/serving.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/eventing.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/in-memory-channel.yaml",
+			},
+			Namespace: []string{
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate-0.1.0.yaml",
+			},
+		},
+		// most recent release of Knative. This manifest is not tested
 		"latest": {
 			ManifestVersion: "0.1",
 			Istio: []string{
@@ -45,19 +62,20 @@ var (
 				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate.yaml",
 			},
 		},
-		"stable": {
+		// most recent build of Knative from master
+		"nightly": {
 			ManifestVersion: "0.1",
 			Istio: []string{
-				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.3/istio.yaml",
+				"https://storage.googleapis.com/knative-nightly/serving/latest/istio.yaml",
 			},
 			Knative: []string{
-				"https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
-				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.3/serving.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/eventing.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/in-memory-channel.yaml",
+				"https://storage.googleapis.com/knative-nightly/build/latest/release.yaml",
+				"https://storage.googleapis.com/knative-nightly/serving/latest/serving.yaml",
+				"https://storage.googleapis.com/knative-nightly/eventing/latest/eventing.yaml",
+				"https://storage.googleapis.com/knative-nightly/eventing/latest/in-memory-channel.yaml",
 			},
 			Namespace: []string{
-				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate-0.1.0.yaml",
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate.yaml",
 			},
 		},
 	}
