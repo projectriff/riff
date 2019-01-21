@@ -19,7 +19,7 @@ test:
 	GO111MODULE=on go test ./...
 
 check-mockery:
-	@which mockery > /dev/null || (echo mockery not found: issue \"go get -u github.com/vektra/mockery/.../\" && false)
+	@which mockery > /dev/null || (echo mockery not found: issue \"GO111MODULE=off go get -u  github.com/vektra/mockery/.../\" && false)
 
 check-jq:
 	@which jq > /dev/null || (echo jq not found: please install jq, eg \"brew install jq\" && false)
