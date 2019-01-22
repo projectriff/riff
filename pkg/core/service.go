@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	ingressServiceName = "knative-ingressgateway"
+	ingressServiceName = "istio-ingressgateway"
 )
 
 type ListServiceOptions struct {
