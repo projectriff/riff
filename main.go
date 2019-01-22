@@ -37,7 +37,8 @@ var (
 				"https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/istio.yaml",
 			},
 			Knative: []string{
-				"https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
+				// NOTE: build should be in the knative-releases bucket, but is hiding in knative-nightly
+				"https://storage.googleapis.com/knative-nightly/build/previous/v0.3.0/release.yaml",
 				"https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/serving.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/eventing.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/in-memory-channel.yaml",
