@@ -34,13 +34,13 @@ var (
 		"stable": {
 			ManifestVersion: "0.1",
 			Istio: []string{
-				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.3/istio.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/istio.yaml",
 			},
 			Knative: []string{
 				"https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
-				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.3/serving.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/eventing.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/in-memory-channel.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/serving.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/eventing.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/in-memory-channel.yaml",
 			},
 			Namespace: []string{
 				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate-0.1.0.yaml",
