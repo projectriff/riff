@@ -24,7 +24,7 @@ if [ -d "$fats_dir" ]; then
   if [ "$TRAVIS_TEST_RESULT" = "1" ]; then
     travis_fold start system-status
     echo "System status"
-    kubectl get deployments,services --all-namespaces || true
+    kubectl get deployments,services,pods --all-namespaces || true
   fi
 
   travis_fold start system-uninstall
