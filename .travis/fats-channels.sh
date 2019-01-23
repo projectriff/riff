@@ -16,7 +16,7 @@ kail_controller_pid=$!
 riff service create correlator --image projectriff/correlator:fats-20181214 --namespace $NAMESPACE
 wait_kservice_ready correlator $NAMESPACE
 
-riff channel create $test_name --cluster-provisioner in-memory-channel --namespace $NAMESPACE
+riff channel create $test_name --namespace $NAMESPACE
 riff subscription create $test_name --channel $test_name --subscriber correlator --namespace $NAMESPACE
 
 wait_channel_ready $test_name $NAMESPACE
