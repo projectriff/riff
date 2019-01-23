@@ -18,6 +18,7 @@ package commands
 
 import (
 	"fmt"
+	"os"
 	"os/user"
 	"strings"
 
@@ -25,6 +26,7 @@ import (
 
 	"github.com/projectriff/riff/pkg/env"
 
+	"github.com/buildpack/pack/logging"
 	eventing "github.com/knative/eventing/pkg/client/clientset/versioned"
 	serving "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/projectriff/riff/pkg/core"
@@ -212,5 +214,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 type buildpackBuilder struct{}
 
 func (*buildpackBuilder) Build(appDir, buildImage, runImage, repoName string) error {
-	return pack.Build(appDir, buildImage, runImage, repoName, true)
+	// TODO get logger and verbosity from command
+	logger := logging.NewLogger(os.Stdout, os.Stderr, true, false)
+	return pack.Build(logger, appDir, buildImage, runImage, repoName, true, false)
 }
