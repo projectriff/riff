@@ -49,11 +49,7 @@ func (c *client) CreateChannel(options CreateChannelOptions) (*v1alpha1.Channel,
 			Name: options.Name,
 		},
 		Spec: v1alpha1.ChannelSpec{
-			Provisioner: &corev1.ObjectReference{
-				APIVersion: "eventing.knative.dev/v1alpha1",
-				Kind:       "ClusterChannelProvisioner",
-				Name:       options.ClusterChannelProvisioner,
-			},
+			Provisioner: makeProvisioner(options),
 		},
 	}
 
@@ -62,6 +58,17 @@ func (c *client) CreateChannel(options CreateChannelOptions) (*v1alpha1.Channel,
 		return &channel, err
 	} else {
 		return &channel, nil
+	}
+}
+
+func makeProvisioner(options CreateChannelOptions) *corev1.ObjectReference {
+	if options.ClusterChannelProvisioner == "" {
+		return nil
+	}
+	return &corev1.ObjectReference{
+		APIVersion: "eventing.knative.dev/v1alpha1",
+		Kind:       "ClusterChannelProvisioner",
+		Name:       options.ClusterChannelProvisioner,
 	}
 }
 

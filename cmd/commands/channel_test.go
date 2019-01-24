@@ -55,11 +55,6 @@ var _ = Describe("The riff channel create command", func() {
 			err := cc.Execute()
 			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
 		})
-		It("should fail without required flags", func() {
-			cc.SetArgs([]string{"my-channel"})
-			err := cc.Execute()
-			Expect(err).To(MatchError("at least one of --cluster-provisioner must be set"))
-		})
 	})
 
 	Context("when given suitable args and flags", func() {
@@ -77,6 +72,17 @@ var _ = Describe("The riff channel create command", func() {
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
 
+		})
+		It("should involve the core.Client with no flags", func() {
+			cc.SetArgs([]string{"my-channel"})
+
+			o := core.CreateChannelOptions{
+				Name: "my-channel",
+			}
+
+			asMock.On("CreateChannel", o).Return(nil, nil)
+			err := cc.Execute()
+			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should involve the core.Client", func() {
 			cc.SetArgs([]string{"my-channel", "--cluster-provisioner", "ccp", "--namespace", "ns"})
