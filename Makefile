@@ -67,5 +67,5 @@ clean:
 	rm -f riff-windows-amd64.zip
 
 define source_of
-	$(shell GO111MODULE=on go mod download -json | jq -r 'select(.Path == "$(1)").Dir' | tr '\\' '/')
+	$(shell GO111MODULE=on go mod download -json | jq -r 'select(.Path == "$(1)").Dir' | tr '\\' '/'  2> /dev/null)
 endef
