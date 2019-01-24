@@ -17,6 +17,9 @@ debug
 ### Coverage artefacts ###
 *.coverprofile
 
+### Credentials
+gcr-storage-admin.json
+
 .DS_Store
 
 /riff
