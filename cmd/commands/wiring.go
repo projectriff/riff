@@ -18,7 +18,7 @@ package commands
 
 import (
 	"fmt"
-	"os"
+	"io"
 	"os/user"
 	"strings"
 
@@ -211,10 +211,22 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 	}
 }
 
-type buildpackBuilder struct{}
+type buildpackBuilder struct {
+	stdout  io.Writer
+	stderr  io.Writer
+	verbose bool
+}
 
-func (*buildpackBuilder) Build(appDir, buildImage, runImage, repoName string) error {
-	// TODO get logger and verbosity from command
-	logger := logging.NewLogger(os.Stdout, os.Stderr, true, false)
+func (b *buildpackBuilder) SetStdIo(stdout, stderr io.Writer) {
+	b.stdout = stdout
+	b.stderr = stderr
+}
+
+func (b *buildpackBuilder) SetVerbose(verbose bool) {
+	b.verbose = verbose
+}
+
+func (b *buildpackBuilder) Build(appDir, buildImage, runImage, repoName string) error {
+	logger := logging.NewLogger(b.stdout, b.stderr, b.verbose, false)
 	return pack.Build(logger, appDir, buildImage, runImage, repoName, true, false)
 }

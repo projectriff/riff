@@ -17,6 +17,10 @@
 package core_test
 
 import (
+	"io/ioutil"
+	"os"
+	"path/filepath"
+
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -26,12 +30,9 @@ import (
 	"github.com/projectriff/riff/pkg/core/vendor_mocks/mockserving"
 	"github.com/projectriff/riff/pkg/test_support"
 	"github.com/stretchr/testify/mock"
-	"io/ioutil"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"os"
-	"path/filepath"
 )
 
 var _ = Describe("Function", func() {
@@ -52,6 +53,8 @@ var _ = Describe("Function", func() {
 	BeforeEach(func() {
 		mockClientConfig = &vendor_mocks.ClientConfig{}
 		mockBuilder = &mockbuilder.Builder{}
+		mockBuilder.On("SetStdIo", mock.Anything, mock.Anything).Return()
+		mockBuilder.On("SetVerbose", mock.Anything).Return()
 		mockServing = &mockserving.Interface{}
 		mockServingV1alpha1 = &mockserving.ServingV1alpha1Interface{}
 		mockServiceInterface = &mockserving.ServiceInterface{}
@@ -128,8 +131,7 @@ var _ = Describe("Function", func() {
 
 			Context("when riff.toml is already present", func() {
 				BeforeEach(func() {
-					if err := ioutil.WriteFile(filepath.Join(workDir, "riff.toml"), []byte{}, os.FileMode(0400));
-						err != nil {
+					if err := ioutil.WriteFile(filepath.Join(workDir, "riff.toml"), []byte{}, os.FileMode(0400)); err != nil {
 						panic(err)
 					}
 				})

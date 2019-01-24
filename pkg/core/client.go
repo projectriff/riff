@@ -50,6 +50,8 @@ type Client interface {
 
 type Builder interface {
 	Build(appDir, buildImage, runImage, repoName string) error
+	SetStdIo(out, err io.Writer)
+	SetVerbose(bool)
 }
 
 type client struct {

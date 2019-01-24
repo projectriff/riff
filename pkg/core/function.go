@@ -38,7 +38,7 @@ import (
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/projectriff/riff/pkg/env"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 )
 
@@ -113,6 +113,8 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			}
 			defer func() { _ = c.deleteRiffToml(options) }()
 
+			buildpackBuilder.SetStdIo(log, log)
+			buildpackBuilder.SetVerbose(options.Verbose)
 			err = buildLocally(buildpackBuilder, appDir, buildImage, runImage, repoName)
 			if err != nil {
 				return nil, err
@@ -538,6 +540,8 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 			return fmt.Errorf("local-path must be specified to rebuild function from source")
 		}
 
+		buildpackBuilder.SetStdIo(log, log)
+		buildpackBuilder.SetVerbose(options.Verbose)
 		err := buildLocally(buildpackBuilder, appDir, buildImage, runImage, repoName)
 		if err != nil {
 			return err
