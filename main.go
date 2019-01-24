@@ -28,7 +28,7 @@ import (
 var (
 	// TODO update to a release version before releasing riff
 	builder         = "projectriff/builder:0.2.0-snapshot-ci-d2415dd0aa50"
-	defaultRunImage = "packs/run"
+	defaultRunImage = "packs/run:v3alpha2"
 
 	manifests = map[string]*core.Manifest{
 		// validated, compatible versions of Knative. This manifest is not tested
