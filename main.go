@@ -26,8 +26,8 @@ import (
 )
 
 var (
-	builder         = "projectriff/builder"
-	defaultRunImage = "packs/run"
+	builder         = "projectriff/builder:0.2.0-snapshot-ci-f2315fde2cae"
+	defaultRunImage = "packs/run:v3alpha2"
 
 	manifests = map[string]*core.Manifest{
 		// validated, compatible versions of Knative. This manifest is not tested
