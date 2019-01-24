@@ -43,7 +43,7 @@ var (
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/in-memory-channel.yaml",
 			},
 			Namespace: []string{
-				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate-0.1.0.yaml",
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate-0.2.0-snapshot-ci-f2315fde2cae.yaml",
 			},
 		},
 		// most recent release of Knative. This manifest is not tested
