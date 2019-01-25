@@ -18,8 +18,9 @@ package commands_test
 
 import (
 	"fmt"
-	"github.com/projectriff/riff/pkg/core/mocks/mockbuilder"
 	"strings"
+
+	"github.com/projectriff/riff/pkg/core/mocks/mockbuilder"
 
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	. "github.com/onsi/ginkgo"
@@ -92,11 +93,13 @@ var _ = Describe("The riff function create command", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 
 			options := core.CreateFunctionOptions{
-				GitRepo:        "https://github.com/repo",
-				GitRevision:    "master",
-				Invoker:        "",
-				BuildpackImage: "projectriff/builder",
-				RunImage:       "packs/run",
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+				BuildOptions: core.BuildOptions{
+					Invoker:        "",
+					BuildpackImage: "projectriff/builder",
+					RunImage:       "packs/run",
+				},
 			}
 			options.Name = "square"
 			options.Image = "foo/bar"
@@ -111,11 +114,13 @@ var _ = Describe("The riff function create command", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo", "--invoker", "pascal"})
 
 			options := core.CreateFunctionOptions{
-				GitRepo:        "https://github.com/repo",
-				GitRevision:    "master",
-				Invoker:        "pascal",
-				BuildpackImage: "projectriff/builder",
-				RunImage:       "packs/run",
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+				BuildOptions: core.BuildOptions{
+					Invoker:        "pascal",
+					BuildpackImage: "projectriff/builder",
+					RunImage:       "packs/run",
+				},
 			}
 			options.Name = "square"
 			options.Image = "foo/bar"
@@ -139,10 +144,12 @@ var _ = Describe("The riff function create command", func() {
 				"--env", "FOO=bar", "--env", "BAZ=qux", "--env-from", "secretKeyRef:foo:bar"})
 
 			options := core.CreateFunctionOptions{
-				GitRepo:        "https://github.com/repo",
-				GitRevision:    "master",
-				BuildpackImage: "projectriff/builder",
-				RunImage:       "packs/run",
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+				BuildOptions: core.BuildOptions{
+					BuildpackImage: "projectriff/builder",
+					RunImage:       "packs/run",
+				},
 			}
 			options.Name = "square"
 			options.Image = "foo/bar"
@@ -157,10 +164,12 @@ var _ = Describe("The riff function create command", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo", "--dry-run"})
 
 			options := core.CreateFunctionOptions{
-				GitRepo:        "https://github.com/repo",
-				GitRevision:    "master",
-				BuildpackImage: "projectriff/builder",
-				RunImage:       "packs/run",
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+				BuildOptions: core.BuildOptions{
+					BuildpackImage: "projectriff/builder",
+					RunImage:       "packs/run",
+				},
 			}
 			options.Name = "square"
 			options.Image = "foo/bar"
@@ -184,10 +193,12 @@ var _ = Describe("The riff function create command", func() {
 		It("should display the status hint", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 			options := core.CreateFunctionOptions{
-				GitRepo:        "https://github.com/repo",
-				GitRevision:    "master",
-				BuildpackImage: "projectriff/builder",
-				RunImage:       "packs/run",
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+				BuildOptions: core.BuildOptions{
+					BuildpackImage: "projectriff/builder",
+					RunImage:       "packs/run",
+				},
 			}
 			options.Name = "square"
 			options.Image = "foo/bar"
@@ -210,10 +221,12 @@ var _ = Describe("The riff function create command", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
 				"--namespace", "ns"})
 			options := core.CreateFunctionOptions{
-				GitRepo:        "https://github.com/repo",
-				GitRevision:    "master",
-				BuildpackImage: "projectriff/builder",
-				RunImage:       "packs/run",
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+				BuildOptions: core.BuildOptions{
+					BuildpackImage: "projectriff/builder",
+					RunImage:       "packs/run",
+				},
 			}
 			options.Name = "square"
 			options.Namespace = "ns"
@@ -272,10 +285,10 @@ var _ = Describe("The riff function update command", func() {
 
 	Context("when given suitable args", func() {
 		var (
-			builder     core.Builder
-			client      core.Client
-			clientMock  *mocks.Client
-			fc          *cobra.Command
+			builder    core.Builder
+			client     core.Client
+			clientMock *mocks.Client
+			fc         *cobra.Command
 		)
 		BeforeEach(func() {
 			builder = new(mockbuilder.Builder)

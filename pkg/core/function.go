@@ -43,28 +43,31 @@ import (
 )
 
 const (
-	functionLabel   = "riff.projectriff.io/function"
-	buildAnnotation = "riff.projectriff.io/nonce"
-	// annotation names with slashes are rejected :-/
+	functionLabel                 = "riff.projectriff.io/function"
+	buildAnnotation               = "riff.projectriff.io/nonce"
 	buildpackBuildImageAnnotation = "riff.projectriff.io-buildpack-buildImage"
 	buildpackRunImageAnnotation   = "riff.projectriff.io-buildpack-runImage"
+	functionArtifactAnnotation    = "riff.projectriff.io/artifact"
+	functionOverrideAnnotation    = "riff.projectriff.io/override"
+	functionHandlerAnnotation     = "riff.projectriff.io/handler"
 	pollServiceTimeout            = 10 * time.Minute
 	pollServicePollingInterval    = time.Second
 )
 
-type CreateFunctionOptions struct {
-	CreateOrUpdateServiceOptions
-
-	LocalPath   string
-	GitRepo     string
-	GitRevision string
-
+type BuildOptions struct {
 	Invoker        string
+	Handler        string
+	Artifact       string
+	LocalPath      string
 	BuildpackImage string
 	RunImage       string
+}
+type CreateFunctionOptions struct {
+	CreateOrUpdateServiceOptions
+	BuildOptions
 
-	Handler  string
-	Artifact string
+	GitRepo     string
+	GitRevision string
 }
 
 func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
@@ -94,29 +97,22 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
 
 	if options.LocalPath != "" {
-		appDir := options.LocalPath
-		buildImage := options.BuildpackImage
-		runImage := options.RunImage
-		repoName := options.Image
 		if s.ObjectMeta.Annotations == nil {
 			s.ObjectMeta.Annotations = make(map[string]string)
 		}
-		s.ObjectMeta.Annotations[buildpackBuildImageAnnotation] = buildImage
-		s.ObjectMeta.Annotations[buildpackRunImageAnnotation] = runImage
+		s.ObjectMeta.Annotations[buildpackBuildImageAnnotation] = options.BuildpackImage
+		s.ObjectMeta.Annotations[buildpackRunImageAnnotation] = options.RunImage
+		s.ObjectMeta.Annotations[functionArtifactAnnotation] = options.Artifact
+		s.ObjectMeta.Annotations[functionHandlerAnnotation] = options.Handler
+		s.ObjectMeta.Annotations[functionOverrideAnnotation] = options.Invoker
 
 		if options.DryRun {
 			// skip build for a dry run
 			log.Write([]byte("Skipping local build\n"))
 		} else {
-			if err := c.writeRiffToml(options); err != nil {
-				return nil, err
-			}
-			defer func() { _ = c.deleteRiffToml(options) }()
-
 			buildpackBuilder.SetStdIo(log, log)
 			buildpackBuilder.SetVerbose(options.Verbose)
-			err = buildLocally(buildpackBuilder, appDir, buildImage, runImage, repoName)
-			if err != nil {
+			if err := doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions); err != nil {
 				return nil, err
 			}
 		}
@@ -154,36 +150,6 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 	}
 
 	return s, nil
-}
-
-func (c *client) writeRiffToml(options CreateFunctionOptions) error {
-	t := struct {
-		Override string `toml:"override"`
-		Handler  string `toml:"handler"`
-		Artifact string `toml:"artifact"`
-	}{
-		Override: options.Invoker,
-		Handler:  options.Handler,
-		Artifact: options.Artifact,
-	}
-	path := filepath.Join(options.LocalPath, "riff.toml")
-	if _, err := os.Stat(path); err != nil && !os.IsNotExist(err) {
-		return err
-	} else if err == nil {
-		return fmt.Errorf("found riff.toml file in local path. Please delete this file and let the CLI create it from flags")
-	}
-
-	f, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	return toml.NewEncoder(f).Encode(t)
-}
-
-func (c *client) deleteRiffToml(options CreateFunctionOptions) error {
-	path := filepath.Join(options.LocalPath, "riff.toml")
-	return os.Remove(path)
 }
 
 func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.SourceSpec {
@@ -533,8 +499,14 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 
 	if build == nil {
 		// function was built locally, attempt to reconstruct configuration
-		buildImage := annotations[buildpackBuildImageAnnotation]
-		runImage := annotations[buildpackRunImageAnnotation]
+		localBuild := BuildOptions{
+			RunImage:       annotations[buildpackRunImageAnnotation],
+			BuildpackImage: annotations[buildpackBuildImageAnnotation],
+			LocalPath:      appDir,
+			Artifact:       annotations[functionArtifactAnnotation],
+			Handler:        annotations[functionHandlerAnnotation],
+			Invoker:        annotations[functionOverrideAnnotation],
+		}
 		repoName := configuration.RevisionTemplate.Spec.Container.Image
 		if appDir == "" {
 			return fmt.Errorf("local-path must be specified to rebuild function from source")
@@ -542,7 +514,7 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 
 		buildpackBuilder.SetStdIo(log, log)
 		buildpackBuilder.SetVerbose(options.Verbose)
-		err := buildLocally(buildpackBuilder, appDir, buildImage, runImage, repoName)
+		err := doBuildLocally(buildpackBuilder, repoName, localBuild)
 		if err != nil {
 			return err
 		}
@@ -585,12 +557,46 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 	return nil
 }
 
-func buildLocally(builder Builder, appDir string, buildImage string, runImage string, repoName string) error {
-	if buildImage == "" {
+func doBuildLocally(builder Builder, image string, options BuildOptions) error {
+	if err := writeRiffToml(options); err != nil {
+		return err
+	}
+	defer func() { _ = deleteRiffToml(options) }()
+	if options.BuildpackImage == "" {
 		return fmt.Errorf("unable to build function locally: buildpack image not specified")
 	}
-	if runImage == "" {
+	if options.RunImage == "" {
 		return fmt.Errorf("unable to build function locally: run image not specified")
 	}
-	return builder.Build(appDir, buildImage, runImage, repoName)
+	return builder.Build(options.LocalPath, options.BuildpackImage, options.RunImage, image)
+}
+
+func writeRiffToml(options BuildOptions) error {
+	t := struct {
+		Override string `toml:"override"`
+		Handler  string `toml:"handler"`
+		Artifact string `toml:"artifact"`
+	}{
+		Override: options.Invoker,
+		Handler:  options.Handler,
+		Artifact: options.Artifact,
+	}
+	path := filepath.Join(options.LocalPath, "riff.toml")
+	if _, err := os.Stat(path); err != nil && !os.IsNotExist(err) {
+		return err
+	} else if err == nil {
+		return fmt.Errorf("found riff.toml file in local path. Please delete this file and let the CLI create it from flags")
+	}
+
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return toml.NewEncoder(f).Encode(t)
+}
+
+func deleteRiffToml(options BuildOptions) error {
+	path := filepath.Join(options.LocalPath, "riff.toml")
+	return os.Remove(path)
 }
