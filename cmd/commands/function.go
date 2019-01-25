@@ -50,8 +50,10 @@ type FunctionCreateDefaults struct {
 
 func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults FunctionCreateDefaults) *cobra.Command {
 	createFunctionOptions := core.CreateFunctionOptions{
-		BuildpackImage: defaults.LocalBuilder,
-		RunImage:       defaults.DefaultRunImage,
+		BuildOptions: core.BuildOptions{
+			BuildpackImage: defaults.LocalBuilder,
+			RunImage:       defaults.DefaultRunImage,
+		},
 	}
 
 	command := &cobra.Command{
