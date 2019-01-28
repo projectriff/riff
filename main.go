@@ -26,8 +26,8 @@ import (
 )
 
 var (
-	builder         = "projectriff/builder"
-	defaultRunImage = "packs/run"
+	builder         = "projectriff/builder:0.2.0-snapshot-ci-f2315fde2cae"
+	defaultRunImage = "packs/run:v3alpha2"
 
 	manifests = map[string]*core.Manifest{
 		// validated, compatible versions of Knative. This manifest is not tested
@@ -45,7 +45,7 @@ var (
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/in-memory-channel.yaml",
 			},
 			Namespace: []string{
-				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate-0.1.0.yaml",
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate-0.2.0-snapshot-ci-f2315fde2cae.yaml",
 			},
 		},
 		// most recent release of Knative. This manifest is not tested

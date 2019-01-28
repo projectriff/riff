@@ -48,8 +48,6 @@ const (
 	channelDeleteNumberOfArgs
 )
 
-var exactlyOneProvisioner = ExactlyOneOf("cluster-provisioner")
-
 func ChannelCreate(fcTool *core.Client) *cobra.Command {
 	options := core.CreateChannelOptions{}
 
@@ -60,8 +58,7 @@ func ChannelCreate(fcTool *core.Client) *cobra.Command {
 			cobra.ExactArgs(channelCreateNumberOfArgs),
 			AtPosition(channelCreateNameIndex, ValidName())),
 		Example: `  ` + env.Cli.Name + ` channel create tweets --cluster-provisioner kafka --namespace steve-ns
-  ` + env.Cli.Name + ` channel create orders --cluster-provisioner global-rabbit`,
-		PreRunE: FlagsValidatorAsCobraRunE(exactlyOneProvisioner),
+  ` + env.Cli.Name + ` channel create orders`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			channelName := args[channelCreateNameIndex]
 			options.Name = channelName
@@ -86,7 +83,7 @@ func ChannelCreate(fcTool *core.Client) *cobra.Command {
 
 	LabelArgs(command, "CHANNEL_NAME")
 
-	command.Flags().StringVar(&options.ClusterChannelProvisioner, "cluster-provisioner", "", "the `name` of the cluster channel provisioner to provision the channel with.")
+	command.Flags().StringVar(&options.ClusterChannelProvisioner, "cluster-provisioner", "", "the `name` of the cluster channel provisioner to provision the channel with. Uses the cluster's default provisioner if not specified.")
 	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", "the `namespace` of the channel")
 
 	command.Flags().BoolVar(&options.DryRun, "dry-run", false, dryRunUsage)
