@@ -168,10 +168,6 @@ func (c *client) makeBuildArguments(options CreateFunctionOptions) []build.Argum
 		// TODO configure buildtemplate based on buildpack image
 		// {Name: "TBD", Value: options.BuildpackImage},
 	}
-	if options.RunImage != "" {
-		// don't overwrite the default with an empty value
-		args = append(args, build.ArgumentSpec{Name: "RUN_IMAGE", Value: options.RunImage})
-	}
 	return args
 }
 
