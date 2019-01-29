@@ -60,7 +60,7 @@ var (
 				"https://storage.googleapis.com/knative-releases/serving/latest/serving.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/latest/eventing.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/latest/in-memory-channel.yaml",
-				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate.yaml"
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate.yaml",
 			},
 			Namespace: []string{
 				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache.yaml",
