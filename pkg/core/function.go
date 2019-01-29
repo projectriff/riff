@@ -124,6 +124,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 				Source:             c.makeBuildSourceSpec(options),
 				Template: &build.TemplateInstantiationSpec{
 					Name:      "riff-cnb",
+					Kind:      "ClusterBuildTemplate",
 					Arguments: c.makeBuildArguments(options),
 				},
 			},
@@ -169,10 +170,6 @@ func (c *client) makeBuildArguments(options CreateFunctionOptions) []build.Argum
 		{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
 		// TODO configure buildtemplate based on buildpack image
 		// {Name: "TBD", Value: options.BuildpackImage},
-	}
-	if options.RunImage != "" {
-		// don't overwrite the default with an empty value
-		args = append(args, build.ArgumentSpec{Name: "RUN_IMAGE", Value: options.RunImage})
 	}
 	return args
 }
