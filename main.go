@@ -26,11 +26,13 @@ import (
 )
 
 var (
-	builder         = "projectriff/builder:0.2.0-snapshot-ci-f2315fde2cae"
+	// TODO update to a release version before releasing riff
+	builderVersion  = "0.2.0-snapshot-ci-8ee79f9144fc"
+	builder         = fmt.Sprintf("projectriff/builder:%s", builderVersion)
 	defaultRunImage = "packs/run:v3alpha2"
 
 	manifests = map[string]*core.Manifest{
-		// validated, compatible versions of Knative. This manifest is not tested
+		// validated, compatible versions of Knative
 		"stable": {
 			ManifestVersion: "0.1",
 			Istio: []string{
@@ -43,9 +45,10 @@ var (
 				"https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/serving.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/eventing.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/in-memory-channel.yaml",
+				fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-%s.yaml", builderVersion),
 			},
 			Namespace: []string{
-				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate-0.2.0-snapshot-ci-f2315fde2cae.yaml",
+				fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache-%s.yaml", builderVersion),
 			},
 		},
 		// most recent release of Knative. This manifest is not tested
@@ -59,12 +62,13 @@ var (
 				"https://storage.googleapis.com/knative-releases/serving/latest/serving.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/latest/eventing.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/latest/in-memory-channel.yaml",
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate.yaml",
 			},
 			Namespace: []string{
-				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate.yaml",
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache.yaml",
 			},
 		},
-		// most recent build of Knative from master
+		// most recent build of Knative from master. This manifest is not tested
 		"nightly": {
 			ManifestVersion: "0.1",
 			Istio: []string{
@@ -75,9 +79,10 @@ var (
 				"https://storage.googleapis.com/knative-nightly/serving/latest/serving.yaml",
 				"https://storage.googleapis.com/knative-nightly/eventing/latest/eventing.yaml",
 				"https://storage.googleapis.com/knative-nightly/eventing/latest/in-memory-channel.yaml",
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate.yaml",
 			},
 			Namespace: []string{
-				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-buildtemplate.yaml",
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache.yaml",
 			},
 		},
 	}

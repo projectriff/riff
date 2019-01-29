@@ -38,7 +38,7 @@ import (
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/projectriff/riff/pkg/env"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 )
 
@@ -122,6 +122,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 				Source:             c.makeBuildSourceSpec(options),
 				Template: &build.TemplateInstantiationSpec{
 					Name:      "riff-cnb",
+					Kind:      "ClusterBuildTemplate",
 					Arguments: c.makeBuildArguments(options),
 				},
 			},
