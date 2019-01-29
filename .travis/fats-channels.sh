@@ -17,9 +17,6 @@ kubectl apply -f https://storage.googleapis.com/knative-releases/eventing-source
 wait_pod_selector_ready control-plane=controller-manager knative-sources
 
 kubectl apply -n $NAMESPACE -f https://storage.googleapis.com/knative-releases/eventing-sources/previous/v0.3.0/message-dumper.yaml
-# TODO remove debug code
-sleep 5
-kubectl describe node
 wait_kservice_ready message-dumper $NAMESPACE
 
 kail --ns $NAMESPACE --label serving.knative.dev/service=message-dumper -c user-container > $test_name.output.logs &

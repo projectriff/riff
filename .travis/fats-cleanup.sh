@@ -25,6 +25,7 @@ if [ -d "$fats_dir" ]; then
     travis_fold start system-status
     echo "System status"
     kubectl get deployments,services,pods --all-namespaces || true
+    kubectl describe node || true
     travis_fold end system-status
   fi
 
