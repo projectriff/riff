@@ -27,12 +27,12 @@ import (
 
 var (
 	// TODO update to a release version before releasing riff
-	builderVersion  = "0.2.0-snapshot"
+	builderVersion  = "0.2.0-snapshot-ci-8ee79f9144fc"
 	builder         = fmt.Sprintf("projectriff/builder:%s", builderVersion)
 	defaultRunImage = "packs/run:v3alpha2"
 
 	manifests = map[string]*core.Manifest{
-		// validated, compatible versions of Knative. This manifest is not tested
+		// validated, compatible versions of Knative
 		"stable": {
 			ManifestVersion: "0.1",
 			Istio: []string{
@@ -66,7 +66,7 @@ var (
 				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache.yaml",
 			},
 		},
-		// most recent build of Knative from master
+		// most recent build of Knative from master. This manifest is not tested
 		"nightly": {
 			ManifestVersion: "0.1",
 			Istio: []string{
