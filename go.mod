@@ -25,7 +25,9 @@ require (
 	github.com/googleapis/gnostic v0.2.0 // indirect
 	github.com/gregjones/httpcache v0.0.0-20180305231024-9cad4c3443a7 // indirect
 	github.com/hashicorp/golang-lru v0.5.0 // indirect
+	github.com/howeyc/gopass v0.0.0-20170109162249-bf9dde6d0d2c // indirect
 	github.com/imdario/mergo v0.3.5 // indirect
+	github.com/jinzhu/copier v0.0.0-20180308034124-7e38e58719c3
 	github.com/json-iterator/go v0.0.0-20180701071628-ab8a2e0c74be // indirect
 	github.com/knative/build v0.3.0
 	github.com/knative/eventing v0.3.0
@@ -52,8 +54,14 @@ require (
 	golang.org/x/time v0.0.0-20180412165947-fbb02b2291d2 // indirect
 	google.golang.org/appengine v1.2.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	k8s.io/api v0.0.0-20180904230853-4e7be11eab3f
-	k8s.io/apimachinery v0.0.0-20180904193909-def12e63c512
-	k8s.io/client-go v0.0.0-20180910083459-2cefa64ff137
+	k8s.io/api v0.0.0-20181221193117-173ce66c1e39
+	k8s.io/apiextensions-apiserver v0.0.0-20181221201254-261a947e2c38
+	k8s.io/apimachinery v0.0.0-20181222072933-b814ad55d7c5
+	k8s.io/cli-runtime v0.0.0-20181221202950-8abb1aeb8307 // indirect
+	k8s.io/client-go v10.0.0+incompatible
+	k8s.io/klog v0.1.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20181114233023-0317810137be // indirect
+	k8s.io/kubernetes v1.13.1
+	sigs.k8s.io/kustomize v1.0.11 // indirect
+	sigs.k8s.io/yaml v1.1.0 // indirect
 )

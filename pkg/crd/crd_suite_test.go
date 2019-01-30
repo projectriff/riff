@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The original author or authors
+ * Copyright 2019 The original author or authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,16 @@
  * limitations under the License.
  */
 
-package main
+package crd_test
 
 import (
-	"fmt"
-	"os"
+	"testing"
 
-	"github.com/projectriff/riff/pkg/core"
-
-	"github.com/projectriff/riff/cmd/commands"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-func main() {
-
-	root := commands.CreateAndWireRootCommand(core.Manifests, core.BuilderName, core.DefaultRunImage)
-
-	sub, err := root.ExecuteC()
-	if err != nil {
-		if !sub.SilenceUsage { // May have been switched to true once we're past PreRunE()
-			sub.Help()
-		}
-		fmt.Fprintf(os.Stderr, "\nError: %v\n", err)
-		os.Exit(1)
-	}
+func TestFileutils(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "CRD Suite")
 }
