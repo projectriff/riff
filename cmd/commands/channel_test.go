@@ -327,7 +327,7 @@ var _ = Describe("The riff channel delete command", func() {
 			e := fmt.Errorf("some error")
 			asMock.On("DeleteChannel", mock.Anything).Return(e)
 			err := cd.Execute()
-			Expect(err).To(MatchError(e))
+			Expect(err).To(MatchError("Unable to delete channel my-channel: some error"))
 		})
 	})
 })

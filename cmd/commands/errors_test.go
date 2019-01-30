@@ -1,6 +1,7 @@
 package commands_test
 
 import (
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
@@ -8,77 +9,56 @@ import (
 )
 
 var _ = Describe("The result handling utility", func() {
-	It("returns a single error message as is", func() {
-		input := []error{errors.New("nope")}
 
-		result := commands.MergeResults(input)
+	var formatter func(commands.CorrelatedResult) string
 
-		Expect(result).To(MatchError("nope"))
+	BeforeEach(func() {
+		formatter = func(result commands.CorrelatedResult) string {
+			err := result.Error
+			if err == nil {
+				return ""
+			}
+			return fmt.Sprintf("got %s, resulted in error: %s", result.Input, err.Error())
+		}
 	})
 
-	It("returns a single non-nil error message as is", func() {
-		input := []error{nil, errors.New("nope"), nil}
+	It("formats the single error message", func() {
+		results := []commands.CorrelatedResult{{Input: "foo", Error: errors.New("nope")}}
 
-		result := commands.MergeResults(input)
+		result := commands.MergeResults(results, formatter)
 
-		Expect(result).To(MatchError("nope"))
+		Expect(result).To(MatchError("got foo, resulted in error: nope"))
 	})
 
-	It("merges error messages", func() {
-		input := []error{errors.New("nope"),
-			errors.New("still nope")}
+	It("skips empty messages", func() {
+		results := []commands.CorrelatedResult{
+			{Input: "foo", Error: nil},
+			{Input: "bar", Error: errors.New("nope")},
+			{Input: "baz", Error: nil},
+		}
 
-		result := commands.MergeResults(input)
+		result := commands.MergeResults(results, formatter)
 
-		Expect(result).To(MatchError(`# Call 1 - error
-	nope
-# Call 2 - error
-	still nope
-`))
+		Expect(result).To(MatchError("got bar, resulted in error: nope"))
 	})
 
-	It("merges error messages, including nil ones", func() {
-		input := []error{errors.New("nope"),
-			nil,
-			errors.New("still nope")}
+	It("merges multiple error messages", func() {
+		results := []commands.CorrelatedResult{
+			{Input: "foo", Error: nil},
+			{Input: "bar", Error: errors.New("nope")},
+			{Input: "baz", Error: errors.New("still nope")},
+		}
 
-		result := commands.MergeResults(input)
+		result := commands.MergeResults(results, formatter)
 
-		Expect(result).To(MatchError(`# Call 1 - error
-	nope
-# Call 2 - no error
-# Call 3 - error
-	still nope
-`))
-	})
-
-	It("indents multi-line messages", func() {
-		input := []error{errors.New("nope\nnope\nnope"), errors.New("ah")}
-
-		result := commands.MergeResults(input)
-
-		Expect(result).To(MatchError(`# Call 1 - error
-	nope
-	nope
-	nope
-# Call 2 - error
-	ah
-`))
-	})
-
-
-	It("returns nil when there is no error", func() {
-		var input []error
-
-		result := commands.MergeResults(input)
-
-		Expect(result).To(BeNil())
+		Expect(result).To(MatchError(`got bar, resulted in error: nope
+got baz, resulted in error: still nope`))
 	})
 
 	It("returns nil when there are only nil errors", func() {
-		input := []error{nil, nil}
+		results := []commands.CorrelatedResult{{Input: "foo", Error: nil}}
 
-		result := commands.MergeResults(input)
+		result := commands.MergeResults(results, formatter)
 
 		Expect(result).To(BeNil())
 	})

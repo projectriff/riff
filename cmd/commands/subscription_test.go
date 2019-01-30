@@ -280,11 +280,12 @@ var _ = Describe("The riff subscription delete command", func() {
 
 		It("should propagate the client error", func() {
 			deleteCommand.SetArgs([]string{"subscription-name"})
-			clientMock.On("DeleteSubscription", mock.Anything).Return(fmt.Errorf("client error"))
+			e := fmt.Errorf("some error")
+			clientMock.On("DeleteSubscription", mock.Anything).Return(e)
 
 			err := deleteCommand.Execute()
 
-			Expect(err).To(MatchError(Equal("client error")))
+			Expect(err).To(MatchError(Equal("Unable to delete subscription subscription-name: some error")))
 		})
 	})
 

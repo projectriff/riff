@@ -539,7 +539,7 @@ var _ = Describe("The riff service delete command", func() {
 			e := fmt.Errorf("some error")
 			asMock.On("DeleteService", mock.Anything).Return(e)
 			err := sd.Execute()
-			Expect(err).To(MatchError(e))
+			Expect(err).To(MatchError("Unable to delete service my-service: some error"))
 		})
 
 	})
