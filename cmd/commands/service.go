@@ -318,10 +318,17 @@ func ServiceDelete(riffClient *core.Client) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			names := args[serviceDeleteNameStartIndex:]
-			err := MergeResults(ApplyInParallel(names, func(name string) error {
+			results := ApplyInParallel(names, func(name string) error {
 				options := core.DeleteServiceOptions{Namespace: cliOptions.Namespace, Name: name}
 				return (*riffClient).DeleteService(options)
-			}))
+			})
+			err := MergeResults(results, func(result CorrelatedResult) string {
+				err := result.Error
+				if err == nil {
+					return ""
+				}
+				return fmt.Sprintf("Unable to delete service %s: %v", result.Input, err)
+			})
 			if err != nil {
 				return err
 			}

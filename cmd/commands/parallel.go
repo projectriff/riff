@@ -2,17 +2,25 @@ package commands
 
 import "sync"
 
-func ApplyInParallel(names []string, action func(string) error) []error {
+type CorrelatedResult struct {
+	Input string
+	Error error
+}
+
+func ApplyInParallel(names []string, action func(string) error) []CorrelatedResult {
 	count := len(names)
-	result := make([]error, count)
+	results := make([]CorrelatedResult, count)
 	waitGroup := sync.WaitGroup{}
 	waitGroup.Add(count)
 	for i, name := range names {
 		go func(i int, name string) {
-			result[i] = action(name)
+			results[i] = CorrelatedResult{
+				Input: name,
+				Error: action(name),
+			}
 			waitGroup.Done()
 		}(i, name)
 	}
 	waitGroup.Wait()
-	return result
+	return results
 }

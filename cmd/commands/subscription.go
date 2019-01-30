@@ -94,10 +94,17 @@ func SubscriptionDelete(riffClient *core.Client) *Command {
 		),
 		RunE: func(cmd *Command, args []string) error {
 			names := args[subscriptionDeleteNameStartIndex:]
-			err := MergeResults(ApplyInParallel(names, func(name string) error {
+			results := ApplyInParallel(names, func(name string) error {
 				options := core.DeleteSubscriptionOptions{Namespace: cliOptions.Namespace, Name: name}
 				return (*riffClient).DeleteSubscription(options)
-			}))
+			})
+			err := MergeResults(results, func(result CorrelatedResult) string {
+				err := result.Error
+				if err == nil {
+					return ""
+				}
+				return fmt.Sprintf("Unable to delete subscription %s: %v", result.Input, err)
+			})
 			if err != nil {
 				return err
 			}

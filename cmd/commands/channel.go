@@ -131,10 +131,17 @@ func ChannelDelete(riffClient *core.Client) *cobra.Command {
   ` + env.Cli.Name + ` channel delete channel-1 channel-2`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			names := args[channelDeleteNameStartIndex:]
-			err := MergeResults(ApplyInParallel(names, func(name string) error {
+			results := ApplyInParallel(names, func(name string) error {
 				options := core.DeleteChannelOptions{Namespace: cliOptions.Namespace, Name: name}
 				return (*riffClient).DeleteChannel(options)
-			}))
+			})
+			err := MergeResults(results, func(result CorrelatedResult) string {
+				err := result.Error
+				if err == nil {
+					return ""
+				}
+				return fmt.Sprintf("Unable to delete channel %s: %v", result.Input, err)
+			})
 			if err != nil {
 				return err
 			}

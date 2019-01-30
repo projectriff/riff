@@ -1,53 +1,53 @@
 package commands
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	"strings"
 )
 
-// Joins and formats results.
+// Joins and formats results, with the provided formatter.
+// The result is skipped if the formatter returns an empty string.
 // Returns nil if all errors are nil.
-// If there is only one non-nil error, the  error is returned as-is.
-func MergeResults(input []error) error {
-	stats := computeStats(input)
+func MergeResults(results []CorrelatedResult, formatter func(CorrelatedResult) string) error {
+	stats := computeStats(results)
 	length := stats.nilFreeSliceLength
 	if length == 0 {
 		return nil
 	}
 	if length == 1 {
-		return input[stats.firstNonNilIndex]
+		return errors.New(format(formatter, results[stats.firstNonNilIndex]))
 	}
-	return errors.New(formatErrorMessages(input))
+	return errors.New(formatErrorMessages(results, formatter))
 }
 
-func formatErrorMessages(input []error) string {
+func formatErrorMessages(input []CorrelatedResult, formatter func(CorrelatedResult) string) string {
 	mergedMessage := strings.Builder{}
-	for i, err := range input {
-		if err == nil {
-			mergedMessage.WriteString(fmt.Sprintf("# Call %d - no error\n", i+1))
-			continue
+	for _, err := range input {
+		formattedMessage := format(formatter, err)
+		if formattedMessage != "" {
+			mergedMessage.WriteString(formattedMessage)
+			mergedMessage.WriteString("\n")
 		}
-		mergedMessage.WriteString(fmt.Sprintf("# Call %d - error\n", i+1))
-		leftPaddedMessage := strings.Replace(err.Error(), "\n", "\n\t", -1)
-		mergedMessage.WriteString("\t" + leftPaddedMessage + "\n")
 	}
-	s := mergedMessage.String()
-	return s
+	return strings.TrimSuffix(mergedMessage.String(), "\n")
 }
 
-func computeStats(errors []error) stats {
+func format(formatter func(CorrelatedResult) string, err CorrelatedResult) string {
+	return formatter(err)
+}
+
+func computeStats(results []CorrelatedResult) *stats {
 	firstNonNilIndex := -1
 	length := 0
-	for i, err := range errors {
-		if err != nil {
+	for i, result := range results {
+		if result.Error != nil {
 			length++
 			if firstNonNilIndex == -1 {
 				firstNonNilIndex = i
 			}
 		}
 	}
-	return stats{
+	return &stats{
 		nilFreeSliceLength: length,
 		firstNonNilIndex:   firstNonNilIndex,
 	}
