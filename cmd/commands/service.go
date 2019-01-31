@@ -19,6 +19,7 @@ package commands
 import (
 	"bytes"
 	"fmt"
+	"github.com/projectriff/riff/pkg/core/tasks"
 	"io"
 	"os"
 	"os/exec"
@@ -368,11 +369,11 @@ func ServiceDelete(riffClient *core.Client) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			names := args[serviceDeleteNameStartIndex:]
-			results := ApplyInParallel(names, func(name string) error {
+			results := tasks.ApplyInParallel(names, func(name string) error {
 				options := core.DeleteServiceOptions{Namespace: cliOptions.Namespace, Name: name}
 				return (*riffClient).DeleteService(options)
 			})
-			err := MergeResults(results, func(result CorrelatedResult) string {
+			err := tasks.MergeResults(results, func(result tasks.CorrelatedResult) string {
 				err := result.Error
 				if err == nil {
 					return ""
