@@ -82,7 +82,7 @@ func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 		command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", desc)
 	} else {
 		command.Flags().StringVarP(&options.Manifest, "manifest", "m", "", "path to a manifest of kubernetes configuration files to be applied")
-		command.MarkFlagRequired("manifest")
+		_ = command.MarkFlagRequired("manifest")
 	}
 
 	command.Flags().BoolVarP(&options.NoSecret, "no-secret", "", false, "no secret required for the image registry")
