@@ -19,12 +19,15 @@ package core
 import (
 	"bufio"
 	"fmt"
+	"github.com/projectriff/riff/pkg/core/tasks"
 	"github.com/projectriff/riff/pkg/env"
 	"github.com/projectriff/riff/pkg/fileutils"
 	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"net/url"
 	"os"
+	"sort"
+	"strings"
 	"syscall"
 
 	corev1 "k8s.io/api/core/v1"
@@ -51,6 +54,12 @@ type NamespaceInitOptions struct {
 	SecretName        string
 	GcrTokenPath      string
 	DockerHubUsername string
+}
+
+type NamespaceCleanupOptions struct {
+	NamespaceName   string
+	SecretName      string
+	RemoveNamespace bool
 }
 
 func (o *NamespaceInitOptions) secretType() secretType {
@@ -98,7 +107,7 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 		return err
 	}
 
-	initLabels := map[string]string{"created-by": fmt.Sprintf("%s-%s", env.Cli.Name, env.Cli.Version)}
+	initLabels := getInitLabels()
 	if options.secretType() != secretTypeNone {
 		if options.GcrTokenPath != "" {
 			if err := c.createGcrSecret(options, initLabels); err != nil {
@@ -182,6 +191,35 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 	return nil
 }
 
+func (c *kubectlClient) NamespaceCleanup(options NamespaceCleanupOptions) error {
+	ns := options.NamespaceName
+	initLabelKeys := sortedKeysOf(getInitLabels())
+	initLabelSelector := existsSelectors(initLabelKeys)
+
+	fmt.Printf("Deleting serviceaccounts matching label keys %v in namespace %q\n", initLabelKeys, ns)
+	if err := c.deleteMatchingServiceAccounts(ns, initLabelSelector); err != nil {
+		return err
+	}
+
+	fmt.Printf("Deleting persistentvolumeclaims matching label keys %v in namespace %q\n", initLabelKeys, ns)
+	if err := c.deleteMatchingPersistentVolumeClaims(ns, initLabelSelector); err != nil {
+		return err
+	}
+
+	fmt.Printf("Deleting secrets matching label keys %v in namespace %q\n", initLabelKeys, ns)
+	if err := c.deleteMatchingSecrets(ns, initLabelSelector); err != nil {
+		return err
+	}
+
+	if options.RemoveNamespace {
+		fmt.Printf("Deleting namespace %q\n", ns)
+		if err := c.kubeClient.CoreV1().Namespaces().Delete(ns, &v1.DeleteOptions{}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (c *kubectlClient) checkSecretExists(options NamespaceInitOptions) error {
 	_, err := c.kubeClient.CoreV1().Secrets(options.NamespaceName).Get(options.SecretName, v1.GetOptions{})
 	return err
@@ -247,4 +285,111 @@ func readPassword(s string) (string, error) {
 		res, err := ioutil.ReadAll(reader)
 		return string(res), err
 	}
+}
+
+func getInitLabels() map[string]string {
+	return map[string]string{
+		"projectriff.io/installer": env.Cli.Name,
+		"projectriff.io/version":   env.Cli.Version,
+	}
+}
+
+func existsSelectors(labelKeys []string) string {
+	builder := strings.Builder{}
+	for _, key := range labelKeys {
+		builder.WriteString(fmt.Sprintf("%s,", key))
+	}
+	return strings.TrimSuffix(builder.String(), ",")
+}
+
+func (c *kubectlClient) deleteMatchingServiceAccounts(ns string, initLabelSelector string) error {
+	serviceAccounts, err := c.kubeClient.CoreV1().ServiceAccounts(ns).List(v1.ListOptions{
+		LabelSelector: initLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+	deletionResults := tasks.ApplyInParallel(serviceAccountNamesOf(serviceAccounts.Items), func(name string) error {
+		return c.kubeClient.CoreV1().ServiceAccounts(ns).Delete(name, &v1.DeleteOptions{})
+	})
+	return tasks.MergeResults(deletionResults, func(result tasks.CorrelatedResult) string {
+		err := result.Error
+		if err == nil {
+			return ""
+		}
+		return fmt.Sprintf("Unable to delete service account %s: %v", result.Input, err)
+	})
+}
+
+func (c *kubectlClient) deleteMatchingPersistentVolumeClaims(ns string, initLabelSelector string) error {
+	persistentVolumeClaims, err := c.kubeClient.CoreV1().PersistentVolumeClaims(ns).List(v1.ListOptions{
+		LabelSelector: initLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+	deletionResults := tasks.ApplyInParallel(persistentVolumeClaimNamesOf(persistentVolumeClaims.Items), func(name string) error {
+		return c.kubeClient.CoreV1().PersistentVolumeClaims(ns).Delete(name, &v1.DeleteOptions{})
+	})
+	return tasks.MergeResults(deletionResults, func(result tasks.CorrelatedResult) string {
+		err := result.Error
+		if err == nil {
+			return ""
+		}
+		return fmt.Sprintf("Unable to delete persistent volume claim %s: %v", result.Input, err)
+	})
+}
+
+func (c *kubectlClient) deleteMatchingSecrets(ns string, initLabelSelector string) error {
+	secrets, err := c.kubeClient.CoreV1().Secrets(ns).List(v1.ListOptions{
+		LabelSelector: initLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+	deletionResults := tasks.ApplyInParallel(secretNamesOf(secrets.Items), func(name string) error {
+		return c.kubeClient.CoreV1().Secrets(ns).Delete(name, &v1.DeleteOptions{})
+	})
+	return tasks.MergeResults(deletionResults, func(result tasks.CorrelatedResult) string {
+		err := result.Error
+		if err == nil {
+			return ""
+		}
+		return fmt.Sprintf("Unable to delete secret %s: %v", result.Input, err)
+	})
+}
+
+func serviceAccountNamesOf(items []corev1.ServiceAccount) []string {
+	result := make([]string, len(items))
+	for i, item := range items {
+		result[i] = item.Name
+	}
+	return result
+}
+
+func persistentVolumeClaimNamesOf(items []corev1.PersistentVolumeClaim) []string {
+	result := make([]string, len(items))
+	for i, item := range items {
+		result[i] = item.Name
+	}
+	return result
+}
+
+func secretNamesOf(items []corev1.Secret) []string {
+	result := make([]string, len(items))
+	for i, item := range items {
+		result[i] = item.Name
+	}
+	return result
+}
+
+func sortedKeysOf(labels map[string]string) []string {
+	result := make([]string, len(labels))
+	i := 0
+	for key := range labels {
+		result[i] = key
+		i++
+	}
+	sort.Strings(result)
+	return result
 }
