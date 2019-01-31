@@ -132,6 +132,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	installKubeConfigSupport(namespace, &client, &kc)
 	namespace.AddCommand(
 		NamespaceInit(manifests, &kc),
+		NamespaceCleanup(&kc),
 	)
 
 	system := System()

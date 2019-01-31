@@ -53,6 +53,11 @@ type NamespaceInitOptions struct {
 	DockerHubUsername string
 }
 
+type NamespaceCleanupOptions struct {
+	NamespaceName   string
+	RemoveNamespace bool
+}
+
 func (o *NamespaceInitOptions) secretType() secretType {
 	switch {
 	case o.NoSecret:
@@ -179,6 +184,10 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 			return err
 		}
 	}
+	return nil
+}
+
+func (c *kubectlClient) NamespaceCleanup(options NamespaceCleanupOptions) error {
 	return nil
 }
 
