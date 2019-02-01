@@ -11,10 +11,12 @@ require (
 	github.com/buildpack/pack v0.0.4
 	github.com/buildpack/packs v0.0.0-20180824112413-aa30a4129237 // indirect
 	github.com/cpuguy83/go-md2man v1.0.8 // indirect
+	github.com/emicklei/go-restful v2.8.1+incompatible // indirect
 	github.com/evanphx/json-patch v4.1.0+incompatible // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/frioux/shellquote v0.0.1
 	github.com/ghodss/yaml v1.0.0
+	github.com/go-openapi/spec v0.18.0 // indirect
 	github.com/go-yaml/yaml v2.1.0+incompatible // indirect
 	github.com/gobuffalo/envy v1.6.10 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
@@ -56,4 +58,5 @@ require (
 	k8s.io/apimachinery v0.0.0-20180904193909-def12e63c512
 	k8s.io/client-go v0.0.0-20180910083459-2cefa64ff137
 	k8s.io/kube-openapi v0.0.0-20181114233023-0317810137be // indirect
+	sigs.k8s.io/kustomize v1.0.11
 )

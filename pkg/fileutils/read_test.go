@@ -17,11 +17,16 @@
 package fileutils_test
 
 import (
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/fileutils"
+	"github.com/projectriff/riff/pkg/test_support"
+	"net"
+	"net/url"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 var _ = Describe("Read", func() {
@@ -132,8 +137,68 @@ var _ = Describe("Read", func() {
 				Expect(string(content)).To(Equal("contents"))
 			})
 		})
+
+		Context("when a file is a URL with an unsupported protocol", func() {
+			BeforeEach(func() {
+				base = "" // irrelevant when file is absolute
+
+				file = "ftp://localhost/some-file.txt"
+			})
+
+			It("should read the file content", func() {
+				Expect(err).To(MatchError("unsupported URL scheme ftp in ftp://localhost/some-file.txt"))
+			})
+		})
 	})
 
+})
+
+var _ = Describe("ReadUrl", func() {
+
+	const (
+		timeout = 200 * time.Millisecond
+	)
+
+	It("reads file URLs", func() {
+		resourceUrl, _ := url.Parse(test_support.FileURL(test_support.AbsolutePath("fixtures/file.txt")))
+
+		result, err := fileutils.ReadUrl(resourceUrl, timeout)
+
+		Expect(err).NotTo(HaveOccurred())
+		Expect(result).To(Equal([]byte("contents")))
+	})
+
+	It("reads HTTP URLs", func() {
+		listener, _ := net.Listen("tcp", "127.0.0.1:0")
+		go func() {
+			err := test_support.Serve(listener, test_support.HttpResponse{
+				Headers: map[string]string{"Content-Type": "text/plain"},
+				Content: []byte("contents"),
+			})
+			Expect(err).NotTo(HaveOccurred())
+		}()
+		resourceUrl, _ := url.Parse(fmt.Sprintf("http://%s/%s", listener.Addr().String(), ""))
+
+		result, err := fileutils.ReadUrl(resourceUrl, timeout)
+
+		Expect(err).NotTo(HaveOccurred())
+		Expect(result).To(Equal([]byte("contents")))
+	})
+
+	It("fails if fetching the remote resource to serve takes too long", func() {
+		resourceListener, _ := net.Listen("tcp", "127.0.0.1:0")
+		go func() {
+			err := test_support.ServeSlow(resourceListener, test_support.HttpResponse{}, 2*timeout)
+			Expect(err).NotTo(HaveOccurred())
+		}()
+		resourceUrl, _ := url.Parse(fmt.Sprintf("http://%s/%s", resourceListener.Addr().String(), ""))
+
+		_, err := fileutils.ReadUrl(resourceUrl, timeout)
+
+		Expect(err).To(SatisfyAll(
+			Not(BeNil()),
+			BeAssignableToTypeOf(&url.Error{})))
+	})
 })
 
 func getwdAsURL() string {
