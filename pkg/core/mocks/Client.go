@@ -268,6 +268,27 @@ func (_m *Client) ServiceStatus(options core.ServiceStatusOptions) (*duckv1alpha
 	return r0, r1
 }
 
+// SystemInstall provides a mock function with given fields: manifests, options
+func (_m *Client) SystemInstall(manifests map[string]*core.Manifest, options core.SystemInstallOptions) (bool, error) {
+	ret := _m.Called(manifests, options)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(map[string]*core.Manifest, core.SystemInstallOptions) bool); ok {
+		r0 = rf(manifests, options)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(map[string]*core.Manifest, core.SystemInstallOptions) error); ok {
+		r1 = rf(manifests, options)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // UpdateFunction provides a mock function with given fields: builder, options, log
 func (_m *Client) UpdateFunction(builder core.Builder, options core.UpdateFunctionOptions, log io.Writer) error {
 	ret := _m.Called(builder, options, log)

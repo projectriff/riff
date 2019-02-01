@@ -20,7 +20,7 @@ package crd
 import (
 	"fmt"
 	"github.com/jinzhu/copier"
-	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/constants"
 	"github.com/projectriff/riff/pkg/env"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -189,7 +189,7 @@ func NewManifest() *Manifest {
 					Name: "serving",
 					Checks: []ResourceChecks{
 						{
-							Kind: "Pod",
+							Kind:      "Pod",
 							Namespace: "knative-serving",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"app": "activator"},
@@ -198,7 +198,7 @@ func NewManifest() *Manifest {
 							Pattern:  "Running",
 						},
 						{
-							Kind: "Pod",
+							Kind:      "Pod",
 							Namespace: "knative-serving",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"app": "autoscaler"},
@@ -255,10 +255,10 @@ func NewManifest() *Manifest {
 					Name: "eventing-in-memory-channel",
 					Checks: []ResourceChecks{
 						{
-							Kind: "Pod",
+							Kind:      "Pod",
 							Namespace: "knative-eventing",
 							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"role": "dispatcher", "clusterChannelProvisioner":"in-memory-channel"},
+								MatchLabels: map[string]string{"role": "dispatcher", "clusterChannelProvisioner": "in-memory-channel"},
 							},
 							JsonPath: ".status.phase",
 							Pattern:  "Running",
@@ -275,7 +275,7 @@ func NewManifest() *Manifest {
 					},
 				},
 				{
-					Path: fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-%s.yaml", core.BuilderVersion),
+					Path: fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-%s.yaml", constants.BuilderVersion),
 					Name: "riff-build-template",
 				},
 			},

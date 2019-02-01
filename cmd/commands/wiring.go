@@ -18,6 +18,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/projectriff/riff/pkg/crd"
 	"os/user"
 	"strings"
 
@@ -27,6 +28,7 @@ import (
 
 	eventing "github.com/knative/eventing/pkg/client/clientset/versioned"
 	serving "github.com/knative/serving/pkg/client/clientset/versioned"
+	apiextensions "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
@@ -36,11 +38,11 @@ import (
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.ClientConfig, kubernetes.Interface, eventing.Interface, serving.Interface, error) {
+var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.ClientConfig, kubernetes.Interface, eventing.Interface, serving.Interface, apiextensions.Interface, error) {
 
 	kubeconfig, err := resolveHomePath(kubeconfig)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 
 	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
@@ -49,19 +51,25 @@ var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.
 
 	cfg, err := clientConfig.ClientConfig()
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 	kubeClientSet, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 	eventingClientSet, err := eventing.NewForConfig(cfg)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 	servingClientSet, err := serving.NewForConfig(cfg)
-
-	return clientConfig, kubeClientSet, eventingClientSet, servingClientSet, err
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
+	}
+	extClientSet, err := apiextensions.NewForConfig(cfg)
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
+	}
+	return clientConfig, kubeClientSet, eventingClientSet, servingClientSet, extClientSet, err
 }
 
 func resolveHomePath(p string) (string, error) {
@@ -137,7 +145,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	system := System()
 	installKubeConfigSupport(system, &client, &kc)
 	system.AddCommand(
-		SystemInstall(manifests, &kc),
+		SystemInstall(manifests, &client),
 		SystemUninstall(&kc),
 	)
 
@@ -192,11 +200,15 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 	oldPersistentPreRunE := command.PersistentPreRunE
 	command.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		var err error
-		clientConfig, kubeClientSet, eventingClientSet, servingClientSet, err := realClientSetFactory(kubeconfig, masterURL)
+		clientConfig, kubeClientSet, eventingClientSet, servingClientSet, extClientSet, err := realClientSetFactory(kubeconfig, masterURL)
 		if err != nil {
 			return err
 		}
-		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet)
+		crdClient, err := crd.NewClient(clientConfig)
+		if err != nil {
+			return err
+		}
+		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, extClientSet, crdClient)
 		if err != nil {
 			return err
 		}

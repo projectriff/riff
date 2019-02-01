@@ -41,7 +41,7 @@ func System() *cobra.Command {
 	}
 }
 
-func SystemInstall(manifests map[string]*core.Manifest, kc *core.KubectlClient) *cobra.Command {
+func SystemInstall(manifests map[string]*core.Manifest, c *core.Client) *cobra.Command {
 	options := core.SystemInstallOptions{}
 
 	var namedManifests []string
@@ -73,7 +73,7 @@ func SystemInstall(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 			"\nNote: relative file paths or http/https URLs may be used in the manifest.",
 		Args: cobra.ExactArgs(systemInstallNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			complete, err := (*kc).SystemInstall(manifests, options)
+			complete, err := (*c).SystemInstall(manifests, options)
 			if err != nil {
 				return err
 			}

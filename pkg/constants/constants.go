@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The original author or authors
+ * Copyright 2019 The original author or authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-package core
+package constants
 
 import (
-	"github.com/projectriff/riff/pkg/kubectl"
-	"k8s.io/client-go/kubernetes"
+	"fmt"
 )
 
-type KubectlClient interface {
-	SystemUninstall(options SystemUninstallOptions) (bool, error)
-	NamespaceInit(manifests map[string]*Manifest, options NamespaceInitOptions) error
-}
+var (
+	// TODO update to a release version before releasing riff
+	BuilderVersion  = "0.2.0-snapshot-ci-8ee79f9144fc"
+	BuilderName         = fmt.Sprintf("projectriff/builder:%s", BuilderVersion)
+	DefaultRunImage = "packs/run:v3alpha2"
 
-type kubectlClient struct {
-	kubeClient kubernetes.Interface
-	kubeCtl    kubectl.KubeCtl
-}
-
-func NewKubectlClient(kubeClient kubernetes.Interface) KubectlClient {
-	return &kubectlClient{kubeClient: kubeClient, kubeCtl: kubectl.RealKubeCtl()}
-}
+)

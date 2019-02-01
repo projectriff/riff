@@ -21,7 +21,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/projectriff/riff/pkg/crd"
+	"github.com/projectriff/riff/pkg/kubectl"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -55,57 +58,204 @@ var (
 	allNameSpaces     = append(knativeNamespaces, istioNamespace)
 )
 
-func (kc *kubectlClient) SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error) {
+func (c *client) SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error) {
 	manifest, err := ResolveManifest(manifests, options.Manifest)
 	if err != nil {
 		return false, err
 	}
 
-	err = ensureNotTerminating(kc, allNameSpaces, "Please try again later.")
+	err = newEnsureNotTerminating(c, allNameSpaces, "Please try again later.")
 	if err != nil {
 		return false, err
 	}
 
-	istioStatus, err := getNamespaceStatus(kc, istioNamespace)
-	if istioStatus == "'NotFound'" {
-		fmt.Print("Installing Istio components\n")
-		for i, release := range manifest.Istio {
-			if i > 0 {
-				time.Sleep(5 * time.Second) // wait for previous resources to be created
-			}
-			err = kc.applyReleaseWithRetry(release, options)
-			if err != nil {
-				return false, err
-			}
-		}
-		fmt.Print("Istio components installed\n\n")
-	} else {
-		if !options.Force {
-			answer, err := confirm("Istio is already installed, do you want to install the Knative components for riff?")
-			if err != nil {
-				return false, err
-			}
-			if !answer {
-				return false, nil
-			}
-		}
-	}
-
-	err = waitForIstioComponents(kc)
+	err = crd.CreateCRD(c.apiExtension)
 	if err != nil {
-		return false, err
+		return false, errors.New(fmt.Sprintf("Could not create riff CRD: %s ", err))
 	}
-
-	fmt.Print("Installing Knative components\n")
-	for _, release := range manifest.Knative {
-		err = kc.applyReleaseWithRetry(release, options)
-		if err != nil {
-			return false, err
-		}
+	riffManifest, err := c.createCRDObject(manifest, options)
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("Could not install riff: %s ", err))
+	}
+	fmt.Println("Installing", env.Cli.Name, "components")
+	fmt.Println()
+	err = c.installAndCheckResources(riffManifest, options)
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("Could not install riff: %s ", err))
 	}
 	fmt.Print("Knative components installed\n\n")
 	return true, nil
 }
+
+func (c *client) createCRDObject(manifest *Manifest, options SystemInstallOptions) (*crd.Manifest, error) {
+	crdManifest, err := buildCrdManifest(manifest)
+	if err != nil {
+		return nil, err
+	}
+	old, err := c.crdClient.Get()
+	if old == nil {
+		_, err = c.crdClient.Create(crdManifest)
+	} else {
+		return nil, errors.New("riff crd already installed")
+	}
+	return crdManifest, err
+}
+
+//TODO this is a stop-gap, remove core.Manifest in favor of crd.Manifest
+func buildCrdManifest(manifest *Manifest) (*crd.Manifest, error) {
+	err := validateManifest(manifest)
+	if err != nil {
+		return nil, err
+	}
+	crdManifest := crd.NewManifest()
+	var resource *crd.RiffResources
+	for i := range crdManifest.Spec.Resources {
+		resource = &crdManifest.Spec.Resources[i]
+		if strings.Contains(resource.Path, "istio") {
+			resource.Path = manifest.Istio[0]
+		} else if strings.Contains(resource.Path, "build") && !strings.Contains(resource.Path, "buildtemplate") {
+			resource.Path = getElementContaining(manifest.Knative, "build")
+		} else if strings.Contains(resource.Path, "serving") {
+			resource.Path = getElementContaining(manifest.Knative, "serving")
+		} else if strings.Contains(resource.Path, "eventing") && !strings.Contains(resource.Path, "channel") {
+			resource.Path = getElementContaining(manifest.Knative, "eventing")
+		} else if strings.Contains(resource.Path, "channel") {
+			resource.Path = getElementContaining(manifest.Knative, "channel")
+		} else if strings.Contains(resource.Path, "buildtemplate") && !strings.Contains(resource.Path, "cache") {
+			resource.Path = getElementContaining(manifest.Knative, "buildtemplate")
+		} else if strings.Contains(resource.Path, "cache") {
+			resource.Path = manifest.Namespace[0]
+		}
+	}
+	return crdManifest, nil
+}
+
+func getElementContaining(array []string, substring string) string {
+	for _, s := range array {
+		if strings.Contains(s, substring) {
+			return s
+		}
+	}
+	return ""
+}
+
+func validateManifest(manifest *Manifest) error {
+	if len(manifest.Namespace) != 1 {
+		return errors.New("invalid buildtemplate specified in manifest")
+	}
+	return nil
+}
+
+
+func (c *client) installAndCheckResources(manifest *crd.Manifest, options SystemInstallOptions) error {
+	for _,resource := range manifest.Spec.Resources {
+		err := c.installResource(resource, options)
+		if err != nil {
+			return err
+		}
+		err = c.checkResource(resource)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *client) installResource(res crd.RiffResources, options SystemInstallOptions) error {
+	if res.Path == "" {
+		return errors.New("cannot install anything other than a url yet")
+	}
+	fmt.Printf("installing %s from %s...", res.Name, res.Path)
+	yaml, err := fileutils.Read(res.Path, filepath.Dir(options.Manifest))
+	if err != nil {
+		return err
+	}
+	if options.NodePort {
+		yaml = bytes.Replace(yaml, []byte("type: LoadBalancer"), []byte("type: NodePort"), -1)
+	}
+	// TODO HACK: use the RESTClient to do this
+	kubectl := kubectl.RealKubeCtl()
+	istioLog, err := kubectl.ExecStdin([]string{"apply", "-f", "-"}, &yaml)
+	if err != nil {
+		fmt.Printf("%s\n", istioLog)
+		if strings.Contains(istioLog, "forbidden") {
+			fmt.Print(`It looks like you don't have cluster-admin permissions.
+
+To fix this you need to:
+ 1. Delete the current failed installation using:
+      ` + env.Cli.Name + ` system uninstall --istio --force
+ 2. Give the user account used for installation cluster-admin permissions, you can use the following command:
+      kubectl create clusterrolebinding cluster-admin-binding \
+        --clusterrole=cluster-admin \
+        --user=<install-user>
+ 3. Re-install ` + env.Cli.Name + `
+
+`)
+		}
+		return err
+	}
+	return nil
+}
+
+// TODO this only supports checking Pods for phases
+func (c *client) checkResource(resource crd.RiffResources) error {
+	cnt := 1
+	for _, check := range resource.Checks {
+		var ready bool
+		var err error
+		for i := 0; i< 360; i++ {
+			if strings.EqualFold(check.Kind, "Pod") {
+				ready, err = c.isPodReady(check)
+				if err != nil {
+					return err
+				}
+				if ready {
+					break
+				}
+			} else {
+				return errors.New("only Kind:Pod supported for resource checks")
+			}
+			time.Sleep(1 * time.Second)
+			cnt++
+			if cnt % 5 == 0 {
+				fmt.Print(".")
+			}
+		}
+		if !ready {
+			return errors.New(fmt.Sprintf("The resource %s did not initialize", resource.Name))
+		}
+	}
+	fmt.Println("done")
+	return nil
+}
+
+func (c *client) isPodReady(check crd.ResourceChecks) (bool, error) {
+	pods := c.kubeClient.CoreV1().Pods(check.Namespace)
+	podList, err := pods.List(metav1.ListOptions{
+		LabelSelector: convertMapToString(check.Selector.MatchLabels),
+	})
+	if err != nil {
+		return false, err
+	}
+	for _, pod := range podList.Items {
+		if strings.EqualFold(string(pod.Status.Phase), check.Pattern) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func convertMapToString(m map[string]string) string {
+	var s string
+	for k,v := range m {
+		s += k + "=" + v + ","
+	}
+	if last := len(s) - 1; last >= 0 && s[last] == ',' {
+		s = s[:last]
+	}
+	return s
+}
+
 
 func (kc *kubectlClient) applyReleaseWithRetry(release string, options SystemInstallOptions) error {
 	err := retry(retryDuration, retrySteps, func() (bool, error) {
@@ -407,6 +557,19 @@ func checkNamespacesExists(kc *kubectlClient, names []string) (int, error) {
 	return count, nil
 }
 
+func newEnsureNotTerminating(c *client, names []string, message string) error {
+	for _, name := range names {
+		status, err := getNewNamespaceStatus(c, name)
+		if err != nil {
+			return err
+		}
+		if status == "'Terminating'" {
+			return errors.New(fmt.Sprintf("The %s namespace is currently 'Terminating'. %s", name, message))
+		}
+	}
+	return nil
+}
+
 func ensureNotTerminating(kc *kubectlClient, names []string, message string) error {
 	for _, name := range names {
 		status, err := getNamespaceStatus(kc, name)
@@ -428,6 +591,18 @@ func getNamespaceStatus(kc *kubectlClient, name string) (string, error) {
 		}
 		return "", err
 	}
+	return nsLog, nil
+}
+
+func getNewNamespaceStatus(c *client, name string) (string, error) {
+	ns, err := c.kubeClient.CoreV1().Namespaces().Get(name, metav1.GetOptions{})
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return "'NotFound'", nil
+		}
+		return "", err
+	}
+	nsLog := string(ns.Status.Phase)
 	return nsLog, nil
 }
 
