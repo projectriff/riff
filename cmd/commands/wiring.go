@@ -17,6 +17,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os/user"
@@ -26,7 +27,6 @@ import (
 
 	"github.com/projectriff/riff/pkg/env"
 
-	"github.com/buildpack/pack/logging"
 	eventing "github.com/knative/eventing/pkg/client/clientset/versioned"
 	serving "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/projectriff/riff/pkg/core"
@@ -227,6 +227,6 @@ func (b *buildpackBuilder) SetVerbose(verbose bool) {
 }
 
 func (b *buildpackBuilder) Build(appDir, buildImage, runImage, repoName string) error {
-	logger := logging.NewLogger(b.stdout, b.stderr, b.verbose, false)
-	return pack.Build(logger, appDir, buildImage, runImage, repoName, true, false)
+	ctx := context.TODO()
+	return pack.Build(ctx, b.stdout, b.stderr, appDir, buildImage, runImage, repoName, true, false)
 }
