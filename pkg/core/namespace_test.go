@@ -17,6 +17,7 @@
 package core
 
 import (
+	"github.com/projectriff/riff/pkg/env"
 	"os"
 
 	. "github.com/onsi/ginkgo"
@@ -70,24 +71,21 @@ var _ = Describe("The NamespaceInit function", func() {
 	})
 
 	It("should create namespace and sa if needed", func() {
-
 		options := NamespaceInitOptions{
 			Manifest:      "fixtures/empty.yaml",
 			NamespaceName: "foo",
 			SecretName:    "push-credentials",
 		}
-
 		namespace := &v1.Namespace{ObjectMeta: meta_v1.ObjectMeta{Name: "foo"}}
 		mockNamespaces.On("Get", "foo", mock.Anything).Return(nil, notFound())
 		mockNamespaces.On("Create", namespace).Return(namespace, nil)
-
 		mockSecrets.On("Get", "push-credentials", meta_v1.GetOptions{}).Return(&v1.Secret{}, nil)
-
 		serviceAccount := &v1.ServiceAccount{}
 		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
 		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(serviceAccount, nil)
 
 		err := kubectlClient.NamespaceInit(manifests, options)
+
 		Expect(err).To(Not(HaveOccurred()))
 	})
 
@@ -112,6 +110,7 @@ var _ = Describe("The NamespaceInit function", func() {
 			s := args[0].(*v1.Secret)
 			Expect(s.StringData).To(HaveKeyWithValue("username", "_json_key"))
 			Expect(s.StringData).To(HaveKeyWithValue("password", "hush hush"))
+			Expect(s.Labels["created-by"]).To(Equal(env.Cli.Name))
 		}).Return(secret, nil)
 
 		mockServiceAccounts.On("Update", mock.Anything).Run(func(args mock.Arguments) {
@@ -160,6 +159,7 @@ var _ = Describe("The NamespaceInit function", func() {
 				s := args[0].(*v1.Secret)
 				Expect(s.StringData).To(HaveKeyWithValue("username", "roger"))
 				Expect(s.StringData).To(HaveKeyWithValue("password", "s3cr3t"))
+				Expect(s.Labels["created-by"]).To(Equal(env.Cli.Name))
 			}).Return(secret, nil)
 
 			mockServiceAccounts.On("Update", mock.Anything).Run(func(args mock.Arguments) {

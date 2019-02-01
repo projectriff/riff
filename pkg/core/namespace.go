@@ -19,6 +19,7 @@ package core
 import (
 	"bufio"
 	"fmt"
+	"github.com/projectriff/riff/pkg/env"
 	"github.com/projectriff/riff/pkg/fileutils"
 	"io/ioutil"
 	"os"
@@ -180,7 +181,7 @@ func (c *kubectlClient) checkSecretExists(options NamespaceInitOptions) error {
 }
 
 func (c *kubectlClient) createDockerHubSecret(options NamespaceInitOptions) error {
-	c.kubeClient.CoreV1().Secrets(options.NamespaceName).Delete(options.SecretName, &v1.DeleteOptions{})
+	_ = c.kubeClient.CoreV1().Secrets(options.NamespaceName).Delete(options.SecretName, &v1.DeleteOptions{})
 
 	password, err := readPassword(fmt.Sprintf("Enter dockerhub password for user %q", options.DockerHubUsername))
 	if err != nil {
@@ -190,6 +191,7 @@ func (c *kubectlClient) createDockerHubSecret(options NamespaceInitOptions) erro
 		ObjectMeta: v1.ObjectMeta{
 			Name:        options.SecretName,
 			Annotations: map[string]string{"build.knative.dev/docker-0": "https://index.docker.io/v1/"},
+			Labels:      map[string]string{"created-by": env.Cli.Name},
 		},
 		Type: corev1.SecretTypeBasicAuth,
 		StringData: map[string]string{
@@ -203,7 +205,7 @@ func (c *kubectlClient) createDockerHubSecret(options NamespaceInitOptions) erro
 }
 
 func (c *kubectlClient) createGcrSecret(options NamespaceInitOptions) error {
-	c.kubeClient.CoreV1().Secrets(options.NamespaceName).Delete(options.SecretName, &v1.DeleteOptions{})
+	_ = c.kubeClient.CoreV1().Secrets(options.NamespaceName).Delete(options.SecretName, &v1.DeleteOptions{})
 
 	token, err := ioutil.ReadFile(options.GcrTokenPath)
 	if err != nil {
@@ -213,6 +215,7 @@ func (c *kubectlClient) createGcrSecret(options NamespaceInitOptions) error {
 		ObjectMeta: v1.ObjectMeta{
 			Name:        options.SecretName,
 			Annotations: map[string]string{"build.knative.dev/docker-0": "https://gcr.io"},
+			Labels:      map[string]string{"created-by": env.Cli.Name},
 		},
 		Type: corev1.SecretTypeBasicAuth,
 		StringData: map[string]string{
