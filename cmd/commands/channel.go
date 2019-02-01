@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/env"
@@ -44,8 +44,8 @@ const (
 )
 
 const (
-	channelDeleteNameIndex = iota
-	channelDeleteNumberOfArgs
+	channelDeleteNameStartIndex = iota
+	channelDeleteMinNumberOfArgs
 )
 
 func ChannelCreate(fcTool *core.Client) *cobra.Command {
@@ -118,20 +118,30 @@ func ChannelList(fcTool *core.Client) *cobra.Command {
 	return command
 }
 
-func ChannelDelete(fcTool *core.Client) *cobra.Command {
-	options := core.DeleteChannelOptions{}
+func ChannelDelete(riffClient *core.Client) *cobra.Command {
+	cliOptions := DeleteChannelsCliOptions{}
 
 	command := &cobra.Command{
 		Use:   "delete",
-		Short: "Delete an existing channel",
+		Short: "Delete existing channels",
 		Args: ArgValidationConjunction(
-			cobra.ExactArgs(channelDeleteNumberOfArgs),
-			AtPosition(channelDeleteNameIndex, ValidName())),
-		Example: `  ` + env.Cli.Name + ` channel delete tweets`,
+			cobra.MinimumNArgs(channelDeleteMinNumberOfArgs),
+			StartingAtPosition(channelDeleteNameStartIndex, ValidName())),
+		Example: `  ` + env.Cli.Name + ` channel delete tweets
+  ` + env.Cli.Name + ` channel delete channel-1 channel-2`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			options.Name = args[channelDeleteNameIndex]
-
-			err := (*fcTool).DeleteChannel(options)
+			names := args[channelDeleteNameStartIndex:]
+			results := ApplyInParallel(names, func(name string) error {
+				options := core.DeleteChannelOptions{Namespace: cliOptions.Namespace, Name: name}
+				return (*riffClient).DeleteChannel(options)
+			})
+			err := MergeResults(results, func(result CorrelatedResult) string {
+				err := result.Error
+				if err == nil {
+					return ""
+				}
+				return fmt.Sprintf("Unable to delete channel %s: %v", result.Input, err)
+			})
 			if err != nil {
 				return err
 			}
@@ -143,7 +153,7 @@ func ChannelDelete(fcTool *core.Client) *cobra.Command {
 
 	LabelArgs(command, "CHANNEL_NAME")
 
-	command.Flags().StringVarP(&options.Namespace, "namespace", "n", "", "the `namespace` of the channel")
+	command.Flags().StringVarP(&cliOptions.Namespace, "namespace", "n", "", "the `namespace` of the channel")
 	return command
 }
 
@@ -188,4 +198,8 @@ func makeChannelExtractors() []NamedExtractor {
 			},
 		},
 	}
+}
+
+type DeleteChannelsCliOptions struct {
+	Namespace string
 }

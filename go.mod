@@ -7,31 +7,25 @@ require (
 	github.com/boz/kail v0.6.0
 	github.com/boz/kcache v0.0.0-20171103002618-fb1338d32301
 	github.com/buildpack/pack v0.0.9
-	github.com/buildpack/packs v0.0.0-20180824112413-aa30a4129237 // indirect
-	github.com/containerd/continuity v0.0.0-20181203112020-004b46473808 // indirect
 	github.com/evanphx/json-patch v4.1.0+incompatible // indirect
 	github.com/frioux/shellquote v0.0.1
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-yaml/yaml v2.1.0+incompatible // indirect
 	github.com/gobuffalo/envy v1.6.10 // indirect
 	github.com/golang/groupcache v0.0.0-20181024230925-c65c006176ff // indirect
-	github.com/golang/lint v0.0.0-20180702182130-06c8688daad7 // indirect
 	github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c // indirect
 	github.com/google/uuid v1.0.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.0 // indirect
 	github.com/imdario/mergo v0.3.5 // indirect
-	github.com/knative/build v0.2.0
-	github.com/knative/eventing v0.2.1
-	github.com/knative/pkg v0.0.0-20181204010225-102237ce9b67
-	github.com/knative/serving v0.2.3
+	github.com/knative/build v0.3.0
+	github.com/knative/eventing v0.3.0
+	github.com/knative/pkg v0.0.0-20190108184541-4365af623c75
+	github.com/knative/serving v0.3.0
 	github.com/markbates/inflect v1.0.4 // indirect
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
 	github.com/onsi/ginkgo v1.6.0
 	github.com/onsi/gomega v1.4.2
-	github.com/opencontainers/runc v0.1.1 // indirect
 	github.com/pkg/errors v0.8.0
 	github.com/spf13/cobra v0.0.3
-	github.com/stevvooe/resumable v0.0.0-20180830230917-22b14a53ba50 // indirect
 	github.com/stretchr/testify v1.2.2
 	go.uber.org/atomic v1.3.2 // indirect
 	go.uber.org/multierr v1.1.0 // indirect

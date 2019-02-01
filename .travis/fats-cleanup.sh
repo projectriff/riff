@@ -21,6 +21,14 @@ fi
 
 # attempt to cleanup fats
 if [ -d "$fats_dir" ]; then
+  if [ "$TRAVIS_TEST_RESULT" = "1" ]; then
+    travis_fold start system-status
+    echo "System status"
+    kubectl get deployments,services,pods --all-namespaces || true
+    kubectl describe node || true
+    travis_fold end system-status
+  fi
+
   travis_fold start system-uninstall
   echo "Uninstall riff system"
   riff system uninstall --istio --force || true

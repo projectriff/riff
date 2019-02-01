@@ -220,11 +220,12 @@ var _ = Describe("The riff subscription delete command", func() {
 		It("should fail if the number of arguments is incorrect", func() {
 			err := deleteCommand.Execute()
 
-			Expect(err).To(MatchError(Equal("accepts 1 arg(s), received 0")))
+			Expect(err).To(MatchError(Equal("requires at least 1 arg(s), only received 0")))
 		})
 
 		It("should fail if the required argument is invalid", func() {
-			deleteCommand.SetArgs([]string{"@@invalid@@"})
+			deleteCommand.SetArgs([]string{"valid", "@@invalid@@", "still-invalid"})
+
 			err := deleteCommand.Execute()
 
 			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
@@ -238,6 +239,23 @@ var _ = Describe("The riff subscription delete command", func() {
 			deleteCommand.SetArgs([]string{"subscription-name"})
 			clientMock.On("DeleteSubscription", core.DeleteSubscriptionOptions{
 				Name: "subscription-name",
+			}).Return(nil)
+
+			err := deleteCommand.Execute()
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(stdout.String()).To(Equal("\ndelete completed successfully\n"))
+		})
+
+		It("should unsubscribe based on the subscription names", func() {
+			stdout := &strings.Builder{}
+			deleteCommand.SetOutput(stdout)
+			deleteCommand.SetArgs([]string{"subscription-1", "subscription-2"})
+			clientMock.On("DeleteSubscription", core.DeleteSubscriptionOptions{
+				Name: "subscription-1",
+			}).Return(nil)
+			clientMock.On("DeleteSubscription", core.DeleteSubscriptionOptions{
+				Name: "subscription-2",
 			}).Return(nil)
 
 			err := deleteCommand.Execute()
@@ -262,11 +280,12 @@ var _ = Describe("The riff subscription delete command", func() {
 
 		It("should propagate the client error", func() {
 			deleteCommand.SetArgs([]string{"subscription-name"})
-			clientMock.On("DeleteSubscription", mock.Anything).Return(fmt.Errorf("client error"))
+			e := fmt.Errorf("some error")
+			clientMock.On("DeleteSubscription", mock.Anything).Return(e)
 
 			err := deleteCommand.Execute()
 
-			Expect(err).To(MatchError(Equal("client error")))
+			Expect(err).To(MatchError(Equal("Unable to delete subscription subscription-name: some error")))
 		})
 	})
 

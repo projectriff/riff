@@ -79,8 +79,5 @@ type DeleteChannelOptions struct {
 
 func (c *client) DeleteChannel(options DeleteChannelOptions) error {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
-
-	err := c.eventing.EventingV1alpha1().Channels(ns).Delete(options.Name, nil)
-
-	return err
+	return c.eventing.EventingV1alpha1().Channels(ns).Delete(options.Name, nil)
 }

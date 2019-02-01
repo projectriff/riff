@@ -22,7 +22,7 @@ import (
 	"os/exec"
 	"time"
 
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 
 	"github.com/frioux/shellquote"
 	servingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
@@ -57,8 +57,8 @@ const (
 )
 
 const (
-	serviceDeleteServiceNameIndex = iota
-	serviceDeleteNumberOfArgs
+	serviceDeleteNameStartIndex = iota
+	serviceDeleteMinNumberOfArgs
 )
 
 func Service() *cobra.Command {
@@ -304,22 +304,31 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 	return command
 }
 
-func ServiceDelete(fcClient *core.Client) *cobra.Command {
-
-	deleteServiceOptions := core.DeleteServiceOptions{}
+func ServiceDelete(riffClient *core.Client) *cobra.Command {
+	cliOptions := DeleteServicesCliOptions{}
 
 	command := &cobra.Command{
-		Use:     "delete",
-		Short:   "Delete an existing service",
-		Example: `  ` + env.Cli.Name + ` service delete square --namespace joseph-ns`,
+		Use:   "delete",
+		Short: "Delete existing services",
+		Example: `  ` + env.Cli.Name + ` service delete square --namespace joseph-ns
+  ` + env.Cli.Name + ` service delete service-1 service-2`,
 		Args: ArgValidationConjunction(
-			cobra.ExactArgs(serviceDeleteNumberOfArgs),
-			AtPosition(serviceDeleteServiceNameIndex, ValidName()),
+			cobra.MinimumNArgs(serviceDeleteMinNumberOfArgs),
+			StartingAtPosition(serviceDeleteNameStartIndex, ValidName()),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fnName := args[serviceDeleteServiceNameIndex]
-			deleteServiceOptions.Name = fnName
-			err := (*fcClient).DeleteService(deleteServiceOptions)
+			names := args[serviceDeleteNameStartIndex:]
+			results := ApplyInParallel(names, func(name string) error {
+				options := core.DeleteServiceOptions{Namespace: cliOptions.Namespace, Name: name}
+				return (*riffClient).DeleteService(options)
+			})
+			err := MergeResults(results, func(result CorrelatedResult) string {
+				err := result.Error
+				if err == nil {
+					return ""
+				}
+				return fmt.Sprintf("Unable to delete service %s: %v", result.Input, err)
+			})
 			if err != nil {
 				return err
 			}
@@ -331,7 +340,7 @@ func ServiceDelete(fcClient *core.Client) *cobra.Command {
 
 	LabelArgs(command, "SERVICE_NAME")
 
-	command.Flags().StringVarP(&deleteServiceOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
+	command.Flags().StringVarP(&cliOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
 
 	return command
 }
@@ -369,4 +378,8 @@ func makeServiceExtractors() []NamedExtractor {
 			},
 		},
 	}
+}
+
+type DeleteServicesCliOptions struct {
+	Namespace string
 }
