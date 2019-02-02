@@ -22,7 +22,7 @@ import (
 
 var (
 	// TODO update to a release version before releasing riff
-	BuilderVersion  = "0.2.0-snapshot-ci-8ee79f9144fc"
+	BuilderVersion  = "0.2.0-snapshot-ci-63cd05079e1f"
 	BuilderName         = fmt.Sprintf("projectriff/builder:%s", BuilderVersion)
 	DefaultRunImage = "packs/run:v3alpha2"
 
