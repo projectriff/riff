@@ -32,13 +32,15 @@ var (
 		"stable": {
 			ManifestVersion: "0.1",
 			Istio: []string{
-				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.3/istio.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/istio.yaml",
+				"https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-3-0-patch.yaml",
 			},
 			Knative: []string{
-				"https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
-				"https://storage.googleapis.com/knative-releases/serving/previous/v0.2.3/serving.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/eventing.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/in-memory-channel.yaml",
+				// NOTE: build should be in the knative-releases bucket, but is hiding in knative-nightly
+				"https://storage.googleapis.com/knative-nightly/build/previous/v0.3.0/release.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/serving.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/eventing.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/in-memory-channel.yaml",
 				fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-%s.yaml", constants.BuilderVersion),
 			},
 			Namespace: []string{

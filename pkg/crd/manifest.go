@@ -161,6 +161,10 @@ func NewManifest() *Manifest {
 					},
 				},
 				{
+					Path: "https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-3-0-patch.yaml",
+					Name: "istio-riff-patch",
+				},
+				{
 					Path: "https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
 					Name: "build",
 					Checks: []ResourceChecks{
@@ -277,6 +281,10 @@ func NewManifest() *Manifest {
 				{
 					Path: fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-%s.yaml", constants.BuilderVersion),
 					Name: "riff-build-template",
+				},
+				{
+					Path: fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache-%s.yaml", constants.BuilderVersion),
+					Name: "riff-build-cache",
 				},
 			},
 		},
