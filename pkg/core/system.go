@@ -205,7 +205,7 @@ func (c *client) checkResource(resource crd.RiffResources) error {
 		var err error
 		for i := 0; i< 360; i++ {
 			if strings.EqualFold(check.Kind, "Pod") {
-				ready, err = c.isPodReady(check)
+				ready, err = c.isPodReady(check, resource.Namespace)
 				if err != nil {
 					return err
 				}
@@ -229,8 +229,8 @@ func (c *client) checkResource(resource crd.RiffResources) error {
 	return nil
 }
 
-func (c *client) isPodReady(check crd.ResourceChecks) (bool, error) {
-	pods := c.kubeClient.CoreV1().Pods(check.Namespace)
+func (c *client) isPodReady(check crd.ResourceChecks, namespace string) (bool, error) {
+	pods := c.kubeClient.CoreV1().Pods(namespace)
 	podList, err := pods.List(metav1.ListOptions{
 		LabelSelector: convertMapToString(check.Selector.MatchLabels),
 	})

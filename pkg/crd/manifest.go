@@ -29,7 +29,6 @@ import (
 
 type ResourceChecks struct {
 	Kind       string               `json:"kind,omitempty"`
-	Namespace  string               `json:"namespace,omitempty"`
 	Selector   metav1.LabelSelector `json:"selector,omitempty"`
 	JsonPath   string               `json:"jsonpath,omitempty"`
 	Pattern    string               `json:"pattern,omitempty"`
@@ -39,6 +38,7 @@ type RiffResources struct {
 	Path       string           `json:"path,omitempty"`
 	Content    string           `json:"content,omitempty"`
 	Name       string           `json:"name,omitempty"`
+	Namespace  string           `json:"namespace,omitempty"`
 	Checks     []ResourceChecks `json:"checks,omitempty"`
 }
 
@@ -85,10 +85,10 @@ func NewManifest() *Manifest {
 				{
 					Path: "https://storage.googleapis.com/knative-releases/serving/previous/v0.2.3/istio.yaml",
 					Name: "istio",
+					Namespace: "istio-system",
 					Checks: []ResourceChecks{
 						{
 							Kind: "Pod",
-							Namespace: "istio-system",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"istio": "citadel"},
 							},
@@ -97,7 +97,6 @@ func NewManifest() *Manifest {
 						},
 						{
 							Kind: "Pod",
-							Namespace: "istio-system",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"istio": "egressgateway"},
 							},
@@ -106,7 +105,6 @@ func NewManifest() *Manifest {
 						},
 						{
 							Kind: "Pod",
-							Namespace: "istio-system",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"istio": "galley"},
 							},
@@ -115,7 +113,6 @@ func NewManifest() *Manifest {
 						},
 						{
 							Kind: "Pod",
-							Namespace: "istio-system",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"istio": "ingressgateway"},
 							},
@@ -124,7 +121,6 @@ func NewManifest() *Manifest {
 						},
 						{
 							Kind: "Pod",
-							Namespace: "istio-system",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"istio": "pilot"},
 							},
@@ -133,7 +129,6 @@ func NewManifest() *Manifest {
 						},
 						{
 							Kind: "Pod",
-							Namespace: "istio-system",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"istio-mixer-type": "policy"},
 							},
@@ -142,7 +137,6 @@ func NewManifest() *Manifest {
 						},
 						{
 							Kind: "Pod",
-							Namespace: "istio-system",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"istio": "sidecar-injector"},
 							},
@@ -151,7 +145,6 @@ func NewManifest() *Manifest {
 						},
 						{
 							Kind: "Pod",
-							Namespace: "istio-system",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"istio-mixer-type": "telemetry"},
 							},
@@ -167,10 +160,10 @@ func NewManifest() *Manifest {
 				{
 					Path: "https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
 					Name: "build",
+					Namespace: "knative-build",
 					Checks: []ResourceChecks{
 						{
 							Kind: "Pod",
-							Namespace: "knative-build",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"app": "build-controller"},
 							},
@@ -179,7 +172,6 @@ func NewManifest() *Manifest {
 						},
 						{
 							Kind: "Pod",
-							Namespace: "knative-build",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"app": "build-webhook"},
 							},
@@ -191,10 +183,10 @@ func NewManifest() *Manifest {
 				{
 					Path: "https://storage.googleapis.com/knative-releases/serving/previous/v0.2.3/serving.yaml",
 					Name: "serving",
+					Namespace: "knative-serving",
 					Checks: []ResourceChecks{
 						{
 							Kind:      "Pod",
-							Namespace: "knative-serving",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"app": "activator"},
 							},
@@ -203,7 +195,6 @@ func NewManifest() *Manifest {
 						},
 						{
 							Kind:      "Pod",
-							Namespace: "knative-serving",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"app": "autoscaler"},
 							},
@@ -212,7 +203,6 @@ func NewManifest() *Manifest {
 						},
 						{
 							Kind: "Pod",
-							Namespace: "knative-serving",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"app": "controller"},
 							},
@@ -221,7 +211,6 @@ func NewManifest() *Manifest {
 						},
 						{
 							Kind: "Pod",
-							Namespace: "knative-serving",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"app": "webhook"},
 							},
@@ -233,10 +222,10 @@ func NewManifest() *Manifest {
 				{
 					Path: "https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/eventing.yaml",
 					Name: "eventing",
+					Namespace: "knative-eventing",
 					Checks: []ResourceChecks{
 						{
 							Kind: "Pod",
-							Namespace: "knative-eventing",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"app": "eventing-controller"},
 							},
@@ -245,7 +234,6 @@ func NewManifest() *Manifest {
 						},
 						{
 							Kind: "Pod",
-							Namespace: "knative-eventing",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"app": "webhook"},
 							},
@@ -257,10 +245,10 @@ func NewManifest() *Manifest {
 				{
 					Path: "https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/in-memory-channel.yaml",
 					Name: "eventing-in-memory-channel",
+					Namespace: "knative-eventing",
 					Checks: []ResourceChecks{
 						{
 							Kind:      "Pod",
-							Namespace: "knative-eventing",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"role": "dispatcher", "clusterChannelProvisioner": "in-memory-channel"},
 							},
@@ -269,7 +257,6 @@ func NewManifest() *Manifest {
 						},
 						{
 							Kind: "Pod",
-							Namespace: "knative-eventing",
 							Selector: metav1.LabelSelector{
 								MatchLabels: map[string]string{"role": "controller", "clusterChannelProvisioner":"in-memory-channel"},
 							},
