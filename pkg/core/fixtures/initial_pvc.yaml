@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+ name: riff-cnb-cache
+spec:
+ accessModes:
+   - ReadWriteOnce
+ resources:
+   requests:
+     storage: 8Gi

@@ -17,8 +17,17 @@
 package core
 
 import (
+	"fmt"
+	"github.com/projectriff/riff/pkg/core/kustomize"
+	"github.com/projectriff/riff/pkg/core/kustomize/mocks"
 	"github.com/projectriff/riff/pkg/env"
+	"github.com/projectriff/riff/pkg/kubectl"
+	"github.com/projectriff/riff/pkg/kubectl/mocks"
+	"io/ioutil"
+	"k8s.io/client-go/kubernetes"
+	"net/url"
 	"os"
+	"path/filepath"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -36,26 +45,31 @@ var _ = Describe("The NamespaceInit function", func() {
 	var (
 		kubectlClient       KubectlClient
 		kubeClient          *vendor_mocks.Interface
+		kubeCtl             *mockkubectl.KubeCtl
 		mockCore            *vendor_mocks.CoreV1Interface
 		mockNamespaces      *vendor_mocks.NamespaceInterface
 		mockServiceAccounts *vendor_mocks.ServiceAccountInterface
 		mockSecrets         *vendor_mocks.SecretInterface
+		mockKustomizer      *mockkustomize.Kustomizer
 		manifests           map[string]*Manifest
 	)
 
 	JustBeforeEach(func() {
 		kubeClient = new(vendor_mocks.Interface)
+		kubeCtl = new(mockkubectl.KubeCtl)
 		mockCore = new(vendor_mocks.CoreV1Interface)
 		mockNamespaces = new(vendor_mocks.NamespaceInterface)
 		mockServiceAccounts = new(vendor_mocks.ServiceAccountInterface)
 		mockSecrets = new(vendor_mocks.SecretInterface)
+		mockKustomizer = new(mockkustomize.Kustomizer)
+		manifests = map[string]*Manifest{}
 
 		kubeClient.On("CoreV1").Return(mockCore)
 		mockCore.On("Namespaces").Return(mockNamespaces)
 		mockCore.On("ServiceAccounts", mock.Anything).Return(mockServiceAccounts)
 		mockCore.On("Secrets", mock.Anything).Return(mockSecrets)
 
-		kubectlClient = NewKubectlClient(kubeClient)
+		kubectlClient = makeKubectlClient(kubeClient, kubeCtl, mockKustomizer)
 	})
 
 	AfterEach(func() {
@@ -82,7 +96,7 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockSecrets.On("Get", "push-credentials", meta_v1.GetOptions{}).Return(&v1.Secret{}, nil)
 		serviceAccount := &v1.ServiceAccount{}
 		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
-		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(serviceAccount, nil)
+		mockServiceAccounts.On("Create", mock.MatchedBy(saNamed(serviceAccountName))).Return(serviceAccount, nil)
 
 		err := kubectlClient.NamespaceInit(manifests, options)
 
@@ -186,20 +200,113 @@ var _ = Describe("The NamespaceInit function", func() {
 
 		serviceAccount := &v1.ServiceAccount{}
 		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
-		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(serviceAccount, nil)
+		mockServiceAccounts.On("Create", mock.MatchedBy(saNamed(serviceAccountName))).Return(serviceAccount, nil)
 
 		err := kubectlClient.NamespaceInit(manifests, options)
 		Expect(err).To(Not(HaveOccurred()))
 	})
 
+	It("should apply label to namespace resource", func() {
+		options := NamespaceInitOptions{
+			Manifest:      "stable",
+			NamespaceName: "foo",
+			NoSecret:      true,
+		}
+		namespaceResource := unsafeAbs("fixtures/initial_pvc.yaml")
+		manifests["stable"] = &Manifest{
+			Namespace: []string{namespaceResource},
+		}
+		namespace := &v1.Namespace{ObjectMeta: meta_v1.ObjectMeta{Name: "foo"}}
+		mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
+
+		serviceAccount := &v1.ServiceAccount{}
+		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
+		mockServiceAccounts.On("Create", mock.MatchedBy(saNamed(serviceAccountName))).Return(serviceAccount, nil)
+		customizedResourceContents := contentsOf("fixtures/kustom_pvc.yaml")
+		mockKustomizer.On("ApplyLabel",
+			mock.MatchedBy(urlPath(namespaceResource)),
+			mock.MatchedBy(labelNamed("created-by"))).Return(customizedResourceContents, nil)
+		kubeCtl.On("ExecStdin", []string{"apply", "-n", "foo", "-f", "-"}, &customizedResourceContents).
+			Return("done!", nil)
+
+		err := kubectlClient.NamespaceInit(manifests, options)
+
+		Expect(err).To(Not(HaveOccurred()))
+	})
+
+	It("should fail if the PVC label kustomization fails", func() {
+		options := NamespaceInitOptions{
+			Manifest:      "stable",
+			NamespaceName: "foo",
+			NoSecret:      true,
+		}
+		namespaceResource := unsafeAbs("fixtures/initial_pvc.yaml")
+		manifests["stable"] = &Manifest{
+			Namespace: []string{namespaceResource},
+		}
+		namespace := &v1.Namespace{ObjectMeta: meta_v1.ObjectMeta{Name: "foo"}}
+		mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
+
+		serviceAccount := &v1.ServiceAccount{}
+		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
+		mockServiceAccounts.On("Create", mock.MatchedBy(saNamed(serviceAccountName))).Return(serviceAccount, nil)
+		expectedError := fmt.Errorf("kustomization failed")
+		mockKustomizer.On("ApplyLabel",
+			mock.MatchedBy(urlPath(namespaceResource)),
+			mock.MatchedBy(labelNamed("created-by"))).Return(nil, expectedError)
+
+		err := kubectlClient.NamespaceInit(manifests, options)
+
+		Expect(err).To(MatchError(expectedError))
+	})
+
 })
+
+func makeKubectlClient(kubeClient kubernetes.Interface,
+	kubeCtl kubectl.KubeCtl,
+	kustomizer kustomize.Kustomizer) KubectlClient {
+	return &kubectlClient{
+		kubeClient: kubeClient,
+		kubeCtl:    kubeCtl,
+		kustomizer: kustomizer,
+	}
+}
 
 func notFound() *errors.StatusError {
 	return errors.NewNotFound(schema.GroupResource{}, "")
 }
 
-func named(name string) func(sa *v1.ServiceAccount) bool {
+func saNamed(name string) func(sa *v1.ServiceAccount) bool {
 	return func(sa *v1.ServiceAccount) bool {
 		return sa.Name == name
 	}
+}
+
+func labelNamed(name string) func(label *kustomize.Label) bool {
+	return func(label *kustomize.Label) bool {
+		return label.Name == name
+	}
+}
+
+func urlPath(path string) func(url *url.URL) bool {
+	return func(url *url.URL) bool {
+		return url.Path == path
+	}
+}
+
+func contentsOf(path string) []byte {
+	absolutePath := unsafeAbs(path)
+	bytes, err := ioutil.ReadFile(absolutePath)
+	if err != nil {
+		panic(err)
+	}
+	return bytes
+}
+
+func unsafeAbs(path string) string {
+	absolutePath, err := filepath.Abs(path)
+	if err != nil {
+		panic(err)
+	}
+	return absolutePath
 }
