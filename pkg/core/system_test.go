@@ -17,10 +17,30 @@
 package core
 
 import (
+	"errors"
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/projectriff/riff/pkg/crd"
+	"github.com/projectriff/riff/pkg/crd/mocks"
+	"github.com/projectriff/riff/pkg/env"
+	"github.com/stretchr/testify/mock"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+var (
+	istioYaml = "my-istio.yaml"
+	buildYaml = "my-build.yaml"
+	servingYaml = "my-serving.yaml"
+	eventingYaml = "my-eventing.yaml"
+	buildtemplateYaml = "my-buildtemplate.yaml"
+	buildCacheYaml = "my-cnb-cache.yaml"
+	coreManifest = &Manifest{
+		Istio: []string{istioYaml},
+		Knative: []string{buildYaml, servingYaml, eventingYaml, buildtemplateYaml},
+		Namespace: [] string{buildCacheYaml},
+	}
+)
 var _ = Describe("Test system commands", func() {
 	Describe("getElementContaining() called", func() {
 
@@ -59,17 +79,6 @@ var _ = Describe("Test system commands", func() {
 
 	Describe("buildManifest() called", func() {
 		It("reconciles the provided manifest with crdManifest", func() {
-			istioYaml := "my-istio.yaml"
-			buildYaml := "my-build.yaml"
-			servingYaml := "my-serving.yaml"
-			eventingYaml := "my-eventing.yaml"
-			buildtemplateYaml := "my-buildtemplate.yaml"
-			buildCacheYaml := "my-cnb-cache.yaml"
-			coreManifest := &Manifest{
-				Istio: []string{istioYaml},
-				Knative: []string{buildYaml, servingYaml, eventingYaml, buildtemplateYaml},
-				Namespace: [] string{buildCacheYaml},
-			}
 			crdManifest, err := buildCrdManifest(coreManifest)
 			Expect(err).To(BeNil())
 			for _, resource := range crdManifest.Spec.Resources {
@@ -88,6 +97,43 @@ var _ = Describe("Test system commands", func() {
 					Expect(resource.Path).To(Equal(buildCacheYaml))
 				}
 			}
+		})
+	})
+
+
+	Describe("createCrdObject() is called", func() {
+		var (
+			c   	      client
+			mockCrdClient *mocks.Client
+			err           error
+		)
+
+		BeforeEach(func() {
+			mockCrdClient = new(mocks.Client)
+			c = client{crdClient: mockCrdClient}
+		})
+
+		AfterEach(func() {
+			mockCrdClient.AssertExpectations(GinkgoT())
+		})
+
+		It("allows only one crd object to be created", func() {
+			mockCrdClient.On("Get").Return(&crd.Manifest{}, nil)
+			_, err = c.createCRDObject(coreManifest, wait.Backoff{Steps:2})
+			Expect(err).To(MatchError(fmt.Sprintf("%s already installed", env.Cli.Name)))
+		})
+
+		It("retries if the crd is not ready", func() {
+			mockCrdClient.On("Get").Return(nil, errors.New("no crd")).Twice()
+			_, err = c.createCRDObject(coreManifest, wait.Backoff{Steps:2})
+			Expect(err).To(MatchError(fmt.Sprintf("timed out creating %s custom resource defiition", env.Cli.Name)))
+		})
+
+		It("retries on error while creating crd object", func() {
+			mockCrdClient.On("Get").Return(nil, errors.New("not found"))
+			mockCrdClient.On("Create", mock.AnythingOfType("*crd.Manifest")).
+				Return(nil, errors.New("err creating")).Twice()
+			_, err = c.createCRDObject(coreManifest, wait.Backoff{Steps:2})
 		})
 	})
 })

@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/projectriff/riff/pkg/crd"
 	"github.com/projectriff/riff/pkg/kubectl"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"os"
 	"path/filepath"
 	"strings"
@@ -40,6 +41,10 @@ const (
 
 	retryDuration = 5 * time.Second
 	retrySteps    = 5
+
+	maxRetries             = 18 // the sum of all retries would add up to 1 minute
+	minRetryInterval       = 100 * time.Millisecond
+	exponentialBackoffBase = 1.3
 )
 
 type SystemInstallOptions struct {
@@ -73,7 +78,7 @@ func (c *client) SystemInstall(manifests map[string]*Manifest, options SystemIns
 	if err != nil {
 		return false, errors.New(fmt.Sprintf("Could not create riff CRD: %s ", err))
 	}
-	riffManifest, err := c.createCRDObject(manifest, options)
+	riffManifest, err := c.createCRDObject(manifest, backOffSettings())
 	if err != nil {
 		return false, errors.New(fmt.Sprintf("Could not install riff: %s ", err))
 	}
@@ -87,26 +92,42 @@ func (c *client) SystemInstall(manifests map[string]*Manifest, options SystemIns
 	return true, nil
 }
 
-func (c *client) createCRDObject(manifest *Manifest, options SystemInstallOptions) (*crd.Manifest, error) {
+func backOffSettings() wait.Backoff {
+	return wait.Backoff{
+		Duration: minRetryInterval,
+		Factor:   exponentialBackoffBase,
+		Steps:    maxRetries,
+	}
+}
+
+func (c *client) createCRDObject(manifest *Manifest, backOffSettings wait.Backoff) (*crd.Manifest, error) {
 	crdManifest, err := buildCrdManifest(manifest)
 	if err != nil {
 		return nil, err
 	}
-	old, err := c.crdClient.Get()
-	if old == nil {
+	err = wait.ExponentialBackoff(backOffSettings, func() (bool, error) {
+		old, err := c.crdClient.Get()
+		if err != nil && !strings.Contains(err.Error(), "not found") {
+			return false, nil
+		}
+		if old != nil {
+			return true, errors.New(fmt.Sprintf("%s already installed", env.Cli.Name))
+		}
 		_, err = c.crdClient.Create(crdManifest)
-	} else {
-		return nil, errors.New("riff crd already installed")
+		if err != nil {
+			return false, nil
+		}
+		return true, nil
+	})
+	if err == wait.ErrWaitTimeout {
+		return nil, errors.New(fmt.Sprintf("timed out creating %s custom resource defiition", env.Cli.Name))
 	}
 	return crdManifest, err
 }
 
 //TODO this is a stop-gap, remove core.Manifest in favor of crd.Manifest
 func buildCrdManifest(manifest *Manifest) (*crd.Manifest, error) {
-	err := validateManifest(manifest)
-	if err != nil {
-		return nil, err
-	}
+
 	crdManifest := crd.NewManifest()
 	var resource *crd.RiffResources
 	for i := range crdManifest.Spec.Resources {
@@ -138,14 +159,6 @@ func getElementContaining(array []string, substring string) string {
 	}
 	return ""
 }
-
-func validateManifest(manifest *Manifest) error {
-	if len(manifest.Namespace) != 1 {
-		return errors.New("invalid buildtemplate specified in manifest")
-	}
-	return nil
-}
-
 
 func (c *client) installAndCheckResources(manifest *crd.Manifest, options SystemInstallOptions) error {
 	for _,resource := range manifest.Spec.Resources {
