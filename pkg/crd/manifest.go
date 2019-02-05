@@ -78,7 +78,7 @@ func NewManifest() *Manifest {
 		},
 		TypeMeta: metav1.TypeMeta{
 			Kind: Kind,
-			APIVersion: "projectriff.io/" + Version,
+			APIVersion: fmt.Sprintf("%s/%s", Group, Version),
 		},
 		Spec: RiffSpec{
 			Resources: []RiffResources{

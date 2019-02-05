@@ -73,7 +73,7 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 
 func (client *riffClient) Create(obj *Manifest) (*Manifest, error) {
 	result := &Manifest{}
-	err := client.restClient.Post().Resource( "riff-system").Name(env.Cli.Name + "-install").
+	err := client.restClient.Post().Resource(Name).Name(env.Cli.Name + "-install").
 		Body(obj).Do().Into(result)
 	return result, err
 }
@@ -88,7 +88,7 @@ func (client *riffClient) Delete(obj *Manifest) (*Manifest, error) {
 
 func (client *riffClient) Get() (*Manifest, error) {
 	result := &Manifest{}
-	err := client.restClient.Get().Resource("riff-system").Name(env.Cli.Name + "-install").Do().Into(result)
+	err := client.restClient.Get().Resource(Name).Name(env.Cli.Name + "-install").Do().Into(result)
 	if err != nil {
 		return nil, err
 	}
