@@ -14,7 +14,7 @@ matrix:
   include:
   - stage: test
     install:
-    - "go get -u github.com/vektra/mockery/.../"
+    - "(cd ~ && go get -u github.com/vektra/mockery/.../)"
     before_script: make gen-mocks && test $(git status --porcelain | wc -l) -eq 0 || exit 1
     script: make build test verify-docs
   - &test-windows
