@@ -18,6 +18,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/projectriff/riff/pkg/crd"
 	"sort"
 	"strings"
 
@@ -41,7 +42,7 @@ func System() *cobra.Command {
 	}
 }
 
-func SystemInstall(manifests map[string]*core.Manifest, c *core.Client) *cobra.Command {
+func SystemInstall(manifests map[string]*crd.Manifest, c *core.Client) *cobra.Command {
 	options := core.SystemInstallOptions{}
 
 	var namedManifests []string
@@ -57,20 +58,7 @@ func SystemInstall(manifests map[string]*core.Manifest, c *core.Client) *cobra.C
 			"\nIf an `istio-system` namespace isn't found, it will be created and Istio components will be installed. " +
 			"\nUse the `--node-port` flag when installing on Minikube and other clusters that don't support an external load balancer. " +
 			"\nUse the `--manifest` flag to specify the path or URL of a manifest file which provides the URLs of the kubernetes configuration files of the " +
-			"components to be installed. The manifest file contents should be of the following form:" +
-			`
-
-    manifestVersion: 0.1
-    istio:
-    - https://path/to/istio-release.yaml
-    knative:
-    - https://path/to/build-release.yaml
-    - https://path/to/serving-release.yaml
-    - https://path/to/eventing-release.yaml
-    namespace:
-    - https://path/to/buildtemplate-release.yaml
-` +
-			"\nNote: relative file paths or http/https URLs may be used in the manifest.",
+			"components to be installed.",
 		Args: cobra.ExactArgs(systemInstallNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			complete, err := (*c).SystemInstall(manifests, options)

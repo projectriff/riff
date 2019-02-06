@@ -3,6 +3,7 @@
 package mocks
 
 import core "github.com/projectriff/riff/pkg/core"
+import crd "github.com/projectriff/riff/pkg/crd"
 import duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 import io "io"
 import mock "github.com/stretchr/testify/mock"
@@ -269,18 +270,18 @@ func (_m *Client) ServiceStatus(options core.ServiceStatusOptions) (*duckv1alpha
 }
 
 // SystemInstall provides a mock function with given fields: manifests, options
-func (_m *Client) SystemInstall(manifests map[string]*core.Manifest, options core.SystemInstallOptions) (bool, error) {
+func (_m *Client) SystemInstall(manifests map[string]*crd.Manifest, options core.SystemInstallOptions) (bool, error) {
 	ret := _m.Called(manifests, options)
 
 	var r0 bool
-	if rf, ok := ret.Get(0).(func(map[string]*core.Manifest, core.SystemInstallOptions) bool); ok {
+	if rf, ok := ret.Get(0).(func(map[string]*crd.Manifest, core.SystemInstallOptions) bool); ok {
 		r0 = rf(manifests, options)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(map[string]*core.Manifest, core.SystemInstallOptions) error); ok {
+	if rf, ok := ret.Get(1).(func(map[string]*crd.Manifest, core.SystemInstallOptions) error); ok {
 		r1 = rf(manifests, options)
 	} else {
 		r1 = ret.Error(1)

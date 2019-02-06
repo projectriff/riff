@@ -63,8 +63,8 @@ var (
 	allNameSpaces     = append(knativeNamespaces, istioNamespace)
 )
 
-func (c *client) SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error) {
-	manifest, err := ResolveManifest(manifests, options.Manifest)
+func (c *client) SystemInstall(manifests map[string]*crd.Manifest, options SystemInstallOptions) (bool, error) {
+	manifest, err := crd.ResolveManifest(manifests, options.Manifest)
 	if err != nil {
 		return false, err
 	}
@@ -100,12 +100,9 @@ func backOffSettings() wait.Backoff {
 	}
 }
 
-func (c *client) createCRDObject(manifest *Manifest, backOffSettings wait.Backoff) (*crd.Manifest, error) {
-	crdManifest, err := buildCrdManifest(manifest)
-	if err != nil {
-		return nil, err
-	}
-	err = wait.ExponentialBackoff(backOffSettings, func() (bool, error) {
+func (c *client) createCRDObject(manifest *crd.Manifest, backOffSettings wait.Backoff) (*crd.Manifest, error) {
+
+	err := wait.ExponentialBackoff(backOffSettings, func() (bool, error) {
 		old, err := c.crdClient.Get()
 		if err != nil && !strings.Contains(err.Error(), "not found") {
 			return false, nil
@@ -113,7 +110,7 @@ func (c *client) createCRDObject(manifest *Manifest, backOffSettings wait.Backof
 		if old != nil {
 			return true, errors.New(fmt.Sprintf("%s already installed", env.Cli.Name))
 		}
-		_, err = c.crdClient.Create(crdManifest)
+		_, err = c.crdClient.Create(manifest)
 		if err != nil {
 			return false, nil
 		}
@@ -122,33 +119,7 @@ func (c *client) createCRDObject(manifest *Manifest, backOffSettings wait.Backof
 	if err == wait.ErrWaitTimeout {
 		return nil, errors.New(fmt.Sprintf("timed out creating %s custom resource defiition", env.Cli.Name))
 	}
-	return crdManifest, err
-}
-
-//TODO this is a stop-gap, remove core.Manifest in favor of crd.Manifest
-func buildCrdManifest(manifest *Manifest) (*crd.Manifest, error) {
-
-	crdManifest := crd.NewManifest()
-	var resource *crd.RiffResources
-	for i := range crdManifest.Spec.Resources {
-		resource = &crdManifest.Spec.Resources[i]
-		if strings.Contains(resource.Path, "istio") {
-			resource.Path = manifest.Istio[0]
-		} else if strings.Contains(resource.Path, "build") && !strings.Contains(resource.Path, "buildtemplate") {
-			resource.Path = getElementContaining(manifest.Knative, "build")
-		} else if strings.Contains(resource.Path, "serving") {
-			resource.Path = getElementContaining(manifest.Knative, "serving")
-		} else if strings.Contains(resource.Path, "eventing") && !strings.Contains(resource.Path, "channel") {
-			resource.Path = getElementContaining(manifest.Knative, "eventing")
-		} else if strings.Contains(resource.Path, "channel") {
-			resource.Path = getElementContaining(manifest.Knative, "channel")
-		} else if strings.Contains(resource.Path, "buildtemplate") && !strings.Contains(resource.Path, "cache") {
-			resource.Path = getElementContaining(manifest.Knative, "buildtemplate")
-		} else if strings.Contains(resource.Path, "cache") {
-			resource.Path = manifest.Namespace[0]
-		}
-	}
-	return crdManifest, nil
+	return manifest, err
 }
 
 func getElementContaining(array []string, substring string) string {
@@ -174,7 +145,7 @@ func (c *client) installAndCheckResources(manifest *crd.Manifest, options System
 	return nil
 }
 
-func (c *client) installResource(res crd.RiffResources, options SystemInstallOptions) error {
+func (c *client) installResource(res crd.RiffResource, options SystemInstallOptions) error {
 	if res.Path == "" {
 		return errors.New("cannot install anything other than a url yet")
 	}
@@ -211,7 +182,7 @@ To fix this you need to:
 }
 
 // TODO this only supports checking Pods for phases
-func (c *client) checkResource(resource crd.RiffResources) error {
+func (c *client) checkResource(resource crd.RiffResource) error {
 	cnt := 1
 	for _, check := range resource.Checks {
 		var ready bool

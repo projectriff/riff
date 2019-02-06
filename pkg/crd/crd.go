@@ -22,6 +22,7 @@ import (
 	extClientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 const (
@@ -30,6 +31,11 @@ const (
 	Kind = "Manifest"
 	Name = "manifest"
 )
+
+var schemeGroupVersion = schema.GroupVersion{
+	Group:   Group,
+	Version: Version,
+}
 
 func CreateCRD(clientset extClientset.Interface) error {
 	_, err := clientset.ApiextensionsV1beta1().CustomResourceDefinitions().Create(

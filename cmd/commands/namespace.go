@@ -18,6 +18,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/projectriff/riff/pkg/crd"
 	"sort"
 	"strings"
 
@@ -38,7 +39,7 @@ const (
 	namespaceInitNumberOfArgs
 )
 
-func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) *cobra.Command {
+func NamespaceInit(manifests map[string]*crd.Manifest, kc *core.KubectlClient) *cobra.Command {
 	options := core.NamespaceInitOptions{}
 
 	var namedManifests []string

@@ -18,6 +18,7 @@ package commands_test
 
 import (
 	"errors"
+	"github.com/projectriff/riff/pkg/crd"
 	"strings"
 
 	. "github.com/onsi/ginkgo"
@@ -56,7 +57,7 @@ var _ = Describe("The riff system install subcommand", func() {
 	BeforeEach(func() {
 		client = new(mocks.Client)
 		clientMock = client.(*mocks.Client)
-		systemInstallCommand = commands.SystemInstall(map[string]*core.Manifest{}, &client)
+		systemInstallCommand = commands.SystemInstall(map[string]*crd.Manifest{}, &client)
 	})
 
 	AfterEach(func() {
@@ -101,7 +102,7 @@ var _ = Describe("The riff system install subcommand", func() {
 			stdout := &strings.Builder{}
 			systemInstallCommand.SetOutput(stdout)
 			clientMock.On("SystemInstall",
-				map[string]*core.Manifest{},
+				map[string]*crd.Manifest{},
 				core.SystemInstallOptions{
 					Manifest: "some/path.yaml",
 				}).
@@ -119,7 +120,7 @@ var _ = Describe("The riff system install subcommand", func() {
 			stdout := &strings.Builder{}
 			systemInstallCommand.SetOutput(stdout)
 			clientMock.On("SystemInstall",
-				map[string]*core.Manifest{},
+				map[string]*crd.Manifest{},
 				core.SystemInstallOptions{
 					Manifest: "some/path.yaml",
 				}).
@@ -135,7 +136,7 @@ var _ = Describe("The riff system install subcommand", func() {
 		It("should propagate client error", func() {
 			expectedError := errors.New("client failure")
 			clientMock.On("SystemInstall",
-				map[string]*core.Manifest{},
+				map[string]*crd.Manifest{},
 				core.SystemInstallOptions{
 					Manifest: "some/path.yaml",
 				}).

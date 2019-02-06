@@ -31,8 +31,8 @@ type riffClient struct {
 }
 type Client interface {
 	Create(obj *Manifest) (*Manifest, error)
-	Update(obj * Manifest) (*Manifest, error)
-	Delete(obj * Manifest) (*Manifest, error)
+	Update(obj *Manifest) (*Manifest, error)
+	Delete(obj *Manifest) (*Manifest, error)
 	Get() (*Manifest, error)
 }
 

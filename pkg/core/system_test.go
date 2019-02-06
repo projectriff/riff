@@ -29,17 +29,7 @@ import (
 )
 
 var (
-	istioYaml = "my-istio.yaml"
-	buildYaml = "my-build.yaml"
-	servingYaml = "my-serving.yaml"
-	eventingYaml = "my-eventing.yaml"
-	buildtemplateYaml = "my-buildtemplate.yaml"
-	buildCacheYaml = "my-cnb-cache.yaml"
-	coreManifest = &Manifest{
-		Istio: []string{istioYaml},
-		Knative: []string{buildYaml, servingYaml, eventingYaml, buildtemplateYaml},
-		Namespace: [] string{buildCacheYaml},
-	}
+	manifest = &crd.Manifest{}
 )
 var _ = Describe("Test system commands", func() {
 	Describe("getElementContaining() called", func() {
@@ -77,30 +67,6 @@ var _ = Describe("Test system commands", func() {
 		})
 	})
 
-	Describe("buildManifest() called", func() {
-		It("reconciles the provided manifest with crdManifest", func() {
-			crdManifest, err := buildCrdManifest(coreManifest)
-			Expect(err).To(BeNil())
-			for _, resource := range crdManifest.Spec.Resources {
-				switch resource.Name {
-				case "istio":
-					Expect(resource.Path).To(Equal(istioYaml))
-				case "build":
-					Expect(resource.Path).To(Equal(buildYaml))
-				case "serving":
-					Expect(resource.Path).To(Equal(servingYaml))
-				case "eventing":
-					Expect(resource.Path).To(Equal(eventingYaml))
-				case "riff-build-template":
-					Expect(resource.Path).To(Equal(buildtemplateYaml))
-				case "riff-build-cache":
-					Expect(resource.Path).To(Equal(buildCacheYaml))
-				}
-			}
-		})
-	})
-
-
 	Describe("createCrdObject() is called", func() {
 		var (
 			c   	      client
@@ -119,13 +85,13 @@ var _ = Describe("Test system commands", func() {
 
 		It("allows only one crd object to be created", func() {
 			mockCrdClient.On("Get").Return(&crd.Manifest{}, nil)
-			_, err = c.createCRDObject(coreManifest, wait.Backoff{Steps:2})
+			_, err = c.createCRDObject(manifest, wait.Backoff{Steps:2})
 			Expect(err).To(MatchError(fmt.Sprintf("%s already installed", env.Cli.Name)))
 		})
 
 		It("retries if the crd is not ready", func() {
 			mockCrdClient.On("Get").Return(nil, errors.New("no crd")).Twice()
-			_, err = c.createCRDObject(coreManifest, wait.Backoff{Steps:2})
+			_, err = c.createCRDObject(manifest, wait.Backoff{Steps:2})
 			Expect(err).To(MatchError(fmt.Sprintf("timed out creating %s custom resource defiition", env.Cli.Name)))
 		})
 
@@ -133,7 +99,7 @@ var _ = Describe("Test system commands", func() {
 			mockCrdClient.On("Get").Return(nil, errors.New("not found"))
 			mockCrdClient.On("Create", mock.AnythingOfType("*crd.Manifest")).
 				Return(nil, errors.New("err creating")).Twice()
-			_, err = c.createCRDObject(coreManifest, wait.Backoff{Steps:2})
+			_, err = c.createCRDObject(manifest, wait.Backoff{Steps:2})
 		})
 	})
 })

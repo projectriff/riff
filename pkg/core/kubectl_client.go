@@ -17,13 +17,14 @@
 package core
 
 import (
+	"github.com/projectriff/riff/pkg/crd"
 	"github.com/projectriff/riff/pkg/kubectl"
 	"k8s.io/client-go/kubernetes"
 )
 
 type KubectlClient interface {
 	SystemUninstall(options SystemUninstallOptions) (bool, error)
-	NamespaceInit(manifests map[string]*Manifest, options NamespaceInitOptions) error
+	NamespaceInit(manifests map[string]*crd.Manifest, options NamespaceInitOptions) error
 }
 
 type kubectlClient struct {

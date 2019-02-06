@@ -16,35 +16,38 @@
 
 package crd
 
-
 import (
+	"errors"
 	"fmt"
+	"github.com/ghodss/yaml"
 	"github.com/jinzhu/copier"
-	"github.com/projectriff/riff/pkg/constants"
-	"github.com/projectriff/riff/pkg/env"
+	"github.com/projectriff/riff/pkg/fileutils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
+	"net/url"
+	"path/filepath"
+	"strings"
 )
 
 type ResourceChecks struct {
-	Kind       string               `json:"kind,omitempty"`
-	Selector   metav1.LabelSelector `json:"selector,omitempty"`
-	JsonPath   string               `json:"jsonpath,omitempty"`
-	Pattern    string               `json:"pattern,omitempty"`
+	Kind     string               `json:"kind,omitempty"`
+	Selector metav1.LabelSelector `json:"selector,omitempty"`
+	JsonPath string               `json:"jsonpath,omitempty"`
+	Pattern  string               `json:"pattern,omitempty"`
 }
 
-type RiffResources struct {
-	Path       string           `json:"path,omitempty"`
-	Content    string           `json:"content,omitempty"`
-	Name       string           `json:"name,omitempty"`
-	Namespace  string           `json:"namespace,omitempty"`
-	Checks     []ResourceChecks `json:"checks,omitempty"`
+type RiffResource struct {
+	Path      string           `json:"path,omitempty"`
+	Content   string           `json:"content,omitempty"`
+	Name      string           `json:"name,omitempty"`
+	Namespace string           `json:"namespace,omitempty"`
+	Checks    []ResourceChecks `json:"checks,omitempty"`
 }
 
 type RiffSpec struct {
-	Images    []string        `json:"images,omitempty"`
-	Resources []RiffResources `json:"resources,omitempty"`
+	Images    []string       `json:"images,omitempty"`
+	Resources []RiffResource `json:"resources,omitempty"`
+	Init      []RiffResource `json:"init,omitempty"`
 }
 
 type RiffStatus struct {
@@ -55,8 +58,9 @@ type Manifest struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   RiffSpec   `json:"spec,omitempty"`
-	Status RiffStatus `json:"status,omitempty"`
+	Spec        RiffSpec   `json:"spec,omitempty"`
+	Status      RiffStatus `json:"status,omitempty"`
+	manifestDir string
 }
 
 func (orig *Manifest) DeepCopyObject() runtime.Object {
@@ -65,216 +69,107 @@ func (orig *Manifest) DeepCopyObject() runtime.Object {
 	return result
 }
 
-var schemeGroupVersion = schema.GroupVersion{
-	Group:    Group,
-	Version:  Version,
+func ResolveManifest(manifests map[string]*Manifest, path string) (*Manifest, error) {
+	if manifest, ok := manifests[path]; ok {
+		return manifest, nil
+	}
+	return NewManifest(path)
 }
 
-func NewManifest() *Manifest {
-	manifest := &Manifest{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   env.Cli.Name + "-install",
-			Labels: map[string]string{env.Cli.Name + "-install": "true"},
-		},
-		TypeMeta: metav1.TypeMeta{
-			Kind: Kind,
-			APIVersion: fmt.Sprintf("%s/%s", Group, Version),
-		},
-		Spec: RiffSpec{
-			Resources: []RiffResources{
-				{
-					Path: "https://storage.googleapis.com/knative-releases/serving/previous/v0.2.3/istio.yaml",
-					Name: "istio",
-					Namespace: "istio-system",
-					Checks: []ResourceChecks{
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"istio": "citadel"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"istio": "egressgateway"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"istio": "galley"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"istio": "ingressgateway"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"istio": "pilot"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"istio-mixer-type": "policy"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"istio": "sidecar-injector"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"istio-mixer-type": "telemetry"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-					},
-				},
-				{
-					Path: "https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-3-0-patch.yaml",
-					Name: "istio-riff-patch",
-				},
-				{
-					Path: "https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
-					Name: "build",
-					Namespace: "knative-build",
-					Checks: []ResourceChecks{
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"app": "build-controller"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"app": "build-webhook"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-					},
-				},
-				{
-					Path: "https://storage.googleapis.com/knative-releases/serving/previous/v0.2.3/serving.yaml",
-					Name: "serving",
-					Namespace: "knative-serving",
-					Checks: []ResourceChecks{
-						{
-							Kind:      "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"app": "activator"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-						{
-							Kind:      "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"app": "autoscaler"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"app": "controller"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"app": "webhook"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-					},
-				},
-				{
-					Path: "https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/eventing.yaml",
-					Name: "eventing",
-					Namespace: "knative-eventing",
-					Checks: []ResourceChecks{
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"app": "eventing-controller"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"app": "webhook"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-					},
-				},
-				{
-					Path: "https://storage.googleapis.com/knative-releases/eventing/previous/v0.2.1/in-memory-channel.yaml",
-					Name: "eventing-in-memory-channel",
-					Namespace: "knative-eventing",
-					Checks: []ResourceChecks{
-						{
-							Kind:      "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"role": "dispatcher", "clusterChannelProvisioner": "in-memory-channel"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-						{
-							Kind: "Pod",
-							Selector: metav1.LabelSelector{
-								MatchLabels: map[string]string{"role": "controller", "clusterChannelProvisioner":"in-memory-channel"},
-							},
-							JsonPath: ".status.phase",
-							Pattern:  "Running",
-						},
-					},
-				},
-				{
-					Path: fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-%s.yaml", constants.BuilderVersion),
-					Name: "riff-build-template",
-				},
-				{
-					Path: fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache-%s.yaml", constants.BuilderVersion),
-					Name: "riff-build-cache",
-				},
-			},
-		},
+func NewManifest(path string) (*Manifest, error) {
+	var m Manifest
+	yamlFile, err := fileutils.Read(path, "")
+	if err != nil {
+		return nil, fmt.Errorf("Error reading manifest file: %v", err)
 	}
-	return manifest
+
+	err = yaml.Unmarshal(yamlFile, &m)
+	if err != nil {
+		if strings.Contains(err.Error(), "did not find expected key") {
+			return nil, fmt.Errorf("Error parsing manifest file: %v. Please ensure that manifest has supported version:", err)
+		}
+		return nil, fmt.Errorf("Error parsing manifest file: %v", err)
+	}
+
+	err = checkCompleteness(m)
+	if err != nil {
+		return nil, err
+	}
+
+	err = m.VisitResources(checkResourcePath)
+	if err != nil {
+		return nil, err
+	}
+
+	m.manifestDir, err = fileutils.Dir(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return &m, nil
+}
+
+func (m *Manifest) VisitResources(f func(resource RiffResource) error) error {
+	for _, resource := range m.Spec.Resources {
+		err := f(resource)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ResourceAbsolutePath takes a path to a resource and returns an equivalent absolute path.
+// If the input path is a http(s) URL or is an absolute file path, it is returned without modification.
+// If the input path is a file URL, the corresponding (absolute) file path is returned.
+// If the input path is a relative file path, it is interpreted to be relative to the directory from which the
+// manifest was read (and if the manifest was not read from a directory, an error is returned) and the corresponding
+// absolute file path is returned.
+func (m *Manifest) ResourceAbsolutePath(path string) (string, error) {
+	absolute, canonicalPath, err := fileutils.IsAbsFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	if absolute {
+		return canonicalPath, nil
+	}
+
+	if m.manifestDir == "" {
+		return "", errors.New("relative path undefined since manifest was not read from a directory")
+	}
+
+	return fileutils.AbsFile(path, m.manifestDir)
+}
+
+func checkCompleteness(m Manifest) error {
+	var omission string
+	if m.Spec.Resources  == nil {
+		omission = "resources"
+	} else if m.Spec.Init  == nil {
+		omission = "namespace-initialization"
+	} else {
+		return nil
+	}
+	return fmt.Errorf("manifest is incomplete: %s missing: %#v", omission, m)
+}
+
+func checkResourcePath(resource RiffResource) error {
+	if filepath.IsAbs(resource.Path) {
+		return fmt.Errorf("resources must use a http or https URL or a relative path: absolute path not supported: %s", resource)
+	}
+
+	u, err := url.Parse(resource.Path)
+	if err != nil {
+		return err
+	}
+	if u.Scheme == "http" || u.Scheme == "https" || (u.Scheme == "" && !filepath.IsAbs(u.Path)) {
+		return nil
+	}
+
+	if u.Scheme == "" {
+		return fmt.Errorf("resources must use a http or https URL or a relative path: absolute path not supported: %s", resource)
+	}
+
+	return fmt.Errorf("resources must use a http or https URL or a relative path: scheme %s not supported: %s", u.Scheme, resource)
 }

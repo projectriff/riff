@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package core_test
+package crd_test
 
 import (
+	"github.com/projectriff/riff/pkg/crd"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -25,7 +26,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/projectriff/riff/pkg/core"
 )
 
 var _ = Describe("Manifest", func() {
@@ -33,12 +33,12 @@ var _ = Describe("Manifest", func() {
 
 		var (
 			manifestPath string
-			manifest     *core.Manifest
+			manifest     *crd.Manifest
 			err          error
 		)
 
 		JustBeforeEach(func() {
-			manifest, err = core.NewManifest(manifestPath)
+			manifest, err = crd.NewManifest(manifestPath)
 		})
 
 		Context("when an invalid path is provided", func() {
@@ -67,37 +67,28 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError("Manifest has unsupported version: 0.0"))
+				Expect(err).To(MatchError(HavePrefix("Error parsing manifest file: ")))
+				Expect(err).To(MatchError(ContainSubstring("Please ensure that manifest has supported version")))
 			})
 		})
 
-		Context("when the manifest does not specify the istio array", func() {
+		Context("when the manifest does not specify istio resource", func() {
 			BeforeEach(func() {
-				manifestPath = "./fixtures/manifest/noistio.yaml"
+				manifestPath = "./fixtures/manifest/noresources.yaml"
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(HavePrefix("manifest is incomplete: istio array missing: ")))
+				Expect(err).To(MatchError(HavePrefix("manifest is incomplete: resources missing: ")))
 			})
 		})
 
-		Context("when the manifest does not specify the knative array", func() {
-			BeforeEach(func() {
-				manifestPath = "./fixtures/manifest/noknative.yaml"
-			})
-
-			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(HavePrefix("manifest is incomplete: knative array missing: ")))
-			})
-		})
-
-		Context("when the manifest does not specify the namespace array", func() {
+		Context("when the manifest does not specify the namespace init resource", func() {
 			BeforeEach(func() {
 				manifestPath = "./fixtures/manifest/nonamespace.yaml"
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(HavePrefix("manifest is incomplete: namespace array missing: ")))
+				Expect(err).To(MatchError(HavePrefix("manifest is incomplete: namespace-initialization missing: ")))
 			})
 		})
 
@@ -122,7 +113,7 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError("resources must use a http or https URL or a relative path: scheme file not supported: file:///x"))
+				Expect(err).To(MatchError(HavePrefix("resources must use a http or https URL or a relative path: scheme file not supported:")))
 			})
 		})
 
@@ -136,15 +127,19 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should parse the istio array", func() {
-				Expect(manifest.Istio).To(ConsistOf("istio-crds", "http://istio-release"))
+				Expect(manifest.Spec.Resources[0].Name).To(Equal("istio"))
 			})
 
 			It("should parse the Knative array", func() {
-				Expect(manifest.Knative).To(ConsistOf("build-release", "https://serving-release", "eventing-release"))
+				releases := []string{}
+				for _, res := range manifest.Spec.Resources {
+					releases = append(releases, res.Name)
+				}
+				Expect(releases).To(ConsistOf("istio", "build", "eventing", "serving", "eventing-in-memory-channel", "riff-build-template"))
 			})
 
 			It("should parse the build template array", func() {
-				Expect(manifest.Namespace).To(ConsistOf("buildtemplate-release"))
+				Expect(manifest.Spec.Init[0].Name).To(ContainSubstring("riff-build-cache"))
 			})
 
 			Describe("ResourceAbsolutePath", func() {
@@ -184,19 +179,19 @@ var _ = Describe("Manifest", func() {
 
 	Describe("ResolveManifest", func() {
 		var (
-			manifests    map[string]*core.Manifest
-			testManifest *core.Manifest
-			manifest     *core.Manifest
+			manifests    map[string]*crd.Manifest
+			testManifest *crd.Manifest
+			manifest     *crd.Manifest
 			err          error
 		)
 
 		BeforeEach(func() {
-			testManifest = &core.Manifest{}
-			manifests = map[string]*core.Manifest{"test": testManifest}
+			testManifest = &crd.Manifest{}
+			manifests = map[string]*crd.Manifest{"test": testManifest}
 		})
 
 		JustBeforeEach(func() {
-			manifest, err = core.ResolveManifest(manifests, "test")
+			manifest, err = crd.ResolveManifest(manifests, "test")
 		})
 
 		It("should return with no error", func() {

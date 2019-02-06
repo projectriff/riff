@@ -1,8 +1,0 @@
-manifestVersion: 0.1
-istio:
-  - istio-crds
-  - istio-release
-knative:
-  - build-release
-  - serving-release
-  - eventing-release

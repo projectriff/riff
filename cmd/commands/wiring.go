@@ -89,7 +89,7 @@ func resolveHomePath(p string) (string, error) {
 
 }
 
-func CreateAndWireRootCommand(manifests map[string]*core.Manifest, localBuilder string, defaultRunImage string) *cobra.Command {
+func CreateAndWireRootCommand(manifests map[string]*crd.Manifest, localBuilder string, defaultRunImage string) *cobra.Command {
 
 	var client core.Client
 	var kc core.KubectlClient

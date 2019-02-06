@@ -19,6 +19,7 @@ package core
 import (
 	"bufio"
 	"fmt"
+	"github.com/projectriff/riff/pkg/crd"
 	"github.com/projectriff/riff/pkg/fileutils"
 	"io/ioutil"
 	"os"
@@ -74,8 +75,8 @@ func (c *client) explicitOrConfigNamespace(explicitNamespace string) string {
 	return namespace
 }
 
-func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options NamespaceInitOptions) error {
-	manifest, err := ResolveManifest(manifests, options.Manifest)
+func (c *kubectlClient) NamespaceInit(manifests map[string]*crd.Manifest, options NamespaceInitOptions) error {
+	manifest, err := crd.ResolveManifest(manifests, options.Manifest)
 	if err != nil {
 		return err
 	}
@@ -149,8 +150,8 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 		}
 	}
 
-	for _, release := range manifest.Namespace {
-		res, err := manifest.ResourceAbsolutePath(release)
+	for _, nsResource := range manifest.Spec.Init {
+		res, err := manifest.ResourceAbsolutePath(nsResource.Path)
 		if err != nil {
 			return err
 		}
@@ -164,7 +165,7 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 			panic(fmt.Sprintf("manifest.ResourceAbsolutePath returned a non-absolute path: %s", res))
 		}
 
-		fmt.Printf("Applying %s in namespace %q\n", release, ns)
+		fmt.Printf("Applying %s in namespace %q\n", nsResource.Path, ns)
 		log, err := c.kubeCtl.Exec([]string{"apply", "-n", ns, "-f", resource})
 		fmt.Printf("%s\n", log)
 		if err != nil {

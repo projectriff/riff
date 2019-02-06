@@ -17,6 +17,7 @@
 package core
 
 import (
+	"github.com/projectriff/riff/pkg/crd"
 	"os"
 
 	. "github.com/onsi/ginkgo"
@@ -39,7 +40,7 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockNamespaces      *vendor_mocks.NamespaceInterface
 		mockServiceAccounts *vendor_mocks.ServiceAccountInterface
 		mockSecrets         *vendor_mocks.SecretInterface
-		manifests           map[string]*Manifest
+		manifests           map[string]*crd.Manifest
 	)
 
 	JustBeforeEach(func() {
