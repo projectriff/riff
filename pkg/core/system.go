@@ -332,6 +332,10 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 			}
 		}
 		fmt.Print("Removing Knative for " + env.Cli.Name + " components\n")
+		err = deleteCrds(kc, crd.Group)
+		if err != nil {
+			return false, err
+		}
 		err = deleteCrds(kc, "knative.dev")
 		if err != nil {
 			return false, err
