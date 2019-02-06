@@ -137,6 +137,18 @@ var _ = Describe("Read", func() {
 				Expect(string(content)).To(Equal("contents"))
 			})
 		})
+
+		Context("when a file is a URL with an unsupported protocol", func() {
+			BeforeEach(func() {
+				base = "" // irrelevant when file is absolute
+
+				file = "ftp://localhost/some-file.txt"
+			})
+
+			It("should read the file content", func() {
+				Expect(err).To(MatchError("unsupported URL scheme ftp in ftp://localhost/some-file.txt"))
+			})
+		})
 	})
 
 })
