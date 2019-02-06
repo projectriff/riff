@@ -40,7 +40,10 @@ func CreateFileWithMode(path string, fileName string, mode os.FileMode, contents
 	fp := filepath.Join(path, fileName)
 	f, err := os.OpenFile(fp, os.O_CREATE|os.O_EXCL|os.O_WRONLY, mode)
 	check(err)
-	defer f.Close()
+	defer func() {
+		err = f.Close()
+		check(err)
+	}()
 	if len(contents) == 0 {
 		_, err = f.WriteString("test contents")
 		check(err)
@@ -110,4 +113,10 @@ func FileURL(absolutePath string) string {
 		extra = "/"
 	}
 	return fmt.Sprintf("file://%s%s", extra, absolutePath)
+}
+
+func AbsolutePath(path string) string {
+	result, err := filepath.Abs(path)
+	check(err)
+	return result
 }

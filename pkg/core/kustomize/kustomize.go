@@ -3,8 +3,8 @@ package kustomize
 import (
 	"bytes"
 	"fmt"
+	"github.com/projectriff/riff/pkg/fileutils"
 	"io/ioutil"
-	"net/http"
 	"net/url"
 	"sigs.k8s.io/kustomize/k8sdeps"
 	"sigs.k8s.io/kustomize/pkg/commands/build"
@@ -19,6 +19,7 @@ type Kustomizer interface {
 	// - the URL scheme is not supported (only file, http and https are)
 	// - retrieving the content fails
 	// - applying the customization fails
+	// As of the current implementation, it is not safe to call this function concurrently
 	ApplyLabel(resourceUri *url.URL, label *Label) ([]byte, error)
 }
 
@@ -32,18 +33,16 @@ func (l *Label) AsMap() map[string]string {
 }
 
 type kustomizer struct {
-	fakeDir    string
-	fs         fs.FileSystem
-	httpClient *http.Client
+	fakeDir     string
+	fs          fs.FileSystem
+	httpTimeout time.Duration
 }
 
 func MakeKustomizer(timeout time.Duration) Kustomizer {
 	return &kustomizer{
-		fs:      fs.MakeFakeFS(),
-		fakeDir: "/",
-		httpClient: &http.Client{
-			Timeout: timeout,
-		},
+		fs:          fs.MakeFakeFS(), // keep contents in-memory
+		fakeDir:     "/",
+		httpTimeout: timeout,
 	}
 }
 
@@ -60,7 +59,7 @@ func (kust *kustomizer) ApplyLabel(resourceUri *url.URL, label *Label) ([]byte, 
 }
 
 func (kust *kustomizer) writeResourceFile(resourceUri *url.URL) (string, error) {
-	resourceContents, err := kust.fetch(resourceUri)
+	resourceContents, err := fileutils.ReadUrl(resourceUri, kust.httpTimeout)
 	if err != nil {
 		return "", err
 	}
@@ -98,44 +97,4 @@ func (kust *kustomizer) runBuild() ([]byte, error) {
 		return nil, err
 	}
 	return out.Bytes(), nil
-}
-
-func (kust *kustomizer) fetch(url *url.URL) (string, error) {
-	switch url.Scheme {
-	case "http":
-		fallthrough
-	case "https":
-		return kust.fetchUri(url)
-	case "file":
-		return read(url)
-	default:
-		return "", fmt.Errorf("unsupported scheme %s", url.Scheme)
-	}
-
-}
-
-func read(path *url.URL) (string, error) {
-	contents, err := ioutil.ReadFile(path.Path)
-	if err != nil {
-		return "", nil
-	}
-	return string(contents), nil
-}
-
-func (kust *kustomizer) fetchUri(url *url.URL) (string, error) {
-	response, err := kust.httpClient.Get(url.String())
-	if err != nil {
-		return "", err
-	}
-	defer func() {
-		err := response.Body.Close()
-		if err != nil {
-			panic(err)
-		}
-	}()
-	contents, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return "", err
-	}
-	return string(contents), nil
 }

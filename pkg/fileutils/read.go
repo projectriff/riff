@@ -24,6 +24,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"runtime"
+	"time"
 )
 
 // Read reads the contents of the specified file. If the file is a relative path, it is relative to base.
@@ -41,18 +42,24 @@ func readAbsFile(file string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if u.Scheme == "http" || u.Scheme == "https" {
-		return downloadFile(u.String())
+	if u.Scheme == "" {
+		if !filepath.IsAbs(file) {
+			return nil, fmt.Errorf("absolute path expected instead of relative path: %s", file)
+		}
+		return ioutil.ReadFile(file)
 	}
-	if u.Scheme == "file" {
-		file = fileURLPath(u)
-	}
+	return ReadUrl(u, 0)
+}
 
-	if !filepath.IsAbs(file) {
-		return nil, fmt.Errorf("absolute path expected instead of relative path: %s", file)
+func ReadUrl(url *url.URL, httpTimeout time.Duration) ([]byte, error) {
+	scheme := url.Scheme
+	if scheme == "http" || scheme == "https" {
+		return downloadFile(url.String(), httpTimeout)
 	}
-
-	return ioutil.ReadFile(file)
+	if scheme == "file" {
+		return ioutil.ReadFile(fileURLPath(url))
+	}
+	return nil, fmt.Errorf("unsupported scheme in %v: %s", url, scheme)
 }
 
 func fileURLPath(u *url.URL) string {
@@ -66,12 +73,19 @@ func fileURLPath(u *url.URL) string {
 	return file
 }
 
-func downloadFile(url string) ([]byte, error) {
-	resp, err := http.Get(url)
+func downloadFile(url string, timeout time.Duration) ([]byte, error) {
+	httpClient := &http.Client{Timeout: timeout}
+	resp, err := httpClient.Get(url)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		responseBody := resp.Body
+		err := responseBody.Close()
+		if err != nil {
+			fmt.Printf("Warning: cannot close %v", responseBody)
+		}
+	}()
 
 	buf := new(bytes.Buffer)
 	_, err = buf.ReadFrom(resp.Body)

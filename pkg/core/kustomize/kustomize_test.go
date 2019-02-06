@@ -5,13 +5,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/core/kustomize"
-	"io"
-	"io/ioutil"
+	"github.com/projectriff/riff/pkg/test_support"
 	"net"
-	"net/http"
 	"net/url"
-	"os"
-	"path/filepath"
 	"time"
 )
 
@@ -20,9 +16,11 @@ var _ = Describe("Kustomize wrapper", func() {
 	var (
 		ownerLabel              *kustomize.Label
 		initialResourceContent  string
+		httpResponse            test_support.HttpResponse
 		expectedResourceContent string
 		kustomizer              kustomize.Kustomizer
 		timeout                 time.Duration
+		workDir                 string
 	)
 
 	BeforeEach(func() {
@@ -37,6 +35,11 @@ spec:
   resources:
     requests:
       storage: 8Gi`
+		httpResponse = test_support.HttpResponse{
+			StatusCode: 200,
+			Headers:    map[string]string{"Content-Type": "application/octet-stream"},
+			Content:    []byte(initialResourceContent),
+		}
 		expectedResourceContent = fmt.Sprintf(`apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -52,28 +55,34 @@ spec:
 `, ownerLabel.Name, ownerLabel.Value)
 		timeout = 500 * time.Millisecond
 		kustomizer = kustomize.MakeKustomizer(timeout)
+		workDir = test_support.CreateTempDir()
+	})
+
+	AfterEach(func() {
+		test_support.CleanupDirs(GinkgoT(), workDir)
 	})
 
 	It("customizes remote resources with provided label", func() {
 		resourceListener, _ := net.Listen("tcp", "127.0.0.1:0")
-		go serve(resourceListener, initialResourceContent)
+		go func() {
+			err := test_support.Serve(resourceListener, httpResponse)
+			Expect(err).NotTo(HaveOccurred())
+		}()
 		resourceUrl := unsafeParseUrl(fmt.Sprintf("http://%s/%s", resourceListener.Addr().String(), "pvc.yaml"))
 
 		result, err := kustomizer.ApplyLabel(resourceUrl, ownerLabel)
 
-		Expect(err).To(Not(HaveOccurred()))
+		Expect(err).NotTo(HaveOccurred())
 		Expect(string(result)).To(Equal(expectedResourceContent))
 	})
 
 	It("customizes local resources with provided label", func() {
-		file, fileUri := localFile("pvc.yaml", initialResourceContent)
-		defer unsafeClose(file)
-
-		resourceUrl := unsafeParseUrl(fileUri)
+		file := test_support.CreateFile(workDir, "pvc.yaml", initialResourceContent)
+		resourceUrl := unsafeParseUrl(test_support.FileURL(test_support.AbsolutePath(file)))
 
 		result, err := kustomizer.ApplyLabel(resourceUrl, ownerLabel)
 
-		Expect(err).To(Not(HaveOccurred()))
+		Expect(err).NotTo(HaveOccurred())
 		Expect(string(result)).To(Equal(expectedResourceContent))
 	})
 
@@ -82,7 +91,7 @@ spec:
 
 		_, err := kustomizer.ApplyLabel(resourceUrl, ownerLabel)
 
-		Expect(err).To(MatchError("unsupported scheme ftp"))
+		Expect(err).To(MatchError("unsupported scheme in ftp://127.0.0.1/goodluck.yaml: ftp"))
 	})
 
 	It("fails if the resource is not reachable", func() {
@@ -94,9 +103,12 @@ spec:
 	})
 
 	It("fails if fetching the resource takes too long", func() {
-		listener, _ := net.Listen("tcp", "127.0.0.1:0")
-		go serveSlow(listener, initialResourceContent, 3*timeout)
-		resourceUrl := unsafeParseUrl(fmt.Sprintf("http://%s/%s", listener.Addr().String(), "pvc.yaml"))
+		resourceListener, _ := net.Listen("tcp", "127.0.0.1:0")
+		go func() {
+			err := test_support.ServeSlow(resourceListener, httpResponse, 3*timeout)
+			Expect(err).NotTo(HaveOccurred())
+		}()
+		resourceUrl := unsafeParseUrl(fmt.Sprintf("http://%s/%s", resourceListener.Addr().String(), "pvc.yaml"))
 
 		_, err := kustomizer.ApplyLabel(resourceUrl, ownerLabel)
 
@@ -106,51 +118,10 @@ spec:
 	})
 })
 
-func serve(listener net.Listener, response string) {
-	serveSlow(listener, response, 0)
-}
-
-func serveSlow(listener net.Listener, response string, sleepDuration time.Duration) {
-	err := http.Serve(listener, http.HandlerFunc(func(responseWriter http.ResponseWriter, req *http.Request) {
-		time.Sleep(sleepDuration)
-		responseWriter.WriteHeader(200)
-		responseWriter.Header().Add("Content-Type", "application/octet-stream")
-		_, _ = io.WriteString(responseWriter, response)
-	}))
-
-	if err != nil {
-		panic(err)
-	}
-	return
-}
-
-func localFile(name string, content string) (*os.File, string) {
-	file, err := ioutil.TempFile("", name)
-	if err != nil {
-		panic(err)
-	}
-	path, err := filepath.Abs(file.Name())
-	if err != nil {
-		panic(err)
-	}
-	err = ioutil.WriteFile(file.Name(), []byte(content), os.FileMode(0600))
-	if err != nil {
-		panic(err)
-	}
-	return file, fmt.Sprintf("file://%s", path)
-}
-
 func unsafeParseUrl(raw string) *url.URL {
 	result, err := url.Parse(raw)
 	if err != nil {
-		panic(err)
+		Expect(err).NotTo(HaveOccurred())
 	}
 	return result
-}
-
-func unsafeClose(file *os.File) {
-	err := file.Close()
-	if err != nil {
-		panic(err)
-	}
 }
