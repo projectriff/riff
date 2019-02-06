@@ -2,7 +2,6 @@
 
 package mockkustomize
 
-import kustomize "github.com/projectriff/riff/pkg/core/kustomize"
 import mock "github.com/stretchr/testify/mock"
 import url "net/url"
 
@@ -11,13 +10,13 @@ type Kustomizer struct {
 	mock.Mock
 }
 
-// ApplyLabel provides a mock function with given fields: resourceUri, label
-func (_m *Kustomizer) ApplyLabel(resourceUri *url.URL, label *kustomize.Label) ([]byte, error) {
-	ret := _m.Called(resourceUri, label)
+// ApplyLabel provides a mock function with given fields: resourceUri, labels
+func (_m *Kustomizer) ApplyLabel(resourceUri *url.URL, labels map[string]string) ([]byte, error) {
+	ret := _m.Called(resourceUri, labels)
 
 	var r0 []byte
-	if rf, ok := ret.Get(0).(func(*url.URL, *kustomize.Label) []byte); ok {
-		r0 = rf(resourceUri, label)
+	if rf, ok := ret.Get(0).(func(*url.URL, map[string]string) []byte); ok {
+		r0 = rf(resourceUri, labels)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]byte)
@@ -25,8 +24,8 @@ func (_m *Kustomizer) ApplyLabel(resourceUri *url.URL, label *kustomize.Label) (
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*url.URL, *kustomize.Label) error); ok {
-		r1 = rf(resourceUri, label)
+	if rf, ok := ret.Get(1).(func(*url.URL, map[string]string) error); ok {
+		r1 = rf(resourceUri, labels)
 	} else {
 		r1 = ret.Error(1)
 	}

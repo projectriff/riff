@@ -19,7 +19,6 @@ package core
 import (
 	"bufio"
 	"fmt"
-	"github.com/projectriff/riff/pkg/core/kustomize"
 	"github.com/projectriff/riff/pkg/env"
 	"github.com/projectriff/riff/pkg/fileutils"
 	"golang.org/x/crypto/ssh/terminal"
@@ -99,17 +98,14 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 		return err
 	}
 
-	ownerLabel := &kustomize.Label{
-		Name:  "created-by",
-		Value: env.Cli.Name,
-	}
+	initLabels := map[string]string{"created-by": fmt.Sprintf("%s-%s", env.Cli.Name, env.Cli.Version)}
 	if options.secretType() != secretTypeNone {
 		if options.GcrTokenPath != "" {
-			if err := c.createGcrSecret(options, ownerLabel); err != nil {
+			if err := c.createGcrSecret(options, initLabels); err != nil {
 				return err
 			}
 		} else if options.DockerHubUsername != "" {
-			if err := c.createDockerHubSecret(options, ownerLabel); err != nil {
+			if err := c.createDockerHubSecret(options, initLabels); err != nil {
 				return err
 			}
 		} else if err = c.checkSecretExists(options); err != nil {
@@ -172,7 +168,7 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 
 		fmt.Printf("Applying %s in namespace %q\n", release, ns)
 		resourceUrl, _ := url.Parse(resource)
-		labeledContent, err := c.kustomizer.ApplyLabel(resourceUrl, ownerLabel)
+		labeledContent, err := c.kustomizer.ApplyLabel(resourceUrl, initLabels)
 		if err != nil {
 			return err
 		}
@@ -190,7 +186,7 @@ func (c *kubectlClient) checkSecretExists(options NamespaceInitOptions) error {
 	return err
 }
 
-func (c *kubectlClient) createDockerHubSecret(options NamespaceInitOptions, label *kustomize.Label) error {
+func (c *kubectlClient) createDockerHubSecret(options NamespaceInitOptions, labels map[string]string) error {
 	_ = c.kubeClient.CoreV1().Secrets(options.NamespaceName).Delete(options.SecretName, &v1.DeleteOptions{})
 
 	password, err := readPassword(fmt.Sprintf("Enter dockerhub password for user %q", options.DockerHubUsername))
@@ -201,7 +197,7 @@ func (c *kubectlClient) createDockerHubSecret(options NamespaceInitOptions, labe
 		ObjectMeta: v1.ObjectMeta{
 			Name:        options.SecretName,
 			Annotations: map[string]string{"build.knative.dev/docker-0": "https://index.docker.io/v1/"},
-			Labels:      label.AsMap(),
+			Labels:      labels,
 		},
 		Type: corev1.SecretTypeBasicAuth,
 		StringData: map[string]string{
@@ -214,7 +210,7 @@ func (c *kubectlClient) createDockerHubSecret(options NamespaceInitOptions, labe
 	return err
 }
 
-func (c *kubectlClient) createGcrSecret(options NamespaceInitOptions, label *kustomize.Label) error {
+func (c *kubectlClient) createGcrSecret(options NamespaceInitOptions, labels map[string]string) error {
 	_ = c.kubeClient.CoreV1().Secrets(options.NamespaceName).Delete(options.SecretName, &v1.DeleteOptions{})
 
 	token, err := ioutil.ReadFile(options.GcrTokenPath)
@@ -225,7 +221,7 @@ func (c *kubectlClient) createGcrSecret(options NamespaceInitOptions, label *kus
 		ObjectMeta: v1.ObjectMeta{
 			Name:        options.SecretName,
 			Annotations: map[string]string{"build.knative.dev/docker-0": "https://gcr.io"},
-			Labels:      label.AsMap(),
+			Labels:      labels,
 		},
 		Type: corev1.SecretTypeBasicAuth,
 		StringData: map[string]string{

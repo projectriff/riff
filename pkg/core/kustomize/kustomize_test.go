@@ -14,7 +14,7 @@ import (
 var _ = Describe("Kustomize wrapper", func() {
 
 	var (
-		ownerLabel              *kustomize.Label
+		initLabels              map[string]string
 		initialResourceContent  string
 		httpResponse            test_support.HttpResponse
 		expectedResourceContent string
@@ -24,7 +24,7 @@ var _ = Describe("Kustomize wrapper", func() {
 	)
 
 	BeforeEach(func() {
-		ownerLabel = &kustomize.Label{Name: "created-by", Value: "riff"}
+		initLabels = map[string]string{"created-by": "riff", "because": "we-can"}
 		initialResourceContent = `kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
@@ -40,11 +40,12 @@ spec:
 			Headers:    map[string]string{"Content-Type": "application/octet-stream"},
 			Content:    []byte(initialResourceContent),
 		}
-		expectedResourceContent = fmt.Sprintf(`apiVersion: v1
+		expectedResourceContent = `apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   labels:
-    %s: %s
+    because: we-can
+    created-by: riff
   name: riff-cnb-cache
 spec:
   accessModes:
@@ -52,7 +53,7 @@ spec:
   resources:
     requests:
       storage: 8Gi
-`, ownerLabel.Name, ownerLabel.Value)
+`
 		timeout = 500 * time.Millisecond
 		kustomizer = kustomize.MakeKustomizer(timeout)
 		workDir = test_support.CreateTempDir()
@@ -62,7 +63,7 @@ spec:
 		test_support.CleanupDirs(GinkgoT(), workDir)
 	})
 
-	It("customizes remote resources with provided label", func() {
+	It("customizes remote resources with provided labels", func() {
 		resourceListener, _ := net.Listen("tcp", "127.0.0.1:0")
 		go func() {
 			err := test_support.Serve(resourceListener, httpResponse)
@@ -70,17 +71,17 @@ spec:
 		}()
 		resourceUrl := unsafeParseUrl(fmt.Sprintf("http://%s/%s", resourceListener.Addr().String(), "pvc.yaml"))
 
-		result, err := kustomizer.ApplyLabel(resourceUrl, ownerLabel)
+		result, err := kustomizer.ApplyLabel(resourceUrl, initLabels)
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(string(result)).To(Equal(expectedResourceContent))
 	})
 
-	It("customizes local resources with provided label", func() {
+	It("customizes local resources with provided labels", func() {
 		file := test_support.CreateFile(workDir, "pvc.yaml", initialResourceContent)
 		resourceUrl := unsafeParseUrl(test_support.FileURL(test_support.AbsolutePath(file)))
 
-		result, err := kustomizer.ApplyLabel(resourceUrl, ownerLabel)
+		result, err := kustomizer.ApplyLabel(resourceUrl, initLabels)
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(string(result)).To(Equal(expectedResourceContent))
@@ -89,13 +90,13 @@ spec:
 	It("fails on unsupported scheme", func() {
 		resourceUrl := unsafeParseUrl("ftp://127.0.0.1/goodluck.yaml")
 
-		_, err := kustomizer.ApplyLabel(resourceUrl, ownerLabel)
+		_, err := kustomizer.ApplyLabel(resourceUrl, initLabels)
 
 		Expect(err).To(MatchError("unsupported scheme in ftp://127.0.0.1/goodluck.yaml: ftp"))
 	})
 
 	It("fails if the resource is not reachable", func() {
-		_, err := kustomizer.ApplyLabel(unsafeParseUrl("http://localhost:12345/nope.yaml"), ownerLabel)
+		_, err := kustomizer.ApplyLabel(unsafeParseUrl("http://localhost:12345/nope.yaml"), initLabels)
 
 		Expect(err).To(SatisfyAll(
 			Not(BeNil()),
@@ -110,7 +111,7 @@ spec:
 		}()
 		resourceUrl := unsafeParseUrl(fmt.Sprintf("http://%s/%s", resourceListener.Addr().String(), "pvc.yaml"))
 
-		_, err := kustomizer.ApplyLabel(resourceUrl, ownerLabel)
+		_, err := kustomizer.ApplyLabel(resourceUrl, initLabels)
 
 		Expect(err).To(SatisfyAll(
 			Not(BeNil()),
