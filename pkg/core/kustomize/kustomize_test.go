@@ -71,7 +71,7 @@ spec:
 		}()
 		resourceUrl := unsafeParseUrl(fmt.Sprintf("http://%s/%s", resourceListener.Addr().String(), "pvc.yaml"))
 
-		result, err := kustomizer.ApplyLabel(resourceUrl, initLabels)
+		result, err := kustomizer.ApplyLabels(resourceUrl, initLabels)
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(string(result)).To(Equal(expectedResourceContent))
@@ -81,7 +81,7 @@ spec:
 		file := test_support.CreateFile(workDir, "pvc.yaml", initialResourceContent)
 		resourceUrl := unsafeParseUrl(test_support.FileURL(test_support.AbsolutePath(file)))
 
-		result, err := kustomizer.ApplyLabel(resourceUrl, initLabels)
+		result, err := kustomizer.ApplyLabels(resourceUrl, initLabels)
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(string(result)).To(Equal(expectedResourceContent))
@@ -90,13 +90,13 @@ spec:
 	It("fails on unsupported scheme", func() {
 		resourceUrl := unsafeParseUrl("ftp://127.0.0.1/goodluck.yaml")
 
-		_, err := kustomizer.ApplyLabel(resourceUrl, initLabels)
+		_, err := kustomizer.ApplyLabels(resourceUrl, initLabels)
 
 		Expect(err).To(MatchError("unsupported scheme in ftp://127.0.0.1/goodluck.yaml: ftp"))
 	})
 
 	It("fails if the resource is not reachable", func() {
-		_, err := kustomizer.ApplyLabel(unsafeParseUrl("http://localhost:12345/nope.yaml"), initLabels)
+		_, err := kustomizer.ApplyLabels(unsafeParseUrl("http://localhost:12345/nope.yaml"), initLabels)
 
 		Expect(err).To(SatisfyAll(
 			Not(BeNil()),
@@ -111,7 +111,7 @@ spec:
 		}()
 		resourceUrl := unsafeParseUrl(fmt.Sprintf("http://%s/%s", resourceListener.Addr().String(), "pvc.yaml"))
 
-		_, err := kustomizer.ApplyLabel(resourceUrl, initLabels)
+		_, err := kustomizer.ApplyLabels(resourceUrl, initLabels)
 
 		Expect(err).To(SatisfyAll(
 			Not(BeNil()),

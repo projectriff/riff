@@ -223,7 +223,7 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
 		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(serviceAccount, nil)
 		customizedResourceContents := contentsOf("fixtures/kustom_pvc.yaml")
-		mockKustomizer.On("ApplyLabel",
+		mockKustomizer.On("ApplyLabels",
 			mock.MatchedBy(urlPath(namespaceResource)),
 			mock.MatchedBy(key("created-by"))).Return(customizedResourceContents, nil)
 		kubeCtl.On("ExecStdin", []string{"apply", "-n", "foo", "-f", "-"}, &customizedResourceContents).
@@ -251,7 +251,7 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
 		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(serviceAccount, nil)
 		expectedError := fmt.Errorf("kustomization failed")
-		mockKustomizer.On("ApplyLabel",
+		mockKustomizer.On("ApplyLabels",
 			mock.MatchedBy(urlPath(namespaceResource)),
 			mock.MatchedBy(key("created-by"))).Return(nil, expectedError)
 

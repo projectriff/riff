@@ -10,8 +10,8 @@ type Kustomizer struct {
 	mock.Mock
 }
 
-// ApplyLabel provides a mock function with given fields: resourceUri, labels
-func (_m *Kustomizer) ApplyLabel(resourceUri *url.URL, labels map[string]string) ([]byte, error) {
+// ApplyLabels provides a mock function with given fields: resourceUri, labels
+func (_m *Kustomizer) ApplyLabels(resourceUri *url.URL, labels map[string]string) ([]byte, error) {
 	ret := _m.Called(resourceUri, labels)
 
 	var r0 []byte

@@ -22,7 +22,7 @@ type Kustomizer interface {
 	// - retrieving the content fails
 	// - applying the customization fails
 	// As of the current implementation, it is not safe to call this function concurrently
-	ApplyLabel(resourceUri *url.URL, labels map[string]string) ([]byte, error)
+	ApplyLabels(resourceUri *url.URL, labels map[string]string) ([]byte, error)
 }
 
 type kustomizer struct {
@@ -39,7 +39,7 @@ func MakeKustomizer(timeout time.Duration) Kustomizer {
 	}
 }
 
-func (kust *kustomizer) ApplyLabel(resourceUri *url.URL, labels map[string]string) ([]byte, error) {
+func (kust *kustomizer) ApplyLabels(resourceUri *url.URL, labels map[string]string) ([]byte, error) {
 	resourcePath, err := kust.writeResourceFile(resourceUri)
 	if err != nil {
 		return nil, err

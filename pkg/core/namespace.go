@@ -168,7 +168,7 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 
 		fmt.Printf("Applying %s in namespace %q\n", release, ns)
 		resourceUrl, _ := url.Parse(resource)
-		labeledContent, err := c.kustomizer.ApplyLabel(resourceUrl, initLabels)
+		labeledContent, err := c.kustomizer.ApplyLabels(resourceUrl, initLabels)
 		if err != nil {
 			return err
 		}
