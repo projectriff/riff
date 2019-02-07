@@ -132,7 +132,7 @@ func getElementContaining(array []string, substring string) string {
 }
 
 func (c *client) installAndCheckResources(manifest *crd.Manifest, options SystemInstallOptions) error {
-	for _,resource := range manifest.Spec.Resources {
+	for _,resource := range manifest.Spec.Resources.System {
 		err := c.installResource(resource, options)
 		if err != nil {
 			return err
@@ -145,7 +145,7 @@ func (c *client) installAndCheckResources(manifest *crd.Manifest, options System
 	return nil
 }
 
-func (c *client) installResource(res crd.RiffResource, options SystemInstallOptions) error {
+func (c *client) installResource(res crd.Resource, options SystemInstallOptions) error {
 	if res.Path == "" {
 		return errors.New("cannot install anything other than a url yet")
 	}
@@ -182,7 +182,7 @@ To fix this you need to:
 }
 
 // TODO this only supports checking Pods for phases
-func (c *client) checkResource(resource crd.RiffResource) error {
+func (c *client) checkResource(resource crd.Resource) error {
 	cnt := 1
 	for _, check := range resource.Checks {
 		var ready bool

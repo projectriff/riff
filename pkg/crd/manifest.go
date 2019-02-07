@@ -36,7 +36,7 @@ type ResourceChecks struct {
 	Pattern  string               `json:"pattern,omitempty"`
 }
 
-type RiffResource struct {
+type Resource struct {
 	Path      string           `json:"path,omitempty"`
 	Content   string           `json:"content,omitempty"`
 	Name      string           `json:"name,omitempty"`
@@ -44,10 +44,14 @@ type RiffResource struct {
 	Checks    []ResourceChecks `json:"checks,omitempty"`
 }
 
+type RiffResource struct {
+	System         []Resource `json:"system,omitempty"`
+	Initialization []Resource `json:"initialization,omitempty"`
+}
+
 type RiffSpec struct {
-	Images    []string       `json:"images,omitempty"`
-	Resources []RiffResource `json:"resources,omitempty"`
-	Init      []RiffResource `json:"init,omitempty"`
+	Images    []string     `json:"images,omitempty"`
+	Resources RiffResource `json:"resources,omitempty"`
 }
 
 type RiffStatus struct {
@@ -91,6 +95,11 @@ func NewManifest(path string) (*Manifest, error) {
 		return nil, fmt.Errorf("Error parsing manifest file: %v", err)
 	}
 
+	supportedVersion := fmt.Sprintf("%s/%s", Group, Version)
+	if !strings.EqualFold(m.APIVersion, supportedVersion) {
+		return nil, errors.New(fmt.Sprintf("Unsupported version %s. Supported version is %s", m.APIVersion, supportedVersion))
+	}
+
 	err = checkCompleteness(m)
 	if err != nil {
 		return nil, err
@@ -109,8 +118,11 @@ func NewManifest(path string) (*Manifest, error) {
 	return &m, nil
 }
 
-func (m *Manifest) VisitResources(f func(resource RiffResource) error) error {
-	for _, resource := range m.Spec.Resources {
+func (m *Manifest) VisitResources(f func(res Resource) error) error {
+	var resources []Resource
+	resources = append(resources, m.Spec.Resources.System...)
+	resources = append(resources, m.Spec.Resources.Initialization...)
+	for _, resource := range resources {
 		err := f(resource)
 		if err != nil {
 			return err
@@ -144,9 +156,9 @@ func (m *Manifest) ResourceAbsolutePath(path string) (string, error) {
 
 func checkCompleteness(m Manifest) error {
 	var omission string
-	if m.Spec.Resources  == nil {
-		omission = "resources"
-	} else if m.Spec.Init  == nil {
+	if m.Spec.Resources.System == nil {
+		omission = "system"
+	} else if m.Spec.Resources.Initialization == nil {
 		omission = "namespace-initialization"
 	} else {
 		return nil
@@ -154,7 +166,7 @@ func checkCompleteness(m Manifest) error {
 	return fmt.Errorf("manifest is incomplete: %s missing: %#v", omission, m)
 }
 
-func checkResourcePath(resource RiffResource) error {
+func checkResourcePath(resource Resource) error {
 	if filepath.IsAbs(resource.Path) {
 		return fmt.Errorf("resources must use a http or https URL or a relative path: absolute path not supported: %s", resource)
 	}

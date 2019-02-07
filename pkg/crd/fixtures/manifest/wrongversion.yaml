@@ -11,8 +11,10 @@ metadata:
   uid: aff8ed3b-2996-11e9-89d7-42010a000b0a
 spec:
   resources:
-    name: istio
-    path: /x
-    - name: build
+    system:
+    - name: istio
+      path: x
+    initialization:
+    - name: cache
       path: y
 status: {}

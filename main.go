@@ -29,214 +29,216 @@ import (
 var (
 	// TODO update to a release version before releasing riff
 	builderVersion  = "0.2.0-snapshot-ci-63cd05079e1f"
-	builderName         = fmt.Sprintf("projectriff/builder:%s", builderVersion)
+	builderName     = fmt.Sprintf("projectriff/builder:%s", builderVersion)
 	defaultRunImage = "packs/run:v3alpha2"
 
-	manifests = map[string]*crd.Manifest {
+	manifests = map[string]*crd.Manifest{
 		"stable": {
 			ObjectMeta: metav1.ObjectMeta{
 				Name:   env.Cli.Name + "-install",
 				Labels: map[string]string{env.Cli.Name + "-install": "true"},
 			},
 			TypeMeta: metav1.TypeMeta{
-				Kind: crd.Kind,
+				Kind:       crd.Kind,
 				APIVersion: fmt.Sprintf("%s/%s", crd.Group, crd.Version),
 			},
-			Spec: crd.RiffSpec {
-				Resources: []crd.RiffResource{
-					{
-						Path: "https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/istio.yaml",
-						Name: "istio",
-						Namespace: "istio-system",
-						Checks: []crd.ResourceChecks {
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"istio": "citadel"},
+			Spec: crd.RiffSpec{
+				Resources: crd.RiffResource{
+					System: []crd.Resource{
+						{
+							Path:      "https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/istio.yaml",
+							Name:      "istio",
+							Namespace: "istio-system",
+							Checks: []crd.ResourceChecks{
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"istio": "citadel"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
 								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"istio": "egressgateway"},
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"istio": "egressgateway"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
 								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"istio": "galley"},
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"istio": "galley"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
 								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"istio": "ingressgateway"},
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"istio": "ingressgateway"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
 								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"istio": "pilot"},
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"istio": "pilot"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
 								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"istio-mixer-type": "policy"},
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"istio-mixer-type": "policy"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
 								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"istio": "sidecar-injector"},
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"istio": "sidecar-injector"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
 								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"istio-mixer-type": "telemetry"},
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"istio-mixer-type": "telemetry"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
 								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-						},
-					},
-					{
-						Path: "https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-3-0-patch.yaml",
-						Name: "istio-riff-patch",
-					},
-					{
-						// NOTE: build should be in the knative-releases bucket, but is hiding in knative-nightly
-						Path: "https://storage.googleapis.com/knative-nightly/build/previous/v0.3.0/release.yaml",
-						Name: "build",
-						Namespace: "knative-build",
-						Checks: []crd.ResourceChecks {
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"app": "build-controller"},
-								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"app": "build-webhook"},
-								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
 							},
 						},
-					},
-					{
-						Path: "https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/serving.yaml",
-						Name: "serving",
-						Namespace: "knative-serving",
-						Checks: []crd.ResourceChecks {
-							{
-								Kind:      "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"app": "activator"},
+						{
+							Path: "https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-3-0-patch.yaml",
+							Name: "istio-riff-patch",
+						},
+						{
+							// NOTE: build should be in the knative-releases bucket, but is hiding in knative-nightly
+							Path:      "https://storage.googleapis.com/knative-nightly/build/previous/v0.3.0/release.yaml",
+							Name:      "build",
+							Namespace: "knative-build",
+							Checks: []crd.ResourceChecks{
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"app": "build-controller"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
 								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-							{
-								Kind:      "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"app": "autoscaler"},
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"app": "build-webhook"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
 								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"app": "controller"},
-								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"app": "webhook"},
-								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
 							},
 						},
-					},
-					{
-						Path: "https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/eventing.yaml",
-						Name: "eventing",
-						Namespace: "knative-eventing",
-						Checks: []crd.ResourceChecks {
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"app": "eventing-controller"},
+						{
+							Path:      "https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/serving.yaml",
+							Name:      "serving",
+							Namespace: "knative-serving",
+							Checks: []crd.ResourceChecks{
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"app": "activator"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
 								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"app": "webhook"},
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"app": "autoscaler"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
 								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-						},
-					},
-					{
-						Path: "https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/in-memory-channel.yaml",
-						Name: "eventing-in-memory-channel",
-						Namespace: "knative-eventing",
-						Checks: []crd.ResourceChecks{
-							{
-								Kind:      "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"role": "dispatcher", "clusterChannelProvisioner": "in-memory-channel"},
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"app": "controller"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
 								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
-							},
-							{
-								Kind: "Pod",
-								Selector: metav1.LabelSelector{
-									MatchLabels: map[string]string{"role": "controller", "clusterChannelProvisioner":"in-memory-channel"},
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"app": "webhook"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
 								},
-								JsonPath: ".status.phase",
-								Pattern:  "Running",
 							},
 						},
+						{
+							Path:      "https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/eventing.yaml",
+							Name:      "eventing",
+							Namespace: "knative-eventing",
+							Checks: []crd.ResourceChecks{
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"app": "eventing-controller"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
+								},
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"app": "webhook"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
+								},
+							},
+						},
+						{
+							Path:      "https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/in-memory-channel.yaml",
+							Name:      "eventing-in-memory-channel",
+							Namespace: "knative-eventing",
+							Checks: []crd.ResourceChecks{
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"role": "dispatcher", "clusterChannelProvisioner": "in-memory-channel"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
+								},
+								{
+									Kind: "Pod",
+									Selector: metav1.LabelSelector{
+										MatchLabels: map[string]string{"role": "controller", "clusterChannelProvisioner": "in-memory-channel"},
+									},
+									JsonPath: ".status.phase",
+									Pattern:  "Running",
+								},
+							},
+						},
+						{
+							Path: fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-%s.yaml", builderVersion),
+							Name: "riff-build-template",
+						},
 					},
-					{
-						Path: fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-%s.yaml", builderVersion),
-						Name: "riff-build-template",
-					},
-				},
-				Init: []crd.RiffResource {
-					{
-						Path: fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache-%s.yaml", builderVersion),
-						Name: "riff-build-cache",
+					Initialization: []crd.Resource{
+						{
+							Path: fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache-%s.yaml", builderVersion),
+							Name: "riff-build-cache",
+						},
 					},
 				},
 			},

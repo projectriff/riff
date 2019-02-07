@@ -150,7 +150,7 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*crd.Manifest, option
 		}
 	}
 
-	for _, nsResource := range manifest.Spec.Init {
+	for _, nsResource := range manifest.Spec.Resources.Initialization {
 		res, err := manifest.ResourceAbsolutePath(nsResource.Path)
 		if err != nil {
 			return err

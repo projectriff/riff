@@ -67,8 +67,7 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(HavePrefix("Error parsing manifest file: ")))
-				Expect(err).To(MatchError(ContainSubstring("Please ensure that manifest has supported version")))
+				Expect(err).To(MatchError(ContainSubstring("Unsupported version")))
 			})
 		})
 
@@ -78,7 +77,7 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should return a suitable error", func() {
-				Expect(err).To(MatchError(HavePrefix("manifest is incomplete: resources missing: ")))
+				Expect(err).To(MatchError(HavePrefix("manifest is incomplete: system missing: ")))
 			})
 		})
 
@@ -127,19 +126,19 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should parse the istio array", func() {
-				Expect(manifest.Spec.Resources[0].Name).To(Equal("istio"))
+				Expect(manifest.Spec.Resources.System[0].Name).To(Equal("istio"))
 			})
 
 			It("should parse the Knative array", func() {
 				releases := []string{}
-				for _, res := range manifest.Spec.Resources {
+				for _, res := range manifest.Spec.Resources.System {
 					releases = append(releases, res.Name)
 				}
 				Expect(releases).To(ConsistOf("istio", "build", "eventing", "serving", "eventing-in-memory-channel", "riff-build-template"))
 			})
 
 			It("should parse the build template array", func() {
-				Expect(manifest.Spec.Init[0].Name).To(ContainSubstring("riff-build-cache"))
+				Expect(manifest.Spec.Resources.Initialization[0].Name).To(ContainSubstring("riff-build-cache"))
 			})
 
 			Describe("ResourceAbsolutePath", func() {
