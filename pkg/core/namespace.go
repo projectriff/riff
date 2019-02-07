@@ -117,6 +117,7 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 	if errors.IsNotFound(err) {
 		sa = &corev1.ServiceAccount{}
 		sa.Name = serviceAccountName
+		sa.Labels = initLabels
 		if options.secretType() != secretTypeNone {
 			secretName := options.SecretName
 			sa.Secrets = append(sa.Secrets, corev1.ObjectReference{Name: secretName})

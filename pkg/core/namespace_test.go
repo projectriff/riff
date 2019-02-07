@@ -28,6 +28,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"reflect"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -96,7 +97,8 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockSecrets.On("Get", "push-credentials", meta_v1.GetOptions{}).Return(&v1.Secret{}, nil)
 		serviceAccount := &v1.ServiceAccount{}
 		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
-		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(serviceAccount, nil)
+		labels := map[string]string{"created-by": env.Cli.Name + "-" + env.Cli.Version}
+		mockServiceAccounts.On("Create", mock.MatchedBy(namedAndLabelled(serviceAccountName, labels))).Return(serviceAccount, nil)
 
 		err := kubectlClient.NamespaceInit(manifests, options)
 
@@ -274,6 +276,12 @@ func makeKubectlClient(kubeClient kubernetes.Interface,
 
 func notFound() *errors.StatusError {
 	return errors.NewNotFound(schema.GroupResource{}, "")
+}
+
+func namedAndLabelled(name string, labels map[string]string) func(sa *v1.ServiceAccount) bool {
+	return func(sa *v1.ServiceAccount) bool {
+		return sa.Name == name && reflect.DeepEqual(sa.Labels, labels)
+	}
 }
 
 func named(name string) func(sa *v1.ServiceAccount) bool {
