@@ -26,6 +26,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"sort"
 	"strings"
 	"syscall"
 
@@ -287,13 +288,17 @@ func readPassword(s string) (string, error) {
 }
 
 func getInitLabels() map[string]string {
-	return map[string]string{"created-by": fmt.Sprintf("%s-%s", env.Cli.Name, env.Cli.Version)}
+	return map[string]string{
+		"projectriff.io/installer": env.Cli.Name,
+		"projectriff.io/version":   env.Cli.Version,
+	}
 }
 
 func transformToSelector(labels map[string]string) string {
 	builder := strings.Builder{}
-	for key, value := range labels {
-		builder.WriteString(fmt.Sprintf("%s=%s,", key, value))
+
+	for _, key := range sortedKeysOf(labels) {
+		builder.WriteString(fmt.Sprintf("%s=%s,", key, labels[key]))
 	}
 	return strings.TrimSuffix(builder.String(), ",")
 }
@@ -376,5 +381,16 @@ func secretNamesOf(items []corev1.Secret) []string {
 	for i, item := range items {
 		result[i] = item.Name
 	}
+	return result
+}
+
+func sortedKeysOf(labels map[string]string) []string {
+	result := make([]string, len(labels))
+	i := 0
+	for key := range labels {
+		result[i] = key
+		i++
+	}
+	sort.Strings(result)
 	return result
 }

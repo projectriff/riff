@@ -103,7 +103,10 @@ var _ = Describe("Namespace-related functions, such as", func() {
 			mockSecrets.On("Get", "push-credentials", metav1.GetOptions{}).Return(&v1.Secret{}, nil)
 			serviceAccount := &v1.ServiceAccount{}
 			mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
-			labels := map[string]string{"created-by": env.Cli.Name + "-" + env.Cli.Version}
+			labels := map[string]string{
+				"projectriff.io/installer": env.Cli.Name,
+				"projectriff.io/version":   env.Cli.Version,
+			}
 			mockServiceAccounts.On("Create", mock.MatchedBy(namedAndLabelled(serviceAccountName, labels))).Return(serviceAccount, nil)
 
 			err := kubectlClient.NamespaceInit(manifests, options)
@@ -132,7 +135,9 @@ var _ = Describe("Namespace-related functions, such as", func() {
 				s := args[0].(*v1.Secret)
 				Expect(s.StringData).To(HaveKeyWithValue("username", "_json_key"))
 				Expect(s.StringData).To(HaveKeyWithValue("password", "hush hush"))
-				Expect(s.Labels["created-by"]).To(HavePrefix(env.Cli.Name))
+				Expect(s.Labels).To(HaveLen(2))
+				Expect(s.Labels["projectriff.io/installer"]).To(Equal(env.Cli.Name))
+				Expect(s.Labels["projectriff.io/version"]).To(Equal(env.Cli.Version))
 			}).Return(secret, nil)
 
 			mockServiceAccounts.On("Update", mock.Anything).Run(func(args mock.Arguments) {
@@ -181,7 +186,9 @@ var _ = Describe("Namespace-related functions, such as", func() {
 					s := args[0].(*v1.Secret)
 					Expect(s.StringData).To(HaveKeyWithValue("username", "roger"))
 					Expect(s.StringData).To(HaveKeyWithValue("password", "s3cr3t"))
-					Expect(s.Labels["created-by"]).To(HavePrefix(env.Cli.Name))
+					Expect(s.Labels).To(HaveLen(2))
+					Expect(s.Labels["projectriff.io/installer"]).To(Equal(env.Cli.Name))
+					Expect(s.Labels["projectriff.io/version"]).To(Equal(env.Cli.Version))
 				}).Return(secret, nil)
 
 				mockServiceAccounts.On("Update", mock.Anything).Run(func(args mock.Arguments) {
@@ -214,7 +221,7 @@ var _ = Describe("Namespace-related functions, such as", func() {
 			Expect(err).To(Not(HaveOccurred()))
 		})
 
-		It("should apply label to namespace resource", func() {
+		It("should apply label to namespace resources", func() {
 			options := NamespaceInitOptions{
 				Manifest:      "stable",
 				NamespaceName: "foo",
@@ -233,7 +240,8 @@ var _ = Describe("Namespace-related functions, such as", func() {
 			customizedResourceContents := contentsOf("fixtures/kustom_pvc.yaml")
 			mockKustomizer.On("ApplyLabels",
 				mock.MatchedBy(urlPath(namespaceResource)),
-				mock.MatchedBy(key("created-by"))).Return(customizedResourceContents, nil)
+				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
+				Return(customizedResourceContents, nil)
 			kubeCtl.On("ExecStdin", []string{"apply", "-n", "foo", "-f", "-"}, &customizedResourceContents).
 				Return("done!", nil)
 
@@ -261,7 +269,8 @@ var _ = Describe("Namespace-related functions, such as", func() {
 			expectedError := fmt.Errorf("kustomization failed")
 			mockKustomizer.On("ApplyLabels",
 				mock.MatchedBy(urlPath(namespaceResource)),
-				mock.MatchedBy(key("created-by"))).Return(nil, expectedError)
+				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
+				Return(nil, expectedError)
 
 			err := kubectlClient.NamespaceInit(manifests, options)
 
@@ -282,7 +291,7 @@ var _ = Describe("Namespace-related functions, such as", func() {
 			options = NamespaceCleanupOptions{
 				NamespaceName: namespace,
 			}
-			expectedListOptions = metav1.ListOptions{LabelSelector: "created-by=" + env.Cli.Name + "-" + env.Cli.Version}
+			expectedListOptions = metav1.ListOptions{LabelSelector: "projectriff.io/installer=" + env.Cli.Name + ",projectriff.io/version=" + env.Cli.Version}
 		})
 
 		It("should fail if the service account list fails", func() {
@@ -472,14 +481,19 @@ func named(name string) func(sa *v1.ServiceAccount) bool {
 	}
 }
 
-func key(key string) func(dict map[string]string) bool {
+func keys(keys ...string) func(dict map[string]string) bool {
 	return func(dict map[string]string) bool {
+		checks := make(map[string]bool, len(dict))
 		for k := range dict {
-			if key == k {
-				return true
-			}
+			checks[k] = true
 		}
-		return false
+		result := true
+		i := 0
+		for i < len(keys) && result {
+			result = result && checks[keys[i]]
+			i++
+		}
+		return result
 	}
 }
 
