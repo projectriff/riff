@@ -667,19 +667,41 @@ func pathAwareHttpServer(path string, pathMatchedChannel chan<- bool) net.Listen
 
 var _ = Describe("PrintCurlHttpErrors", func() {
 	var (
-		input  string
-		output string
+		buffer *bytes.Buffer
 	)
 
-	JustBeforeEach(func() {
-		buffer := new(bytes.Buffer)
-		commands.PrintCurlHttpErrors(input, buffer)
-		output = buffer.String()
+	BeforeEach(func() {
+		buffer = new(bytes.Buffer)
 	})
 
-	Context("when the output contains HTTP 200", func() {
-		BeforeEach(func() {
-			input = `*   Trying 12.34.56.78...
+	Context("when the output contains no HTTP errors", func() {
+
+		It("should produce no output for a 1xx response", func() {
+			input := `*   Trying 12.34.56.78...
+* TCP_NODELAY set
+* Connected to 12.34.56.78 (12.34.56.78) port 80 (#0)
+> POST / HTTP/1.1
+> Host: square.default.example.com
+> Expect: 100-continue
+> User-Agent: curl/7.54.0
+> Accept: */*
+> Content-Type: text/plain
+>
+< HTTP/1.1 100 Continue
+< date: Thu, 07 Feb 2019 11:29:49 GMT
+< server: envoy
+< x-envoy-upstream-service-time: 6771
+< x-powered-by: Express
+<
+* Connection #0 to host 12.34.56.78 left intact`
+
+			commands.PrintCurlHttpErrors(input, buffer)
+
+			Expect(buffer.String()).To(BeEmpty())
+		})
+
+		It("should produce no output for a 2xx response", func() {
+			input := `*   Trying 12.34.56.78...
 * TCP_NODELAY set
 * Connected to 12.34.56.78 (12.34.56.78) port 80 (#0)
 > POST / HTTP/1.1
@@ -699,16 +721,42 @@ var _ = Describe("PrintCurlHttpErrors", func() {
 < x-powered-by: Express
 <
 * Connection #0 to host 12.34.56.78 left intact`
+
+			commands.PrintCurlHttpErrors(input, buffer)
+
+			Expect(buffer.String()).To(BeEmpty())
 		})
 
-		It("should produce no output", func() {
-			Expect(output).To(BeEmpty())
+		It("should produce no output for a 3xx response", func() {
+			input := `*   Trying 12.34.56.78...
+* TCP_NODELAY set
+* Connected to 12.34.56.78 (12.34.56.78) port 80 (#0)
+> POST / HTTP/1.1
+> Host: square.default.example.com
+> User-Agent: curl/7.54.0
+> Accept: */*
+> Content-Type: text/plain
+> Content-Length: 1
+>
+* upload completely sent off: 1 out of 1 bytes
+< HTTP/1.1 301 Moved Permanently
+< Location: carre.default.example.com
+< date: Thu, 07 Feb 2019 11:29:49 GMT
+< server: envoy
+< x-envoy-upstream-service-time: 6771
+< x-powered-by: Express
+<
+* Connection #0 to host 12.34.56.78 left intact`
+
+			commands.PrintCurlHttpErrors(input, buffer)
+
+			Expect(buffer.String()).To(BeEmpty())
 		})
 	})
 
 	Context("when the output contains an HTTP error", func() {
-		BeforeEach(func() {
-			input = `*   Trying 12.34.56.78...
+		It("should print the 4xx error in the output", func() {
+			input := `*   Trying 12.34.56.78...
 * TCP_NODELAY set
 * Connected to 12.34.56.78 (12.34.56.78) port 80 (#0)
 > POST / HTTP/1.1
@@ -726,10 +774,36 @@ var _ = Describe("PrintCurlHttpErrors", func() {
 < content-length: 0
 <
 * Closing connection 0`
+
+			commands.PrintCurlHttpErrors(input, buffer)
+
+			Expect(buffer.String()).To(Equal(`< HTTP/1.1 404 Not Found
+`))
 		})
 
-		It("should print the error in the output", func() {
-			Expect(output).To(Equal(`< HTTP/1.1 404 Not Found
+		It("should print the 5xx error in the output", func() {
+			input := `*   Trying 12.34.56.78...
+* TCP_NODELAY set
+* Connected to 12.34.56.78 (12.34.56.78) port 80 (#0)
+> POST / HTTP/1.1
+> Host: square.default.example.com
+> User-Agent: curl/7.54.0
+> Accept: */*
+> Content-Type: text/plain
+> Content-Length: 1
+>
+* upload completely sent off: 1 out of 1 bytes
+< HTTP/1.1 500 Internal Server Error
+< date: Thu, 07 Feb 2019 10:04:33 GMT
+< server: envoy
+< connection: close
+< content-length: 0
+<
+* Closing connection 0`
+
+			commands.PrintCurlHttpErrors(input, buffer)
+
+			Expect(buffer.String()).To(Equal(`< HTTP/1.1 500 Internal Server Error
 `))
 		})
 	})
