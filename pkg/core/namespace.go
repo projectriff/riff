@@ -194,7 +194,7 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 func (c *kubectlClient) NamespaceCleanup(options NamespaceCleanupOptions) error {
 	ns := options.NamespaceName
 	initLabels := getInitLabels()
-	initLabelSelector := transformToSelector(initLabels)
+	initLabelSelector := existsSelectors(sortedKeysOf(initLabels))
 
 	fmt.Printf("Deleting serviceaccounts matching labels %v in namespace %q\n", initLabels, ns)
 	if err := c.deleteMatchingServiceAccounts(ns, initLabelSelector); err != nil {
@@ -294,11 +294,10 @@ func getInitLabels() map[string]string {
 	}
 }
 
-func transformToSelector(labels map[string]string) string {
+func existsSelectors(labelKeys []string) string {
 	builder := strings.Builder{}
-
-	for _, key := range sortedKeysOf(labels) {
-		builder.WriteString(fmt.Sprintf("%s=%s,", key, labels[key]))
+	for _, key := range labelKeys {
+		builder.WriteString(fmt.Sprintf("%s,", key))
 	}
 	return strings.TrimSuffix(builder.String(), ",")
 }

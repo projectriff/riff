@@ -291,7 +291,7 @@ var _ = Describe("Namespace-related functions, such as", func() {
 			options = NamespaceCleanupOptions{
 				NamespaceName: namespace,
 			}
-			expectedListOptions = metav1.ListOptions{LabelSelector: "projectriff.io/installer=" + env.Cli.Name + ",projectriff.io/version=" + env.Cli.Version}
+			expectedListOptions = metav1.ListOptions{LabelSelector: "projectriff.io/installer,projectriff.io/version"}
 		})
 
 		It("should fail if the service account list fails", func() {
