@@ -114,7 +114,7 @@ func NamespaceCleanup(kc *core.KubectlClient) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options.NamespaceName = args[namespaceCleanupNameIndex]
 			if options.NamespaceName == "default" && options.RemoveNamespace {
-				return fmt.Errorf("the default namespace cannot be removed")
+				return fmt.Errorf("cleanup canceled: the default namespace cannot be removed")
 			}
 			if err := (*kc).NamespaceCleanup(options); err != nil {
 				return err

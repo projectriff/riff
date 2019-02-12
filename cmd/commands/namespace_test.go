@@ -61,7 +61,7 @@ var _ = Describe("The riff namespace destroy create command", func() {
 
 			err := command.Execute()
 
-			Expect(err).To(MatchError("the default namespace cannot be removed"))
+			Expect(err).To(MatchError("cleanup canceled: the default namespace cannot be removed"))
 		})
 	})
 
