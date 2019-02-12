@@ -193,20 +193,20 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 
 func (c *kubectlClient) NamespaceCleanup(options NamespaceCleanupOptions) error {
 	ns := options.NamespaceName
-	initLabels := getInitLabels()
-	initLabelSelector := existsSelectors(sortedKeysOf(initLabels))
+	initLabelKeys := sortedKeysOf(getInitLabels())
+	initLabelSelector := existsSelectors(initLabelKeys)
 
-	fmt.Printf("Deleting serviceaccounts matching labels %v in namespace %q\n", initLabels, ns)
+	fmt.Printf("Deleting serviceaccounts matching label keys %v in namespace %q\n", initLabelKeys, ns)
 	if err := c.deleteMatchingServiceAccounts(ns, initLabelSelector); err != nil {
 		return err
 	}
 
-	fmt.Printf("Deleting persistentvolumeclaims matching labels %v in namespace %q\n", initLabels, ns)
+	fmt.Printf("Deleting persistentvolumeclaims matching label keys %v in namespace %q\n", initLabelKeys, ns)
 	if err := c.deleteMatchingPersistentVolumeClaims(ns, initLabelSelector); err != nil {
 		return err
 	}
 
-	fmt.Printf("Deleting secrets matching labels %v in namespace %q\n", initLabels, ns)
+	fmt.Printf("Deleting secrets matching label keys %v in namespace %q\n", initLabelKeys, ns)
 	if err := c.deleteMatchingSecrets(ns, initLabelSelector); err != nil {
 		return err
 	}
