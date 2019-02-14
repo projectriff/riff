@@ -129,6 +129,9 @@ func newService(options CreateOrUpdateServiceOptions) (*v1alpha1.Service, error)
 							Container: core_v1.Container{
 								Env:   envVars,
 								Image: options.Image,
+								Ports: []core_v1.ContainerPort{
+									{Name: "h2c", ContainerPort: 8080},
+								},
 							},
 						},
 					},
