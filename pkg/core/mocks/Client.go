@@ -106,6 +106,27 @@ func (_m *Client) CreateSubscription(options core.CreateSubscriptionOptions) (*v
 	return r0, r1
 }
 
+// DefaultBuildImagePrefix provides a mock function with given fields: namespace
+func (_m *Client) DefaultBuildImagePrefix(namespace string) (string, error) {
+	ret := _m.Called(namespace)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(namespace)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(namespace)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteChannel provides a mock function with given fields: options
 func (_m *Client) DeleteChannel(options core.DeleteChannelOptions) error {
 	ret := _m.Called(options)
@@ -266,6 +287,20 @@ func (_m *Client) ServiceStatus(options core.ServiceStatusOptions) (*duckv1alpha
 	}
 
 	return r0, r1
+}
+
+// SetDefaultBuildImagePrefix provides a mock function with given fields: namespace, prefix
+func (_m *Client) SetDefaultBuildImagePrefix(namespace string, prefix string) error {
+	ret := _m.Called(namespace, prefix)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = rf(namespace, prefix)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // UpdateFunction provides a mock function with given fields: builder, options, log

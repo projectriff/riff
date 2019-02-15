@@ -35,15 +35,20 @@ import (
 var _ = Describe("The riff function create command", func() {
 	Context("when given wrong args or flags", func() {
 		var (
-			mockBuilder core.Builder
-			mockClient  core.Client
-			fc          *cobra.Command
+			builder core.Builder
+			client  core.Client
+			asMock  *mocks.Client
+			fc      *cobra.Command
 		)
 		BeforeEach(func() {
-			mockClient = nil
-			mockBuilder = nil
+			client = new(mocks.Client)
+			builder = nil
+			asMock = client.(*mocks.Client)
 			defaults := commands.FunctionCreateDefaults{LocalBuilder: "projectriff/builder", DefaultRunImage: "packs/run"}
-			fc = commands.FunctionCreate(mockBuilder, &mockClient, defaults)
+			fc = commands.FunctionCreate(builder, &client, defaults)
+		})
+		AfterEach(func() {
+			asMock.AssertExpectations(GinkgoT())
 		})
 		It("should fail with no args", func() {
 			fc.SetArgs([]string{})
@@ -57,6 +62,7 @@ var _ = Describe("The riff function create command", func() {
 		})
 		It("should fail without required flags", func() {
 			fc.SetArgs([]string{"square", "--local-path", "."})
+			asMock.On("DefaultBuildImagePrefix", "").Return("", nil)
 			err := fc.Execute()
 			Expect(err).To(MatchError(ContainSubstring("required flag(s)")))
 			Expect(err).To(MatchError(ContainSubstring("image")))
@@ -87,7 +93,6 @@ var _ = Describe("The riff function create command", func() {
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
-
 		})
 		It("should involve the core.Client", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
@@ -131,6 +136,28 @@ var _ = Describe("The riff function create command", func() {
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
+		It("should provide a default image", func() {
+			fc.SetArgs([]string{"square", "--git-repo", "https://github.com/repo"})
+
+			options := core.CreateFunctionOptions{
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+				BuildOptions: core.BuildOptions{
+					Invoker:        "",
+					BuildpackImage: "projectriff/builder",
+					RunImage:       "packs/run",
+				},
+			}
+			options.Name = "square"
+			options.Image = "defaulted-prefix/square"
+			options.Env = []string{}
+			options.EnvFrom = []string{}
+
+			asMock.On("DefaultBuildImagePrefix", "").Return("defaulted-prefix", nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil)
+			err := fc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		})
 		It("should propagate core.Client errors", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 
@@ -138,6 +165,14 @@ var _ = Describe("The riff function create command", func() {
 			asMock.On("CreateFunction", mock.Anything, mock.Anything, mock.Anything).Return(nil, e)
 			err := fc.Execute()
 			Expect(err).To(MatchError(e))
+		})
+		It("should propagate core.Client errors from default image lookup", func() {
+			fc.SetArgs([]string{"square", "--git-repo", "https://github.com/repo"})
+
+			e := fmt.Errorf("some error")
+			asMock.On("DefaultBuildImagePrefix", "").Return("", e)
+			err := fc.Execute()
+			Expect(err).To(MatchError("unable to default image: some error"))
 		})
 		It("should add env vars when asked to", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",

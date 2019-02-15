@@ -46,6 +46,10 @@ type Client interface {
 	DeleteService(options DeleteServiceOptions) error
 	ServiceStatus(options ServiceStatusOptions) (*duckv1alpha1.Condition, error)
 	ServiceCoordinates(options ServiceInvokeOptions) (ingressIP string, hostName string, err error)
+
+	// helpers
+	DefaultBuildImagePrefix(namespace string) (string, error)
+	SetDefaultBuildImagePrefix(namespace, prefix string) error
 }
 
 type Builder interface {
