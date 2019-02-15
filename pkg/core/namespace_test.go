@@ -157,7 +157,7 @@ var _ = Describe("namespace", func() {
 
 			BeforeEach(func() {
 				oldStdIn = os.Stdin
-				creds, _ := os.Open("fixtures/dockerhub-creds")
+				creds, _ := os.Open("fixtures/registry-password")
 				os.Stdin = creds
 			})
 
@@ -184,6 +184,61 @@ var _ = Describe("namespace", func() {
 				mockSecrets.On("Delete", "push-credentials", &metav1.DeleteOptions{}).Return(nil)
 				mockSecrets.On("Create", mock.Anything).Run(func(args mock.Arguments) {
 					s := args[0].(*v1.Secret)
+					Expect(s.StringData).To(HaveKeyWithValue("username", "roger"))
+					Expect(s.StringData).To(HaveKeyWithValue("password", "s3cr3t"))
+					Expect(s.Labels).To(HaveLen(2))
+					Expect(s.Labels["projectriff.io/installer"]).To(Equal(env.Cli.Name))
+					Expect(s.Labels["projectriff.io/version"]).To(Equal(env.Cli.Version))
+				}).Return(secret, nil)
+
+				mockServiceAccounts.On("Update", mock.Anything).Run(func(args mock.Arguments) {
+					sa := args[0].(*v1.ServiceAccount)
+					Expect(sa.Secrets).To(ContainElement(MatchFields(IgnoreExtras, Fields{
+						"Name": Equal("push-credentials"),
+					})))
+				}).Return(serviceAccount, nil)
+
+				err := kubectlClient.NamespaceInit(manifests, options)
+				Expect(err).To(Not(HaveOccurred()))
+			})
+		})
+
+		Context("when dealing with a basic auth registry", func() {
+
+			var oldStdIn *os.File
+
+			BeforeEach(func() {
+				oldStdIn = os.Stdin
+				creds, _ := os.Open("fixtures/registry-password")
+				os.Stdin = creds
+			})
+
+			AfterEach(func() {
+				os.Stdin = oldStdIn
+			})
+
+			It("should create a secret for the registry", func() {
+
+				options := NamespaceInitOptions{
+					Manifest:         "fixtures/empty.yaml",
+					NamespaceName:    "foo",
+					RegistryProtocol: "https",
+					RegistryHost:     "registry.example.com",
+					RegistryUser:     "roger",
+					SecretName:       "push-credentials",
+				}
+
+				namespace := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "foo"}}
+				mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
+
+				serviceAccount := &v1.ServiceAccount{}
+				mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(serviceAccount, nil)
+
+				secret := &v1.Secret{}
+				mockSecrets.On("Delete", "push-credentials", &metav1.DeleteOptions{}).Return(nil)
+				mockSecrets.On("Create", mock.Anything).Run(func(args mock.Arguments) {
+					s := args[0].(*v1.Secret)
+					Expect(s.ObjectMeta.Annotations).To(HaveKeyWithValue("build.knative.dev/docker-0", "https://registry.example.com"))
 					Expect(s.StringData).To(HaveKeyWithValue("username", "roger"))
 					Expect(s.StringData).To(HaveKeyWithValue("password", "s3cr3t"))
 					Expect(s.Labels).To(HaveLen(2))
