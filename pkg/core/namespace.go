@@ -44,6 +44,7 @@ const (
 	secretTypeUserProvided
 	secretTypeGcr
 	secretTypeDockerHub
+	secretTypeBasicAuth
 )
 
 type NamespaceInitOptions struct {
@@ -73,6 +74,8 @@ func (o *NamespaceInitOptions) secretType() secretType {
 		return secretTypeDockerHub
 	case o.GcrTokenPath != "":
 		return secretTypeGcr
+	case o.RegistryServer != "":
+		return secretTypeBasicAuth
 	default:
 		return secretTypeUserProvided
 	}
@@ -119,6 +122,10 @@ func (kc *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options N
 		}
 	case secretTypeDockerHub:
 		if err := kc.createDockerHubSecret(options, initLabels); err != nil {
+			return err
+		}
+	case secretTypeBasicAuth:
+		if err := kc.createRegistrySecret(options, initLabels); err != nil {
 			return err
 		}
 	case secretTypeUserProvided:
@@ -251,6 +258,15 @@ func (kc *kubectlClient) createGcrSecret(options NamespaceInitOptions, labels ma
 	return kc.createBasicAuthSecret(options.NamespaceName, options.SecretName, "_json_key", string(token), "https://gcr.io", labels)
 }
 
+func (kc *kubectlClient) createRegistrySecret(options NamespaceInitOptions, labels map[string]string) error {
+	username := options.RegistryUser
+	password, err := readPassword(fmt.Sprintf("Enter password for user %q", username))
+	if err != nil {
+		return err
+	}
+	return kc.createBasicAuthSecret(options.NamespaceName, options.SecretName, username, password, options.RegistryServer, labels)
+}
+
 func (kc *kubectlClient) createBasicAuthSecret(namespace string,
 	secretName string,
 	username string,
@@ -278,8 +294,8 @@ func (kc *kubectlClient) createBasicAuthSecret(namespace string,
 	return err
 }
 
-func readPassword(s string) (string, error) {
-	fmt.Print(s)
+func readPassword(prompt string) (string, error) {
+	fmt.Print(prompt)
 	if terminal.IsTerminal(int(syscall.Stdin)) {
 		res, err := terminal.ReadPassword(int(syscall.Stdin))
 		fmt.Print("\n")
