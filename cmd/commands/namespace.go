@@ -62,9 +62,11 @@ func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 		),
 		PreRunE: FlagsValidatorAsCobraRunE(
 			FlagsValidationConjunction(
-				AtMostOneOf("gcr", "dockerhub", "no-secret"),
+				AtMostOneOf("gcr", "dockerhub", "no-secret", "registry-server"),
 				AtMostOneOf("secret", "no-secret"),
 				NotBlank("secret"),
+				FlagsDependency(Set("registry-server"), NotBlank("registry-user")),
+				FlagsDependency(Set("registry-user"), NotBlank("registry-server")),
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -94,6 +96,8 @@ func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 	command.Flags().StringVarP(&options.SecretName, "secret", "s", "push-credentials", "the name of a `secret` containing credentials for the image registry")
 	command.Flags().StringVar(&options.GcrTokenPath, "gcr", "", "path to a file containing Google Container Registry credentials")
 	command.Flags().StringVar(&options.DockerHubUsername, "dockerhub", "", "dockerhub username for authentication; password will be read from stdin")
+	command.Flags().StringVar(&options.RegistryServer, "registry-server", "", "registry server address")
+	command.Flags().StringVar(&options.RegistryUser, "registry-user", "", "registry username; password will be read from stdin")
 
 	return command
 }

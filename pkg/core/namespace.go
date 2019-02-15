@@ -54,6 +54,9 @@ type NamespaceInitOptions struct {
 	SecretName        string
 	GcrTokenPath      string
 	DockerHubUsername string
+
+	RegistryServer string
+	RegistryUser   string
 }
 
 type NamespaceCleanupOptions struct {

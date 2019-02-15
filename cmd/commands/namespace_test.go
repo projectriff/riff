@@ -54,12 +54,19 @@ var _ = Describe("The riff namespace init command", func() {
 
 				err := namespaceInit.Execute()
 
-				Expect(err).To(MatchError("at most one of --gcr, --dockerhub, --no-secret must be set"))
+				Expect(err).To(MatchError("at most one of --gcr, --dockerhub, --no-secret, --registry-server must be set"))
 			},
-			Entry("all modes					=>", []string{"--dockerhub", "/path/to/.docker/config.json"}, []string{"--gcr", "/path/to/gcr.json"}, []string{"--no-secret"}),
+			Entry("all modes					=>", []string{"--dockerhub", "/path/to/.docker/config.json"}, []string{"--gcr", "/path/to/gcr.json"}, []string{"--no-secret"}, []string{"--registry-server", "registry.example.com"}),
+			Entry("docker+grc+nosecret		=>", []string{"--dockerhub", "/path/to/.docker/config.json"}, []string{"--gcr", "/path/to/gcr.json"}, []string{"--no-secret"}),
+			Entry("docker+grc+registry		=>", []string{"--dockerhub", "/path/to/.docker/config.json"}, []string{"--gcr", "/path/to/gcr.json"}, []string{"--registry-server", "registry.example.com"}),
 			Entry("docker+grc				=>", []string{"--dockerhub", "/path/to/.docker/config.json"}, []string{"--gcr", "/path/to/gcr.json"}),
+			Entry("docker+nosecret+registry	=>", []string{"--dockerhub", "/path/to/.docker/config.json"}, []string{"--no-secret"}, []string{"--registry-server", "registry.example.com"}),
 			Entry("docker+nosecret			=>", []string{"--dockerhub", "/path/to/.docker/config.json"}, []string{"--no-secret"}),
+			Entry("docker+registry			=>", []string{"--dockerhub", "/path/to/.docker/config.json"}, []string{"--registry-server", "registry.example.com"}),
+			Entry("gcr+nosecret+registry		=>", []string{"--gcr", "/path/to/gcr.json"}, []string{"--no-secret"}, []string{"--registry-server", "registry.example.com"}),
 			Entry("gcr+nosecret 				=>", []string{"--gcr", "/path/to/gcr.json"}, []string{"--no-secret"}),
+			Entry("gcr+registry 				=>", []string{"--gcr", "/path/to/gcr.json"}, []string{"--registry-server", "registry.example.com"}),
+			Entry("nosecret+registry			=>", []string{"--no-secret"}, []string{"--registry-server", "registry.example.com"}),
 		)
 
 		It("fails with ambiguous secret configuration", func() {
@@ -84,6 +91,22 @@ var _ = Describe("The riff namespace init command", func() {
 			err := namespaceInit.Execute()
 
 			Expect(err).To(MatchError("required flag(s) \"manifest\" not set"))
+		})
+
+		It("fails if the registry server is set but not the registry username", func() {
+			namespaceInit.SetArgs([]string{"ns", "--manifest", "some-path", "--registry-server", "registry.example.com"})
+
+			err := namespaceInit.Execute()
+
+			Expect(err).To(MatchError("when --registry-server is set, flag --registry-user cannot be empty"))
+		})
+
+		It("fails if the registry user is set but not the registry server", func() {
+			namespaceInit.SetArgs([]string{"ns", "--manifest", "some-path", "--registry-user", "me"})
+
+			err := namespaceInit.Execute()
+
+			Expect(err).To(MatchError("when --registry-user is set, flag --registry-server cannot be empty"))
 		})
 	})
 
@@ -137,6 +160,21 @@ var _ = Describe("The riff namespace init command", func() {
 				Manifest:      "some-path",
 				NoSecret:      true,
 				SecretName:    "push-credentials",
+			}).Return(nil)
+
+			err := namespaceInit.Execute()
+
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("involves the core.Client with explicit registry configuration", func() {
+			namespaceInit.SetArgs([]string{"ns", "--manifest", "some-path", "--registry-server", "registry.example.com", "--registry-user", "me"})
+			kubectlClientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
+				NamespaceName:  "ns",
+				Manifest:       "some-path",
+				RegistryServer: "registry.example.com",
+				RegistryUser:   "me",
+				SecretName:     "push-credentials",
 			}).Return(nil)
 
 			err := namespaceInit.Execute()

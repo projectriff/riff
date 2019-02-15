@@ -65,6 +65,37 @@ var _ = Describe("The cobra extensions", func() {
 			Expect(command.Execute()).To(MatchError("3 should be even\n7 should be even\n"))
 		})
 
+		It("should fail if a not blank argument is not set", func() {
+			var foobar string
+			command := &Command{
+				Use:     "some-command",
+				PreRunE: commands.FlagsValidatorAsCobraRunE(commands.NotBlank("foobar")),
+				RunE: func(cmd *Command, args []string) error {
+					return nil
+				},
+			}
+			command.Flags().StringVar(&foobar, "foobar", "", "some meaningful flag")
+
+			Expect(command.Execute()).To(MatchError("flag --foobar cannot be empty"))
+		})
+
+		// note: the unset value case is handled separately by cobra
+		It("should fail if a not blank argument's value is... blank", func() {
+			var foobar string
+			command := &Command{
+				Use:     "some-command",
+				PreRunE: commands.FlagsValidatorAsCobraRunE(commands.NotBlank("foobar")),
+				RunE: func(cmd *Command, args []string) error {
+					return nil
+				},
+			}
+			command.Flags().StringVar(&foobar, "foobar", "", "some meaningful flag")
+
+			command.SetArgs([]string{"--foobar", ""})
+
+			Expect(command.Execute()).To(MatchError("flag --foobar cannot be empty"))
+		})
+
 	})
 })
 
