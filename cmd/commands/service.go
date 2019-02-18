@@ -17,9 +17,14 @@
 package commands
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/projectriff/riff/pkg/core/tasks"
+	"io"
 	"os"
 	"os/exec"
+	"regexp"
+	"strings"
 	"time"
 
 	"k8s.io/api/core/v1"
@@ -281,8 +286,16 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 				curlCmd.Args = append(curlCmd.Args, "-H", "Content-Type: text/plain")
 			}
 
+			verbose := false
+
 			if argsLengthAtDash > 0 {
-				curlCmd.Args = append(curlCmd.Args, args[argsLengthAtDash:]...)
+				curlArgs := args[argsLengthAtDash:]
+				for _, a := range curlArgs {
+					if verboseCurl(a) {
+						verbose = true
+					}
+				}
+				curlCmd.Args = append(curlCmd.Args, curlArgs...)
 			}
 
 			quoted, err := shellquote.Quote(curlCmd.Args)
@@ -291,7 +304,22 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 			}
 			fmt.Fprintln(cmd.OutOrStdout(), quoted)
 
-			return curlCmd.Run()
+			if verbose {
+				return curlCmd.Run()
+			}
+
+			// curl is not verbose, so make it verbose, capture standard error, and print any HTTP errors
+			curlCmd.Args = append(curlCmd.Args, "-v")
+
+			buffer := new(bytes.Buffer)
+			errStream := curlCmd.Stderr
+			curlCmd.Stderr = buffer
+
+			curlErr := curlCmd.Run()
+
+			PrintCurlHttpErrors(buffer.String(), errStream)
+
+			return curlErr
 		},
 	}
 
@@ -302,6 +330,29 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 	command.Flags().BoolVar(&serviceInvokeOptions.ContentTypeText, "text", false, "set the request's content type to 'text/plain'")
 
 	return command
+}
+
+// Print any HTTP errors in the given string to the given writer
+func PrintCurlHttpErrors(curlErrOutput string, w io.Writer) {
+	okResponseRegex := regexp.MustCompile("< HTTP/[\\d.]* 200")
+	matched := okResponseRegex.MatchString(curlErrOutput)
+
+	if !matched {
+		errorResponseRegex := regexp.MustCompile("< HTTP/[\\d.]* ")
+		for _, line := range strings.Split(curlErrOutput, "\n") {
+			matched := errorResponseRegex.MatchString(line)
+
+			if matched {
+				_, _ = fmt.Fprintf(w, "%s\n", line)
+			}
+		}
+	}
+}
+
+func verboseCurl(curlArg string) bool {
+	return curlArg == "-v" || curlArg == "--verbose" ||
+		// short flags can be used next to each other, e.g. -Lv
+		(strings.HasPrefix(curlArg, "-") && !strings.HasPrefix(curlArg, "--") && strings.Contains(curlArg, "v"))
 }
 
 func ServiceDelete(riffClient *core.Client) *cobra.Command {
@@ -318,11 +369,11 @@ func ServiceDelete(riffClient *core.Client) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			names := args[serviceDeleteNameStartIndex:]
-			results := ApplyInParallel(names, func(name string) error {
+			results := tasks.ApplyInParallel(names, func(name string) error {
 				options := core.DeleteServiceOptions{Namespace: cliOptions.Namespace, Name: name}
 				return (*riffClient).DeleteService(options)
 			})
-			err := MergeResults(results, func(result CorrelatedResult) string {
+			err := tasks.MergeResults(results, func(result tasks.CorrelatedResult) string {
 				err := result.Error
 				if err == nil {
 					return ""

@@ -134,6 +134,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	installKubeConfigSupport(namespace, &client, &kc)
 	namespace.AddCommand(
 		NamespaceInit(manifests, &kc),
+		NamespaceCleanup(&kc),
 	)
 
 	system := System()
@@ -163,7 +164,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		Completion(rootCmd),
 	)
 
-	Visit(rootCmd, func(c *cobra.Command) error {
+	_ = Visit(rootCmd, func(c *cobra.Command) error {
 		// Disable usage printing as soon as we enter RunE(), as errors that happen from then on
 		// are not mis-usage error, but "regular" runtime errors
 		exec := c.RunE

@@ -45,6 +45,13 @@ var _ = Describe("`riff` root command", func() {
 			Expect(FindSubcommand(rootCommand, "subscription", "list")).NotTo(BeNil(), fmt.Sprintf(errMsg, "subscription list"))
 		})
 
+		It("including `riff namespace`", func() {
+			errMsg := "`%s` should be wired to root command"
+			Expect(FindSubcommand(rootCommand, "namespace")).NotTo(BeNil(), fmt.Sprintf(errMsg, "namespace"))
+			Expect(FindSubcommand(rootCommand, "namespace", "init")).NotTo(BeNil(), fmt.Sprintf(errMsg, "namespace init"))
+			Expect(FindSubcommand(rootCommand, "namespace", "cleanup")).NotTo(BeNil(), fmt.Sprintf(errMsg, "namespace cleanup"))
+		})
+
 	})
 
 })

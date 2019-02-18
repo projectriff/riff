@@ -8,9 +8,11 @@ require (
 	github.com/boz/kcache v0.0.0-20171103002618-fb1338d32301
 	github.com/buildpack/pack v0.0.10-0.20190201165224-40fa6f50dd61
 	github.com/cpuguy83/go-md2man v1.0.8 // indirect
+	github.com/emicklei/go-restful v2.8.1+incompatible // indirect
 	github.com/evanphx/json-patch v4.1.0+incompatible // indirect
 	github.com/frioux/shellquote v0.0.1
 	github.com/ghodss/yaml v1.0.0
+	github.com/go-openapi/spec v0.18.0 // indirect
 	github.com/gobuffalo/envy v1.6.10 // indirect
 	github.com/golang/groupcache v0.0.0-20181024230925-c65c006176ff // indirect
 	github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c // indirect
@@ -45,4 +47,5 @@ require (
 	k8s.io/apimachinery v0.0.0-20180904193909-def12e63c512
 	k8s.io/client-go v8.0.0+incompatible
 	k8s.io/kube-openapi v0.0.0-20181114233023-0317810137be // indirect
+	sigs.k8s.io/kustomize v1.0.11
 )

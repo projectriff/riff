@@ -1,6 +1,6 @@
 language: go
 go:
-- '1.11.4'
+- '1.11.x'
 cache:
   directories:
   - $GOPATH/pkg/mod
@@ -14,7 +14,7 @@ matrix:
   include:
   - stage: test
     install:
-    - "go get -u github.com/vektra/mockery/.../"
+    - "GO111MODULE=off go get -u github.com/vektra/mockery/.../"
     before_script: make gen-mocks && test $(git status --porcelain | wc -l) -eq 0 || exit 1
     script: make build test verify-docs
   - &test-windows
@@ -22,7 +22,7 @@ matrix:
     os: windows # Git Bash
     install:
     - "choco install make"
-    - "go get -u github.com/vektra/mockery/.../"
+    - "GO111MODULE=off go get -u github.com/vektra/mockery/.../"
     before_script: make gen-mocks && test $(git status --porcelain | wc -l) -eq 0 || exit 1
     script: make build test verify-docs
   - stage: fats-lite

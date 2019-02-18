@@ -17,21 +17,30 @@
 package core
 
 import (
+	"github.com/projectriff/riff/pkg/core/kustomize"
 	"github.com/projectriff/riff/pkg/kubectl"
 	"k8s.io/client-go/kubernetes"
+	"time"
 )
 
 type KubectlClient interface {
 	SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error)
 	SystemUninstall(options SystemUninstallOptions) (bool, error)
 	NamespaceInit(manifests map[string]*Manifest, options NamespaceInitOptions) error
+	NamespaceCleanup(options NamespaceCleanupOptions) error
 }
 
 type kubectlClient struct {
 	kubeClient kubernetes.Interface
 	kubeCtl    kubectl.KubeCtl
+	kustomizer kustomize.Kustomizer
 }
 
 func NewKubectlClient(kubeClient kubernetes.Interface) KubectlClient {
-	return &kubectlClient{kubeClient: kubeClient, kubeCtl: kubectl.RealKubeCtl()}
+	httpTimeout := 30 * time.Second
+	return &kubectlClient{
+		kubeClient: kubeClient,
+		kubeCtl:    kubectl.RealKubeCtl(),
+		kustomizer: kustomize.MakeKustomizer(httpTimeout),
+	}
 }

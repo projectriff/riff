@@ -18,6 +18,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/projectriff/riff/pkg/core/tasks"
 
 	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"k8s.io/api/core/v1"
@@ -131,11 +132,11 @@ func ChannelDelete(riffClient *core.Client) *cobra.Command {
   ` + env.Cli.Name + ` channel delete channel-1 channel-2`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			names := args[channelDeleteNameStartIndex:]
-			results := ApplyInParallel(names, func(name string) error {
+			results := tasks.ApplyInParallel(names, func(name string) error {
 				options := core.DeleteChannelOptions{Namespace: cliOptions.Namespace, Name: name}
 				return (*riffClient).DeleteChannel(options)
 			})
-			err := MergeResults(results, func(result CorrelatedResult) string {
+			err := tasks.MergeResults(results, func(result tasks.CorrelatedResult) string {
 				err := result.Error
 				if err == nil {
 					return ""

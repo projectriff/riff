@@ -18,6 +18,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/projectriff/riff/pkg/core/tasks"
 	"io"
 	"strings"
 	"text/template"
@@ -94,11 +95,11 @@ func SubscriptionDelete(riffClient *core.Client) *Command {
 		),
 		RunE: func(cmd *Command, args []string) error {
 			names := args[subscriptionDeleteNameStartIndex:]
-			results := ApplyInParallel(names, func(name string) error {
+			results := tasks.ApplyInParallel(names, func(name string) error {
 				options := core.DeleteSubscriptionOptions{Namespace: cliOptions.Namespace, Name: name}
 				return (*riffClient).DeleteSubscription(options)
 			})
-			err := MergeResults(results, func(result CorrelatedResult) string {
+			err := tasks.MergeResults(results, func(result tasks.CorrelatedResult) string {
 				err := result.Error
 				if err == nil {
 					return ""

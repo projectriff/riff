@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"bytes"
 	"fmt"
 	"net"
 	"net/http"
@@ -663,3 +664,73 @@ func pathAwareHttpServer(path string, pathMatchedChannel chan<- bool) net.Listen
 	}))
 	return listener
 }
+
+var _ = Describe("PrintCurlHttpErrors", func() {
+	var (
+		input  string
+		output string
+	)
+
+	JustBeforeEach(func() {
+		buffer := new(bytes.Buffer)
+		commands.PrintCurlHttpErrors(input, buffer)
+		output = buffer.String()
+	})
+
+	Context("when the output contains HTTP 200", func() {
+		BeforeEach(func() {
+			input = `*   Trying 12.34.56.78...
+* TCP_NODELAY set
+* Connected to 12.34.56.78 (12.34.56.78) port 80 (#0)
+> POST / HTTP/1.1
+> Host: square.default.example.com
+> User-Agent: curl/7.54.0
+> Accept: */*
+> Content-Type: text/plain
+> Content-Length: 1
+>
+* upload completely sent off: 1 out of 1 bytes
+< HTTP/1.1 200 OK
+< content-length: 2
+< content-type: text/plain; charset=utf-8
+< date: Thu, 07 Feb 2019 11:29:49 GMT
+< server: envoy
+< x-envoy-upstream-service-time: 6771
+< x-powered-by: Express
+<
+* Connection #0 to host 12.34.56.78 left intact`
+		})
+
+		It("should produce no output", func() {
+			Expect(output).To(BeEmpty())
+		})
+	})
+
+	Context("when the output contains an HTTP error", func() {
+		BeforeEach(func() {
+			input = `*   Trying 12.34.56.78...
+* TCP_NODELAY set
+* Connected to 12.34.56.78 (12.34.56.78) port 80 (#0)
+> POST / HTTP/1.1
+> Host: square.default.example.comx
+> User-Agent: curl/7.54.0
+> Accept: */*
+> Content-Type: text/plain
+> Content-Length: 1
+>
+* upload completely sent off: 1 out of 1 bytes
+< HTTP/1.1 404 Not Found
+< date: Thu, 07 Feb 2019 10:04:33 GMT
+< server: envoy
+< connection: close
+< content-length: 0
+<
+* Closing connection 0`
+		})
+
+		It("should print the error in the output", func() {
+			Expect(output).To(Equal(`< HTTP/1.1 404 Not Found
+`))
+		})
+	})
+})
