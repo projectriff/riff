@@ -18,21 +18,23 @@ package core
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
-	"github.com/projectriff/riff/pkg/env"
-	"github.com/projectriff/riff/pkg/fileutils"
-	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"net/url"
 	"os"
 	"syscall"
 
+	"github.com/projectriff/riff/pkg/env"
+	"github.com/projectriff/riff/pkg/fileutils"
+	"golang.org/x/crypto/ssh/terminal"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const serviceAccountName = "riff-build"
+const BuildServiceAccountName = "riff-build"
 
 type secretType int
 
@@ -113,10 +115,10 @@ func (c *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options Na
 		}
 	}
 
-	sa, err := c.kubeClient.CoreV1().ServiceAccounts(ns).Get(serviceAccountName, v1.GetOptions{})
+	sa, err := c.kubeClient.CoreV1().ServiceAccounts(ns).Get(BuildServiceAccountName, v1.GetOptions{})
 	if errors.IsNotFound(err) {
 		sa = &corev1.ServiceAccount{}
-		sa.Name = serviceAccountName
+		sa.Name = BuildServiceAccountName
 		sa.Labels = initLabels
 		if options.secretType() != secretTypeNone {
 			secretName := options.SecretName
@@ -208,7 +210,11 @@ func (c *kubectlClient) createDockerHubSecret(options NamespaceInitOptions, labe
 	}
 	fmt.Printf("Creating secret %q with DockerHub authentication for user %q\n", options.SecretName, options.DockerHubUsername)
 	_, err = c.kubeClient.CoreV1().Secrets(options.NamespaceName).Create(secret)
-	return err
+	if err != nil {
+		return err
+	}
+	prefix := fmt.Sprintf("docker.io/%s", options.DockerHubUsername)
+	return c.client.SetDefaultBuildImagePrefix(options.NamespaceName, prefix)
 }
 
 func (c *kubectlClient) createGcrSecret(options NamespaceInitOptions, labels map[string]string) error {
@@ -232,8 +238,17 @@ func (c *kubectlClient) createGcrSecret(options NamespaceInitOptions, labels map
 	}
 	fmt.Printf("Creating secret %q with GCR authentication key from file %s\n", options.SecretName, options.GcrTokenPath)
 	_, err = c.kubeClient.CoreV1().Secrets(options.NamespaceName).Create(secret)
+	if err != nil {
+		return err
+	}
+	tokenMap := map[string]string{}
+	err = json.Unmarshal(token, &tokenMap)
+	if err != nil {
+		return err
+	}
+	prefix := fmt.Sprintf("gcr.io/%s", tokenMap["project_id"])
+	return c.client.SetDefaultBuildImagePrefix(options.NamespaceName, prefix)
 
-	return err
 }
 
 func readPassword(s string) (string, error) {

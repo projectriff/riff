@@ -20,9 +20,9 @@ import (
 	"github.com/projectriff/riff/pkg/core/kustomize"
 	"github.com/projectriff/riff/pkg/kubectl"
 	"k8s.io/client-go/kubernetes"
-	"time"
 )
 
+// TODO merge KubectlClient into Client
 type KubectlClient interface {
 	SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error)
 	SystemUninstall(options SystemUninstallOptions) (bool, error)
@@ -30,16 +30,17 @@ type KubectlClient interface {
 }
 
 type kubectlClient struct {
+	client     Client
 	kubeClient kubernetes.Interface
 	kubeCtl    kubectl.KubeCtl
 	kustomizer kustomize.Kustomizer
 }
 
-func NewKubectlClient(kubeClient kubernetes.Interface) KubectlClient {
-	httpTimeout := 30 * time.Second
+func NewKubectlClient(client Client, kubeClient kubernetes.Interface, kubeCtl kubectl.KubeCtl, kustomizer kustomize.Kustomizer) KubectlClient {
 	return &kubectlClient{
+		client:     client,
 		kubeClient: kubeClient,
-		kubeCtl:    kubectl.RealKubeCtl(),
-		kustomizer: kustomize.MakeKustomizer(httpTimeout),
+		kubeCtl:    kubeCtl,
+		kustomizer: kustomizer,
 	}
 }

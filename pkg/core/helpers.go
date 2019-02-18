@@ -56,6 +56,7 @@ func (c *client) buildConfigMap(namespace string) (*core_v1.ConfigMap, error) {
 				Name:      buildConfigMap,
 				Namespace: ns,
 			},
+			Data: map[string]string{},
 		}
 	}
 	return cm, nil

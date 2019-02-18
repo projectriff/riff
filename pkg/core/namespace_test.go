@@ -14,63 +14,63 @@
  * limitations under the License.
  */
 
-package core
+package core_test
 
 import (
 	"fmt"
-	"github.com/projectriff/riff/pkg/core/kustomize"
-	"github.com/projectriff/riff/pkg/core/kustomize/mocks"
-	"github.com/projectriff/riff/pkg/env"
-	"github.com/projectriff/riff/pkg/kubectl"
-	"github.com/projectriff/riff/pkg/kubectl/mocks"
 	"io/ioutil"
-	"k8s.io/client-go/kubernetes"
 	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
 
+	"github.com/projectriff/riff/pkg/core"
+	mockkustomize "github.com/projectriff/riff/pkg/core/kustomize/mocks"
+	"github.com/projectriff/riff/pkg/env"
+	mockkubectl "github.com/projectriff/riff/pkg/kubectl/mocks"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
+	core_mocks "github.com/projectriff/riff/pkg/core/mocks"
 	"github.com/projectriff/riff/pkg/core/vendor_mocks"
 	"github.com/stretchr/testify/mock"
-	"k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 var _ = Describe("The NamespaceInit function", func() {
 
 	var (
-		kubectlClient       KubectlClient
+		kubectlClient       core.KubectlClient
 		kubeClient          *vendor_mocks.Interface
 		kubeCtl             *mockkubectl.KubeCtl
+		mockClient          *core_mocks.Client
 		mockCore            *vendor_mocks.CoreV1Interface
 		mockNamespaces      *vendor_mocks.NamespaceInterface
 		mockServiceAccounts *vendor_mocks.ServiceAccountInterface
 		mockSecrets         *vendor_mocks.SecretInterface
 		mockKustomizer      *mockkustomize.Kustomizer
-		manifests           map[string]*Manifest
+		manifests           map[string]*core.Manifest
 	)
 
 	JustBeforeEach(func() {
 		kubeClient = new(vendor_mocks.Interface)
 		kubeCtl = new(mockkubectl.KubeCtl)
+		mockClient = new(core_mocks.Client)
 		mockCore = new(vendor_mocks.CoreV1Interface)
 		mockNamespaces = new(vendor_mocks.NamespaceInterface)
 		mockServiceAccounts = new(vendor_mocks.ServiceAccountInterface)
 		mockSecrets = new(vendor_mocks.SecretInterface)
 		mockKustomizer = new(mockkustomize.Kustomizer)
-		manifests = map[string]*Manifest{}
+		manifests = map[string]*core.Manifest{}
 
 		kubeClient.On("CoreV1").Return(mockCore)
 		mockCore.On("Namespaces").Return(mockNamespaces)
 		mockCore.On("ServiceAccounts", mock.Anything).Return(mockServiceAccounts)
 		mockCore.On("Secrets", mock.Anything).Return(mockSecrets)
 
-		kubectlClient = makeKubectlClient(kubeClient, kubeCtl, mockKustomizer)
+		kubectlClient = core.NewKubectlClient(mockClient, kubeClient, kubeCtl, mockKustomizer)
 	})
 
 	AfterEach(func() {
@@ -80,13 +80,13 @@ var _ = Describe("The NamespaceInit function", func() {
 	})
 
 	It("should fail on wrong manifest", func() {
-		options := NamespaceInitOptions{Manifest: "wrong"}
+		options := core.NamespaceInitOptions{Manifest: "wrong"}
 		err := kubectlClient.NamespaceInit(manifests, options)
 		Expect(err).To(MatchError(ContainSubstring("wrong: "))) // error message is quite different on Windows and macOS
 	})
 
 	It("should create namespace and sa if needed", func() {
-		options := NamespaceInitOptions{
+		options := core.NamespaceInitOptions{
 			Manifest:      "fixtures/empty.yaml",
 			NamespaceName: "foo",
 			SecretName:    "push-credentials",
@@ -96,9 +96,9 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockNamespaces.On("Create", namespace).Return(namespace, nil)
 		mockSecrets.On("Get", "push-credentials", meta_v1.GetOptions{}).Return(&v1.Secret{}, nil)
 		serviceAccount := &v1.ServiceAccount{}
-		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
+		mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
 		labels := map[string]string{"created-by": env.Cli.Name + "-" + env.Cli.Version}
-		mockServiceAccounts.On("Create", mock.MatchedBy(namedAndLabelled(serviceAccountName, labels))).Return(serviceAccount, nil)
+		mockServiceAccounts.On("Create", mock.MatchedBy(namedAndLabelled(core.BuildServiceAccountName, labels))).Return(serviceAccount, nil)
 
 		err := kubectlClient.NamespaceInit(manifests, options)
 
@@ -107,7 +107,7 @@ var _ = Describe("The NamespaceInit function", func() {
 
 	It("should create secret for gcr", func() {
 
-		options := NamespaceInitOptions{
+		options := core.NamespaceInitOptions{
 			Manifest:      "fixtures/empty.yaml",
 			NamespaceName: "foo",
 			GcrTokenPath:  "fixtures/gcr-creds",
@@ -118,14 +118,14 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
 
 		serviceAccount := &v1.ServiceAccount{}
-		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(serviceAccount, nil)
+		mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(serviceAccount, nil)
 
 		secret := &v1.Secret{}
 		mockSecrets.On("Delete", "push-credentials", &meta_v1.DeleteOptions{}).Return(nil)
 		mockSecrets.On("Create", mock.Anything).Run(func(args mock.Arguments) {
 			s := args[0].(*v1.Secret)
 			Expect(s.StringData).To(HaveKeyWithValue("username", "_json_key"))
-			Expect(s.StringData).To(HaveKeyWithValue("password", "hush hush"))
+			Expect(s.StringData).To(HaveKeyWithValue("password", "{ \"project_id\": \"gcp-project-id\" }\n"))
 			Expect(s.Labels["created-by"]).To(HavePrefix(env.Cli.Name))
 		}).Return(secret, nil)
 
@@ -135,6 +135,8 @@ var _ = Describe("The NamespaceInit function", func() {
 				"Name": Equal("push-credentials"),
 			})))
 		}).Return(serviceAccount, nil)
+
+		mockClient.On("SetDefaultBuildImagePrefix", "foo", "gcr.io/gcp-project-id").Return(nil)
 
 		err := kubectlClient.NamespaceInit(manifests, options)
 		Expect(err).To(Not(HaveOccurred()))
@@ -156,7 +158,7 @@ var _ = Describe("The NamespaceInit function", func() {
 
 		It("should create secret for dockerhub", func() {
 
-			options := NamespaceInitOptions{
+			options := core.NamespaceInitOptions{
 				Manifest:          "fixtures/empty.yaml",
 				NamespaceName:     "foo",
 				DockerHubUsername: "roger",
@@ -167,7 +169,7 @@ var _ = Describe("The NamespaceInit function", func() {
 			mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
 
 			serviceAccount := &v1.ServiceAccount{}
-			mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(serviceAccount, nil)
+			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(serviceAccount, nil)
 
 			secret := &v1.Secret{}
 			mockSecrets.On("Delete", "push-credentials", &meta_v1.DeleteOptions{}).Return(nil)
@@ -185,13 +187,15 @@ var _ = Describe("The NamespaceInit function", func() {
 				})))
 			}).Return(serviceAccount, nil)
 
+			mockClient.On("SetDefaultBuildImagePrefix", "foo", "docker.io/roger").Return(nil)
+
 			err := kubectlClient.NamespaceInit(manifests, options)
 			Expect(err).To(Not(HaveOccurred()))
 		})
 	})
 
 	It("should run unauthenticated and still create a service account", func() {
-		options := NamespaceInitOptions{
+		options := core.NamespaceInitOptions{
 			Manifest:      "fixtures/empty.yaml",
 			NamespaceName: "foo",
 			NoSecret:      true,
@@ -201,29 +205,29 @@ var _ = Describe("The NamespaceInit function", func() {
 		mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
 
 		serviceAccount := &v1.ServiceAccount{}
-		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
-		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(serviceAccount, nil)
+		mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
+		mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
 
 		err := kubectlClient.NamespaceInit(manifests, options)
 		Expect(err).To(Not(HaveOccurred()))
 	})
 
 	It("should apply label to namespace resource", func() {
-		options := NamespaceInitOptions{
+		options := core.NamespaceInitOptions{
 			Manifest:      "stable",
 			NamespaceName: "foo",
 			NoSecret:      true,
 		}
 		namespaceResource := unsafeAbs("fixtures/initial_pvc.yaml")
-		manifests["stable"] = &Manifest{
+		manifests["stable"] = &core.Manifest{
 			Namespace: []string{namespaceResource},
 		}
 		namespace := &v1.Namespace{ObjectMeta: meta_v1.ObjectMeta{Name: "foo"}}
 		mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
 
 		serviceAccount := &v1.ServiceAccount{}
-		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
-		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(serviceAccount, nil)
+		mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
+		mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
 		customizedResourceContents := contentsOf("fixtures/kustom_pvc.yaml")
 		mockKustomizer.On("ApplyLabels",
 			mock.MatchedBy(urlPath(namespaceResource)),
@@ -237,21 +241,21 @@ var _ = Describe("The NamespaceInit function", func() {
 	})
 
 	It("should fail if the PVC label kustomization fails", func() {
-		options := NamespaceInitOptions{
+		options := core.NamespaceInitOptions{
 			Manifest:      "stable",
 			NamespaceName: "foo",
 			NoSecret:      true,
 		}
 		namespaceResource := unsafeAbs("fixtures/initial_pvc.yaml")
-		manifests["stable"] = &Manifest{
+		manifests["stable"] = &core.Manifest{
 			Namespace: []string{namespaceResource},
 		}
 		namespace := &v1.Namespace{ObjectMeta: meta_v1.ObjectMeta{Name: "foo"}}
 		mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
 
 		serviceAccount := &v1.ServiceAccount{}
-		mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
-		mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(serviceAccount, nil)
+		mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
+		mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
 		expectedError := fmt.Errorf("kustomization failed")
 		mockKustomizer.On("ApplyLabels",
 			mock.MatchedBy(urlPath(namespaceResource)),
@@ -263,20 +267,6 @@ var _ = Describe("The NamespaceInit function", func() {
 	})
 
 })
-
-func makeKubectlClient(kubeClient kubernetes.Interface,
-	kubeCtl kubectl.KubeCtl,
-	kustomizer kustomize.Kustomizer) KubectlClient {
-	return &kubectlClient{
-		kubeClient: kubeClient,
-		kubeCtl:    kubeCtl,
-		kustomizer: kustomizer,
-	}
-}
-
-func notFound() *errors.StatusError {
-	return errors.NewNotFound(schema.GroupResource{}, "")
-}
 
 func namedAndLabelled(name string, labels map[string]string) func(sa *v1.ServiceAccount) bool {
 	return func(sa *v1.ServiceAccount) bool {
