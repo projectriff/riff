@@ -27,6 +27,7 @@ type KubectlClient interface {
 	SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error)
 	SystemUninstall(options SystemUninstallOptions) (bool, error)
 	NamespaceInit(manifests map[string]*Manifest, options NamespaceInitOptions) error
+	NamespaceCleanup(options NamespaceCleanupOptions) error
 }
 
 type kubectlClient struct {

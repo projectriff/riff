@@ -38,6 +38,11 @@ const (
 	namespaceInitNumberOfArgs
 )
 
+const (
+	namespaceCleanupNameIndex = iota
+	namespaceCleanupNumberOfArgs
+)
+
 func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) *cobra.Command {
 	options := core.NamespaceInitOptions{}
 
@@ -82,13 +87,47 @@ func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 		command.Flags().StringVarP(&options.Manifest, "manifest", "m", "stable", desc)
 	} else {
 		command.Flags().StringVarP(&options.Manifest, "manifest", "m", "", "path to a manifest of kubernetes configuration files to be applied")
-		command.MarkFlagRequired("manifest")
+		_ = command.MarkFlagRequired("manifest")
 	}
 
 	command.Flags().BoolVarP(&options.NoSecret, "no-secret", "", false, "no secret required for the image registry")
 	command.Flags().StringVarP(&options.SecretName, "secret", "s", "push-credentials", "the name of a `secret` containing credentials for the image registry")
 	command.Flags().StringVar(&options.GcrTokenPath, "gcr", "", "path to a file containing Google Container Registry credentials")
 	command.Flags().StringVar(&options.DockerHubUsername, "dockerhub", "", "dockerhub username for authentication; password will be read from stdin")
+
+	return command
+}
+
+func NamespaceCleanup(kc *core.KubectlClient) *cobra.Command {
+	options := core.NamespaceCleanupOptions{}
+
+	command := &cobra.Command{
+		Use:   "cleanup",
+		Short: "cleans up " + env.Cli.Name + " resources in the namespace",
+		Long: fmt.Sprintf(`cleans up %s resources in the namespace and the namespace itself if "--remove-ns" is set`, env.Cli.Name),
+		Example: fmt.Sprintf(`  %[1]s namespace cleanup my-ns
+  %[1]s namespace cleanup my-ns --remove-ns`, env.Cli.Name),
+		Args: ArgValidationConjunction(
+			cobra.ExactArgs(namespaceCleanupNumberOfArgs),
+			AtPosition(namespaceCleanupNameIndex, ValidName()),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			options.NamespaceName = args[namespaceCleanupNameIndex]
+			if options.NamespaceName == "default" && options.RemoveNamespace {
+				return fmt.Errorf("cleanup canceled: the default namespace cannot be removed")
+			}
+			if err := (*kc).NamespaceCleanup(options); err != nil {
+				return err
+			}
+
+			PrintSuccessfulCompletion(cmd)
+			return nil
+		},
+	}
+
+	LabelArgs(command, "NAMESPACE")
+
+	command.Flags().BoolVarP(&options.RemoveNamespace, "remove-ns", "", false, "removes the (non-default) namespace as well")
 
 	return command
 }

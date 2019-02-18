@@ -10,6 +10,20 @@ type KubectlClient struct {
 	mock.Mock
 }
 
+// NamespaceCleanup provides a mock function with given fields: options
+func (_m *KubectlClient) NamespaceCleanup(options core.NamespaceCleanupOptions) error {
+	ret := _m.Called(options)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(core.NamespaceCleanupOptions) error); ok {
+		r0 = rf(options)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // NamespaceInit provides a mock function with given fields: manifests, options
 func (_m *KubectlClient) NamespaceInit(manifests map[string]*core.Manifest, options core.NamespaceInitOptions) error {
 	ret := _m.Called(manifests, options)

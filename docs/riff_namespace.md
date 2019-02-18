@@ -17,5 +17,6 @@ Manage namespaces used for riff resources
 ### SEE ALSO
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
+* [riff namespace cleanup](riff_namespace_cleanup.md)	 - cleans up riff resources in the namespace
 * [riff namespace init](riff_namespace_init.md)	 - initialize riff resources in the namespace
 
