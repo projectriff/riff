@@ -24,8 +24,8 @@ github.com/boz/kcache v0.0.0-20171103002618-fb1338d32301 h1:gmAO/HxKZ2ORAk25TZ2s
 github.com/boz/kcache v0.0.0-20171103002618-fb1338d32301/go.mod h1:IfCzwQoSBZFA8rxK0BFX6eVlKY9BDpTeozoX/40dD2w=
 github.com/buildpack/lifecycle v0.0.0-20190130224558-68e8abc962e2 h1:l7+pJ+kqE7YHCwS7IsgJ3Va3T0TIK4BFwVVbr+46DQE=
 github.com/buildpack/lifecycle v0.0.0-20190130224558-68e8abc962e2/go.mod h1:RwXcEaUl8/LuSUKAg/GzlgyQTE0Jvv+CPllQBDP3/cQ=
-github.com/buildpack/pack v0.0.10-0.20190201165224-40fa6f50dd61 h1:N3iqS+sSENz8UKufiM4vOhtINjFS/s0CEaelu87xD98=
-github.com/buildpack/pack v0.0.10-0.20190201165224-40fa6f50dd61/go.mod h1:Md0VwXCblGPgelB+Nh88G1ph8kAMHI4QoJjWr3ZeSLA=
+github.com/buildpack/pack v0.0.10-0.20190214223016-eb2864ae5a04 h1:rqpvaveEm9+fV24TntYtqtkOGKAHoD1aXZEjxYw49PQ=
+github.com/buildpack/pack v0.0.10-0.20190214223016-eb2864ae5a04/go.mod h1:Md0VwXCblGPgelB+Nh88G1ph8kAMHI4QoJjWr3ZeSLA=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cockroachdb/apd v1.1.0/go.mod h1:8Sl8LxpKi29FqWXR16WEFZRNSz3SoPzUzeMeY4+DwBQ=
 github.com/cockroachdb/cockroach-go v0.0.0-20181001143604-e0a95dfd547c/go.mod h1:XGLbWH/ujMcbPbhZq52Nv6UrCghb1yGn//133kEsvDk=
