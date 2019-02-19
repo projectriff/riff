@@ -62,11 +62,17 @@ func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 		),
 		PreRunE: FlagsValidatorAsCobraRunE(
 			FlagsValidationConjunction(
-				AtMostOneOf("gcr", "dockerhub", "no-secret", "registry-server"),
+				AtMostOneOf("gcr", "dockerhub", "no-secret", "registry-host"),
 				AtMostOneOf("secret", "no-secret"),
 				NotBlank("secret"),
-				FlagsDependency(Set("registry-server"), NotBlank("registry-user")),
-				FlagsDependency(Set("registry-user"), NotBlank("registry-server")),
+				FlagsDependency(Set("registry-protocol"), NotBlank("registry-host")),
+				FlagsDependency(Set("registry-host"),
+					ValueOneOf("registry-protocol", "https", "http"),
+					NotBlank("registry-host"),
+					ValueDoesNotStartWith("registry-host", "http://", "https://"),
+					NotBlank("registry-user"),
+				),
+				FlagsDependency(Set("registry-user"), NotBlank("registry-host")),
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -96,7 +102,8 @@ func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 	command.Flags().StringVarP(&options.SecretName, "secret", "s", "push-credentials", "the name of a `secret` containing credentials for the image registry")
 	command.Flags().StringVar(&options.GcrTokenPath, "gcr", "", "path to a file containing Google Container Registry credentials")
 	command.Flags().StringVar(&options.DockerHubUsername, "dockerhub", "", "dockerhub username for authentication; password will be read from stdin")
-	command.Flags().StringVar(&options.RegistryServer, "registry-server", "", "registry server address")
+	command.Flags().StringVarP(&options.RegistryProtocol, "registry-protocol", "", "https", "registry protocol (http or https)")
+	command.Flags().StringVar(&options.RegistryHost, "registry-host", "", "registry server host")
 	command.Flags().StringVar(&options.RegistryUser, "registry-user", "", "registry username; password will be read from stdin")
 
 	return command
@@ -108,7 +115,7 @@ func NamespaceCleanup(kc *core.KubectlClient) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "cleanup",
 		Short: "cleans up " + env.Cli.Name + " resources in the namespace",
-		Long: fmt.Sprintf(`cleans up %s resources in the namespace and the namespace itself if "--remove-ns" is set`, env.Cli.Name),
+		Long:  fmt.Sprintf(`cleans up %s resources in the namespace and the namespace itself if "--remove-ns" is set`, env.Cli.Name),
 		Example: fmt.Sprintf(`  %[1]s namespace cleanup my-ns
   %[1]s namespace cleanup my-ns --remove-ns`, env.Cli.Name),
 		Args: ArgValidationConjunction(

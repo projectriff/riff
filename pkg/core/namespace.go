@@ -56,8 +56,9 @@ type NamespaceInitOptions struct {
 	GcrTokenPath      string
 	DockerHubUsername string
 
-	RegistryServer string
-	RegistryUser   string
+	RegistryProtocol string
+	RegistryHost     string
+	RegistryUser     string
 }
 
 type NamespaceCleanupOptions struct {
@@ -74,7 +75,7 @@ func (o *NamespaceInitOptions) secretType() secretType {
 		return secretTypeDockerHub
 	case o.GcrTokenPath != "":
 		return secretTypeGcr
-	case o.RegistryServer != "":
+	case o.RegistryHost != "":
 		return secretTypeBasicAuth
 	default:
 		return secretTypeUserProvided
@@ -264,7 +265,8 @@ func (kc *kubectlClient) createRegistrySecret(options NamespaceInitOptions, labe
 	if err != nil {
 		return err
 	}
-	return kc.createBasicAuthSecret(options.NamespaceName, options.SecretName, username, password, options.RegistryServer, labels)
+	registryAddress := fmt.Sprintf("%s://%s", options.RegistryProtocol, options.RegistryHost)
+	return kc.createBasicAuthSecret(options.NamespaceName, options.SecretName, username, password, registryAddress, labels)
 }
 
 func (kc *kubectlClient) createBasicAuthSecret(namespace string,

@@ -220,11 +220,12 @@ var _ = Describe("namespace", func() {
 			It("should create a secret for the registry", func() {
 
 				options := NamespaceInitOptions{
-					Manifest:       "fixtures/empty.yaml",
-					NamespaceName:  "foo",
-					RegistryServer: "https://registry.example.com",
-					RegistryUser:   "roger",
-					SecretName:     "push-credentials",
+					Manifest:         "fixtures/empty.yaml",
+					NamespaceName:    "foo",
+					RegistryProtocol: "https",
+					RegistryHost:     "registry.example.com",
+					RegistryUser:     "roger",
+					SecretName:       "push-credentials",
 				}
 
 				namespace := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "foo"}}

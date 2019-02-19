@@ -67,11 +67,12 @@ func AtPosition(i int, validator PositionalArg) cobra.PositionalArgs {
 		return validator(cmd, args[i])
 	}
 }
+
 // StartingAtPosition returns a PositionalArgs that applies the single valued validator start at the i-th argument till the last one.
 func StartingAtPosition(position int, validator PositionalArg) cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		errorBuilder := strings.Builder{}
-		for i := position ; i < len(args) ; i++  {
+		for i := position; i < len(args); i++ {
 			err := validator(cmd, args[i])
 			if err != nil {
 				errorBuilder.WriteString(err.Error() + "\n")
@@ -177,19 +178,21 @@ func Set(name string) FlagsMatcher {
 	}
 }
 
-// FlagsDependency returns a validator that will evaluate the given delegate if the provided flag matcher returns true.
+// FlagsDependency returns a validator that will evaluate the given delegates if the provided flag matcher returns true.
 // Use to enforce scenarios such as "if --foo is set, then --bar must be set as well".
-func FlagsDependency(matcher FlagsMatcher, delegate FlagsValidator) FlagsValidator {
+func FlagsDependency(matcher FlagsMatcher, delegates ...FlagsValidator) FlagsValidator {
 	return func(cmd *cobra.Command) error {
 		if matcher.Evaluate(cmd) {
-			// Flag set. Delegate condition must HOLD
-			err := delegate(cmd)
-			if err != nil {
-				return fmt.Errorf("when %v, %v", matcher.Description(), err)
+			// Flag set. Delegate conditions must HOLD
+			for _, delegate := range delegates {
+				err := delegate(cmd)
+				if err != nil {
+					return fmt.Errorf("when %v, %v", matcher.Description(), err)
+				}
 			}
 			return nil
 		} else {
-			// Flag not set. Don't check delegate.
+			// Flag not set. Don't check delegates.
 			return nil
 		}
 	}
@@ -238,6 +241,40 @@ func NotBlank(flagName string) FlagsValidator {
 		flag := cmd.Flag(flagName)
 		if flag == nil || strings.TrimSpace(flag.Value.String()) == "" {
 			return fmt.Errorf("flag --%s cannot be empty", flagName)
+		}
+		return nil
+	}
+}
+
+// ValueOneOf returns a FlagsValidator that asserts that the given flag value matches one of the subsequently given values.
+func ValueOneOf(flagName string, values ...string) FlagsValidator {
+	return func(cmd *cobra.Command) error {
+		flag := cmd.Flag(flagName)
+		if flag == nil {
+			return fmt.Errorf("flag --%s cannot be nil", flagName)
+		}
+		flagValue := flag.Value.String()
+		for _, value := range values {
+			if flagValue == value {
+				return nil
+			}
+		}
+		return fmt.Errorf(`flag --%s cannot have value %q, valid values are: "%s"`, flagName, flagValue, strings.Join(values, `", "`))
+	}
+}
+
+// ValueDoesNotStartWith returns a FlagsValidator that asserts that the given flag value does not start with any of the subsequently given prefixes.
+func ValueDoesNotStartWith(flagName string, prefixes ...string) FlagsValidator {
+	return func(cmd *cobra.Command) error {
+		flag := cmd.Flag(flagName)
+		if flag == nil {
+			return fmt.Errorf("flag --%s cannot be nil", flagName)
+		}
+		flagValue := flag.Value.String()
+		for _, value := range prefixes {
+			if strings.HasPrefix(flagValue, value) {
+				return fmt.Errorf(`flag --%s cannot have value %q, it should not start with "%s"`, flagName, flagValue, strings.Join(prefixes, `" nor "`))
+			}
 		}
 		return nil
 	}
@@ -358,7 +395,6 @@ func PrintSuccessfulCompletion(cmd *cobra.Command) {
 func PrintInterruptedCompletion(cmd *cobra.Command) {
 	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "\n%s was interrupted\n", cmd.CommandPath())
 }
-
 
 func FindSubcommand(command *cobra.Command, names ...string) *cobra.Command {
 	cmd, unmatchedArgs, err := command.Find(names)
