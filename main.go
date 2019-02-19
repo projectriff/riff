@@ -75,7 +75,7 @@ var (
 				"https://storage.googleapis.com/knative-nightly/serving/latest/istio.yaml",
 			},
 			Knative: []string{
-				"https://storage.googleapis.com/knative-nightly/build/latest/release.yaml",
+				"https://storage.googleapis.com/knative-nightly/build/latest/build.yaml",
 				"https://storage.googleapis.com/knative-nightly/serving/latest/serving.yaml",
 				"https://storage.googleapis.com/knative-nightly/eventing/latest/eventing.yaml",
 				"https://storage.googleapis.com/knative-nightly/eventing/latest/in-memory-channel.yaml",
