@@ -76,6 +76,8 @@ var (
 			},
 			Knative: []string{
 				"https://storage.googleapis.com/knative-nightly/build/latest/build.yaml",
+				//ToDo: update the following with a published file when available
+				"https://raw.githubusercontent.com/knative/serving/master/third_party/config/build/clusterrole.yaml",
 				"https://storage.googleapis.com/knative-nightly/serving/latest/serving.yaml",
 				"https://storage.googleapis.com/knative-nightly/eventing/latest/eventing.yaml",
 				"https://storage.googleapis.com/knative-nightly/eventing/latest/in-memory-channel.yaml",
