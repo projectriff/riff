@@ -41,7 +41,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-var _ = Describe("Namespace-related functions, such as", func() {
+var _ = Describe("namespace", func() {
 
 	var (
 		kubectlClient              KubectlClient
@@ -83,7 +83,7 @@ var _ = Describe("Namespace-related functions, such as", func() {
 		mockPersistentVolumeClaims.AssertExpectations(GinkgoT())
 	})
 
-	Describe("the NamespaceCleanup function", func() {
+	Describe("NamespaceInit", func() {
 
 		It("should fail on wrong manifest", func() {
 			options := NamespaceInitOptions{Manifest: "wrong"}
@@ -276,9 +276,38 @@ var _ = Describe("Namespace-related functions, such as", func() {
 
 			Expect(err).To(MatchError(expectedError))
 		})
+
+		It("should support local kubernetes configuration files", func() {
+			options := NamespaceInitOptions{
+				Manifest:      "fixtures/local-yaml/manifest.yaml",
+				NamespaceName: "foo",
+				NoSecret:      true,
+			}
+
+			namespace := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "foo"}}
+			mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
+
+			serviceAccount := &v1.ServiceAccount{}
+			mockServiceAccounts.On("Get", serviceAccountName, mock.Anything).Return(nil, notFound())
+			mockServiceAccounts.On("Create", mock.MatchedBy(named(serviceAccountName))).Return(serviceAccount, nil)
+
+			mockKustomizer.On("ApplyLabels",
+				mock.MatchedBy(func(resourceUri *url.URL) bool {
+					return resourceUri.Scheme == "file" && resourceUri.Path == unsafeAbs("fixtures/local-yaml/buildtemplate.yaml")
+				}),
+				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
+				Return([]byte("customised content"), nil)
+
+			kubeCtl.On("ExecStdin", []string{"apply", "-n", "foo", "-f", "-"}, mock.Anything).
+				Return("done!", nil)
+
+
+			err := kubectlClient.NamespaceInit(manifests, options)
+			Expect(err).To(Not(HaveOccurred()))
+		})
 	})
 
-	Describe("the NamespaceCleanup function", func() {
+	Describe("NamespaceCleanup", func() {
 
 		var (
 			namespace           string
