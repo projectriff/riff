@@ -197,6 +197,10 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 				return false, nil
 			}
 		}
+		err = deleteKnativeServices(kc)
+		if err != nil {
+			return false, err
+		}
 		fmt.Print("Removing Knative for " + env.Cli.Name + " components\n")
 		err = deleteCrds(kc, "knative.dev")
 		if err != nil {
@@ -266,8 +270,6 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 		if err != nil {
 			return false, err
 		}
-		// TODO: remove this once https://github.com/knative/serving/issues/2018 is resolved
-		deleteSingleResource(kc, "horizontalpodautoscaler.autoscaling", "istio-pilot", "")
 	}
 	return true, nil
 }
@@ -370,9 +372,47 @@ func deleteClusterResources(kc *kubectlClient, resourceType string, prefix strin
 	return nil
 }
 
+func deleteKnativeServices(kc *kubectlClient) error {
+	fmt.Printf("Deleting Knative Services\n")
+	err := deleteAllKnative(kc, "service.serving.knative.dev")
+	if err != nil {
+		return err
+	}
+	err = deleteAllKnative(kc, "configuration.serving.knative.dev")
+	if err != nil {
+		return err
+	}
+	err = deleteAllKnative(kc, "route.serving.knative.dev")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func deleteAllKnative(kc *kubectlClient, resourceType string) error {
+	resourceList, err := kc.kubeCtl.Exec([]string{"get", resourceType, "--all-namespaces", "-ocustom-columns=ns:metadata.namespace,name:metadata.name", "--no-headers=true"})
+	if err != nil {
+		fmt.Printf("Error while getting %s in all namespaces: %v\n", resourceType, err)
+		fmt.Printf("The system seems to be in an unstable state!\n")
+	} else {
+		resources := strings.Split(string(resourceList), "\n")
+		for _, resource := range resources {
+			if (len(resource) > 0) {
+				args := strings.Fields(resource)
+				delLog, err := kc.kubeCtl.Exec(append([]string{"delete", "-n", args[0], resourceType}, args[1]))
+				fmt.Printf("In namespace \"%s\" %s", args[0], delLog)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func deleteCrds(kc *kubectlClient, suffix string) error {
 	fmt.Printf("Deleting CRDs for %s\n", suffix)
-	crdList, err := kc.kubeCtl.Exec([]string{"get", "customresourcedefinitions", "-ocustom-columns=name:metadata.name"})
+	crdList, err := kc.kubeCtl.Exec([]string{"get", "customresourcedefinitions", "-ocustom-columns=name:metadata.name", "--no-headers=true"})
 	if err != nil {
 		return err
 	}
