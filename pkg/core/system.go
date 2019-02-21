@@ -374,15 +374,15 @@ func deleteClusterResources(kc *kubectlClient, resourceType string, prefix strin
 
 func deleteKnativeServices(kc *kubectlClient) error {
 	fmt.Printf("Deleting Knative Services\n")
-	err := deleteAllKnative(kc, "service.serving")
+	err := deleteAllKnative(kc, "service.serving.knative.dev")
 	if err != nil {
 		return err
 	}
-	err = deleteAllKnative(kc, "configuration.serving")
+	err = deleteAllKnative(kc, "configuration.serving.knative.dev")
 	if err != nil {
 		return err
 	}
-	err = deleteAllKnative(kc, "route.serving")
+	err = deleteAllKnative(kc, "route.serving.knative.dev")
 	if err != nil {
 		return err
 	}
