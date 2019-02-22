@@ -17,14 +17,6 @@ matrix:
     - "GO111MODULE=off go get -u github.com/vektra/mockery/.../"
     before_script: make gen-mocks && test $(git status --porcelain | wc -l) -eq 0 || exit 1
     script: make build test verify-docs
-  - &test-windows
-    stage: test
-    os: windows # Git Bash
-    install:
-    - "choco install make"
-    - "GO111MODULE=off go get -u github.com/vektra/mockery/.../"
-    before_script: make gen-mocks && test $(git status --porcelain | wc -l) -eq 0 || exit 1
-    script: make build test verify-docs
   - stage: fats-lite
     script: .travis/fats.sh lite
     after_script: .travis/fats-cleanup.sh
@@ -47,8 +39,6 @@ matrix:
     - REGISTRY=gcr
   - stage: publish
     script: .travis/publish.sh
-  allow_failures:
-  - *test-windows
 stages:
 - test
 - name: fats-lite
