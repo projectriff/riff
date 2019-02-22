@@ -412,8 +412,8 @@ func deleteAllKnative(kc *kubectlClient, resourceType string) error {
 
 func deleteCrds(kc *kubectlClient, suffix string) error {
 	fmt.Printf("Deleting CRDs for %s\n", suffix)
-	crdList, err := kc.kubeCtl.Exec([]string{"get", "customresourcedefinitions","-ocustom-columns=name:metadata.name", "--no-headers=true"})
-	if err == nil {
+	crdList, err := kc.kubeCtl.Exec([]string{"get", "customresourcedefinitions", "-ocustom-columns=name:metadata.name", "--no-headers=true"})
+	if err != nil {
 		return err
 	}
 	crds := strings.Split(string(crdList), "\n")
