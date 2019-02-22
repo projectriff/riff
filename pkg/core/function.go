@@ -180,10 +180,17 @@ func (c *client) displayFunctionCreationProgress(serviceNamespace string, servic
 	} else if revName == "" { // stopped
 		return
 	}
+	buildName, err := c.buildName(serviceNamespace, revName, logWriter, stopChan)
+	if err != nil {
+		errChan <- err
+		return
+	} else if buildName == "" { // stopped
+		return
+	}
 
 	ctx := newContext()
 
-	podController, err := c.podController(revName, serviceName, ctx)
+	podController, err := c.podController(buildName, serviceName, ctx)
 	if err != nil {
 		errChan <- err
 		return
@@ -229,6 +236,14 @@ func (c *client) revisionName(serviceNamespace string, serviceName string, logWr
 	return revName, nil
 }
 
+func (c *client) buildName(ns string, revName string, logWriter io.Writer, stopChan <-chan struct{}) (string, error) {
+	revObj, err := c.serving.ServingV1alpha1().Revisions(ns).Get(revName, v1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+	return revObj.Spec.BuildRef.Name, nil
+}
+
 func newContext() context.Context {
 	ctx := context.Background()
 	// avoid kail logs appearing
@@ -237,14 +252,10 @@ func newContext() context.Context {
 	return ctx
 }
 
-func (c *client) podController(revName string, serviceName string, ctx context.Context) (pod.Controller, error) {
+func (c *client) podController(buildName string, serviceName string, ctx context.Context) (pod.Controller, error) {
 	dsb := kail.NewDSBuilder()
 
-	buildSelOld, err := labels.Parse(fmt.Sprintf("%s=%s", "build-name", revName))
-	if err != nil {
-		return nil, err
-	}
-	buildSel, err := labels.Parse(fmt.Sprintf("%s=%s", "build.knative.dev/buildName", revName))
+	buildSel, err := labels.Parse(fmt.Sprintf("%s=%s", "build.knative.dev/buildName", buildName))
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +263,7 @@ func (c *client) podController(revName string, serviceName string, ctx context.C
 	if err != nil {
 		return nil, err
 	}
-	ds, err := dsb.WithSelectors(or(buildSel, runtimeSel, buildSelOld)).Create(ctx, c.kubeClient) // delete buildSelOld when https://github.com/knative/build/pull/299 is integrated into k/s
+	ds, err := dsb.WithSelectors(or(buildSel, runtimeSel)).Create(ctx, c.kubeClient)
 	if err != nil {
 		return nil, err
 	}
@@ -460,7 +471,7 @@ func (c *client) getServiceSpecGeneration(namespace string, name string) (int64,
 	if err != nil {
 		return 0, err
 	}
-	return s.Spec.Generation, nil
+	return s.Generation, nil
 }
 
 func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunctionOptions, log io.Writer) error {
@@ -474,7 +485,7 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 	// create a copy before mutating
 	service = service.DeepCopy()
 
-	gen := service.Spec.Generation
+	gen := service.Generation
 
 	// TODO support non-RunLatest configurations
 	configuration := service.Spec.RunLatest.Configuration

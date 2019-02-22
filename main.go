@@ -36,15 +36,15 @@ var (
 		"stable": {
 			ManifestVersion: "0.1",
 			Istio: []string{
-				"https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/istio.yaml",
-				"https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-3-0-patch.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.4.0/istio.yaml",
+				"https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-4-0-patch.yaml",
 			},
 			Knative: []string{
-				// NOTE: build should be in the knative-releases bucket, but is hiding in knative-nightly
-				"https://storage.googleapis.com/knative-nightly/build/previous/v0.3.0/release.yaml",
-				"https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/serving.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/eventing.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/in-memory-channel.yaml",
+				"https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.4.0/serving.yaml",
+				"https://raw.githubusercontent.com/knative/serving/master/third_party/config/build/clusterrole.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/eventing.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/in-memory-channel.yaml",
 				fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-%s.yaml", builderVersion),
 			},
 			Namespace: []string{
@@ -58,8 +58,9 @@ var (
 				"https://storage.googleapis.com/knative-releases/serving/latest/istio.yaml",
 			},
 			Knative: []string{
-				"https://storage.googleapis.com/knative-releases/build/latest/release.yaml",
+				"https://storage.googleapis.com/knative-releases/build/latest/build.yaml",
 				"https://storage.googleapis.com/knative-releases/serving/latest/serving.yaml",
+				"https://raw.githubusercontent.com/knative/serving/master/third_party/config/build/clusterrole.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/latest/eventing.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/latest/in-memory-channel.yaml",
 				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate.yaml",
@@ -75,8 +76,9 @@ var (
 				"https://storage.googleapis.com/knative-nightly/serving/latest/istio.yaml",
 			},
 			Knative: []string{
-				"https://storage.googleapis.com/knative-nightly/build/latest/release.yaml",
+				"https://storage.googleapis.com/knative-nightly/build/latest/build.yaml",
 				"https://storage.googleapis.com/knative-nightly/serving/latest/serving.yaml",
+				"https://raw.githubusercontent.com/knative/serving/master/third_party/config/build/clusterrole.yaml",
 				"https://storage.googleapis.com/knative-nightly/eventing/latest/eventing.yaml",
 				"https://storage.googleapis.com/knative-nightly/eventing/latest/in-memory-channel.yaml",
 				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate.yaml",
