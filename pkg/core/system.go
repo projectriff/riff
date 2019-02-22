@@ -262,6 +262,10 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 		if err != nil {
 			return false, err
 		}
+		err = deleteClusterResources(kc, "mutatingwebhookconfiguration", "istio-")
+		if err != nil {
+			return false, err
+		}
 		err = deleteNamespaces(kc, []string{istioNamespace})
 		if err != nil {
 			return false, err
