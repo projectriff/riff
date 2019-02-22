@@ -392,16 +392,18 @@ func deleteKnativeServices(kc *kubectlClient) error {
 func deleteAllKnative(kc *kubectlClient, resourceType string) error {
 	resourceList, err := kc.kubeCtl.Exec([]string{"get", resourceType, "--all-namespaces", "-ocustom-columns=ns:metadata.namespace,name:metadata.name", "--no-headers=true"})
 	if err != nil {
-		return err
-	}
-	resources := strings.Split(string(resourceList), "\n")
-	for _, resource := range resources {
-		if (len(resource) > 0) {
-			args := strings.Fields(resource)
-			delLog, err := kc.kubeCtl.Exec(append([]string{"delete", "-n", args[0], resourceType}, args[1]))
-			fmt.Printf("In namespace \"%s\" %s", args[0], delLog)
-			if err != nil {
-				return err
+		fmt.Printf("Error while getting %s in all namespaces: %v\n", resourceType, err)
+		fmt.Printf("The system seems to be in an unstable state!\n")
+	} else {
+		resources := strings.Split(string(resourceList), "\n")
+		for _, resource := range resources {
+			if (len(resource) > 0) {
+				args := strings.Fields(resource)
+				delLog, err := kc.kubeCtl.Exec(append([]string{"delete", "-n", args[0], resourceType}, args[1]))
+				fmt.Printf("In namespace \"%s\" %s", args[0], delLog)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -411,7 +413,7 @@ func deleteAllKnative(kc *kubectlClient, resourceType string) error {
 func deleteCrds(kc *kubectlClient, suffix string) error {
 	fmt.Printf("Deleting CRDs for %s\n", suffix)
 	crdList, err := kc.kubeCtl.Exec([]string{"get", "customresourcedefinitions","-ocustom-columns=name:metadata.name", "--no-headers=true"})
-	if err != nil {
+	if err == nil {
 		return err
 	}
 	crds := strings.Split(string(crdList), "\n")
