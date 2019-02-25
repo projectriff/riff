@@ -19,6 +19,8 @@ package commands
 import (
 	"context"
 	"fmt"
+	"github.com/projectriff/riff/pkg/fileutils"
+	"github.com/projectriff/riff/pkg/kubectl"
 	"os"
 	"os/user"
 	"strings"
@@ -30,7 +32,6 @@ import (
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/core/kustomize"
 	"github.com/projectriff/riff/pkg/env"
-	"github.com/projectriff/riff/pkg/kubectl"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -187,16 +188,16 @@ See https://projectriff.io and https://github.com/knative/docs`,
 // reference here and to the command creation helpers) are correctly initialized.
 func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *core.KubectlClient) {
 
-	kubeconfig := ""
+	kubeConfigPath := ""
 	masterURL := ""
 
-	command.PersistentFlags().StringVar(&kubeconfig, "kubeconfig", "~/.kube/config", "the `path` of a kubeconfig")
+	command.PersistentFlags().StringVar(&kubeConfigPath, "kubeconfig", "~/.kube/config", "the `path` of a kubeconfig")
 	command.PersistentFlags().StringVar(&masterURL, "master", "", "the `address` of the Kubernetes API server; overrides any value in kubeconfig")
 
 	oldPersistentPreRunE := command.PersistentPreRunE
 	command.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		var err error
-		clientConfig, kubeClientSet, eventingClientSet, servingClientSet, err := realClientSetFactory(kubeconfig, masterURL)
+		clientConfig, kubeClientSet, eventingClientSet, servingClientSet, err := realClientSetFactory(kubeConfigPath, masterURL)
 		if err != nil {
 			return err
 		}
@@ -204,7 +205,13 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 		if err != nil {
 			return err
 		}
-		*kc = core.NewKubectlClient(*client, kubeClientSet, kubectl.RealKubeCtl(), kustomize.MakeKustomizer(30*time.Second))
+
+		configPath, err := fileutils.ResolveTilde(kubeConfigPath)
+		if err != nil {
+			return err
+		}
+		kubeCtl := kubectl.RealKubeCtl(configPath, masterURL)
+		*kc = core.NewKubectlClient(*client, kubeClientSet, kubeCtl, kustomize.MakeKustomizer(30*time.Second))
 
 		if oldPersistentPreRunE != nil {
 			return oldPersistentPreRunE(cmd, args)
