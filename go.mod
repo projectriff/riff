@@ -13,7 +13,6 @@ require (
 	github.com/frioux/shellquote v0.0.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/spec v0.18.0 // indirect
-	github.com/go-yaml/yaml v2.1.0+incompatible // indirect
 	github.com/gobuffalo/envy v1.6.10 // indirect
 	github.com/golang/groupcache v0.0.0-20181024230925-c65c006176ff // indirect
 	github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c // indirect
@@ -23,7 +22,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.0 // indirect
 	github.com/imdario/mergo v0.3.5 // indirect
 	github.com/json-iterator/go v0.0.0-20180701071628-ab8a2e0c74be // indirect
-	github.com/knative/build v0.2.0
+	github.com/knative/build v0.4.0
 	github.com/knative/eventing v0.4.0
 	github.com/knative/pkg v0.0.0-20190219005745-729d5ada5f62
 	github.com/knative/serving v0.4.0

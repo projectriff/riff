@@ -40,7 +40,7 @@ var (
 				"https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-4-0-patch.yaml",
 			},
 			Knative: []string{
-				"https://storage.googleapis.com/knative-releases/build/previous/v0.2.0/release.yaml",
+				"https://storage.googleapis.com/knative-releases/build/previous/v0.4.0/build.yaml",
 				"https://storage.googleapis.com/knative-releases/serving/previous/v0.4.0/serving.yaml",
 				"https://raw.githubusercontent.com/knative/serving/master/third_party/config/build/clusterrole.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/eventing.yaml",
