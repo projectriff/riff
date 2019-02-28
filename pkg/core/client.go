@@ -32,6 +32,9 @@ type Client interface {
 	CreateFunction(builder Builder, options CreateFunctionOptions, log io.Writer) (*serving.Service, error)
 	UpdateFunction(builder Builder, options UpdateFunctionOptions, log io.Writer) error
 
+	LocalBuildFunction(builder Builder, options LocalBuildFunctionOptions, log io.Writer) error
+	LocalRunFunction(builder Builder, options LocalRunFunctionOptions, log io.Writer) error
+
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
 	DeleteSubscription(options DeleteSubscriptionOptions) error
 	ListSubscriptions(options ListSubscriptionsOptions) (*eventing.SubscriptionList, error)
@@ -50,6 +53,8 @@ type Client interface {
 
 type Builder interface {
 	Build(appDir, buildImage, runImage, repoName string) error
+	Run(appDir, buildImage, runImage string, ports []string) error
+	SetStdIo(out, err io.Writer)
 }
 
 type client struct {

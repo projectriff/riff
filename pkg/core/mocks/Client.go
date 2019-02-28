@@ -217,6 +217,34 @@ func (_m *Client) ListSubscriptions(options core.ListSubscriptionsOptions) (*v1a
 	return r0, r1
 }
 
+// LocalBuildFunction provides a mock function with given fields: builder, options, log
+func (_m *Client) LocalBuildFunction(builder core.Builder, options core.LocalBuildFunctionOptions, log io.Writer) error {
+	ret := _m.Called(builder, options, log)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(core.Builder, core.LocalBuildFunctionOptions, io.Writer) error); ok {
+		r0 = rf(builder, options, log)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// LocalRunFunction provides a mock function with given fields: builder, options, log
+func (_m *Client) LocalRunFunction(builder core.Builder, options core.LocalRunFunctionOptions, log io.Writer) error {
+	ret := _m.Called(builder, options, log)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(core.Builder, core.LocalRunFunctionOptions, io.Writer) error); ok {
+		r0 = rf(builder, options, log)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // ServiceCoordinates provides a mock function with given fields: options
 func (_m *Client) ServiceCoordinates(options core.ServiceInvokeOptions) (string, string, error) {
 	ret := _m.Called(options)

@@ -110,6 +110,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			// skip build for a dry run
 			log.Write([]byte("Skipping local build\n"))
 		} else {
+			buildpackBuilder.SetStdIo(log, log)
 			if err := doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions); err != nil {
 				return nil, err
 			}
@@ -507,6 +508,7 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 			return fmt.Errorf("local-path must be specified to rebuild function from source")
 		}
 
+		buildpackBuilder.SetStdIo(log, log)
 		err := doBuildLocally(buildpackBuilder, repoName, localBuild)
 		if err != nil {
 			return err
@@ -550,18 +552,52 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 	return nil
 }
 
+type LocalBuildFunctionOptions struct {
+	BuildOptions
+
+	Image string
+}
+
+func (c *client) LocalBuildFunction(buildpackBuilder Builder, options LocalBuildFunctionOptions, log io.Writer) error {
+	buildpackBuilder.SetStdIo(log, log)
+	return doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions)
+}
+
+type LocalRunFunctionOptions struct {
+	BuildOptions
+
+	Ports []string
+}
+
+func (c *client) LocalRunFunction(buildpackBuilder Builder, options LocalRunFunctionOptions, log io.Writer) error {
+	buildpackBuilder.SetStdIo(log, log)
+	return doRunLocally(buildpackBuilder, options.Ports, options.BuildOptions)
+}
+
 func doBuildLocally(builder Builder, image string, options BuildOptions) error {
+	return doLocally(options, func() error {
+		return builder.Build(options.LocalPath, options.BuildpackImage, options.RunImage, image)
+	})
+}
+
+func doRunLocally(builder Builder, ports []string, options BuildOptions) error {
+	return doLocally(options, func() error {
+		return builder.Run(options.LocalPath, options.BuildpackImage, options.RunImage, ports)
+	})
+}
+
+func doLocally(options BuildOptions, doer func() error) error {
 	if err := writeRiffToml(options); err != nil {
 		return err
 	}
 	defer func() { _ = deleteRiffToml(options) }()
 	if options.BuildpackImage == "" {
-		return fmt.Errorf("unable to build function locally: buildpack image not specified")
+		return fmt.Errorf("unable to do locally: buildpack image not specified")
 	}
 	if options.RunImage == "" {
-		return fmt.Errorf("unable to build function locally: run image not specified")
+		return fmt.Errorf("unable to do locally: run image not specified")
 	}
-	return builder.Build(options.LocalPath, options.BuildpackImage, options.RunImage, image)
+	return doer()
 }
 
 func writeRiffToml(options BuildOptions) error {

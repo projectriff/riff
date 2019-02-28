@@ -2,7 +2,7 @@ module github.com/projectriff/riff
 
 require (
 	github.com/BurntSushi/toml v0.3.1
-	github.com/boz/go-lifecycle v0.0.0-20170921044039-c39961a5a0ce // indirect
+	github.com/boz/go-lifecycle v0.0.0-20181208011852-29999c775d97 // indirect
 	github.com/boz/go-logutil v0.0.0-20170814044541-9d21a9e4757d
 	github.com/boz/kail v0.6.0
 	github.com/boz/kcache v0.0.0-20171103002618-fb1338d32301
@@ -18,10 +18,10 @@ require (
 	github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c // indirect
 	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf // indirect
 	github.com/googleapis/gnostic v0.2.0 // indirect
-	github.com/gregjones/httpcache v0.0.0-20180305231024-9cad4c3443a7 // indirect
+	github.com/gregjones/httpcache v0.0.0-20181110185634-c63ab54fda8f // indirect
 	github.com/hashicorp/golang-lru v0.5.0 // indirect
-	github.com/imdario/mergo v0.3.5 // indirect
-	github.com/json-iterator/go v0.0.0-20180701071628-ab8a2e0c74be // indirect
+	github.com/imdario/mergo v0.3.7 // indirect
+	github.com/json-iterator/go v1.1.5 // indirect
 	github.com/knative/build v0.3.0
 	github.com/knative/eventing v0.3.0
 	github.com/knative/pkg v0.0.0-20190108184541-4365af623c75
@@ -29,12 +29,12 @@ require (
 	github.com/markbates/inflect v1.0.4 // indirect
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742 // indirect
+	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/onsi/ginkgo v1.6.0
 	github.com/onsi/gomega v1.4.2
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.8.0
-	github.com/russross/blackfriday v1.5.1 // indirect
+	github.com/russross/blackfriday v1.5.2 // indirect
 	github.com/spf13/cobra v0.0.3
 	github.com/stretchr/testify v1.2.2
 	go.uber.org/atomic v1.3.2 // indirect

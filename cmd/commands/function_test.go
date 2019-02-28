@@ -42,7 +42,7 @@ var _ = Describe("The riff function create command", func() {
 		BeforeEach(func() {
 			mockClient = nil
 			mockBuilder = nil
-			defaults := commands.FunctionCreateDefaults{LocalBuilder: "projectriff/builder", DefaultRunImage: "packs/run"}
+			defaults := commands.PackDefaults{BuilderImage: "projectriff/builder", RunImage: "packs/run"}
 			fc = commands.FunctionCreate(mockBuilder, &mockClient, defaults)
 		})
 		It("should fail with no args", func() {
@@ -81,7 +81,7 @@ var _ = Describe("The riff function create command", func() {
 			builder = new(mockbuilder.Builder)
 			client = new(mocks.Client)
 			asMock = client.(*mocks.Client)
-			defaults := commands.FunctionCreateDefaults{LocalBuilder: "projectriff/builder", DefaultRunImage: "packs/run"}
+			defaults := commands.PackDefaults{BuilderImage: "projectriff/builder", RunImage: "packs/run"}
 
 			fc = commands.FunctionCreate(builder, &client, defaults)
 		})

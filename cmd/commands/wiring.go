@@ -19,9 +19,12 @@ package commands
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
+	"os/signal"
 	"os/user"
 	"strings"
+	"syscall"
 
 	"github.com/buildpack/pack"
 
@@ -88,6 +91,8 @@ func CreateAndWireRootCommand(manifests map[string]*core.Manifest, localBuilder 
 	var client core.Client
 	var kc core.KubectlClient
 
+	packDefaults := PackDefaults{BuilderImage: localBuilder, RunImage: defaultRunImage}
+
 	rootCmd := &cobra.Command{
 		Use:   env.Cli.Name,
 		Short: "Commands for creating and managing function resources",
@@ -107,9 +112,16 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	function := Function()
 	installKubeConfigSupport(function, &client, &kc)
 	function.AddCommand(
-		FunctionCreate(buildpackBuilder, &client, FunctionCreateDefaults{LocalBuilder: localBuilder, DefaultRunImage: defaultRunImage}),
+		FunctionCreate(buildpackBuilder, &client, packDefaults),
 		FunctionUpdate(buildpackBuilder, &client),
 	)
+
+	functionLocal := FunctionLocal()
+	functionLocal.AddCommand(
+		FunctionLocalBuild(buildpackBuilder, &client, packDefaults),
+		FunctionLocalRun(buildpackBuilder, &client, packDefaults),
+	)
+	function.AddCommand(functionLocal)
 
 	service := Service()
 	installKubeConfigSupport(service, &client, &kc)
@@ -212,9 +224,34 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 	}
 }
 
-type buildpackBuilder struct{}
+type buildpackBuilder struct {
+	stdout io.Writer
+	stderr io.Writer
+}
 
-func (*buildpackBuilder) Build(appDir, buildImage, runImage, repoName string) error {
+func (b *buildpackBuilder) SetStdIo(stdout, stderr io.Writer) {
+	b.stdout = stdout
+	b.stderr = stderr
+}
+
+func (b *buildpackBuilder) Build(appDir, buildImage, runImage, repoName string) error {
 	ctx := context.TODO()
-	return pack.Build(ctx, os.Stdout, os.Stderr, appDir, buildImage, runImage, repoName, true, false)
+	return pack.Build(ctx, b.stdout, b.stderr, appDir, buildImage, runImage, repoName, true, false)
+}
+
+func (b *buildpackBuilder) Run(appDir, buildImage, runImage string, ports []string) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	canceled := false
+	go func() {
+		sigsCh := make(chan os.Signal, 1)
+		signal.Notify(sigsCh, syscall.SIGINT, syscall.SIGTERM)
+		<-sigsCh
+		canceled = true
+		cancel()
+	}()
+	err := pack.Run(ctx, b.stdout, b.stderr, appDir, buildImage, runImage, ports)
+	if canceled {
+		return nil
+	}
+	return err
 }
