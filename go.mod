@@ -49,3 +49,5 @@ require (
 	k8s.io/kube-openapi v0.0.0-20181114233023-0317810137be // indirect
 	sigs.k8s.io/kustomize v1.0.11
 )
+
+replace github.com/Nvveen/Gotty => github.com/ijc/Gotty v0.0.0-20170406111628-a8b993ba6abd
