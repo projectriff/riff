@@ -9,7 +9,6 @@ env:
   global:
     - CLUSTER_NAME="riff-${TRAVIS_JOB_NUMBER//./-}"
     - NAMESPACE="riff-${TRAVIS_JOB_NUMBER//./-}"
-    - CGO_ENABLED=0
 install: true
 matrix:
   include:
