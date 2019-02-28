@@ -24,7 +24,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	logutil "github.com/boz/go-logutil"
@@ -365,30 +364,22 @@ func checkService(c *client, namespace string, name string, gen int64) (transien
 		return fmt.Errorf("checkService failed to obtain service status for observedGeneration %d", gen), nil
 	}
 
-	serviceStatusOptions := ServiceStatusOptions{
-		Namespace: namespace,
-		Name:      name,
-	}
-	cond, err := c.ServiceStatus(serviceStatusOptions)
-	if err != nil {
-		return nil, fmt.Errorf("checkService failed to obtain service status: %v", err)
+	if service.Status.IsReady() {
+		return nil, nil
 	}
 
-	switch cond.Status {
-	case corev1.ConditionTrue:
-		return nil, nil
-	case corev1.ConditionFalse:
-		conds, message := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
-		if conds != nil {
-			if s := fetchTransientError(conds); s != "" {
-				return fmt.Errorf("%s: %s: %s", s, cond.Reason, message), nil
-			}
-		}
-		return nil, fmt.Errorf("function creation failed: %s: %s", cond.Reason, message)
-	default:
-		_, message := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
-		return fmt.Errorf("function creation incomplete: service status unknown: %s: %s", cond.Reason, message), nil
+	ready := service.Status.GetCondition(v1alpha1.ServiceConditionReady)
+	if ready == nil {
+		return nil, fmt.Errorf("unable to obtain ready condition status")
 	}
+
+	if ready.Status == corev1.ConditionFalse {
+		if s := fetchTransientError(service.Status.Conditions); s != "" {
+			return fmt.Errorf("%s: %s", s, ready.Reason), nil
+		}
+		return nil, fmt.Errorf("function creation failed: %s", ready.Reason)
+	}
+	return fmt.Errorf("function creation incomplete: service status unknown: %s", ready.Reason), nil
 }
 
 func fetchTransientError(conds duckv1alpha1.Conditions) string {
@@ -398,29 +389,6 @@ func fetchTransientError(conds duckv1alpha1.Conditions) string {
 		}
 	}
 	return ""
-}
-
-func (c *client) serviceConditionsWithMessage(options ServiceStatusOptions, cond *duckv1alpha1.Condition) (duckv1alpha1.Conditions, string) {
-	conds, err := c.ServiceConditions(options)
-	var message string
-	if err != nil {
-		// fall back to a basic message
-		message = cond.Message
-	} else {
-		message = serviceConditionsMessage(conds, cond.Message)
-	}
-
-	return conds, message
-}
-
-func serviceConditionsMessage(conds duckv1alpha1.Conditions, primaryMessage string) string {
-	msg := []string{primaryMessage}
-	for _, cond := range conds {
-		if cond.IsFalse() && cond.Type != v1alpha1.ServiceConditionReady && cond.Message != primaryMessage {
-			msg = append(msg, cond.Message)
-		}
-	}
-	return strings.Join(msg, "; ")
 }
 
 func or(disjuncts ...labels.Selector) labels.Selector {
