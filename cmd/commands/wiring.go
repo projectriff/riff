@@ -17,7 +17,9 @@
 package commands
 
 import (
+	"context"
 	"fmt"
+	"os"
 	"os/user"
 	"strings"
 
@@ -213,5 +215,6 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 type buildpackBuilder struct{}
 
 func (*buildpackBuilder) Build(appDir, buildImage, runImage, repoName string) error {
-	return pack.Build(appDir, buildImage, runImage, repoName, true)
+	ctx := context.TODO()
+	return pack.Build(ctx, os.Stdout, os.Stderr, appDir, buildImage, runImage, repoName, true, false)
 }
