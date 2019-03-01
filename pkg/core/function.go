@@ -171,19 +171,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 
 		if buildCache != nil {
 			// add service as owner of build cache so that deleting the service, deletes the cache
-			buildCache, err = c.kubeClient.CoreV1().PersistentVolumeClaims(ns).Get(buildCache.Name, v1.GetOptions{})
-			if err != nil {
-				return nil, nil, err
-			}
-			buildCache.ObjectMeta.OwnerReferences = []v1.OwnerReference{
-				*v1.NewControllerRef(s, schema.GroupVersionKind{
-					Group:   v1alpha1.SchemeGroupVersion.Group,
-					Version: v1alpha1.SchemeGroupVersion.Version,
-					Kind:    "Service",
-				}),
-			}
-			_, err = c.kubeClient.CoreV1().PersistentVolumeClaims(ns).Update(buildCache)
-			if err != nil {
+			if _, err = c.addOwnerReferenceToCacheWithRetry(3, buildCache, s); err != nil {
 				return nil, nil, err
 			}
 		}
@@ -202,6 +190,29 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 	}
 
 	return s, buildCache, nil
+}
+
+func (c *client) addOwnerReferenceToCacheWithRetry(attempts int, cache *corev1.PersistentVolumeClaim, svc *v1alpha1.Service) (*corev1.PersistentVolumeClaim, error) {
+	result, err := c.addOwnerReferenceToCache(cache, svc)
+	if err != nil && attempts > 0 {
+		return c.addOwnerReferenceToCacheWithRetry(attempts-1, cache, svc)
+	}
+	return result, err
+}
+
+func (c *client) addOwnerReferenceToCache(cache *corev1.PersistentVolumeClaim, svc *v1alpha1.Service) (*corev1.PersistentVolumeClaim, error) {
+	cache, err := c.kubeClient.CoreV1().PersistentVolumeClaims(cache.Namespace).Get(cache.Name, v1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	cache.ObjectMeta.OwnerReferences = []v1.OwnerReference{
+		*v1.NewControllerRef(svc, schema.GroupVersionKind{
+			Group:   v1alpha1.SchemeGroupVersion.Group,
+			Version: v1alpha1.SchemeGroupVersion.Version,
+			Kind:    "Service",
+		}),
+	}
+	return c.kubeClient.CoreV1().PersistentVolumeClaims(cache.Namespace).Update(cache)
 }
 
 func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.SourceSpec {
