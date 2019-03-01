@@ -24,7 +24,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	logutil "github.com/boz/go-logutil"
@@ -180,10 +179,17 @@ func (c *client) displayFunctionCreationProgress(serviceNamespace string, servic
 	} else if revName == "" { // stopped
 		return
 	}
+	buildName, err := c.buildName(serviceNamespace, revName, logWriter, stopChan)
+	if err != nil {
+		errChan <- err
+		return
+	} else if buildName == "" { // stopped
+		return
+	}
 
 	ctx := newContext()
 
-	podController, err := c.podController(revName, serviceName, ctx)
+	podController, err := c.podController(buildName, serviceName, ctx)
 	if err != nil {
 		errChan <- err
 		return
@@ -229,6 +235,18 @@ func (c *client) revisionName(serviceNamespace string, serviceName string, logWr
 	return revName, nil
 }
 
+func (c *client) buildName(ns string, revName string, logWriter io.Writer, stopChan <-chan struct{}) (string, error) {
+	revObj, err := c.serving.ServingV1alpha1().Revisions(ns).Get(revName, v1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+	if revObj.Spec.BuildRef == nil {
+		// revsion has no build
+		return "", nil
+	}
+	return revObj.Spec.BuildRef.Name, nil
+}
+
 func newContext() context.Context {
 	ctx := context.Background()
 	// avoid kail logs appearing
@@ -237,14 +255,10 @@ func newContext() context.Context {
 	return ctx
 }
 
-func (c *client) podController(revName string, serviceName string, ctx context.Context) (pod.Controller, error) {
+func (c *client) podController(buildName string, serviceName string, ctx context.Context) (pod.Controller, error) {
 	dsb := kail.NewDSBuilder()
 
-	buildSelOld, err := labels.Parse(fmt.Sprintf("%s=%s", "build-name", revName))
-	if err != nil {
-		return nil, err
-	}
-	buildSel, err := labels.Parse(fmt.Sprintf("%s=%s", "build.knative.dev/buildName", revName))
+	buildSel, err := labels.Parse(fmt.Sprintf("%s=%s", "build.knative.dev/buildName", buildName))
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +266,7 @@ func (c *client) podController(revName string, serviceName string, ctx context.C
 	if err != nil {
 		return nil, err
 	}
-	ds, err := dsb.WithSelectors(or(buildSel, runtimeSel, buildSelOld)).Create(ctx, c.kubeClient) // delete buildSelOld when https://github.com/knative/build/pull/299 is integrated into k/s
+	ds, err := dsb.WithSelectors(or(buildSel, runtimeSel)).Create(ctx, c.kubeClient)
 	if err != nil {
 		return nil, err
 	}
@@ -354,30 +368,22 @@ func checkService(c *client, namespace string, name string, gen int64) (transien
 		return fmt.Errorf("checkService failed to obtain service status for observedGeneration %d", gen), nil
 	}
 
-	serviceStatusOptions := ServiceStatusOptions{
-		Namespace: namespace,
-		Name:      name,
-	}
-	cond, err := c.ServiceStatus(serviceStatusOptions)
-	if err != nil {
-		return nil, fmt.Errorf("checkService failed to obtain service status: %v", err)
+	if service.Status.IsReady() {
+		return nil, nil
 	}
 
-	switch cond.Status {
-	case corev1.ConditionTrue:
-		return nil, nil
-	case corev1.ConditionFalse:
-		conds, message := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
-		if conds != nil {
-			if s := fetchTransientError(conds); s != "" {
-				return fmt.Errorf("%s: %s: %s", s, cond.Reason, message), nil
-			}
-		}
-		return nil, fmt.Errorf("function creation failed: %s: %s", cond.Reason, message)
-	default:
-		_, message := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
-		return fmt.Errorf("function creation incomplete: service status unknown: %s: %s", cond.Reason, message), nil
+	ready := service.Status.GetCondition(v1alpha1.ServiceConditionReady)
+	if ready == nil {
+		return nil, fmt.Errorf("unable to obtain ready condition status")
 	}
+
+	if ready.Status == corev1.ConditionFalse {
+		if s := fetchTransientError(service.Status.Conditions); s != "" {
+			return fmt.Errorf("%s: %s", s, ready.Reason), nil
+		}
+		return nil, fmt.Errorf("function creation failed: %s", ready.Reason)
+	}
+	return fmt.Errorf("function creation incomplete: service status unknown: %s", ready.Reason), nil
 }
 
 func fetchTransientError(conds duckv1alpha1.Conditions) string {
@@ -387,29 +393,6 @@ func fetchTransientError(conds duckv1alpha1.Conditions) string {
 		}
 	}
 	return ""
-}
-
-func (c *client) serviceConditionsWithMessage(options ServiceStatusOptions, cond *duckv1alpha1.Condition) (duckv1alpha1.Conditions, string) {
-	conds, err := c.ServiceConditions(options)
-	var message string
-	if err != nil {
-		// fall back to a basic message
-		message = cond.Message
-	} else {
-		message = serviceConditionsMessage(conds, cond.Message)
-	}
-
-	return conds, message
-}
-
-func serviceConditionsMessage(conds duckv1alpha1.Conditions, primaryMessage string) string {
-	msg := []string{primaryMessage}
-	for _, cond := range conds {
-		if cond.IsFalse() && cond.Type != v1alpha1.ServiceConditionReady && cond.Message != primaryMessage {
-			msg = append(msg, cond.Message)
-		}
-	}
-	return strings.Join(msg, "; ")
 }
 
 func or(disjuncts ...labels.Selector) labels.Selector {
@@ -460,7 +443,7 @@ func (c *client) getServiceSpecGeneration(namespace string, name string) (int64,
 	if err != nil {
 		return 0, err
 	}
-	return s.Spec.Generation, nil
+	return s.Generation, nil
 }
 
 func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunctionOptions, log io.Writer) error {
@@ -474,7 +457,7 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 	// create a copy before mutating
 	service = service.DeepCopy()
 
-	gen := service.Spec.Generation
+	gen := service.Generation
 
 	// TODO support non-RunLatest configurations
 	configuration := service.Spec.RunLatest.Configuration
