@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 
+	build "github.com/knative/build/pkg/apis/build/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -244,7 +245,15 @@ var _ = Describe("Function", func() {
 				testService.Spec = v1alpha1.ServiceSpec{
 					RunLatest: &v1alpha1.RunLatestType{
 						Configuration: v1alpha1.ConfigurationSpec{
-							Build: &v1alpha1.RawExtension{}, // non-nil build === cluster-built
+							Build: &v1alpha1.RawExtension{ // non-nil build === cluster-built
+								Object: &build.Build{
+									TypeMeta: v1.TypeMeta{
+										APIVersion: "build.knative.dev/v1alpha1",
+										Kind: "Build",
+									},
+									Spec: build.BuildSpec{},
+								},
+							},
 							RevisionTemplate: v1alpha1.RevisionTemplateSpec{
 								ObjectMeta: v1.ObjectMeta{
 									Labels: map[string]string{"riff.projectriff.io/function": functionName},

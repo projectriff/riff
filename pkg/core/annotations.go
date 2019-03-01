@@ -20,9 +20,11 @@ import (
 	"strconv"
 
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	"github.com/knative/serving/pkg/reconciler/v1alpha1/configuration/resources"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-func (c *client) bumpNonceAnnotation(s *v1alpha1.Service) {
+func (c *client) bumpNonceAnnotationForRevision(s *v1alpha1.Service) {
 	annotations := s.Spec.RunLatest.Configuration.RevisionTemplate.Annotations
 	if annotations == nil {
 		annotations = map[string]string{}
@@ -34,4 +36,33 @@ func (c *client) bumpNonceAnnotation(s *v1alpha1.Service) {
 	}
 	annotations[buildAnnotation] = strconv.Itoa(i + 1)
 	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
+}
+
+func (c *client) bumpNonceAnnotationForBuild(s *v1alpha1.Service) {
+	configurationSpec := s.Spec.RunLatest.Configuration
+	build := getBuild(configurationSpec)
+	if build != nil {
+		annotations := build.GetAnnotations()
+		if annotations == nil {
+			annotations = map[string]string{}
+		}
+		nonce := annotations[buildAnnotation]
+		i, err := strconv.Atoi(nonce)
+		if err != nil {
+			i = 0
+		}
+		annotations[buildAnnotation] = strconv.Itoa(i + 1)
+		build.SetAnnotations(annotations)
+		s.Spec.RunLatest.Configuration.Build = &v1alpha1.RawExtension{
+			Object: build,
+		}
+	}
+}
+
+func getBuild(configSpec v1alpha1.ConfigurationSpec) *unstructured.Unstructured {
+	if configSpec.Build == nil {
+		return nil
+	}
+	u := resources.GetBuild(&configSpec)
+	return u
 }

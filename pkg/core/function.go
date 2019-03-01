@@ -38,7 +38,7 @@ import (
 	"github.com/projectriff/riff/pkg/env"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -91,12 +91,6 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 	}
 	labels[functionLabel] = functionName
 	s.Spec.RunLatest.Configuration.RevisionTemplate.SetLabels(labels)
-	annotations := s.Spec.RunLatest.Configuration.RevisionTemplate.Annotations
-	if annotations == nil {
-		annotations = map[string]string{}
-	}
-	annotations[buildAnnotation] = "1"
-	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
 
 	if options.LocalPath != "" {
 		if s.ObjectMeta.Annotations == nil {
@@ -138,23 +132,31 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 
 		// buildpack based cluster build
 		s.Spec.RunLatest.Configuration.Build = &v1alpha1.RawExtension{
-			BuildSpec: &build.BuildSpec{
-				ServiceAccountName: "riff-build",
-				Source:             c.makeBuildSourceSpec(options),
-				Template: &build.TemplateInstantiationSpec{
-					Name: "riff-cnb",
-					Kind: "ClusterBuildTemplate",
-					Arguments: []build.ArgumentSpec{
-						{Name: "IMAGE", Value: options.Image},
-						{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
-						{Name: "FUNCTION_HANDLER", Value: options.Handler},
-						{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
-						{Name: "CACHE_VOLUME", Value: buildCache.Name},
+			Object: &build.Build{
+				TypeMeta: v1.TypeMeta{
+					APIVersion: "build.knative.dev/v1alpha1",
+					Kind:       "Build",
+				},
+				Spec: build.BuildSpec{
+					ServiceAccountName: "riff-build",
+					Source:             c.makeBuildSourceSpec(options),
+					Template: &build.TemplateInstantiationSpec{
+						Name: "riff-cnb",
+						Kind: "ClusterBuildTemplate",
+						Arguments: []build.ArgumentSpec{
+							{Name: "IMAGE", Value: options.Image},
+							{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
+							{Name: "FUNCTION_HANDLER", Value: options.Handler},
+							{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
+							{Name: "CACHE_VOLUME", Value: buildCache.Name},
+						},
 					},
 				},
 			},
 		}
 	}
+
+	c.bumpNonceAnnotationForBuild(s)
 
 	if !options.DryRun {
 		if buildCache != nil {
@@ -514,14 +516,15 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 
 	// TODO support non-RunLatest configurations
 	configuration := service.Spec.RunLatest.Configuration
-	build := configuration.Build
-	annotations := service.Annotations
 	labels := configuration.RevisionTemplate.Labels
 	if labels[functionLabel] == "" {
 		return fmt.Errorf("the service named \"%s\" is not a %s function", options.Name, env.Cli.Name)
 	}
 
-	c.bumpNonceAnnotation(service)
+	c.bumpNonceAnnotationForBuild(service)
+
+	build := configuration.Build
+	annotations := service.Annotations
 
 	appDir := options.LocalPath
 	if build != nil && appDir != "" {

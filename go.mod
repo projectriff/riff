@@ -22,7 +22,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.0 // indirect
 	github.com/imdario/mergo v0.3.5 // indirect
 	github.com/json-iterator/go v0.0.0-20180701071628-ab8a2e0c74be // indirect
-	github.com/knative/build v0.3.0
+	github.com/knative/build v0.4.0
 	github.com/knative/eventing v0.4.0
 	github.com/knative/pkg v0.0.0-20190219005745-729d5ada5f62
 	github.com/knative/serving v0.4.0
