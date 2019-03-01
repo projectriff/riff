@@ -24,12 +24,13 @@ import (
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	serving_cs "github.com/knative/serving/pkg/client/clientset/versioned"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 type Client interface {
-	CreateFunction(builder Builder, options CreateFunctionOptions, log io.Writer) (*serving.Service, error)
+	CreateFunction(builder Builder, options CreateFunctionOptions, log io.Writer) (*serving.Service, *corev1.PersistentVolumeClaim, error)
 	UpdateFunction(builder Builder, options UpdateFunctionOptions, log io.Writer) error
 
 	LocalBuildFunction(builder Builder, options LocalBuildFunctionOptions, log io.Writer) error
@@ -49,6 +50,10 @@ type Client interface {
 	DeleteService(options DeleteServiceOptions) error
 	ServiceStatus(options ServiceStatusOptions) (*duckv1alpha1.Condition, error)
 	ServiceCoordinates(options ServiceInvokeOptions) (ingressIP string, hostName string, err error)
+
+	// helpers
+	DefaultBuildImagePrefix(namespace string) (string, error)
+	SetDefaultBuildImagePrefix(namespace, prefix string) error
 }
 
 type Builder interface {

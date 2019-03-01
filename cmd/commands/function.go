@@ -74,7 +74,27 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults
 			envFromLongDesc + "\n",
 		Example: `  ` + env.Cli.Name + ` function create square --git-repo https://github.com/acme/square --artifact square.js --image acme/square --invoker node --namespace joseph-ns
   ` + env.Cli.Name + ` function create tweets-logger --git-repo https://github.com/acme/tweets --image acme/tweets-logger:1.0.0`,
-		PreRunE: FlagsValidatorAsCobraRunE(AtLeastOneOf("git-repo", "local-path")),
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			validator := FlagsValidatorAsCobraRunE(AtLeastOneOf("git-repo", "local-path"))
+			err := validator(cmd, args)
+			if err != nil {
+				return err
+			}
+
+			if createFunctionOptions.Image == "" {
+				prefix, err := (*fcTool).DefaultBuildImagePrefix(createFunctionOptions.Namespace)
+				if err != nil {
+					return fmt.Errorf("unable to default image: %s", err)
+				}
+				if prefix == "" {
+					return fmt.Errorf("required flag(s) \"image\" not set, this flag is optional if --image-prefix is specified during namespace init")
+				}
+				// combine prefix and function name to provide default image
+				createFunctionOptions.Image = fmt.Sprintf("%s/%s", prefix, args[functionCreateFunctionNameIndex])
+			}
+
+			return nil
+		},
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(functionCreateNumberOfArgs),
 			AtPosition(functionCreateFunctionNameIndex, ValidName()),
@@ -87,13 +107,16 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults
 			fnName := args[functionCreateFunctionNameIndex]
 
 			createFunctionOptions.Name = fnName
-			f, err := (*fcTool).CreateFunction(buildpackBuilder, createFunctionOptions, cmd.OutOrStdout())
+			f, pvc, err := (*fcTool).CreateFunction(buildpackBuilder, createFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err
 			}
 
 			if createFunctionOptions.DryRun {
 				marshaller := NewMarshaller(cmd.OutOrStdout())
+				if err = marshaller.Marshal(pvc); err != nil {
+					return err
+				}
 				if err = marshaller.Marshal(f); err != nil {
 					return err
 				}
@@ -117,7 +140,6 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults
 	command.Flags().StringVarP(&createFunctionOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
 	command.Flags().BoolVarP(&createFunctionOptions.DryRun, "dry-run", "", false, dryRunUsage)
 	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
-	command.MarkFlagRequired("image")
 	command.Flags().StringVar(&createFunctionOptions.Invoker, "invoker", "", "invoker runtime to override `language` detected by buildpack")
 	command.Flags().StringVar(&createFunctionOptions.GitRepo, "git-repo", "", "the `URL` for a git repository hosting the function code")
 	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` of the function code to use")

@@ -18,11 +18,8 @@ package core
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
-	"github.com/projectriff/riff/pkg/core/tasks"
-	"github.com/projectriff/riff/pkg/env"
-	"github.com/projectriff/riff/pkg/fileutils"
-	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -30,12 +27,16 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/projectriff/riff/pkg/core/tasks"
+	"github.com/projectriff/riff/pkg/env"
+	"github.com/projectriff/riff/pkg/fileutils"
+	"golang.org/x/crypto/ssh/terminal"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const serviceAccountName = "riff-build"
+const BuildServiceAccountName = "riff-build"
 
 type secretType int
 
@@ -50,6 +51,8 @@ const (
 type NamespaceInitOptions struct {
 	NamespaceName string
 	Manifest      string
+
+	ImagePrefix string
 
 	NoSecret          bool
 	SecretName        string
@@ -121,9 +124,19 @@ func (kc *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options N
 		if err := kc.createGcrSecret(options, initLabels); err != nil {
 			return err
 		}
+		if options.ImagePrefix == "" {
+			prefix, err := kc.gcrImagePrefix(options)
+			if err != nil {
+				return err
+			}
+			options.ImagePrefix = prefix
+		}
 	case secretTypeDockerHub:
 		if err := kc.createDockerHubSecret(options, initLabels); err != nil {
 			return err
+		}
+		if options.ImagePrefix == "" {
+			options.ImagePrefix = kc.dockerHubImagePrefix(options)
 		}
 	case secretTypeBasicAuth:
 		if err := kc.createRegistrySecret(options, initLabels); err != nil {
@@ -133,13 +146,12 @@ func (kc *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options N
 		if err = kc.checkSecretExists(options); err != nil {
 			return err
 		}
-
 	}
 
-	sa, err := kc.kubeClient.CoreV1().ServiceAccounts(ns).Get(serviceAccountName, v1.GetOptions{})
+	sa, err := kc.kubeClient.CoreV1().ServiceAccounts(ns).Get(BuildServiceAccountName, v1.GetOptions{})
 	if errors.IsNotFound(err) {
 		sa = &corev1.ServiceAccount{}
-		sa.Name = serviceAccountName
+		sa.Name = BuildServiceAccountName
 		sa.Labels = initLabels
 		if options.secretType() != secretTypeNone {
 			secretName := options.SecretName
@@ -173,6 +185,14 @@ func (kc *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options N
 				return err
 			}
 		}
+	}
+
+	if options.ImagePrefix != "" {
+		if err := kc.client.SetDefaultBuildImagePrefix(options.NamespaceName, options.ImagePrefix); err != nil {
+			return err
+		}
+	} else {
+		fmt.Printf("Skipping setting default image prefix, the --image argument will be required for commands\n")
 	}
 
 	for _, release := range manifest.Namespace {
@@ -251,12 +271,29 @@ func (kc *kubectlClient) createDockerHubSecret(options NamespaceInitOptions, lab
 	return kc.createBasicAuthSecret(options.NamespaceName, options.SecretName, username, password, "https://index.docker.io/v1/", labels)
 }
 
+func (kc *kubectlClient) dockerHubImagePrefix(options NamespaceInitOptions) string {
+	return fmt.Sprintf("docker.io/%s", options.DockerHubUsername)
+}
+
 func (kc *kubectlClient) createGcrSecret(options NamespaceInitOptions, labels map[string]string) error {
 	token, err := ioutil.ReadFile(options.GcrTokenPath)
 	if err != nil {
 		return err
 	}
 	return kc.createBasicAuthSecret(options.NamespaceName, options.SecretName, "_json_key", string(token), "https://gcr.io", labels)
+}
+
+func (kc *kubectlClient) gcrImagePrefix(options NamespaceInitOptions) (string, error) {
+	token, err := ioutil.ReadFile(options.GcrTokenPath)
+	if err != nil {
+		return "", err
+	}
+	tokenMap := map[string]string{}
+	err = json.Unmarshal(token, &tokenMap)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("gcr.io/%s", tokenMap["project_id"]), nil
 }
 
 func (kc *kubectlClient) createRegistrySecret(options NamespaceInitOptions, labels map[string]string) error {

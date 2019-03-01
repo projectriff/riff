@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 
+	build "github.com/knative/build/pkg/apis/build/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -30,6 +31,7 @@ import (
 	"github.com/projectriff/riff/pkg/core/vendor_mocks/mockserving"
 	"github.com/projectriff/riff/pkg/test_support"
 	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -47,6 +49,7 @@ var _ = Describe("Function", func() {
 		workDir              string
 		service              *v1alpha1.Service
 		testService          *v1alpha1.Service
+		cache                *corev1.PersistentVolumeClaim
 		err                  error
 	)
 
@@ -77,7 +80,7 @@ var _ = Describe("Function", func() {
 		)
 
 		JustBeforeEach(func() {
-			service, err = client.CreateFunction(mockBuilder, createFunctionOptions, ioutil.Discard)
+			service, cache, err = client.CreateFunction(mockBuilder, createFunctionOptions, ioutil.Discard)
 		})
 
 		Context("when building locally", func() {
@@ -104,6 +107,7 @@ var _ = Describe("Function", func() {
 					Expect(err).NotTo(HaveOccurred())
 					// The returned service should be the input to service create, not the output.
 					Expect(service).To(Equal(createdService))
+					Expect(cache).To(BeNil())
 				})
 			})
 
@@ -243,7 +247,15 @@ var _ = Describe("Function", func() {
 				testService.Spec = v1alpha1.ServiceSpec{
 					RunLatest: &v1alpha1.RunLatestType{
 						Configuration: v1alpha1.ConfigurationSpec{
-							Build: &v1alpha1.RawExtension{}, // non-nil build === cluster-built
+							Build: &v1alpha1.RawExtension{ // non-nil build === cluster-built
+								Object: &build.Build{
+									TypeMeta: v1.TypeMeta{
+										APIVersion: "build.knative.dev/v1alpha1",
+										Kind:       "Build",
+									},
+									Spec: build.BuildSpec{},
+								},
+							},
 							RevisionTemplate: v1alpha1.RevisionTemplateSpec{
 								ObjectMeta: v1.ObjectMeta{
 									Labels: map[string]string{"riff.projectriff.io/function": functionName},

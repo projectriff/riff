@@ -27,7 +27,7 @@ import (
 
 var (
 	// TODO update to a release version before releasing riff
-	builderVersion  = "0.2.0-snapshot-ci-912b954091ca"
+	builderVersion  = "0.2.0-snapshot-ci-1aa01f4f464c"
 	builder         = fmt.Sprintf("projectriff/builder:%s", builderVersion)
 	defaultRunImage = "packs/run:v3alpha2"
 
@@ -36,19 +36,16 @@ var (
 		"stable": {
 			ManifestVersion: "0.1",
 			Istio: []string{
-				"https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/istio.yaml",
-				"https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-3-0-patch.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.4.0/istio.yaml",
+				"https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-4-0-patch.yaml",
 			},
 			Knative: []string{
-				// NOTE: build should be in the knative-releases bucket, but is hiding in knative-nightly
-				"https://storage.googleapis.com/knative-nightly/build/previous/v0.3.0/release.yaml",
-				"https://storage.googleapis.com/knative-releases/serving/previous/v0.3.0/serving.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/eventing.yaml",
-				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.3.0/in-memory-channel.yaml",
+				"https://storage.googleapis.com/knative-releases/build/previous/v0.4.0/build.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.4.0/serving.yaml",
+				"https://raw.githubusercontent.com/knative/serving/master/third_party/config/build/clusterrole.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/eventing.yaml",
+				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/in-memory-channel.yaml",
 				fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-%s.yaml", builderVersion),
-			},
-			Namespace: []string{
-				fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache-%s.yaml", builderVersion),
 			},
 		},
 		// most recent release of Knative. This manifest is not tested
@@ -58,14 +55,12 @@ var (
 				"https://storage.googleapis.com/knative-releases/serving/latest/istio.yaml",
 			},
 			Knative: []string{
-				"https://storage.googleapis.com/knative-releases/build/latest/release.yaml",
+				"https://storage.googleapis.com/knative-releases/build/latest/build.yaml",
 				"https://storage.googleapis.com/knative-releases/serving/latest/serving.yaml",
+				"https://raw.githubusercontent.com/knative/serving/master/third_party/config/build/clusterrole.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/latest/eventing.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/latest/in-memory-channel.yaml",
 				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate.yaml",
-			},
-			Namespace: []string{
-				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache.yaml",
 			},
 		},
 		// most recent build of Knative from master. This manifest is not tested
@@ -75,14 +70,12 @@ var (
 				"https://storage.googleapis.com/knative-nightly/serving/latest/istio.yaml",
 			},
 			Knative: []string{
-				"https://storage.googleapis.com/knative-nightly/build/latest/release.yaml",
+				"https://storage.googleapis.com/knative-nightly/build/latest/build.yaml",
 				"https://storage.googleapis.com/knative-nightly/serving/latest/serving.yaml",
+				"https://raw.githubusercontent.com/knative/serving/master/third_party/config/build/clusterrole.yaml",
 				"https://storage.googleapis.com/knative-nightly/eventing/latest/eventing.yaml",
 				"https://storage.googleapis.com/knative-nightly/eventing/latest/in-memory-channel.yaml",
 				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate.yaml",
-			},
-			Namespace: []string{
-				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-cache.yaml",
 			},
 		},
 	}

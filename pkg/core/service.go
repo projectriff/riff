@@ -90,7 +90,7 @@ func (c *client) UpdateService(options CreateOrUpdateServiceOptions) (*v1alpha1.
 	existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env = append(existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env, envVars...)
 	existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env = append(existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env, envVarsFrom...)
 
-	c.bumpNonceAnnotation(existingSvc)
+	c.bumpNonceAnnotationForRevision(existingSvc)
 
 	if !options.DryRun {
 		_, err := c.serving.ServingV1alpha1().Services(ns).Update(existingSvc)
@@ -147,27 +147,15 @@ type ServiceStatusOptions struct {
 
 func (c *client) ServiceStatus(options ServiceStatusOptions) (*duckv1alpha1.Condition, error) {
 
-	conds, err := c.ServiceConditions(options)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, cond := range conds {
-		if cond.Type == v1alpha1.ServiceConditionReady {
-			return &cond, nil
-		}
-	}
-
-	return nil, errors.New("No condition of type ServiceConditionReady found for the service")
-}
-
-func (c *client) ServiceConditions(options ServiceStatusOptions) (duckv1alpha1.Conditions, error) {
-
 	s, err := c.service(options.Namespace, options.Name)
 	if err != nil {
 		return nil, err
 	}
-	return s.Status.Conditions, nil
+
+	if ready := s.Status.GetCondition(v1alpha1.ServiceConditionReady); ready != nil {
+		return ready, nil
+	}
+	return nil, errors.New("No condition of type ServiceConditionReady found for the service")
 }
 
 type ServiceInvokeOptions struct {

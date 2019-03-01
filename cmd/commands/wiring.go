@@ -25,14 +25,15 @@ import (
 	"os/user"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/buildpack/pack"
-
-	"github.com/projectriff/riff/pkg/env"
-
 	eventing "github.com/knative/eventing/pkg/client/clientset/versioned"
 	serving "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/core/kustomize"
+	"github.com/projectriff/riff/pkg/env"
+	"github.com/projectriff/riff/pkg/kubectl"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -215,7 +216,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 		if err != nil {
 			return err
 		}
-		*kc = core.NewKubectlClient(kubeClientSet)
+		*kc = core.NewKubectlClient(*client, kubeClientSet, kubectl.RealKubeCtl(), kustomize.MakeKustomizer(30*time.Second))
 
 		if oldPersistentPreRunE != nil {
 			return oldPersistentPreRunE(cmd, args)

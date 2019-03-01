@@ -30,20 +30,26 @@ import (
 	"github.com/projectriff/riff/pkg/core/mocks"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
 )
 
 var _ = Describe("The riff function create command", func() {
 	Context("when given wrong args or flags", func() {
 		var (
-			mockBuilder core.Builder
-			mockClient  core.Client
-			fc          *cobra.Command
+			builder core.Builder
+			client  core.Client
+			asMock  *mocks.Client
+			fc      *cobra.Command
 		)
 		BeforeEach(func() {
-			mockClient = nil
-			mockBuilder = nil
+			client = new(mocks.Client)
+			builder = nil
+			asMock = client.(*mocks.Client)
 			defaults := commands.PackDefaults{BuilderImage: "projectriff/builder", RunImage: "packs/run"}
-			fc = commands.FunctionCreate(mockBuilder, &mockClient, defaults)
+			fc = commands.FunctionCreate(builder, &client, defaults)
+		})
+		AfterEach(func() {
+			asMock.AssertExpectations(GinkgoT())
 		})
 		It("should fail with no args", func() {
 			fc.SetArgs([]string{})
@@ -57,6 +63,7 @@ var _ = Describe("The riff function create command", func() {
 		})
 		It("should fail without required flags", func() {
 			fc.SetArgs([]string{"square", "--local-path", "."})
+			asMock.On("DefaultBuildImagePrefix", "").Return("", nil)
 			err := fc.Execute()
 			Expect(err).To(MatchError(ContainSubstring("required flag(s)")))
 			Expect(err).To(MatchError(ContainSubstring("image")))
@@ -87,7 +94,6 @@ var _ = Describe("The riff function create command", func() {
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
-
 		})
 		It("should involve the core.Client", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
@@ -106,7 +112,7 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{}
 			options.EnvFrom = []string{}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -127,7 +133,29 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{}
 			options.EnvFrom = []string{}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
+			err := fc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		})
+		It("should provide a default image", func() {
+			fc.SetArgs([]string{"square", "--git-repo", "https://github.com/repo"})
+
+			options := core.CreateFunctionOptions{
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+				BuildOptions: core.BuildOptions{
+					Invoker:        "",
+					BuildpackImage: "projectriff/builder",
+					RunImage:       "packs/run",
+				},
+			}
+			options.Name = "square"
+			options.Image = "defaulted-prefix/square"
+			options.Env = []string{}
+			options.EnvFrom = []string{}
+
+			asMock.On("DefaultBuildImagePrefix", "").Return("defaulted-prefix", nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -135,9 +163,17 @@ var _ = Describe("The riff function create command", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 
 			e := fmt.Errorf("some error")
-			asMock.On("CreateFunction", mock.Anything, mock.Anything, mock.Anything).Return(nil, e)
+			asMock.On("CreateFunction", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, e)
 			err := fc.Execute()
 			Expect(err).To(MatchError(e))
+		})
+		It("should propagate core.Client errors from default image lookup", func() {
+			fc.SetArgs([]string{"square", "--git-repo", "https://github.com/repo"})
+
+			e := fmt.Errorf("some error")
+			asMock.On("DefaultBuildImagePrefix", "").Return("", e)
+			err := fc.Execute()
+			Expect(err).To(MatchError("unable to default image: some error"))
 		})
 		It("should add env vars when asked to", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
@@ -156,7 +192,7 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{"FOO=bar", "BAZ=qux"}
 			options.EnvFrom = []string{"secretKeyRef:foo:bar"}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -179,7 +215,9 @@ var _ = Describe("The riff function create command", func() {
 
 			f := v1alpha1.Service{}
 			f.Name = "square"
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&f, nil)
+			cache := corev1.PersistentVolumeClaim{}
+			cache.Name = "square-build-cache"
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&f, &cache, nil)
 
 			stdout := &strings.Builder{}
 			fc.SetOutput(stdout)
@@ -206,7 +244,9 @@ var _ = Describe("The riff function create command", func() {
 			options.EnvFrom = []string{}
 			function := v1alpha1.Service{}
 			function.Name = "square"
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&function, nil)
+			cache := corev1.PersistentVolumeClaim{}
+			cache.Name = "square-build-cache"
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&function, &cache, nil)
 			stdout := &strings.Builder{}
 			fc.SetOutput(stdout)
 
@@ -236,7 +276,10 @@ var _ = Describe("The riff function create command", func() {
 			function := v1alpha1.Service{}
 			function.Name = "square"
 			function.Namespace = "ns"
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&function, nil)
+			cache := corev1.PersistentVolumeClaim{}
+			cache.Name = "square-build-cache"
+			cache.Namespace = "ns"
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&function, &cache, nil)
 			stdout := &strings.Builder{}
 			fc.SetOutput(stdout)
 
@@ -251,6 +294,13 @@ var _ = Describe("The riff function create command", func() {
 })
 
 const fnCreateDryRun = `metadata:
+  creationTimestamp: null
+  name: square-build-cache
+spec:
+  resources: {}
+status: {}
+---
+metadata:
   creationTimestamp: null
   name: square
 spec: {}
