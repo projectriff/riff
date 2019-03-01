@@ -71,18 +71,18 @@ type CreateFunctionOptions struct {
 	GitRevision string
 }
 
-func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
+func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, *corev1.PersistentVolumeClaim, error) {
 	var buildCache *corev1.PersistentVolumeClaim
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 	functionName := options.Name
 	_, err := c.serving.ServingV1alpha1().Services(ns).Get(functionName, v1.GetOptions{})
 	if err == nil {
-		return nil, fmt.Errorf("service '%s' already exists in namespace '%s'", functionName, ns)
+		return nil, nil, fmt.Errorf("service '%s' already exists in namespace '%s'", functionName, ns)
 	}
 
 	s, err := newService(options.CreateOrUpdateServiceOptions)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	labels := s.Spec.RunLatest.Configuration.RevisionTemplate.Labels
@@ -113,15 +113,18 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			log.Write([]byte("Skipping local build\n"))
 		} else {
 			if err := doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions); err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 		}
 	} else {
 		// create build cache for service
 		buildCache = &corev1.PersistentVolumeClaim{
+			TypeMeta: v1.TypeMeta{
+				APIVersion: "v1",
+				Kind:       "PersistentVolumeClaim",
+			},
 			ObjectMeta: v1.ObjectMeta{
-				Name:      fmt.Sprintf("%s-build-cache", options.Name),
-				Namespace: ns,
+				Name: fmt.Sprintf("%s-build-cache", options.Name),
 			},
 			Spec: corev1.PersistentVolumeClaimSpec{
 				AccessModes: []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
@@ -157,20 +160,20 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 		if buildCache != nil {
 			buildCache, err = c.kubeClient.CoreV1().PersistentVolumeClaims(ns).Create(buildCache)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 		}
 
 		s, err := c.serving.ServingV1alpha1().Services(ns).Create(s)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		if buildCache != nil {
 			// add service as owner of build cache so that deleting the service, deletes the cache
 			buildCache, err = c.kubeClient.CoreV1().PersistentVolumeClaims(ns).Get(buildCache.Name, v1.GetOptions{})
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			buildCache.ObjectMeta.OwnerReferences = []v1.OwnerReference{
 				*v1.NewControllerRef(s, schema.GroupVersionKind{
@@ -181,7 +184,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			}
 			_, err = c.kubeClient.CoreV1().PersistentVolumeClaims(ns).Update(buildCache)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 		}
 
@@ -193,12 +196,12 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			}
 			err := c.waitForSuccessOrFailure(ns, s.Name, 1, stopChan, errChan, options.Verbose)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 		}
 	}
 
-	return s, nil
+	return s, buildCache, nil
 }
 
 func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.SourceSpec {
