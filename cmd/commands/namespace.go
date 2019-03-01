@@ -105,6 +105,7 @@ func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 	command.Flags().StringVarP(&options.RegistryProtocol, "registry-protocol", "", "https", "registry protocol (http or https)")
 	command.Flags().StringVar(&options.RegistryHost, "registry-host", "", "registry server host")
 	command.Flags().StringVar(&options.RegistryUser, "registry-user", "", "registry username; password will be read from stdin")
+	command.Flags().StringVar(&options.ImagePrefix, "image-prefix", "", "image prefix to use for commands that would otherwise require an --image argument. If not set, this value will be derived for DockerHub and GCR")
 
 	return command
 }

@@ -78,15 +78,13 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults
 				if err != nil {
 					return fmt.Errorf("unable to default image: %s", err)
 				}
-				if prefix != "" {
-					// combine prefix and function name to provide default image
-					createFunctionOptions.Image = fmt.Sprintf("%s/%s", prefix, args[functionCreateFunctionNameIndex])
+				if prefix == "" {
+					return fmt.Errorf("required flag(s) \"image\" not set, this flag is optional if --image-prefix is specified during namespace init")
 				}
+				// combine prefix and function name to provide default image
+				createFunctionOptions.Image = fmt.Sprintf("%s/%s", prefix, args[functionCreateFunctionNameIndex])
 			}
 
-			if createFunctionOptions.Image == "" {
-				return fmt.Errorf("required flag(s) \"image\" not set")
-			}
 			return nil
 		},
 		Args: ArgValidationConjunction(

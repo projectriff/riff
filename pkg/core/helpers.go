@@ -17,6 +17,8 @@
 package core
 
 import (
+	"fmt"
+
 	core_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,6 +43,7 @@ func (c *client) SetDefaultBuildImagePrefix(namespace, prefix string) error {
 		return err
 	}
 	cm.Data[defaultImagePrefixKey] = prefix
+	fmt.Printf("Setting default image prefix to %q for namespace %q\n", prefix, namespace)
 	return c.saveBuildConfigMap(cm)
 }
 

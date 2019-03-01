@@ -279,6 +279,27 @@ var _ = Describe("namespace", func() {
 			Expect(err).To(Not(HaveOccurred()))
 		})
 
+		It("should set the default image prefix if defined", func() {
+			options := core.NamespaceInitOptions{
+				Manifest:      "fixtures/empty.yaml",
+				NamespaceName: "foo",
+				NoSecret:      true,
+				ImagePrefix:   "registry.example.com",
+			}
+
+			namespace := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "foo"}}
+			mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
+
+			serviceAccount := &v1.ServiceAccount{}
+			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
+			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+
+			mockClient.On("SetDefaultBuildImagePrefix", "foo", "registry.example.com").Return(nil)
+
+			err := kubectlClient.NamespaceInit(manifests, options)
+			Expect(err).To(Not(HaveOccurred()))
+		})
+
 		It("should apply label to namespace resources", func() {
 			options := core.NamespaceInitOptions{
 				Manifest:      "stable",
