@@ -1,0 +1,83 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: riff-cnb-cache
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+---
+apiVersion: build.knative.dev/v1alpha1
+kind: BuildTemplate
+metadata:
+  name: riff-cnb
+spec:
+  parameters:
+    - name: IMAGE
+      description: The image you wish to create. For example, "repo/example", or "example.com/repo/image".
+    - name: FUNCTION_ARTIFACT
+      default: ""
+      description: Path to the function artifact, source code or jar file (attempts
+        detection if not specified)
+    - name: FUNCTION_HANDLER
+      default: ""
+      description: Name of method or class to invoke (see specific invoker for detail)
+    - name: FUNCTION_LANGUAGE
+      default: ""
+      description: Explicit language to use for the function, will skip detection.
+    - name: RUN_IMAGE
+      description: The run image buildpacks will use as the base for IMAGE.
+      default: packs/run:v3alpha2
+    - name: USE_CRED_HELPERS
+      description: Use Docker credential helpers for Google's GCR, Amazon's ECR, or Microsoft's ACR.
+      default: 'true'
+
+  steps:
+    - name: prepare
+      image: packs/base
+      command: ["/lifecycle/knative-helper"]
+      volumeMounts:
+        - name: app-cache
+          mountPath: /cache
+      imagePullPolicy: Always
+    - name: write-riff-toml
+      image: projectriff/builder:0.2.0-snapshot-ci-f2315fde2cae
+      command: ["/bin/bash", "-c", "printf \"artifact = '${FUNCTION_ARTIFACT}'\\nhandler = '${FUNCTION_HANDLER}'\\noverride = '${FUNCTION_LANGUAGE}'\\n\" > app/riff.toml"]
+      imagePullPolicy: Always
+    - name: detect
+      image: projectriff/builder:0.2.0-snapshot-ci-f2315fde2cae
+      command: ["/lifecycle/detector"]
+      imagePullPolicy: Always
+    - name: analyze
+      image: packs/util
+      command: ["/lifecycle/analyzer"]
+      args: ["${IMAGE}"]
+      env:
+        - name: PACK_USE_HELPERS
+          value: ${USE_CRED_HELPERS}
+      imagePullPolicy: Always
+    - name: build
+      image: projectriff/builder:0.2.0-snapshot-ci-f2315fde2cae
+      command: ["/lifecycle/builder"]
+      volumeMounts:
+        - name: app-cache
+          mountPath: /cache
+      imagePullPolicy: Always
+    - name: export
+      image: packs/util
+      command: ["/lifecycle/exporter"]
+      args: ["${IMAGE}"]
+      env:
+        - name: PACK_RUN_IMAGE
+          value: ${RUN_IMAGE}
+        - name: PACK_USE_HELPERS
+          value: ${USE_CRED_HELPERS}
+      imagePullPolicy: Always
+
+  volumes:
+    - name: app-cache
+      persistentVolumeClaim:
+        claimName: riff-cnb-cache

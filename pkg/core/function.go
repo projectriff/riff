@@ -24,7 +24,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	logutil "github.com/boz/go-logutil"
@@ -38,8 +37,10 @@ import (
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/projectriff/riff/pkg/env"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 const (
@@ -70,17 +71,18 @@ type CreateFunctionOptions struct {
 	GitRevision string
 }
 
-func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, error) {
+func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, *corev1.PersistentVolumeClaim, error) {
+	var buildCache *corev1.PersistentVolumeClaim
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 	functionName := options.Name
 	_, err := c.serving.ServingV1alpha1().Services(ns).Get(functionName, v1.GetOptions{})
 	if err == nil {
-		return nil, fmt.Errorf("service '%s' already exists in namespace '%s'", functionName, ns)
+		return nil, nil, fmt.Errorf("service '%s' already exists in namespace '%s'", functionName, ns)
 	}
 
 	s, err := newService(options.CreateOrUpdateServiceOptions)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	labels := s.Spec.RunLatest.Configuration.RevisionTemplate.Labels
@@ -111,28 +113,67 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			log.Write([]byte("Skipping local build\n"))
 		} else {
 			if err := doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions); err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 		}
 	} else {
+		// create build cache for service
+		buildCache = &corev1.PersistentVolumeClaim{
+			TypeMeta: v1.TypeMeta{
+				APIVersion: "v1",
+				Kind:       "PersistentVolumeClaim",
+			},
+			ObjectMeta: v1.ObjectMeta{
+				Name: fmt.Sprintf("%s-build-cache", options.Name),
+			},
+			Spec: corev1.PersistentVolumeClaimSpec{
+				AccessModes: []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
+				Resources: corev1.ResourceRequirements{
+					Requests: corev1.ResourceList{
+						corev1.ResourceStorage: resource.MustParse("8Gi"),
+					},
+				},
+			},
+		}
+
 		// buildpack based cluster build
 		s.Spec.RunLatest.Configuration.Build = &v1alpha1.RawExtension{
 			BuildSpec: &build.BuildSpec{
 				ServiceAccountName: "riff-build",
 				Source:             c.makeBuildSourceSpec(options),
 				Template: &build.TemplateInstantiationSpec{
-					Name:      "riff-cnb",
-					Kind:      "ClusterBuildTemplate",
-					Arguments: c.makeBuildArguments(options),
+					Name: "riff-cnb",
+					Kind: "ClusterBuildTemplate",
+					Arguments: []build.ArgumentSpec{
+						{Name: "IMAGE", Value: options.Image},
+						{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
+						{Name: "FUNCTION_HANDLER", Value: options.Handler},
+						{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
+						{Name: "CACHE_VOLUME", Value: buildCache.Name},
+					},
 				},
 			},
 		}
 	}
 
 	if !options.DryRun {
-		_, err := c.serving.ServingV1alpha1().Services(ns).Create(s)
+		if buildCache != nil {
+			buildCache, err = c.kubeClient.CoreV1().PersistentVolumeClaims(ns).Create(buildCache)
+			if err != nil {
+				return nil, nil, err
+			}
+		}
+
+		s, err := c.serving.ServingV1alpha1().Services(ns).Create(s)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
+		}
+
+		if buildCache != nil {
+			// add service as owner of build cache so that deleting the service, deletes the cache
+			if _, err = c.addOwnerReferenceToCacheWithRetry(3, buildCache, s); err != nil {
+				return nil, nil, err
+			}
 		}
 
 		if options.Verbose || options.Wait {
@@ -143,12 +184,35 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			}
 			err := c.waitForSuccessOrFailure(ns, s.Name, 1, stopChan, errChan, options.Verbose)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 		}
 	}
 
-	return s, nil
+	return s, buildCache, nil
+}
+
+func (c *client) addOwnerReferenceToCacheWithRetry(attempts int, cache *corev1.PersistentVolumeClaim, svc *v1alpha1.Service) (*corev1.PersistentVolumeClaim, error) {
+	result, err := c.addOwnerReferenceToCache(cache, svc)
+	if err != nil && attempts > 0 {
+		return c.addOwnerReferenceToCacheWithRetry(attempts-1, cache, svc)
+	}
+	return result, err
+}
+
+func (c *client) addOwnerReferenceToCache(cache *corev1.PersistentVolumeClaim, svc *v1alpha1.Service) (*corev1.PersistentVolumeClaim, error) {
+	cache, err := c.kubeClient.CoreV1().PersistentVolumeClaims(cache.Namespace).Get(cache.Name, v1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	cache.ObjectMeta.OwnerReferences = []v1.OwnerReference{
+		*v1.NewControllerRef(svc, schema.GroupVersionKind{
+			Group:   v1alpha1.SchemeGroupVersion.Group,
+			Version: v1alpha1.SchemeGroupVersion.Version,
+			Kind:    "Service",
+		}),
+	}
+	return c.kubeClient.CoreV1().PersistentVolumeClaims(cache.Namespace).Update(cache)
 }
 
 func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.SourceSpec {
@@ -160,18 +224,6 @@ func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.Sourc
 	}
 }
 
-func (c *client) makeBuildArguments(options CreateFunctionOptions) []build.ArgumentSpec {
-	args := []build.ArgumentSpec{
-		{Name: "IMAGE", Value: options.Image},
-		{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
-		{Name: "FUNCTION_HANDLER", Value: options.Handler},
-		{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
-		// TODO configure buildtemplate based on buildpack image
-		// {Name: "TBD", Value: options.BuildpackImage},
-	}
-	return args
-}
-
 func (c *client) displayFunctionCreationProgress(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}, errChan chan<- error) {
 	revName, err := c.revisionName(serviceNamespace, serviceName, logWriter, stopChan)
 	if err != nil {
@@ -180,10 +232,17 @@ func (c *client) displayFunctionCreationProgress(serviceNamespace string, servic
 	} else if revName == "" { // stopped
 		return
 	}
+	buildName, err := c.buildName(serviceNamespace, revName, logWriter, stopChan)
+	if err != nil {
+		errChan <- err
+		return
+	} else if buildName == "" { // stopped
+		return
+	}
 
 	ctx := newContext()
 
-	podController, err := c.podController(revName, serviceName, ctx)
+	podController, err := c.podController(buildName, serviceName, ctx)
 	if err != nil {
 		errChan <- err
 		return
@@ -229,6 +288,18 @@ func (c *client) revisionName(serviceNamespace string, serviceName string, logWr
 	return revName, nil
 }
 
+func (c *client) buildName(ns string, revName string, logWriter io.Writer, stopChan <-chan struct{}) (string, error) {
+	revObj, err := c.serving.ServingV1alpha1().Revisions(ns).Get(revName, v1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+	if revObj.Spec.BuildRef == nil {
+		// revsion has no build
+		return "", nil
+	}
+	return revObj.Spec.BuildRef.Name, nil
+}
+
 func newContext() context.Context {
 	ctx := context.Background()
 	// avoid kail logs appearing
@@ -237,14 +308,10 @@ func newContext() context.Context {
 	return ctx
 }
 
-func (c *client) podController(revName string, serviceName string, ctx context.Context) (pod.Controller, error) {
+func (c *client) podController(buildName string, serviceName string, ctx context.Context) (pod.Controller, error) {
 	dsb := kail.NewDSBuilder()
 
-	buildSelOld, err := labels.Parse(fmt.Sprintf("%s=%s", "build-name", revName))
-	if err != nil {
-		return nil, err
-	}
-	buildSel, err := labels.Parse(fmt.Sprintf("%s=%s", "build.knative.dev/buildName", revName))
+	buildSel, err := labels.Parse(fmt.Sprintf("%s=%s", "build.knative.dev/buildName", buildName))
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +319,7 @@ func (c *client) podController(revName string, serviceName string, ctx context.C
 	if err != nil {
 		return nil, err
 	}
-	ds, err := dsb.WithSelectors(or(buildSel, runtimeSel, buildSelOld)).Create(ctx, c.kubeClient) // delete buildSelOld when https://github.com/knative/build/pull/299 is integrated into k/s
+	ds, err := dsb.WithSelectors(or(buildSel, runtimeSel)).Create(ctx, c.kubeClient)
 	if err != nil {
 		return nil, err
 	}
@@ -354,30 +421,22 @@ func checkService(c *client, namespace string, name string, gen int64) (transien
 		return fmt.Errorf("checkService failed to obtain service status for observedGeneration %d", gen), nil
 	}
 
-	serviceStatusOptions := ServiceStatusOptions{
-		Namespace: namespace,
-		Name:      name,
-	}
-	cond, err := c.ServiceStatus(serviceStatusOptions)
-	if err != nil {
-		return nil, fmt.Errorf("checkService failed to obtain service status: %v", err)
+	if service.Status.IsReady() {
+		return nil, nil
 	}
 
-	switch cond.Status {
-	case corev1.ConditionTrue:
-		return nil, nil
-	case corev1.ConditionFalse:
-		conds, message := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
-		if conds != nil {
-			if s := fetchTransientError(conds); s != "" {
-				return fmt.Errorf("%s: %s: %s", s, cond.Reason, message), nil
-			}
-		}
-		return nil, fmt.Errorf("function creation failed: %s: %s", cond.Reason, message)
-	default:
-		_, message := c.serviceConditionsWithMessage(serviceStatusOptions, cond)
-		return fmt.Errorf("function creation incomplete: service status unknown: %s: %s", cond.Reason, message), nil
+	ready := service.Status.GetCondition(v1alpha1.ServiceConditionReady)
+	if ready == nil {
+		return nil, fmt.Errorf("unable to obtain ready condition status")
 	}
+
+	if ready.Status == corev1.ConditionFalse {
+		if s := fetchTransientError(service.Status.Conditions); s != "" {
+			return fmt.Errorf("%s: %s", s, ready.Reason), nil
+		}
+		return nil, fmt.Errorf("function creation failed: %s", ready.Reason)
+	}
+	return fmt.Errorf("function creation incomplete: service status unknown: %s", ready.Reason), nil
 }
 
 func fetchTransientError(conds duckv1alpha1.Conditions) string {
@@ -387,29 +446,6 @@ func fetchTransientError(conds duckv1alpha1.Conditions) string {
 		}
 	}
 	return ""
-}
-
-func (c *client) serviceConditionsWithMessage(options ServiceStatusOptions, cond *duckv1alpha1.Condition) (duckv1alpha1.Conditions, string) {
-	conds, err := c.ServiceConditions(options)
-	var message string
-	if err != nil {
-		// fall back to a basic message
-		message = cond.Message
-	} else {
-		message = serviceConditionsMessage(conds, cond.Message)
-	}
-
-	return conds, message
-}
-
-func serviceConditionsMessage(conds duckv1alpha1.Conditions, primaryMessage string) string {
-	msg := []string{primaryMessage}
-	for _, cond := range conds {
-		if cond.IsFalse() && cond.Type != v1alpha1.ServiceConditionReady && cond.Message != primaryMessage {
-			msg = append(msg, cond.Message)
-		}
-	}
-	return strings.Join(msg, "; ")
 }
 
 func or(disjuncts ...labels.Selector) labels.Selector {
@@ -460,13 +496,13 @@ func (c *client) getServiceSpecGeneration(namespace string, name string) (int64,
 	if err != nil {
 		return 0, err
 	}
-	return s.Spec.Generation, nil
+	return s.Generation, nil
 }
 
 func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunctionOptions, log io.Writer) error {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 
-	service, err := c.service(options.Namespace, options.Name)
+	service, err := c.service(ns, options.Name)
 	if err != nil {
 		return err
 	}
@@ -474,7 +510,7 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 	// create a copy before mutating
 	service = service.DeepCopy()
 
-	gen := service.Spec.Generation
+	gen := service.Generation
 
 	// TODO support non-RunLatest configurations
 	configuration := service.Spec.RunLatest.Configuration
@@ -527,10 +563,10 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 		)
 		for i := 0; i < 10; i++ {
 			if i >= 10 {
-				return fmt.Errorf("update unsuccesful for \"%s\", service resource was never updated", options.Name)
+				return fmt.Errorf("update unsuccessful for \"%s\", service resource was never updated", options.Name)
 			}
 			time.Sleep(500 * time.Millisecond)
-			nextGen, err = c.getServiceSpecGeneration(options.Namespace, options.Name)
+			nextGen, err = c.getServiceSpecGeneration(ns, options.Name)
 			if err != nil {
 				return err
 			}

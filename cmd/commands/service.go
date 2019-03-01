@@ -334,17 +334,17 @@ Additional curl arguments and flags may be specified after a double dash (--).`,
 
 // Print any HTTP errors in the given string to the given writer
 func PrintCurlHttpErrors(curlErrOutput string, w io.Writer) {
-	okResponseRegex := regexp.MustCompile("< HTTP/[\\d.]* 200")
-	matched := okResponseRegex.MatchString(curlErrOutput)
+	errorResponseRegex := regexp.MustCompile("< HTTP/[\\d.]* [45]\\d{2}")
+	matched := errorResponseRegex.MatchString(curlErrOutput)
 
 	if !matched {
-		errorResponseRegex := regexp.MustCompile("< HTTP/[\\d.]* ")
-		for _, line := range strings.Split(curlErrOutput, "\n") {
-			matched := errorResponseRegex.MatchString(line)
+		return
+	}
+	for _, line := range strings.Split(curlErrOutput, "\n") {
+		matched := errorResponseRegex.MatchString(line)
 
-			if matched {
-				_, _ = fmt.Fprintf(w, "%s\n", line)
-			}
+		if matched {
+			_, _ = fmt.Fprintf(w, "%s\n", line)
 		}
 	}
 }

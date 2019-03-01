@@ -24,12 +24,13 @@ import (
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	serving_cs "github.com/knative/serving/pkg/client/clientset/versioned"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 type Client interface {
-	CreateFunction(builder Builder, options CreateFunctionOptions, log io.Writer) (*serving.Service, error)
+	CreateFunction(builder Builder, options CreateFunctionOptions, log io.Writer) (*serving.Service, *corev1.PersistentVolumeClaim, error)
 	UpdateFunction(builder Builder, options UpdateFunctionOptions, log io.Writer) error
 
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)

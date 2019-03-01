@@ -101,13 +101,16 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults
 			fnName := args[functionCreateFunctionNameIndex]
 
 			createFunctionOptions.Name = fnName
-			f, err := (*fcTool).CreateFunction(buildpackBuilder, createFunctionOptions, cmd.OutOrStdout())
+			f, pvc, err := (*fcTool).CreateFunction(buildpackBuilder, createFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err
 			}
 
 			if createFunctionOptions.DryRun {
 				marshaller := NewMarshaller(cmd.OutOrStdout())
+				if err = marshaller.Marshal(pvc); err != nil {
+					return err
+				}
 				if err = marshaller.Marshal(f); err != nil {
 					return err
 				}
