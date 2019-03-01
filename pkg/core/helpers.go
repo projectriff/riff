@@ -19,6 +19,7 @@ package core
 import (
 	"fmt"
 
+	"github.com/projectriff/riff/pkg/env"
 	core_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -58,6 +59,10 @@ func (c *client) buildConfigMap(namespace string) (*core_v1.ConfigMap, error) {
 			ObjectMeta: meta_v1.ObjectMeta{
 				Name:      buildConfigMap,
 				Namespace: ns,
+				Labels: map[string]string{
+					"projectriff.io/installer": env.Cli.Name,
+					"projectriff.io/version":   env.Cli.Version,
+				},
 			},
 			Data: map[string]string{},
 		}
