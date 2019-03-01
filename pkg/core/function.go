@@ -240,6 +240,10 @@ func (c *client) buildName(ns string, revName string, logWriter io.Writer, stopC
 	if err != nil {
 		return "", err
 	}
+	if revObj.Spec.BuildRef == nil {
+		// revsion has no build
+		return "", nil
+	}
 	return revObj.Spec.BuildRef.Name, nil
 }
 
