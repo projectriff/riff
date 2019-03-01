@@ -30,6 +30,7 @@ import (
 	"github.com/projectriff/riff/pkg/core/mocks"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
 )
 
 var _ = Describe("The riff function create command", func() {
@@ -106,7 +107,7 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{}
 			options.EnvFrom = []string{}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -127,7 +128,7 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{}
 			options.EnvFrom = []string{}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -135,7 +136,7 @@ var _ = Describe("The riff function create command", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 
 			e := fmt.Errorf("some error")
-			asMock.On("CreateFunction", mock.Anything, mock.Anything, mock.Anything).Return(nil, e)
+			asMock.On("CreateFunction", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, e)
 			err := fc.Execute()
 			Expect(err).To(MatchError(e))
 		})
@@ -156,7 +157,7 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{"FOO=bar", "BAZ=qux"}
 			options.EnvFrom = []string{"secretKeyRef:foo:bar"}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -179,7 +180,9 @@ var _ = Describe("The riff function create command", func() {
 
 			f := v1alpha1.Service{}
 			f.Name = "square"
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&f, nil)
+			cache := corev1.PersistentVolumeClaim{}
+			cache.Name = "square-build-cache"
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&f, &cache, nil)
 
 			stdout := &strings.Builder{}
 			fc.SetOutput(stdout)
@@ -206,7 +209,9 @@ var _ = Describe("The riff function create command", func() {
 			options.EnvFrom = []string{}
 			function := v1alpha1.Service{}
 			function.Name = "square"
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&function, nil)
+			cache := corev1.PersistentVolumeClaim{}
+			cache.Name = "square-build-cache"
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&function, &cache, nil)
 			stdout := &strings.Builder{}
 			fc.SetOutput(stdout)
 
@@ -236,7 +241,10 @@ var _ = Describe("The riff function create command", func() {
 			function := v1alpha1.Service{}
 			function.Name = "square"
 			function.Namespace = "ns"
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&function, nil)
+			cache := corev1.PersistentVolumeClaim{}
+			cache.Name = "square-build-cache"
+			cache.Namespace = "ns"
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&function, &cache, nil)
 			stdout := &strings.Builder{}
 			fc.SetOutput(stdout)
 
@@ -251,6 +259,13 @@ var _ = Describe("The riff function create command", func() {
 })
 
 const fnCreateDryRun = `metadata:
+  creationTimestamp: null
+  name: square-build-cache
+spec:
+  resources: {}
+status: {}
+---
+metadata:
   creationTimestamp: null
   name: square
 spec: {}
