@@ -377,7 +377,7 @@ func deleteClusterResources(kc *kubectlClient, resourceType string, prefix strin
 }
 
 func deleteKnativeServices(kc *kubectlClient) error {
-	fmt.Printf("Deleting Knative Services\n")
+	fmt.Printf("Deleting Knative services\n")
 	err := deleteAllKnative(kc, "service.serving.knative.dev")
 	if err != nil {
 		return err
@@ -401,7 +401,7 @@ func deleteAllKnative(kc *kubectlClient, resourceType string) error {
 	} else {
 		resources := strings.Split(string(resourceList), "\n")
 		for _, resource := range resources {
-			if (len(resource) > 0) {
+			if len(resource) > 0 {
 				args := strings.Fields(resource)
 				delLog, err := kc.kubeCtl.Exec(append([]string{"delete", "-n", args[0], resourceType}, args[1]))
 				fmt.Printf("In namespace \"%s\" %s", args[0], delLog)
