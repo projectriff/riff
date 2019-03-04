@@ -41,20 +41,8 @@ func Function() *cobra.Command {
 	}
 }
 
-// FunctionCreateDefaults contains values for "defaults" or "constants" that
-// can be overridden depending on the actual CLI tool being built.
-type FunctionCreateDefaults struct {
-	LocalBuilder    string // the image for the builder used when building locally
-	DefaultRunImage string // the default for the --run-image flag.
-}
-
-func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults FunctionCreateDefaults) *cobra.Command {
-	createFunctionOptions := core.CreateFunctionOptions{
-		BuildOptions: core.BuildOptions{
-			BuildpackImage: defaults.LocalBuilder,
-			RunImage:       defaults.DefaultRunImage,
-		},
-	}
+func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, packDefaults func() (*core.PackDefaults, error)) *cobra.Command {
+	createFunctionOptions := core.CreateFunctionOptions{}
 
 	command := &cobra.Command{
 		Use:   "create",
@@ -85,6 +73,17 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults
 				createFunctionOptions.Image = fmt.Sprintf("%s/%s", prefix, args[functionCreateFunctionNameIndex])
 			}
 
+			defaults, err := packDefaults()
+			if err != nil {
+				return fmt.Errorf("unable to default build config: %s", err)
+			}
+			if createFunctionOptions.BuildOptions.BuildpackImage == "" {
+				createFunctionOptions.BuildOptions.BuildpackImage = defaults.BuilderImage
+			}
+			if createFunctionOptions.BuildOptions.RunImage == "" {
+				createFunctionOptions.BuildOptions.RunImage = defaults.RunImage
+			}
+
 			return nil
 		},
 		Args: ArgValidationConjunction(
@@ -92,7 +91,7 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults
 			AtPosition(functionCreateFunctionNameIndex, ValidName()),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if defaults.LocalBuilder == "" && createFunctionOptions.LocalPath != "" {
+			if createFunctionOptions.BuildOptions.BuildpackImage == "" && createFunctionOptions.LocalPath != "" {
 				return fmt.Errorf("building from a local path requires that the builder be set. " +
 					"Refer to documentation to set the value in your environment")
 			}

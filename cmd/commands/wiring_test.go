@@ -34,7 +34,14 @@ var _ = Describe("`riff` root command", func() {
 		)
 
 		BeforeEach(func() {
-			rootCommand = CreateAndWireRootCommand(manifests, "projectriff/builder", "packs/run")
+			defaults := func() (*core.PackDefaults, error) {
+				return &core.PackDefaults{
+					BuilderImage: "projectriff/builder",
+					RunImage:     "packs/run",
+				}, nil
+			}
+
+			rootCommand = CreateAndWireRootCommand(manifests, defaults)
 		})
 
 		It("including `riff subscription`", func() {
