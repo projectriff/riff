@@ -64,7 +64,7 @@ var _ = Describe("Function", func() {
 		testService = &v1alpha1.Service{}
 		workDir = test_support.CreateTempDir()
 		mockClientConfig.On("Namespace").Return("default", false, nil)
-		client = core.NewClient(mockClientConfig, nil, nil, mockServing)
+		client = core.NewClient(mockClientConfig, nil, nil, mockServing, nil)
 	})
 
 	AfterEach(func() {
@@ -249,7 +249,7 @@ var _ = Describe("Function", func() {
 								Object: &build.Build{
 									TypeMeta: v1.TypeMeta{
 										APIVersion: "build.knative.dev/v1alpha1",
-										Kind: "Build",
+										Kind:       "Build",
 									},
 									Spec: build.BuildSpec{},
 								},

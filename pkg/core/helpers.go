@@ -23,12 +23,35 @@ import (
 	core_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
 	buildConfigMap        = "riff-build"
 	defaultImagePrefixKey = "default-image-prefix"
 )
+
+type PackConfig struct {
+	BuilderImage string
+	RunImage     string
+}
+
+func (c *client) FetchPackConfig() (*PackConfig, error) {
+	template, err := c.build.BuildV1alpha1().ClusterBuildTemplates().Get("riff-cnb", v1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	config := &PackConfig{}
+	for _, param := range template.Spec.Parameters {
+		switch param.Name {
+		case "BUILDER_IMAGE":
+			config.BuilderImage = *param.Default
+		case "RUN_IMAGE":
+			config.RunImage = *param.Default
+		}
+	}
+	return config, nil
+}
 
 func (c *client) DefaultBuildImagePrefix(namespace string) (string, error) {
 	cm, err := c.buildConfigMap(namespace)
