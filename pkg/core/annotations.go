@@ -29,12 +29,12 @@ func (c *client) bumpNonceAnnotationForRevision(s *v1alpha1.Service) {
 	if annotations == nil {
 		annotations = map[string]string{}
 	}
-	build := annotations[buildAnnotation]
+	build := annotations[nonceAnnotation]
 	i, err := strconv.Atoi(build)
 	if err != nil {
 		i = 0
 	}
-	annotations[buildAnnotation] = strconv.Itoa(i + 1)
+	annotations[nonceAnnotation] = strconv.Itoa(i + 1)
 	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
 }
 
@@ -46,12 +46,12 @@ func (c *client) bumpNonceAnnotationForBuild(s *v1alpha1.Service) {
 		if annotations == nil {
 			annotations = map[string]string{}
 		}
-		nonce := annotations[buildAnnotation]
+		nonce := annotations[nonceAnnotation]
 		i, err := strconv.Atoi(nonce)
 		if err != nil {
 			i = 0
 		}
-		annotations[buildAnnotation] = strconv.Itoa(i + 1)
+		annotations[nonceAnnotation] = strconv.Itoa(i + 1)
 		build.SetAnnotations(annotations)
 		s.Spec.RunLatest.Configuration.Build = &v1alpha1.RawExtension{
 			Object: build,
