@@ -90,7 +90,7 @@ func (c *client) UpdateService(options CreateOrUpdateServiceOptions) (*v1alpha1.
 	existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env = append(existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env, envVars...)
 	existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env = append(existingSvc.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Env, envVarsFrom...)
 
-	c.bumpNonceAnnotationForRevision(existingSvc)
+	c.bumpBuildAnnotationForRevision(existingSvc)
 
 	if !options.DryRun {
 		_, err := c.serving.ServingV1alpha1().Services(ns).Update(existingSvc)

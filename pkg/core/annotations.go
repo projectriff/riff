@@ -24,7 +24,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-func (c *client) bumpNonceAnnotationForRevision(s *v1alpha1.Service) {
+func (c *client) bumpBuildAnnotationForRevision(s *v1alpha1.Service) {
 	annotations := s.Spec.RunLatest.Configuration.RevisionTemplate.Annotations
 	if annotations == nil {
 		annotations = map[string]string{}
@@ -38,7 +38,7 @@ func (c *client) bumpNonceAnnotationForRevision(s *v1alpha1.Service) {
 	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
 }
 
-func (c *client) bumpNonceAnnotationForBuild(s *v1alpha1.Service) {
+func (c *client) bumpBuildAnnotationForBuild(s *v1alpha1.Service) {
 	configurationSpec := s.Spec.RunLatest.Configuration
 	build := getBuild(configurationSpec)
 	if build != nil {
