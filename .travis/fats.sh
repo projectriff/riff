@@ -13,6 +13,9 @@ fats_dir=`dirname "${BASH_SOURCE[0]}"`/fats
 source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $fats_dir
 source $fats_dir/.util.sh
 
+$fats_dir/install.sh kubectl
+$fats_dir/install.sh kail
+
 # install riff-cli
 travis_fold start install-riff
 echo "Installing riff"
