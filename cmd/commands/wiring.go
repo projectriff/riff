@@ -87,7 +87,6 @@ func resolveHomePath(p string) (string, error) {
 func CreateAndWireRootCommand(manifests map[string]*core.Manifest, localBuilder string, defaultRunImage string) *cobra.Command {
 
 	var client core.Client
-	var kc core.KubectlClient
 
 	rootCmd := &cobra.Command{
 		Use:   env.Cli.Name,
@@ -106,14 +105,14 @@ See https://projectriff.io and https://github.com/knative/docs`,
 
 	buildpackBuilder := &buildpackBuilder{}
 	function := Function()
-	installKubeConfigSupport(function, &client, &kc)
+	installKubeConfigSupport(function, &client)
 	function.AddCommand(
 		FunctionCreate(buildpackBuilder, &client, FunctionCreateDefaults{LocalBuilder: localBuilder, DefaultRunImage: defaultRunImage}),
 		FunctionUpdate(buildpackBuilder, &client),
 	)
 
 	service := Service()
-	installKubeConfigSupport(service, &client, &kc)
+	installKubeConfigSupport(service, &client)
 	service.AddCommand(
 		ServiceList(&client),
 		ServiceCreate(&client),
@@ -124,7 +123,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	)
 
 	channel := Channel()
-	installKubeConfigSupport(channel, &client, &kc)
+	installKubeConfigSupport(channel, &client)
 	channel.AddCommand(
 		ChannelList(&client),
 		ChannelCreate(&client),
@@ -132,21 +131,21 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	)
 
 	namespace := Namespace()
-	installKubeConfigSupport(namespace, &client, &kc)
+	installKubeConfigSupport(namespace, &client)
 	namespace.AddCommand(
-		NamespaceInit(manifests, &kc),
-		NamespaceCleanup(&kc),
+		NamespaceInit(manifests, &client),
+		NamespaceCleanup(&client),
 	)
 
 	system := System()
-	installKubeConfigSupport(system, &client, &kc)
+	installKubeConfigSupport(system, &client)
 	system.AddCommand(
-		SystemInstall(manifests, &kc),
-		SystemUninstall(&kc),
+		SystemInstall(manifests, &client),
+		SystemUninstall(&client),
 	)
 
 	subscription := Subscription()
-	installKubeConfigSupport(subscription, &client, &kc)
+	installKubeConfigSupport(subscription, &client)
 	subscription.AddCommand(
 		SubscriptionCreate(&client),
 		SubscriptionDelete(&client),
@@ -185,7 +184,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 // to a kubeconfig configuration. It adds two flags and sets up the PersistentPreRunE function so that it reads
 // those configuration files. Hence, when entering the RunE function of the command, the provided clients (passed by
 // reference here and to the command creation helpers) are correctly initialized.
-func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *core.KubectlClient) {
+func installKubeConfigSupport(command *cobra.Command, client *core.Client) {
 
 	kubeconfig := ""
 	masterURL := ""
@@ -200,12 +199,10 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *c
 		if err != nil {
 			return err
 		}
-		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet)
+		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, kubectl.RealKubeCtl(), kustomize.MakeKustomizer(30*time.Second))
 		if err != nil {
 			return err
 		}
-		*kc = core.NewKubectlClient(*client, kubeClientSet, kubectl.RealKubeCtl(), kustomize.MakeKustomizer(30*time.Second))
-
 		if oldPersistentPreRunE != nil {
 			return oldPersistentPreRunE(cmd, args)
 		}

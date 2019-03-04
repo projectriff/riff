@@ -55,25 +55,25 @@ var (
 	allNameSpaces     = append(knativeNamespaces, istioNamespace)
 )
 
-func (kc *kubectlClient) SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error) {
+func (c *client) SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error) {
 	manifest, err := ResolveManifest(manifests, options.Manifest)
 	if err != nil {
 		return false, err
 	}
 
-	err = ensureNotTerminating(kc, allNameSpaces, "Please try again later.")
+	err = ensureNotTerminating(c, allNameSpaces, "Please try again later.")
 	if err != nil {
 		return false, err
 	}
 
-	istioStatus, err := getNamespaceStatus(kc, istioNamespace)
+	istioStatus, err := getNamespaceStatus(c, istioNamespace)
 	if istioStatus == "'NotFound'" {
 		fmt.Print("Installing Istio components\n")
 		for i, release := range manifest.Istio {
 			if i > 0 {
 				time.Sleep(5 * time.Second) // wait for previous resources to be created
 			}
-			err = kc.applyReleaseWithRetry(release, options)
+			err = c.applyReleaseWithRetry(release, options)
 			if err != nil {
 				return false, err
 			}
@@ -91,14 +91,14 @@ func (kc *kubectlClient) SystemInstall(manifests map[string]*Manifest, options S
 		}
 	}
 
-	err = waitForIstioComponents(kc)
+	err = waitForIstioComponents(c)
 	if err != nil {
 		return false, err
 	}
 
 	fmt.Print("Installing Knative components\n")
 	for _, release := range manifest.Knative {
-		err = kc.applyReleaseWithRetry(release, options)
+		err = c.applyReleaseWithRetry(release, options)
 		if err != nil {
 			return false, err
 		}
@@ -107,14 +107,14 @@ func (kc *kubectlClient) SystemInstall(manifests map[string]*Manifest, options S
 	return true, nil
 }
 
-func (kc *kubectlClient) applyReleaseWithRetry(release string, options SystemInstallOptions) error {
+func (c *client) applyReleaseWithRetry(release string, options SystemInstallOptions) error {
 	err := retry(retryDuration, retrySteps, func() (bool, error) {
-		return kc.applyRelease(release, options, true)
+		return c.applyRelease(release, options, true)
 	})
 
 	if err != nil {
 		// Try again and return the true failure or success.
-		_, err = kc.applyRelease(release, options, false)
+		_, err = c.applyRelease(release, options, false)
 		return err
 	}
 
@@ -135,7 +135,7 @@ func retry(duration time.Duration, steps int, condition func() (done bool, err e
 	return errTimeout
 }
 
-func (kc *kubectlClient) applyRelease(release string, options SystemInstallOptions, willRetry bool) (bool, error) {
+func (c *client) applyRelease(release string, options SystemInstallOptions, willRetry bool) (bool, error) {
 	dir, err := fileutils.Dir(options.Manifest)
 	if err != nil {
 		return false, err // hard error
@@ -148,7 +148,7 @@ func (kc *kubectlClient) applyRelease(release string, options SystemInstallOptio
 		yaml = bytes.Replace(yaml, []byte("type: LoadBalancer"), []byte("type: NodePort"), -1)
 	}
 	fmt.Printf("Applying resources defined in: %s\n", release)
-	istioLog, err := kc.kubeCtl.ExecStdin([]string{"apply", "-f", "-"}, &yaml)
+	istioLog, err := c.kubeCtl.ExecStdin([]string{"apply", "-f", "-"}, &yaml)
 	if err != nil {
 		fmt.Printf("%s\n", istioLog)
 		if strings.Contains(istioLog, "forbidden") {
@@ -174,14 +174,14 @@ To fix this you need to:
 	return true, nil // success
 }
 
-func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, error) {
+func (c *client) SystemUninstall(options SystemUninstallOptions) (bool, error) {
 
-	err := ensureNotTerminating(kc, allNameSpaces, "This would indicate that the system was already uninstalled.")
+	err := ensureNotTerminating(c, allNameSpaces, "This would indicate that the system was already uninstalled.")
 	if err != nil {
 		return false, err
 	}
-	knativeNsCount, err := checkNamespacesExists(kc, knativeNamespaces)
-	istioNsCount, err := checkNamespacesExists(kc, []string{istioNamespace})
+	knativeNsCount, err := checkNamespacesExists(c, knativeNamespaces)
+	istioNsCount, err := checkNamespacesExists(c, []string{istioNamespace})
 	if err != nil {
 		return false, err
 	}
@@ -197,43 +197,43 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 				return false, nil
 			}
 		}
-		err = deleteKnativeServices(kc)
+		err = deleteKnativeServices(c)
 		if err != nil {
 			return false, err
 		}
 		fmt.Print("Removing Knative for " + env.Cli.Name + " components\n")
-		err = deleteCrds(kc, "knative.dev")
+		err = deleteCrds(c, "knative.dev")
 		if err != nil {
 			return false, err
 		}
-		err = deleteClusterResources(kc, "clusterrolebinding", "knative-")
+		err = deleteClusterResources(c, "clusterrolebinding", "knative-")
 		if err != nil {
 			return false, err
 		}
-		err = deleteClusterResources(kc, "clusterrolebinding", "build-controller-")
+		err = deleteClusterResources(c, "clusterrolebinding", "build-controller-")
 		if err != nil {
 			return false, err
 		}
-		err = deleteClusterResources(kc, "clusterrolebinding", "eventing-controller-")
+		err = deleteClusterResources(c, "clusterrolebinding", "eventing-controller-")
 		if err != nil {
 			return false, err
 		}
-		err = deleteClusterResources(kc, "clusterrolebinding", "in-memory-channel-")
+		err = deleteClusterResources(c, "clusterrolebinding", "in-memory-channel-")
 		if err != nil {
 			return false, err
 		}
-		err = deleteClusterResources(kc, "clusterrole", "in-memory-channel-")
+		err = deleteClusterResources(c, "clusterrole", "in-memory-channel-")
 		if err != nil {
 			return false, err
 		}
-		err = deleteClusterResources(kc, "clusterrole", "knative-")
+		err = deleteClusterResources(c, "clusterrole", "knative-")
 		if err != nil {
 			return false, err
 		}
-		deleteSingleResource(kc, "service", "knative-ingressgateway", "istio-system")
-		deleteSingleResource(kc, "horizontalpodautoscaler", "knative-ingressgateway", "istio-system")
-		deleteSingleResource(kc, "deployment", "knative-ingressgateway", "istio-system")
-		err = deleteNamespaces(kc, knativeNamespaces)
+		deleteSingleResource(c, "service", "knative-ingressgateway", "istio-system")
+		deleteSingleResource(c, "horizontalpodautoscaler", "knative-ingressgateway", "istio-system")
+		deleteSingleResource(c, "deployment", "knative-ingressgateway", "istio-system")
+		err = deleteNamespaces(c, knativeNamespaces)
 		if err != nil {
 			return false, err
 		}
@@ -254,23 +254,23 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 			}
 		}
 		fmt.Print("Removing Istio components\n")
-		err = deleteCrds(kc, "istio.io")
+		err = deleteCrds(c, "istio.io")
 		if err != nil {
 			return false, err
 		}
-		err = deleteClusterResources(kc, "clusterrolebinding", "istio-")
+		err = deleteClusterResources(c, "clusterrolebinding", "istio-")
 		if err != nil {
 			return false, err
 		}
-		err = deleteClusterResources(kc, "clusterrole", "istio-")
+		err = deleteClusterResources(c, "clusterrole", "istio-")
 		if err != nil {
 			return false, err
 		}
-		err = deleteClusterResources(kc, "mutatingwebhookconfiguration", "istio-")
+		err = deleteClusterResources(c, "mutatingwebhookconfiguration", "istio-")
 		if err != nil {
 			return false, err
 		}
-		err = deleteNamespaces(kc, []string{istioNamespace})
+		err = deleteNamespaces(c, []string{istioNamespace})
 		if err != nil {
 			return false, err
 		}
@@ -278,12 +278,12 @@ func (kc *kubectlClient) SystemUninstall(options SystemUninstallOptions) (bool, 
 	return true, nil
 }
 
-func waitForIstioComponents(kc *kubectlClient) error {
+func waitForIstioComponents(c *client) error {
 	fmt.Print("Waiting for the Istio components to start ")
 	for i := 0; i < 36; i++ {
 		time.Sleep(10 * time.Second) // wait for them to start
 		fmt.Print(".")
-		pods := kc.kubeClient.CoreV1().Pods(istioNamespace)
+		pods := c.kubeClient.CoreV1().Pods(istioNamespace)
 		podList, err := pods.List(metav1.ListOptions{})
 		if err != nil {
 			return err
@@ -320,10 +320,10 @@ func waitForIstioComponents(kc *kubectlClient) error {
 	return errors.New("the Istio components did not start in time")
 }
 
-func deleteNamespaces(kc *kubectlClient, namespaces []string) error {
+func deleteNamespaces(c *client, namespaces []string) error {
 	for _, namespace := range namespaces {
 		fmt.Printf("Deleting resources defined in: %s\n", namespace)
-		deleteLog, err := kc.kubeCtl.Exec([]string{"delete", "namespace", namespace})
+		deleteLog, err := c.kubeCtl.Exec([]string{"delete", "namespace", namespace})
 		if err != nil {
 			if strings.Contains(deleteLog, "NotFound") {
 				fmt.Printf("Namespace \"%s\" was not found\n", namespace)
@@ -335,15 +335,15 @@ func deleteNamespaces(kc *kubectlClient, namespaces []string) error {
 	return nil
 }
 
-func deleteSingleResource(kc *kubectlClient, resourceType string, name string, namespace string) error {
+func deleteSingleResource(c *client, resourceType string, name string, namespace string) error {
 	var err error
 	var deleteLog string
 	if namespace == "" {
 		fmt.Printf("Deleting %s/%s resource\n", resourceType, name)
-		deleteLog, err = kc.kubeCtl.Exec([]string{"delete", resourceType, name})
+		deleteLog, err = c.kubeCtl.Exec([]string{"delete", resourceType, name})
 	} else {
 		fmt.Printf("Deleting %s/%s resource in %s\n", resourceType, name, namespace)
-		deleteLog, err = kc.kubeCtl.Exec([]string{"delete", "-n", namespace, resourceType, name})
+		deleteLog, err = c.kubeCtl.Exec([]string{"delete", "-n", namespace, resourceType, name})
 	}
 	if err != nil {
 		if !strings.Contains(deleteLog, "NotFound") {
@@ -353,9 +353,9 @@ func deleteSingleResource(kc *kubectlClient, resourceType string, name string, n
 	return err
 }
 
-func deleteClusterResources(kc *kubectlClient, resourceType string, prefix string) error {
+func deleteClusterResources(c *client, resourceType string, prefix string) error {
 	fmt.Printf("Deleting %ss prefixed with %s\n", resourceType, prefix)
-	resourceList, err := kc.kubeCtl.Exec([]string{"get", resourceType, "-ocustom-columns=name:metadata.name"})
+	resourceList, err := c.kubeCtl.Exec([]string{"get", resourceType, "-ocustom-columns=name:metadata.name"})
 	if err != nil {
 		return err
 	}
@@ -367,7 +367,7 @@ func deleteClusterResources(kc *kubectlClient, resourceType string, prefix strin
 		}
 	}
 	if len(resourcesToDelete) > 0 {
-		resourceLog, err := kc.kubeCtl.Exec(append([]string{"delete", resourceType}, resourcesToDelete...))
+		resourceLog, err := c.kubeCtl.Exec(append([]string{"delete", resourceType}, resourcesToDelete...))
 		if err != nil {
 			fmt.Printf("%s", resourceLog)
 			return err
@@ -376,25 +376,25 @@ func deleteClusterResources(kc *kubectlClient, resourceType string, prefix strin
 	return nil
 }
 
-func deleteKnativeServices(kc *kubectlClient) error {
+func deleteKnativeServices(c *client) error {
 	fmt.Printf("Deleting Knative services\n")
-	err := deleteAllKnative(kc, "service.serving.knative.dev")
+	err := deleteAllKnative(c, "service.serving.knative.dev")
 	if err != nil {
 		return err
 	}
-	err = deleteAllKnative(kc, "configuration.serving.knative.dev")
+	err = deleteAllKnative(c, "configuration.serving.knative.dev")
 	if err != nil {
 		return err
 	}
-	err = deleteAllKnative(kc, "route.serving.knative.dev")
+	err = deleteAllKnative(c, "route.serving.knative.dev")
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func deleteAllKnative(kc *kubectlClient, resourceType string) error {
-	resourceList, err := kc.kubeCtl.Exec([]string{"get", resourceType, "--all-namespaces", "-ocustom-columns=ns:metadata.namespace,name:metadata.name", "--no-headers=true"})
+func deleteAllKnative(c *client, resourceType string) error {
+	resourceList, err := c.kubeCtl.Exec([]string{"get", resourceType, "--all-namespaces", "-ocustom-columns=ns:metadata.namespace,name:metadata.name", "--no-headers=true"})
 	if err != nil {
 		fmt.Printf("Error while getting %s in all namespaces: %v\n", resourceType, err)
 		fmt.Printf("The system seems to be in an unstable state!\n")
@@ -403,7 +403,7 @@ func deleteAllKnative(kc *kubectlClient, resourceType string) error {
 		for _, resource := range resources {
 			if len(resource) > 0 {
 				args := strings.Fields(resource)
-				delLog, err := kc.kubeCtl.Exec(append([]string{"delete", "-n", args[0], resourceType}, args[1]))
+				delLog, err := c.kubeCtl.Exec(append([]string{"delete", "-n", args[0], resourceType}, args[1]))
 				fmt.Printf("In namespace \"%s\" %s", args[0], delLog)
 				if err != nil {
 					return err
@@ -414,9 +414,9 @@ func deleteAllKnative(kc *kubectlClient, resourceType string) error {
 	return nil
 }
 
-func deleteCrds(kc *kubectlClient, suffix string) error {
+func deleteCrds(c *client, suffix string) error {
 	fmt.Printf("Deleting CRDs for %s\n", suffix)
-	crdList, err := kc.kubeCtl.Exec([]string{"get", "customresourcedefinitions", "-ocustom-columns=name:metadata.name", "--no-headers=true"})
+	crdList, err := c.kubeCtl.Exec([]string{"get", "customresourcedefinitions", "-ocustom-columns=name:metadata.name", "--no-headers=true"})
 	if err != nil {
 		return err
 	}
@@ -428,7 +428,7 @@ func deleteCrds(kc *kubectlClient, suffix string) error {
 		}
 	}
 	if len(crdsToDelete) > 0 {
-		crdLog, err := kc.kubeCtl.Exec(append([]string{"delete", "customresourcedefinition"}, crdsToDelete...))
+		crdLog, err := c.kubeCtl.Exec(append([]string{"delete", "customresourcedefinition"}, crdsToDelete...))
 		if err != nil {
 			fmt.Printf("%s", crdLog)
 			return err
@@ -437,10 +437,10 @@ func deleteCrds(kc *kubectlClient, suffix string) error {
 	return nil
 }
 
-func checkNamespacesExists(kc *kubectlClient, names []string) (int, error) {
+func checkNamespacesExists(c *client, names []string) (int, error) {
 	count := 0
 	for _, name := range names {
-		status, err := getNamespaceStatus(kc, name)
+		status, err := getNamespaceStatus(c, name)
 		if err != nil {
 			return count, err
 		}
@@ -451,9 +451,9 @@ func checkNamespacesExists(kc *kubectlClient, names []string) (int, error) {
 	return count, nil
 }
 
-func ensureNotTerminating(kc *kubectlClient, names []string, message string) error {
+func ensureNotTerminating(c *client, names []string, message string) error {
 	for _, name := range names {
-		status, err := getNamespaceStatus(kc, name)
+		status, err := getNamespaceStatus(c, name)
 		if err != nil {
 			return err
 		}
@@ -464,8 +464,8 @@ func ensureNotTerminating(kc *kubectlClient, names []string, message string) err
 	return nil
 }
 
-func getNamespaceStatus(kc *kubectlClient, name string) (string, error) {
-	nsLog, err := kc.kubeCtl.Exec([]string{"get", "namespace", name, "-o", "jsonpath='{.status.phase}'"})
+func getNamespaceStatus(c *client, name string) (string, error) {
+	nsLog, err := c.kubeCtl.Exec([]string{"get", "namespace", name, "-o", "jsonpath='{.status.phase}'"})
 	if err != nil {
 		if strings.Contains(nsLog, "NotFound") {
 			return "'NotFound'", nil
