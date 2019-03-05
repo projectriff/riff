@@ -31,17 +31,17 @@ const (
 	defaultImagePrefixKey = "default-image-prefix"
 )
 
-type PackDefaults struct {
+type PackConfig struct {
 	BuilderImage string
 	RunImage     string
 }
 
-func (c *client) FetchPackDefaults() (*PackDefaults, error) {
+func (c *client) FetchPackConfig() (*PackConfig, error) {
 	template, err := c.build.BuildV1alpha1().ClusterBuildTemplates().Get("riff-cnb", v1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
-	config := &PackDefaults{}
+	config := &PackConfig{}
 	for _, param := range template.Spec.Parameters {
 		switch param.Name {
 		case "BUILDER_IMAGE":

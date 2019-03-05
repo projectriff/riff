@@ -45,13 +45,7 @@ var _ = Describe("The riff function create command", func() {
 			client = new(mocks.Client)
 			builder = nil
 			asMock = client.(*mocks.Client)
-			defaults := func() (*core.PackDefaults, error) {
-				return &core.PackDefaults{
-					BuilderImage: "projectriff/builder",
-					RunImage:     "packs/run",
-				}, nil
-			}
-
+			defaults := commands.FunctionCreateDefaults{LocalBuilder: "projectriff/builder", DefaultRunImage: "packs/run"}
 			fc = commands.FunctionCreate(builder, &client, defaults)
 		})
 		AfterEach(func() {
@@ -94,12 +88,7 @@ var _ = Describe("The riff function create command", func() {
 			builder = new(mockbuilder.Builder)
 			client = new(mocks.Client)
 			asMock = client.(*mocks.Client)
-			defaults := func() (*core.PackDefaults, error) {
-				return &core.PackDefaults{
-					BuilderImage: "projectriff/builder",
-					RunImage:     "packs/run",
-				}, nil
-			}
+			defaults := commands.FunctionCreateDefaults{LocalBuilder: "projectriff/builder", DefaultRunImage: "packs/run"}
 
 			fc = commands.FunctionCreate(builder, &client, defaults)
 		})

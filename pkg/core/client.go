@@ -50,7 +50,7 @@ type Client interface {
 	ServiceCoordinates(options ServiceInvokeOptions) (ingressIP string, hostName string, err error)
 
 	// helpers
-	FetchPackDefaults() (*PackDefaults, error)
+	FetchPackConfig() (*PackConfig, error)
 	DefaultBuildImagePrefix(namespace string) (string, error)
 	SetDefaultBuildImagePrefix(namespace, prefix string) error
 }

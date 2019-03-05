@@ -83,12 +83,7 @@ var (
 
 func main() {
 
-	root := commands.CreateAndWireRootCommand(manifests, func() (*core.PackDefaults, error) {
-		return &core.PackDefaults{
-			BuilderImage: builder,
-			RunImage:     defaultRunImage,
-		}, nil
-	})
+	root := commands.CreateAndWireRootCommand(manifests, builder, defaultRunImage)
 
 	sub, err := root.ExecuteC()
 	if err != nil {

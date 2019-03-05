@@ -179,16 +179,16 @@ func (_m *Client) DeleteSubscription(options core.DeleteSubscriptionOptions) err
 	return r0
 }
 
-// FetchPackDefaults provides a mock function with given fields:
-func (_m *Client) FetchPackDefaults() (*core.PackDefaults, error) {
+// FetchPackConfig provides a mock function with given fields:
+func (_m *Client) FetchPackConfig() (*core.PackConfig, error) {
 	ret := _m.Called()
 
-	var r0 *core.PackDefaults
-	if rf, ok := ret.Get(0).(func() *core.PackDefaults); ok {
+	var r0 *core.PackConfig
+	if rf, ok := ret.Get(0).(func() *core.PackConfig); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*core.PackDefaults)
+			r0 = ret.Get(0).(*core.PackConfig)
 		}
 	}
 
