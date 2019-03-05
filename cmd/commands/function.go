@@ -34,6 +34,10 @@ const (
 	functionUpdateNumberOfArgs
 )
 
+const (
+	functionBuildNumberOfArgs = iota
+)
+
 func Function() *cobra.Command {
 	return &cobra.Command{
 		Use:   "function",
@@ -41,18 +45,18 @@ func Function() *cobra.Command {
 	}
 }
 
-// FunctionCreateDefaults contains values for "defaults" or "constants" that
+// PackDefaults contains values for "defaults" or "constants" that
 // can be overridden depending on the actual CLI tool being built.
-type FunctionCreateDefaults struct {
-	LocalBuilder    string // the image for the builder used when building locally
-	DefaultRunImage string // the default for the --run-image flag.
+type PackDefaults struct {
+	BuilderImage string
+	RunImage     string
 }
 
-func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults FunctionCreateDefaults) *cobra.Command {
+func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults PackDefaults) *cobra.Command {
 	createFunctionOptions := core.CreateFunctionOptions{
 		BuildOptions: core.BuildOptions{
-			BuildpackImage: defaults.LocalBuilder,
-			RunImage:       defaults.DefaultRunImage,
+			BuildpackImage: defaults.BuilderImage,
+			RunImage:       defaults.RunImage,
 		},
 	}
 
@@ -92,7 +96,7 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults
 			AtPosition(functionCreateFunctionNameIndex, ValidName()),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if defaults.LocalBuilder == "" && createFunctionOptions.LocalPath != "" {
+			if defaults.BuilderImage == "" && createFunctionOptions.LocalPath != "" {
 				return fmt.Errorf("building from a local path requires that the builder be set. " +
 					"Refer to documentation to set the value in your environment")
 			}
@@ -181,6 +185,46 @@ func FunctionUpdate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.C
 	command.Flags().StringVarP(&updateFunctionOptions.LocalPath, "local-path", "l", "", "path to local source to build the image from; only build-pack builds are supported at this time")
 	command.Flags().BoolVarP(&updateFunctionOptions.Verbose, "verbose", "v", false, verboseUsage)
 	command.Flags().BoolVarP(&updateFunctionOptions.Wait, "wait", "w", false, waitUsage)
+
+	return command
+}
+
+func FunctionBuild(buildpackBuilder core.Builder, fcTool *core.Client, defaults PackDefaults) *cobra.Command {
+	buildFunctionOptions := core.BuildFunctionOptions{
+		BuildOptions: core.BuildOptions{
+			BuildpackImage: defaults.BuilderImage,
+			RunImage:       defaults.RunImage,
+		},
+	}
+
+	command := &cobra.Command{
+		Use:   "build",
+		Short: "Build a function container from local source",
+		Args:  cobra.ExactArgs(functionBuildNumberOfArgs),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if defaults.BuilderImage == "" && buildFunctionOptions.LocalPath != "" {
+				return fmt.Errorf("building from a local path requires that the builder be set. " +
+					"Refer to documentation to set the value in your environment")
+			}
+
+			err := (*fcTool).BuildFunction(buildpackBuilder, buildFunctionOptions, cmd.OutOrStdout())
+			if err != nil {
+				return err
+			}
+
+			PrintSuccessfulCompletion(cmd)
+
+			return nil
+		},
+	}
+
+	command.Flags().StringVar(&buildFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
+	command.MarkFlagRequired("image")
+	command.Flags().StringVar(&buildFunctionOptions.Invoker, "invoker", "", "invoker runtime to override `language` detected by buildpack")
+	command.Flags().StringVarP(&buildFunctionOptions.LocalPath, "local-path", "l", "", "`path` to local source to build the image from; only build-pack builds are supported at this time")
+	command.MarkFlagRequired("local-path")
+	command.Flags().StringVar(&buildFunctionOptions.Handler, "handler", "", "the name of the `method or class` to invoke, depending on the invoker used")
+	command.Flags().StringVar(&buildFunctionOptions.Artifact, "artifact", "", "`path` to the function source code or jar file; auto-detected if not specified")
 
 	return command
 }

@@ -34,6 +34,7 @@ import (
 type Client interface {
 	CreateFunction(builder Builder, options CreateFunctionOptions, log io.Writer) (*serving.Service, *corev1.PersistentVolumeClaim, error)
 	UpdateFunction(builder Builder, options UpdateFunctionOptions, log io.Writer) error
+	BuildFunction(builder Builder, options BuildFunctionOptions, log io.Writer) error
 
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
 	DeleteSubscription(options DeleteSubscriptionOptions) error

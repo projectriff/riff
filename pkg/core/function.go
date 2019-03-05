@@ -38,7 +38,7 @@ import (
 	"github.com/projectriff/riff/pkg/env"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -589,18 +589,34 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 	return nil
 }
 
+type BuildFunctionOptions struct {
+	BuildOptions
+
+	Image string
+}
+
+func (c *client) BuildFunction(buildpackBuilder Builder, options BuildFunctionOptions, log io.Writer) error {
+	return doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions)
+}
+
 func doBuildLocally(builder Builder, image string, options BuildOptions) error {
+	return doLocally(options, func() error {
+		return builder.Build(options.LocalPath, options.BuildpackImage, options.RunImage, image)
+	})
+}
+
+func doLocally(options BuildOptions, doer func() error) error {
 	if err := writeRiffToml(options); err != nil {
 		return err
 	}
 	defer func() { _ = deleteRiffToml(options) }()
 	if options.BuildpackImage == "" {
-		return fmt.Errorf("unable to build function locally: buildpack image not specified")
+		return fmt.Errorf("unable to do locally: buildpack image not specified")
 	}
 	if options.RunImage == "" {
-		return fmt.Errorf("unable to build function locally: run image not specified")
+		return fmt.Errorf("unable to do locally: run image not specified")
 	}
-	return builder.Build(options.LocalPath, options.BuildpackImage, options.RunImage, image)
+	return doer()
 }
 
 func writeRiffToml(options BuildOptions) error {
