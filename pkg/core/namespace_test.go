@@ -29,7 +29,6 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 	"github.com/projectriff/riff/pkg/core"
 	mockkustomize "github.com/projectriff/riff/pkg/core/kustomize/mocks"
-	core_mocks "github.com/projectriff/riff/pkg/core/mocks"
 	"github.com/projectriff/riff/pkg/core/vendor_mocks"
 	"github.com/projectriff/riff/pkg/env"
 	mockkubectl "github.com/projectriff/riff/pkg/kubectl/mocks"
@@ -41,13 +40,13 @@ import (
 var _ = Describe("namespace", func() {
 
 	var (
-		kubectlClient              core.KubectlClient
+		client                     core.Client
 		kubeClient                 *vendor_mocks.Interface
 		kubeCtl                    *mockkubectl.KubeCtl
-		mockClient                 *core_mocks.Client
 		mockCore                   *vendor_mocks.CoreV1Interface
 		mockNamespaces             *vendor_mocks.NamespaceInterface
 		mockServiceAccounts        *vendor_mocks.ServiceAccountInterface
+		mockConfigMaps             *vendor_mocks.ConfigMapInterface
 		mockSecrets                *vendor_mocks.SecretInterface
 		mockPersistentVolumeClaims *vendor_mocks.PersistentVolumeClaimInterface
 		mockKustomizer             *mockkustomize.Kustomizer
@@ -57,10 +56,10 @@ var _ = Describe("namespace", func() {
 	JustBeforeEach(func() {
 		kubeClient = new(vendor_mocks.Interface)
 		kubeCtl = new(mockkubectl.KubeCtl)
-		mockClient = new(core_mocks.Client)
 		mockCore = new(vendor_mocks.CoreV1Interface)
 		mockNamespaces = new(vendor_mocks.NamespaceInterface)
 		mockServiceAccounts = new(vendor_mocks.ServiceAccountInterface)
+		mockConfigMaps = new(vendor_mocks.ConfigMapInterface)
 		mockSecrets = new(vendor_mocks.SecretInterface)
 		mockPersistentVolumeClaims = new(vendor_mocks.PersistentVolumeClaimInterface)
 		mockKustomizer = new(mockkustomize.Kustomizer)
@@ -69,10 +68,11 @@ var _ = Describe("namespace", func() {
 		kubeClient.On("CoreV1").Return(mockCore)
 		mockCore.On("Namespaces").Return(mockNamespaces)
 		mockCore.On("ServiceAccounts", mock.Anything).Return(mockServiceAccounts)
+		mockCore.On("ConfigMaps", mock.Anything).Return(mockConfigMaps)
 		mockCore.On("Secrets", mock.Anything).Return(mockSecrets)
 		mockCore.On("PersistentVolumeClaims", mock.Anything).Return(mockPersistentVolumeClaims)
 
-		kubectlClient = core.NewKubectlClient(mockClient, kubeClient, kubeCtl, mockKustomizer)
+		client = core.NewClient(nil, kubeClient, nil, nil, nil, kubeCtl, mockKustomizer)
 	})
 
 	AfterEach(func() {
@@ -86,7 +86,7 @@ var _ = Describe("namespace", func() {
 
 		It("should fail on wrong manifest", func() {
 			options := core.NamespaceInitOptions{Manifest: "wrong"}
-			err := kubectlClient.NamespaceInit(manifests, options)
+			err := client.NamespaceInit(manifests, options)
 			Expect(err).To(MatchError(ContainSubstring("wrong: "))) // error message is quite different on Windows and macOS
 		})
 
@@ -108,7 +108,7 @@ var _ = Describe("namespace", func() {
 			}
 			mockServiceAccounts.On("Create", mock.MatchedBy(namedAndLabelled(core.BuildServiceAccountName, labels))).Return(serviceAccount, nil)
 
-			err := kubectlClient.NamespaceInit(manifests, options)
+			err := client.NamespaceInit(manifests, options)
 
 			Expect(err).To(Not(HaveOccurred()))
 		})
@@ -146,9 +146,11 @@ var _ = Describe("namespace", func() {
 				})))
 			}).Return(serviceAccount, nil)
 
-			mockClient.On("SetDefaultBuildImagePrefix", "foo", "gcr.io/gcp-project-id").Return(nil)
+			configMap := &v1.ConfigMap{}
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
+			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig("gcr.io/gcp-project-id"))).Return(configMap, nil)
 
-			err := kubectlClient.NamespaceInit(manifests, options)
+			err := client.NamespaceInit(manifests, options)
 			Expect(err).To(Not(HaveOccurred()))
 		})
 
@@ -199,9 +201,11 @@ var _ = Describe("namespace", func() {
 					})))
 				}).Return(serviceAccount, nil)
 
-				mockClient.On("SetDefaultBuildImagePrefix", "foo", "docker.io/roger").Return(nil)
+				configMap := &v1.ConfigMap{}
+				mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
+				mockConfigMaps.On("Create", mock.MatchedBy(buildConfig("docker.io/roger"))).Return(configMap, nil)
 
-				err := kubectlClient.NamespaceInit(manifests, options)
+				err := client.NamespaceInit(manifests, options)
 				Expect(err).To(Not(HaveOccurred()))
 			})
 		})
@@ -256,7 +260,7 @@ var _ = Describe("namespace", func() {
 					})))
 				}).Return(serviceAccount, nil)
 
-				err := kubectlClient.NamespaceInit(manifests, options)
+				err := client.NamespaceInit(manifests, options)
 				Expect(err).To(Not(HaveOccurred()))
 			})
 		})
@@ -275,7 +279,7 @@ var _ = Describe("namespace", func() {
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
 			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
 
-			err := kubectlClient.NamespaceInit(manifests, options)
+			err := client.NamespaceInit(manifests, options)
 			Expect(err).To(Not(HaveOccurred()))
 		})
 
@@ -294,9 +298,11 @@ var _ = Describe("namespace", func() {
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
 			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
 
-			mockClient.On("SetDefaultBuildImagePrefix", "foo", "registry.example.com").Return(nil)
+			configMap := &v1.ConfigMap{}
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
+			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig("registry.example.com"))).Return(configMap, nil)
 
-			err := kubectlClient.NamespaceInit(manifests, options)
+			err := client.NamespaceInit(manifests, options)
 			Expect(err).To(Not(HaveOccurred()))
 		})
 
@@ -324,7 +330,7 @@ var _ = Describe("namespace", func() {
 			kubeCtl.On("ExecStdin", []string{"apply", "-n", "foo", "-f", "-"}, &customizedResourceContents).
 				Return("done!", nil)
 
-			err := kubectlClient.NamespaceInit(manifests, options)
+			err := client.NamespaceInit(manifests, options)
 
 			Expect(err).To(Not(HaveOccurred()))
 		})
@@ -351,7 +357,7 @@ var _ = Describe("namespace", func() {
 				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
 				Return(nil, expectedError)
 
-			err := kubectlClient.NamespaceInit(manifests, options)
+			err := client.NamespaceInit(manifests, options)
 
 			Expect(err).To(MatchError(expectedError))
 		})
@@ -380,7 +386,7 @@ var _ = Describe("namespace", func() {
 			kubeCtl.On("ExecStdin", []string{"apply", "-n", "foo", "-f", "-"}, mock.Anything).
 				Return("done!", nil)
 
-			err := kubectlClient.NamespaceInit(manifests, options)
+			err := client.NamespaceInit(manifests, options)
 			Expect(err).To(Not(HaveOccurred()))
 		})
 	})
@@ -405,7 +411,7 @@ var _ = Describe("namespace", func() {
 			expectedError := fmt.Errorf("SA list failed")
 			mockServiceAccounts.On("List", expectedListOptions).Return(nil, expectedError)
 
-			err := kubectlClient.NamespaceCleanup(options)
+			err := client.NamespaceCleanup(options)
 
 			Expect(err).To(MatchError(expectedError))
 		})
@@ -417,7 +423,7 @@ var _ = Describe("namespace", func() {
 			expectedError := fmt.Errorf("SA deletion failed")
 			mockServiceAccounts.On("Delete", core.BuildServiceAccountName, mock.Anything).Return(expectedError)
 
-			err := kubectlClient.NamespaceCleanup(options)
+			err := client.NamespaceCleanup(options)
 
 			Expect(err).To(MatchError(fmt.Sprintf("Unable to delete service account %s: %s", core.BuildServiceAccountName, expectedError.Error())))
 		})
@@ -430,7 +436,7 @@ var _ = Describe("namespace", func() {
 			expectedError := fmt.Errorf("PVC list failed")
 			mockPersistentVolumeClaims.On("List", expectedListOptions).Return(nil, expectedError)
 
-			err := kubectlClient.NamespaceCleanup(options)
+			err := client.NamespaceCleanup(options)
 
 			Expect(err).To(MatchError(expectedError))
 		})
@@ -447,7 +453,7 @@ var _ = Describe("namespace", func() {
 			expectedError := fmt.Errorf("PVC deletion failed")
 			mockPersistentVolumeClaims.On("Delete", pvcName, mock.Anything).Return(expectedError)
 
-			err := kubectlClient.NamespaceCleanup(options)
+			err := client.NamespaceCleanup(options)
 
 			Expect(err).To(MatchError(fmt.Sprintf("Unable to delete persistent volume claim %s: %s", pvcName, expectedError.Error())))
 		})
@@ -465,7 +471,7 @@ var _ = Describe("namespace", func() {
 			expectedError := fmt.Errorf("secret deletion failed")
 			mockSecrets.On("List", expectedListOptions).Return(nil, expectedError)
 
-			err := kubectlClient.NamespaceCleanup(options)
+			err := client.NamespaceCleanup(options)
 
 			Expect(err).To(MatchError(expectedError))
 		})
@@ -487,7 +493,7 @@ var _ = Describe("namespace", func() {
 			expectedError := fmt.Errorf("secret deletion failed")
 			mockSecrets.On("Delete", secretName, mock.Anything).Return(expectedError)
 
-			err := kubectlClient.NamespaceCleanup(options)
+			err := client.NamespaceCleanup(options)
 
 			Expect(err).To(MatchError(fmt.Sprintf("Unable to delete secret %s: %s", secretName, expectedError.Error())))
 		})
@@ -511,7 +517,7 @@ var _ = Describe("namespace", func() {
 			expectedError := fmt.Errorf("namespace deletion failed")
 			mockNamespaces.On("Delete", namespace, mock.Anything).Return(expectedError)
 
-			err := kubectlClient.NamespaceCleanup(options)
+			err := client.NamespaceCleanup(options)
 
 			Expect(err).To(MatchError(expectedError))
 		})
@@ -532,7 +538,7 @@ var _ = Describe("namespace", func() {
 			}, nil)
 			mockSecrets.On("Delete", secretName, mock.Anything).Return(nil)
 
-			err := kubectlClient.NamespaceCleanup(options)
+			err := client.NamespaceCleanup(options)
 
 			Expect(err).To(BeNil())
 		})
@@ -555,7 +561,7 @@ var _ = Describe("namespace", func() {
 			mockSecrets.On("Delete", secretName, mock.Anything).Return(nil)
 			mockNamespaces.On("Delete", namespace, mock.Anything).Return(nil)
 
-			err := kubectlClient.NamespaceCleanup(options)
+			err := client.NamespaceCleanup(options)
 
 			Expect(err).To(BeNil())
 		})
@@ -571,6 +577,12 @@ func namedAndLabelled(name string, labels map[string]string) func(sa *v1.Service
 func named(name string) func(sa *v1.ServiceAccount) bool {
 	return func(sa *v1.ServiceAccount) bool {
 		return sa.Name == name
+	}
+}
+
+func buildConfig(prefix string) func(cm *v1.ConfigMap) bool {
+	return func(cm *v1.ConfigMap) bool {
+		return cm.Data[core.DefaultImagePrefixKey] == prefix
 	}
 }
 

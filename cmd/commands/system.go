@@ -41,7 +41,7 @@ func System() *cobra.Command {
 	}
 }
 
-func SystemInstall(manifests map[string]*core.Manifest, kc *core.KubectlClient) *cobra.Command {
+func SystemInstall(manifests map[string]*core.Manifest, c *core.Client) *cobra.Command {
 	options := core.SystemInstallOptions{}
 
 	var namedManifests []string
@@ -73,7 +73,7 @@ func SystemInstall(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 			"\nNote: relative file paths or http/https URLs may be used in the manifest.",
 		Args: cobra.ExactArgs(systemInstallNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			complete, err := (*kc).SystemInstall(manifests, options)
+			complete, err := (*c).SystemInstall(manifests, options)
 			if err != nil {
 				return err
 			}
@@ -101,7 +101,7 @@ func SystemInstall(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 	return command
 }
 
-func SystemUninstall(kc *core.KubectlClient) *cobra.Command {
+func SystemUninstall(c *core.Client) *cobra.Command {
 	options := core.SystemUninstallOptions{}
 
 	command := &cobra.Command{
@@ -111,7 +111,7 @@ func SystemUninstall(kc *core.KubectlClient) *cobra.Command {
 		Example: `  ` + env.Cli.Name + ` system uninstall`,
 		Args:    cobra.ExactArgs(systemUninstallNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			complete, err := (*kc).SystemUninstall(options)
+			complete, err := (*c).SystemUninstall(options)
 			if err != nil {
 				return err
 			}

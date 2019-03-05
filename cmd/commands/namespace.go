@@ -43,7 +43,7 @@ const (
 	namespaceCleanupNumberOfArgs
 )
 
-func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) *cobra.Command {
+func NamespaceInit(manifests map[string]*core.Manifest, c *core.Client) *cobra.Command {
 	options := core.NamespaceInitOptions{}
 
 	var namedManifests []string
@@ -78,7 +78,7 @@ func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			nsName := args[channelCreateNameIndex]
 			options.NamespaceName = nsName
-			err := (*kc).NamespaceInit(manifests, options)
+			err := (*c).NamespaceInit(manifests, options)
 			if err != nil {
 				return err
 			}
@@ -110,7 +110,7 @@ func NamespaceInit(manifests map[string]*core.Manifest, kc *core.KubectlClient) 
 	return command
 }
 
-func NamespaceCleanup(kc *core.KubectlClient) *cobra.Command {
+func NamespaceCleanup(c *core.Client) *cobra.Command {
 	options := core.NamespaceCleanupOptions{}
 
 	command := &cobra.Command{
@@ -128,7 +128,7 @@ func NamespaceCleanup(kc *core.KubectlClient) *cobra.Command {
 			if options.NamespaceName == "default" && options.RemoveNamespace {
 				return fmt.Errorf("cleanup canceled: the default namespace cannot be removed")
 			}
-			if err := (*kc).NamespaceCleanup(options); err != nil {
+			if err := (*c).NamespaceCleanup(options); err != nil {
 				return err
 			}
 

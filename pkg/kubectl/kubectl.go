@@ -30,18 +30,33 @@ type KubeCtl interface {
 // processKubeCtl interacts with kubernetes by spawning a process and running the kubectl
 // command line tool.
 type processKubeCtl struct {
+	configLocation        string
+	serverAddressOverride string
 }
 
 func (kc *processKubeCtl) Exec(cmdArgs []string) (string, error) {
-	out, err := osutils.Exec("kubectl", cmdArgs, 60*time.Second)
+	args := kc.withConfigFlags(cmdArgs)
+	out, err := osutils.Exec("kubectl", args, 60*time.Second)
 	return string(out), err
 }
 
 func (kc *processKubeCtl) ExecStdin(cmdArgs []string, stdin *[]byte) (string, error) {
-	out, err := osutils.ExecStdin("kubectl", cmdArgs, stdin, 60*time.Second)
+	args := kc.withConfigFlags(cmdArgs)
+	out, err := osutils.ExecStdin("kubectl", args, stdin, 60*time.Second)
 	return string(out), err
 }
 
-func RealKubeCtl() KubeCtl {
-	return &processKubeCtl{}
+func (kc *processKubeCtl) withConfigFlags(otherArgs []string) []string {
+	flags := []string{"--kubeconfig", kc.configLocation}
+	if kc.serverAddressOverride != "" {
+		flags = append(flags, "--server", kc.serverAddressOverride)
+	}
+	return append(flags, otherArgs...)
+}
+
+func RealKubeCtl(configLocation string, serverAddressOverride string) KubeCtl {
+	return &processKubeCtl{
+		configLocation:        configLocation,
+		serverAddressOverride: serverAddressOverride,
+	}
 }

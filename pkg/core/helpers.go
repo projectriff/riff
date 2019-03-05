@@ -27,8 +27,8 @@ import (
 )
 
 const (
-	buildConfigMap        = "riff-build"
-	defaultImagePrefixKey = "default-image-prefix"
+	BuildConfigMapName    = "riff-build"
+	DefaultImagePrefixKey = "default-image-prefix"
 )
 
 type PackConfig struct {
@@ -58,7 +58,7 @@ func (c *client) DefaultBuildImagePrefix(namespace string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return cm.Data[defaultImagePrefixKey], nil
+	return cm.Data[DefaultImagePrefixKey], nil
 }
 
 func (c *client) SetDefaultBuildImagePrefix(namespace, prefix string) error {
@@ -66,21 +66,21 @@ func (c *client) SetDefaultBuildImagePrefix(namespace, prefix string) error {
 	if err != nil {
 		return err
 	}
-	cm.Data[defaultImagePrefixKey] = prefix
+	cm.Data[DefaultImagePrefixKey] = prefix
 	fmt.Printf("Setting default image prefix to %q for namespace %q\n", prefix, namespace)
 	return c.saveBuildConfigMap(cm)
 }
 
 func (c *client) buildConfigMap(namespace string) (*core_v1.ConfigMap, error) {
 	ns := c.explicitOrConfigNamespace(namespace)
-	cm, err := c.kubeClient.CoreV1().ConfigMaps(ns).Get(buildConfigMap, meta_v1.GetOptions{})
+	cm, err := c.kubeClient.CoreV1().ConfigMaps(ns).Get(BuildConfigMapName, meta_v1.GetOptions{})
 	if err != nil {
 		if !errors.IsNotFound(err) {
 			return nil, err
 		}
 		cm = &core_v1.ConfigMap{
 			ObjectMeta: meta_v1.ObjectMeta{
-				Name:      buildConfigMap,
+				Name:      BuildConfigMapName,
 				Namespace: ns,
 				Labels: map[string]string{
 					"projectriff.io/installer": env.Cli.Name,

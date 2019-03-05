@@ -94,7 +94,7 @@ func (c *client) explicitOrConfigNamespace(explicitNamespace string) string {
 	return namespace
 }
 
-func (kc *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options NamespaceInitOptions) error {
+func (c *client) NamespaceInit(manifests map[string]*Manifest, options NamespaceInitOptions) error {
 	manifest, err := ResolveManifest(manifests, options.Manifest)
 	if err != nil {
 		return err
@@ -104,12 +104,12 @@ func (kc *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options N
 
 	fmt.Printf("Initializing namespace %q\n\n", ns)
 
-	namespace, err := kc.kubeClient.CoreV1().Namespaces().Get(ns, v1.GetOptions{})
+	namespace, err := c.kubeClient.CoreV1().Namespaces().Get(ns, v1.GetOptions{})
 	if errors.IsNotFound(err) {
 		fmt.Printf("Creating namespace %q \n", ns)
 		namespace = &corev1.Namespace{}
 		namespace.Name = ns
-		namespace, err = kc.kubeClient.CoreV1().Namespaces().Create(namespace)
+		namespace, err = c.kubeClient.CoreV1().Namespaces().Create(namespace)
 		if err != nil {
 			return err
 		}
@@ -121,34 +121,34 @@ func (kc *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options N
 
 	switch options.secretType() {
 	case secretTypeGcr:
-		if err := kc.createGcrSecret(options, initLabels); err != nil {
+		if err := c.createGcrSecret(options, initLabels); err != nil {
 			return err
 		}
 		if options.ImagePrefix == "" {
-			prefix, err := kc.gcrImagePrefix(options)
+			prefix, err := c.gcrImagePrefix(options)
 			if err != nil {
 				return err
 			}
 			options.ImagePrefix = prefix
 		}
 	case secretTypeDockerHub:
-		if err := kc.createDockerHubSecret(options, initLabels); err != nil {
+		if err := c.createDockerHubSecret(options, initLabels); err != nil {
 			return err
 		}
 		if options.ImagePrefix == "" {
-			options.ImagePrefix = kc.dockerHubImagePrefix(options)
+			options.ImagePrefix = c.dockerHubImagePrefix(options)
 		}
 	case secretTypeBasicAuth:
-		if err := kc.createRegistrySecret(options, initLabels); err != nil {
+		if err := c.createRegistrySecret(options, initLabels); err != nil {
 			return err
 		}
 	case secretTypeUserProvided:
-		if err = kc.checkSecretExists(options); err != nil {
+		if err = c.checkSecretExists(options); err != nil {
 			return err
 		}
 	}
 
-	sa, err := kc.kubeClient.CoreV1().ServiceAccounts(ns).Get(BuildServiceAccountName, v1.GetOptions{})
+	sa, err := c.kubeClient.CoreV1().ServiceAccounts(ns).Get(BuildServiceAccountName, v1.GetOptions{})
 	if errors.IsNotFound(err) {
 		sa = &corev1.ServiceAccount{}
 		sa.Name = BuildServiceAccountName
@@ -160,7 +160,7 @@ func (kc *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options N
 		} else {
 			fmt.Printf("Creating unauthenticated serviceaccount %q in namespace %q\n", sa.Name, ns)
 		}
-		_, err = kc.kubeClient.CoreV1().ServiceAccounts(ns).Create(sa)
+		_, err = c.kubeClient.CoreV1().ServiceAccounts(ns).Create(sa)
 		if err != nil {
 			return err
 		}
@@ -180,7 +180,7 @@ func (kc *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options N
 		} else {
 			sa.Secrets = append(sa.Secrets, corev1.ObjectReference{Name: secretName})
 			fmt.Printf("Adding secret %q to serviceaccount %q in namespace %q\n", secretName, sa.Name, ns)
-			_, err = kc.kubeClient.CoreV1().ServiceAccounts(ns).Update(sa)
+			_, err = c.kubeClient.CoreV1().ServiceAccounts(ns).Update(sa)
 			if err != nil {
 				return err
 			}
@@ -188,7 +188,7 @@ func (kc *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options N
 	}
 
 	if options.ImagePrefix != "" {
-		if err := kc.client.SetDefaultBuildImagePrefix(options.NamespaceName, options.ImagePrefix); err != nil {
+		if err := c.SetDefaultBuildImagePrefix(options.NamespaceName, options.ImagePrefix); err != nil {
 			return err
 		}
 	} else {
@@ -215,11 +215,11 @@ func (kc *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options N
 		if resourceUrl.Scheme == "" {
 			resourceUrl.Scheme = "file"
 		}
-		labeledContent, err := kc.kustomizer.ApplyLabels(resourceUrl, initLabels)
+		labeledContent, err := c.kustomizer.ApplyLabels(resourceUrl, initLabels)
 		if err != nil {
 			return err
 		}
-		log, err := kc.kubeCtl.ExecStdin([]string{"apply", "-n", ns, "-f", "-"}, &labeledContent)
+		log, err := c.kubeCtl.ExecStdin([]string{"apply", "-n", ns, "-f", "-"}, &labeledContent)
 		fmt.Printf("%s\n", log)
 		if err != nil {
 			return err
@@ -228,62 +228,62 @@ func (kc *kubectlClient) NamespaceInit(manifests map[string]*Manifest, options N
 	return nil
 }
 
-func (kc *kubectlClient) NamespaceCleanup(options NamespaceCleanupOptions) error {
+func (c *client) NamespaceCleanup(options NamespaceCleanupOptions) error {
 	ns := options.NamespaceName
 	initLabelKeys := sortedKeysOf(getInitLabels())
 	initLabelSelector := existsSelectors(initLabelKeys)
 
 	fmt.Printf("Deleting serviceaccounts matching label keys %v in namespace %q\n", initLabelKeys, ns)
-	if err := kc.deleteMatchingServiceAccounts(ns, initLabelSelector); err != nil {
+	if err := c.deleteMatchingServiceAccounts(ns, initLabelSelector); err != nil {
 		return err
 	}
 
 	fmt.Printf("Deleting persistentvolumeclaims matching label keys %v in namespace %q\n", initLabelKeys, ns)
-	if err := kc.deleteMatchingPersistentVolumeClaims(ns, initLabelSelector); err != nil {
+	if err := c.deleteMatchingPersistentVolumeClaims(ns, initLabelSelector); err != nil {
 		return err
 	}
 
 	fmt.Printf("Deleting secrets matching label keys %v in namespace %q\n", initLabelKeys, ns)
-	if err := kc.deleteMatchingSecrets(ns, initLabelSelector); err != nil {
+	if err := c.deleteMatchingSecrets(ns, initLabelSelector); err != nil {
 		return err
 	}
 
 	if options.RemoveNamespace {
 		fmt.Printf("Deleting namespace %q\n", ns)
-		if err := kc.kubeClient.CoreV1().Namespaces().Delete(ns, &v1.DeleteOptions{}); err != nil {
+		if err := c.kubeClient.CoreV1().Namespaces().Delete(ns, &v1.DeleteOptions{}); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (kc *kubectlClient) checkSecretExists(options NamespaceInitOptions) error {
-	_, err := kc.kubeClient.CoreV1().Secrets(options.NamespaceName).Get(options.SecretName, v1.GetOptions{})
+func (c *client) checkSecretExists(options NamespaceInitOptions) error {
+	_, err := c.kubeClient.CoreV1().Secrets(options.NamespaceName).Get(options.SecretName, v1.GetOptions{})
 	return err
 }
 
-func (kc *kubectlClient) createDockerHubSecret(options NamespaceInitOptions, labels map[string]string) error {
+func (c *client) createDockerHubSecret(options NamespaceInitOptions, labels map[string]string) error {
 	username := options.DockerHubUsername
 	password, err := readPassword(fmt.Sprintf("Enter password for user %q", username))
 	if err != nil {
 		return err
 	}
-	return kc.createBasicAuthSecret(options.NamespaceName, options.SecretName, username, password, "https://index.docker.io/v1/", labels)
+	return c.createBasicAuthSecret(options.NamespaceName, options.SecretName, username, password, "https://index.docker.io/v1/", labels)
 }
 
-func (kc *kubectlClient) dockerHubImagePrefix(options NamespaceInitOptions) string {
+func (c *client) dockerHubImagePrefix(options NamespaceInitOptions) string {
 	return fmt.Sprintf("docker.io/%s", options.DockerHubUsername)
 }
 
-func (kc *kubectlClient) createGcrSecret(options NamespaceInitOptions, labels map[string]string) error {
+func (c *client) createGcrSecret(options NamespaceInitOptions, labels map[string]string) error {
 	token, err := ioutil.ReadFile(options.GcrTokenPath)
 	if err != nil {
 		return err
 	}
-	return kc.createBasicAuthSecret(options.NamespaceName, options.SecretName, "_json_key", string(token), "https://gcr.io", labels)
+	return c.createBasicAuthSecret(options.NamespaceName, options.SecretName, "_json_key", string(token), "https://gcr.io", labels)
 }
 
-func (kc *kubectlClient) gcrImagePrefix(options NamespaceInitOptions) (string, error) {
+func (c *client) gcrImagePrefix(options NamespaceInitOptions) (string, error) {
 	token, err := ioutil.ReadFile(options.GcrTokenPath)
 	if err != nil {
 		return "", err
@@ -296,24 +296,24 @@ func (kc *kubectlClient) gcrImagePrefix(options NamespaceInitOptions) (string, e
 	return fmt.Sprintf("gcr.io/%s", tokenMap["project_id"]), nil
 }
 
-func (kc *kubectlClient) createRegistrySecret(options NamespaceInitOptions, labels map[string]string) error {
+func (c *client) createRegistrySecret(options NamespaceInitOptions, labels map[string]string) error {
 	username := options.RegistryUser
 	password, err := readPassword(fmt.Sprintf("Enter password for user %q", username))
 	if err != nil {
 		return err
 	}
 	registryAddress := fmt.Sprintf("%s://%s", options.RegistryProtocol, options.RegistryHost)
-	return kc.createBasicAuthSecret(options.NamespaceName, options.SecretName, username, password, registryAddress, labels)
+	return c.createBasicAuthSecret(options.NamespaceName, options.SecretName, username, password, registryAddress, labels)
 }
 
-func (kc *kubectlClient) createBasicAuthSecret(namespace string,
+func (c *client) createBasicAuthSecret(namespace string,
 	secretName string,
 	username string,
 	password string,
 	serverAddress string,
 	initLabels map[string]string) error {
 
-	_ = kc.kubeClient.CoreV1().Secrets(namespace).Delete(secretName, &v1.DeleteOptions{})
+	_ = c.kubeClient.CoreV1().Secrets(namespace).Delete(secretName, &v1.DeleteOptions{})
 
 	secret := &corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{
@@ -329,7 +329,7 @@ func (kc *kubectlClient) createBasicAuthSecret(namespace string,
 	}
 	fmt.Printf("Creating secret %q with basic authentication to server %q for user %q\n", secretName, serverAddress, username)
 
-	_, err := kc.kubeClient.CoreV1().Secrets(namespace).Create(secret)
+	_, err := c.kubeClient.CoreV1().Secrets(namespace).Create(secret)
 	return err
 }
 
@@ -361,15 +361,15 @@ func existsSelectors(labelKeys []string) string {
 	return strings.TrimSuffix(builder.String(), ",")
 }
 
-func (kc *kubectlClient) deleteMatchingServiceAccounts(ns string, initLabelSelector string) error {
-	serviceAccounts, err := kc.kubeClient.CoreV1().ServiceAccounts(ns).List(v1.ListOptions{
+func (c *client) deleteMatchingServiceAccounts(ns string, initLabelSelector string) error {
+	serviceAccounts, err := c.kubeClient.CoreV1().ServiceAccounts(ns).List(v1.ListOptions{
 		LabelSelector: initLabelSelector,
 	})
 	if err != nil {
 		return err
 	}
 	deletionResults := tasks.ApplyInParallel(serviceAccountNamesOf(serviceAccounts.Items), func(name string) error {
-		return kc.kubeClient.CoreV1().ServiceAccounts(ns).Delete(name, &v1.DeleteOptions{})
+		return c.kubeClient.CoreV1().ServiceAccounts(ns).Delete(name, &v1.DeleteOptions{})
 	})
 	return tasks.MergeResults(deletionResults, func(result tasks.CorrelatedResult) string {
 		err := result.Error
@@ -380,15 +380,15 @@ func (kc *kubectlClient) deleteMatchingServiceAccounts(ns string, initLabelSelec
 	})
 }
 
-func (kc *kubectlClient) deleteMatchingPersistentVolumeClaims(ns string, initLabelSelector string) error {
-	persistentVolumeClaims, err := kc.kubeClient.CoreV1().PersistentVolumeClaims(ns).List(v1.ListOptions{
+func (c *client) deleteMatchingPersistentVolumeClaims(ns string, initLabelSelector string) error {
+	persistentVolumeClaims, err := c.kubeClient.CoreV1().PersistentVolumeClaims(ns).List(v1.ListOptions{
 		LabelSelector: initLabelSelector,
 	})
 	if err != nil {
 		return err
 	}
 	deletionResults := tasks.ApplyInParallel(persistentVolumeClaimNamesOf(persistentVolumeClaims.Items), func(name string) error {
-		return kc.kubeClient.CoreV1().PersistentVolumeClaims(ns).Delete(name, &v1.DeleteOptions{})
+		return c.kubeClient.CoreV1().PersistentVolumeClaims(ns).Delete(name, &v1.DeleteOptions{})
 	})
 	return tasks.MergeResults(deletionResults, func(result tasks.CorrelatedResult) string {
 		err := result.Error
@@ -399,15 +399,15 @@ func (kc *kubectlClient) deleteMatchingPersistentVolumeClaims(ns string, initLab
 	})
 }
 
-func (kc *kubectlClient) deleteMatchingSecrets(ns string, initLabelSelector string) error {
-	secrets, err := kc.kubeClient.CoreV1().Secrets(ns).List(v1.ListOptions{
+func (c *client) deleteMatchingSecrets(ns string, initLabelSelector string) error {
+	secrets, err := c.kubeClient.CoreV1().Secrets(ns).List(v1.ListOptions{
 		LabelSelector: initLabelSelector,
 	})
 	if err != nil {
 		return err
 	}
 	deletionResults := tasks.ApplyInParallel(secretNamesOf(secrets.Items), func(name string) error {
-		return kc.kubeClient.CoreV1().Secrets(ns).Delete(name, &v1.DeleteOptions{})
+		return c.kubeClient.CoreV1().Secrets(ns).Delete(name, &v1.DeleteOptions{})
 	})
 	return tasks.MergeResults(deletionResults, func(result tasks.CorrelatedResult) string {
 		err := result.Error

@@ -25,6 +25,8 @@ import (
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	serving_cs "github.com/knative/serving/pkg/client/clientset/versioned"
+	"github.com/projectriff/riff/pkg/core/kustomize"
+	"github.com/projectriff/riff/pkg/kubectl"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -49,6 +51,12 @@ type Client interface {
 	ServiceStatus(options ServiceStatusOptions) (*duckv1alpha1.Condition, error)
 	ServiceCoordinates(options ServiceInvokeOptions) (ingressIP string, hostName string, err error)
 
+	SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error)
+	SystemUninstall(options SystemUninstallOptions) (bool, error)
+
+	NamespaceInit(manifests map[string]*Manifest, options NamespaceInitOptions) error
+	NamespaceCleanup(options NamespaceCleanupOptions) error
+
 	// helpers
 	FetchPackConfig() (*PackConfig, error)
 	DefaultBuildImagePrefix(namespace string) (string, error)
@@ -65,8 +73,18 @@ type client struct {
 	serving      serving_cs.Interface
 	build        build_cs.Interface
 	clientConfig clientcmd.ClientConfig
+	kubeCtl      kubectl.KubeCtl
+	kustomizer   kustomize.Kustomizer
 }
 
-func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface, build build_cs.Interface) Client {
-	return &client{clientConfig: clientConfig, kubeClient: kubeClient, eventing: eventing, serving: serving, build: build}
+func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface, build build_cs.Interface, kubeCtl kubectl.KubeCtl, kustomizer kustomize.Kustomizer) Client {
+	return &client{
+		clientConfig: clientConfig,
+		kubeClient:   kubeClient,
+		eventing:     eventing,
+		serving:      serving,
+		build:        build,
+		kubeCtl:      kubeCtl,
+		kustomizer:   kustomizer,
+	}
 }
