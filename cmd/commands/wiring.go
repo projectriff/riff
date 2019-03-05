@@ -89,7 +89,7 @@ func resolveHomePath(p string) (string, error) {
 
 }
 
-func CreateAndWireRootCommand(manifests map[string]*core.Manifest, packDefaults func() (*core.PackDefaults, error)) (*cobra.Command, *core.Client) {
+func CreateAndWireRootCommand(manifests map[string]*core.Manifest, packDefaults func() (*core.PackDefaults, error)) *cobra.Command {
 
 	var client core.Client
 	var kc core.KubectlClient
@@ -183,7 +183,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		return nil
 	})
 
-	return rootCmd, &client
+	return rootCmd
 }
 
 // installKubeConfigSupport is to be applied to commands (or parents of commands) that construct a k8s client thanks
