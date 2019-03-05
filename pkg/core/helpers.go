@@ -37,7 +37,9 @@ type PackConfig struct {
 }
 
 func (c *client) FetchPackConfig() (*PackConfig, error) {
-	template, err := c.build.BuildV1alpha1().ClusterBuildTemplates().Get("riff-cnb", v1.GetOptions{})
+	a := c.build.BuildV1alpha1()
+	b := a.ClusterBuildTemplates()
+	template, err := b.Get("riff-cnb", v1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

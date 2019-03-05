@@ -28,6 +28,7 @@ import (
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/core/mocks/mockbuilder"
 	"github.com/projectriff/riff/pkg/core/vendor_mocks"
+	"github.com/projectriff/riff/pkg/core/vendor_mocks/mockbuild"
 	"github.com/projectriff/riff/pkg/core/vendor_mocks/mockserving"
 	"github.com/projectriff/riff/pkg/test_support"
 	"github.com/stretchr/testify/mock"
@@ -40,17 +41,20 @@ import (
 var _ = Describe("Function", func() {
 
 	var (
-		client               core.Client
-		mockClientConfig     *vendor_mocks.ClientConfig
-		mockBuilder          *mockbuilder.Builder
-		mockServing          *mockserving.Interface
-		mockServingV1alpha1  *mockserving.ServingV1alpha1Interface
-		mockServiceInterface *mockserving.ServiceInterface
-		workDir              string
-		service              *v1alpha1.Service
-		testService          *v1alpha1.Service
-		cache                *corev1.PersistentVolumeClaim
-		err                  error
+		client                            core.Client
+		mockClientConfig                  *vendor_mocks.ClientConfig
+		mockBuilder                       *mockbuilder.Builder
+		mockServing                       *mockserving.Interface
+		mockServingV1alpha1               *mockserving.ServingV1alpha1Interface
+		mockServiceInterface              *mockserving.ServiceInterface
+		mockBuild                         *mockbuild.Interface
+		mockBuildV1alpha1                 *mockbuild.BuildV1alpha1Interface
+		mockClusterBuildTemplateInterface *mockbuild.ClusterBuildTemplateInterface
+		workDir                           string
+		service                           *v1alpha1.Service
+		testService                       *v1alpha1.Service
+		cache                             *corev1.PersistentVolumeClaim
+		err                               error
 	)
 
 	BeforeEach(func() {
@@ -61,10 +65,15 @@ var _ = Describe("Function", func() {
 		mockServiceInterface = &mockserving.ServiceInterface{}
 		mockServing.On("ServingV1alpha1").Return(mockServingV1alpha1)
 		mockServingV1alpha1.On("Services", mock.Anything).Return(mockServiceInterface)
+		mockBuild = &mockbuild.Interface{}
+		mockBuildV1alpha1 = &mockbuild.BuildV1alpha1Interface{}
+		mockClusterBuildTemplateInterface = &mockbuild.ClusterBuildTemplateInterface{}
+		mockBuild.On("BuildV1alpha1").Return(mockBuildV1alpha1)
+		mockBuildV1alpha1.On("ClusterBuildTemplates").Return(mockClusterBuildTemplateInterface)
 		testService = &v1alpha1.Service{}
 		workDir = test_support.CreateTempDir()
 		mockClientConfig.On("Namespace").Return("default", false, nil)
-		client = core.NewClient(mockClientConfig, nil, nil, mockServing, nil)
+		client = core.NewClient(mockClientConfig, nil, nil, mockServing, mockBuild)
 	})
 
 	AfterEach(func() {
@@ -88,6 +97,18 @@ var _ = Describe("Function", func() {
 				}).Return(testService, nil)
 				mockServiceInterface.On("Get", mock.Anything, mock.Anything).
 					Return(nil, notFound())
+
+				runImage := "packs/run:testing"
+				builderImage := "projectriff/builder:testing"
+				mockClusterBuildTemplateInterface.On("Get", mock.Anything, mock.Anything).
+					Return(&build.ClusterBuildTemplate{
+						Spec: build.BuildTemplateSpec{
+							Parameters: []build.ParameterSpec{
+								{Name: "RUN_IMAGE", Default: &runImage},
+								{Name: "BUILDER_IMAGE", Default: &builderImage},
+							},
+						},
+					}, nil)
 			})
 
 			BeforeEach(func() {
@@ -115,8 +136,11 @@ var _ = Describe("Function", func() {
 					createFunctionOptions.RunImage = "some/run"
 				})
 
-				It("should return a suitable error", func() {
-					Expect(err).To(MatchError("unable to build function locally: buildpack image not specified"))
+				It("should succeed", func() {
+					Expect(err).NotTo(HaveOccurred())
+					// The returned service should be the input to service create, not the output.
+					Expect(service).To(Equal(createdService))
+					Expect(cache).To(BeNil())
 				})
 			})
 
@@ -126,8 +150,11 @@ var _ = Describe("Function", func() {
 					createFunctionOptions.RunImage = ""
 				})
 
-				It("should return a suitable error", func() {
-					Expect(err).To(MatchError("unable to build function locally: run image not specified"))
+				It("should succeed", func() {
+					Expect(err).NotTo(HaveOccurred())
+					// The returned service should be the input to service create, not the output.
+					Expect(service).To(Equal(createdService))
+					Expect(cache).To(BeNil())
 				})
 			})
 
@@ -204,37 +231,22 @@ var _ = Describe("Function", func() {
 				}
 				updateFunctionOptions.LocalPath = workDir
 				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+				runImage := "packs/run:testing"
+				builderImage := "projectriff/builder:testing"
+				mockClusterBuildTemplateInterface.On("Get", mock.Anything, mock.Anything).
+					Return(&build.ClusterBuildTemplate{
+						Spec: build.BuildTemplateSpec{
+							Parameters: []build.ParameterSpec{
+								{Name: "RUN_IMAGE", Default: &runImage},
+								{Name: "BUILDER_IMAGE", Default: &builderImage},
+							},
+						},
+					}, nil)
 			})
 
-			Context("when buildpack and run images are provided", func() {
-				BeforeEach(func() {
-					testService.Annotations = map[string]string{"riff.projectriff.io-buildpack-buildImage": "some/buildpack",
-						"riff.projectriff.io-buildpack-runImage": "some/run"}
-				})
-
-				It("should succeed", func() {
-					Expect(err).NotTo(HaveOccurred())
-				})
-			})
-
-			Context("when buildpack image is omitted", func() {
-				BeforeEach(func() {
-					testService.Annotations = map[string]string{"riff.projectriff.io-buildpack-runImage": "some/run"}
-				})
-
-				It("should return a suitable error", func() {
-					Expect(err).To(MatchError("unable to build function locally: buildpack image not specified"))
-				})
-			})
-
-			Context("when run image is omitted", func() {
-				BeforeEach(func() {
-					testService.Annotations = map[string]string{"riff.projectriff.io-buildpack-buildImage": "some/buildpack"}
-				})
-
-				It("should return a suitable error", func() {
-					Expect(err).To(MatchError("unable to build function locally: run image not specified"))
-				})
+			It("should succeed", func() {
+				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 
