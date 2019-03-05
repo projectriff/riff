@@ -45,7 +45,7 @@ import (
 
 const (
 	functionLabel                 = "riff.projectriff.io/function"
-	nonceAnnotation               = "riff.projectriff.io/nonce"
+	buildAnnotation               = "riff.projectriff.io/build"
 	buildpackBuildImageAnnotation = "riff.projectriff.io-buildpack-buildImage"
 	buildpackRunImageAnnotation   = "riff.projectriff.io-buildpack-runImage"
 	functionArtifactAnnotation    = "riff.projectriff.io/artifact"
@@ -110,7 +110,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 				return nil, nil, err
 			}
 		}
-		c.bumpNonceAnnotationForRevision(s)
+		c.bumpBuildAnnotationForRevision(s)
 	} else {
 		// create build cache for service
 		buildCache = &corev1.PersistentVolumeClaim{
@@ -155,7 +155,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 				},
 			},
 		}
-		c.bumpNonceAnnotationForBuild(s)
+		c.bumpBuildAnnotationForBuild(s)
 	}
 
 	if !options.DryRun {
@@ -548,9 +548,9 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 		if err != nil {
 			return err
 		}
-		c.bumpNonceAnnotationForRevision(service)
+		c.bumpBuildAnnotationForRevision(service)
 	} else {
-		c.bumpNonceAnnotationForBuild(service)
+		c.bumpBuildAnnotationForBuild(service)
 	}
 
 	_, err = c.serving.ServingV1alpha1().Services(service.Namespace).Update(service)
