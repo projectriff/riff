@@ -30,6 +30,7 @@ var _ = Describe("`riff` root command", func() {
 	Context("should wire subcommands", func() {
 		var (
 			rootCommand *cobra.Command
+			client      *core.Client
 			manifests   map[string]*core.Manifest
 		)
 
@@ -41,7 +42,7 @@ var _ = Describe("`riff` root command", func() {
 				}, nil
 			}
 
-			rootCommand = CreateAndWireRootCommand(manifests, defaults)
+			rootCommand, client = CreateAndWireRootCommand(manifests, defaults)
 		})
 
 		It("including `riff subscription`", func() {
@@ -57,6 +58,10 @@ var _ = Describe("`riff` root command", func() {
 			Expect(FindSubcommand(rootCommand, "namespace")).NotTo(BeNil(), fmt.Sprintf(errMsg, "namespace"))
 			Expect(FindSubcommand(rootCommand, "namespace", "init")).NotTo(BeNil(), fmt.Sprintf(errMsg, "namespace init"))
 			Expect(FindSubcommand(rootCommand, "namespace", "cleanup")).NotTo(BeNil(), fmt.Sprintf(errMsg, "namespace cleanup"))
+		})
+
+		It("client is nil until resolved", func() {
+			Expect(client).To(BeNil())
 		})
 
 	})
