@@ -66,7 +66,7 @@ var _ = Describe("Function", func() {
 		testService = &v1alpha1.Service{}
 		workDir = test_support.CreateTempDir()
 		mockClientConfig.On("Namespace").Return("default", false, nil)
-		client = core.NewClient(mockClientConfig, nil, nil, mockServing)
+		client = core.NewClient(mockClientConfig, nil, nil, mockServing, nil, nil)
 	})
 
 	AfterEach(func() {

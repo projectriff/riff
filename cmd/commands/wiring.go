@@ -27,13 +27,15 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/projectriff/riff/pkg/fileutils"
+	"github.com/projectriff/riff/pkg/kubectl"
+
 	"github.com/buildpack/pack"
 	eventing "github.com/knative/eventing/pkg/client/clientset/versioned"
 	serving "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/core/kustomize"
 	"github.com/projectriff/riff/pkg/env"
-	"github.com/projectriff/riff/pkg/kubectl"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -90,7 +92,6 @@ func resolveHomePath(p string) (string, error) {
 func CreateAndWireRootCommand(manifests map[string]*core.Manifest, localBuilder string, defaultRunImage string) *cobra.Command {
 
 	var client core.Client
-	var kc core.KubectlClient
 
 	packDefaults := PackDefaults{BuilderImage: localBuilder, RunImage: defaultRunImage}
 
@@ -111,7 +112,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 
 	buildpackBuilder := &buildpackBuilder{}
 	function := Function()
-	installKubeConfigSupport(function, &client, &kc)
+	installKubeConfigSupport(function, &client)
 	function.AddCommand(
 		FunctionCreate(buildpackBuilder, &client, packDefaults),
 		FunctionUpdate(buildpackBuilder, &client),
@@ -125,7 +126,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	function.AddCommand(functionLocal)
 
 	service := Service()
-	installKubeConfigSupport(service, &client, &kc)
+	installKubeConfigSupport(service, &client)
 	service.AddCommand(
 		ServiceList(&client),
 		ServiceCreate(&client),
@@ -136,7 +137,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	)
 
 	channel := Channel()
-	installKubeConfigSupport(channel, &client, &kc)
+	installKubeConfigSupport(channel, &client)
 	channel.AddCommand(
 		ChannelList(&client),
 		ChannelCreate(&client),
@@ -144,21 +145,21 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	)
 
 	namespace := Namespace()
-	installKubeConfigSupport(namespace, &client, &kc)
+	installKubeConfigSupport(namespace, &client)
 	namespace.AddCommand(
-		NamespaceInit(manifests, &kc),
-		NamespaceCleanup(&kc),
+		NamespaceInit(manifests, &client),
+		NamespaceCleanup(&client),
 	)
 
 	system := System()
-	installKubeConfigSupport(system, &client, &kc)
+	installKubeConfigSupport(system, &client)
 	system.AddCommand(
-		SystemInstall(manifests, &kc),
-		SystemUninstall(&kc),
+		SystemInstall(manifests, &client),
+		SystemUninstall(&client),
 	)
 
 	subscription := Subscription()
-	installKubeConfigSupport(subscription, &client, &kc)
+	installKubeConfigSupport(subscription, &client)
 	subscription.AddCommand(
 		SubscriptionCreate(&client),
 		SubscriptionDelete(&client),
@@ -197,30 +198,36 @@ See https://projectriff.io and https://github.com/knative/docs`,
 // to a kubeconfig configuration. It adds two flags and sets up the PersistentPreRunE function so that it reads
 // those configuration files. Hence, when entering the RunE function of the command, the provided clients (passed by
 // reference here and to the command creation helpers) are correctly initialized.
-func installKubeConfigSupport(command *cobra.Command, client *core.Client, kc *core.KubectlClient) {
+func installKubeConfigSupport(command *cobra.Command, client *core.Client) {
 
-	kubeconfig := ""
+	kubeConfigPath := ""
 	masterURL := ""
 
-	command.PersistentFlags().StringVar(&kubeconfig, "kubeconfig", "~/.kube/config", "the `path` of a kubeconfig")
+	command.PersistentFlags().StringVar(&kubeConfigPath, "kubeconfig", "~/.kube/config", "the `path` of a kubeconfig")
 	command.PersistentFlags().StringVar(&masterURL, "master", "", "the `address` of the Kubernetes API server; overrides any value in kubeconfig")
 
 	oldPersistentPreRunE := command.PersistentPreRunE
 	command.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
-		var err error
-		clientConfig, kubeClientSet, eventingClientSet, servingClientSet, err := realClientSetFactory(kubeconfig, masterURL)
+		clientConfig, kubeClientSet, eventingClientSet, servingClientSet, err := realClientSetFactory(kubeConfigPath, masterURL)
 		if err != nil {
 			return err
 		}
-		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet)
+
+		configPath, err := fileutils.ResolveTilde(kubeConfigPath)
 		if err != nil {
 			return err
 		}
-		*kc = core.NewKubectlClient(*client, kubeClientSet, kubectl.RealKubeCtl(), kustomize.MakeKustomizer(30*time.Second))
+		kubeCtl := kubectl.RealKubeCtl(configPath, masterURL)
+
+		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, kubeCtl, kustomize.MakeKustomizer(30*time.Second))
+		if err != nil {
+			return err
+		}
 
 		if oldPersistentPreRunE != nil {
 			return oldPersistentPreRunE(cmd, args)
 		}
+
 		return nil
 	}
 }
