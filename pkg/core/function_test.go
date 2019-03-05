@@ -74,6 +74,18 @@ var _ = Describe("Function", func() {
 		workDir = test_support.CreateTempDir()
 		mockClientConfig.On("Namespace").Return("default", false, nil)
 		client = core.NewClient(mockClientConfig, nil, nil, mockServing, mockBuild)
+
+		runImage := "packs/run:testing"
+		builderImage := "projectriff/builder:testing"
+		mockClusterBuildTemplateInterface.On("Get", mock.Anything, mock.Anything).
+			Return(&build.ClusterBuildTemplate{
+				Spec: build.BuildTemplateSpec{
+					Parameters: []build.ParameterSpec{
+						{Name: "RUN_IMAGE", Default: &runImage},
+						{Name: "BUILDER_IMAGE", Default: &builderImage},
+					},
+				},
+			}, nil)
 	})
 
 	AfterEach(func() {
@@ -97,18 +109,6 @@ var _ = Describe("Function", func() {
 				}).Return(testService, nil)
 				mockServiceInterface.On("Get", mock.Anything, mock.Anything).
 					Return(nil, notFound())
-
-				runImage := "packs/run:testing"
-				builderImage := "projectriff/builder:testing"
-				mockClusterBuildTemplateInterface.On("Get", mock.Anything, mock.Anything).
-					Return(&build.ClusterBuildTemplate{
-						Spec: build.BuildTemplateSpec{
-							Parameters: []build.ParameterSpec{
-								{Name: "RUN_IMAGE", Default: &runImage},
-								{Name: "BUILDER_IMAGE", Default: &builderImage},
-							},
-						},
-					}, nil)
 			})
 
 			BeforeEach(func() {
@@ -231,18 +231,6 @@ var _ = Describe("Function", func() {
 				}
 				updateFunctionOptions.LocalPath = workDir
 				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-
-				runImage := "packs/run:testing"
-				builderImage := "projectriff/builder:testing"
-				mockClusterBuildTemplateInterface.On("Get", mock.Anything, mock.Anything).
-					Return(&build.ClusterBuildTemplate{
-						Spec: build.BuildTemplateSpec{
-							Parameters: []build.ParameterSpec{
-								{Name: "RUN_IMAGE", Default: &runImage},
-								{Name: "BUILDER_IMAGE", Default: &builderImage},
-							},
-						},
-					}, nil)
 			})
 
 			It("should succeed", func() {
