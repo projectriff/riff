@@ -3,6 +3,8 @@ package commands_test
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -10,23 +12,22 @@ import (
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/core/mocks"
 	"github.com/spf13/cobra"
-	"io/ioutil"
 )
 
 var _ = Describe("The riff namespace init command", func() {
 
 	var (
-		manifests         map[string]*core.Manifest
-		kubectlClient     core.KubectlClient
-		kubectlClientMock *mocks.KubectlClient
-		namespaceInit     *cobra.Command
+		manifests     map[string]*core.Manifest
+		client        core.Client
+		clientMock    *mocks.Client
+		namespaceInit *cobra.Command
 	)
 
 	BeforeEach(func() {
 		manifests = map[string]*core.Manifest{}
-		kubectlClient = new(mocks.KubectlClient)
-		kubectlClientMock = kubectlClient.(*mocks.KubectlClient)
-		namespaceInit = commands.NamespaceInit(manifests, &kubectlClient)
+		client = new(mocks.Client)
+		clientMock = client.(*mocks.Client)
+		namespaceInit = commands.NamespaceInit(manifests, &client)
 		namespaceInit.SetOutput(ioutil.Discard)
 	})
 
@@ -130,7 +131,7 @@ var _ = Describe("The riff namespace init command", func() {
 
 		It("involves the core.Client", func() {
 			namespaceInit.SetArgs([]string{"ns", "--manifest", "some-path", "--secret", "s3cr3t"})
-			kubectlClientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
+			clientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
 				NamespaceName:    "ns",
 				Manifest:         "some-path",
 				SecretName:       "s3cr3t",
@@ -144,7 +145,7 @@ var _ = Describe("The riff namespace init command", func() {
 
 		It("involves the core.Client with GCR config", func() {
 			namespaceInit.SetArgs([]string{"ns", "--manifest", "some-path", "--gcr", "/path/to/gcr/config.json"})
-			kubectlClientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
+			clientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
 				NamespaceName:    "ns",
 				Manifest:         "some-path",
 				GcrTokenPath:     "/path/to/gcr/config.json",
@@ -159,7 +160,7 @@ var _ = Describe("The riff namespace init command", func() {
 
 		It("involves the core.Client with Dockerhub config", func() {
 			namespaceInit.SetArgs([]string{"ns", "--manifest", "some-path", "--dockerhub", "username"})
-			kubectlClientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
+			clientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
 				NamespaceName:     "ns",
 				Manifest:          "some-path",
 				DockerHubUsername: "username",
@@ -174,7 +175,7 @@ var _ = Describe("The riff namespace init command", func() {
 
 		It("involves the core.Client without any secret", func() {
 			namespaceInit.SetArgs([]string{"ns", "--manifest", "some-path", "--no-secret"})
-			kubectlClientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
+			clientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
 				NamespaceName:    "ns",
 				Manifest:         "some-path",
 				NoSecret:         true,
@@ -189,7 +190,7 @@ var _ = Describe("The riff namespace init command", func() {
 
 		It("involves the core.Client with explicit registry configuration", func() {
 			namespaceInit.SetArgs([]string{"ns", "--manifest", "some-path", "--registry-host", "registry.example.com", "--registry-user", "me"})
-			kubectlClientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
+			clientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
 				NamespaceName:    "ns",
 				Manifest:         "some-path",
 				RegistryProtocol: "https",
@@ -206,7 +207,7 @@ var _ = Describe("The riff namespace init command", func() {
 		It("propagates the core.Client errors", func() {
 			namespaceInit.SetArgs([]string{"ns", "--manifest", "some-path", "--secret", "s3cr3t"})
 			expectedError := fmt.Errorf("oopsie")
-			kubectlClientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
+			clientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
 				NamespaceName:    "ns",
 				Manifest:         "some-path",
 				SecretName:       "s3cr3t",
@@ -222,22 +223,22 @@ var _ = Describe("The riff namespace init command", func() {
 
 var _ = Describe("The riff namespace cleanup command", func() {
 	var (
-		outWriter     bytes.Buffer
-		kubectlClient core.KubectlClient
-		kubectlMock   *mocks.KubectlClient
-		command       *cobra.Command
+		outWriter  bytes.Buffer
+		client     core.Client
+		clientMock *mocks.Client
+		command    *cobra.Command
 	)
 
 	BeforeEach(func() {
-		kubectlClient = new(mocks.KubectlClient)
-		kubectlMock = kubectlClient.(*mocks.KubectlClient)
-		command = commands.NamespaceCleanup(&kubectlClient)
+		client = new(mocks.Client)
+		clientMock = client.(*mocks.Client)
+		command = commands.NamespaceCleanup(&client)
 		command.SetOutput(&outWriter)
 	})
 
 	AfterEach(func() {
 		outWriter.Reset()
-		kubectlMock.AssertExpectations(GinkgoT())
+		clientMock.AssertExpectations(GinkgoT())
 	})
 
 	It("should be documented", func() {
@@ -280,7 +281,7 @@ var _ = Describe("The riff namespace cleanup command", func() {
 			namespace := "ns"
 			command.SetArgs([]string{namespace})
 			options := core.NamespaceCleanupOptions{NamespaceName: namespace, RemoveNamespace: false}
-			kubectlMock.On("NamespaceCleanup", options).Return(nil)
+			clientMock.On("NamespaceCleanup", options).Return(nil)
 
 			err := command.Execute()
 
@@ -293,7 +294,7 @@ var _ = Describe("The riff namespace cleanup command", func() {
 			namespace := "ns"
 			command.SetArgs([]string{namespace, "--remove-ns"})
 			options := core.NamespaceCleanupOptions{NamespaceName: namespace, RemoveNamespace: true}
-			kubectlMock.On("NamespaceCleanup", options).Return(nil)
+			clientMock.On("NamespaceCleanup", options).Return(nil)
 
 			err := command.Execute()
 
@@ -307,7 +308,7 @@ var _ = Describe("The riff namespace cleanup command", func() {
 			command.SetArgs([]string{namespace})
 			options := core.NamespaceCleanupOptions{NamespaceName: namespace, RemoveNamespace: false}
 			expectedError := fmt.Errorf("nope")
-			kubectlMock.On("NamespaceCleanup", options).Return(expectedError)
+			clientMock.On("NamespaceCleanup", options).Return(expectedError)
 
 			err := command.Execute()
 
