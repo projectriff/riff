@@ -92,7 +92,7 @@ var _ = Describe("Function", func() {
 
 			BeforeEach(func() {
 				createFunctionOptions.LocalPath = workDir
-				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			})
 
 			Context("when buildpack and run images are provided", func() {
@@ -116,7 +116,7 @@ var _ = Describe("Function", func() {
 				})
 
 				It("should return a suitable error", func() {
-					Expect(err).To(MatchError("unable to do locally: buildpack image not specified"))
+					Expect(err).To(MatchError("unable to build locally: buildpack image not specified"))
 				})
 			})
 
@@ -127,7 +127,7 @@ var _ = Describe("Function", func() {
 				})
 
 				It("should return a suitable error", func() {
-					Expect(err).To(MatchError("unable to do locally: run image not specified"))
+					Expect(err).To(MatchError("unable to build locally: run image not specified"))
 				})
 			})
 
@@ -203,7 +203,7 @@ var _ = Describe("Function", func() {
 					},
 				}
 				updateFunctionOptions.LocalPath = workDir
-				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			})
 
 			Context("when buildpack and run images are provided", func() {
@@ -223,7 +223,7 @@ var _ = Describe("Function", func() {
 				})
 
 				It("should return a suitable error", func() {
-					Expect(err).To(MatchError("unable to do locally: buildpack image not specified"))
+					Expect(err).To(MatchError("unable to build locally: buildpack image not specified"))
 				})
 			})
 
@@ -233,7 +233,7 @@ var _ = Describe("Function", func() {
 				})
 
 				It("should return a suitable error", func() {
-					Expect(err).To(MatchError("unable to do locally: run image not specified"))
+					Expect(err).To(MatchError("unable to build locally: run image not specified"))
 				})
 			})
 		})
@@ -284,7 +284,7 @@ var _ = Describe("Function", func() {
 		Context("when building locally", func() {
 			BeforeEach(func() {
 				buildFunctionOptions.LocalPath = workDir
-				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			})
 
 			Context("when buildpack and run images are provided", func() {
@@ -305,7 +305,7 @@ var _ = Describe("Function", func() {
 				})
 
 				It("should return a suitable error", func() {
-					Expect(err).To(MatchError("unable to do locally: buildpack image not specified"))
+					Expect(err).To(MatchError("unable to build locally: buildpack image not specified"))
 				})
 			})
 
@@ -316,7 +316,7 @@ var _ = Describe("Function", func() {
 				})
 
 				It("should return a suitable error", func() {
-					Expect(err).To(MatchError("unable to do locally: run image not specified"))
+					Expect(err).To(MatchError("unable to build locally: run image not specified"))
 				})
 			})
 

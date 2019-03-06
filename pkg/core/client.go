@@ -63,7 +63,7 @@ type Client interface {
 }
 
 type Builder interface {
-	Build(appDir, buildImage, runImage, repoName string) error
+	Build(appDir, buildImage, runImage, repoName string, log io.Writer) error
 }
 
 type client struct {

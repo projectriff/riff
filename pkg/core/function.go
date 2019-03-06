@@ -106,7 +106,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			// skip build for a dry run
 			log.Write([]byte("Skipping local build\n"))
 		} else {
-			if err := doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions); err != nil {
+			if err := doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions, log); err != nil {
 				return nil, nil, err
 			}
 		}
@@ -546,7 +546,7 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 			return fmt.Errorf("local-path must be specified to rebuild function from source")
 		}
 
-		err := doBuildLocally(buildpackBuilder, repoName, localBuild)
+		err := doBuildLocally(buildpackBuilder, repoName, localBuild, log)
 		if err != nil {
 			return err
 		}
@@ -596,12 +596,18 @@ type BuildFunctionOptions struct {
 }
 
 func (c *client) BuildFunction(buildpackBuilder Builder, options BuildFunctionOptions, log io.Writer) error {
-	return doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions)
+	return doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions, log)
 }
 
-func doBuildLocally(builder Builder, image string, options BuildOptions) error {
+func doBuildLocally(builder Builder, image string, options BuildOptions, log io.Writer) error {
 	return doLocally(options, func() error {
-		return builder.Build(options.LocalPath, options.BuildpackImage, options.RunImage, image)
+		if options.BuildpackImage == "" {
+			return fmt.Errorf("unable to build locally: buildpack image not specified")
+		}
+		if options.RunImage == "" {
+			return fmt.Errorf("unable to build locally: run image not specified")
+		}
+		return builder.Build(options.LocalPath, options.BuildpackImage, options.RunImage, image, log)
 	})
 }
 
@@ -610,12 +616,6 @@ func doLocally(options BuildOptions, doer func() error) error {
 		return err
 	}
 	defer func() { _ = deleteRiffToml(options) }()
-	if options.BuildpackImage == "" {
-		return fmt.Errorf("unable to do locally: buildpack image not specified")
-	}
-	if options.RunImage == "" {
-		return fmt.Errorf("unable to do locally: run image not specified")
-	}
 	return doer()
 }
 

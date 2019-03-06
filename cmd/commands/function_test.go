@@ -385,7 +385,7 @@ var _ = Describe("The riff function build command", func() {
 			client = new(mocks.Client)
 			builder = nil
 			asMock = client.(*mocks.Client)
-			defaults := commands.PackDefaults{BuilderImage: "projectriff/builder", RunImage: "packs/run"}
+			defaults := commands.PackDefaults{}
 			fc = commands.FunctionBuild(builder, &client, defaults)
 		})
 		AfterEach(func() {
