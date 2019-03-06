@@ -27,8 +27,8 @@ import (
 
 var (
 	// TODO update to a release version before releasing riff
-	builderVersion  = "0.2.0-snapshot-ci-1aa01f4f464c"
-	builder         = fmt.Sprintf("projectriff/builder:%s", builderVersion)
+	//builderVersion  = "0.2.0-snapshot-ci-1aa01f4f464c"
+	builder         = "ericbottard/builder:streaming"
 	defaultRunImage = "packs/run:v3alpha2"
 
 	manifests = map[string]*core.Manifest{
@@ -45,7 +45,7 @@ var (
 				"https://raw.githubusercontent.com/knative/serving/v0.4.0/third_party/config/build/clusterrole.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/eventing.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/in-memory-channel.yaml",
-				fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-%s.yaml", builderVersion),
+				"file:///Users/fbiville/workspace/riff-buildpack-group/riff-cnb-clusterbuildtemplate.yaml",
 			},
 		},
 		// most recent release of Knative. This manifest is not tested
