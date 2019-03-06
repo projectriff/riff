@@ -44,6 +44,7 @@ riff function create [flags]
       --invoker language               invoker runtime to override language detected by buildpack
   -l, --local-path path                path to local source to build the image from; only build-pack builds are supported at this time
   -n, --namespace namespace            the namespace of the service
+      --sub-path string                the directory within the git repo to expose, files outside of this directory will not be available during the build
   -v, --verbose                        print details of command progress
   -w, --wait                           wait until the created resource reaches either a successful or an error state (automatic with --verbose)
 ```

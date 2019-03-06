@@ -110,11 +110,12 @@ var _ = Describe("The riff function create command", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should pass correct options from flags", func() {
-			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo", "--invoker", "pascal"})
+			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo", "--sub-path", "path/in/repo", "--invoker", "pascal"})
 
 			options := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
+				SubPath:     "path/in/repo",
 				BuildOptions: core.BuildOptions{
 					Invoker: "pascal",
 				},
