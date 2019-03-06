@@ -15,6 +15,20 @@ type Client struct {
 	mock.Mock
 }
 
+// BuildFunction provides a mock function with given fields: builder, options, log
+func (_m *Client) BuildFunction(builder core.Builder, options core.BuildFunctionOptions, log io.Writer) error {
+	ret := _m.Called(builder, options, log)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(core.Builder, core.BuildFunctionOptions, io.Writer) error); ok {
+		r0 = rf(builder, options, log)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CreateChannel provides a mock function with given fields: options
 func (_m *Client) CreateChannel(options core.CreateChannelOptions) (*v1alpha1.Channel, error) {
 	ret := _m.Called(options)

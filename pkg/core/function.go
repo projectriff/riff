@@ -103,7 +103,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			// skip build for a dry run
 			log.Write([]byte("Skipping local build\n"))
 		} else {
-			if err := c.doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions); err != nil {
+			if err := c.doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions, log); err != nil {
 				return nil, nil, err
 			}
 		}
@@ -539,7 +539,7 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 			return fmt.Errorf("local-path must be specified to rebuild function from source")
 		}
 
-		err := c.doBuildLocally(buildpackBuilder, repoName, localBuild)
+		err := c.doBuildLocally(buildpackBuilder, repoName, localBuild, log)
 		if err != nil {
 			return err
 		}
@@ -585,20 +585,36 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 	return nil
 }
 
-func (c *client) doBuildLocally(builder Builder, image string, options BuildOptions) error {
+type BuildFunctionOptions struct {
+	BuildOptions
+
+	Image string
+}
+
+func (c *client) BuildFunction(buildpackBuilder Builder, options BuildFunctionOptions, log io.Writer) error {
+	return c.doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions, log)
+}
+
+func (c *client) doBuildLocally(builder Builder, image string, options BuildOptions, log io.Writer) error {
+	return doLocally(options, func() error {
+		if options.BuildpackImage == "" || options.RunImage == "" {
+			config, err := c.FetchPackConfig()
+			if err != nil {
+				return fmt.Errorf("unable to load pack config: %s", err)
+			}
+			options.BuildpackImage = config.BuilderImage
+			options.RunImage = config.RunImage
+		}
+		return builder.Build(options.LocalPath, options.BuildpackImage, options.RunImage, image, log)
+	})
+}
+
+func doLocally(options BuildOptions, doer func() error) error {
 	if err := writeRiffToml(options); err != nil {
 		return err
 	}
 	defer func() { _ = deleteRiffToml(options) }()
-	if options.BuildpackImage == "" || options.RunImage == "" {
-		config, err := c.FetchPackConfig()
-		if err != nil {
-			return fmt.Errorf("unable to load pack config: %s", err)
-		}
-		options.BuildpackImage = config.BuilderImage
-		options.RunImage = config.RunImage
-	}
-	return builder.Build(options.LocalPath, options.BuildpackImage, options.RunImage, image)
+	return doer()
 }
 
 func writeRiffToml(options BuildOptions) error {
