@@ -72,7 +72,7 @@ var _ = Describe("namespace", func() {
 		mockCore.On("Secrets", mock.Anything).Return(mockSecrets)
 		mockCore.On("PersistentVolumeClaims", mock.Anything).Return(mockPersistentVolumeClaims)
 
-		client = core.NewClient(nil, kubeClient, nil, nil, kubeCtl, mockKustomizer)
+		client = core.NewClient(nil, kubeClient, nil, nil, nil, kubeCtl, mockKustomizer)
 	})
 
 	AfterEach(func() {

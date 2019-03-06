@@ -44,15 +44,14 @@ import (
 )
 
 const (
-	functionLabel                 = "riff.projectriff.io/function"
-	buildAnnotation               = "riff.projectriff.io/build"
-	buildpackBuildImageAnnotation = "riff.projectriff.io-buildpack-buildImage"
-	buildpackRunImageAnnotation   = "riff.projectriff.io-buildpack-runImage"
-	functionArtifactAnnotation    = "riff.projectriff.io/artifact"
-	functionOverrideAnnotation    = "riff.projectriff.io/override"
-	functionHandlerAnnotation     = "riff.projectriff.io/handler"
-	pollServiceTimeout            = 10 * time.Minute
-	pollServicePollingInterval    = time.Second
+	functionLabel              = "riff.projectriff.io/function"
+	buildAnnotation            = "riff.projectriff.io/build"
+	functionArtifactAnnotation = "riff.projectriff.io/artifact"
+	functionOverrideAnnotation = "riff.projectriff.io/override"
+	functionHandlerAnnotation  = "riff.projectriff.io/handler"
+	buildTemplateName          = "riff-cnb"
+	pollServiceTimeout         = 10 * time.Minute
+	pollServicePollingInterval = time.Second
 )
 
 type BuildOptions struct {
@@ -96,8 +95,6 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 		if s.ObjectMeta.Annotations == nil {
 			s.ObjectMeta.Annotations = make(map[string]string)
 		}
-		s.ObjectMeta.Annotations[buildpackBuildImageAnnotation] = options.BuildpackImage
-		s.ObjectMeta.Annotations[buildpackRunImageAnnotation] = options.RunImage
 		s.ObjectMeta.Annotations[functionArtifactAnnotation] = options.Artifact
 		s.ObjectMeta.Annotations[functionHandlerAnnotation] = options.Handler
 		s.ObjectMeta.Annotations[functionOverrideAnnotation] = options.Invoker
@@ -106,7 +103,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			// skip build for a dry run
 			log.Write([]byte("Skipping local build\n"))
 		} else {
-			if err := doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions, log); err != nil {
+			if err := c.doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions, log); err != nil {
 				return nil, nil, err
 			}
 		}
@@ -142,7 +139,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 					ServiceAccountName: "riff-build",
 					Source:             c.makeBuildSourceSpec(options),
 					Template: &build.TemplateInstantiationSpec{
-						Name: "riff-cnb",
+						Name: buildTemplateName,
 						Kind: "ClusterBuildTemplate",
 						Arguments: []build.ArgumentSpec{
 							{Name: "IMAGE", Value: options.Image},
@@ -540,19 +537,17 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 	if build == nil {
 		// function was built locally, attempt to reconstruct configuration
 		localBuild := BuildOptions{
-			RunImage:       annotations[buildpackRunImageAnnotation],
-			BuildpackImage: annotations[buildpackBuildImageAnnotation],
-			LocalPath:      appDir,
-			Artifact:       annotations[functionArtifactAnnotation],
-			Handler:        annotations[functionHandlerAnnotation],
-			Invoker:        annotations[functionOverrideAnnotation],
+			LocalPath: appDir,
+			Artifact:  annotations[functionArtifactAnnotation],
+			Handler:   annotations[functionHandlerAnnotation],
+			Invoker:   annotations[functionOverrideAnnotation],
 		}
 		repoName := configuration.RevisionTemplate.Spec.Container.Image
 		if appDir == "" {
 			return fmt.Errorf("local-path must be specified to rebuild function from source")
 		}
 
-		err := doBuildLocally(buildpackBuilder, repoName, localBuild, log)
+		err := c.doBuildLocally(buildpackBuilder, repoName, localBuild, log)
 		if err != nil {
 			return err
 		}
@@ -605,16 +600,18 @@ type BuildFunctionOptions struct {
 }
 
 func (c *client) BuildFunction(buildpackBuilder Builder, options BuildFunctionOptions, log io.Writer) error {
-	return doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions, log)
+	return c.doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions, log)
 }
 
-func doBuildLocally(builder Builder, image string, options BuildOptions, log io.Writer) error {
+func (c *client) doBuildLocally(builder Builder, image string, options BuildOptions, log io.Writer) error {
 	return doLocally(options, func() error {
-		if options.BuildpackImage == "" {
-			return fmt.Errorf("unable to build locally: buildpack image not specified")
-		}
-		if options.RunImage == "" {
-			return fmt.Errorf("unable to build locally: run image not specified")
+		if options.BuildpackImage == "" || options.RunImage == "" {
+			config, err := c.FetchPackConfig()
+			if err != nil {
+				return fmt.Errorf("unable to load pack config: %s", err)
+			}
+			options.BuildpackImage = config.BuilderImage
+			options.RunImage = config.RunImage
 		}
 		return builder.Build(options.LocalPath, options.BuildpackImage, options.RunImage, image, log)
 	})

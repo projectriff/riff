@@ -45,20 +45,8 @@ func Function() *cobra.Command {
 	}
 }
 
-// PackDefaults contains values for "defaults" or "constants" that
-// can be overridden depending on the actual CLI tool being built.
-type PackDefaults struct {
-	BuilderImage string
-	RunImage     string
-}
-
-func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults PackDefaults) *cobra.Command {
-	createFunctionOptions := core.CreateFunctionOptions{
-		BuildOptions: core.BuildOptions{
-			BuildpackImage: defaults.BuilderImage,
-			RunImage:       defaults.RunImage,
-		},
-	}
+func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.Command {
+	createFunctionOptions := core.CreateFunctionOptions{}
 
 	command := &cobra.Command{
 		Use:   "create",
@@ -96,10 +84,6 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults
 			AtPosition(functionCreateFunctionNameIndex, ValidName()),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if defaults.BuilderImage == "" && createFunctionOptions.LocalPath != "" {
-				return fmt.Errorf("building from a local path requires that the builder be set. " +
-					"Refer to documentation to set the value in your environment")
-			}
 			fnName := args[functionCreateFunctionNameIndex]
 
 			createFunctionOptions.Name = fnName
@@ -187,24 +171,14 @@ func FunctionUpdate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.C
 	return command
 }
 
-func FunctionBuild(buildpackBuilder core.Builder, fcTool *core.Client, defaults PackDefaults) *cobra.Command {
-	buildFunctionOptions := core.BuildFunctionOptions{
-		BuildOptions: core.BuildOptions{
-			BuildpackImage: defaults.BuilderImage,
-			RunImage:       defaults.RunImage,
-		},
-	}
+func FunctionBuild(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.Command {
+	buildFunctionOptions := core.BuildFunctionOptions{}
 
 	command := &cobra.Command{
 		Use:   "build",
 		Short: "Build a function container from local source",
 		Args:  cobra.ExactArgs(functionBuildNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if defaults.BuilderImage == "" && buildFunctionOptions.LocalPath != "" {
-				return fmt.Errorf("building from a local path requires that the builder be set. " +
-					"Refer to documentation to set the value in your environment")
-			}
-
 			err := (*fcTool).BuildFunction(buildpackBuilder, buildFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err

@@ -193,6 +193,29 @@ func (_m *Client) DeleteSubscription(options core.DeleteSubscriptionOptions) err
 	return r0
 }
 
+// FetchPackConfig provides a mock function with given fields:
+func (_m *Client) FetchPackConfig() (*core.PackConfig, error) {
+	ret := _m.Called()
+
+	var r0 *core.PackConfig
+	if rf, ok := ret.Get(0).(func() *core.PackConfig); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*core.PackConfig)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListChannels provides a mock function with given fields: options
 func (_m *Client) ListChannels(options core.ListChannelOptions) (*v1alpha1.ChannelList, error) {
 	ret := _m.Called(options)

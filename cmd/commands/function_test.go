@@ -45,8 +45,7 @@ var _ = Describe("The riff function create command", func() {
 			client = new(mocks.Client)
 			builder = nil
 			asMock = client.(*mocks.Client)
-			defaults := commands.PackDefaults{BuilderImage: "projectriff/builder", RunImage: "packs/run"}
-			fc = commands.FunctionCreate(builder, &client, defaults)
+			fc = commands.FunctionCreate(builder, &client)
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
@@ -88,9 +87,8 @@ var _ = Describe("The riff function create command", func() {
 			builder = new(mockbuilder.Builder)
 			client = new(mocks.Client)
 			asMock = client.(*mocks.Client)
-			defaults := commands.PackDefaults{BuilderImage: "projectriff/builder", RunImage: "packs/run"}
 
-			fc = commands.FunctionCreate(builder, &client, defaults)
+			fc = commands.FunctionCreate(builder, &client)
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
@@ -101,11 +99,6 @@ var _ = Describe("The riff function create command", func() {
 			options := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
-				BuildOptions: core.BuildOptions{
-					Invoker:        "",
-					BuildpackImage: "projectriff/builder",
-					RunImage:       "packs/run",
-				},
 			}
 			options.Name = "square"
 			options.Image = "foo/bar"
@@ -123,9 +116,7 @@ var _ = Describe("The riff function create command", func() {
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
 				BuildOptions: core.BuildOptions{
-					Invoker:        "pascal",
-					BuildpackImage: "projectriff/builder",
-					RunImage:       "packs/run",
+					Invoker: "pascal",
 				},
 			}
 			options.Name = "square"
@@ -143,11 +134,6 @@ var _ = Describe("The riff function create command", func() {
 			options := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
-				BuildOptions: core.BuildOptions{
-					Invoker:        "",
-					BuildpackImage: "projectriff/builder",
-					RunImage:       "packs/run",
-				},
 			}
 			options.Name = "square"
 			options.Image = "defaulted-prefix/square"
@@ -182,10 +168,6 @@ var _ = Describe("The riff function create command", func() {
 			options := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
-				BuildOptions: core.BuildOptions{
-					BuildpackImage: "projectriff/builder",
-					RunImage:       "packs/run",
-				},
 			}
 			options.Name = "square"
 			options.Image = "foo/bar"
@@ -202,10 +184,6 @@ var _ = Describe("The riff function create command", func() {
 			options := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
-				BuildOptions: core.BuildOptions{
-					BuildpackImage: "projectriff/builder",
-					RunImage:       "packs/run",
-				},
 			}
 			options.Name = "square"
 			options.Image = "foo/bar"
@@ -233,10 +211,6 @@ var _ = Describe("The riff function create command", func() {
 			options := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
-				BuildOptions: core.BuildOptions{
-					BuildpackImage: "projectriff/builder",
-					RunImage:       "packs/run",
-				},
 			}
 			options.Name = "square"
 			options.Image = "foo/bar"
@@ -263,10 +237,6 @@ var _ = Describe("The riff function create command", func() {
 			options := core.CreateFunctionOptions{
 				GitRepo:     "https://github.com/repo",
 				GitRevision: "master",
-				BuildOptions: core.BuildOptions{
-					BuildpackImage: "projectriff/builder",
-					RunImage:       "packs/run",
-				},
 			}
 			options.Name = "square"
 			options.Namespace = "ns"
@@ -385,8 +355,8 @@ var _ = Describe("The riff function build command", func() {
 			client = new(mocks.Client)
 			builder = nil
 			asMock = client.(*mocks.Client)
-			defaults := commands.PackDefaults{}
-			fc = commands.FunctionBuild(builder, &client, defaults)
+
+			fc = commands.FunctionBuild(builder, &client)
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
@@ -416,9 +386,8 @@ var _ = Describe("The riff function build command", func() {
 			builder = new(mockbuilder.Builder)
 			client = new(mocks.Client)
 			asMock = client.(*mocks.Client)
-			defaults := commands.PackDefaults{BuilderImage: "projectriff/builder", RunImage: "packs/run"}
 
-			fc = commands.FunctionBuild(builder, &client, defaults)
+			fc = commands.FunctionBuild(builder, &client)
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
@@ -428,10 +397,7 @@ var _ = Describe("The riff function build command", func() {
 
 			options := core.BuildFunctionOptions{
 				BuildOptions: core.BuildOptions{
-					Invoker:        "",
-					BuildpackImage: "projectriff/builder",
-					RunImage:       "packs/run",
-					LocalPath:      ".",
+					LocalPath: ".",
 				},
 				Image: "foo/bar",
 			}
@@ -445,10 +411,8 @@ var _ = Describe("The riff function build command", func() {
 
 			options := core.BuildFunctionOptions{
 				BuildOptions: core.BuildOptions{
-					Invoker:        "pascal",
-					BuildpackImage: "projectriff/builder",
-					RunImage:       "packs/run",
-					LocalPath:      ".",
+					Invoker:   "pascal",
+					LocalPath: ".",
 				},
 				Image: "foo/bar",
 			}

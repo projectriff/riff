@@ -19,6 +19,7 @@ package core
 import (
 	"io"
 
+	build_cs "github.com/knative/build/pkg/client/clientset/versioned"
 	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	eventing_cs "github.com/knative/eventing/pkg/client/clientset/versioned"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
@@ -58,6 +59,7 @@ type Client interface {
 	NamespaceCleanup(options NamespaceCleanupOptions) error
 
 	// helpers
+	FetchPackConfig() (*PackConfig, error)
 	DefaultBuildImagePrefix(namespace string) (string, error)
 	SetDefaultBuildImagePrefix(namespace, prefix string) error
 }
@@ -70,17 +72,19 @@ type client struct {
 	kubeClient   kubernetes.Interface
 	eventing     eventing_cs.Interface
 	serving      serving_cs.Interface
+	build        build_cs.Interface
 	clientConfig clientcmd.ClientConfig
 	kubeCtl      kubectl.KubeCtl
 	kustomizer   kustomize.Kustomizer
 }
 
-func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface, kubeCtl kubectl.KubeCtl, kustomizer kustomize.Kustomizer) Client {
+func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface, build build_cs.Interface, kubeCtl kubectl.KubeCtl, kustomizer kustomize.Kustomizer) Client {
 	return &client{
 		clientConfig: clientConfig,
 		kubeClient:   kubeClient,
 		eventing:     eventing,
 		serving:      serving,
+		build:        build,
 		kubeCtl:      kubeCtl,
 		kustomizer:   kustomizer,
 	}
