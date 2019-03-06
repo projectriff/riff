@@ -230,15 +230,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client) {
 	}
 }
 
-type buildpackBuilder struct {
-	stdout io.Writer
-	stderr io.Writer
-}
-
-func (b *buildpackBuilder) SetStdIo(stdout, stderr io.Writer) {
-	b.stdout = stdout
-	b.stderr = stderr
-}
+type buildpackBuilder struct{}
 
 func (*buildpackBuilder) Build(appDir, buildImage, runImage, repoName string, log io.Writer) error {
 	ctx := context.TODO()

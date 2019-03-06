@@ -60,8 +60,6 @@ var _ = Describe("Function", func() {
 	BeforeEach(func() {
 		mockClientConfig = &vendor_mocks.ClientConfig{}
 		mockBuilder = &mockbuilder.Builder{}
-		mockBuilder.On("SetStdIo", mock.Anything, mock.Anything).Return()
-		mockBuilder.On("SetVerbose", mock.Anything).Return()
 		mockServing = &mockserving.Interface{}
 		mockServingV1alpha1 = &mockserving.ServingV1alpha1Interface{}
 		mockServiceInterface = &mockserving.ServiceInterface{}
