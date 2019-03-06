@@ -122,6 +122,8 @@ func ServiceCreate(fcTool *core.Client) *cobra.Command {
 	command.Flags().StringVar(&createServiceOptions.Image, "image", "", "the `name[:tag]` reference of an image containing the application/function")
 	command.MarkFlagRequired("image")
 
+	command.Flags().BoolVarP(&createServiceOptions.NoScaleToZero, "no-scale-to-zero", "", false, "the service should not scale to zero instances")
+
 	command.Flags().StringArrayVar(&createServiceOptions.Env, "env", []string{}, envUsage)
 	command.Flags().StringArrayVar(&createServiceOptions.EnvFrom, "env-from", []string{}, envFromUsage)
 

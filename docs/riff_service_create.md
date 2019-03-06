@@ -33,6 +33,7 @@ riff service create [flags]
   -h, --help                   help for create
       --image name[:tag]       the name[:tag] reference of an image containing the application/function
   -n, --namespace namespace    the namespace of the service
+      --no-scale-to-zero       the service should not scale to zero instances
 ```
 
 ### Options inherited from parent commands

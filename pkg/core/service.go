@@ -41,14 +41,15 @@ func (c *client) ListServices(options ListServiceOptions) (*v1alpha1.ServiceList
 }
 
 type CreateOrUpdateServiceOptions struct {
-	Namespace string
-	Name      string
-	Image     string
-	Env       []string
-	EnvFrom   []string
-	DryRun    bool
-	Verbose   bool
-	Wait      bool
+	Namespace     string
+	Name          string
+	Image         string
+	Env           []string
+	EnvFrom       []string
+	NoScaleToZero bool
+	DryRun        bool
+	Verbose       bool
+	Wait          bool
 }
 
 func (c *client) CreateService(options CreateOrUpdateServiceOptions) (*v1alpha1.Service, error) {
@@ -57,6 +58,10 @@ func (c *client) CreateService(options CreateOrUpdateServiceOptions) (*v1alpha1.
 	s, err := newService(options)
 	if err != nil {
 		return nil, err
+	}
+
+	if options.NoScaleToZero {
+		c.addMinScaleAnnotationForRevision(s, 1)
 	}
 
 	if !options.DryRun {

@@ -19,10 +19,20 @@ package core
 import (
 	"strconv"
 
+	"github.com/knative/serving/pkg/apis/autoscaling"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/knative/serving/pkg/reconciler/v1alpha1/configuration/resources"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
+
+func (c *client) addMinScaleAnnotationForRevision(s *v1alpha1.Service, minScale int) {
+	annotations := s.Spec.RunLatest.Configuration.RevisionTemplate.Annotations
+	if annotations == nil {
+		annotations = map[string]string{}
+	}
+	annotations[autoscaling.MinScaleAnnotationKey] = strconv.Itoa(minScale)
+	s.Spec.RunLatest.Configuration.RevisionTemplate.SetAnnotations(annotations)
+}
 
 func (c *client) bumpBuildAnnotationForRevision(s *v1alpha1.Service) {
 	annotations := s.Spec.RunLatest.Configuration.RevisionTemplate.Annotations
