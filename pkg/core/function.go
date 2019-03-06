@@ -146,7 +146,15 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 							{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
 							{Name: "FUNCTION_HANDLER", Value: options.Handler},
 							{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
-							{Name: "CACHE_VOLUME", Value: buildCache.Name},
+							{Name: "CACHE", Value: "cache"},
+						},
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: "cache",
+							VolumeSource: corev1.VolumeSource{
+								PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{ClaimName: buildCache.Name},
+							},
 						},
 					},
 				},

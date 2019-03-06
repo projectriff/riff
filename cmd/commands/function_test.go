@@ -343,7 +343,7 @@ var _ = Describe("The riff function update command", func() {
 	})
 })
 
-var _ = FDescribe("The riff function build command", func() {
+var _ = Describe("The riff function build command", func() {
 	Context("when given wrong args or flags", func() {
 		var (
 			builder core.Builder
