@@ -49,6 +49,7 @@ const (
 	functionArtifactAnnotation = "riff.projectriff.io/artifact"
 	functionOverrideAnnotation = "riff.projectriff.io/override"
 	functionHandlerAnnotation  = "riff.projectriff.io/handler"
+	buildTemplateName          = "riff-cnb"
 	pollServiceTimeout         = 10 * time.Minute
 	pollServicePollingInterval = time.Second
 )
@@ -137,7 +138,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 					ServiceAccountName: "riff-build",
 					Source:             c.makeBuildSourceSpec(options),
 					Template: &build.TemplateInstantiationSpec{
-						Name: "riff-cnb",
+						Name: buildTemplateName,
 						Kind: "ClusterBuildTemplate",
 						Arguments: []build.ArgumentSpec{
 							{Name: "IMAGE", Value: options.Image},

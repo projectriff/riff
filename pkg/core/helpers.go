@@ -29,6 +29,8 @@ import (
 const (
 	BuildConfigMapName    = "riff-build"
 	DefaultImagePrefixKey = "default-image-prefix"
+	builderImageParamName = "BUILDER_IMAGE"
+	runImageParamName     = "RUN_IMAGE"
 )
 
 type PackConfig struct {
@@ -37,18 +39,25 @@ type PackConfig struct {
 }
 
 func (c *client) FetchPackConfig() (*PackConfig, error) {
-	template, err := c.build.BuildV1alpha1().ClusterBuildTemplates().Get("riff-cnb", v1.GetOptions{})
+	template, err := c.build.BuildV1alpha1().ClusterBuildTemplates().Get(buildTemplateName, v1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
 	config := &PackConfig{}
 	for _, param := range template.Spec.Parameters {
+		if param.Default == nil {
+			continue
+		}
 		switch param.Name {
-		case "BUILDER_IMAGE":
+		case builderImageParamName:
 			config.BuilderImage = *param.Default
-		case "RUN_IMAGE":
+		case runImageParamName:
 			config.RunImage = *param.Default
 		}
+	}
+	if config.BuilderImage == "" || config.RunImage == "" {
+		// should never get here
+		return nil, fmt.Errorf("unable to find builder and run images in cluster")
 	}
 	return config, nil
 }
