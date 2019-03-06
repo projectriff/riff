@@ -68,6 +68,7 @@ type CreateFunctionOptions struct {
 
 	GitRepo     string
 	GitRevision string
+	SubPath     string
 }
 
 func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, *corev1.PersistentVolumeClaim, error) {
@@ -228,6 +229,7 @@ func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.Sourc
 			Url:      options.GitRepo,
 			Revision: options.GitRevision,
 		},
+		SubPath: options.SubPath,
 	}
 }
 

@@ -123,6 +123,7 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.C
 	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
 	command.Flags().StringVar(&createFunctionOptions.GitRepo, "git-repo", "", "the `URL` for a git repository hosting the function code")
 	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` of the function code to use")
+	command.Flags().StringVar(&createFunctionOptions.SubPath, "sub-path", "", "the directory within the git repo to expose, files outside of this directory will not be available during the build")
 	command.Flags().StringVarP(&createFunctionOptions.LocalPath, "local-path", "l", "", "`path` to local source to build the image from; only build-pack builds are supported at this time")
 	command.Flags().BoolVarP(&createFunctionOptions.Verbose, "verbose", "v", false, verboseUsage)
 	command.Flags().BoolVarP(&createFunctionOptions.Wait, "wait", "w", false, waitUsage)
