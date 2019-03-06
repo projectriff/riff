@@ -23,12 +23,44 @@ import (
 	core_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
 	BuildConfigMapName    = "riff-build"
 	DefaultImagePrefixKey = "default-image-prefix"
+	builderImageParamName = "BUILDER_IMAGE"
+	runImageParamName     = "RUN_IMAGE"
 )
+
+type PackConfig struct {
+	BuilderImage string
+	RunImage     string
+}
+
+func (c *client) FetchPackConfig() (*PackConfig, error) {
+	template, err := c.build.BuildV1alpha1().ClusterBuildTemplates().Get(buildTemplateName, v1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	config := &PackConfig{}
+	for _, param := range template.Spec.Parameters {
+		if param.Default == nil {
+			continue
+		}
+		switch param.Name {
+		case builderImageParamName:
+			config.BuilderImage = *param.Default
+		case runImageParamName:
+			config.RunImage = *param.Default
+		}
+	}
+	if config.BuilderImage == "" || config.RunImage == "" {
+		// should never get here
+		return nil, fmt.Errorf("unable to find builder and run images in cluster")
+	}
+	return config, nil
+}
 
 func (c *client) DefaultBuildImagePrefix(namespace string) (string, error) {
 	cm, err := c.buildConfigMap(namespace)

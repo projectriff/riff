@@ -17,7 +17,8 @@ Interact with function related resources
 ### SEE ALSO
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
+* [riff function build](riff_function_build.md)	 - Build a function container from local source
 * [riff function create](riff_function_create.md)	 - Create a new function resource
-* [riff function local](riff_function_local.md)	 - Interact with functions outside of a kubernetes cluster
+* [riff function run](riff_function_run.md)	 - Run a function from source locally
 * [riff function update](riff_function_update.md)	 - Trigger a build to generate a new revision for a function resource
 

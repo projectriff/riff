@@ -25,12 +25,12 @@ import (
 	"github.com/projectriff/riff/cmd/commands"
 )
 
-var (
+const (
 	// TODO update to a release version before releasing riff
-	builderVersion  = "0.2.0-snapshot-ci-1aa01f4f464c"
-	builder         = fmt.Sprintf("projectriff/builder:%s", builderVersion)
-	defaultRunImage = "packs/run:v3alpha2"
+	builderVersion = "0.2.0-snapshot-ci-a974b8e885d3"
+)
 
+var (
 	manifests = map[string]*core.Manifest{
 		// validated, compatible versions of Knative
 		"stable": {
@@ -83,7 +83,7 @@ var (
 
 func main() {
 
-	root := commands.CreateAndWireRootCommand(manifests, builder, defaultRunImage)
+	root := commands.CreateAndWireRootCommand(manifests)
 
 	sub, err := root.ExecuteC()
 	if err != nil {

@@ -15,6 +15,20 @@ type Client struct {
 	mock.Mock
 }
 
+// BuildFunction provides a mock function with given fields: builder, options, log
+func (_m *Client) BuildFunction(builder core.Builder, options core.BuildFunctionOptions, log io.Writer) error {
+	ret := _m.Called(builder, options, log)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(core.Builder, core.BuildFunctionOptions, io.Writer) error); ok {
+		r0 = rf(builder, options, log)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CreateChannel provides a mock function with given fields: options
 func (_m *Client) CreateChannel(options core.CreateChannelOptions) (*v1alpha1.Channel, error) {
 	ret := _m.Called(options)
@@ -179,6 +193,29 @@ func (_m *Client) DeleteSubscription(options core.DeleteSubscriptionOptions) err
 	return r0
 }
 
+// FetchPackConfig provides a mock function with given fields:
+func (_m *Client) FetchPackConfig() (*core.PackConfig, error) {
+	ret := _m.Called()
+
+	var r0 *core.PackConfig
+	if rf, ok := ret.Get(0).(func() *core.PackConfig); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*core.PackConfig)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListChannels provides a mock function with given fields: options
 func (_m *Client) ListChannels(options core.ListChannelOptions) (*v1alpha1.ChannelList, error) {
 	ret := _m.Called(options)
@@ -248,34 +285,6 @@ func (_m *Client) ListSubscriptions(options core.ListSubscriptionsOptions) (*v1a
 	return r0, r1
 }
 
-// LocalBuildFunction provides a mock function with given fields: builder, options, log
-func (_m *Client) LocalBuildFunction(builder core.Builder, options core.LocalBuildFunctionOptions, log io.Writer) error {
-	ret := _m.Called(builder, options, log)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(core.Builder, core.LocalBuildFunctionOptions, io.Writer) error); ok {
-		r0 = rf(builder, options, log)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// LocalRunFunction provides a mock function with given fields: builder, options, log
-func (_m *Client) LocalRunFunction(builder core.Builder, options core.LocalRunFunctionOptions, log io.Writer) error {
-	ret := _m.Called(builder, options, log)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(core.Builder, core.LocalRunFunctionOptions, io.Writer) error); ok {
-		r0 = rf(builder, options, log)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // NamespaceCleanup provides a mock function with given fields: options
 func (_m *Client) NamespaceCleanup(options core.NamespaceCleanupOptions) error {
 	ret := _m.Called(options)
@@ -297,6 +306,20 @@ func (_m *Client) NamespaceInit(manifests map[string]*core.Manifest, options cor
 	var r0 error
 	if rf, ok := ret.Get(0).(func(map[string]*core.Manifest, core.NamespaceInitOptions) error); ok {
 		r0 = rf(manifests, options)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// RunFunction provides a mock function with given fields: builder, options, log
+func (_m *Client) RunFunction(builder core.Builder, options core.RunFunctionOptions, log io.Writer) error {
+	ret := _m.Called(builder, options, log)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(core.Builder, core.RunFunctionOptions, io.Writer) error); ok {
+		r0 = rf(builder, options, log)
 	} else {
 		r0 = ret.Error(0)
 	}

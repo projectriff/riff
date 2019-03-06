@@ -19,6 +19,7 @@ package core
 import (
 	"io"
 
+	build_cs "github.com/knative/build/pkg/client/clientset/versioned"
 	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	eventing_cs "github.com/knative/eventing/pkg/client/clientset/versioned"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
@@ -34,9 +35,8 @@ import (
 type Client interface {
 	CreateFunction(builder Builder, options CreateFunctionOptions, log io.Writer) (*serving.Service, *corev1.PersistentVolumeClaim, error)
 	UpdateFunction(builder Builder, options UpdateFunctionOptions, log io.Writer) error
-
-	LocalBuildFunction(builder Builder, options LocalBuildFunctionOptions, log io.Writer) error
-	LocalRunFunction(builder Builder, options LocalRunFunctionOptions, log io.Writer) error
+	BuildFunction(builder Builder, options BuildFunctionOptions, log io.Writer) error
+	RunFunction(builder Builder, options RunFunctionOptions, log io.Writer) error
 
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
 	DeleteSubscription(options DeleteSubscriptionOptions) error
@@ -60,31 +60,33 @@ type Client interface {
 	NamespaceCleanup(options NamespaceCleanupOptions) error
 
 	// helpers
+	FetchPackConfig() (*PackConfig, error)
 	DefaultBuildImagePrefix(namespace string) (string, error)
 	SetDefaultBuildImagePrefix(namespace, prefix string) error
 }
 
 type Builder interface {
-	Build(appDir, buildImage, runImage, repoName string) error
-	Run(appDir, buildImage, runImage string, ports []string) error
-	SetStdIo(out, err io.Writer)
+	Build(appDir, buildImage, runImage, repoName string, log io.Writer) error
+	Run(appDir, buildImage, runImage string, ports []string, log io.Writer) error
 }
 
 type client struct {
 	kubeClient   kubernetes.Interface
 	eventing     eventing_cs.Interface
 	serving      serving_cs.Interface
+	build        build_cs.Interface
 	clientConfig clientcmd.ClientConfig
 	kubeCtl      kubectl.KubeCtl
 	kustomizer   kustomize.Kustomizer
 }
 
-func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface, kubeCtl kubectl.KubeCtl, kustomizer kustomize.Kustomizer) Client {
+func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface, build build_cs.Interface, kubeCtl kubectl.KubeCtl, kustomizer kustomize.Kustomizer) Client {
 	return &client{
 		clientConfig: clientConfig,
 		kubeClient:   kubeClient,
 		eventing:     eventing,
 		serving:      serving,
+		build:        build,
 		kubeCtl:      kubeCtl,
 		kustomizer:   kustomizer,
 	}

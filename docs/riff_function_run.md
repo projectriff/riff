@@ -1,4 +1,4 @@
-## riff function local run
+## riff function run
 
 Run a function from source locally
 
@@ -7,7 +7,7 @@ Run a function from source locally
 Run a function from source locally
 
 ```
-riff function local run [flags]
+riff function run [flags]
 ```
 
 ### Options
@@ -30,5 +30,5 @@ riff function local run [flags]
 
 ### SEE ALSO
 
-* [riff function local](riff_function_local.md)	 - Interact with functions outside of a kubernetes cluster
+* [riff function](riff_function.md)	 - Interact with function related resources
 

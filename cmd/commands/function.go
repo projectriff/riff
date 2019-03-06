@@ -35,11 +35,11 @@ const (
 )
 
 const (
-	functionLocalBuildNumberOfArgs = iota
+	functionBuildNumberOfArgs = iota
 )
 
 const (
-	functionLocalRunNumberOfArgs = iota
+	functionRunNumberOfArgs = iota
 )
 
 func Function() *cobra.Command {
@@ -49,20 +49,8 @@ func Function() *cobra.Command {
 	}
 }
 
-// PackDefaults contains values for "defaults" or "constants" that
-// can be overridden depending on the actual CLI tool being built.
-type PackDefaults struct {
-	BuilderImage string
-	RunImage     string
-}
-
-func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults PackDefaults) *cobra.Command {
-	createFunctionOptions := core.CreateFunctionOptions{
-		BuildOptions: core.BuildOptions{
-			BuildpackImage: defaults.BuilderImage,
-			RunImage:       defaults.RunImage,
-		},
-	}
+func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.Command {
+	createFunctionOptions := core.CreateFunctionOptions{}
 
 	command := &cobra.Command{
 		Use:   "create",
@@ -100,10 +88,6 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults
 			AtPosition(functionCreateFunctionNameIndex, ValidName()),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if defaults.BuilderImage == "" && createFunctionOptions.LocalPath != "" {
-				return fmt.Errorf("building from a local path requires that the builder be set. " +
-					"Refer to documentation to set the value in your environment")
-			}
 			fnName := args[functionCreateFunctionNameIndex]
 
 			createFunctionOptions.Name = fnName
@@ -137,15 +121,13 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client, defaults
 
 	LabelArgs(command, "FUNCTION_NAME")
 
+	registerBuildOptionsFlags(command, &createFunctionOptions.BuildOptions)
 	command.Flags().StringVarP(&createFunctionOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
 	command.Flags().BoolVarP(&createFunctionOptions.DryRun, "dry-run", "", false, dryRunUsage)
 	command.Flags().StringVar(&createFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
-	command.Flags().StringVar(&createFunctionOptions.Invoker, "invoker", "", "invoker runtime to override `language` detected by buildpack")
 	command.Flags().StringVar(&createFunctionOptions.GitRepo, "git-repo", "", "the `URL` for a git repository hosting the function code")
 	command.Flags().StringVar(&createFunctionOptions.GitRevision, "git-revision", "master", "the git `ref-spec` of the function code to use")
 	command.Flags().StringVarP(&createFunctionOptions.LocalPath, "local-path", "l", "", "`path` to local source to build the image from; only build-pack builds are supported at this time")
-	command.Flags().StringVar(&createFunctionOptions.Handler, "handler", "", "the name of the `method or class` to invoke, depending on the invoker used")
-	command.Flags().StringVar(&createFunctionOptions.Artifact, "artifact", "", "`path` to the function source code or jar file; auto-detected if not specified")
 	command.Flags().BoolVarP(&createFunctionOptions.Verbose, "verbose", "v", false, verboseUsage)
 	command.Flags().BoolVarP(&createFunctionOptions.Wait, "wait", "w", false, waitUsage)
 
@@ -193,32 +175,15 @@ func FunctionUpdate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.C
 	return command
 }
 
-func FunctionLocal() *cobra.Command {
-	return &cobra.Command{
-		Use:   "local",
-		Short: "Interact with functions outside of a kubernetes cluster",
-	}
-}
-
-func FunctionLocalBuild(buildpackBuilder core.Builder, fcTool *core.Client, defaults PackDefaults) *cobra.Command {
-	localBuildFunctionOptions := core.LocalBuildFunctionOptions{
-		BuildOptions: core.BuildOptions{
-			BuildpackImage: defaults.BuilderImage,
-			RunImage:       defaults.RunImage,
-		},
-	}
+func FunctionBuild(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.Command {
+	buildFunctionOptions := core.BuildFunctionOptions{}
 
 	command := &cobra.Command{
 		Use:   "build",
 		Short: "Build a function container from local source",
-		Args:  cobra.ExactArgs(functionLocalBuildNumberOfArgs),
+		Args:  cobra.ExactArgs(functionBuildNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if defaults.BuilderImage == "" && localBuildFunctionOptions.LocalPath != "" {
-				return fmt.Errorf("building from a local path requires that the builder be set. " +
-					"Refer to documentation to set the value in your environment")
-			}
-
-			err := (*fcTool).LocalBuildFunction(buildpackBuilder, localBuildFunctionOptions, cmd.OutOrStdout())
+			err := (*fcTool).BuildFunction(buildpackBuilder, buildFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err
 			}
@@ -229,37 +194,25 @@ func FunctionLocalBuild(buildpackBuilder core.Builder, fcTool *core.Client, defa
 		},
 	}
 
-	command.Flags().StringVar(&localBuildFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
+	registerBuildOptionsFlags(command, &buildFunctionOptions.BuildOptions)
+	command.Flags().StringVar(&buildFunctionOptions.Image, "image", "", "the name of the image to build; must be a writable `repository/image[:tag]` with credentials configured")
 	command.MarkFlagRequired("image")
-	command.Flags().StringVar(&localBuildFunctionOptions.Invoker, "invoker", "", "invoker runtime to override `language` detected by buildpack")
-	command.Flags().StringVarP(&localBuildFunctionOptions.LocalPath, "local-path", "l", "", "`path` to local source to build the image from; only build-pack builds are supported at this time")
+	command.Flags().StringVarP(&buildFunctionOptions.LocalPath, "local-path", "l", "", "`path` to local source to build the image from; only build-pack builds are supported at this time")
 	command.MarkFlagRequired("local-path")
-	command.Flags().StringVar(&localBuildFunctionOptions.Handler, "handler", "", "the name of the `method or class` to invoke, depending on the invoker used")
-	command.Flags().StringVar(&localBuildFunctionOptions.Artifact, "artifact", "", "`path` to the function source code or jar file; auto-detected if not specified")
 
 	return command
 }
 
-func FunctionLocalRun(buildpackBuilder core.Builder, fcTool *core.Client, defaults PackDefaults) *cobra.Command {
-	localRunFunctionOptions := core.LocalRunFunctionOptions{
-		BuildOptions: core.BuildOptions{
-			BuildpackImage: defaults.BuilderImage,
-			RunImage:       defaults.RunImage,
-		},
-	}
+func FunctionRun(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.Command {
+	runFunctionOptions := core.RunFunctionOptions{}
 
 	command := &cobra.Command{
 		Use:     "run",
 		Short:   "Run a function from source locally",
 		PreRunE: FlagsValidatorAsCobraRunE(AtLeastOneOf("local-path")),
-		Args:    cobra.ExactArgs(functionLocalRunNumberOfArgs),
+		Args:    cobra.ExactArgs(functionRunNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if defaults.BuilderImage == "" && localRunFunctionOptions.LocalPath != "" {
-				return fmt.Errorf("building from a local path requires that the builder be set. " +
-					"Refer to documentation to set the value in your environment")
-			}
-
-			err := (*fcTool).LocalRunFunction(buildpackBuilder, localRunFunctionOptions, cmd.OutOrStdout())
+			err := (*fcTool).RunFunction(buildpackBuilder, runFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err
 			}
@@ -268,11 +221,15 @@ func FunctionLocalRun(buildpackBuilder core.Builder, fcTool *core.Client, defaul
 		},
 	}
 
-	command.Flags().StringVar(&localRunFunctionOptions.Invoker, "invoker", "", "invoker runtime to override `language` detected by buildpack")
-	command.Flags().StringVarP(&localRunFunctionOptions.LocalPath, "local-path", "l", "", "`path` to local source to build the image from; only build-pack builds are supported at this time")
-	command.Flags().StringVar(&localRunFunctionOptions.Handler, "handler", "", "the name of the `method or class` to invoke, depending on the invoker used")
-	command.Flags().StringVar(&localRunFunctionOptions.Artifact, "artifact", "", "`path` to the function source code or jar file; auto-detected if not specified")
-	command.Flags().StringSliceVarP(&localRunFunctionOptions.Ports, "port", "p", nil, "Port to publish (defaults to port(s) exposed by container)")
+	registerBuildOptionsFlags(command, &runFunctionOptions.BuildOptions)
+	command.Flags().StringVarP(&runFunctionOptions.LocalPath, "local-path", "l", "", "`path` to local source to build the image from; only build-pack builds are supported at this time")
+	command.Flags().StringSliceVarP(&runFunctionOptions.Ports, "port", "p", nil, "Port to publish (defaults to port(s) exposed by container)")
 
 	return command
+}
+
+func registerBuildOptionsFlags(command *cobra.Command, options *core.BuildOptions) {
+	command.Flags().StringVar(&options.Invoker, "invoker", "", "invoker runtime to override `language` detected by buildpack")
+	command.Flags().StringVar(&options.Handler, "handler", "", "the name of the `method or class` to invoke, depending on the invoker used")
+	command.Flags().StringVar(&options.Artifact, "artifact", "", "`path` to the function source code or jar file; auto-detected if not specified")
 }

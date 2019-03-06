@@ -1,4 +1,4 @@
-## riff function local build
+## riff function build
 
 Build a function container from local source
 
@@ -7,7 +7,7 @@ Build a function container from local source
 Build a function container from local source
 
 ```
-riff function local build [flags]
+riff function build [flags]
 ```
 
 ### Options
@@ -30,5 +30,5 @@ riff function local build [flags]
 
 ### SEE ALSO
 
-* [riff function local](riff_function_local.md)	 - Interact with functions outside of a kubernetes cluster
+* [riff function](riff_function.md)	 - Interact with function related resources
 

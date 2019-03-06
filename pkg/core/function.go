@@ -38,21 +38,20 @@ import (
 	"github.com/projectriff/riff/pkg/env"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 const (
-	functionLabel                 = "riff.projectriff.io/function"
-	buildAnnotation               = "riff.projectriff.io/nonce"
-	buildpackBuildImageAnnotation = "riff.projectriff.io-buildpack-buildImage"
-	buildpackRunImageAnnotation   = "riff.projectriff.io-buildpack-runImage"
-	functionArtifactAnnotation    = "riff.projectriff.io/artifact"
-	functionOverrideAnnotation    = "riff.projectriff.io/override"
-	functionHandlerAnnotation     = "riff.projectriff.io/handler"
-	pollServiceTimeout            = 10 * time.Minute
-	pollServicePollingInterval    = time.Second
+	functionLabel              = "riff.projectriff.io/function"
+	buildAnnotation            = "riff.projectriff.io/build"
+	functionArtifactAnnotation = "riff.projectriff.io/artifact"
+	functionOverrideAnnotation = "riff.projectriff.io/override"
+	functionHandlerAnnotation  = "riff.projectriff.io/handler"
+	buildTemplateName          = "riff-cnb"
+	pollServiceTimeout         = 10 * time.Minute
+	pollServicePollingInterval = time.Second
 )
 
 type BuildOptions struct {
@@ -96,8 +95,6 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 		if s.ObjectMeta.Annotations == nil {
 			s.ObjectMeta.Annotations = make(map[string]string)
 		}
-		s.ObjectMeta.Annotations[buildpackBuildImageAnnotation] = options.BuildpackImage
-		s.ObjectMeta.Annotations[buildpackRunImageAnnotation] = options.RunImage
 		s.ObjectMeta.Annotations[functionArtifactAnnotation] = options.Artifact
 		s.ObjectMeta.Annotations[functionHandlerAnnotation] = options.Handler
 		s.ObjectMeta.Annotations[functionOverrideAnnotation] = options.Invoker
@@ -106,11 +103,11 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			// skip build for a dry run
 			log.Write([]byte("Skipping local build\n"))
 		} else {
-			buildpackBuilder.SetStdIo(log, log)
-			if err := doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions); err != nil {
+			if err := c.doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions, log); err != nil {
 				return nil, nil, err
 			}
 		}
+		c.bumpBuildAnnotationForRevision(s)
 	} else {
 		// create build cache for service
 		buildCache = &corev1.PersistentVolumeClaim{
@@ -142,22 +139,29 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 					ServiceAccountName: "riff-build",
 					Source:             c.makeBuildSourceSpec(options),
 					Template: &build.TemplateInstantiationSpec{
-						Name: "riff-cnb",
+						Name: buildTemplateName,
 						Kind: "ClusterBuildTemplate",
 						Arguments: []build.ArgumentSpec{
 							{Name: "IMAGE", Value: options.Image},
 							{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
 							{Name: "FUNCTION_HANDLER", Value: options.Handler},
 							{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
-							{Name: "CACHE_VOLUME", Value: buildCache.Name},
+							{Name: "CACHE", Value: "cache"},
+						},
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: "cache",
+							VolumeSource: corev1.VolumeSource{
+								PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{ClaimName: buildCache.Name},
+							},
 						},
 					},
 				},
 			},
 		}
+		c.bumpBuildAnnotationForBuild(s)
 	}
-
-	c.bumpNonceAnnotationForBuild(s)
 
 	if !options.DryRun {
 		if buildCache != nil {
@@ -522,8 +526,6 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 		return fmt.Errorf("the service named \"%s\" is not a %s function", options.Name, env.Cli.Name)
 	}
 
-	c.bumpNonceAnnotationForBuild(service)
-
 	build := configuration.Build
 	annotations := service.Annotations
 
@@ -535,23 +537,23 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 	if build == nil {
 		// function was built locally, attempt to reconstruct configuration
 		localBuild := BuildOptions{
-			RunImage:       annotations[buildpackRunImageAnnotation],
-			BuildpackImage: annotations[buildpackBuildImageAnnotation],
-			LocalPath:      appDir,
-			Artifact:       annotations[functionArtifactAnnotation],
-			Handler:        annotations[functionHandlerAnnotation],
-			Invoker:        annotations[functionOverrideAnnotation],
+			LocalPath: appDir,
+			Artifact:  annotations[functionArtifactAnnotation],
+			Handler:   annotations[functionHandlerAnnotation],
+			Invoker:   annotations[functionOverrideAnnotation],
 		}
 		repoName := configuration.RevisionTemplate.Spec.Container.Image
 		if appDir == "" {
 			return fmt.Errorf("local-path must be specified to rebuild function from source")
 		}
 
-		buildpackBuilder.SetStdIo(log, log)
-		err := doBuildLocally(buildpackBuilder, repoName, localBuild)
+		err := c.doBuildLocally(buildpackBuilder, repoName, localBuild, log)
 		if err != nil {
 			return err
 		}
+		c.bumpBuildAnnotationForRevision(service)
+	} else {
+		c.bumpBuildAnnotationForBuild(service)
 	}
 
 	_, err = c.serving.ServingV1alpha1().Services(service.Namespace).Update(service)
@@ -591,51 +593,51 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 	return nil
 }
 
-type LocalBuildFunctionOptions struct {
+type BuildFunctionOptions struct {
 	BuildOptions
 
 	Image string
 }
 
-func (c *client) LocalBuildFunction(buildpackBuilder Builder, options LocalBuildFunctionOptions, log io.Writer) error {
-	buildpackBuilder.SetStdIo(log, log)
-	return doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions)
+func (c *client) BuildFunction(buildpackBuilder Builder, options BuildFunctionOptions, log io.Writer) error {
+	return c.doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions, log)
 }
 
-type LocalRunFunctionOptions struct {
+type RunFunctionOptions struct {
 	BuildOptions
 
 	Ports []string
 }
 
-func (c *client) LocalRunFunction(buildpackBuilder Builder, options LocalRunFunctionOptions, log io.Writer) error {
-	buildpackBuilder.SetStdIo(log, log)
-	return doRunLocally(buildpackBuilder, options.Ports, options.BuildOptions)
+func (c *client) RunFunction(buildpackBuilder Builder, options RunFunctionOptions, log io.Writer) error {
+	return c.doRunLocally(buildpackBuilder, options.Ports, options.BuildOptions, log)
 }
 
-func doBuildLocally(builder Builder, image string, options BuildOptions) error {
-	return doLocally(options, func() error {
-		return builder.Build(options.LocalPath, options.BuildpackImage, options.RunImage, image)
+func (c *client) doBuildLocally(builder Builder, image string, options BuildOptions, log io.Writer) error {
+	return c.doLocally(options, func() error {
+		return builder.Build(options.LocalPath, options.BuildpackImage, options.RunImage, image, log)
 	})
 }
 
-func doRunLocally(builder Builder, ports []string, options BuildOptions) error {
-	return doLocally(options, func() error {
-		return builder.Run(options.LocalPath, options.BuildpackImage, options.RunImage, ports)
+func (c *client) doRunLocally(builder Builder, ports []string, options BuildOptions, log io.Writer) error {
+	return c.doLocally(options, func() error {
+		return builder.Run(options.LocalPath, options.BuildpackImage, options.RunImage, ports, log)
 	})
 }
 
-func doLocally(options BuildOptions, doer func() error) error {
+func (c *client) doLocally(options BuildOptions, doer func() error) error {
+	if options.BuildpackImage == "" || options.RunImage == "" {
+		config, err := c.FetchPackConfig()
+		if err != nil {
+			return fmt.Errorf("unable to load pack config: %s", err)
+		}
+		options.BuildpackImage = config.BuilderImage
+		options.RunImage = config.RunImage
+	}
 	if err := writeRiffToml(options); err != nil {
 		return err
 	}
 	defer func() { _ = deleteRiffToml(options) }()
-	if options.BuildpackImage == "" {
-		return fmt.Errorf("unable to do locally: buildpack image not specified")
-	}
-	if options.RunImage == "" {
-		return fmt.Errorf("unable to do locally: run image not specified")
-	}
 	return doer()
 }
 

@@ -31,6 +31,7 @@ import (
 	"github.com/projectriff/riff/pkg/kubectl"
 
 	"github.com/buildpack/pack"
+	build "github.com/knative/build/pkg/client/clientset/versioned"
 	eventing "github.com/knative/eventing/pkg/client/clientset/versioned"
 	serving "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/projectriff/riff/pkg/core"
@@ -44,11 +45,11 @@ import (
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.ClientConfig, kubernetes.Interface, eventing.Interface, serving.Interface, error) {
+var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.ClientConfig, kubernetes.Interface, eventing.Interface, serving.Interface, build.Interface, error) {
 
 	kubeconfig, err := resolveHomePath(kubeconfig)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 
 	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
@@ -57,19 +58,23 @@ var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.
 
 	cfg, err := clientConfig.ClientConfig()
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 	kubeClientSet, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 	eventingClientSet, err := eventing.NewForConfig(cfg)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 	servingClientSet, err := serving.NewForConfig(cfg)
+	if err != nil {
+		return nil, nil, nil, nil, nil, err
+	}
+	buildClientSet, err := build.NewForConfig(cfg)
 
-	return clientConfig, kubeClientSet, eventingClientSet, servingClientSet, err
+	return clientConfig, kubeClientSet, eventingClientSet, servingClientSet, buildClientSet, err
 }
 
 func resolveHomePath(p string) (string, error) {
@@ -89,11 +94,9 @@ func resolveHomePath(p string) (string, error) {
 
 }
 
-func CreateAndWireRootCommand(manifests map[string]*core.Manifest, localBuilder string, defaultRunImage string) *cobra.Command {
+func CreateAndWireRootCommand(manifests map[string]*core.Manifest) *cobra.Command {
 
 	var client core.Client
-
-	packDefaults := PackDefaults{BuilderImage: localBuilder, RunImage: defaultRunImage}
 
 	rootCmd := &cobra.Command{
 		Use:   env.Cli.Name,
@@ -114,16 +117,11 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	function := Function()
 	installKubeConfigSupport(function, &client)
 	function.AddCommand(
-		FunctionCreate(buildpackBuilder, &client, packDefaults),
+		FunctionCreate(buildpackBuilder, &client),
 		FunctionUpdate(buildpackBuilder, &client),
+		FunctionBuild(buildpackBuilder, &client),
+		FunctionRun(buildpackBuilder, &client),
 	)
-
-	functionLocal := FunctionLocal()
-	functionLocal.AddCommand(
-		FunctionLocalBuild(buildpackBuilder, &client, packDefaults),
-		FunctionLocalRun(buildpackBuilder, &client, packDefaults),
-	)
-	function.AddCommand(functionLocal)
 
 	service := Service()
 	installKubeConfigSupport(service, &client)
@@ -208,7 +206,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client) {
 
 	oldPersistentPreRunE := command.PersistentPreRunE
 	command.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
-		clientConfig, kubeClientSet, eventingClientSet, servingClientSet, err := realClientSetFactory(kubeConfigPath, masterURL)
+		clientConfig, kubeClientSet, eventingClientSet, servingClientSet, buildClientSet, err := realClientSetFactory(kubeConfigPath, masterURL)
 		if err != nil {
 			return err
 		}
@@ -219,7 +217,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client) {
 		}
 		kubeCtl := kubectl.RealKubeCtl(configPath, masterURL)
 
-		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, kubeCtl, kustomize.MakeKustomizer(30*time.Second))
+		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, buildClientSet, kubeCtl, kustomize.MakeKustomizer(30*time.Second))
 		if err != nil {
 			return err
 		}
@@ -242,12 +240,12 @@ func (b *buildpackBuilder) SetStdIo(stdout, stderr io.Writer) {
 	b.stderr = stderr
 }
 
-func (b *buildpackBuilder) Build(appDir, buildImage, runImage, repoName string) error {
+func (*buildpackBuilder) Build(appDir, buildImage, runImage, repoName string, log io.Writer) error {
 	ctx := context.TODO()
-	return pack.Build(ctx, b.stdout, b.stderr, appDir, buildImage, runImage, repoName, true, false)
+	return pack.Build(ctx, log, log, appDir, buildImage, runImage, repoName, true, false)
 }
 
-func (b *buildpackBuilder) Run(appDir, buildImage, runImage string, ports []string) error {
+func (*buildpackBuilder) Run(appDir, buildImage, runImage string, ports []string, log io.Writer) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	canceled := false
 	go func() {
@@ -257,7 +255,7 @@ func (b *buildpackBuilder) Run(appDir, buildImage, runImage string, ports []stri
 		canceled = true
 		cancel()
 	}()
-	err := pack.Run(ctx, b.stdout, b.stderr, appDir, buildImage, runImage, ports)
+	err := pack.Run(ctx, log, log, appDir, buildImage, runImage, ports)
 	if canceled {
 		return nil
 	}
