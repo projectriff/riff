@@ -45,7 +45,7 @@ var _ = Describe("The riff function create command", func() {
 			client = new(mocks.Client)
 			builder = nil
 			asMock = client.(*mocks.Client)
-			defaults := commands.FunctionCreateDefaults{LocalBuilder: "projectriff/builder", DefaultRunImage: "packs/run"}
+			defaults := commands.PackDefaults{BuilderImage: "projectriff/builder", RunImage: "packs/run"}
 			fc = commands.FunctionCreate(builder, &client, defaults)
 		})
 		AfterEach(func() {
@@ -88,7 +88,7 @@ var _ = Describe("The riff function create command", func() {
 			builder = new(mockbuilder.Builder)
 			client = new(mocks.Client)
 			asMock = client.(*mocks.Client)
-			defaults := commands.FunctionCreateDefaults{LocalBuilder: "projectriff/builder", DefaultRunImage: "packs/run"}
+			defaults := commands.PackDefaults{BuilderImage: "projectriff/builder", RunImage: "packs/run"}
 
 			fc = commands.FunctionCreate(builder, &client, defaults)
 		})
@@ -370,5 +370,101 @@ var _ = Describe("The riff function update command", func() {
 			err := fc.Execute()
 			Expect(err).To(MatchError(e))
 		})
+	})
+})
+
+var _ = Describe("The riff function build command", func() {
+	Context("when given wrong args or flags", func() {
+		var (
+			builder core.Builder
+			client  core.Client
+			asMock  *mocks.Client
+			fc      *cobra.Command
+		)
+		BeforeEach(func() {
+			client = new(mocks.Client)
+			builder = nil
+			asMock = client.(*mocks.Client)
+			defaults := commands.PackDefaults{}
+			fc = commands.FunctionBuild(builder, &client, defaults)
+		})
+		AfterEach(func() {
+			asMock.AssertExpectations(GinkgoT())
+		})
+		It("should fail with extra args", func() {
+			fc.SetArgs([]string{"hello"})
+			err := fc.Execute()
+			Expect(err).To(MatchError(ContainSubstring("accepts 0 arg(s), received 1")))
+		})
+		It("should fail without required flags", func() {
+			fc.SetArgs([]string{})
+			err := fc.Execute()
+			Expect(err).To(MatchError(ContainSubstring("required flag(s)")))
+			Expect(err).To(MatchError(ContainSubstring("image")))
+			Expect(err).To(MatchError(ContainSubstring("local-path")))
+		})
+	})
+
+	Context("when given suitable args and flags", func() {
+		var (
+			builder core.Builder
+			client  core.Client
+			asMock  *mocks.Client
+			fc      *cobra.Command
+		)
+		BeforeEach(func() {
+			builder = new(mockbuilder.Builder)
+			client = new(mocks.Client)
+			asMock = client.(*mocks.Client)
+			defaults := commands.PackDefaults{BuilderImage: "projectriff/builder", RunImage: "packs/run"}
+
+			fc = commands.FunctionBuild(builder, &client, defaults)
+		})
+		AfterEach(func() {
+			asMock.AssertExpectations(GinkgoT())
+		})
+		It("should involve the core.Client", func() {
+			fc.SetArgs([]string{"--image", "foo/bar", "--local-path", "."})
+
+			options := core.BuildFunctionOptions{
+				BuildOptions: core.BuildOptions{
+					Invoker:        "",
+					BuildpackImage: "projectriff/builder",
+					RunImage:       "packs/run",
+					LocalPath:      ".",
+				},
+				Image: "foo/bar",
+			}
+
+			asMock.On("BuildFunction", builder, options, mock.Anything).Return(nil)
+			err := fc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		})
+		It("should pass correct options from flags", func() {
+			fc.SetArgs([]string{"--image", "foo/bar", "--local-path", ".", "--invoker", "pascal"})
+
+			options := core.BuildFunctionOptions{
+				BuildOptions: core.BuildOptions{
+					Invoker:        "pascal",
+					BuildpackImage: "projectriff/builder",
+					RunImage:       "packs/run",
+					LocalPath:      ".",
+				},
+				Image: "foo/bar",
+			}
+
+			asMock.On("BuildFunction", builder, options, mock.Anything).Return(nil)
+			err := fc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		})
+		It("should propagate core.Client errors", func() {
+			fc.SetArgs([]string{"--image", "foo/bar", "--local-path", "."})
+
+			e := fmt.Errorf("some error")
+			asMock.On("BuildFunction", mock.Anything, mock.Anything, mock.Anything).Return(e)
+			err := fc.Execute()
+			Expect(err).To(MatchError(e))
+		})
+
 	})
 })

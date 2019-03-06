@@ -19,7 +19,7 @@ package commands
 import (
 	"context"
 	"fmt"
-	"os"
+	"io"
 	"os/user"
 	"strings"
 	"time"
@@ -90,6 +90,8 @@ func CreateAndWireRootCommand(manifests map[string]*core.Manifest, localBuilder 
 
 	var client core.Client
 
+	packDefaults := PackDefaults{BuilderImage: localBuilder, RunImage: defaultRunImage}
+
 	rootCmd := &cobra.Command{
 		Use:   env.Cli.Name,
 		Short: "Commands for creating and managing function resources",
@@ -109,8 +111,9 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	function := Function()
 	installKubeConfigSupport(function, &client)
 	function.AddCommand(
-		FunctionCreate(buildpackBuilder, &client, FunctionCreateDefaults{LocalBuilder: localBuilder, DefaultRunImage: defaultRunImage}),
+		FunctionCreate(buildpackBuilder, &client, packDefaults),
 		FunctionUpdate(buildpackBuilder, &client),
+		FunctionBuild(buildpackBuilder, &client, packDefaults),
 	)
 
 	service := Service()
@@ -222,7 +225,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client) {
 
 type buildpackBuilder struct{}
 
-func (*buildpackBuilder) Build(appDir, buildImage, runImage, repoName string) error {
+func (*buildpackBuilder) Build(appDir, buildImage, runImage, repoName string, log io.Writer) error {
 	ctx := context.TODO()
-	return pack.Build(ctx, os.Stdout, os.Stderr, appDir, buildImage, runImage, repoName, true, false)
+	return pack.Build(ctx, log, log, appDir, buildImage, runImage, repoName, true, false)
 }
