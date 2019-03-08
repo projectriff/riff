@@ -39,7 +39,6 @@ gen-mocks: check-mockery check-jq
 	GO111MODULE=on mockery -output pkg/core/vendor_mocks             -outpkg vendor_mocks  -dir $(call source_of,k8s.io/client-go)/kubernetes/typed/core/v1                                        -name ServiceAccountInterface
 	GO111MODULE=on mockery -output pkg/core/vendor_mocks             -outpkg vendor_mocks  -dir $(call source_of,k8s.io/client-go)/kubernetes/typed/core/v1                                        -name ConfigMapInterface
 	GO111MODULE=on mockery -output pkg/core/vendor_mocks             -outpkg vendor_mocks  -dir $(call source_of,k8s.io/client-go)/kubernetes/typed/core/v1                                        -name SecretInterface
-	GO111MODULE=on mockery -output pkg/core/vendor_mocks             -outpkg vendor_mocks  -dir $(call source_of,k8s.io/client-go)/kubernetes/typed/core/v1                                        -name PersistentVolumeClaimInterface
 	GO111MODULE=on mockery -output pkg/core/vendor_mocks             -outpkg vendor_mocks  -dir $(call source_of,k8s.io/client-go)/kubernetes                                                      -name Interface
 	GO111MODULE=on mockery -output pkg/core/vendor_mocks             -outpkg vendor_mocks  -dir $(call source_of,k8s.io/client-go)/tools/clientcmd                                                 -name ClientConfig
 	GO111MODULE=on mockery -output pkg/fileutils/mocks               -outpkg mocks         -dir pkg/fileutils                                                                                      -name Checker

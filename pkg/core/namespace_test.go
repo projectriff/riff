@@ -28,29 +28,28 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	"github.com/projectriff/riff/pkg/core"
-	mockkustomize "github.com/projectriff/riff/pkg/core/kustomize/mocks"
+	"github.com/projectriff/riff/pkg/core/kustomize/mocks"
 	"github.com/projectriff/riff/pkg/core/vendor_mocks"
 	"github.com/projectriff/riff/pkg/env"
-	mockkubectl "github.com/projectriff/riff/pkg/kubectl/mocks"
+	"github.com/projectriff/riff/pkg/kubectl/mocks"
 	"github.com/stretchr/testify/mock"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var _ = Describe("namespace", func() {
 
 	var (
-		client                     core.Client
-		kubeClient                 *vendor_mocks.Interface
-		kubeCtl                    *mockkubectl.KubeCtl
-		mockCore                   *vendor_mocks.CoreV1Interface
-		mockNamespaces             *vendor_mocks.NamespaceInterface
-		mockServiceAccounts        *vendor_mocks.ServiceAccountInterface
-		mockConfigMaps             *vendor_mocks.ConfigMapInterface
-		mockSecrets                *vendor_mocks.SecretInterface
-		mockPersistentVolumeClaims *vendor_mocks.PersistentVolumeClaimInterface
-		mockKustomizer             *mockkustomize.Kustomizer
-		manifests                  map[string]*core.Manifest
+		client              core.Client
+		kubeClient          *vendor_mocks.Interface
+		kubeCtl             *mockkubectl.KubeCtl
+		mockCore            *vendor_mocks.CoreV1Interface
+		mockNamespaces      *vendor_mocks.NamespaceInterface
+		mockServiceAccounts *vendor_mocks.ServiceAccountInterface
+		mockConfigMaps      *vendor_mocks.ConfigMapInterface
+		mockSecrets         *vendor_mocks.SecretInterface
+		mockKustomizer      *mockkustomize.Kustomizer
+		manifests           map[string]*core.Manifest
 	)
 
 	JustBeforeEach(func() {
@@ -61,7 +60,6 @@ var _ = Describe("namespace", func() {
 		mockServiceAccounts = new(vendor_mocks.ServiceAccountInterface)
 		mockConfigMaps = new(vendor_mocks.ConfigMapInterface)
 		mockSecrets = new(vendor_mocks.SecretInterface)
-		mockPersistentVolumeClaims = new(vendor_mocks.PersistentVolumeClaimInterface)
 		mockKustomizer = new(mockkustomize.Kustomizer)
 		manifests = map[string]*core.Manifest{}
 
@@ -70,7 +68,6 @@ var _ = Describe("namespace", func() {
 		mockCore.On("ServiceAccounts", mock.Anything).Return(mockServiceAccounts)
 		mockCore.On("ConfigMaps", mock.Anything).Return(mockConfigMaps)
 		mockCore.On("Secrets", mock.Anything).Return(mockSecrets)
-		mockCore.On("PersistentVolumeClaims", mock.Anything).Return(mockPersistentVolumeClaims)
 
 		client = core.NewClient(nil, kubeClient, nil, nil, nil, kubeCtl, mockKustomizer)
 	})
@@ -79,7 +76,6 @@ var _ = Describe("namespace", func() {
 		mockNamespaces.AssertExpectations(GinkgoT())
 		mockServiceAccounts.AssertExpectations(GinkgoT())
 		mockSecrets.AssertExpectations(GinkgoT())
-		mockPersistentVolumeClaims.AssertExpectations(GinkgoT())
 	})
 
 	Describe("NamespaceInit", func() {
@@ -428,46 +424,11 @@ var _ = Describe("namespace", func() {
 			Expect(err).To(MatchError(fmt.Sprintf("Unable to delete service account %s: %s", core.BuildServiceAccountName, expectedError.Error())))
 		})
 
-		It("should fail if the persistent volume claim list fails", func() {
-			mockServiceAccounts.On("List", expectedListOptions).Return(&v1.ServiceAccountList{
-				Items: []v1.ServiceAccount{serviceAccount(core.BuildServiceAccountName)},
-			}, nil)
-			mockServiceAccounts.On("Delete", core.BuildServiceAccountName, mock.Anything).Return(nil)
-			expectedError := fmt.Errorf("PVC list failed")
-			mockPersistentVolumeClaims.On("List", expectedListOptions).Return(nil, expectedError)
-
-			err := client.NamespaceCleanup(options)
-
-			Expect(err).To(MatchError(expectedError))
-		})
-
-		It("should fail if the persistent volume claim deletion fails", func() {
-			mockServiceAccounts.On("List", expectedListOptions).Return(&v1.ServiceAccountList{
-				Items: []v1.ServiceAccount{serviceAccount(core.BuildServiceAccountName)},
-			}, nil)
-			mockServiceAccounts.On("Delete", core.BuildServiceAccountName, mock.Anything).Return(nil)
-			pvcName := "pvc-name"
-			mockPersistentVolumeClaims.On("List", expectedListOptions).Return(&v1.PersistentVolumeClaimList{
-				Items: []v1.PersistentVolumeClaim{persistentVolumeClaim(pvcName)},
-			}, nil)
-			expectedError := fmt.Errorf("PVC deletion failed")
-			mockPersistentVolumeClaims.On("Delete", pvcName, mock.Anything).Return(expectedError)
-
-			err := client.NamespaceCleanup(options)
-
-			Expect(err).To(MatchError(fmt.Sprintf("Unable to delete persistent volume claim %s: %s", pvcName, expectedError.Error())))
-		})
-
 		It("should fail if the secret list fails", func() {
 			mockServiceAccounts.On("List", expectedListOptions).Return(&v1.ServiceAccountList{
 				Items: []v1.ServiceAccount{serviceAccount(core.BuildServiceAccountName)},
 			}, nil)
 			mockServiceAccounts.On("Delete", core.BuildServiceAccountName, mock.Anything).Return(nil)
-			pvcName := "pvc-name"
-			mockPersistentVolumeClaims.On("List", expectedListOptions).Return(&v1.PersistentVolumeClaimList{
-				Items: []v1.PersistentVolumeClaim{persistentVolumeClaim(pvcName)},
-			}, nil)
-			mockPersistentVolumeClaims.On("Delete", pvcName, mock.Anything).Return(nil)
 			expectedError := fmt.Errorf("secret deletion failed")
 			mockSecrets.On("List", expectedListOptions).Return(nil, expectedError)
 
@@ -481,11 +442,6 @@ var _ = Describe("namespace", func() {
 				Items: []v1.ServiceAccount{serviceAccount(core.BuildServiceAccountName)},
 			}, nil)
 			mockServiceAccounts.On("Delete", core.BuildServiceAccountName, mock.Anything).Return(nil)
-			pvcName := "pvc-name"
-			mockPersistentVolumeClaims.On("List", expectedListOptions).Return(&v1.PersistentVolumeClaimList{
-				Items: []v1.PersistentVolumeClaim{persistentVolumeClaim(pvcName)},
-			}, nil)
-			mockPersistentVolumeClaims.On("Delete", pvcName, mock.Anything).Return(nil)
 			secretName := "s3cr3t"
 			mockSecrets.On("List", expectedListOptions).Return(&v1.SecretList{
 				Items: []v1.Secret{secret(secretName)},
@@ -504,11 +460,6 @@ var _ = Describe("namespace", func() {
 				Items: []v1.ServiceAccount{serviceAccount(core.BuildServiceAccountName)},
 			}, nil)
 			mockServiceAccounts.On("Delete", core.BuildServiceAccountName, mock.Anything).Return(nil)
-			pvcName := "pvc-name"
-			mockPersistentVolumeClaims.On("List", expectedListOptions).Return(&v1.PersistentVolumeClaimList{
-				Items: []v1.PersistentVolumeClaim{persistentVolumeClaim(pvcName)},
-			}, nil)
-			mockPersistentVolumeClaims.On("Delete", pvcName, mock.Anything).Return(nil)
 			secretName := "s3cr3t"
 			mockSecrets.On("List", expectedListOptions).Return(&v1.SecretList{
 				Items: []v1.Secret{secret(secretName)},
@@ -522,16 +473,11 @@ var _ = Describe("namespace", func() {
 			Expect(err).To(MatchError(expectedError))
 		})
 
-		It("should successfully delete the service account, the PVC and the secret", func() {
+		It("should successfully delete the service account and the secret", func() {
 			mockServiceAccounts.On("List", expectedListOptions).Return(&v1.ServiceAccountList{
 				Items: []v1.ServiceAccount{serviceAccount(core.BuildServiceAccountName)},
 			}, nil)
 			mockServiceAccounts.On("Delete", core.BuildServiceAccountName, mock.Anything).Return(nil)
-			pvcName := "pvc-name"
-			mockPersistentVolumeClaims.On("List", expectedListOptions).Return(&v1.PersistentVolumeClaimList{
-				Items: []v1.PersistentVolumeClaim{persistentVolumeClaim(pvcName)},
-			}, nil)
-			mockPersistentVolumeClaims.On("Delete", pvcName, mock.Anything).Return(nil)
 			secretName := "s3cr3t"
 			mockSecrets.On("List", expectedListOptions).Return(&v1.SecretList{
 				Items: []v1.Secret{secret(secretName)},
@@ -543,17 +489,12 @@ var _ = Describe("namespace", func() {
 			Expect(err).To(BeNil())
 		})
 
-		It("should successfully delete the service account, the PVC, the secret and the namespace itself", func() {
+		It("should successfully delete the service account, the secret and the namespace itself", func() {
 			options.RemoveNamespace = true
 			mockServiceAccounts.On("List", expectedListOptions).Return(&v1.ServiceAccountList{
 				Items: []v1.ServiceAccount{serviceAccount(core.BuildServiceAccountName)},
 			}, nil)
 			mockServiceAccounts.On("Delete", core.BuildServiceAccountName, mock.Anything).Return(nil)
-			pvcName := "pvc-name"
-			mockPersistentVolumeClaims.On("List", expectedListOptions).Return(&v1.PersistentVolumeClaimList{
-				Items: []v1.PersistentVolumeClaim{persistentVolumeClaim(pvcName)},
-			}, nil)
-			mockPersistentVolumeClaims.On("Delete", pvcName, mock.Anything).Return(nil)
 			secretName := "s3cr3t"
 			mockSecrets.On("List", expectedListOptions).Return(&v1.SecretList{
 				Items: []v1.Secret{secret(secretName)},
@@ -627,12 +568,6 @@ func unsafeAbs(path string) string {
 
 func serviceAccount(name string) v1.ServiceAccount {
 	return v1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{Name: name},
-	}
-}
-
-func persistentVolumeClaim(name string) v1.PersistentVolumeClaim {
-	return v1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{Name: name},
 	}
 }

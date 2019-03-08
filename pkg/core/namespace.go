@@ -238,11 +238,6 @@ func (c *client) NamespaceCleanup(options NamespaceCleanupOptions) error {
 		return err
 	}
 
-	fmt.Printf("Deleting persistentvolumeclaims matching label keys %v in namespace %q\n", initLabelKeys, ns)
-	if err := c.deleteMatchingPersistentVolumeClaims(ns, initLabelSelector); err != nil {
-		return err
-	}
-
 	fmt.Printf("Deleting secrets matching label keys %v in namespace %q\n", initLabelKeys, ns)
 	if err := c.deleteMatchingSecrets(ns, initLabelSelector); err != nil {
 		return err
@@ -377,25 +372,6 @@ func (c *client) deleteMatchingServiceAccounts(ns string, initLabelSelector stri
 			return ""
 		}
 		return fmt.Sprintf("Unable to delete service account %s: %v", result.Input, err)
-	})
-}
-
-func (c *client) deleteMatchingPersistentVolumeClaims(ns string, initLabelSelector string) error {
-	persistentVolumeClaims, err := c.kubeClient.CoreV1().PersistentVolumeClaims(ns).List(v1.ListOptions{
-		LabelSelector: initLabelSelector,
-	})
-	if err != nil {
-		return err
-	}
-	deletionResults := tasks.ApplyInParallel(persistentVolumeClaimNamesOf(persistentVolumeClaims.Items), func(name string) error {
-		return c.kubeClient.CoreV1().PersistentVolumeClaims(ns).Delete(name, &v1.DeleteOptions{})
-	})
-	return tasks.MergeResults(deletionResults, func(result tasks.CorrelatedResult) string {
-		err := result.Error
-		if err == nil {
-			return ""
-		}
-		return fmt.Sprintf("Unable to delete persistent volume claim %s: %v", result.Input, err)
 	})
 }
 
