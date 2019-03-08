@@ -18,14 +18,12 @@ package commands
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
+	"io"
 	"strings"
-
+	"text/template"
 	"unicode"
 
-	"io"
-	"text/template"
-
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/util/validation"
 )
@@ -228,7 +226,7 @@ func AtMostOneOf(flagNames ...string) FlagsValidator {
 			}
 		}
 		if set > 1 {
-			return fmt.Errorf("at most one of --%s must be set", strings.Join(flagNames, ", --"))
+			return fmt.Errorf("at most one of --%s may be set", strings.Join(flagNames, ", --"))
 		} else {
 			return nil
 		}

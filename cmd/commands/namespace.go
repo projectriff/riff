@@ -62,17 +62,21 @@ func NamespaceInit(manifests map[string]*core.Manifest, c *core.Client) *cobra.C
 		),
 		PreRunE: FlagsValidatorAsCobraRunE(
 			FlagsValidationConjunction(
-				AtMostOneOf("gcr", "dockerhub", "no-secret", "registry-host"),
+				AtMostOneOf("gcr", "dockerhub", "no-secret", "registry-user"),
 				AtMostOneOf("secret", "no-secret"),
 				NotBlank("secret"),
-				FlagsDependency(Set("registry-protocol"), NotBlank("registry-host")),
-				FlagsDependency(Set("registry-host"),
-					ValueOneOf("registry-protocol", "https", "http"),
-					NotBlank("registry-host"),
-					ValueDoesNotStartWith("registry-host", "http://", "https://"),
-					NotBlank("registry-user"),
-				),
-				FlagsDependency(Set("registry-user"), NotBlank("registry-host")),
+				FlagsDependency(Set("registry-user"), NotBlank("registry")),
+				// NOTE this should be relaxed when we add support for bearer auth
+				FlagsDependency(Set("registry"), NotBlank("registry-user")),
+				FlagsDependency(Set("registry"), func(cmd *cobra.Command) error {
+					if parts := strings.SplitN(options.Registry, "://", 2); len(parts) == 1 {
+						// default to https
+						options.Registry = fmt.Sprintf("https://%s", options.Registry)
+					} else if parts[0] != "http" && parts[0] != "https" {
+						return fmt.Errorf("valid protocols are: %q, %q, found: %q", "http", "https", parts[0])
+					}
+					return nil
+				}),
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -102,8 +106,7 @@ func NamespaceInit(manifests map[string]*core.Manifest, c *core.Client) *cobra.C
 	command.Flags().StringVarP(&options.SecretName, "secret", "s", "push-credentials", "the name of a `secret` containing credentials for the image registry")
 	command.Flags().StringVar(&options.GcrTokenPath, "gcr", "", "path to a file containing Google Container Registry credentials")
 	command.Flags().StringVar(&options.DockerHubUsername, "dockerhub", "", "dockerhub username for authentication; password will be read from stdin")
-	command.Flags().StringVarP(&options.RegistryProtocol, "registry-protocol", "", "https", "registry protocol (http or https)")
-	command.Flags().StringVar(&options.RegistryHost, "registry-host", "", "registry server host")
+	command.Flags().StringVar(&options.Registry, "registry", "", "registry server host, scheme must be \"http\" or \"https\" (default \"https\")")
 	command.Flags().StringVar(&options.RegistryUser, "registry-user", "", "registry username; password will be read from stdin")
 	command.Flags().StringVar(&options.ImagePrefix, "image-prefix", "", "image prefix to use for commands that would otherwise require an --image argument. If not set, this value will be derived for DockerHub and GCR")
 
