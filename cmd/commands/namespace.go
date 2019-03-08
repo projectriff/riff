@@ -69,10 +69,7 @@ func NamespaceInit(manifests map[string]*core.Manifest, c *core.Client) *cobra.C
 				// NOTE this should be relaxed when we add support for bearer auth
 				FlagsDependency(Set("registry"), NotBlank("registry-user")),
 				FlagsDependency(Set("registry"), func(cmd *cobra.Command) error {
-					if parts := strings.SplitN(options.Registry, "://", 2); len(parts) == 1 {
-						// default to https
-						options.Registry = fmt.Sprintf("https://%s", options.Registry)
-					} else if parts[0] != "http" && parts[0] != "https" {
+					if parts := strings.SplitN(options.Registry, "://", 2); len(parts) == 2 && parts[0] != "http" && parts[0] != "https" {
 						return fmt.Errorf("valid protocols are: %q, %q, found: %q", "http", "https", parts[0])
 					}
 					return nil
@@ -80,8 +77,14 @@ func NamespaceInit(manifests map[string]*core.Manifest, c *core.Client) *cobra.C
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			nsName := args[channelCreateNameIndex]
+			nsName := args[namespaceInitNameIndex]
 			options.NamespaceName = nsName
+
+			if options.Registry != "" && !strings.Contains(options.Registry, "://") {
+				// default to https
+				options.Registry = fmt.Sprintf("https://%s", options.Registry)
+			}
+
 			err := (*c).NamespaceInit(manifests, options)
 			if err != nil {
 				return err
