@@ -59,9 +59,8 @@ type NamespaceInitOptions struct {
 	GcrTokenPath      string
 	DockerHubUsername string
 
-	RegistryProtocol string
-	RegistryHost     string
-	RegistryUser     string
+	Registry     string
+	RegistryUser string
 }
 
 type NamespaceCleanupOptions struct {
@@ -78,7 +77,7 @@ func (o *NamespaceInitOptions) secretType() secretType {
 		return secretTypeDockerHub
 	case o.GcrTokenPath != "":
 		return secretTypeGcr
-	case o.RegistryHost != "":
+	case o.RegistryUser != "":
 		return secretTypeBasicAuth
 	default:
 		return secretTypeUserProvided
@@ -297,8 +296,7 @@ func (c *client) createRegistrySecret(options NamespaceInitOptions, labels map[s
 	if err != nil {
 		return err
 	}
-	registryAddress := fmt.Sprintf("%s://%s", options.RegistryProtocol, options.RegistryHost)
-	return c.createBasicAuthSecret(options.NamespaceName, options.SecretName, username, password, registryAddress, labels)
+	return c.createBasicAuthSecret(options.NamespaceName, options.SecretName, username, password, options.Registry, labels)
 }
 
 func (c *client) createBasicAuthSecret(namespace string,
