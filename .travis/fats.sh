@@ -10,7 +10,9 @@ commit=$(git rev-parse HEAD)
 
 # fetch FATS scripts
 fats_dir=`dirname "${BASH_SOURCE[0]}"`/fats
-source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $fats_dir
+fats_repo="projectriff/fats"
+fats_refspec=b61f2422d1e8b16c9c9c78352daf47741a430ef6 # projectriff/fats master as of 2019-03-08
+source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $fats_dir $fats_refspec $fats_repo
 source $fats_dir/.util.sh
 
 $fats_dir/install.sh kubectl
@@ -60,21 +62,24 @@ source $fats_dir/functions/helpers.sh
 
 for test in java java-boot node npm command; do
   path=${fats_dir}/functions/uppercase/${test}
-  function_name=fats-uppercase-${test}
+  function_name=riff-cluster-uppercase-${test}
   image=$(fats_image_repo ${function_name})
+  create_args="--git-repo https://github.com/${fats_repo}.git --git-revision ${fats_refspec} --sub-path functions/uppercase/node"
   input_data=riff
   expected_data=RIFF
 
-  run_function $path $function_name $image $input_data $expected_data
+  run_function $path $function_name $image "${create_args}" $input_data $expected_data
 done
-for test in java-local; do
+
+for test in node command; do
   path=${fats_dir}/functions/uppercase/${test}
-  function_name=fats-uppercase-${test}
+  function_name=riff-local-uppercase-${test}
   image=$(fats_image_repo ${function_name})
+  create_args="--local-path ."
   input_data=riff
   expected_data=RIFF
 
-  run_function $path $function_name $image $input_data $expected_data
+  run_function $path $function_name $image "${create_args}" $input_data $expected_data
 done
 
 source `dirname "${BASH_SOURCE[0]}"`/fats-channels.sh
