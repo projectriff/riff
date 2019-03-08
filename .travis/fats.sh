@@ -64,7 +64,7 @@ for test in java java-boot node npm command; do
   path=${fats_dir}/functions/uppercase/${test}
   function_name=riff-cluster-uppercase-${test}
   image=$(fats_image_repo ${function_name})
-  create_args="--git-repo https://github.com/${fats_repo}.git --git-revision ${fats_refspec} --sub-path functions/uppercase/node"
+  create_args="--git-repo https://github.com/${fats_repo}.git --git-revision ${fats_refspec} --sub-path functions/uppercase/${test}"
   input_data=riff
   expected_data=RIFF
 
