@@ -32,12 +32,12 @@ import (
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/projectriff/riff/cmd/commands"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/core/mocks"
+	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/mock"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
