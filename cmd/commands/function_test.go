@@ -74,6 +74,18 @@ var _ = Describe("The riff function create command", func() {
 			Expect(err).To(MatchError(ContainSubstring("--git-repo")))
 			Expect(err).To(MatchError(ContainSubstring("--local-path")))
 		})
+		It("should fail without a full image repository", func() {
+			fc.SetArgs([]string{"square", "--local-path", ".", "--image", "_/square"})
+			asMock.On("DefaultBuildImagePrefix", "").Return("", nil)
+			err := fc.Execute()
+			Expect(err).To(MatchError("--image flag must include a repository, the image prefix was not set during namespace init"))
+		})
+		It("should fail with an invalid image", func() {
+			fc.SetArgs([]string{"square", "--local-path", ".", "--image", "_square"})
+			asMock.On("DefaultBuildImagePrefix", "").Return("defaulted-prefix", nil)
+			err := fc.Execute()
+			Expect(err).To(MatchError(ContainSubstring("Unknown image prefix syntax")))
+		})
 	})
 
 	Context("when given suitable args and flags", func() {
@@ -138,6 +150,40 @@ var _ = Describe("The riff function create command", func() {
 			}
 			options.Name = "square"
 			options.Image = "defaulted-prefix/square"
+			options.Env = []string{}
+			options.EnvFrom = []string{}
+
+			asMock.On("DefaultBuildImagePrefix", "").Return("defaulted-prefix", nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
+			err := fc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		})
+		It("should apply the image prefix with a custom repo name", func() {
+			fc.SetArgs([]string{"square", "--git-repo", "https://github.com/repo", "--image", "_/square-custom"})
+
+			options := core.CreateFunctionOptions{
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+			}
+			options.Name = "square"
+			options.Image = "defaulted-prefix/square-custom"
+			options.Env = []string{}
+			options.EnvFrom = []string{}
+
+			asMock.On("DefaultBuildImagePrefix", "").Return("defaulted-prefix", nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
+			err := fc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		})
+		It("should apply the image prefix with a custom tag", func() {
+			fc.SetArgs([]string{"square", "--git-repo", "https://github.com/repo", "--image", "_:custom"})
+
+			options := core.CreateFunctionOptions{
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+			}
+			options.Name = "square"
+			options.Image = "defaulted-prefix/square:custom"
 			options.Env = []string{}
 			options.EnvFrom = []string{}
 

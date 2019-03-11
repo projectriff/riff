@@ -18,6 +18,7 @@ package commands
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/env"
@@ -53,7 +54,7 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.C
 		Short: "Create a new function resource",
 		Long: "Create a new function resource from the content of the provided Git repo/revision or local source.\n\n" +
 			"The --invoker flag can be used to force the language runtime and function invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function.\n\n" +
-			"Images will be pushed to the registry specified in the image name.\n\n" +
+			"Images will be pushed to the registry specified in the image name. If a default image prefix was specified during namespace init, the image flag is optional. The function name is combined with the default prefix to define the image. Instead of using the function name, a custom repository can be specified with the image set like `--image _/custom-name` which would resolve to `docker.io/example/custom-name. Still using the prefix and function name to define the repository, a custom tag can be specified using `--image _:custom-tag`.\n\n" +
 			"From then on you can use the sub-commands for the `service` command to interact with the service created for the function.\n\n" +
 			envFromLongDesc + "\n",
 		Example: `  ` + env.Cli.Name + ` function create square --git-repo https://github.com/acme/square --artifact square.js --image acme/square --invoker node --namespace joseph-ns
@@ -65,16 +66,31 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.C
 				return err
 			}
 
-			if createFunctionOptions.Image == "" {
+			if createFunctionOptions.Image == "" || strings.HasPrefix(createFunctionOptions.Image, "_") {
 				prefix, err := (*fcTool).DefaultBuildImagePrefix(createFunctionOptions.Namespace)
 				if err != nil {
 					return fmt.Errorf("unable to default image: %s", err)
 				}
 				if prefix == "" {
-					return fmt.Errorf("required flag(s) \"image\" not set, this flag is optional if --image-prefix is specified during namespace init")
+					if createFunctionOptions.Image == "" {
+						return fmt.Errorf("required flag(s) \"image\" not set, this flag is optional if --image-prefix is specified during namespace init")
+					}
+					return fmt.Errorf("--image flag must include a repository, the image prefix was not set during namespace init")
 				}
-				// combine prefix and function name to provide default image
-				createFunctionOptions.Image = fmt.Sprintf("%s/%s", prefix, args[functionCreateFunctionNameIndex])
+
+				fnName := args[functionCreateFunctionNameIndex]
+				if createFunctionOptions.Image == "" {
+					// combine prefix and function name to provide default image
+					createFunctionOptions.Image = fmt.Sprintf("%s/%s", prefix, fnName)
+				} else if strings.HasPrefix(createFunctionOptions.Image, "_:") {
+					// add the prefix to the specified image tag
+					createFunctionOptions.Image = strings.Replace(createFunctionOptions.Image, "_", fmt.Sprintf("%s/%s", prefix, fnName), 1)
+				} else if strings.HasPrefix(createFunctionOptions.Image, "_/") {
+					// add the prefix to the specified image name
+					createFunctionOptions.Image = strings.Replace(createFunctionOptions.Image, "_", prefix, 1)
+				} else {
+					return fmt.Errorf("Unknown image prefix syntax, expected %q or %q, found: %q", "_/", "_:", createFunctionOptions.Image)
+				}
 			}
 
 			return nil
