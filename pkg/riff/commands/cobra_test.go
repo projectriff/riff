@@ -24,7 +24,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/projectriff/riff/cmd/commands"
+	"github.com/projectriff/riff/pkg/riff/commands"
 	. "github.com/spf13/cobra"
 )
 
