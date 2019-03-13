@@ -22,9 +22,9 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/projectriff/riff/cmd/commands"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/core/mocks"
+	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/spf13/cobra"
 )
 
