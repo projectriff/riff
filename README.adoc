@@ -8,14 +8,10 @@ It includes commands to install Knative in a Kubernetes cluster, and for managin
 
 == Installation of the latest release
 
-=== Chocolatey
+=== Binaries
 
-To install the CLI for Windows with link:https://chocolatey.org/[Chocolatey]:
-
-[source, bash]
-----
-choco install riff
-----
+Official binary releases are available from the link:https://github.com/projectriff/riff/releases[Releases] page. See link:https://projectriff.io/docs/getting-started-with-knative-riff-on-minikube/[Getting started on Minikube] or
+link:https://projectriff.io/docs/getting-started-with-knative-riff-on-gke/[Getting started on GKE] for how to install the riff CLI and the riff system.
 
 === Homebrew
 
@@ -26,12 +22,14 @@ To install the CLI for Mac OS with link:https://brew.sh/[Homebrew]:
 brew install riff
 ----
 
-=== Binaries
+=== Chocolatey
 
-Official binary releases are available from the link:https://github.com/projectriff/riff/releases[Releases] page. See link:https://projectriff.io/docs/getting-started-with-knative-riff-on-minikube/[Getting started on Minikube] or
-link:https://projectriff.io/docs/getting-started-with-knative-riff-on-gke/[Getting started on GKE] for how to install the riff CLI and the riff system.
+To install the CLI for Windows with link:https://chocolatey.org/[Chocolatey]:
 
-See link:Community-Releases.adoc[Community releases] for Debian Apt packages.
+[source, bash]
+----
+choco install riff
+----
 
 == Developer installation of Knative
 
