@@ -49,12 +49,12 @@ install: build
 	cp $(OUTPUT) $(GOBIN)
 
 $(OUTPUT): $(GO_SOURCES) VERSION
-	GO111MODULE=on go build -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)"
+	GO111MODULE=on go build -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)" ./cmd/riff
 
 release: $(GO_SOURCES) VERSION
-	GOOS=darwin   GOARCH=amd64 GO111MODULE=on go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     && tar -czf riff-darwin-amd64.tgz $(OUTPUT)     && rm -f $(OUTPUT)
-	GOOS=linux    GOARCH=amd64 GO111MODULE=on go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     && tar -czf riff-linux-amd64.tgz  $(OUTPUT)     && rm -f $(OUTPUT)
-	GOOS=windows  GOARCH=amd64 GO111MODULE=on go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT).exe && zip -mq riff-windows-amd64.zip $(OUTPUT).exe && rm -f $(OUTPUT).exe
+	GOOS=darwin   GOARCH=amd64 GO111MODULE=on go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     ./cmd/riff && tar -czf riff-darwin-amd64.tgz $(OUTPUT)     && rm -f $(OUTPUT)
+	GOOS=linux    GOARCH=amd64 GO111MODULE=on go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     ./cmd/riff && tar -czf riff-linux-amd64.tgz  $(OUTPUT)     && rm -f $(OUTPUT)
+	GOOS=windows  GOARCH=amd64 GO111MODULE=on go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT).exe ./cmd/riff && zip -mq riff-windows-amd64.zip $(OUTPUT).exe && rm -f $(OUTPUT).exe
 
 docs: $(OUTPUT) clean-docs
 	$(OUTPUT) docs
