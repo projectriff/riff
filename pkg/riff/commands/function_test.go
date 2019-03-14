@@ -175,23 +175,6 @@ var _ = Describe("The riff function create command", func() {
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
-		It("should apply the image prefix with a custom tag", func() {
-			fc.SetArgs([]string{"square", "--git-repo", "https://github.com/repo", "--image", "_:custom"})
-
-			options := core.CreateFunctionOptions{
-				GitRepo:     "https://github.com/repo",
-				GitRevision: "master",
-			}
-			options.Name = "square"
-			options.Image = "defaulted-prefix/square:custom"
-			options.Env = []string{}
-			options.EnvFrom = []string{}
-
-			asMock.On("DefaultBuildImagePrefix", "").Return("defaulted-prefix", nil)
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
-			err := fc.Execute()
-			Expect(err).NotTo(HaveOccurred())
-		})
 		It("should propagate core.Client errors", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 
