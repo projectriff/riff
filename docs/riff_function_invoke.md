@@ -1,24 +1,24 @@
-## riff service invoke
+## riff function invoke
 
-Invoke a service
+Invoke a function
 
 ### Synopsis
 
-Invoke a service by shelling out to curl.
+Invoke a function by shelling out to curl.
 
 The curl command is printed so it can be copied and extended.
 
 Additional curl arguments and flags may be specified after a double dash (--).
 
 ```
-riff service invoke [flags]
+riff function invoke [flags]
 ```
 
 ### Examples
 
 ```
-  riff service invoke square --namespace joseph-ns
-  riff service invoke square /foo -- --data 42
+  riff function invoke square --namespace joseph-ns
+  riff function invoke square /foo -- --data 42
 ```
 
 ### Options
@@ -39,5 +39,5 @@ riff service invoke [flags]
 
 ### SEE ALSO
 
-* [riff service](riff_service.md)	 - Interact with service related resources
+* [riff function](riff_function.md)	 - Interact with function related resources
 

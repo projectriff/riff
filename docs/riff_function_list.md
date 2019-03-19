@@ -1,27 +1,27 @@
-## riff service list
+## riff function list
 
-List service resources
+List function resources
 
 ### Synopsis
 
-List service resources
+List function resources
 
 ```
-riff service list [flags]
+riff function list [flags]
 ```
 
 ### Examples
 
 ```
-  riff service list
-  riff service list --namespace joseph-ns
+  riff function list
+  riff function list --namespace joseph-ns
 ```
 
 ### Options
 
 ```
   -h, --help                  help for list
-  -n, --namespace namespace   the namespace of the services to be listed
+  -n, --namespace namespace   the namespace of the functions to be listed
 ```
 
 ### Options inherited from parent commands
@@ -33,5 +33,5 @@ riff service list [flags]
 
 ### SEE ALSO
 
-* [riff service](riff_service.md)	 - Interact with service related resources
+* [riff function](riff_function.md)	 - Interact with function related resources
 

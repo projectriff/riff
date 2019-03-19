@@ -1,20 +1,20 @@
-## riff service delete
+## riff function delete
 
-Delete existing services
+Delete existing functions
 
 ### Synopsis
 
-Delete existing services
+Delete existing functions
 
 ```
-riff service delete [flags]
+riff function delete [flags]
 ```
 
 ### Examples
 
 ```
-  riff service delete square --namespace joseph-ns
-  riff service delete service-1 service-2
+  riff function delete square --namespace joseph-ns
+  riff function delete service-1 service-2
 ```
 
 ### Options
@@ -33,5 +33,5 @@ riff service delete [flags]
 
 ### SEE ALSO
 
-* [riff service](riff_service.md)	 - Interact with service related resources
+* [riff function](riff_function.md)	 - Interact with function related resources
 
