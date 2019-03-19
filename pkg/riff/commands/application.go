@@ -166,6 +166,8 @@ func ApplicationCreate(buildpackBuilder core.Builder, fcTool *core.Client) *cobr
 
 	command.Flags().StringArrayVar(&createApplicationOptions.Env, "env", []string{}, envUsage)
 	command.Flags().StringArrayVar(&createApplicationOptions.EnvFrom, "env-from", []string{}, envFromUsage)
+	command.Flags().StringVar(&createApplicationOptions.BuildTemplate, "build-template", "cnb", "build template to apply")
+	command.Flags().StringArrayVarP(&createApplicationOptions.Arguments, "argument", "a", []string{}, "build template arguments in a NAME=value form. Valid arguments will vary based on the build template")
 
 	return command
 }

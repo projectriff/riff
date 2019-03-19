@@ -30,6 +30,8 @@ riff application create [flags]
 ### Options
 
 ```
+  -a, --argument stringArray           build template arguments in a NAME=value form. Valid arguments will vary based on the build template
+      --build-template string          build template to apply (default "cnb")
       --dry-run                        don't create resources but print yaml representation on stdout
       --env stringArray                environment variable expressed in a 'key=value' format
       --env-from stringArray           environment variable created from a source reference; see command help for supported formats

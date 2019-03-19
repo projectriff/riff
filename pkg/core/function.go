@@ -398,13 +398,13 @@ func checkService(c *client, namespace string, name string, gen int64) (transien
 		}
 		return nil, fmt.Errorf("function creation failed: %s", ready.Reason)
 	}
-	return fmt.Errorf("function creation incomplete: service status unknown: %s", ready.Reason), nil
+	return fmt.Errorf("function creation incomplete: status unknown: %s", ready.Reason), nil
 }
 
 func fetchTransientError(conds duckv1alpha1.Conditions) string {
 	for _, c := range conds {
 		if c.IsUnknown() {
-			return "function creation incomplete: service status false"
+			return "function creation incomplete: status false"
 		}
 	}
 	return ""

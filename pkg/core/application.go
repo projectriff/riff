@@ -46,6 +46,9 @@ type CreateApplicationOptions struct {
 	GitRepo     string
 	GitRevision string
 	SubPath     string
+
+	Arguments     []string
+	BuildTemplate string
 }
 
 type ListApplicationOptions struct {
@@ -82,9 +85,17 @@ func (c *client) CreateApplication(buildpackBuilder Builder, options CreateAppli
 	} else {
 		// buildpack based cluster build
 		cacheSize := resource.MustParse("8Gi")
-		f.Spec.Build.CacheSize = &cacheSize
-		f.Spec.Build.Template = "cnb"
-		f.Spec.Build.Source = c.makeApplicationBuildSourceSpec(options)
+		arguments, err := c.makeApplicationBuildArguments(options)
+		if err != nil {
+			return nil, err
+		}
+		f.Spec.Build = projectriffv1alpha1.ApplicationBuild{
+			CacheSize: &cacheSize,
+			Template:  options.BuildTemplate,
+			Arguments: arguments,
+			Source:    c.makeApplicationBuildSourceSpec(options),
+		}
+
 	}
 
 	if !options.DryRun {
@@ -130,7 +141,6 @@ func newApplication(options CreateApplicationOptions) (*projectriffv1alpha1.Appl
 		},
 		Spec: projectriffv1alpha1.ApplicationSpec{
 			Image: options.Image,
-			Build: projectriffv1alpha1.ApplicationBuild{},
 			Run: projectriffv1alpha1.ApplicationRun{
 				Env: envVars,
 			},
@@ -148,6 +158,21 @@ func (c *client) makeApplicationBuildSourceSpec(options CreateApplicationOptions
 		},
 		SubPath: options.SubPath,
 	}
+}
+
+func (c *client) makeApplicationBuildArguments(options CreateApplicationOptions) ([]projectriffv1alpha1.BuildArgument, error) {
+	args := []projectriffv1alpha1.BuildArgument{}
+	for _, a := range options.Arguments {
+		p := strings.SplitN(a, "=", 2)
+		if len(p) != 2 {
+			return nil, fmt.Errorf("expected argument in form %q got %q", "NAME=value", a)
+		}
+		args = append(args, projectriffv1alpha1.BuildArgument{
+			Name:  p[0],
+			Value: p[1],
+		})
+	}
+	return args, nil
 }
 
 func (c *client) displayApplicationCreationProgress(applicationNamespace string, applicationName string, logWriter io.Writer, stopChan <-chan struct{}, errChan chan<- error) {
