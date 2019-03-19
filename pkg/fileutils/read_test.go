@@ -201,6 +201,135 @@ var _ = Describe("ReadUrl", func() {
 	})
 })
 
+var _ = Describe("EmptyScheme", func() {
+
+	var (
+		os      string
+		file	string
+		u       *url.URL
+		err     error
+		empty   bool
+	)
+
+	JustBeforeEach(func() {
+		u, err = url.Parse(file)
+		empty = fileutils.EmptyScheme(u, os)
+	})
+
+	Context("on Windows", func() {
+
+		BeforeEach(func() {
+			os = "windows"
+		})
+
+		Context("when file: is the scheme and using unix separators", func() {
+			BeforeEach(func() {
+				file = "file:///my/file"
+			})
+
+			It("scheme should not be empty", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(empty).To(BeFalse())
+			})
+		})
+
+		Context("when no scheme and using windows separators and no drive letter", func() {
+			BeforeEach(func() {
+				file = "\\my\\file"
+			})
+
+			It("scheme should be empty", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(empty).To(BeTrue())
+			})
+		})
+
+		Context("when no scheme and using windows separators and drive letter", func() {
+			BeforeEach(func() {
+				file = "C:\\my\\file"
+			})
+
+			It("scheme should be empty", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(empty).To(BeTrue())
+			})
+		})
+
+		Context("when http: is the scheme", func() {
+			BeforeEach(func() {
+				file = "http://foo.com/bar"
+			})
+
+			It("scheme should not be empty", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(empty).To(BeFalse())
+			})
+		})
+
+		Context("when https: is the scheme", func() {
+			BeforeEach(func() {
+				u, err = url.Parse("https://foo.com/bar")
+			})
+
+			It("scheme should not be empty", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(empty).To(BeFalse())
+			})
+		})
+	})
+
+	Context("on Unix-style OS", func() {
+
+		BeforeEach(func() {
+			os = "linux"
+		})
+
+		Context("when file: is the scheme and using unix separators", func() {
+			BeforeEach(func() {
+				file = "file:///my/file"
+			})
+
+			It("scheme should not be empty", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(empty).To(BeFalse())
+			})
+		})
+
+		Context("when no scheme and using unix separators", func() {
+			BeforeEach(func() {
+				file = "/my/file"
+			})
+
+			It("scheme should be empty", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(empty).To(BeTrue())
+			})
+		})
+
+		Context("when http: is the scheme", func() {
+			BeforeEach(func() {
+				file = "http://foo.com/bar"
+			})
+
+			It("scheme should not be empty", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(empty).To(BeFalse())
+			})
+		})
+
+		Context("when https: is the scheme", func() {
+			BeforeEach(func() {
+				u, err = url.Parse("https://foo.com/bar")
+			})
+
+			It("scheme should not be empty", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(empty).To(BeFalse())
+			})
+		})
+	})
+})
+
 func getwdAsURL() string {
 	cwd, err := os.Getwd()
 	Expect(err).NotTo(HaveOccurred())

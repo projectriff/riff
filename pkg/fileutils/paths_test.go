@@ -20,6 +20,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/projectriff/riff/pkg/fileutils"
+	"os"
+	"strings"
 )
 
 var _ = Describe("StartsWithHomeDirAsTilde", func() {
@@ -58,7 +60,8 @@ var _ = Describe("ResolveTilde", func() {
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(path).NotTo(ContainSubstring("~"))
-		Expect(path).To(HaveSuffix(initialPath[2:]))
+		// on windows the path separator might have changed so replace / with the OS specific separator
+		Expect(path).To(HaveSuffix(strings.Replace( initialPath[2:], "/", string(os.PathSeparator), -1)))
 	})
 
 	It("returns path without tilde as is", func() {
