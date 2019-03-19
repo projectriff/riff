@@ -34,6 +34,7 @@ require (
 	github.com/onsi/gomega v1.4.2
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.8.0
+	github.com/projectriff/system v0.0.0-20190318214547-0178fde44731
 	github.com/russross/blackfriday v1.5.1 // indirect
 	github.com/spf13/cobra v0.0.3
 	github.com/stretchr/testify v1.2.2

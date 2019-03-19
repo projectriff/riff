@@ -19,7 +19,6 @@ package commands
 import (
 	"bytes"
 	"fmt"
-	"github.com/projectriff/riff/pkg/core/tasks"
 	"io"
 	"os"
 	"os/exec"
@@ -27,7 +26,9 @@ import (
 	"strings"
 	"time"
 
-	"k8s.io/api/core/v1"
+	"github.com/projectriff/riff/pkg/core/tasks"
+
+	v1 "k8s.io/api/core/v1"
 
 	"github.com/frioux/shellquote"
 	servingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"

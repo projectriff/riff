@@ -18,12 +18,14 @@ package core
 
 import (
 	"context"
+	errs "errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	logutil "github.com/boz/go-logutil"
@@ -32,15 +34,16 @@ import (
 
 	"github.com/boz/kail"
 	"github.com/boz/kcache/types/pod"
-	build "github.com/knative/build/pkg/apis/build/v1alpha1"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	"github.com/projectriff/riff/pkg/env"
+	projectriff "github.com/projectriff/system/pkg/apis/projectriff/v1alpha1"
+	projectriffv1alpha1 "github.com/projectriff/system/pkg/apis/projectriff/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 const (
@@ -71,177 +74,121 @@ type CreateFunctionOptions struct {
 	SubPath     string
 }
 
-func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, *corev1.PersistentVolumeClaim, error) {
-	var buildCache *corev1.PersistentVolumeClaim
+type ListFunctionOptions struct {
+	Namespace string
+}
+
+func (c *client) ListFunctions(options ListFunctionOptions) (*projectriffv1alpha1.FunctionList, error) {
+	ns := c.explicitOrConfigNamespace(options.Namespace)
+	return c.system.ProjectriffV1alpha1().Functions(ns).List(meta_v1.ListOptions{})
+}
+
+func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*projectriffv1alpha1.Function, error) {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 	functionName := options.Name
-	_, err := c.serving.ServingV1alpha1().Services(ns).Get(functionName, v1.GetOptions{})
+	_, err := c.system.ProjectriffV1alpha1().Functions(ns).Get(functionName, v1.GetOptions{})
 	if err == nil {
-		return nil, nil, fmt.Errorf("service '%s' already exists in namespace '%s'", functionName, ns)
+		return nil, fmt.Errorf("function '%s' already exists in namespace '%s'", functionName, ns)
 	}
 
-	s, err := newService(options.CreateOrUpdateServiceOptions)
+	f, err := newFunction(options)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-
-	labels := s.Spec.RunLatest.Configuration.RevisionTemplate.Labels
-	if labels == nil {
-		labels = map[string]string{}
-	}
-	labels[functionLabel] = functionName
-	s.Spec.RunLatest.Configuration.RevisionTemplate.SetLabels(labels)
 
 	if options.LocalPath != "" {
-		if s.ObjectMeta.Annotations == nil {
-			s.ObjectMeta.Annotations = make(map[string]string)
-		}
-		s.ObjectMeta.Annotations[functionArtifactAnnotation] = options.Artifact
-		s.ObjectMeta.Annotations[functionHandlerAnnotation] = options.Handler
-		s.ObjectMeta.Annotations[functionOverrideAnnotation] = options.Invoker
-
 		if options.DryRun {
 			// skip build for a dry run
 			log.Write([]byte("Skipping local build\n"))
 		} else {
 			if err := c.doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions, log); err != nil {
-				return nil, nil, err
+				return nil, err
 			}
 		}
-		c.bumpBuildAnnotationForRevision(s)
 	} else {
-		// create build cache for service
-		buildCache = &corev1.PersistentVolumeClaim{
-			TypeMeta: v1.TypeMeta{
-				APIVersion: "v1",
-				Kind:       "PersistentVolumeClaim",
-			},
-			ObjectMeta: v1.ObjectMeta{
-				Name: fmt.Sprintf("%s-build-cache", options.Name),
-			},
-			Spec: corev1.PersistentVolumeClaimSpec{
-				AccessModes: []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce},
-				Resources: corev1.ResourceRequirements{
-					Requests: corev1.ResourceList{
-						corev1.ResourceStorage: resource.MustParse("8Gi"),
-					},
-				},
-			},
-		}
-
 		// buildpack based cluster build
-		s.Spec.RunLatest.Configuration.Build = &v1alpha1.RawExtension{
-			Object: &build.Build{
-				TypeMeta: v1.TypeMeta{
-					APIVersion: "build.knative.dev/v1alpha1",
-					Kind:       "Build",
-				},
-				Spec: build.BuildSpec{
-					ServiceAccountName: "riff-build",
-					Source:             c.makeBuildSourceSpec(options),
-					Template: &build.TemplateInstantiationSpec{
-						Name: buildTemplateName,
-						Kind: "ClusterBuildTemplate",
-						Arguments: []build.ArgumentSpec{
-							{Name: "IMAGE", Value: options.Image},
-							{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
-							{Name: "FUNCTION_HANDLER", Value: options.Handler},
-							{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
-							{Name: "CACHE", Value: "cache"},
-						},
-					},
-					Volumes: []corev1.Volume{
-						{
-							Name: "cache",
-							VolumeSource: corev1.VolumeSource{
-								PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{ClaimName: buildCache.Name},
-							},
-						},
-					},
-				},
-			},
-		}
-		c.bumpBuildAnnotationForBuild(s)
+		cacheSize := resource.MustParse("8Gi")
+		f.Spec.Build.CacheSize = &cacheSize
+		f.Spec.Build.Source = c.makeBuildSourceSpec(options)
 	}
 
 	if !options.DryRun {
-		if buildCache != nil {
-			buildCache, err = c.kubeClient.CoreV1().PersistentVolumeClaims(ns).Create(buildCache)
-			if err != nil {
-				return nil, nil, err
-			}
-		}
-
-		s, err := c.serving.ServingV1alpha1().Services(ns).Create(s)
+		f, err := c.system.ProjectriffV1alpha1().Functions(ns).Create(f)
 		if err != nil {
-			return nil, nil, err
-		}
-
-		if buildCache != nil {
-			// add service as owner of build cache so that deleting the service, deletes the cache
-			if _, err = c.addOwnerReferenceToCacheWithRetry(3, buildCache, s); err != nil {
-				return nil, nil, err
-			}
+			return nil, err
 		}
 
 		if options.Verbose || options.Wait {
 			stopChan := make(chan struct{})
 			errChan := make(chan error)
 			if options.Verbose {
-				go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, errChan)
+				go c.displayFunctionCreationProgress(ns, f.Name, log, stopChan, errChan)
 			}
-			err := c.waitForSuccessOrFailure(ns, s.Name, 1, stopChan, errChan, options.Verbose)
+			err := c.waitForSuccessOrFailure(ns, f.Name, 1, stopChan, errChan, options.Verbose)
 			if err != nil {
-				return nil, nil, err
+				return nil, err
 			}
 		}
 	}
 
-	return s, buildCache, nil
+	return f, nil
 }
 
-func (c *client) addOwnerReferenceToCacheWithRetry(attempts int, cache *corev1.PersistentVolumeClaim, svc *v1alpha1.Service) (*corev1.PersistentVolumeClaim, error) {
-	result, err := c.addOwnerReferenceToCache(cache, svc)
-	if err != nil && attempts > 0 {
-		return c.addOwnerReferenceToCacheWithRetry(attempts-1, cache, svc)
-	}
-	return result, err
-}
-
-func (c *client) addOwnerReferenceToCache(cache *corev1.PersistentVolumeClaim, svc *v1alpha1.Service) (*corev1.PersistentVolumeClaim, error) {
-	cache, err := c.kubeClient.CoreV1().PersistentVolumeClaims(cache.Namespace).Get(cache.Name, v1.GetOptions{})
+func newFunction(options CreateFunctionOptions) (*projectriffv1alpha1.Function, error) {
+	envVars, err := ParseEnvVar(options.Env)
 	if err != nil {
 		return nil, err
 	}
-	cache.ObjectMeta.OwnerReferences = []v1.OwnerReference{
-		*v1.NewControllerRef(svc, schema.GroupVersionKind{
-			Group:   v1alpha1.SchemeGroupVersion.Group,
-			Version: v1alpha1.SchemeGroupVersion.Version,
-			Kind:    "Service",
-		}),
+	envVarsFrom, err := ParseEnvVarSource(options.EnvFrom)
+	if err != nil {
+		return nil, err
 	}
-	return c.kubeClient.CoreV1().PersistentVolumeClaims(cache.Namespace).Update(cache)
+	envVars = append(envVars, envVarsFrom...)
+
+	f := projectriffv1alpha1.Function{
+		TypeMeta: meta_v1.TypeMeta{
+			APIVersion: "projectriff.io/v1alpha1",
+			Kind:       "Function",
+		},
+		ObjectMeta: meta_v1.ObjectMeta{
+			Name: options.Name,
+		},
+		Spec: projectriffv1alpha1.FunctionSpec{
+			Image: options.Image,
+			Build: projectriffv1alpha1.FunctionBuild{
+				Artifact: options.Artifact,
+				Handler:  options.Handler,
+				Invoker:  options.Invoker,
+			},
+			Run: projectriffv1alpha1.FunctionRun{
+				Env: envVars,
+			},
+		},
+	}
+
+	return &f, nil
 }
 
-func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.SourceSpec {
-	return &build.SourceSpec{
-		Git: &build.GitSourceSpec{
-			Url:      options.GitRepo,
+func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *projectriffv1alpha1.Source {
+	return &projectriffv1alpha1.Source{
+		Git: &projectriffv1alpha1.GitSource{
+			URL:      options.GitRepo,
 			Revision: options.GitRevision,
 		},
 		SubPath: options.SubPath,
 	}
 }
 
-func (c *client) displayFunctionCreationProgress(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}, errChan chan<- error) {
-	revName, err := c.revisionName(serviceNamespace, serviceName, logWriter, stopChan)
+func (c *client) displayFunctionCreationProgress(functionNamespace string, functionName string, logWriter io.Writer, stopChan <-chan struct{}, errChan chan<- error) {
+	// TODO this assumes the function and service have the same name, they may not in the future
+	revName, err := c.revisionName(functionNamespace, functionName, logWriter, stopChan)
 	if err != nil {
 		errChan <- err
 		return
 	} else if revName == "" { // stopped
 		return
 	}
-	buildName, err := c.buildName(serviceNamespace, revName, logWriter, stopChan)
+	buildName, err := c.buildName(functionNamespace, revName, logWriter, stopChan)
 	if err != nil {
 		errChan <- err
 		return
@@ -251,7 +198,7 @@ func (c *client) displayFunctionCreationProgress(serviceNamespace string, servic
 
 	ctx := newContext()
 
-	podController, err := c.podController(buildName, serviceName, ctx)
+	podController, err := c.podController(buildName, functionName, ctx)
 	if err != nil {
 		errChan <- err
 		return
@@ -279,6 +226,9 @@ func (c *client) revisionName(serviceNamespace string, serviceName string, logWr
 	for {
 		serviceObj, err := c.serving.ServingV1alpha1().Services(serviceNamespace).Get(serviceName, v1.GetOptions{})
 		if err != nil {
+			if errors.IsNotFound(err) {
+				continue
+			}
 			return "", err
 		}
 		revName = serviceObj.Status.LatestCreatedRevisionName
@@ -370,6 +320,9 @@ func (c *client) createServiceChecker(namespace string, name string, gen int64) 
 
 func (c *client) waitForSuccessOrFailure(namespace string, name string, gen int64, stopChan chan<- struct{}, errChan <-chan error, verbose bool) error {
 	defer close(stopChan)
+
+	// give a moment for resource to settle
+	time.Sleep(5000 * time.Millisecond)
 
 	var log io.Writer
 	if verbose {
@@ -500,65 +453,54 @@ type UpdateFunctionOptions struct {
 	Wait      bool
 }
 
-func (c *client) getServiceSpecGeneration(namespace string, name string) (int64, error) {
-	s, err := c.service(namespace, name)
+func (c *client) getFunctionSpecGeneration(namespace string, name string) (int64, error) {
+	f, err := c.function(namespace, name)
 	if err != nil {
 		return 0, err
 	}
-	return s.Generation, nil
+	return f.Generation, nil
 }
 
 func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunctionOptions, log io.Writer) error {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 
-	service, err := c.service(ns, options.Name)
+	function, err := c.function(ns, options.Name)
 	if err != nil {
 		return err
 	}
 
 	// create a copy before mutating
-	service = service.DeepCopy()
+	function = function.DeepCopy()
 
-	gen := service.Generation
-
-	// TODO support non-RunLatest configurations
-	configuration := service.Spec.RunLatest.Configuration
-	labels := configuration.RevisionTemplate.Labels
-	if labels[functionLabel] == "" {
-		return fmt.Errorf("the service named \"%s\" is not a %s function", options.Name, env.Cli.Name)
-	}
-
-	build := configuration.Build
-	annotations := service.Annotations
+	gen := function.Generation
 
 	appDir := options.LocalPath
-	if build != nil && appDir != "" {
-		return fmt.Errorf("unable to proceed: local path specified for cluster-built service named \"%s\"", options.Name)
-	}
 
-	if build == nil {
+	if appDir != "" {
 		// function was built locally, attempt to reconstruct configuration
 		localBuild := BuildOptions{
 			LocalPath: appDir,
-			Artifact:  annotations[functionArtifactAnnotation],
-			Handler:   annotations[functionHandlerAnnotation],
-			Invoker:   annotations[functionOverrideAnnotation],
+			Artifact:  function.Spec.Build.Artifact,
+			Handler:   function.Spec.Build.Handler,
+			Invoker:   function.Spec.Build.Invoker,
 		}
-		repoName := configuration.RevisionTemplate.Spec.Container.Image
-		if appDir == "" {
-			return fmt.Errorf("local-path must be specified to rebuild function from source")
-		}
+		repoName := function.Spec.Image
 
 		err := c.doBuildLocally(buildpackBuilder, repoName, localBuild, log)
 		if err != nil {
 			return err
 		}
-		c.bumpBuildAnnotationForRevision(service)
+		// TODO this won't work, we need a replacement
+		// c.bumpBuildAnnotationForRevision(service)
 	} else {
-		c.bumpBuildAnnotationForBuild(service)
+		if function.Spec.Build.Source == nil {
+			return fmt.Errorf("local-path must be specified to rebuild function from source")
+		}
+		// TODO this won't work, we need a replacement
+		// c.bumpBuildAnnotationForBuild(service)
 	}
 
-	_, err = c.serving.ServingV1alpha1().Services(service.Namespace).Update(service)
+	_, err = c.system.ProjectriffV1alpha1().Functions(function.Namespace).Update(function)
 	if err != nil {
 		return err
 	}
@@ -572,10 +514,10 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 		)
 		for i := 0; i < 10; i++ {
 			if i >= 10 {
-				return fmt.Errorf("update unsuccessful for \"%s\", service resource was never updated", options.Name)
+				return fmt.Errorf("update unsuccessful for \"%s\", function resource was never updated", options.Name)
 			}
 			time.Sleep(500 * time.Millisecond)
-			nextGen, err = c.getServiceSpecGeneration(ns, options.Name)
+			nextGen, err = c.getFunctionSpecGeneration(ns, options.Name)
 			if err != nil {
 				return err
 			}
@@ -584,9 +526,9 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 			}
 		}
 		if options.Verbose {
-			go c.displayFunctionCreationProgress(ns, service.Name, log, stopChan, errChan)
+			go c.displayFunctionCreationProgress(ns, function.Name, log, stopChan, errChan)
 		}
-		err = c.waitForSuccessOrFailure(ns, service.Name, nextGen, stopChan, errChan, options.Verbose)
+		err = c.waitForSuccessOrFailure(ns, function.Name, nextGen, stopChan, errChan, options.Verbose)
 		if err != nil {
 			return err
 		}
@@ -655,4 +597,85 @@ func writeRiffToml(options BuildOptions) error {
 func deleteRiffToml(options BuildOptions) error {
 	path := filepath.Join(options.LocalPath, "riff.toml")
 	return os.Remove(path)
+}
+
+type FunctionStatusOptions struct {
+	Namespace string
+	Name      string
+}
+
+func (c *client) FunctionStatus(options FunctionStatusOptions) (*duckv1alpha1.Condition, error) {
+
+	s, err := c.function(options.Namespace, options.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	if ready := s.Status.GetCondition(projectriffv1alpha1.FunctionConditionReady); ready != nil {
+		return ready, nil
+	}
+	return nil, errs.New("No condition of type FunctionConditionReady found for the function")
+}
+
+type FunctionInvokeOptions struct {
+	Namespace       string
+	Name            string
+	ContentTypeText bool
+	ContentTypeJson bool
+}
+
+func (c *client) FunctionCoordinates(options FunctionInvokeOptions) (string, string, error) {
+
+	ksvc, err := c.kubeClient.CoreV1().Services(istioNamespace).Get(ingressServiceName, meta_v1.GetOptions{})
+	if err != nil {
+		return "", "", err
+	}
+	var ingress string
+	if ksvc.Spec.Type == "LoadBalancer" {
+		ingresses := ksvc.Status.LoadBalancer.Ingress
+		if len(ingresses) > 0 {
+			ingress = ingresses[0].IP
+			if ingress == "" {
+				ingress = ingresses[0].Hostname
+			}
+		}
+	}
+	if ingress == "" {
+		for _, port := range ksvc.Spec.Ports {
+			if port.Name == "http" || port.Name == "http2" {
+				config, err := c.clientConfig.ClientConfig()
+				if err != nil {
+					return "", "", err
+				}
+				host := config.Host[0:strings.LastIndex(config.Host, ":")]
+				host = strings.Replace(host, "https", "http", 1)
+				ingress = fmt.Sprintf("%s:%d", host, port.NodePort)
+			}
+		}
+		if ingress == "" {
+			return "", "", errs.New("Ingress not available")
+		}
+	}
+
+	f, err := c.function(options.Namespace, options.Name)
+	if err != nil {
+		return "", "", err
+	}
+
+	return ingress, f.Status.Address.Hostname, nil
+}
+
+func (c *client) function(namespace, name string) (*projectriff.Function, error) {
+	ns := c.explicitOrConfigNamespace(namespace)
+	return c.system.ProjectriffV1alpha1().Functions(ns).Get(name, meta_v1.GetOptions{})
+}
+
+type DeleteFunctionOptions struct {
+	Namespace string
+	Name      string
+}
+
+func (c *client) DeleteFunction(options DeleteFunctionOptions) error {
+	ns := c.explicitOrConfigNamespace(options.Namespace)
+	return c.system.ProjectriffV1alpha1().Functions(ns).Delete(options.Name, nil)
 }

@@ -17,12 +17,20 @@
 package commands
 
 import (
+	"bytes"
 	"fmt"
+	"os"
+	"os/exec"
 	"strings"
+	"time"
 
+	"github.com/frioux/shellquote"
 	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/core/tasks"
 	"github.com/projectriff/riff/pkg/env"
+	projectriffv1alpha1 "github.com/projectriff/system/pkg/apis/projectriff/v1alpha1"
 	"github.com/spf13/cobra"
+	v1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -36,7 +44,27 @@ const (
 )
 
 const (
+	functionStatusFunctionNameIndex = iota
+	functionStatusNumberOfArgs
+)
+
+const (
 	functionBuildNumberOfArgs = iota
+)
+
+const (
+	functionListNumberOfArgs = iota
+)
+
+const (
+	functionInvokeServiceNameIndex = iota
+	functionInvokeServicePathIndex
+	functionInvokeMaxNumberOfArgs
+)
+
+const (
+	functionDeleteNameStartIndex = iota
+	functionDeleteMinNumberOfArgs
 )
 
 func Function() *cobra.Command {
@@ -100,16 +128,13 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.C
 			fnName := args[functionCreateFunctionNameIndex]
 
 			createFunctionOptions.Name = fnName
-			f, pvc, err := (*fcTool).CreateFunction(buildpackBuilder, createFunctionOptions, cmd.OutOrStdout())
+			f, err := (*fcTool).CreateFunction(buildpackBuilder, createFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err
 			}
 
 			if createFunctionOptions.DryRun {
 				marshaller := NewMarshaller(cmd.OutOrStdout())
-				if err = marshaller.Marshal(pvc); err != nil {
-					return err
-				}
 				if err = marshaller.Marshal(f); err != nil {
 					return err
 				}
@@ -211,6 +236,247 @@ func FunctionBuild(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.Co
 	command.MarkFlagRequired("local-path")
 
 	return command
+}
+
+func FunctionStatus(fcClient *core.Client) *cobra.Command {
+
+	functionStatusOptions := core.FunctionStatusOptions{}
+
+	command := &cobra.Command{
+		Use:     "status",
+		Short:   "Display the status of a function",
+		Example: `  ` + env.Cli.Name + ` function status square --namespace joseph-ns`,
+		Args: ArgValidationConjunction(
+			cobra.ExactArgs(functionStatusNumberOfArgs),
+			AtPosition(functionStatusFunctionNameIndex, ValidName()),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fnName := args[functionStatusFunctionNameIndex]
+			functionStatusOptions.Name = fnName
+			cond, err := (*fcClient).FunctionStatus(functionStatusOptions)
+			if err != nil {
+				return err
+			}
+
+			fmt.Fprintf(cmd.OutOrStdout(), "Last Transition Time:        %s\n", cond.LastTransitionTime.Inner.Format(time.RFC3339))
+
+			if cond.Reason != "" {
+				fmt.Fprintf(cmd.OutOrStdout(), "Message:                     %s\n", cond.Message)
+				fmt.Fprintf(cmd.OutOrStdout(), "Reason:                      %s\n", cond.Reason)
+			}
+
+			fmt.Fprintf(cmd.OutOrStdout(), "Status:                      %s\n", cond.Status)
+			fmt.Fprintf(cmd.OutOrStdout(), "Type:                        %s\n", cond.Type)
+
+			return nil
+		},
+	}
+
+	LabelArgs(command, "FUNCTION_NAME")
+
+	command.Flags().StringVarP(&functionStatusOptions.Namespace, "namespace", "n", "", "the `namespace` of the function")
+
+	return command
+}
+
+func FunctionList(fcClient *core.Client) *cobra.Command {
+	listFunctionOptions := core.ListFunctionOptions{}
+
+	command := &cobra.Command{
+		Use:   "list",
+		Short: "List function resources",
+		Example: `  ` + env.Cli.Name + ` function list
+  ` + env.Cli.Name + ` function list --namespace joseph-ns`,
+		Args: cobra.ExactArgs(functionListNumberOfArgs),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			functions, err := (*fcClient).ListFunctions(listFunctionOptions)
+			if err != nil {
+				return err
+			}
+
+			Display(cmd.OutOrStdout(), functionToInterfaceSlice(functions.Items), makeFunctionExtractors())
+			PrintSuccessfulCompletion(cmd)
+			return nil
+		},
+	}
+
+	command.Flags().StringVarP(&listFunctionOptions.Namespace, "namespace", "n", "", "the `namespace` of the functions to be listed")
+
+	return command
+}
+
+func FunctionInvoke(fcClient *core.Client) *cobra.Command {
+
+	functionInvokeOptions := core.FunctionInvokeOptions{}
+
+	command := &cobra.Command{
+		Use:   "invoke",
+		Short: "Invoke a function",
+		Long: `Invoke a function by shelling out to curl.
+
+The curl command is printed so it can be copied and extended.
+
+Additional curl arguments and flags may be specified after a double dash (--).`,
+		Example: `  ` + env.Cli.Name + ` function invoke square --namespace joseph-ns
+  ` + env.Cli.Name + ` function invoke square /foo -- --data 42`,
+		PreRunE: FlagsValidatorAsCobraRunE(AtMostOneOf("json", "text")),
+		Args: UpToDashDash(ArgValidationConjunction(
+			cobra.MinimumNArgs(functionInvokeMaxNumberOfArgs-1),
+			cobra.MaximumNArgs(functionInvokeMaxNumberOfArgs),
+			AtPosition(functionInvokeServiceNameIndex, ValidName()),
+		)),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			argsLengthAtDash := cmd.ArgsLenAtDash()
+			functionInvokeOptions.Name = args[functionInvokeServiceNameIndex]
+			path := "/"
+			if argsLengthAtDash > functionInvokeServicePathIndex ||
+				argsLengthAtDash == -1 && len(args) > functionInvokeServicePathIndex {
+				path = args[functionInvokeServicePathIndex]
+			}
+			ingress, hostName, err := (*fcClient).FunctionCoordinates(functionInvokeOptions)
+			if err != nil {
+				return err
+			}
+
+			curlCmd := exec.Command("curl", ingress+path)
+
+			curlCmd.Stdin = os.Stdin
+			curlCmd.Stdout = cmd.OutOrStdout()
+			curlCmd.Stderr = cmd.OutOrStderr()
+
+			hostHeader := fmt.Sprintf("Host: %s", hostName)
+			curlCmd.Args = append(curlCmd.Args, "-H", hostHeader)
+
+			if functionInvokeOptions.ContentTypeJson {
+				curlCmd.Args = append(curlCmd.Args, "-H", "Content-Type: application/json")
+			} else if functionInvokeOptions.ContentTypeText {
+				curlCmd.Args = append(curlCmd.Args, "-H", "Content-Type: text/plain")
+			}
+
+			verbose := false
+
+			if argsLengthAtDash > 0 {
+				curlArgs := args[argsLengthAtDash:]
+				for _, a := range curlArgs {
+					if verboseCurl(a) {
+						verbose = true
+					}
+				}
+				curlCmd.Args = append(curlCmd.Args, curlArgs...)
+			}
+
+			quoted, err := shellquote.Quote(curlCmd.Args)
+			if err != nil {
+				return err
+			}
+			fmt.Fprintln(cmd.OutOrStdout(), quoted)
+
+			if verbose {
+				return curlCmd.Run()
+			}
+
+			// curl is not verbose, so make it verbose, capture standard error, and print any HTTP errors
+			curlCmd.Args = append(curlCmd.Args, "-v")
+
+			buffer := new(bytes.Buffer)
+			errStream := curlCmd.Stderr
+			curlCmd.Stderr = buffer
+
+			curlErr := curlCmd.Run()
+
+			PrintCurlHttpErrors(buffer.String(), errStream)
+
+			return curlErr
+		},
+	}
+
+	LabelArgs(command, "FUNCTION_NAME", "PATH")
+
+	command.Flags().StringVarP(&functionInvokeOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
+	command.Flags().BoolVar(&functionInvokeOptions.ContentTypeJson, "json", false, "set the request's content type to 'application/json'")
+	command.Flags().BoolVar(&functionInvokeOptions.ContentTypeText, "text", false, "set the request's content type to 'text/plain'")
+
+	return command
+}
+
+func FunctionDelete(riffClient *core.Client) *cobra.Command {
+	cliOptions := DeleteFunctionsCliOptions{}
+
+	command := &cobra.Command{
+		Use:   "delete",
+		Short: "Delete existing functions",
+		Example: `  ` + env.Cli.Name + ` function delete square --namespace joseph-ns
+  ` + env.Cli.Name + ` function delete service-1 service-2`,
+		Args: ArgValidationConjunction(
+			cobra.MinimumNArgs(functionDeleteMinNumberOfArgs),
+			StartingAtPosition(functionDeleteNameStartIndex, ValidName()),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			names := args[functionDeleteNameStartIndex:]
+			results := tasks.ApplyInParallel(names, func(name string) error {
+				options := core.DeleteFunctionOptions{Namespace: cliOptions.Namespace, Name: name}
+				return (*riffClient).DeleteFunction(options)
+			})
+			err := tasks.MergeResults(results, func(result tasks.CorrelatedResult) string {
+				err := result.Error
+				if err == nil {
+					return ""
+				}
+				return fmt.Sprintf("Unable to delete function %s: %v", result.Input, err)
+			})
+			if err != nil {
+				return err
+			}
+
+			PrintSuccessfulCompletion(cmd)
+			return nil
+		},
+	}
+
+	LabelArgs(command, "FUNCTION_NAME")
+
+	command.Flags().StringVarP(&cliOptions.Namespace, "namespace", "n", "", "the `namespace` of the service")
+
+	return command
+}
+
+func functionToInterfaceSlice(functions []projectriffv1alpha1.Function) []interface{} {
+	result := make([]interface{}, len(functions))
+	for i := range functions {
+		result[i] = functions[i]
+	}
+	return result
+}
+
+func makeFunctionExtractors() []NamedExtractor {
+	return []NamedExtractor{
+		{
+			name: "NAME",
+			fn:   func(f interface{}) string { return f.(projectriffv1alpha1.Function).Name },
+		},
+		{
+			name: "STATUS",
+			fn: func(f interface{}) string {
+				function := f.(projectriffv1alpha1.Function)
+				cond := function.Status.GetCondition(projectriffv1alpha1.FunctionConditionReady)
+				if cond == nil {
+					return "Unknown"
+				}
+				switch cond.Status {
+				case v1.ConditionTrue:
+					return "Running"
+				case v1.ConditionFalse:
+					return fmt.Sprintf("%s: %s", cond.Reason, cond.Message)
+				default:
+					return "Unknown"
+				}
+			},
+		},
+	}
+}
+
+type DeleteFunctionsCliOptions struct {
+	Namespace string
 }
 
 func registerBuildOptionsFlags(command *cobra.Command, options *core.BuildOptions) {
