@@ -17,6 +17,7 @@ See https://projectriff.io and https://github.com/knative/docs
 
 ### SEE ALSO
 
+* [riff application](riff_application.md)	 - Interact with application related resources
 * [riff channel](riff_channel.md)	 - Interact with channel related resources
 * [riff completion](riff_completion.md)	 - Generate shell completion scripts
 * [riff function](riff_function.md)	 - Interact with function related resources
