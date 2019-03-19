@@ -23,7 +23,6 @@ import (
 	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	eventing_cs "github.com/knative/eventing/pkg/client/clientset/versioned"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	serving_cs "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/projectriff/riff/pkg/core/kustomize"
 	"github.com/projectriff/riff/pkg/kubectl"
@@ -50,12 +49,12 @@ type Client interface {
 	CreateChannel(options CreateChannelOptions) (*eventing.Channel, error)
 	DeleteChannel(options DeleteChannelOptions) error
 
-	ListServices(options ListServiceOptions) (*serving.ServiceList, error)
-	CreateService(options CreateOrUpdateServiceOptions) (*serving.Service, error)
-	UpdateService(options CreateOrUpdateServiceOptions) (*serving.Service, error)
-	DeleteService(options DeleteServiceOptions) error
-	ServiceStatus(options ServiceStatusOptions) (*duckv1alpha1.Condition, error)
-	ServiceCoordinates(options ServiceInvokeOptions) (ingressIP string, hostName string, err error)
+	// ListServices(options ListServiceOptions) (*serving.ServiceList, error)
+	// CreateService(options CreateOrUpdateServiceOptions) (*serving.Service, error)
+	// UpdateService(options CreateOrUpdateServiceOptions) (*serving.Service, error)
+	// DeleteService(options DeleteServiceOptions) error
+	// ServiceStatus(options ServiceStatusOptions) (*duckv1alpha1.Condition, error)
+	// ServiceCoordinates(options ServiceInvokeOptions) (ingressIP string, hostName string, err error)
 
 	SystemInstall(manifests map[string]*Manifest, options SystemInstallOptions) (bool, error)
 	SystemUninstall(options SystemUninstallOptions) (bool, error)
