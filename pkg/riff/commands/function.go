@@ -145,7 +145,7 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.C
 					if createFunctionOptions.Namespace != "" {
 						namespaceOption = fmt.Sprintf(" -n %s", createFunctionOptions.Namespace)
 					}
-					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Issue `%s service status %s%s` to see the status of the function\n", env.Cli.Name, fnName, namespaceOption)
+					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Issue `%s function status %s%s` to see the status of the function\n", env.Cli.Name, fnName, namespaceOption)
 				}
 			}
 

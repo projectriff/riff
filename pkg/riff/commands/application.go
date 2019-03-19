@@ -144,7 +144,7 @@ func ApplicationCreate(buildpackBuilder core.Builder, fcTool *core.Client) *cobr
 					if createApplicationOptions.Namespace != "" {
 						namespaceOption = fmt.Sprintf(" -n %s", createApplicationOptions.Namespace)
 					}
-					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Issue `%s service status %s%s` to see the status of the application\n", env.Cli.Name, fnName, namespaceOption)
+					_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Issue `%s application status %s%s` to see the status of the application\n", env.Cli.Name, fnName, namespaceOption)
 				}
 			}
 
