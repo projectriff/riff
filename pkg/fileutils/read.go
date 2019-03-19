@@ -38,17 +38,21 @@ func Read(file string, base string) ([]byte, error) {
 }
 
 func readAbsFile(file string) ([]byte, error) {
+	// The file argument could be an abs file reference or a URL
 	u, err := url.Parse(file)
 	if err != nil {
 		return nil, err
 	}
-	if u.Scheme == "" {
+	if u.Scheme == "http" || u.Scheme == "https" || u.Scheme == "file" {
+		return ReadUrl(u, 0)
+	}
+	if EmptyScheme(u, runtime.GOOS) {
 		if !filepath.IsAbs(file) {
 			return nil, fmt.Errorf("absolute path expected instead of relative path: %s", file)
 		}
 		return ioutil.ReadFile(file)
 	}
-	return ReadUrl(u, 0)
+	return nil, fmt.Errorf("invalid scheme '%s' for file path: %s", u.Scheme, file)
 }
 
 func ReadUrl(url *url.URL, httpTimeout time.Duration) ([]byte, error) {
@@ -93,4 +97,12 @@ func downloadFile(url string, timeout time.Duration) ([]byte, error) {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+func EmptyScheme(u *url.URL, os string) bool {
+	// On Windows the URL potentially ends up with the drive letter as the scheme
+	if u.Scheme == "" || (os == "windows" && len(u.Scheme) == 1) {
+		return true
+	}
+	return false
 }
