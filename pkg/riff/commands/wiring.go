@@ -128,16 +128,17 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		FunctionDelete(&client),
 	)
 
-	// service := Service()
-	// installKubeConfigSupport(service, &client)
-	// service.AddCommand(
-	// 	ServiceList(&client),
-	// 	ServiceCreate(&client),
-	// 	ServiceUpdate(&client),
-	// 	ServiceStatus(&client),
-	// 	ServiceInvoke(&client),
-	// 	ServiceDelete(&client),
-	// )
+	application := Application()
+	installKubeConfigSupport(application, &client)
+	application.AddCommand(
+		ApplicationList(&client),
+		ApplicationCreate(buildpackBuilder, &client),
+		ApplicationUpdate(buildpackBuilder, &client),
+		ApplicationBuild(buildpackBuilder, &client),
+		ApplicationStatus(&client),
+		ApplicationInvoke(&client),
+		ApplicationDelete(&client),
+	)
 
 	channel := Channel()
 	installKubeConfigSupport(channel, &client)
@@ -171,6 +172,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 
 	rootCmd.AddCommand(
 		function,
+		application,
 		// service,
 		channel,
 		namespace,

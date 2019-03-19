@@ -42,6 +42,14 @@ type Client interface {
 	FunctionStatus(options FunctionStatusOptions) (*duckv1alpha1.Condition, error)
 	FunctionCoordinates(options FunctionInvokeOptions) (ingressIP string, hostName string, err error)
 
+	ListApplications(options ListApplicationOptions) (*projectriff.ApplicationList, error)
+	CreateApplication(builder Builder, options CreateApplicationOptions, log io.Writer) (*projectriff.Application, error)
+	UpdateApplication(builder Builder, options UpdateApplicationOptions, log io.Writer) error
+	BuildApplication(builder Builder, options BuildApplicationOptions, log io.Writer) error
+	DeleteApplication(options DeleteApplicationOptions) error
+	ApplicationStatus(options ApplicationStatusOptions) (*duckv1alpha1.Condition, error)
+	ApplicationCoordinates(options ApplicationInvokeOptions) (ingressIP string, hostName string, err error)
+
 	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
 	DeleteSubscription(options DeleteSubscriptionOptions) error
 	ListSubscriptions(options ListSubscriptionsOptions) (*eventing.SubscriptionList, error)
