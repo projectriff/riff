@@ -157,11 +157,11 @@ var _ = Describe("The cobra extensions", func() {
 					},
 				}
 				command.Flags().StringVar(&foobar, "foobar", "", "some meaningful flag")
-				command.SetArgs([]string{"--foobar", "http://example.com"})
+				command.SetArgs([]string{"--foobar", "https://example.com"})
 				command.SetOutput(ioutil.Discard)
 
 				Expect(command.Execute()).
-					To(MatchError(`flag --foobar cannot have value "http://example.com", it should not start with "http://" nor "https://"`))
+					To(MatchError(`flag --foobar cannot have value "https://example.com", it should not start with "http://" nor "https://"`))
 			})
 		})
 	})

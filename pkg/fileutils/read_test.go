@@ -177,7 +177,7 @@ var _ = Describe("ReadUrl", func() {
 			})
 			Expect(err).NotTo(HaveOccurred())
 		}()
-		resourceUrl, _ := url.Parse(fmt.Sprintf("http://%s/%s", listener.Addr().String(), ""))
+		resourceUrl, _ := url.Parse(fmt.Sprintf("https://%s/%s", listener.Addr().String(), ""))
 
 		result, err := fileutils.ReadUrl(resourceUrl, timeout)
 
@@ -191,7 +191,7 @@ var _ = Describe("ReadUrl", func() {
 			err := test_support.ServeSlow(resourceListener, test_support.HttpResponse{}, 2*timeout)
 			Expect(err).NotTo(HaveOccurred())
 		}()
-		resourceUrl, _ := url.Parse(fmt.Sprintf("http://%s/%s", resourceListener.Addr().String(), ""))
+		resourceUrl, _ := url.Parse(fmt.Sprintf("https://%s/%s", resourceListener.Addr().String(), ""))
 
 		_, err := fileutils.ReadUrl(resourceUrl, timeout)
 

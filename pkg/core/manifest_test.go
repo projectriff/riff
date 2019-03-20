@@ -136,7 +136,7 @@ var _ = Describe("Manifest", func() {
 			})
 
 			It("should parse the istio array", func() {
-				Expect(manifest.Istio).To(ConsistOf("istio-crds", "http://istio-release"))
+				Expect(manifest.Istio).To(ConsistOf("istio-crds", "https://istio-release"))
 			})
 
 			It("should parse the Knative array", func() {
@@ -157,7 +157,7 @@ var _ = Describe("Manifest", func() {
 				})
 
 				It("should return a http URL unchanged", func() {
-					Expect(manifest.ResourceAbsolutePath("http://istio-release")).To(Equal("http://istio-release"))
+					Expect(manifest.ResourceAbsolutePath("https://istio-release")).To(Equal("https://istio-release"))
 				})
 
 				It("should return a https URL unchanged", func() {

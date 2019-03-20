@@ -85,7 +85,7 @@ spec:
 			err := test_support.Serve(resourceListener, httpResponse)
 			Expect(err).NotTo(HaveOccurred())
 		}()
-		resourceUrl := unsafeParseUrl(fmt.Sprintf("http://%s/%s", resourceListener.Addr().String(), "pvc.yaml"))
+		resourceUrl := unsafeParseUrl(fmt.Sprintf("https://%s/%s", resourceListener.Addr().String(), "pvc.yaml"))
 
 		result, err := kustomizer.ApplyLabels(resourceUrl, initLabels)
 
@@ -125,7 +125,7 @@ spec:
 			err := test_support.ServeSlow(resourceListener, httpResponse, 3*timeout)
 			Expect(err).NotTo(HaveOccurred())
 		}()
-		resourceUrl := unsafeParseUrl(fmt.Sprintf("http://%s/%s", resourceListener.Addr().String(), "pvc.yaml"))
+		resourceUrl := unsafeParseUrl(fmt.Sprintf("https://%s/%s", resourceListener.Addr().String(), "pvc.yaml"))
 
 		_, err := kustomizer.ApplyLabels(resourceUrl, initLabels)
 

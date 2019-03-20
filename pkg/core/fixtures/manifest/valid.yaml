@@ -1,7 +1,7 @@
 manifestVersion: 0.1
 istio:
   - istio-crds
-  - http://istio-release
+  - https://istio-release
 knative:
   - build-release
   - https://serving-release
