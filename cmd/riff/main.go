@@ -36,7 +36,7 @@ var (
 			Knative: []string{
 				"https://storage.googleapis.com/knative-releases/build/previous/v0.4.0/build.yaml",
 				"https://storage.googleapis.com/knative-releases/serving/previous/v0.4.1/serving.yaml",
-				"https://raw.githubusercontent.com/knative/serving/v0.4.0/third_party/config/build/clusterrole.yaml",
+				"https://raw.githubusercontent.com/knative/serving/v0.4.1/third_party/config/build/clusterrole.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/eventing.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/in-memory-channel.yaml",
 				// TODO update to a release version before releasing riff
