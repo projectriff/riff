@@ -30,13 +30,13 @@ var (
 		"stable": {
 			ManifestVersion: "0.1",
 			Istio: []string{
-				"https://storage.googleapis.com/knative-releases/serving/previous/v0.4.0/istio.yaml",
-				"https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-4-0-patch.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.4.1/istio.yaml",
+				"https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-4-1-patch.yaml",
 			},
 			Knative: []string{
 				"https://storage.googleapis.com/knative-releases/build/previous/v0.4.0/build.yaml",
-				"https://storage.googleapis.com/knative-releases/serving/previous/v0.4.0/serving.yaml",
-				"https://raw.githubusercontent.com/knative/serving/v0.4.0/third_party/config/build/clusterrole.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.4.1/serving.yaml",
+				"https://raw.githubusercontent.com/knative/serving/v0.4.1/third_party/config/build/clusterrole.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/eventing.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/in-memory-channel.yaml",
 				// TODO update to a release version before releasing riff
