@@ -6,7 +6,7 @@ require (
 	github.com/boz/go-logutil v0.0.0-20170814044541-9d21a9e4757d
 	github.com/boz/kail v0.6.0
 	github.com/boz/kcache v0.0.0-20171103002618-fb1338d32301
-	github.com/buildpack/pack v0.0.10-0.20190227222144-8ef83e3d4052
+	github.com/buildpack/pack v0.0.10-0.20190321150154-40640e5370f3
 	github.com/cpuguy83/go-md2man v1.0.8 // indirect
 	github.com/emicklei/go-restful v2.8.1+incompatible // indirect
 	github.com/evanphx/json-patch v4.1.0+incompatible // indirect
@@ -33,15 +33,14 @@ require (
 	github.com/onsi/ginkgo v1.6.0
 	github.com/onsi/gomega v1.4.2
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
-	github.com/pkg/errors v0.8.0
+	github.com/pkg/errors v0.8.1
 	github.com/russross/blackfriday v1.5.1 // indirect
 	github.com/spf13/cobra v0.0.3
-	github.com/stretchr/testify v1.2.2
+	github.com/stretchr/testify v1.3.0
 	go.uber.org/atomic v1.3.2 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
 	go.uber.org/zap v1.9.1 // indirect
-	golang.org/x/crypto v0.0.0-20181127143415-eb0de9b17e85
-	google.golang.org/appengine v1.2.0 // indirect
+	golang.org/x/crypto v0.0.0-20190228161510-8dd112bcdc25
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	k8s.io/api v0.0.0-20180904230853-4e7be11eab3f
 	k8s.io/apimachinery v0.0.0-20180904193909-def12e63c512
