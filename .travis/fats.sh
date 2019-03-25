@@ -11,7 +11,7 @@ commit=$(git rev-parse HEAD)
 # fetch FATS scripts
 fats_dir=`dirname "${BASH_SOURCE[0]}"`/fats
 fats_repo="projectriff/fats"
-fats_refspec=b61f2422d1e8b16c9c9c78352daf47741a430ef6 # projectriff/fats master as of 2019-03-08
+fats_refspec=9a3c6ed1c184ab37a0651b977d1d7d8f0a62cf07 # projectriff/fats master as of 2019-03-21
 source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $fats_dir $fats_refspec $fats_repo
 source $fats_dir/.util.sh
 
