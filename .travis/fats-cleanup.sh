@@ -26,7 +26,7 @@ if [ -d "$fats_dir" ]; then
     echo "System status"
     kubectl get deployments,services,pods --all-namespaces || true
     kubectl get pods --all-namespaces --field-selector=status.phase!=Running \
-      | tail -n +2 | awk '{print "-n", $1, $2}' | xargs -L 1 kubectl describe pod
+      | tail -n +2 | awk '{print "-n", $1, $2}' | xargs -L 1 kubectl describe pod || true
     kubectl describe node || true
     travis_fold end system-status
   fi
