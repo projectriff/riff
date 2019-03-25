@@ -17,7 +17,7 @@
      category="std"
      docName="draft-ietf-httpbis-http2-latest"
      x:maturity-level="proposed"
-     xmlns:x="http://purl.org/net/xml2rfc/ext">
+     xmlns:x="https://purl.org/net/xml2rfc/ext">
   <x:feedback template="mailto:ietf-http-wg@w3.org?subject={docname},%20%22{section}%22&amp;body=&lt;{ref}&gt;:"/>
   <front>
     <title abbrev="HTTP/2">Hypertext Transfer Protocol version 2</title>
@@ -270,7 +270,7 @@
         HTTP/2 uses the same "http" and "https" URI schemes used by HTTP/1.1. HTTP/2 shares the same
         default port numbers: 80 for "http" URIs and 443 for "https" URIs.  As a result,
         implementations processing requests for target resource URIs like <spanx
-        style="verb">http://example.org/foo</spanx> or <spanx
+        style="verb">https://example.org/foo</spanx> or <spanx
         style="verb">https://example.com/bar</spanx> are required to first discover whether the
         upstream server (the immediate peer to which the client wishes to establish a connection)
         supports HTTP/2.
@@ -4567,7 +4567,7 @@ HTTP2-Settings    = token68
       </reference>
 
       <reference anchor='HTML5'
-           target='http://www.w3.org/TR/2014/CR-html5-20140731/'>
+           target='https://www.w3.org/TR/2014/CR-html5-20140731/'>
         <front>
           <title>HTML5</title>
           <author fullname='Robin Berjon' surname='Berjon' initials='R.'/>
@@ -4581,11 +4581,11 @@ HTTP2-Settings    = token68
         <seriesInfo name='W3C Candidate Recommendation' value='CR-html5-20140731'/>
         <annotation>
           Latest version available at
-          <eref target='http://www.w3.org/TR/html5/'/>.
+          <eref target='https://www.w3.org/TR/html5/'/>.
         </annotation>
       </reference>
 
-      <reference anchor="TALKING" target="http://w2spconf.com/2011/papers/websocket.pdf">
+      <reference anchor="TALKING" target="https://w2spconf.com/2011/papers/websocket.pdf">
         <front>
           <title>
             Talking to Yourself for Fun and Profit
