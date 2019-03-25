@@ -24,11 +24,6 @@ import (
 	"github.com/projectriff/riff/pkg/riff/commands"
 )
 
-const (
-	// TODO update to a release version before releasing riff
-	builderVersion = "0.2.0-snapshot-ci-a974b8e885d3"
-)
-
 var (
 	manifests = map[string]*core.Manifest{
 		// validated, compatible versions of Knative
@@ -44,7 +39,8 @@ var (
 				"https://raw.githubusercontent.com/knative/serving/v0.4.0/third_party/config/build/clusterrole.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/eventing.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/in-memory-channel.yaml",
-				fmt.Sprintf("https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-%s.yaml", builderVersion),
+				// TODO update to a release version before releasing riff
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-0.2.0-snapshot-ci-92b29a6fb99c.yaml",
 			},
 		},
 		// most recent release of Knative. This manifest is not tested
