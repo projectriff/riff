@@ -12,7 +12,7 @@ func ExampleNormalizeURLString() {
 	} else {
 		fmt.Print(normalized)
 	}
-	// Output: http://somewebsite.com:80/Amazing%3F/url/
+	// Output: https://somewebsite.com:80/Amazing%3F/url/
 }
 
 func ExampleMustNormalizeURLString() {
@@ -20,7 +20,7 @@ func ExampleMustNormalizeURLString() {
 		FlagsUnsafeGreedy)
 	fmt.Print(normalized)
 
-	// Output: http://somewebsite.com/Amazing%FA/url
+	// Output: https://somewebsite.com/Amazing%FA/url
 }
 
 func ExampleNormalizeURL() {
@@ -31,5 +31,5 @@ func ExampleNormalizeURL() {
 		fmt.Print(normalized)
 	}
 
-	// Output: http://someurl.com:8080/a/c/g?c=3&a=1&b=9&c=0
+	// Output: https://someurl.com:8080/a/c/g?c=3&a=1&b=9&c=0
 }

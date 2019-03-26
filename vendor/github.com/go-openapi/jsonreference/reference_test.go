@@ -225,7 +225,7 @@ func TestURLRelativePathOnly(t *testing.T) {
 }
 
 func TestInheritsInValid(t *testing.T) {
-	in1 := "http://www.test.com/doc.json"
+	in1 := "https://www.test.com/doc.json"
 	in2 := "#/a/b"
 
 	r1, _ := New(in1)
@@ -243,7 +243,7 @@ func TestInheritsInValid(t *testing.T) {
 
 func TestInheritsValid(t *testing.T) {
 
-	in1 := "http://www.test.com/doc.json"
+	in1 := "https://www.test.com/doc.json"
 	in2 := "#/a/b"
 	out := in1 + in2
 
@@ -266,8 +266,8 @@ func TestInheritsValid(t *testing.T) {
 
 func TestInheritsDifferentHost(t *testing.T) {
 
-	in1 := "http://www.test.com/doc.json"
-	in2 := "http://www.test2.com/doc.json#bla"
+	in1 := "https://www.test.com/doc.json"
+	in2 := "https://www.test2.com/doc.json#bla"
 
 	r1, _ := New(in1)
 	r2, _ := New(in2)
@@ -327,7 +327,7 @@ func TestFileScheme(t *testing.T) {
 func TestReferenceResolution(t *testing.T) {
 
 	// 5.4. Reference Resolution Examples
-	// http://tools.ietf.org/html/rfc3986#section-5.4
+	// https://tools.ietf.org/html/rfc3986#section-5.4
 
 	base := "http://a/b/c/d;p?q"
 	baseRef, err := New(base)
@@ -341,7 +341,7 @@ func TestReferenceResolution(t *testing.T) {
 
 	checks := []string{
 		// 5.4.1. Normal Examples
-		// http://tools.ietf.org/html/rfc3986#section-5.4.1
+		// https://tools.ietf.org/html/rfc3986#section-5.4.1
 
 		"g:h", "g:h",
 		"g", "http://a/b/c/g",
@@ -368,7 +368,7 @@ func TestReferenceResolution(t *testing.T) {
 		"../../g", "http://a/g",
 
 		// 5.4.2. Abnormal Examples
-		// http://tools.ietf.org/html/rfc3986#section-5.4.2
+		// https://tools.ietf.org/html/rfc3986#section-5.4.2
 
 		"../../../g", "http://a/g",
 		"../../../../g", "http://a/g",
@@ -376,9 +376,9 @@ func TestReferenceResolution(t *testing.T) {
 		"/./g", "http://a/g",
 		"/../g", "http://a/g",
 		"g.", "http://a/b/c/g.",
-		".g", "http://a/b/c/.g",
+		".g", "https://a/b/c/.g",
 		"g..", "http://a/b/c/g..",
-		"..g", "http://a/b/c/..g",
+		"..g", "https://a/b/c/..g",
 
 		"./../g", "http://a/b/g",
 		"./g/.", "http://a/b/c/g/",
@@ -387,8 +387,8 @@ func TestReferenceResolution(t *testing.T) {
 		"g;x=1/./y", "http://a/b/c/g;x=1/y",
 		"g;x=1/../y", "http://a/b/c/y",
 
-		"g?y/./x", "http://a/b/c/g?y/./x",
-		"g?y/../x", "http://a/b/c/g?y/../x",
+		"g?y/./x", "https://a/b/c/g?y/./x",
+		"g?y/../x", "https://a/b/c/g?y/../x",
 		"g#s/./x", "http://a/b/c/g#s/./x",
 		"g#s/../x", "http://a/b/c/g#s/../x",
 

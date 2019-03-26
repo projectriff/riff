@@ -31,7 +31,7 @@ func TestCollectSuccessfully(t *testing.T) {
 	// expectations are resolved.
 	defer safeClose(t, s)
 
-	req, err := http.NewRequest("GET", "http://example.com/?data", nil)
+	req, err := http.NewRequest("GET", "https://example.com/?data", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +62,7 @@ func TestCollectionFailure(t *testing.T) {
 	}
 	defer safeClose(t, s)
 
-	req, err := http.NewRequest("GET", "http://example.com/?data", nil)
+	req, err := http.NewRequest("GET", "https://example.com/?data", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,7 +89,7 @@ func TestWrongPath(t *testing.T) {
 	}
 	defer safeClose(t, s)
 
-	req, err := http.NewRequest("GET", "http://example.com/wrong?data", nil)
+	req, err := http.NewRequest("GET", "https://example.com/wrong?data", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

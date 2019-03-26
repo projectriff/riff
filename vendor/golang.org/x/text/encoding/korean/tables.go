@@ -4,7 +4,7 @@
 package korean // import "golang.org/x/text/encoding/korean"
 
 // decode is the decoding table from EUC-KR code to Unicode.
-// It is defined at http://encoding.spec.whatwg.org/index-euc-kr.txt
+// It is defined at https://encoding.spec.whatwg.org/index-euc-kr.txt
 var decode = [...]uint16{
 	0:     0xAC02,
 	1:     0xAC03,

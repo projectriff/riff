@@ -13,7 +13,7 @@ Improvements:
 
 - Significantly improved parallel test distribution.  Now instead of pre-sharding test cases across workers (which can result in idle workers and poor test performance) Ginkgo uses a shared queue to keep all workers busy until all tests are complete.  This improves test-time performance and consistency.
 - `Skip(message)` can be used to skip the current test.
-- Added `extensions/table` - a Ginkgo DSL for [Table Driven Tests](http://onsi.github.io/ginkgo/#table-driven-tests)
+- Added `extensions/table` - a Ginkgo DSL for [Table Driven Tests](https://onsi.github.io/ginkgo/#table-driven-tests)
 - Add `GinkgoRandomSeed()` - shorthand for `config.GinkgoConfig.RandomSeed`
 - Support for retrying flaky tests with `--flakeAttempts`
 - `ginkgo ./...` now recurses as you'd expect
@@ -60,7 +60,7 @@ Improvements:
     - `ginkgo build <path-to-package>` will now compile the package, producing a file named `package.test`
     - The compiled `package.test` file can be run directly.  This runs the tests in series.
     - To run precompiled tests in parallel, you can run: `ginkgo -p package.test`
-- Support `bootstrap`ping and `generate`ing [Agouti](http://agouti.org) specs.
+- Support `bootstrap`ping and `generate`ing [Agouti](https://agouti.org) specs.
 - `ginkgo generate` and `ginkgo bootstrap` now honor the package name already defined in a given directory
 - The `ginkgo` CLI ignores `SIGQUIT`.  Prevents its stack dump from interlacing with the underlying test suite's stack dump.
 - The `ginkgo` CLI now compiles tests into a temporary directory instead of the package directory.  This necessitates upgrading to Go v1.4+.

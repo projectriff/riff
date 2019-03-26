@@ -831,7 +831,7 @@ message EmptyDirVolumeSource {
   // The maximum usage on memory medium EmptyDir would be the minimum value between
   // the SizeLimit specified here and the sum of memory limits of all containers in a pod.
   // The default is nil which means that the limit is undefined.
-  // More info: http://kubernetes.io/docs/user-guide/volumes#emptydir
+  // More info: https://kubernetes.io/docs/user-guide/volumes#emptydir
   // +optional
   optional k8s.io.apimachinery.pkg.api.resource.Quantity sizeLimit = 2;
 }
@@ -1715,7 +1715,7 @@ message NodeProxyOptions {
 }
 
 // NodeResources is an object for conveying resource information about a node.
-// see http://releases.k8s.io/HEAD/docs/design/resources.md for more details.
+// see https://releases.k8s.io/HEAD/docs/design/resources.md for more details.
 message NodeResources {
   // Capacity represents the available resources of a node
   map<string, k8s.io.apimachinery.pkg.api.resource.Quantity> capacity = 1;

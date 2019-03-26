@@ -459,11 +459,11 @@ func TestDefaultResolutionCache(t *testing.T) {
 	assert.False(t, ok)
 	assert.Nil(t, sch)
 
-	sch, ok = cache.Get("http://swagger.io/v2/schema.json")
+	sch, ok = cache.Get("https://swagger.io/v2/schema.json")
 	assert.True(t, ok)
 	assert.Equal(t, swaggerSchema, sch)
 
-	sch, ok = cache.Get("http://json-schema.org/draft-04/schema")
+	sch, ok = cache.Get("https://json-schema.org/draft-04/schema")
 	assert.True(t, ok)
 	assert.Equal(t, jsonSchema, sch)
 
@@ -822,11 +822,11 @@ const PetStore20 = `{
     "title": "Swagger Petstore",
     "contact": {
       "name": "Wordnik API Team",
-      "url": "http://developer.wordnik.com"
+      "url": "https://developer.wordnik.com"
     },
     "license": {
       "name": "Creative Commons 4.0 International",
-      "url": "http://creativecommons.org/licenses/by/4.0/"
+      "url": "https://creativecommons.org/licenses/by/4.0/"
     }
   },
   "host": "petstore.swagger.wordnik.com",

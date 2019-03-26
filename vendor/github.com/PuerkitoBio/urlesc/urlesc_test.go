@@ -18,7 +18,7 @@ type URLTest struct {
 var urltests = []URLTest{
 	// no path
 	{
-		"http://www.google.com",
+		"https://www.google.com",
 		&url.URL{
 			Scheme: "http",
 			Host:   "www.google.com",
@@ -27,7 +27,7 @@ var urltests = []URLTest{
 	},
 	// path
 	{
-		"http://www.google.com/",
+		"https://www.google.com/",
 		&url.URL{
 			Scheme: "http",
 			Host:   "www.google.com",
@@ -37,13 +37,13 @@ var urltests = []URLTest{
 	},
 	// path with hex escaping
 	{
-		"http://www.google.com/file%20one%26two",
+		"https://www.google.com/file%20one%26two",
 		&url.URL{
 			Scheme: "http",
 			Host:   "www.google.com",
 			Path:   "/file one&two",
 		},
-		"http://www.google.com/file%20one&two",
+		"https://www.google.com/file%20one&two",
 	},
 	// user
 	{
@@ -69,7 +69,7 @@ var urltests = []URLTest{
 	},
 	// query
 	{
-		"http://www.google.com/?q=go+language",
+		"https://www.google.com/?q=go+language",
 		&url.URL{
 			Scheme:   "http",
 			Host:     "www.google.com",
@@ -80,7 +80,7 @@ var urltests = []URLTest{
 	},
 	// query with hex escaping: NOT parsed
 	{
-		"http://www.google.com/?q=go%20language",
+		"https://www.google.com/?q=go%20language",
 		&url.URL{
 			Scheme:   "http",
 			Host:     "www.google.com",
@@ -91,7 +91,7 @@ var urltests = []URLTest{
 	},
 	// %20 outside query
 	{
-		"http://www.google.com/a%20b?q=c+d",
+		"https://www.google.com/a%20b?q=c+d",
 		&url.URL{
 			Scheme:   "http",
 			Host:     "www.google.com",
@@ -179,36 +179,36 @@ var urltests = []URLTest{
 		"",
 	},
 	{
-		"http://user:password@google.com",
+		"https://user:password@google.com",
 		&url.URL{
 			Scheme: "http",
 			User:   url.UserPassword("user", "password"),
 			Host:   "google.com",
 		},
-		"http://user:password@google.com",
+		"https://user:password@google.com",
 	},
 	// unescaped @ in username should not confuse host
 	{
-		"http://j@ne:password@google.com",
+		"https://j@ne:password@google.com",
 		&url.URL{
 			Scheme: "http",
 			User:   url.UserPassword("j@ne", "password"),
 			Host:   "google.com",
 		},
-		"http://j%40ne:password@google.com",
+		"https://j%40ne:password@google.com",
 	},
 	// unescaped @ in password should not confuse host
 	{
-		"http://jane:p@ssword@google.com",
+		"https://jane:p@ssword@google.com",
 		&url.URL{
 			Scheme: "http",
 			User:   url.UserPassword("jane", "p@ssword"),
 			Host:   "google.com",
 		},
-		"http://jane:p%40ssword@google.com",
+		"https://jane:p%40ssword@google.com",
 	},
 	{
-		"http://j@ne:password@google.com/p@th?q=@go",
+		"https://j@ne:password@google.com/p@th?q=@go",
 		&url.URL{
 			Scheme:   "http",
 			User:     url.UserPassword("j@ne", "password"),
@@ -216,10 +216,10 @@ var urltests = []URLTest{
 			Path:     "/p@th",
 			RawQuery: "q=@go",
 		},
-		"http://j%40ne:password@google.com/p@th?q=@go",
+		"https://j%40ne:password@google.com/p@th?q=@go",
 	},
 	{
-		"http://www.google.com/?q=go+language#foo",
+		"https://www.google.com/?q=go+language#foo",
 		&url.URL{
 			Scheme:   "http",
 			Host:     "www.google.com",
@@ -230,7 +230,7 @@ var urltests = []URLTest{
 		"",
 	},
 	{
-		"http://www.google.com/?q=go+language#foo%26bar",
+		"https://www.google.com/?q=go+language#foo%26bar",
 		&url.URL{
 			Scheme:   "http",
 			Host:     "www.google.com",
@@ -238,7 +238,7 @@ var urltests = []URLTest{
 			RawQuery: "q=go+language",
 			Fragment: "foo&bar",
 		},
-		"http://www.google.com/?q=go+language#foo&bar",
+		"https://www.google.com/?q=go+language#foo&bar",
 	},
 	{
 		"file:///home/adg/rabbits",
@@ -279,7 +279,7 @@ var urltests = []URLTest{
 	},
 	// escaped '?' in username and password
 	{
-		"http://%3Fam:pa%3Fsword@google.com",
+		"https://%3Fam:pa%3Fsword@google.com",
 		&url.URL{
 			Scheme: "http",
 			User:   url.UserPassword("?am", "pa?sword"),
@@ -289,7 +289,7 @@ var urltests = []URLTest{
 	},
 	// escaped '?' and '#' in path
 	{
-		"http://example.com/%3F%23",
+		"https://example.com/%3F%23",
 		&url.URL{
 			Scheme: "http",
 			Host:   "example.com",
@@ -299,17 +299,17 @@ var urltests = []URLTest{
 	},
 	// unescaped [ ] ! ' ( ) * in path
 	{
-		"http://example.com/[]!'()*",
+		"https://example.com/[]!'()*",
 		&url.URL{
 			Scheme: "http",
 			Host:   "example.com",
 			Path:   "[]!'()*",
 		},
-		"http://example.com/[]!'()*",
+		"https://example.com/[]!'()*",
 	},
 	// escaped : / ? # [ ] @ in username and password
 	{
-		"http://%3A%2F%3F:%23%5B%5D%40@example.com",
+		"https://%3A%2F%3F:%23%5B%5D%40@example.com",
 		&url.URL{
 			Scheme: "http",
 			User:   url.UserPassword(":/?", "#[]@"),
@@ -329,18 +329,18 @@ var urltests = []URLTest{
 	},
 	// unescaped = : / . ? = in query component
 	{
-		"http://example.com/?q=http://google.com/?q=",
+		"https://example.com/?q=http://google.com/?q=",
 		&url.URL{
 			Scheme:   "http",
 			Host:     "example.com",
 			Path:     "/",
-			RawQuery: "q=http://google.com/?q=",
+			RawQuery: "q=https://google.com/?q=",
 		},
 		"",
 	},
 	// unescaped : / ? [ ] @ ! $ & ' ( ) * + , ; = in fragment
 	{
-		"http://example.com/#:/?%23[]@!$&'()*+,;=",
+		"https://example.com/#:/?%23[]@!$&'()*+,;=",
 		&url.URL{
 			Scheme:   "http",
 			Host:     "example.com",
@@ -375,7 +375,7 @@ func TestURLString(t *testing.T) {
 	// no leading slash on path should prepend
 	// slash on String() call
 	noslash := URLTest{
-		"http://www.google.com/search",
+		"https://www.google.com/search",
 		&url.URL{
 			Scheme: "http",
 			Host:   "www.google.com",
@@ -442,14 +442,14 @@ var resolveReferenceTests = []struct {
 	base, rel, expected string
 }{
 	// Absolute URL references
-	{"http://foo.com?a=b", "https://bar.com/", "https://bar.com/"},
-	{"http://foo.com/", "https://bar.com/?a=b", "https://bar.com/?a=b"},
-	{"http://foo.com/bar", "mailto:foo@example.com", "mailto:foo@example.com"},
+	{"http://www.foo.com/?a=b", "https://bar.com/", "https://bar.com/"},
+	{"http://www.foo.com/", "https://bar.com/?a=b", "https://bar.com/?a=b"},
+	{"http://www.foo.com/bar", "mailto:foo@example.com", "mailto:foo@example.com"},
 
 	// Path-absolute references
-	{"http://foo.com/bar", "/baz", "http://foo.com/baz"},
-	{"http://foo.com/bar?a=b#f", "/baz", "http://foo.com/baz"},
-	{"http://foo.com/bar?a=b", "/baz?c=d", "http://foo.com/baz?c=d"},
+	{"http://www.foo.com/bar", "/baz", "http://www.foo.com/baz"},
+	{"http://www.foo.com/bar?a=b#f", "/baz", "http://www.foo.com/baz"},
+	{"http://www.foo.com/bar?a=b", "/baz?c=d", "http://www.foo.com/baz?c=d"},
 
 	// Scheme-relative
 	{"https://foo.com/bar?a=b", "//bar.com/quux", "https://bar.com/quux"},
@@ -457,42 +457,42 @@ var resolveReferenceTests = []struct {
 	// Path-relative references:
 
 	// ... current directory
-	{"http://foo.com", ".", "http://foo.com/"},
-	{"http://foo.com/bar", ".", "http://foo.com/"},
-	{"http://foo.com/bar/", ".", "http://foo.com/bar/"},
+	{"http://www.foo.com/", ".", "http://www.foo.com/"},
+	{"http://www.foo.com/bar", ".", "http://www.foo.com/"},
+	{"http://www.foo.com/bar/", ".", "http://www.foo.com/bar/"},
 
 	// ... going down
-	{"http://foo.com", "bar", "http://foo.com/bar"},
-	{"http://foo.com/", "bar", "http://foo.com/bar"},
-	{"http://foo.com/bar/baz", "quux", "http://foo.com/bar/quux"},
+	{"http://www.foo.com/", "bar", "http://www.foo.com/bar"},
+	{"http://www.foo.com/", "bar", "http://www.foo.com/bar"},
+	{"http://www.foo.com/bar/baz", "quux", "http://www.foo.com/bar/quux"},
 
 	// ... going up
-	{"http://foo.com/bar/baz", "../quux", "http://foo.com/quux"},
-	{"http://foo.com/bar/baz", "../../../../../quux", "http://foo.com/quux"},
-	{"http://foo.com/bar", "..", "http://foo.com/"},
-	{"http://foo.com/bar/baz", "./..", "http://foo.com/"},
+	{"http://www.foo.com/bar/baz", "../quux", "http://www.foo.com/quux"},
+	{"http://www.foo.com/bar/baz", "../../../../../quux", "http://www.foo.com/quux"},
+	{"http://www.foo.com/bar", "..", "http://www.foo.com/"},
+	{"http://www.foo.com/bar/baz", "./..", "http://www.foo.com/"},
 	// ".." in the middle (issue 3560)
-	{"http://foo.com/bar/baz", "quux/dotdot/../tail", "http://foo.com/bar/quux/tail"},
-	{"http://foo.com/bar/baz", "quux/./dotdot/../tail", "http://foo.com/bar/quux/tail"},
-	{"http://foo.com/bar/baz", "quux/./dotdot/.././tail", "http://foo.com/bar/quux/tail"},
-	{"http://foo.com/bar/baz", "quux/./dotdot/./../tail", "http://foo.com/bar/quux/tail"},
-	{"http://foo.com/bar/baz", "quux/./dotdot/dotdot/././../../tail", "http://foo.com/bar/quux/tail"},
-	{"http://foo.com/bar/baz", "quux/./dotdot/dotdot/./.././../tail", "http://foo.com/bar/quux/tail"},
-	{"http://foo.com/bar/baz", "quux/./dotdot/dotdot/dotdot/./../../.././././tail", "http://foo.com/bar/quux/tail"},
-	{"http://foo.com/bar/baz", "quux/./dotdot/../dotdot/../dot/./tail/..", "http://foo.com/bar/quux/dot/"},
+	{"http://www.foo.com/bar/baz", "quux/dotdot/../tail", "http://www.foo.com/bar/quux/tail"},
+	{"http://www.foo.com/bar/baz", "quux/./dotdot/../tail", "http://www.foo.com/bar/quux/tail"},
+	{"http://www.foo.com/bar/baz", "quux/./dotdot/.././tail", "http://www.foo.com/bar/quux/tail"},
+	{"http://www.foo.com/bar/baz", "quux/./dotdot/./../tail", "http://www.foo.com/bar/quux/tail"},
+	{"http://www.foo.com/bar/baz", "quux/./dotdot/dotdot/././../../tail", "http://www.foo.com/bar/quux/tail"},
+	{"http://www.foo.com/bar/baz", "quux/./dotdot/dotdot/./.././../tail", "http://www.foo.com/bar/quux/tail"},
+	{"http://www.foo.com/bar/baz", "quux/./dotdot/dotdot/dotdot/./../../.././././tail", "http://www.foo.com/bar/quux/tail"},
+	{"http://www.foo.com/bar/baz", "quux/./dotdot/../dotdot/../dot/./tail/..", "http://www.foo.com/bar/quux/dot/"},
 
 	// Remove any dot-segments prior to forming the target URI.
-	// http://tools.ietf.org/html/rfc3986#section-5.2.4
-	{"http://foo.com/dot/./dotdot/../foo/bar", "../baz", "http://foo.com/dot/baz"},
+	// https://tools.ietf.org/html/rfc3986#section-5.2.4
+	{"http://www.foo.com/dot/foo/bar", "../baz", "http://www.foo.com/dot/baz"},
 
 	// Triple dot isn't special
-	{"http://foo.com/bar", "...", "http://foo.com/..."},
+	{"http://www.foo.com/bar", "...", "http://www.foo.com/..."},
 
 	// Fragment
-	{"http://foo.com/bar", ".#frag", "http://foo.com/#frag"},
+	{"http://www.foo.com/bar", ".#frag", "http://www.foo.com/#frag"},
 
 	// RFC 3986: Normal Examples
-	// http://tools.ietf.org/html/rfc3986#section-5.4.1
+	// https://tools.ietf.org/html/rfc3986#section-5.4.1
 	{"http://a/b/c/d;p?q", "g:h", "g:h"},
 	{"http://a/b/c/d;p?q", "g", "http://a/b/c/g"},
 	{"http://a/b/c/d;p?q", "./g", "http://a/b/c/g"},
@@ -518,23 +518,23 @@ var resolveReferenceTests = []struct {
 	{"http://a/b/c/d;p?q", "../../g", "http://a/g"},
 
 	// RFC 3986: Abnormal Examples
-	// http://tools.ietf.org/html/rfc3986#section-5.4.2
+	// https://tools.ietf.org/html/rfc3986#section-5.4.2
 	{"http://a/b/c/d;p?q", "../../../g", "http://a/g"},
 	{"http://a/b/c/d;p?q", "../../../../g", "http://a/g"},
 	{"http://a/b/c/d;p?q", "/./g", "http://a/g"},
 	{"http://a/b/c/d;p?q", "/../g", "http://a/g"},
 	{"http://a/b/c/d;p?q", "g.", "http://a/b/c/g."},
-	{"http://a/b/c/d;p?q", ".g", "http://a/b/c/.g"},
+	{"http://a/b/c/d;p?q", ".g", "https://a/b/c/.g"},
 	{"http://a/b/c/d;p?q", "g..", "http://a/b/c/g.."},
-	{"http://a/b/c/d;p?q", "..g", "http://a/b/c/..g"},
+	{"http://a/b/c/d;p?q", "..g", "https://a/b/c/..g"},
 	{"http://a/b/c/d;p?q", "./../g", "http://a/b/g"},
 	{"http://a/b/c/d;p?q", "./g/.", "http://a/b/c/g/"},
 	{"http://a/b/c/d;p?q", "g/./h", "http://a/b/c/g/h"},
 	{"http://a/b/c/d;p?q", "g/../h", "http://a/b/c/h"},
 	{"http://a/b/c/d;p?q", "g;x=1/./y", "http://a/b/c/g;x=1/y"},
 	{"http://a/b/c/d;p?q", "g;x=1/../y", "http://a/b/c/y"},
-	{"http://a/b/c/d;p?q", "g?y/./x", "http://a/b/c/g?y/./x"},
-	{"http://a/b/c/d;p?q", "g?y/../x", "http://a/b/c/g?y/../x"},
+	{"http://a/b/c/d;p?q", "g?y/./x", "https://a/b/c/g?y/./x"},
+	{"http://a/b/c/d;p?q", "g?y/../x", "https://a/b/c/g?y/../x"},
 	{"http://a/b/c/d;p?q", "g#s/./x", "http://a/b/c/g#s/./x"},
 	{"http://a/b/c/d;p?q", "g#s/../x", "http://a/b/c/g#s/../x"},
 

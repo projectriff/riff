@@ -11,7 +11,7 @@ import (
 
 func TestQueryParameter(t *testing.T) {
 	hreq := http.Request{Method: "GET"}
-	hreq.URL, _ = url.Parse("http://www.google.com/search?q=foo&q=bar")
+	hreq.URL, _ = url.Parse("https://www.google.com/search?q=foo&q=bar")
 	rreq := Request{Request: &hreq}
 	if rreq.QueryParameter("q") != "foo" {
 		t.Errorf("q!=foo %#v", rreq)

@@ -7,7 +7,7 @@ import (
 )
 
 // go test -v -test.run TestCORSFilter_Preflight ...restful
-// http://www.html5rocks.com/en/tutorials/cors/#toc-handling-a-not-so-simple-request
+// https://www.html5rocks.com/en/tutorials/cors/#toc-handling-a-not-so-simple-request
 func TestCORSFilter_Preflight(t *testing.T) {
 	tearDown()
 	ws := new(WebService)
@@ -22,9 +22,9 @@ func TestCORSFilter_Preflight(t *testing.T) {
 	Filter(cors.Filter)
 
 	// Preflight
-	httpRequest, _ := http.NewRequest("OPTIONS", "http://api.alice.com/cors", nil)
+	httpRequest, _ := http.NewRequest("OPTIONS", "https://api.alice.com/cors", nil)
 	httpRequest.Method = "OPTIONS"
-	httpRequest.Header.Set(HEADER_Origin, "http://api.bob.com")
+	httpRequest.Header.Set(HEADER_Origin, "https://api.bob.com")
 	httpRequest.Header.Set(HEADER_AccessControlRequestMethod, "PUT")
 	httpRequest.Header.Set(HEADER_AccessControlRequestHeaders, "X-Custom-Header, X-Additional-Header")
 
@@ -32,8 +32,8 @@ func TestCORSFilter_Preflight(t *testing.T) {
 	DefaultContainer.Dispatch(httpWriter, httpRequest)
 
 	actual := httpWriter.Header().Get(HEADER_AccessControlAllowOrigin)
-	if "http://api.bob.com" != actual {
-		t.Fatal("expected: http://api.bob.com but got:" + actual)
+	if "https://api.bob.com" != actual {
+		t.Fatal("expected: https://api.bob.com but got:" + actual)
 	}
 	actual = httpWriter.Header().Get(HEADER_AccessControlAllowMethods)
 	if "PUT" != actual {
@@ -58,7 +58,7 @@ func TestCORSFilter_Preflight(t *testing.T) {
 }
 
 // go test -v -test.run TestCORSFilter_Actual ...restful
-// http://www.html5rocks.com/en/tutorials/cors/#toc-handling-a-not-so-simple-request
+// https://www.html5rocks.com/en/tutorials/cors/#toc-handling-a-not-so-simple-request
 func TestCORSFilter_Actual(t *testing.T) {
 	tearDown()
 	ws := new(WebService)
@@ -73,15 +73,15 @@ func TestCORSFilter_Actual(t *testing.T) {
 	Filter(cors.Filter)
 
 	// Actual
-	httpRequest, _ := http.NewRequest("PUT", "http://api.alice.com/cors", nil)
-	httpRequest.Header.Set(HEADER_Origin, "http://api.bob.com")
+	httpRequest, _ := http.NewRequest("PUT", "https://api.alice.com/cors", nil)
+	httpRequest.Header.Set(HEADER_Origin, "https://api.bob.com")
 	httpRequest.Header.Set("X-Custom-Header", "value")
 
 	httpWriter := httptest.NewRecorder()
 	DefaultContainer.Dispatch(httpWriter, httpRequest)
 	actual := httpWriter.Header().Get(HEADER_AccessControlAllowOrigin)
-	if "http://api.bob.com" != actual {
-		t.Fatal("expected: http://api.bob.com but got:" + actual)
+	if "https://api.bob.com" != actual {
+		t.Fatal("expected: https://api.bob.com but got:" + actual)
 	}
 	if httpWriter.Body.String() != "dummy" {
 		t.Fatal("expected: dummy but got:" + httpWriter.Body.String())
@@ -93,7 +93,7 @@ var allowedDomainInput = []struct {
 	origin  string
 	allowed bool
 }{
-	{[]string{}, "http://anything.com", true},
+	{[]string{}, "https://anything.com", true},
 	{[]string{"example.com"}, "example.com", true},
 	{[]string{"example.com"}, "not-allowed", false},
 	{[]string{"not-matching.com", "example.com"}, "example.com", true},
@@ -114,7 +114,7 @@ func TestCORSFilter_AllowedDomains(t *testing.T) {
 			Container:      DefaultContainer}
 		Filter(cors.Filter)
 
-		httpRequest, _ := http.NewRequest("PUT", "http://api.his.com/cors", nil)
+		httpRequest, _ := http.NewRequest("PUT", "https://api.his.com/cors", nil)
 		httpRequest.Header.Set(HEADER_Origin, each.origin)
 		httpWriter := httptest.NewRecorder()
 		DefaultContainer.Dispatch(httpWriter, httpRequest)

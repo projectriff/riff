@@ -17,7 +17,7 @@ var darwinVersion int
 
 func init() {
 	if runtime.GOOS == "darwin" {
-		// See http://support.apple.com/kb/HT1633.
+		// See https://support.apple.com/kb/HT1633.
 		s, err := syscall.Sysctl("kern.osrelease")
 		if err != nil {
 			return
@@ -33,7 +33,7 @@ func init() {
 func supportsIPv6MulticastDeliveryOnLoopback() bool {
 	switch runtime.GOOS {
 	case "freebsd":
-		// See http://www.freebsd.org/cgi/query-pr.cgi?pr=180065.
+		// See https://www.freebsd.org/cgi/query-pr.cgi?pr=180065.
 		// Even after the fix, it looks like the latest
 		// kernels don't deliver link-local scoped multicast
 		// packets correctly.

@@ -42,7 +42,7 @@ type Reference struct {
 	// All known corresponding accession IDs in INSDC (GenBank/ENA/DDBJ) ideally
 	// with a version number, for example `GCF_000001405.26`.
 	SourceAccessions []string `protobuf:"bytes,6,rep,name=source_accessions,json=sourceAccessions" json:"source_accessions,omitempty"`
-	// ID from http://www.ncbi.nlm.nih.gov/taxonomy. For example, 9606 for human.
+	// ID from https://www.ncbi.nlm.nih.gov/taxonomy. For example, 9606 for human.
 	NcbiTaxonId int32 `protobuf:"varint,7,opt,name=ncbi_taxon_id,json=ncbiTaxonId" json:"ncbi_taxon_id,omitempty"`
 }
 
@@ -120,7 +120,7 @@ type ReferenceSet struct {
 	// ascending lexicographic order, concatenating, and taking the MD5 of that
 	// value. The resulting value is represented in lower case hexadecimal format.
 	Md5Checksum string `protobuf:"bytes,3,opt,name=md5checksum" json:"md5checksum,omitempty"`
-	// ID from http://www.ncbi.nlm.nih.gov/taxonomy (for example, 9606 for human)
+	// ID from https://www.ncbi.nlm.nih.gov/taxonomy (for example, 9606 for human)
 	// indicating the species which this reference set is intended to model. Note
 	// that contained references may specify a different `ncbiTaxonId`, as
 	// assemblies may contain reference sequences which do not belong to the

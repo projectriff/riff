@@ -7,7 +7,7 @@ info:
   contact:
     email: founders@apis.guru
     name: APIs.guru
-    url: 'http://APIs.guru'
+    url: 'https://APIs.guru'
   description: |
     Wikipedia for Web APIs. Repository of API specs in OpenAPI(fka Swagger) 2.0 format.
 

@@ -25,7 +25,7 @@ Go 1.9 through 1.7, and Kafka 1.0 through 0.10, although older releases are
 still likely to work.
 
 Sarama follows semantic versioning and provides API stability via the gopkg.in service.
-You can import a version with a guaranteed stable API via http://gopkg.in/Shopify/sarama.v1.
+You can import a version with a guaranteed stable API via https://gopkg.in/Shopify/sarama.v1.
 A changelog is available [here](CHANGELOG.md).
 
 ### Contributing

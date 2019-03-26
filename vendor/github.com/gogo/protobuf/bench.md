@@ -6,7 +6,7 @@ For a comparison run:
 
     make bench
 
-followed by [benchcmp](http://code.google.com/p/go/source/browse/misc/benchcmp benchcmp) on the resulting files:
+followed by [benchcmp](https://code.google.com/p/go/source/browse/misc/benchcmp benchcmp) on the resulting files:
 
     $GOROOT/misc/benchcmp $GOPATH/src/github.com/gogo/protobuf/test/mixbench/marshal.txt $GOPATH/src/github.com/gogo/protobuf/test/mixbench/marshaler.txt
     $GOROOT/misc/benchcmp $GOPATH/src/github.com/gogo/protobuf/test/mixbench/unmarshal.txt $GOPATH/src/github.com/gogo/protobuf/test/mixbench/unmarshaler.txt

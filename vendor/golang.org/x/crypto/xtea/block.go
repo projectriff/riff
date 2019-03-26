@@ -4,7 +4,7 @@
 
 /*
 	Implementation adapted from Needham and Wheeler's paper:
-	http://www.cix.co.uk/~klockstone/xtea.pdf
+	https://www.cix.co.uk/~klockstone/xtea.pdf
 
 	A precalculated look up table is used during encryption/decryption for values that are based purely on the key.
 */

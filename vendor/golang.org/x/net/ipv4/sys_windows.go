@@ -46,7 +46,7 @@ type ipMreqSource struct {
 	Interface  [4]byte
 }
 
-// See http://msdn.microsoft.com/en-us/library/windows/desktop/ms738586(v=vs.85).aspx
+// See https://msdn.microsoft.com/en-us/library/windows/desktop/ms738586(v=vs.85).aspx
 var (
 	ctlOpts = [ctlMax]ctlOpt{}
 

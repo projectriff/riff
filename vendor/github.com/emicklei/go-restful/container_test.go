@@ -13,7 +13,7 @@ func TestContainer_computeAllowedMethods(t *testing.T) {
 	ws1.Route(ws1.GET("{i}").To(dummy))
 	ws1.Route(ws1.POST("{i}").To(dummy))
 	wc.Add(ws1)
-	httpRequest, _ := http.NewRequest("GET", "http://api.his.com/users/1", nil)
+	httpRequest, _ := http.NewRequest("GET", "https://api.his.com/users/1", nil)
 	rreq := Request{Request: httpRequest}
 	m := wc.computeAllowedMethods(&rreq)
 	if len(m) != 2 {

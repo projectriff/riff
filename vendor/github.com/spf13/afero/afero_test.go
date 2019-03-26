@@ -347,7 +347,7 @@ func TestSeek(t *testing.T) {
 			if off != tt.out || err != nil {
 				if e, ok := err.(*os.PathError); ok && e.Err == syscall.EINVAL && tt.out > 1<<32 {
 					// Reiserfs rejects the big seeks.
-					// http://code.google.com/p/go/issues/detail?id=91
+					// https://code.google.com/p/go/issues/detail?id=91
 					break
 				}
 				t.Errorf("#%d: Seek(%v, %v) = %v, %v want %v, nil", i, tt.in, tt.whence, off, err, tt.out)

@@ -38,7 +38,7 @@ var (
 		AuthInfos: map[string]*clientcmdapi.AuthInfo{
 			"red-user": {Token: "red-token"}},
 		Clusters: map[string]*clientcmdapi.Cluster{
-			"cow-cluster": {Server: "http://cow.org:8080"}},
+			"cow-cluster": {Server: "https://cow.org:8080"}},
 		Contexts: map[string]*clientcmdapi.Context{
 			"federal-context": {AuthInfo: "red-user", Cluster: "cow-cluster", Namespace: "hammer-ns"}},
 	}
@@ -46,7 +46,7 @@ var (
 		AuthInfos: map[string]*clientcmdapi.AuthInfo{
 			"black-user": {Token: "black-token"}},
 		Clusters: map[string]*clientcmdapi.Cluster{
-			"pig-cluster": {Server: "http://pig.org:8080"}},
+			"pig-cluster": {Server: "https://pig.org:8080"}},
 		Contexts: map[string]*clientcmdapi.Context{
 			"queen-anne-context": {AuthInfo: "black-user", Cluster: "pig-cluster", Namespace: "saw-ns"}},
 	}
@@ -54,7 +54,7 @@ var (
 		AuthInfos: map[string]*clientcmdapi.AuthInfo{
 			"green-user": {Token: "green-token"}},
 		Clusters: map[string]*clientcmdapi.Cluster{
-			"horse-cluster": {Server: "http://horse.org:8080"}},
+			"horse-cluster": {Server: "https://horse.org:8080"}},
 		Contexts: map[string]*clientcmdapi.Context{
 			"shaker-context": {AuthInfo: "green-user", Cluster: "horse-cluster", Namespace: "chisel-ns"}},
 	}
@@ -62,7 +62,7 @@ var (
 		AuthInfos: map[string]*clientcmdapi.AuthInfo{
 			"blue-user": {Token: "blue-token"}},
 		Clusters: map[string]*clientcmdapi.Cluster{
-			"chicken-cluster": {Server: "http://chicken.org:8080"}},
+			"chicken-cluster": {Server: "https://chicken.org:8080"}},
 		Contexts: map[string]*clientcmdapi.Context{
 			"gothic-context": {AuthInfo: "blue-user", Cluster: "chicken-cluster", Namespace: "plane-ns"}},
 	}
@@ -72,8 +72,8 @@ var (
 			"red-user":    {Token: "a-different-red-token"},
 			"yellow-user": {Token: "yellow-token"}},
 		Clusters: map[string]*clientcmdapi.Cluster{
-			"cow-cluster":    {Server: "http://a-different-cow.org:8080", InsecureSkipTLSVerify: true},
-			"donkey-cluster": {Server: "http://donkey.org:8080", InsecureSkipTLSVerify: true}},
+			"cow-cluster":    {Server: "https://a-different-cow.org:8080", InsecureSkipTLSVerify: true},
+			"donkey-cluster": {Server: "https://donkey.org:8080", InsecureSkipTLSVerify: true}},
 		CurrentContext: "federal-context",
 	}
 )
@@ -423,7 +423,7 @@ func Example_noMergingOnExplicitPaths() {
 	// apiVersion: v1
 	// clusters:
 	// - cluster:
-	//     server: http://cow.org:8080
+	//     server: https://cow.org:8080
 	//   name: cow-cluster
 	// contexts:
 	// - context:
@@ -469,11 +469,11 @@ func Example_mergingSomeWithConflict() {
 	// apiVersion: v1
 	// clusters:
 	// - cluster:
-	//     server: http://cow.org:8080
+	//     server: https://cow.org:8080
 	//   name: cow-cluster
 	// - cluster:
 	//     insecure-skip-tls-verify: true
-	//     server: http://donkey.org:8080
+	//     server: https://donkey.org:8080
 	//   name: donkey-cluster
 	// contexts:
 	// - context:
@@ -528,16 +528,16 @@ func Example_mergingEverythingNoConflicts() {
 	// 	apiVersion: v1
 	// clusters:
 	// - cluster:
-	//     server: http://chicken.org:8080
+	//     server: https://chicken.org:8080
 	//   name: chicken-cluster
 	// - cluster:
-	//     server: http://cow.org:8080
+	//     server: https://cow.org:8080
 	//   name: cow-cluster
 	// - cluster:
-	//     server: http://horse.org:8080
+	//     server: https://horse.org:8080
 	//   name: horse-cluster
 	// - cluster:
-	//     server: http://pig.org:8080
+	//     server: https://pig.org:8080
 	//   name: pig-cluster
 	// contexts:
 	// - context:

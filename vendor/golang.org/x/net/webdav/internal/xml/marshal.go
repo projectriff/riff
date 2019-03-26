@@ -331,7 +331,7 @@ type printerPrefix struct {
 func (p *printer) prefixForNS(url string, isAttr bool) string {
 	// The "http://www.w3.org/XML/1998/namespace" name space is predefined as "xml"
 	// and must be referred to that way.
-	// (The "http://www.w3.org/2000/xmlns/" name space is also predefined as "xmlns",
+	// (The "https://www.w3.org/2000/xmlns/" name space is also predefined as "xmlns",
 	// but users should not be trying to use that one directly - that's our job.)
 	if url == xmlURL {
 		return "xml"
@@ -356,7 +356,7 @@ func (p *printer) defineNS(attr Attr, ignoreNonEmptyDefault bool) error {
 		prefix = attr.Name.Local
 		if attr.Value == "" {
 			// Technically, an empty XML namespace is allowed for an attribute.
-			// From http://www.w3.org/TR/xml-names11/#scoping-defaulting:
+			// From https://www.w3.org/TR/xml-names11/#scoping-defaulting:
 			//
 			// 	The attribute value in a namespace declaration for a prefix may be
 			//	empty. This has the effect, within the scope of the declaration, of removing
@@ -856,7 +856,7 @@ func (p *printer) writeStart(start *StartElement) error {
 	// Define any new name spaces implied by the attributes.
 	for _, attr := range start.Attr {
 		name := attr.Name
-		// From http://www.w3.org/TR/xml-names11/#defaulting
+		// From https://www.w3.org/TR/xml-names11/#defaulting
 		// "Default namespace declarations do not apply directly
 		// to attribute names; the interpretation of unprefixed
 		// attributes is determined by the element on which they

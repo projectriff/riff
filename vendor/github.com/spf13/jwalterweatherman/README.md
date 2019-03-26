@@ -5,7 +5,7 @@ Seamless printing to the terminal (stdout) and logging to a io.Writer
 (file) that’s as easy to use as fmt.Println.
 
 ![and_that__s_why_you_always_leave_a_note_by_jonnyetc-d57q7um](https://cloud.githubusercontent.com/assets/173412/11002937/ccd01654-847d-11e5-828e-12ebaf582eaf.jpg)
-Graphic by [JonnyEtc](http://jonnyetc.deviantart.com/art/And-That-s-Why-You-Always-Leave-a-Note-315311422)
+Graphic by [JonnyEtc](https://jonnyetc.deviantart.com/art/And-That-s-Why-You-Always-Leave-a-Note-315311422)
 
 JWW is primarily a wrapper around the excellent standard log library. It
 provides a few advantages over using the standard log library alone.

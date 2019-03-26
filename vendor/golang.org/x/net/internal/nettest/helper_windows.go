@@ -15,7 +15,7 @@ func maxOpenFiles() int {
 }
 
 func supportsRawIPSocket() (string, bool) {
-	// From http://msdn.microsoft.com/en-us/library/windows/desktop/ms740548.aspx:
+	// From https://msdn.microsoft.com/en-us/library/windows/desktop/ms740548.aspx:
 	// Note: To use a socket of type SOCK_RAW requires administrative privileges.
 	// Users running Winsock applications that use raw sockets must be a member of
 	// the Administrators group on the local computer, otherwise raw socket calls

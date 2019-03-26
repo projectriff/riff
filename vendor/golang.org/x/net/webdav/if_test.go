@@ -134,11 +134,11 @@ func TestParseIfHeader(t *testing.T) {
 		},
 	}, {
 		"section 7.5.1",
-		`<http://www.example.com/users/f/fielding/index.html> 
+		`<https://www.example.com/users/f/fielding/index.html> 
 			(<urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6>)`,
 		ifHeader{
 			lists: []ifList{{
-				resourceTag: `http://www.example.com/users/f/fielding/index.html`,
+				resourceTag: `https://www.example.com/users/f/fielding/index.html`,
 				conditions: []Condition{{
 					Token: `urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6`,
 				}},
@@ -156,11 +156,11 @@ func TestParseIfHeader(t *testing.T) {
 		},
 	}, {
 		"section 7.5.2 #2",
-		`<http://example.com/locked/>
+		`<https://example.com/locked/>
 			(<urn:uuid:150852e2-3847-42d5-8cbe-0f4f296f26cf>)`,
 		ifHeader{
 			lists: []ifList{{
-				resourceTag: `http://example.com/locked/`,
+				resourceTag: `https://example.com/locked/`,
 				conditions: []Condition{{
 					Token: `urn:uuid:150852e2-3847-42d5-8cbe-0f4f296f26cf`,
 				}},
@@ -168,11 +168,11 @@ func TestParseIfHeader(t *testing.T) {
 		},
 	}, {
 		"section 7.5.2 #3",
-		`<http://example.com/locked/member>
+		`<https://example.com/locked/member>
 			(<urn:uuid:150852e2-3847-42d5-8cbe-0f4f296f26cf>)`,
 		ifHeader{
 			lists: []ifList{{
-				resourceTag: `http://example.com/locked/member`,
+				resourceTag: `https://example.com/locked/member`,
 				conditions: []Condition{{
 					Token: `urn:uuid:150852e2-3847-42d5-8cbe-0f4f296f26cf`,
 				}},
@@ -273,11 +273,11 @@ func TestParseIfHeader(t *testing.T) {
 		},
 	}, {
 		"section 10.4.10",
-		`<http://www.example.com/specs/> 
+		`<https://www.example.com/specs/> 
 			(<urn:uuid:181d4fae-7d8c-11d0-a765-00a0c91e6bf2>)`,
 		ifHeader{
 			lists: []ifList{{
-				resourceTag: `http://www.example.com/specs/`,
+				resourceTag: `https://www.example.com/specs/`,
 				conditions: []Condition{{
 					Token: `urn:uuid:181d4fae-7d8c-11d0-a765-00a0c91e6bf2`,
 				}},

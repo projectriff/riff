@@ -99,7 +99,7 @@
 // References
 //
 // BCP 47 - Tags for Identifying Languages
-// http://tools.ietf.org/html/bcp47
+// https://tools.ietf.org/html/bcp47
 package language // import "golang.org/x/text/language"
 
 // TODO: Remove above NOTE after:
@@ -263,8 +263,8 @@ func (t Tag) canonicalize(c CanonType) (Tag, bool) {
 						// for legacy reasons, CLDR maps "no", the macro language
 						// code for Norwegian, to the dominant variant "nb". This
 						// change is currently under consideration for CLDR as well.
-						// See http://unicode.org/cldr/trac/ticket/2698 and also
-						// http://unicode.org/cldr/trac/ticket/1790 for some of the
+						// See https://unicode.org/cldr/trac/ticket/2698 and also
+						// https://unicode.org/cldr/trac/ticket/1790 for some of the
 						// practical implications. TODO: this check could be removed
 						// if CLDR adopts this change.
 						if c&CLDR == 0 || t.lang != _nb {
@@ -940,7 +940,7 @@ var errNoTLD = errors.New("language: region is not a valid ccTLD")
 // region will already be canonicalized it was obtained from a Tag that was
 // obtained using any of the default methods.
 func (r Region) TLD() (Region, error) {
-	// See http://en.wikipedia.org/wiki/Country_code_top-level_domain for the
+	// See https://en.wikipedia.org/wiki/Country_code_top-level_domain for the
 	// difference between ISO 3166-1 and IANA ccTLD.
 	if r.regionID == _GB {
 		r = Region{_UK}

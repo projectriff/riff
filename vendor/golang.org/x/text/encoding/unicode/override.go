@@ -19,7 +19,7 @@ import (
 // This technique is recommended by the W3C for use in HTML 5: "For
 // compatibility with deployed content, the byte order mark (also known as BOM)
 // is considered more authoritative than anything else."
-// http://www.w3.org/TR/encoding/#specification-hooks
+// https://www.w3.org/TR/encoding/#specification-hooks
 //
 // Using BOMOverride is mostly intended for use cases where the first characters
 // of a fallback encoding are known to not be a BOM, for example, for valid HTML

@@ -35,11 +35,11 @@ func TestURLBackoffFunctionalityCollisions(t *testing.T) {
 	}
 
 	// Add some noise and make sure backoff for a clean URL is zero.
-	myBackoff.UpdateBackoff(parse("http://100.200.300.400:8080"), nil, 500)
+	myBackoff.UpdateBackoff(parse("https://100.200.300.400:8080"), nil, 500)
 
-	myBackoff.UpdateBackoff(parse("http://1.2.3.4:8080"), nil, 500)
+	myBackoff.UpdateBackoff(parse("https://1.2.3.4:8080"), nil, 500)
 
-	if myBackoff.CalculateBackoff(parse("http://1.2.3.4:100")) > 0 {
+	if myBackoff.CalculateBackoff(parse("https://1.2.3.4:100")) > 0 {
 		t.Errorf("URLs are colliding in the backoff map!")
 	}
 }
@@ -66,14 +66,14 @@ func TestURLBackoffFunctionality(t *testing.T) {
 	}
 
 	for i, sec := range seconds {
-		backoffSec := myBackoff.CalculateBackoff(parse("http://1.2.3.4:100"))
+		backoffSec := myBackoff.CalculateBackoff(parse("https://1.2.3.4:100"))
 		if backoffSec < time.Duration(sec)*time.Second || backoffSec > time.Duration(sec+5)*time.Second {
 			t.Errorf("Backoff out of range %v: %v %v", i, sec, backoffSec)
 		}
-		myBackoff.UpdateBackoff(parse("http://1.2.3.4:100/responseCodeForFuncTest"), nil, returnCodes[i])
+		myBackoff.UpdateBackoff(parse("https://1.2.3.4:100/responseCodeForFuncTest"), nil, returnCodes[i])
 	}
 
-	if myBackoff.CalculateBackoff(parse("http://1.2.3.4:100")) == 0 {
+	if myBackoff.CalculateBackoff(parse("https://1.2.3.4:100")) == 0 {
 		t.Errorf("The final return code %v should have resulted in a backoff ! ", returnCodes[7])
 	}
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// OpenPGP CFB Mode. http://tools.ietf.org/html/rfc4880#section-13.9
+// OpenPGP CFB Mode. https://tools.ietf.org/html/rfc4880#section-13.9
 
 package packet
 

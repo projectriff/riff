@@ -26,7 +26,7 @@ import (
 // Swagger this is the root document object for the API specification.
 // It combines what previously was the Resource Listing and API Declaration (version 1.2 and earlier) together into one document.
 //
-// For more information: http://goo.gl/8us55a#swagger-object-
+// For more information: https://goo.gl/8us55a#swagger-object-
 type Swagger struct {
 	VendorExtensible
 	SwaggerProps
@@ -186,14 +186,14 @@ func (s *SchemaOrStringArray) UnmarshalJSON(data []byte) error {
 // An object to hold data types that can be consumed and produced by operations.
 // These data types can be primitives, arrays or models.
 //
-// For more information: http://goo.gl/8us55a#definitionsObject
+// For more information: https://goo.gl/8us55a#definitionsObject
 type Definitions map[string]Schema
 
 // SecurityDefinitions a declaration of the security schemes available to be used in the specification.
 // This does not enforce the security schemes on the operations and only serves to provide
 // the relevant details for each scheme.
 //
-// For more information: http://goo.gl/8us55a#securityDefinitionsObject
+// For more information: https://goo.gl/8us55a#securityDefinitionsObject
 type SecurityDefinitions map[string]*SecurityScheme
 
 // StringOrArray represents a value that can either be a string

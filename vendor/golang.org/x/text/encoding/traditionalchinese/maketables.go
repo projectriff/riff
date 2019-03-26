@@ -23,7 +23,7 @@ func main() {
 	fmt.Printf("// Package traditionalchinese provides Traditional Chinese encodings such as Big5.\n")
 	fmt.Printf(`package traditionalchinese // import "golang.org/x/text/encoding/traditionalchinese"` + "\n\n")
 
-	res, err := http.Get("http://encoding.spec.whatwg.org/index-big5.txt")
+	res, err := http.Get("https://encoding.spec.whatwg.org/index-big5.txt")
 	if err != nil {
 		log.Fatalf("Get: %v", err)
 	}
@@ -47,13 +47,13 @@ func main() {
 		}
 		mapping[x] = y
 
-		// The WHATWG spec http://encoding.spec.whatwg.org/#indexes says that
+		// The WHATWG spec https://encoding.spec.whatwg.org/#indexes says that
 		// "The index pointer for code point in index is the first pointer
 		// corresponding to code point in index", which would normally mean
 		// that the code below should be guarded by "if reverse[y] == 0", but
 		// last instead of first seems to match the behavior of
 		// "iconv -f UTF-8 -t BIG5". For example, U+8005 者 occurs twice in
-		// http://encoding.spec.whatwg.org/index-big5.txt, as index 2148
+		// https://encoding.spec.whatwg.org/index-big5.txt, as index 2148
 		// (encoded as "\x8e\xcd") and index 6543 (encoded as "\xaa\xcc")
 		// and "echo 者 | iconv -f UTF-8 -t BIG5 | xxd" gives "\xaa\xcc".
 		c0, c1 := x/157, x%157
@@ -69,7 +69,7 @@ func main() {
 	}
 
 	fmt.Printf("// decode is the decoding table from Big5 code to Unicode.\n")
-	fmt.Printf("// It is defined at http://encoding.spec.whatwg.org/index-big5.txt\n")
+	fmt.Printf("// It is defined at https://encoding.spec.whatwg.org/index-big5.txt\n")
 	fmt.Printf("var decode = [...]uint32{\n")
 	for i, v := range mapping {
 		if v != 0 {

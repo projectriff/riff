@@ -152,7 +152,7 @@ func TestTextSignedMessage(t *testing.T) {
 // packets that expand into themselves and cause an infinite recursive
 // parsing loop.
 // The packet in this test case comes from Taylor R. Campbell at
-// http://mumble.net/~campbell/misc/pgp-quine/
+// https://mumble.net/~campbell/misc/pgp-quine/
 func TestCampbellQuine(t *testing.T) {
 	md, err := ReadMessage(readerFromHex(campbellQuine), nil, nil, nil)
 	if md != nil {

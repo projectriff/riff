@@ -41,8 +41,8 @@ var resCache = initResolutionCache()
 
 func initResolutionCache() ResolutionCache {
 	return &simpleCache{store: map[string]interface{}{
-		"http://swagger.io/v2/schema.json":       MustLoadSwagger20Schema(),
-		"http://json-schema.org/draft-04/schema": MustLoadJSONSchemaDraft04(),
+		"https://swagger.io/v2/schema.json":       MustLoadSwagger20Schema(),
+		"https://json-schema.org/draft-04/schema": MustLoadJSONSchemaDraft04(),
 	}}
 }
 

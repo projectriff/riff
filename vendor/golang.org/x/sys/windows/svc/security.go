@@ -24,7 +24,7 @@ func allocSid(subAuth0 uint32) (*windows.SID, error) {
 
 // IsAnInteractiveSession determines if calling process is running interactively.
 // It queries the process token for membership in the Interactive group.
-// http://stackoverflow.com/questions/2668851/how-do-i-detect-that-my-application-is-running-as-service-or-in-an-interactive-s
+// https://stackoverflow.com/questions/2668851/how-do-i-detect-that-my-application-is-running-as-service-or-in-an-interactive-s
 func IsAnInteractiveSession() (bool, error) {
 	interSid, err := allocSid(windows.SECURITY_INTERACTIVE_RID)
 	if err != nil {

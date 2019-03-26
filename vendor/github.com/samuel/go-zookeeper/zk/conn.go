@@ -146,7 +146,7 @@ type Event struct {
 
 // HostProvider is used to represent a set of hosts a ZooKeeper client should connect to.
 // It is an analog of the Java equivalent:
-// http://svn.apache.org/viewvc/zookeeper/trunk/src/java/main/org/apache/zookeeper/client/HostProvider.java?view=markup
+// https://svn.apache.org/viewvc/zookeeper/trunk/src/java/main/org/apache/zookeeper/client/HostProvider.java?view=markup
 type HostProvider interface {
 	// Init is called first, with the servers specified in the connection string.
 	Init(servers []string) error

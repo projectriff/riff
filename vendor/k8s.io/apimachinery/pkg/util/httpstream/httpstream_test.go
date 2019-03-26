@@ -71,7 +71,7 @@ func TestHandshake(t *testing.T) {
 	}
 
 	for name, test := range tests {
-		req, err := http.NewRequest("GET", "http://www.example.com/", nil)
+		req, err := http.NewRequest("GET", "https://www.example.com/", nil)
 		if err != nil {
 			t.Fatalf("%s: error creating request: %v", name, err)
 		}

@@ -13,7 +13,7 @@ confluent/stop: confluent/rest/stop confluent/registry/stop confluent/kafka/stop
 # Download & extract tasks
 
 confluent/confluent.tgz:
-	mkdir -p confluent && wget http://packages.confluent.io/archive/3.0/confluent-3.0.1-2.11.tar.gz -O confluent/confluent.tgz
+	mkdir -p confluent && wget https://packages.confluent.io/archive/3.0/confluent-3.0.1-2.11.tar.gz -O confluent/confluent.tgz
 
 confluent/EXTRACTED: confluent/confluent.tgz
 	tar xzf confluent/confluent.tgz -C confluent --strip-components 1 && mkdir confluent/logs && touch confluent/EXTRACTED

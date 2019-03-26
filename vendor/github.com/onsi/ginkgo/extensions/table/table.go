@@ -2,7 +2,7 @@
 
 Table provides a simple DSL for Ginkgo-native Table-Driven Tests
 
-The godoc documentation describes Table's API.  More comprehensive documentation (with examples!) is available at http://onsi.github.io/ginkgo#table-driven-tests
+The godoc documentation describes Table's API.  More comprehensive documentation (with examples!) is available at https://onsi.github.io/ginkgo#table-driven-tests
 
 */
 

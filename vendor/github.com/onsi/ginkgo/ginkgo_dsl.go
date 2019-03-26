@@ -1,11 +1,11 @@
 /*
 Ginkgo is a BDD-style testing framework for Golang
 
-The godoc documentation describes Ginkgo's API.  More comprehensive documentation (with examples!) is available at http://onsi.github.io/ginkgo/
+The godoc documentation describes Ginkgo's API.  More comprehensive documentation (with examples!) is available at https://onsi.github.io/ginkgo/
 
-Ginkgo's preferred matcher library is [Gomega](http://github.com/onsi/gomega)
+Ginkgo's preferred matcher library is [Gomega](https://github.com/onsi/gomega)
 
-Ginkgo on Github: http://github.com/onsi/ginkgo
+Ginkgo on Github: https://github.com/onsi/ginkgo
 
 Ginkgo is MIT-Licensed
 */
@@ -181,7 +181,7 @@ func CurrentGinkgoTestDescription() GinkgoTestDescription {
 //The optional info argument is passed to the test reporter and can be used to
 // provide the measurement data to a custom reporter with context.
 //
-//See http://onsi.github.io/ginkgo/#benchmark_tests for more details
+//See https://onsi.github.io/ginkgo/#benchmark_tests for more details
 type Benchmarker interface {
 	Time(name string, body func(), info ...interface{}) (elapsedTime time.Duration)
 	RecordValue(name string, value float64, info ...interface{})
@@ -541,7 +541,7 @@ func BeforeEach(body interface{}, timeout ...float64) bool {
 }
 
 //JustBeforeEach blocks are run before It blocks but *after* all BeforeEach blocks.  For more details,
-//read the [documentation](http://onsi.github.io/ginkgo/#separating_creation_and_configuration_)
+//read the [documentation](https://onsi.github.io/ginkgo/#separating_creation_and_configuration_)
 //
 //Like It blocks, BeforeEach blocks can be made asynchronous by providing a body function that accepts
 //a Done channel

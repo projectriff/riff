@@ -72,7 +72,7 @@ const (
 	// recognition accuracy is not compromised by a lossy codec.
 	//
 	// The stream FLAC (Free Lossless Audio Codec) encoding is specified at:
-	// http://flac.sourceforge.net/documentation.html.
+	// https://xiph.org/flac/documentation.html.
 	// 16-bit and 24-bit samples are supported.
 	// Not all fields in STREAMINFO are supported.
 	RecognitionConfig_FLAC RecognitionConfig_AudioEncoding = 2

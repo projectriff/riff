@@ -14,9 +14,9 @@ import (
 // Cross-origin resource sharing (CORS) is a mechanism that allows JavaScript on a web page
 // to make XMLHttpRequests to another domain, not the domain the JavaScript originated from.
 //
-// http://en.wikipedia.org/wiki/Cross-origin_resource_sharing
-// http://enable-cors.org/server.html
-// http://www.html5rocks.com/en/tutorials/cors/#toc-handling-a-not-so-simple-request
+// https://en.wikipedia.org/wiki/Cross-origin_resource_sharing
+// https://enable-cors.org/server.html
+// https://www.html5rocks.com/en/tutorials/cors/#toc-handling-a-not-so-simple-request
 type CrossOriginResourceSharing struct {
 	ExposeHeaders  []string // list of Header names
 	AllowedHeaders []string // list of Header names
@@ -29,8 +29,8 @@ type CrossOriginResourceSharing struct {
 	allowedOriginPatterns []*regexp.Regexp // internal field for origin regexp check.
 }
 
-// Filter is a filter function that implements the CORS flow as documented on http://enable-cors.org/server.html
-// and http://www.html5rocks.com/static/images/cors_server_flowchart.png
+// Filter is a filter function that implements the CORS flow as documented on https://enable-cors.org/server.html
+// and https://www.html5rocks.com/static/images/cors_server_flowchart.png
 func (c CrossOriginResourceSharing) Filter(req *Request, resp *Response, chain *FilterChain) {
 	origin := req.Request.Header.Get(HEADER_Origin)
 	if len(origin) == 0 {

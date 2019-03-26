@@ -133,7 +133,7 @@ Change history of go-restful
 
 2014-01-10
 
-- (api add) support for CloseNotify, see http://golang.org/pkg/net/http/#CloseNotifier
+- (api add) support for CloseNotify, see https://golang.org/pkg/net/http/#CloseNotifier
 
 2014-01-07
 

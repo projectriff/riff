@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/satori/go.uuid.png?branch=master)](https://travis-ci.org/satori/go.uuid)
 [![Coverage Status](https://coveralls.io/repos/github/satori/go.uuid/badge.svg?branch=master)](https://coveralls.io/github/satori/go.uuid)
-[![GoDoc](http://godoc.org/github.com/satori/go.uuid?status.png)](http://godoc.org/github.com/satori/go.uuid)
+[![GoDoc](https://godoc.org/github.com/satori/go.uuid?status.png)](https://godoc.org/github.com/satori/go.uuid)
 
 This package provides pure Go implementation of Universally Unique Identifier (UUID). Supported both creation and parsing of UUIDs.
 
@@ -51,11 +51,11 @@ func main() {
 
 ## Documentation
 
-[Documentation](http://godoc.org/github.com/satori/go.uuid) is hosted at GoDoc project.
+[Documentation](https://godoc.org/github.com/satori/go.uuid) is hosted at GoDoc project.
 
 ## Links
-* [RFC 4122](http://tools.ietf.org/html/rfc4122)
-* [DCE 1.1: Authentication and Security Services](http://pubs.opengroup.org/onlinepubs/9696989899/chap5.htm#tagcjh_08_02_01_01)
+* [RFC 4122](https://tools.ietf.org/html/rfc4122)
+* [DCE 1.1: Authentication and Security Services](https://pubs.opengroup.org/onlinepubs/9696989899/chap5.htm#tagcjh_08_02_01_01)
 
 ## Copyright
 

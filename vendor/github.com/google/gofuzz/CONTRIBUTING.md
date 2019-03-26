@@ -62,6 +62,6 @@ again.
 [golint readme]: https://github.com/golang/lint/blob/master/README
 [gocov]: https://github.com/axw/gocov
 [gocov-html]: https://github.com/matm/gocov-html
-[well-formed commit messages]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
-[squash]: http://git-scm.com/book/en/Git-Tools-Rewriting-History#Squashing-Commits
+[well-formed commit messages]: https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
+[squash]: https://git-scm.com/book/en/Git-Tools-Rewriting-History#Squashing-Commits
 [pull request]: https://help.github.com/articles/creating-a-pull-request

@@ -677,7 +677,7 @@ type VariantAnnotation struct {
 	// Describes the clinical significance of a variant.
 	// It is adapted from the ClinVar controlled vocabulary for clinical
 	// significance described at:
-	// http://www.ncbi.nlm.nih.gov/clinvar/docs/clinsig/
+	// https://www.ncbi.nlm.nih.gov/clinvar/docs/clinsig/
 	ClinicalSignificance VariantAnnotation_ClinicalSignificance `protobuf:"varint,7,opt,name=clinical_significance,json=clinicalSignificance,enum=google.genomics.v1.VariantAnnotation_ClinicalSignificance" json:"clinical_significance,omitempty"`
 }
 
@@ -741,10 +741,10 @@ type VariantAnnotation_ClinicalCondition struct {
 	// The set of external IDs for this condition.
 	ExternalIds []*ExternalId `protobuf:"bytes,2,rep,name=external_ids,json=externalIds" json:"external_ids,omitempty"`
 	// The MedGen concept id associated with this gene.
-	// Search for these IDs at http://www.ncbi.nlm.nih.gov/medgen/
+	// Search for these IDs at https://www.ncbi.nlm.nih.gov/medgen/
 	ConceptId string `protobuf:"bytes,3,opt,name=concept_id,json=conceptId" json:"concept_id,omitempty"`
 	// The OMIM id for this condition.
-	// Search for these IDs at http://omim.org/
+	// Search for these IDs at https://omim.org/
 	OmimId string `protobuf:"bytes,4,opt,name=omim_id,json=omimId" json:"omim_id,omitempty"`
 }
 
@@ -788,7 +788,7 @@ func (m *VariantAnnotation_ClinicalCondition) GetOmimId() string {
 type Transcript struct {
 	// The annotation ID of the gene from which this transcript is transcribed.
 	GeneId string `protobuf:"bytes,1,opt,name=gene_id,json=geneId" json:"gene_id,omitempty"`
-	// The <a href="http://en.wikipedia.org/wiki/Exon">exons</a> that compose
+	// The <a href="https://en.wikipedia.org/wiki/Exon">exons</a> that compose
 	// this transcript. This field should be unset for genomes where transcript
 	// splicing does not occur, for example prokaryotes.
 	//

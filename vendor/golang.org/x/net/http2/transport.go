@@ -781,11 +781,11 @@ func (cc *ClientConn) RoundTrip(req *http.Request) (*http.Response, error) {
 		req.Method != "HEAD" {
 		// Request gzip only, not deflate. Deflate is ambiguous and
 		// not as universally supported anyway.
-		// See: http://www.gzip.org/zlib/zlib_faq.html#faq38
+		// See: https://www.gzip.org/zlib/zlib_faq.html#faq38
 		//
 		// Note that we don't request this for HEAD requests,
 		// due to a bug in nginx:
-		//   http://trac.nginx.org/nginx/ticket/358
+		//   https://trac.nginx.org/nginx/ticket/358
 		//   https://golang.org/issue/5522
 		//
 		// We don't request gzip if the request is for a range, since

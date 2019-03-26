@@ -34,7 +34,7 @@ func gaeUrl() string {
 		// Include your URL on App Engine here.
 		// I found no way to get AppID without appengine.Context and this always
 		// based on a http.Request.
-		return "http://federatedservices.appspot.com"
+		return "https://federatedservices.appspot.com"
 	}
 }
 

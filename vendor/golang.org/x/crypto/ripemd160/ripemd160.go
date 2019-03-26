@@ -7,7 +7,7 @@ package ripemd160 // import "golang.org/x/crypto/ripemd160"
 
 // RIPEMD-160 is designed by by Hans Dobbertin, Antoon Bosselaers, and Bart
 // Preneel with specifications available at:
-// http://homes.esat.kuleuven.be/~cosicart/pdf/AB-9601/AB-9601.pdf.
+// https://homes.esat.kuleuven.be/~cosicart/pdf/AB-9601/AB-9601.pdf.
 
 import (
 	"crypto"

@@ -1,6 +1,6 @@
 //
 // Blackfriday Markdown Processor
-// Available at http://github.com/russross/blackfriday
+// Available at https://github.com/russross/blackfriday
 //
 // Copyright © 2011 Russ Ross <russ@russross.com>.
 // Distributed under the Simplified BSD License.
@@ -841,17 +841,17 @@ func autoLink(p *Markdown, data []byte, offset int) (int, *Node) {
 		 *
 		 * Examples:
 		 *
-		 *      foo http://www.pokemon.com/Pikachu_(Electric) bar
-		 *              => http://www.pokemon.com/Pikachu_(Electric)
+		 *      foo https://www.pokemon.com/Pikachu_(Electric) bar
+		 *              => https://www.pokemon.com/Pikachu_(Electric)
 		 *
-		 *      foo (http://www.pokemon.com/Pikachu_(Electric)) bar
-		 *              => http://www.pokemon.com/Pikachu_(Electric)
+		 *      foo (https://www.pokemon.com/Pikachu_(Electric)) bar
+		 *              => https://www.pokemon.com/Pikachu_(Electric)
 		 *
-		 *      foo http://www.pokemon.com/Pikachu_(Electric)) bar
-		 *              => http://www.pokemon.com/Pikachu_(Electric))
+		 *      foo https://www.pokemon.com/Pikachu_(Electric)) bar
+		 *              => https://www.pokemon.com/Pikachu_(Electric))
 		 *
-		 *      (foo http://www.pokemon.com/Pikachu_(Electric)) bar
-		 *              => foo http://www.pokemon.com/Pikachu_(Electric)
+		 *      (foo https://www.pokemon.com/Pikachu_(Electric)) bar
+		 *              => foo https://www.pokemon.com/Pikachu_(Electric)
 		 */
 
 		for bufEnd >= 0 && origData[bufEnd] != '\n' && openDelim != 0 {

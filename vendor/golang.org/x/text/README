@@ -1,6 +1,6 @@
 This repository holds supplementary Go libraries for text processing, many involving Unicode.
 
-To submit changes to this repository, see http://golang.org/doc/contribute.html.
+To submit changes to this repository, see https://golang.org/doc/contribute.html.
 
 To generate the tables in this repository (except for the encoding tables),
 run go generate from this directory. By default tables are generated for the

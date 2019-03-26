@@ -4,7 +4,7 @@ Gomega matchers
 This package implements the Gomega matchers and does not typically need to be imported.
 See the docs for Gomega for documentation on the matchers
 
-http://onsi.github.io/gomega/
+https://onsi.github.io/gomega/
 */
 package matchers
 

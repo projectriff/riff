@@ -810,7 +810,7 @@ type StackTrace_StackFrame struct {
 	// method that is active in this frame (up to 1024 bytes).
 	FunctionName *TruncatableString `protobuf:"bytes,1,opt,name=function_name,json=functionName" json:"function_name,omitempty"`
 	// An un-mangled function name, if `function_name` is
-	// [mangled](http://www.avabodh.com/cxxin/namemangling.html). The name can
+	// [mangled](https://www.avabodh.com/cxxin/namemangling.html). The name can
 	// be fully-qualified (up to 1024 bytes).
 	OriginalFunctionName *TruncatableString `protobuf:"bytes,2,opt,name=original_function_name,json=originalFunctionName" json:"original_function_name,omitempty"`
 	// The name of the source file where the function call appears (up to 256

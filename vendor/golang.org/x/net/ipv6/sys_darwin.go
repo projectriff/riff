@@ -49,7 +49,7 @@ func init() {
 	// The IP_PKTINFO and protocol-independent multicast API were
 	// introduced in OS X 10.7 (Darwin 11). But it looks like
 	// those features require OS X 10.8 (Darwin 12) or above.
-	// See http://support.apple.com/kb/HT1633.
+	// See https://support.apple.com/kb/HT1633.
 	if mjver, err := strconv.Atoi(ss[0]); err != nil || mjver < 12 {
 		return
 	}

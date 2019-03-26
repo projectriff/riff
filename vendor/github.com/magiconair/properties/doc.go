@@ -149,8 +149,8 @@
 // The following documents provide a description of the properties
 // file format.
 //
-// http://en.wikipedia.org/wiki/.properties
+// https://en.wikipedia.org/wiki/.properties
 //
-// http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html#load%28java.io.Reader%29
+// https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html#load%28java.io.Reader%29
 //
 package properties

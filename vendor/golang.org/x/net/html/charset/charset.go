@@ -48,7 +48,7 @@ func (h *htmlEncoding) NewEncoder() *encoding.Encoder {
 // DetermineEncoding determines the encoding of an HTML document by examining
 // up to the first 1024 bytes of content and the declared Content-Type.
 //
-// See http://www.whatwg.org/specs/web-apps/current-work/multipage/parsing.html#determining-the-character-encoding
+// See https://www.whatwg.org/specs/web-apps/current-work/multipage/parsing.html#determining-the-character-encoding
 func DetermineEncoding(content []byte, contentType string) (e encoding.Encoding, name string, certain bool) {
 	if len(content) > 1024 {
 		content = content[:1024]

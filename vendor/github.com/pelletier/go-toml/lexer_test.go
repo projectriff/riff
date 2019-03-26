@@ -728,7 +728,7 @@ func TestLexUnknownRvalue(t *testing.T) {
 
 func BenchmarkLexer(b *testing.B) {
 	sample := `title = "Hugo: A Fast and Flexible Website Generator"
-baseurl = "http://gohugo.io/"
+baseurl = "https://gohugo.io/"
 MetaDataFormat = "yaml"
 pluralizeListTitles = false
 

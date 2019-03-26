@@ -6,7 +6,7 @@
 ## Synopsis
 
 xxHash is a very fast hashing algorithm (see the details [here](https://github.com/Cyan4973/xxHash/)).
-This package implements xxHash in pure [Go](http://www.golang.com).
+This package implements xxHash in pure [Go](https://www.golang.com).
 
 
 ## Usage

@@ -19,7 +19,7 @@ var (
 	errNoSuchInterface          = errors.New("no such interface")
 	errNoSuchMulticastInterface = errors.New("no such multicast interface")
 
-	// See http://www.freebsd.org/doc/en/books/porters-handbook/freebsd-versions.html.
+	// See https://www.freebsd.org/doc/en/books/porters-handbook/freebsd-versions.html.
 	freebsdVersion uint32
 )
 

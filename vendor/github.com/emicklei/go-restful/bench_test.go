@@ -21,7 +21,7 @@ func setup(container *Container) {
 		}
 		container.Add(ws)
 		for _, each := range ws.Routes() {
-			uris = append(uris, "http://bench.com"+each.Path)
+			uris = append(uris, "https://www.bench.com"+each.Path)
 		}
 	}
 }

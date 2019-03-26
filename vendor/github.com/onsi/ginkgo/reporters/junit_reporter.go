@@ -2,7 +2,7 @@
 
 JUnit XML Reporter for Ginkgo
 
-For usage instructions: http://onsi.github.io/ginkgo/#generating_junit_xml_output
+For usage instructions: https://onsi.github.io/ginkgo/#generating_junit_xml_output
 
 */
 

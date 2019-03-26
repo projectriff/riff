@@ -1,7 +1,7 @@
 /*
 The Ginkgo CLI
 
-The Ginkgo CLI is fully documented [here](http://onsi.github.io/ginkgo/#the_ginkgo_cli)
+The Ginkgo CLI is fully documented [here](https://onsi.github.io/ginkgo/#the_ginkgo_cli)
 
 You can also learn more by running:
 

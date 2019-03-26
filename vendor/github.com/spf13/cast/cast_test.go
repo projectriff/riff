@@ -621,7 +621,7 @@ func TestToStringE(t *testing.T) {
 		{[]byte("one time"), "one time", false},
 		{"one more time", "one more time", false},
 		{template.HTML("one time"), "one time", false},
-		{template.URL("http://somehost.foo"), "http://somehost.foo", false},
+		{template.URL("https://somehost.foo"), "https://somehost.foo", false},
 		{template.JS("(1+2)"), "(1+2)", false},
 		{template.CSS("a"), "a", false},
 		{template.HTMLAttr("a"), "a", false},

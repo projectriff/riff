@@ -7,7 +7,7 @@
 //
 // This package defines command line flags that are common to most generation
 // tools. The flags allow for specifying specific Unicode and CLDR versions
-// in the public Unicode data repository (http://www.unicode.org/Public).
+// in the public Unicode data repository (http://www.unicode.org/Public/).
 //
 // A local Unicode data mirror can be set through the flag -local or the
 // environment variable UNICODE_DIR. The former takes precedence. The local
@@ -39,10 +39,10 @@ import (
 
 var (
 	url = flag.String("url",
-		"http://www.unicode.org/Public",
+		"http://www.unicode.org/Public/",
 		"URL of Unicode database directory")
 	iana = flag.String("iana",
-		"http://www.iana.org",
+		"https://www.iana.org",
 		"URL of the IANA repository")
 	unicodeVersion = flag.String("unicode",
 		getEnv("UNICODE_VERSION", unicode.Version),
@@ -120,7 +120,7 @@ func OpenUnicodeFile(category, version, file string) io.ReadCloser {
 }
 
 // OpenIANAFile opens the requested IANA file. The file is specified relative
-// to the IANA root, which is typically either http://www.iana.org or the
+// to the IANA root, which is typically either https://www.iana.org or the
 // iana directory in the local mirror. It will call log.Fatal if there are any
 // errors.
 func OpenIANAFile(path string) io.ReadCloser {

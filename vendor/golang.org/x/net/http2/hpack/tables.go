@@ -125,7 +125,7 @@ func (t *headerFieldTable) idToIndex(id uint64) uint64 {
 	return k + 1
 }
 
-// http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-07#appendix-B
+// https://tools.ietf.org/html/draft-ietf-httpbis-header-compression-07#appendix-B
 var staticTable = newStaticTable()
 var staticTableEntries = [...]HeaderField{
 	{Name: ":authority"},

@@ -5,7 +5,7 @@
 package ripemd160
 
 // Test vectors are from:
-// http://homes.esat.kuleuven.be/~bosselae/ripemd160.html
+// https://homes.esat.kuleuven.be/~bosselae/ripemd160.html
 
 import (
 	"fmt"

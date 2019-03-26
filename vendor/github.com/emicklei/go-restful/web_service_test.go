@@ -41,7 +41,7 @@ func TestWebService_CanCreateParameterKinds(t *testing.T) {
 func TestCapturePanic(t *testing.T) {
 	tearDown()
 	Add(newPanicingService())
-	httpRequest, _ := http.NewRequest("GET", "http://here.com/fire", nil)
+	httpRequest, _ := http.NewRequest("GET", "https://here.com/fire", nil)
 	httpRequest.Header.Set("Accept", "*/*")
 	httpWriter := httptest.NewRecorder()
 	// override the default here
@@ -56,7 +56,7 @@ func TestCapturePanicWithEncoded(t *testing.T) {
 	tearDown()
 	Add(newPanicingService())
 	DefaultContainer.EnableContentEncoding(true)
-	httpRequest, _ := http.NewRequest("GET", "http://here.com/fire", nil)
+	httpRequest, _ := http.NewRequest("GET", "https://here.com/fire", nil)
 	httpRequest.Header.Set("Accept", "*/*")
 	httpRequest.Header.Set("Accept-Encoding", "gzip")
 	httpWriter := httptest.NewRecorder()
@@ -68,7 +68,7 @@ func TestCapturePanicWithEncoded(t *testing.T) {
 
 func TestNotFound(t *testing.T) {
 	tearDown()
-	httpRequest, _ := http.NewRequest("GET", "http://here.com/missing", nil)
+	httpRequest, _ := http.NewRequest("GET", "https://here.com/missing", nil)
 	httpRequest.Header.Set("Accept", "*/*")
 	httpWriter := httptest.NewRecorder()
 	DefaultContainer.dispatch(httpWriter, httpRequest)
@@ -80,7 +80,7 @@ func TestNotFound(t *testing.T) {
 func TestMethodNotAllowed(t *testing.T) {
 	tearDown()
 	Add(newGetOnlyService())
-	httpRequest, _ := http.NewRequest("POST", "http://here.com/get", nil)
+	httpRequest, _ := http.NewRequest("POST", "https://here.com/get", nil)
 	httpRequest.Header.Set("Accept", "*/*")
 	httpWriter := httptest.NewRecorder()
 	DefaultContainer.dispatch(httpWriter, httpRequest)
@@ -92,7 +92,7 @@ func TestMethodNotAllowed(t *testing.T) {
 func TestSelectedRoutePath_Issue100(t *testing.T) {
 	tearDown()
 	Add(newSelectedRouteTestingService())
-	httpRequest, _ := http.NewRequest("GET", "http://here.com/get/232452/friends", nil)
+	httpRequest, _ := http.NewRequest("GET", "https://here.com/get/232452/friends", nil)
 	httpRequest.Header.Set("Accept", "*/*")
 	httpWriter := httptest.NewRecorder()
 	DefaultContainer.dispatch(httpWriter, httpRequest)
@@ -104,7 +104,7 @@ func TestSelectedRoutePath_Issue100(t *testing.T) {
 func TestContentType415_Issue170(t *testing.T) {
 	tearDown()
 	Add(newGetOnlyJsonOnlyService())
-	httpRequest, _ := http.NewRequest("GET", "http://here.com/get", nil)
+	httpRequest, _ := http.NewRequest("GET", "https://here.com/get", nil)
 	httpWriter := httptest.NewRecorder()
 	DefaultContainer.dispatch(httpWriter, httpRequest)
 	if 200 != httpWriter.Code {
@@ -115,7 +115,7 @@ func TestContentType415_Issue170(t *testing.T) {
 func TestNoContentTypePOST(t *testing.T) {
 	tearDown()
 	Add(newPostNoConsumesService())
-	httpRequest, _ := http.NewRequest("POST", "http://here.com/post", nil)
+	httpRequest, _ := http.NewRequest("POST", "https://here.com/post", nil)
 	httpWriter := httptest.NewRecorder()
 	DefaultContainer.dispatch(httpWriter, httpRequest)
 	if 204 != httpWriter.Code {
@@ -126,7 +126,7 @@ func TestNoContentTypePOST(t *testing.T) {
 func TestContentType415_POST_Issue170(t *testing.T) {
 	tearDown()
 	Add(newPostOnlyJsonOnlyService())
-	httpRequest, _ := http.NewRequest("POST", "http://here.com/post", nil)
+	httpRequest, _ := http.NewRequest("POST", "https://here.com/post", nil)
 	httpRequest.Header.Set("Content-Type", "application/json")
 	httpWriter := httptest.NewRecorder()
 	DefaultContainer.dispatch(httpWriter, httpRequest)
@@ -140,7 +140,7 @@ func TestContentType406PlainJson(t *testing.T) {
 	tearDown()
 	TraceLogger(testLogger{t})
 	Add(newGetPlainTextOrJsonService())
-	httpRequest, _ := http.NewRequest("GET", "http://here.com/get", nil)
+	httpRequest, _ := http.NewRequest("GET", "https://here.com/get", nil)
 	httpRequest.Header.Set("Accept", "text/plain")
 	httpWriter := httptest.NewRecorder()
 	DefaultContainer.dispatch(httpWriter, httpRequest)
@@ -154,7 +154,7 @@ func TestRemoveRoute(t *testing.T) {
 	TraceLogger(testLogger{t})
 	ws := newGetPlainTextOrJsonService()
 	Add(ws)
-	httpRequest, _ := http.NewRequest("GET", "http://here.com/get", nil)
+	httpRequest, _ := http.NewRequest("GET", "https://here.com/get", nil)
 	httpRequest.Header.Set("Accept", "text/plain")
 	httpWriter := httptest.NewRecorder()
 	DefaultContainer.dispatch(httpWriter, httpRequest)
@@ -189,7 +189,7 @@ func TestRemoveLastRoute(t *testing.T) {
 	TraceLogger(testLogger{t})
 	ws := newGetPlainTextOrJsonServiceMultiRoute()
 	Add(ws)
-	httpRequest, _ := http.NewRequest("GET", "http://here.com/get", nil)
+	httpRequest, _ := http.NewRequest("GET", "https://here.com/get", nil)
 	httpRequest.Header.Set("Accept", "text/plain")
 	httpWriter := httptest.NewRecorder()
 	DefaultContainer.dispatch(httpWriter, httpRequest)
@@ -225,7 +225,7 @@ func TestContentTypeOctet_Issue170(t *testing.T) {
 	tearDown()
 	Add(newGetConsumingOctetStreamService())
 	// with content-type
-	httpRequest, _ := http.NewRequest("GET", "http://here.com/get", nil)
+	httpRequest, _ := http.NewRequest("GET", "https://here.com/get", nil)
 	httpRequest.Header.Set("Content-Type", MIME_OCTET)
 	httpWriter := httptest.NewRecorder()
 	DefaultContainer.dispatch(httpWriter, httpRequest)
@@ -233,7 +233,7 @@ func TestContentTypeOctet_Issue170(t *testing.T) {
 		t.Errorf("Expected 200, got %d", httpWriter.Code)
 	}
 	// without content-type
-	httpRequest, _ = http.NewRequest("GET", "http://here.com/get", nil)
+	httpRequest, _ = http.NewRequest("GET", "https://here.com/get", nil)
 	httpWriter = httptest.NewRecorder()
 	DefaultContainer.dispatch(httpWriter, httpRequest)
 	if 200 != httpWriter.Code {

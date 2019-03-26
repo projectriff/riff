@@ -26,7 +26,7 @@ import (
 
 const service = "http://localhost:8080"
 
-//const service = "http://generated-bookstore.appspot.com"
+//const service = "https://generated-bookstore.appspot.com"
 
 func TestBookstore(t *testing.T) {
 	// create a client

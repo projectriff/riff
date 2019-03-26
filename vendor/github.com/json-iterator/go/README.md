@@ -1,9 +1,9 @@
 [![Sourcegraph](https://sourcegraph.com/github.com/json-iterator/go/-/badge.svg)](https://sourcegraph.com/github.com/json-iterator/go?badge)
-[![GoDoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](http://godoc.org/github.com/json-iterator/go)
+[![GoDoc](https://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://godoc.org/github.com/json-iterator/go)
 [![Build Status](https://travis-ci.org/json-iterator/go.svg?branch=master)](https://travis-ci.org/json-iterator/go)
 [![codecov](https://codecov.io/gh/json-iterator/go/branch/master/graph/badge.svg)](https://codecov.io/gh/json-iterator/go)
 [![rcard](https://goreportcard.com/badge/github.com/json-iterator/go)](https://goreportcard.com/report/github.com/json-iterator/go)
-[![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/json-iterator/go/master/LICENSE)
+[![License](https://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/json-iterator/go/master/LICENSE)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/json-iterator/Lobby)
 
 A high-performance 100% compatible drop-in replacement of "encoding/json"
@@ -14,7 +14,7 @@ Go开发者们请加入我们，滴滴出行平台技术部 taowen@didichuxing.c
 
 # Benchmark
 
-![benchmark](http://jsoniter.com/benchmarks/go-benchmark.png)
+![benchmark](https://jsoniter.com/benchmarks/go-benchmark.png)
 
 Source code: https://github.com/json-iterator/go-benchmark/blob/master/src/github.com/json-iterator/go-benchmark/benchmark_medium_payload_test.go
 
@@ -61,7 +61,7 @@ import "github.com/json-iterator/go"
 jsoniter.Unmarshal(input, &data)
 ```
 
-[More documentation](http://jsoniter.com/migrate-from-go-std.html)
+[More documentation](https://jsoniter.com/migrate-from-go-std.html)
 
 # How to get
 

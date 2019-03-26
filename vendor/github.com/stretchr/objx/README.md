@@ -11,7 +11,7 @@ Objx - Go package for dealing with maps, slices, JSON and other data.
 Get started:
 
 - Install Objx with [one line of code](#installation), or [update it with another](#staying-up-to-date)
-- Check out the API Documentation http://godoc.org/github.com/stretchr/objx
+- Check out the API Documentation https://godoc.org/github.com/stretchr/objx
 
 ## Overview
 Objx provides the `objx.Map` type, which is a `map[string]interface{}` that exposes a powerful `Get` method (among others) that allows you to easily and quickly get access to data within the map, without having to worry too much about type assertions, missing data, default values etc.

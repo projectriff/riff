@@ -29,7 +29,7 @@ import (
 // The only possible returned error is ErrBadPattern, when pattern
 // is malformed.
 //
-// This was adapted from (http://golang.org/pkg/path/filepath) and uses several
+// This was adapted from (https://golang.org/pkg/path/filepath) and uses several
 // built-ins from that package.
 func Glob(fs Fs, pattern string) (matches []string, err error) {
 	if !hasMeta(pattern) {

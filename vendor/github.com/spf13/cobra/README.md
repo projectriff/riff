@@ -4,21 +4,21 @@ Cobra is both a library for creating powerful modern CLI applications as well as
 
 Many of the most widely used Go projects are built using Cobra including:
 
-* [Kubernetes](http://kubernetes.io/)
-* [Hugo](http://gohugo.io)
+* [Kubernetes](https://kubernetes.io/)
+* [Hugo](https://gohugo.io)
 * [rkt](https://github.com/coreos/rkt)
 * [etcd](https://github.com/coreos/etcd)
 * [Moby (former Docker)](https://github.com/moby/moby)
 * [Docker (distribution)](https://github.com/docker/distribution)
 * [OpenShift](https://www.openshift.com/)
 * [Delve](https://github.com/derekparker/delve)
-* [GopherJS](http://www.gopherjs.org/)
-* [CockroachDB](http://www.cockroachlabs.com/)
-* [Bleve](http://www.blevesearch.com/)
-* [ProjectAtomic (enterprise)](http://www.projectatomic.io/)
+* [GopherJS](https://gopherjs.github.io)
+* [CockroachDB](https://www.cockroachlabs.com/)
+* [Bleve](https://www.blevesearch.com/)
+* [ProjectAtomic (enterprise)](https://www.projectatomic.io/)
 * [GiantSwarm's swarm](https://github.com/giantswarm/cli)
 * [Nanobox](https://github.com/nanobox-io/nanobox)/[Nanopack](https://github.com/nanopack)
-* [rclone](http://rclone.org/)
+* [rclone](https://rclone.org/)
 * [nehm](https://github.com/bogem/nehm)
 * [Pouch](https://github.com/alibaba/pouch)
 
@@ -69,7 +69,7 @@ Cobra provides:
 * Automatically generated man pages for your application
 * Command aliases so you can change things without breaking them
 * The flexibility to define your own help, usage, etc.
-* Optional tight integration with [viper](http://github.com/spf13/viper) for 12-factor apps
+* Optional tight integration with [viper](https://github.com/spf13/viper) for 12-factor apps
 
 # Concepts
 
@@ -485,7 +485,7 @@ a count and a string.`,
 }
 ```
 
-For a more complete example of a larger application, please checkout [Hugo](http://gohugo.io/).
+For a more complete example of a larger application, please checkout [Hugo](https://gohugo.io/).
 
 ## Help Command
 
@@ -683,7 +683,7 @@ Did you mean this?
 Run 'hugo --help' for usage.
 ```
 
-Suggestions are automatic based on every subcommand registered and use an implementation of [Levenshtein distance](http://en.wikipedia.org/wiki/Levenshtein_distance). Every registered command that matches a minimum distance of 2 (ignoring case) will be displayed as a suggestion.
+Suggestions are automatic based on every subcommand registered and use an implementation of [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance). Every registered command that matches a minimum distance of 2 (ignoring case) will be displayed as a suggestion.
 
 If you need to disable suggestions or tweak the string distance in your command, use:
 

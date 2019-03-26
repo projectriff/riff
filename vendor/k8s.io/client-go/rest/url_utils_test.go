@@ -33,7 +33,7 @@ func TestValidatesHostParameter(t *testing.T) {
 	}{
 		{"127.0.0.1", "", "http://127.0.0.1/" + v1.SchemeGroupVersion.Version, false},
 		{"127.0.0.1:8080", "", "http://127.0.0.1:8080/" + v1.SchemeGroupVersion.Version, false},
-		{"foo.bar.com", "", "http://foo.bar.com/" + v1.SchemeGroupVersion.Version, false},
+		{"foo.bar.com", "", "https://foo.bar.com/" + v1.SchemeGroupVersion.Version, false},
 		{"http://host/prefix", "", "http://host/prefix/" + v1.SchemeGroupVersion.Version, false},
 		{"http://host", "", "http://host/" + v1.SchemeGroupVersion.Version, false},
 		{"http://host", "/", "http://host/" + v1.SchemeGroupVersion.Version, false},

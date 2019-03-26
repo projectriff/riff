@@ -35,8 +35,8 @@ func BenchmarkEscapeHTML(b *testing.B) {
 		[]byte("Here's a link with an ampersand in the link text: [AT&T] [2]."),
 		[]byte("Here's an inline [link](/script?foo=1&bar=2)."),
 		[]byte("Here's an inline [link](</script?foo=1&bar=2>)."),
-		[]byte("[1]: http://example.com/?foo=1&bar=2"),
-		[]byte("[2]: http://att.com/  \"AT&T\""),
+		[]byte("[1]: https://example.com/?foo=1&bar=2"),
+		[]byte("[2]: https://att.com/  \"AT&T\""),
 	}
 	var buf bytes.Buffer
 	for n := 0; n < b.N; n++ {

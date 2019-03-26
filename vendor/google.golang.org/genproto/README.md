@@ -23,6 +23,6 @@ There are two sources for the proto files used in this repository:
    repo. The packages here contain types specifically for interacting with Google
    APIs.
 
-[1]: http://grpc.io
+[1]: https://grpc.io
 [2]: https://github.com/google/protobuf/
 [3]: https://github.com/googleapis/googleapis/

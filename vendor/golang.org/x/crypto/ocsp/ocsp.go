@@ -616,7 +616,7 @@ func CreateRequest(cert, issuer *x509.Certificate, opts *RequestOptions) ([]byte
 
 	// OCSP seems to be the only place where these raw hash identifiers are
 	// used. I took the following from
-	// http://msdn.microsoft.com/en-us/library/ff635603.aspx
+	// https://msdn.microsoft.com/en-us/library/ff635603.aspx
 	_, ok := hashOIDs[hashFunc]
 	if !ok {
 		return nil, x509.ErrUnsupportedAlgorithm

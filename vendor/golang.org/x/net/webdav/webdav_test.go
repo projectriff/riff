@@ -32,7 +32,7 @@ func TestPrefix(t *testing.T) {
 			<D:lockscope><D:exclusive/></D:lockscope>
 			<D:locktype><D:write/></D:locktype>
 			<D:owner>
-				<D:href>http://example.org/~ejw/contact.html</D:href>
+				<D:href>https://example.org/~ejw/contact.html</D:href>
 			</D:owner>
 		</D:lockinfo>
 	`

@@ -186,7 +186,7 @@ func (h *Handler) handleOptions(w http.ResponseWriter, r *http.Request) (status 
 	w.Header().Set("Allow", allow)
 	// http://www.webdav.org/specs/rfc4918.html#dav.compliance.classes
 	w.Header().Set("DAV", "1, 2")
-	// http://msdn.microsoft.com/en-au/library/cc250217.aspx
+	// https://msdn.microsoft.com/en-au/library/cc250217.aspx
 	w.Header().Set("MS-Author-Via", "DAV")
 	return 0, nil
 }

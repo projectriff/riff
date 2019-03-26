@@ -18,14 +18,14 @@ import (
 	"testing"
 )
 
-var contactInfoJSON = `{"name":"wordnik api team","url":"http://developer.wordnik.com","email":"some@mailayada.dkdkd"}`
+var contactInfoJSON = `{"name":"wordnik api team","url":"https://developer.wordnik.com","email":"some@mailayada.dkdkd"}`
 var contactInfoYAML = `name: wordnik api team
-url: http://developer.wordnik.com
+url: https://developer.wordnik.com
 email: some@mailayada.dkdkd
 `
 var contactInfo = ContactInfo{
 	Name:  "wordnik api team",
-	URL:   "http://developer.wordnik.com",
+	URL:   "https://developer.wordnik.com",
 	Email: "some@mailayada.dkdkd",
 }
 

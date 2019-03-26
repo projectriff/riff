@@ -27,11 +27,11 @@ var infoJSON = `{
 	"termsOfService": "http://helloreverb.com/terms/",
 	"contact": {
 		"name": "wordnik api team",
-		"url": "http://developer.wordnik.com"
+		"url": "https://developer.wordnik.com"
 	},
 	"license": {
 		"name": "Creative Commons 4.0 International",
-		"url": "http://creativecommons.org/licenses/by/4.0/"
+		"url": "https://creativecommons.org/licenses/by/4.0/"
 	},
 	"version": "1.0.9-abcd",
 	"x-framework": "go-swagger"
@@ -43,8 +43,8 @@ var info = Info{
 		Title:          "Swagger Sample API",
 		Description:    "A sample API that uses a petstore as an example to demonstrate features in the swagger-2.0 specification",
 		TermsOfService: "http://helloreverb.com/terms/",
-		Contact:        &ContactInfo{Name: "wordnik api team", URL: "http://developer.wordnik.com"},
-		License:        &License{Name: "Creative Commons 4.0 International", URL: "http://creativecommons.org/licenses/by/4.0/"},
+		Contact:        &ContactInfo{Name: "wordnik api team", URL: "https://developer.wordnik.com"},
+		License:        &License{Name: "Creative Commons 4.0 International", URL: "https://creativecommons.org/licenses/by/4.0/"},
 	},
 	VendorExtensible: VendorExtensible{map[string]interface{}{"x-framework": "go-swagger"}},
 }

@@ -26,14 +26,14 @@ func TestUnmarshalFeed(t *testing.T) {
 	}
 }
 
-// hget http://codereview.appspot.com/rss/mine/rsc
+// hget https://codereview.appspot.com/rss/mine/rsc
 const atomFeedString = `
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-us" updated="2009-10-04T01:35:58+00:00"><title>Code Review - My issues</title><link href="http://codereview.appspot.com/" rel="alternate"></link><link href="http://codereview.appspot.com/rss/mine/rsc" rel="self"></link><id>http://codereview.appspot.com/</id><author><name>rietveld&lt;&gt;</name></author><entry><title>rietveld: an attempt at pubsubhubbub
-</title><link href="http://codereview.appspot.com/126085" rel="alternate"></link><updated>2009-10-04T01:35:58+00:00</updated><author><name>email-address-removed</name></author><id>urn:md5:134d9179c41f806be79b3a5f7877d19a</id><summary type="html">
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-us" updated="2009-10-04T01:35:58+00:00"><title>Code Review - My issues</title><link href="https://codereview.appspot.com/" rel="alternate"></link><link href="https://codereview.appspot.com/rss/mine/rsc" rel="self"></link><id>https://codereview.appspot.com/</id><author><name>rietveld&lt;&gt;</name></author><entry><title>rietveld: an attempt at pubsubhubbub
+</title><link href="https://codereview.appspot.com/126085" rel="alternate"></link><updated>2009-10-04T01:35:58+00:00</updated><author><name>email-address-removed</name></author><id>urn:md5:134d9179c41f806be79b3a5f7877d19a</id><summary type="html">
   An attempt at adding pubsubhubbub support to Rietveld.
-http://code.google.com/p/pubsubhubbub
-http://code.google.com/p/rietveld/issues/detail?id=155
+https://code.google.com/p/pubsubhubbub
+https://code.google.com/p/rietveld/issues/detail?id=155
 
 The server side of the protocol is trivial:
   1. add a &amp;lt;link rel=&amp;quot;hub&amp;quot; href=&amp;quot;hub-server&amp;quot;&amp;gt; tag to all
@@ -62,9 +62,9 @@ the top of feeds.py marked NOTE(rsc).
 
 
 </summary></entry><entry><title>rietveld: correct tab handling
-</title><link href="http://codereview.appspot.com/124106" rel="alternate"></link><updated>2009-10-03T23:02:17+00:00</updated><author><name>email-address-removed</name></author><id>urn:md5:0a2a4f19bb815101f0ba2904aed7c35a</id><summary type="html">
+</title><link href="https://codereview.appspot.com/124106" rel="alternate"></link><updated>2009-10-03T23:02:17+00:00</updated><author><name>email-address-removed</name></author><id>urn:md5:0a2a4f19bb815101f0ba2904aed7c35a</id><summary type="html">
   This fixes the buggy tab rendering that can be seen at
-http://codereview.appspot.com/116075/diff/1/2
+https://codereview.appspot.com/116075/diff/1/2
 
 The fundamental problem was that the tab code was
 not being told what column the text began in, so it
@@ -122,10 +122,10 @@ var atomFeed = Feed{
 	XMLName: Name{"http://www.w3.org/2005/Atom", "feed"},
 	Title:   "Code Review - My issues",
 	Link: []Link{
-		{Rel: "alternate", Href: "http://codereview.appspot.com/"},
-		{Rel: "self", Href: "http://codereview.appspot.com/rss/mine/rsc"},
+		{Rel: "alternate", Href: "https://codereview.appspot.com/"},
+		{Rel: "self", Href: "https://codereview.appspot.com/rss/mine/rsc"},
 	},
-	Id:      "http://codereview.appspot.com/",
+	Id:      "https://codereview.appspot.com/",
 	Updated: ParseTime("2009-10-04T01:35:58+00:00"),
 	Author: Person{
 		Name:     "rietveld<>",
@@ -135,7 +135,7 @@ var atomFeed = Feed{
 		{
 			Title: "rietveld: an attempt at pubsubhubbub\n",
 			Link: []Link{
-				{Rel: "alternate", Href: "http://codereview.appspot.com/126085"},
+				{Rel: "alternate", Href: "https://codereview.appspot.com/126085"},
 			},
 			Updated: ParseTime("2009-10-04T01:35:58+00:00"),
 			Author: Person{
@@ -147,8 +147,8 @@ var atomFeed = Feed{
 				Type: "html",
 				Body: `
   An attempt at adding pubsubhubbub support to Rietveld.
-http://code.google.com/p/pubsubhubbub
-http://code.google.com/p/rietveld/issues/detail?id=155
+https://code.google.com/p/pubsubhubbub
+https://code.google.com/p/rietveld/issues/detail?id=155
 
 The server side of the protocol is trivial:
   1. add a &lt;link rel=&quot;hub&quot; href=&quot;hub-server&quot;&gt; tag to all
@@ -182,7 +182,7 @@ the top of feeds.py marked NOTE(rsc).
 		{
 			Title: "rietveld: correct tab handling\n",
 			Link: []Link{
-				{Rel: "alternate", Href: "http://codereview.appspot.com/124106"},
+				{Rel: "alternate", Href: "https://codereview.appspot.com/124106"},
 			},
 			Updated: ParseTime("2009-10-03T23:02:17+00:00"),
 			Author: Person{
@@ -194,7 +194,7 @@ the top of feeds.py marked NOTE(rsc).
 				Type: "html",
 				Body: `
   This fixes the buggy tab rendering that can be seen at
-http://codereview.appspot.com/116075/diff/1/2
+https://codereview.appspot.com/116075/diff/1/2
 
 The fundamental problem was that the tab code was
 not being told what column the text began in, so it
@@ -406,7 +406,7 @@ func TestUnmarshalAttr(t *testing.T) {
 
 type Tables struct {
 	HTable string `xml:"http://www.w3.org/TR/html4/ table"`
-	FTable string `xml:"http://www.w3schools.com/furniture table"`
+	FTable string `xml:"https://www.w3schools.com/furniture table"`
 }
 
 var tables = []struct {
@@ -417,19 +417,19 @@ var tables = []struct {
 	{
 		xml: `<Tables>` +
 			`<table xmlns="http://www.w3.org/TR/html4/">hello</table>` +
-			`<table xmlns="http://www.w3schools.com/furniture">world</table>` +
+			`<table xmlns="https://www.w3schools.com/furniture">world</table>` +
 			`</Tables>`,
 		tab: Tables{"hello", "world"},
 	},
 	{
 		xml: `<Tables>` +
-			`<table xmlns="http://www.w3schools.com/furniture">world</table>` +
+			`<table xmlns="https://www.w3schools.com/furniture">world</table>` +
 			`<table xmlns="http://www.w3.org/TR/html4/">hello</table>` +
 			`</Tables>`,
 		tab: Tables{"hello", "world"},
 	},
 	{
-		xml: `<Tables xmlns:f="http://www.w3schools.com/furniture" xmlns:h="http://www.w3.org/TR/html4/">` +
+		xml: `<Tables xmlns:f="https://www.w3schools.com/furniture" xmlns:h="http://www.w3.org/TR/html4/">` +
 			`<f:table>world</f:table>` +
 			`<h:table>hello</h:table>` +
 			`</Tables>`,
@@ -453,7 +453,7 @@ var tables = []struct {
 			`<table>only</table>` +
 			`</Tables>`,
 		tab: Tables{FTable: "only"},
-		ns:  "http://www.w3schools.com/furniture",
+		ns:  "https://www.w3schools.com/furniture",
 	},
 	{
 		xml: `<Tables>` +
@@ -488,7 +488,7 @@ func TestUnmarshalNS(t *testing.T) {
 
 func TestRoundTrip(t *testing.T) {
 	// From issue 7535
-	const s = `<ex:element xmlns:ex="http://example.com/schema"></ex:element>`
+	const s = `<ex:element xmlns:ex="https://example.com/schema"></ex:element>`
 	in := bytes.NewBufferString(s)
 	for i := 0; i < 10; i++ {
 		out := &bytes.Buffer{}
@@ -520,7 +520,7 @@ func TestMarshalNS(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
-	want := `<Tables><table xmlns="http://www.w3.org/TR/html4/">hello</table><table xmlns="http://www.w3schools.com/furniture">world</table></Tables>`
+	want := `<Tables><table xmlns="http://www.w3.org/TR/html4/">hello</table><table xmlns="https://www.w3schools.com/furniture">world</table></Tables>`
 	str := string(data)
 	if str != want {
 		t.Errorf("have: %q\nwant: %q\n", str, want)
@@ -533,12 +533,12 @@ type TableAttrs struct {
 
 type TAttr struct {
 	HTable string `xml:"http://www.w3.org/TR/html4/ table,attr"`
-	FTable string `xml:"http://www.w3schools.com/furniture table,attr"`
+	FTable string `xml:"https://www.w3schools.com/furniture table,attr"`
 	Lang   string `xml:"http://www.w3.org/XML/1998/namespace lang,attr,omitempty"`
-	Other1 string `xml:"http://golang.org/xml/ other,attr,omitempty"`
-	Other2 string `xml:"http://golang.org/xmlfoo/ other,attr,omitempty"`
-	Other3 string `xml:"http://golang.org/json/ other,attr,omitempty"`
-	Other4 string `xml:"http://golang.org/2/json/ other,attr,omitempty"`
+	Other1 string `xml:"https://golang.org/xml/ other,attr,omitempty"`
+	Other2 string `xml:"https://golang.org/xmlfoo/ other,attr,omitempty"`
+	Other3 string `xml:"https://golang.org/json/ other,attr,omitempty"`
+	Other4 string `xml:"https://golang.org/2/json/ other,attr,omitempty"`
 }
 
 var tableAttrs = []struct {
@@ -547,33 +547,33 @@ var tableAttrs = []struct {
 	ns  string
 }{
 	{
-		xml: `<TableAttrs xmlns:f="http://www.w3schools.com/furniture" xmlns:h="http://www.w3.org/TR/html4/"><TAttr ` +
+		xml: `<TableAttrs xmlns:f="https://www.w3schools.com/furniture" xmlns:h="http://www.w3.org/TR/html4/"><TAttr ` +
 			`h:table="hello" f:table="world" ` +
 			`/></TableAttrs>`,
 		tab: TableAttrs{TAttr{HTable: "hello", FTable: "world"}},
 	},
 	{
-		xml: `<TableAttrs><TAttr xmlns:f="http://www.w3schools.com/furniture" xmlns:h="http://www.w3.org/TR/html4/" ` +
+		xml: `<TableAttrs><TAttr xmlns:f="https://www.w3schools.com/furniture" xmlns:h="http://www.w3.org/TR/html4/" ` +
 			`h:table="hello" f:table="world" ` +
 			`/></TableAttrs>`,
 		tab: TableAttrs{TAttr{HTable: "hello", FTable: "world"}},
 	},
 	{
 		xml: `<TableAttrs><TAttr ` +
-			`h:table="hello" f:table="world" xmlns:f="http://www.w3schools.com/furniture" xmlns:h="http://www.w3.org/TR/html4/" ` +
+			`h:table="hello" f:table="world" xmlns:f="https://www.w3schools.com/furniture" xmlns:h="http://www.w3.org/TR/html4/" ` +
 			`/></TableAttrs>`,
 		tab: TableAttrs{TAttr{HTable: "hello", FTable: "world"}},
 	},
 	{
 		// Default space does not apply to attribute names.
-		xml: `<TableAttrs xmlns="http://www.w3schools.com/furniture" xmlns:h="http://www.w3.org/TR/html4/"><TAttr ` +
+		xml: `<TableAttrs xmlns="https://www.w3schools.com/furniture" xmlns:h="http://www.w3.org/TR/html4/"><TAttr ` +
 			`h:table="hello" table="world" ` +
 			`/></TableAttrs>`,
 		tab: TableAttrs{TAttr{HTable: "hello", FTable: ""}},
 	},
 	{
 		// Default space does not apply to attribute names.
-		xml: `<TableAttrs xmlns:f="http://www.w3schools.com/furniture"><TAttr xmlns="http://www.w3.org/TR/html4/" ` +
+		xml: `<TableAttrs xmlns:f="https://www.w3schools.com/furniture"><TAttr xmlns="http://www.w3.org/TR/html4/" ` +
 			`table="hello" f:table="world" ` +
 			`/></TableAttrs>`,
 		tab: TableAttrs{TAttr{HTable: "", FTable: "world"}},
@@ -590,11 +590,11 @@ var tableAttrs = []struct {
 			`h:table="hello" table="world" ` +
 			`/></TableAttrs>`,
 		tab: TableAttrs{TAttr{HTable: "hello", FTable: ""}},
-		ns:  "http://www.w3schools.com/furniture",
+		ns:  "https://www.w3schools.com/furniture",
 	},
 	{
 		// Default space does not apply to attribute names.
-		xml: `<TableAttrs xmlns:f="http://www.w3schools.com/furniture"><TAttr ` +
+		xml: `<TableAttrs xmlns:f="https://www.w3schools.com/furniture"><TAttr ` +
 			`table="hello" f:table="world" ` +
 			`/></TableAttrs>`,
 		tab: TableAttrs{TAttr{HTable: "", FTable: "world"}},
@@ -637,7 +637,7 @@ func TestMarshalNSAttr(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
-	want := `<TableAttrs><TAttr xmlns:json_1="http://golang.org/2/json/" xmlns:json="http://golang.org/json/" xmlns:_xmlfoo="http://golang.org/xmlfoo/" xmlns:_xml="http://golang.org/xml/" xmlns:furniture="http://www.w3schools.com/furniture" xmlns:html4="http://www.w3.org/TR/html4/" html4:table="hello" furniture:table="world" xml:lang="en_US" _xml:other="other1" _xmlfoo:other="other2" json:other="other3" json_1:other="other4"></TAttr></TableAttrs>`
+	want := `<TableAttrs><TAttr xmlns:json_1="https://golang.org/2/json/" xmlns:json="https://golang.org/json/" xmlns:_xmlfoo="https://golang.org/xmlfoo/" xmlns:_xml="https://golang.org/xml/" xmlns:furniture="https://www.w3schools.com/furniture" xmlns:html4="http://www.w3.org/TR/html4/" html4:table="hello" furniture:table="world" xml:lang="en_US" _xml:other="other1" _xmlfoo:other="other2" json:other="other3" json_1:other="other4"></TAttr></TableAttrs>`
 	str := string(data)
 	if str != want {
 		t.Errorf("Marshal:\nhave: %#q\nwant: %#q\n", str, want)

@@ -8,4 +8,4 @@ https://go.googlesource.com/go/+log/master/src/encoding/xml
 This fork is temporary, and I (nigeltao) expect to revert it after Go 1.6 is
 released.
 
-See http://golang.org/issue/11841
+See https://golang.org/issue/11841

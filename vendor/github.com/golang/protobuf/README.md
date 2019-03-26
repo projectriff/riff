@@ -189,7 +189,7 @@ parameter list separated from the output directory by a colon:
 ## gRPC Support ##
 
 If a proto file specifies RPC services, protoc-gen-go can be instructed to
-generate code compatible with gRPC (http://www.grpc.io/). To do this, pass
+generate code compatible with gRPC (https://www.grpc.io/). To do this, pass
 the `plugins` parameter to protoc-gen-go; the usual way is to insert it into
 the --go_out argument to protoc:
 

@@ -21,9 +21,9 @@ Then,
 $ go get github.com/peterbourgon/diskv
 ```
 
-[3]: http://golang.org
-[4]: http://golang.org/doc/install/source
-[5]: http://golang.org/doc/install
+[3]: https://golang.org
+[4]: https://golang.org/doc/install/source
+[5]: https://golang.org/doc/install
 
 
 # Usage
@@ -84,7 +84,7 @@ will place all keys in the same, base directory. The design is inspired by
 [Redis diskstore][6]; a TransformFunc which emulates the default diskstore
 behavior is available in the content-addressable-storage example.
 
-[6]: http://groups.google.com/group/redis-db/browse_thread/thread/d444bc786689bde9?pli=1
+[6]: https://groups.google.com/group/redis-db/browse_thread/thread/d444bc786689bde9?pli=1
 
 **Note** that your TransformFunc should ensure that one valid key doesn't
 transform to a subset of another valid key. That is, it shouldn't be possible

@@ -33,7 +33,7 @@ If you intend to re-generate mocks for testing, install:
 
 If you would like to run tests using the `ginkgo` command, install:
 
-- http://onsi.github.io/ginkgo/[Ginkgo]
+- https://onsi.github.io/ginkgo/[Ginkgo]
 
 If you intend to run the autoscaler with a simulated workload:
 

@@ -75,8 +75,8 @@ func main() {
 	//
 	// Empty namespaces seem disallowed in the second (2006) edition of the XML
 	// standard, but allowed in a later edition. The grammar differs between
-	// http://www.w3.org/TR/2006/REC-xml-names-20060816/#ns-decl and
-	// http://www.w3.org/TR/REC-xml-names/#dt-prefix
+	// https://www.w3.org/TR/2006/REC-xml-names-20060816/#ns-decl and
+	// https://www.w3.org/TR/REC-xml-names/#dt-prefix
 	//
 	// Thus, we assume that the propfind_invalid2 test is obsolete, and
 	// hard-code the 400 Bad Request response that the test expects.

@@ -12,7 +12,7 @@ import (
 )
 
 // RouterJSR311 implements the flow for matching Requests to Routes (and consequently Resource Functions)
-// as specified by the JSR311 http://jsr311.java.net/nonav/releases/1.1/spec/spec.html.
+// as specified by the JSR311 https://jsr311.java.net/nonav/releases/1.1/spec/spec.html.
 // RouterJSR311 implements the Router interface.
 // Concept of locators is not implemented.
 type RouterJSR311 struct{}
@@ -39,7 +39,7 @@ func (r RouterJSR311) SelectRoute(
 	return dispatcher, route, ok
 }
 
-// http://jsr311.java.net/nonav/releases/1.1/spec/spec3.html#x3-360003.7.2
+// https://jsr311.java.net/nonav/releases/1.1/spec/spec3.html#x3-360003.7.2
 func (r RouterJSR311) detectRoute(routes []Route, httpRequest *http.Request) (*Route, error) {
 	// http method
 	methodOk := []Route{}
@@ -92,14 +92,14 @@ func (r RouterJSR311) detectRoute(routes []Route, httpRequest *http.Request) (*R
 	return &outputMediaOk[0], nil
 }
 
-// http://jsr311.java.net/nonav/releases/1.1/spec/spec3.html#x3-360003.7.2
+// https://jsr311.java.net/nonav/releases/1.1/spec/spec3.html#x3-360003.7.2
 // n/m > n/* > */*
 func (r RouterJSR311) bestMatchByMedia(routes []Route, contentType string, accept string) *Route {
 	// TODO
 	return &routes[0]
 }
 
-// http://jsr311.java.net/nonav/releases/1.1/spec/spec3.html#x3-360003.7.2  (step 2)
+// https://jsr311.java.net/nonav/releases/1.1/spec/spec3.html#x3-360003.7.2  (step 2)
 func (r RouterJSR311) selectRoutes(dispatcher *WebService, pathRemainder string) []Route {
 	filtered := &sortableRouteCandidates{}
 	for _, each := range dispatcher.Routes() {
@@ -132,7 +132,7 @@ func (r RouterJSR311) selectRoutes(dispatcher *WebService, pathRemainder string)
 	return matchingRoutes
 }
 
-// http://jsr311.java.net/nonav/releases/1.1/spec/spec3.html#x3-360003.7.2 (step 1)
+// https://jsr311.java.net/nonav/releases/1.1/spec/spec3.html#x3-360003.7.2 (step 1)
 func (r RouterJSR311) detectDispatcher(requestPath string, dispatchers []*WebService) (*WebService, string, error) {
 	filtered := &sortableDispatcherCandidates{}
 	for _, each := range dispatchers {

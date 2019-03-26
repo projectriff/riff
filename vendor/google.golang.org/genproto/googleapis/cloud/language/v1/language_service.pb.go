@@ -1524,7 +1524,7 @@ func (m *PartOfSpeech) GetVoice() PartOfSpeech_Voice {
 
 // Represents dependency parse tree information for a token. (For more
 // information on dependency labels, see
-// http://www.aclweb.org/anthology/P13-2017
+// https://www.aclweb.org/anthology/P13-2017
 type DependencyEdge struct {
 	// Represents the head of this token in the dependency tree.
 	// This is the index of the token which has an arc going to this token.

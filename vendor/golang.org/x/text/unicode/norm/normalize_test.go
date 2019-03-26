@@ -1182,7 +1182,7 @@ func BenchmarkOverflow(b *testing.B) {
 var overflow = string(bytes.Repeat([]byte("\u035D"), 4096)) + "\u035B"
 
 // Tests sampled from the Canonical ordering tests (Part 2) of
-// http://unicode.org/Public/UNIDATA/NormalizationTest.txt
+// https://unicode.org/Public/UNIDATA/NormalizationTest.txt
 const txt_canon = `\u0061\u0315\u0300\u05AE\u0300\u0062 \u0061\u0300\u0315\u0300\u05AE\u0062
 \u0061\u0302\u0315\u0300\u05AE\u0062 \u0061\u0307\u0315\u0300\u05AE\u0062
 \u0061\u0315\u0300\u05AE\u030A\u0062 \u0061\u059A\u0316\u302A\u031C\u0062
@@ -1202,7 +1202,7 @@ const txt_canon = `\u0061\u0315\u0300\u05AE\u0300\u0062 \u0061\u0300\u0315\u0300
 \u0061\u1CD9\u059A\u0316\u302A\u0062 \u0061\u2DED\u0315\u0300\u05AE\u0062
 \u0061\u2DEF\u0315\u0300\u05AE\u0062 \u0061\u302D\u302E\u059A\u0316\u0062`
 
-// Taken from http://creativecommons.org/licenses/by-sa/3.0/vn/
+// Taken from https://creativecommons.org/licenses/by-sa/3.0/vn/
 const txt_vn = `Với các điều kiện sau: Ghi nhận công của tác giả. 
 Nếu bạn sử dụng, chuyển đổi, hoặc xây dựng dự án từ 
 nội dung được chia sẻ này, bạn phải áp dụng giấy phép này hoặc 
@@ -1214,7 +1214,7 @@ bất kỳ chương nào của tác phẩm đã trong vùng dành cho công
 chúng theo quy định của pháp luật thì tình trạng của nó không 
 bị ảnh hưởng bởi giấy phép trong bất kỳ trường hợp nào.`
 
-// Taken from http://creativecommons.org/licenses/by-sa/1.0/deed.ru
+// Taken from https://creativecommons.org/licenses/by-sa/1.0/deed.ru
 const txt_ru = `При обязательном соблюдении следующих условий:
 Attribution — Вы должны атрибутировать произведение (указывать
 автора и источник) в порядке, предусмотренном автором или
@@ -1222,7 +1222,7 @@ Attribution — Вы должны атрибутировать произвед�
 что они поддерживают вас или использование вами данного произведения).
 Υπό τις ακόλουθες προϋποθέσεις:`
 
-// Taken from http://creativecommons.org/licenses/by-sa/3.0/gr/
+// Taken from https://creativecommons.org/licenses/by-sa/3.0/gr/
 const txt_gr = `Αναφορά Δημιουργού — Θα πρέπει να κάνετε την αναφορά στο έργο με τον
 τρόπο που έχει οριστεί από το δημιουργό ή το χορηγούντο την άδεια
 (χωρίς όμως να εννοείται με οποιονδήποτε τρόπο ότι εγκρίνουν εσάς ή
@@ -1231,7 +1231,7 @@ const txt_gr = `Αναφορά Δημιουργού — Θα πρέπει να �
 μπορείτε να διανέμετε το έργο που θα προκύψει μόνο με την ίδια ή
 παρόμοια άδεια.`
 
-// Taken from http://creativecommons.org/licenses/by-sa/3.0/deed.ar
+// Taken from https://creativecommons.org/licenses/by-sa/3.0/deed.ar
 const txt_ar = `بموجب الشروط التالية نسب المصنف — يجب عليك أن
 تنسب العمل بالطريقة التي تحددها المؤلف أو المرخص (ولكن ليس بأي حال من
 الأحوال أن توحي وتقترح بتحول أو استخدامك للعمل).
@@ -1239,7 +1239,7 @@ const txt_ar = `بموجب الشروط التالية نسب المصنف — �
 من هذا العمل ، قد ينتج عن توزيع العمل إلا في ظل تشابه او تطابق فى واحد
 لهذا الترخيص.`
 
-// Taken from http://creativecommons.org/licenses/by-sa/1.0/il/
+// Taken from https://creativecommons.org/licenses/by-sa/1.0/il/
 const txt_il = `בכפוף לתנאים הבאים: ייחוס — עליך לייחס את היצירה (לתת קרדיט) באופן
 המצויין על-ידי היוצר או מעניק הרישיון (אך לא בשום אופן המרמז על כך
 שהם תומכים בך או בשימוש שלך ביצירה). שיתוף זהה — אם תחליט/י לשנות,
@@ -1248,7 +1248,7 @@ const txt_il = `בכפוף לתנאים הבאים: ייחוס — עליך לי
 
 const twoByteUtf8 = txt_ru + txt_gr + txt_ar + txt_il
 
-// Taken from http://creativecommons.org/licenses/by-sa/2.0/kr/
+// Taken from https://creativecommons.org/licenses/by-sa/2.0/kr/
 const txt_kr = `다음과 같은 조건을 따라야 합니다: 저작자표시
 (Attribution) — 저작자나 이용허락자가 정한 방법으로 저작물의
 원저작자를 표시하여야 합니다(그러나 원저작자가 이용자나 이용자의
@@ -1256,7 +1256,7 @@ const txt_kr = `다음과 같은 조건을 따라야 합니다: 저작자표시
 동일조건변경허락 — 이 저작물을 이용하여 만든 이차적 저작물에는 본
 라이선스와 동일한 라이선스를 적용해야 합니다.`
 
-// Taken from http://creativecommons.org/licenses/by-sa/3.0/th/
+// Taken from https://creativecommons.org/licenses/by-sa/3.0/th/
 const txt_th = `ภายใต้เงื่อนไข ดังต่อไปนี้ : แสดงที่มา — คุณต้องแสดงที่
 มาของงานดังกล่าว ตามรูปแบบที่ผู้สร้างสรรค์หรือผู้อนุญาตกำหนด (แต่
 ไม่ใช่ในลักษณะที่ว่า พวกเขาสนับสนุนคุณหรือสนับสนุนการที่
@@ -1266,14 +1266,14 @@ const txt_th = `ภายใต้เงื่อนไข ดังต่อไ
 
 const threeByteUtf8 = txt_th
 
-// Taken from http://creativecommons.org/licenses/by-sa/2.0/jp/
+// Taken from https://creativecommons.org/licenses/by-sa/2.0/jp/
 const txt_jp = `あなたの従うべき条件は以下の通りです。
 表示 — あなたは原著作者のクレジットを表示しなければなりません。
 継承 — もしあなたがこの作品を改変、変形または加工した場合、
 あなたはその結果生じた作品をこの作品と同一の許諾条件の下でのみ
 頒布することができます。`
 
-// http://creativecommons.org/licenses/by-sa/2.5/cn/
+// https://creativecommons.org/licenses/by-sa/2.5/cn/
 const txt_cn = `您可以自由： 复制、发行、展览、表演、放映、
 广播或通过信息网络传播本作品 创作演绎作品
 对本作品进行商业性使用 惟须遵守下列条件：

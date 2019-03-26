@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	c := apis_guru.NewClient("http://api.apis.guru/v2")
+	c := apis_guru.NewClient("https://api.apis.guru/v2")
 
 	metrics, err := c.GetMetrics()
 	if err != nil {

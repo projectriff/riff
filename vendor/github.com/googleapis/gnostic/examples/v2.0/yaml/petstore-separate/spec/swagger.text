@@ -6,12 +6,12 @@ info: <
   terms_of_service: "http://helloreverb.com/terms/"
   contact: <
     name: "Wordnik API Team"
-    url: "http://madskristensen.net"
+    url: "https://madskristensen.net"
     email: "foo@example.com"
   >
   license: <
     name: "MIT"
-    url: "http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT"
+    url: "https://github.com/gruntjs/grunt/blob/master/LICENSE-MIT"
   >
 >
 host: "petstore.swagger.wordnik.com"

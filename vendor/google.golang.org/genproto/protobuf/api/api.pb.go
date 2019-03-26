@@ -56,7 +56,7 @@ type Api struct {
 	// consistent with what is provided here.
 	//
 	// The versioning schema uses [semantic
-	// versioning](http://semver.org) where the major version number
+	// versioning](https://semver.org) where the major version number
 	// indicates a breaking change and the minor version an additive,
 	// non-breaking change. Both version numbers are signals to users
 	// what to expect from different versions, and should be carefully

@@ -38,7 +38,7 @@ type OperationProps struct {
 
 // Operation describes a single API operation on a path.
 //
-// For more information: http://goo.gl/8us55a#operationObject
+// For more information: https://goo.gl/8us55a#operationObject
 type Operation struct {
 	VendorExtensible
 	OperationProps

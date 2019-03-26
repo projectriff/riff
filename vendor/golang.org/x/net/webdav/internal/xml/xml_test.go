@@ -17,7 +17,7 @@ import (
 const testInput = `
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <body xmlns:foo="ns1" xmlns="ns2" xmlns:tag="ns3" ` +
 	"\r\n\t" + `  >
   <hello lang="en">World &lt;&gt;&apos;&quot; &#x767d;&#40300;翔</hello>
@@ -38,7 +38,7 @@ var rawTokens = []Token{
 	ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)},
 	CharData("\n"),
 	Directive(`DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"`),
+  "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"`),
 	CharData("\n"),
 	StartElement{Name{"", "body"}, []Attr{{Name{"xmlns", "foo"}, "ns1"}, {Name{"", "xmlns"}, "ns2"}, {Name{"xmlns", "tag"}, "ns3"}}},
 	CharData("\n  "),
@@ -75,7 +75,7 @@ var cookedTokens = []Token{
 	ProcInst{"xml", []byte(`version="1.0" encoding="UTF-8"`)},
 	CharData("\n"),
 	Directive(`DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"`),
+  "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"`),
 	CharData("\n"),
 	StartElement{Name{"ns2", "body"}, []Attr{{Name{"xmlns", "foo"}, "ns1"}, {Name{"", "xmlns"}, "ns2"}, {Name{"xmlns", "tag"}, "ns3"}}},
 	CharData("\n  "),
@@ -331,7 +331,7 @@ func testRawToken(t *testing.T, d *Decoder, raw string, rawTokens []Token) {
 // nesting depth if they are in single or double quotes.
 
 var nestedDirectivesInput = `
-<!DOCTYPE [<!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#">]>
+<!DOCTYPE [<!ENTITY rdf "https://www.w3.org/1999/02/22-rdf-syntax-ns#">]>
 <!DOCTYPE [<!ENTITY xlt ">">]>
 <!DOCTYPE [<!ENTITY xlt "<">]>
 <!DOCTYPE [<!ENTITY xlt '>'>]>
@@ -342,7 +342,7 @@ var nestedDirectivesInput = `
 
 var nestedDirectivesTokens = []Token{
 	CharData("\n"),
-	Directive(`DOCTYPE [<!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#">]`),
+	Directive(`DOCTYPE [<!ENTITY rdf "https://www.w3.org/1999/02/22-rdf-syntax-ns#">]`),
 	CharData("\n"),
 	Directive(`DOCTYPE [<!ENTITY xlt ">">]`),
 	CharData("\n"),
@@ -682,14 +682,14 @@ func TestProcInstEncoding(t *testing.T) {
 // text of any nested directives.
 
 var directivesWithCommentsInput = `
-<!DOCTYPE [<!-- a comment --><!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#">]>
+<!DOCTYPE [<!-- a comment --><!ENTITY rdf "https://www.w3.org/1999/02/22-rdf-syntax-ns#">]>
 <!DOCTYPE [<!ENTITY go "Golang"><!-- a comment-->]>
 <!DOCTYPE <!-> <!> <!----> <!-->--> <!--->--> [<!ENTITY go "Golang"><!-- a comment-->]>
 `
 
 var directivesWithCommentsTokens = []Token{
 	CharData("\n"),
-	Directive(`DOCTYPE [<!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#">]`),
+	Directive(`DOCTYPE [<!ENTITY rdf "https://www.w3.org/1999/02/22-rdf-syntax-ns#">]`),
 	CharData("\n"),
 	Directive(`DOCTYPE [<!ENTITY go "Golang">]`),
 	CharData("\n"),

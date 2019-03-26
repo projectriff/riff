@@ -24,7 +24,7 @@ import (
 )
 
 // See the sshd manpage
-// (http://man.openbsd.org/sshd#SSH_KNOWN_HOSTS_FILE_FORMAT) for
+// (https://man.openbsd.org/sshd#SSH_KNOWN_HOSTS_FILE_FORMAT) for
 // background.
 
 type addr struct{ host, port string }

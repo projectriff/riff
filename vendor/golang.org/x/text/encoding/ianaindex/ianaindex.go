@@ -7,7 +7,7 @@
 // Package ianaindex maps names to Encodings as specified by the IANA registry.
 // This includes both the MIME and IANA names.
 //
-// See http://www.iana.org/assignments/character-sets/character-sets.xhtml for
+// See https://www.iana.org/assignments/character-sets/character-sets.xhtml for
 // more details.
 package ianaindex
 

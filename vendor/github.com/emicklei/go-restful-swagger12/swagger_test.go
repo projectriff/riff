@@ -13,10 +13,10 @@ func TestInfoStruct_Issue231(t *testing.T) {
 		Info: Info{
 			Title:             "Title",
 			Description:       "Description",
-			TermsOfServiceUrl: "http://example.com",
+			TermsOfServiceUrl: "https://example.com",
 			Contact:           "example@example.com",
 			License:           "License",
-			LicenseUrl:        "http://example.com/license.txt",
+			LicenseUrl:        "https://example.com/license.txt",
 		},
 	}
 	sws := newSwaggerService(config)
@@ -32,10 +32,10 @@ func TestInfoStruct_Issue231(t *testing.T) {
 		"info": {
 			"title": "Title",
 			"description": "Description",
-			"termsOfServiceUrl": "http://example.com",
+			"termsOfServiceUrl": "https://example.com",
 			"contact": "example@example.com",
 			"license": "License",
-			"licenseUrl": "http://example.com/license.txt"
+			"licenseUrl": "https://example.com/license.txt"
 		}
 	}
 	`)
@@ -48,7 +48,7 @@ func TestThatMultiplePathsOnRootAreHandled(t *testing.T) {
 	ws1.Route(ws1.GET("/version").To(dummy))
 
 	cfg := Config{
-		WebServicesUrl: "http://here.com",
+		WebServicesUrl: "https://here.com",
 		ApiPath:        "/apipath",
 		WebServices:    []*restful.WebService{ws1},
 	}
@@ -66,7 +66,7 @@ func TestWriteSamples(t *testing.T) {
 	ws1.Route(ws1.GET("/object_and_array").To(dummy).Writes(struct{ Abc test_package.TestStruct }{}))
 
 	cfg := Config{
-		WebServicesUrl: "http://here.com",
+		WebServicesUrl: "https://here.com",
 		ApiPath:        "/apipath",
 		WebServices:    []*restful.WebService{ws1},
 	}
@@ -166,7 +166,7 @@ func TestRoutesWithCommonPart(t *testing.T) {
 	ws1.Route(ws1.HEAD("/foo").To(dummy).Writes(test_package.TestStruct{}))
 
 	cfg := Config{
-		WebServicesUrl: "http://here.com",
+		WebServicesUrl: "https://here.com",
 		ApiPath:        "/apipath",
 		WebServices:    []*restful.WebService{ws1},
 	}
@@ -221,7 +221,7 @@ func TestServiceToApi(t *testing.T) {
 	ws.Route(ws.DELETE("/a").To(dummy).Writes(sample{}))
 	ws.ApiVersion("1.2.3")
 	cfg := Config{
-		WebServicesUrl:   "http://here.com",
+		WebServicesUrl:   "https://here.com",
 		ApiPath:          "/apipath",
 		WebServices:      []*restful.WebService{ws},
 		PostBuildHandler: func(in *ApiDeclarationList) {},
@@ -232,8 +232,8 @@ func TestServiceToApi(t *testing.T) {
 	if decl.ApiVersion != "1.2.3" {
 		t.Errorf("got %v want %v", decl.ApiVersion, "1.2.3")
 	}
-	if decl.BasePath != "http://here.com" {
-		t.Errorf("got %v want %v", decl.BasePath, "http://here.com")
+	if decl.BasePath != "https://here.com" {
+		t.Errorf("got %v want %v", decl.BasePath, "https://here.com")
 	}
 	if len(decl.Apis) != 4 {
 		t.Errorf("got %v want %v", len(decl.Apis), 4)

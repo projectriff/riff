@@ -45,7 +45,7 @@ type Context interface {
 	//  	}
 	//  }
 	//
-	// See http://blog.golang.org/pipelines for more examples of how to use
+	// See https://blog.golang.org/pipelines for more examples of how to use
 	// a Done channel for cancelation.
 	Done() <-chan struct{}
 

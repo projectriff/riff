@@ -31,7 +31,7 @@ var _ = Describe("HealthHandler", func() {
 	)
 
 	BeforeEach(func() {
-		req = httptest.NewRequest("GET", "http://example.com", nil)
+		req = httptest.NewRequest("GET", "https://example.com", nil)
 		req.URL.Path = "/health"
 		mockResponseWriter = httptest.NewRecorder()
 

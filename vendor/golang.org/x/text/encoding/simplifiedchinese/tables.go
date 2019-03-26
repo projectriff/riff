@@ -3,7 +3,7 @@
 // Package simplifiedchinese provides Simplified Chinese encodings such as GBK.
 package simplifiedchinese // import "golang.org/x/text/encoding/simplifiedchinese"
 
-// gb18030 is the table from http://encoding.spec.whatwg.org/index-gb18030.txt
+// gb18030 is the table from https://encoding.spec.whatwg.org/index-gb18030.txt
 var gb18030 = [...][2]uint16{
 	{0x0000, 0x0080},
 	{0x0024, 0x00a5},
@@ -214,7 +214,7 @@ var gb18030 = [...][2]uint16{
 }
 
 // decode is the decoding table from GBK code to Unicode.
-// It is defined at http://encoding.spec.whatwg.org/index-gbk.txt
+// It is defined at https://encoding.spec.whatwg.org/index-gbk.txt
 var decode = [...]uint16{
 	0:     0x4E02,
 	1:     0x4E04,

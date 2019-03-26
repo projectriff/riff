@@ -23,7 +23,7 @@ func main() {
 	fmt.Printf("// Package korean provides Korean encodings such as EUC-KR.\n")
 	fmt.Printf(`package korean // import "golang.org/x/text/encoding/korean"` + "\n\n")
 
-	res, err := http.Get("http://encoding.spec.whatwg.org/index-euc-kr.txt")
+	res, err := http.Get("https://encoding.spec.whatwg.org/index-euc-kr.txt")
 	if err != nil {
 		log.Fatalf("Get: %v", err)
 	}
@@ -72,7 +72,7 @@ func main() {
 	}
 
 	fmt.Printf("// decode is the decoding table from EUC-KR code to Unicode.\n")
-	fmt.Printf("// It is defined at http://encoding.spec.whatwg.org/index-euc-kr.txt\n")
+	fmt.Printf("// It is defined at https://encoding.spec.whatwg.org/index-euc-kr.txt\n")
 	fmt.Printf("var decode = [...]uint16{\n")
 	for i, v := range mapping {
 		if v != 0 {

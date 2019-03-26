@@ -57,8 +57,8 @@ can <a href="/projects/markdown/syntax.text">see the source for it by adding '.t
 document should be publishable as-is, as plain text, without looking
 like it's been marked up with tags or formatting instructions. While
 Markdown's syntax has been influenced by several existing text-to-HTML
-filters -- including <a href="http://docutils.sourceforge.net/mirror/setext.html">Setext</a>, <a href="http://www.aaronsw.com/2002/atx/">atx</a>, <a href="http://textism.com/tools/textile/">Textile</a>, <a href="http://docutils.sourceforge.net/rst.html">reStructuredText</a>,
-<a href="http://www.triptico.com/software/grutatxt.html">Grutatext</a>, and <a href="http://ettext.taint.org/doc/">EtText</a> -- the single biggest source of
+filters -- including <a href="http://docutils.sourceforge.net/mirror/setext.html">Setext</a>, <a href="http://www.aaronsw.com/2002/atx/">atx</a>, <a href="https://www.booked.net/textism.html">Textile</a>, <a href="http://docutils.sourceforge.net/rst.html">reStructuredText</a>,
+<a href="https://triptico.com/software/grutatxt.html">Grutatext</a>, and <a href="http://ettext.taint.org/doc/">EtText</a> -- the single biggest source of
 inspiration for Markdown's syntax is the format of plain text email.</p>
 
 <p>To this end, Markdown's syntax is comprised entirely of punctuation
@@ -131,12 +131,12 @@ characters, you must escape them as entities, e.g. <code>&amp;lt;</code>, and
 write about 'AT&amp;T', you need to write '<code>AT&amp;amp;T</code>'. You even need to
 escape ampersands within URLs. Thus, if you want to link to:</p>
 
-<pre><code>http://images.google.com/images?num=30&amp;q=larry+bird
+<pre><code>https://images.google.com/imghp?num=30
 </code></pre>
 
 <p>you need to encode the URL as:</p>
 
-<pre><code>http://images.google.com/images?num=30&amp;amp;q=larry+bird
+<pre><code>https://images.google.com/imghp?num=30
 </code></pre>
 
 <p>in your anchor tag <code>href</code> attribute. Needless to say, this is easy to
@@ -578,17 +578,17 @@ after the link text's closing square bracket. Inside the parentheses,
 put the URL where you want the link to point, along with an <em>optional</em>
 title for the link, surrounded in quotes. For example:</p>
 
-<pre><code>This is [an example](http://example.com/ &quot;Title&quot;) inline link.
+<pre><code>This is [an example](https://example.com/ &quot;Title&quot;) inline link.
 
-[This link](http://example.net/) has no title attribute.
+[This link](https://example.net/) has no title attribute.
 </code></pre>
 
 <p>Will produce:</p>
 
-<pre><code>&lt;p&gt;This is &lt;a href=&quot;http://example.com/&quot; title=&quot;Title&quot;&gt;
+<pre><code>&lt;p&gt;This is &lt;a href=&quot;https://example.com/&quot; title=&quot;Title&quot;&gt;
 an example&lt;/a&gt; inline link.&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://example.net/&quot;&gt;This link&lt;/a&gt; has no
+&lt;p&gt;&lt;a href=&quot;https://example.net/&quot;&gt;This link&lt;/a&gt; has no
 title attribute.&lt;/p&gt;
 </code></pre>
 
@@ -612,7 +612,7 @@ which you place a label of your choosing to identify the link:</p>
 <p>Then, anywhere in the document, you define your link label like this,
 on a line by itself:</p>
 
-<pre><code>[id]: http://example.com/  &quot;Optional Title Here&quot;
+<pre><code>[id]: https://example.com/  &quot;Optional Title Here&quot;
 </code></pre>
 
 <p>That is:</p>
@@ -629,13 +629,13 @@ in double or single quotes.</li>
 
 <p>The link URL may, optionally, be surrounded by angle brackets:</p>
 
-<pre><code>[id]: &lt;http://example.com/&gt;  &quot;Optional Title Here&quot;
+<pre><code>[id]: &lt;https://example.com/&gt;  &quot;Optional Title Here&quot;
 </code></pre>
 
 <p>You can put the title attribute on the next line and use extra spaces
 or tabs for padding, which tends to look better with longer URLs:</p>
 
-<pre><code>[id]: http://example.com/longish/path/to/resource/here
+<pre><code>[id]: https://example.com/longish/path/to/resource/here
     &quot;Optional Title Here&quot;
 </code></pre>
 
@@ -660,7 +660,7 @@ Just use an empty set of square brackets -- e.g., to link the word
 
 <p>And then define the link:</p>
 
-<pre><code>[Google]: http://google.com/
+<pre><code>[Google]: https://google.com/
 </code></pre>
 
 <p>Because link names may contain spaces, this shortcut even works for
@@ -671,7 +671,7 @@ multiple words in the link text:</p>
 
 <p>And then define the link:</p>
 
-<pre><code>[Daring Fireball]: http://daringfireball.net/
+<pre><code>[Daring Fireball]: https://daringfireball.net/
 </code></pre>
 
 <p>Link definitions can be placed anywhere in your Markdown document. I
@@ -684,9 +684,9 @@ document, sort of like footnotes.</p>
 <pre><code>I get 10 times more traffic from [Google] [1] than from
 [Yahoo] [2] or [MSN] [3].
 
-  [1]: http://google.com/        &quot;Google&quot;
-  [2]: http://search.yahoo.com/  &quot;Yahoo Search&quot;
-  [3]: http://search.msn.com/    &quot;MSN Search&quot;
+  [1]: https://google.com/        &quot;Google&quot;
+  [2]: https://search.yahoo.com/  &quot;Yahoo Search&quot;
+  [3]: https://search.msn.com/    &quot;MSN Search&quot;
 </code></pre>
 
 <p>Using the implicit link name shortcut, you could instead write:</p>
@@ -694,25 +694,25 @@ document, sort of like footnotes.</p>
 <pre><code>I get 10 times more traffic from [Google][] than from
 [Yahoo][] or [MSN][].
 
-  [google]: http://google.com/        &quot;Google&quot;
-  [yahoo]:  http://search.yahoo.com/  &quot;Yahoo Search&quot;
-  [msn]:    http://search.msn.com/    &quot;MSN Search&quot;
+  [google]: https://google.com/        &quot;Google&quot;
+  [yahoo]:  https://search.yahoo.com/  &quot;Yahoo Search&quot;
+  [msn]:    https://search.msn.com/    &quot;MSN Search&quot;
 </code></pre>
 
 <p>Both of the above examples will produce the following HTML output:</p>
 
-<pre><code>&lt;p&gt;I get 10 times more traffic from &lt;a href=&quot;http://google.com/&quot;
+<pre><code>&lt;p&gt;I get 10 times more traffic from &lt;a href=&quot;https://google.com/&quot;
 title=&quot;Google&quot;&gt;Google&lt;/a&gt; than from
-&lt;a href=&quot;http://search.yahoo.com/&quot; title=&quot;Yahoo Search&quot;&gt;Yahoo&lt;/a&gt;
-or &lt;a href=&quot;http://search.msn.com/&quot; title=&quot;MSN Search&quot;&gt;MSN&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&quot;https://search.yahoo.com/&quot; title=&quot;Yahoo Search&quot;&gt;Yahoo&lt;/a&gt;
+or &lt;a href=&quot;https://search.msn.com/&quot; title=&quot;MSN Search&quot;&gt;MSN&lt;/a&gt;.&lt;/p&gt;
 </code></pre>
 
 <p>For comparison, here is the same paragraph written using
 Markdown's inline link style:</p>
 
-<pre><code>I get 10 times more traffic from [Google](http://google.com/ &quot;Google&quot;)
-than from [Yahoo](http://search.yahoo.com/ &quot;Yahoo Search&quot;) or
-[MSN](http://search.msn.com/ &quot;MSN Search&quot;).
+<pre><code>I get 10 times more traffic from [Google](https://google.com/ &quot;Google&quot;)
+than from [Yahoo](https://search.yahoo.com/ &quot;Yahoo Search&quot;) or
+[MSN](https://search.msn.com/ &quot;MSN Search&quot;).
 </code></pre>
 
 <p>The point of reference-style links is not that they're easier to
@@ -887,12 +887,12 @@ use regular HTML <code>&lt;img&gt;</code> tags.</p>
 
 <p>Markdown supports a shortcut style for creating &quot;automatic&quot; links for URLs and email addresses: simply surround the URL or email address with angle brackets. What this means is that if you want to show the actual text of a URL or email address, and also have it be a clickable link, you can do this:</p>
 
-<pre><code>&lt;http://example.com/&gt;
+<pre><code>&lt;https://example.com/&gt;
 </code></pre>
 
 <p>Markdown will turn this into:</p>
 
-<pre><code>&lt;a href=&quot;http://example.com/&quot;&gt;http://example.com/&lt;/a&gt;
+<pre><code>&lt;a href=&quot;https://example.com/&quot;&gt;http://example.com/&lt;/a&gt;
 </code></pre>
 
 <p>Automatic links for email addresses work similarly, except that

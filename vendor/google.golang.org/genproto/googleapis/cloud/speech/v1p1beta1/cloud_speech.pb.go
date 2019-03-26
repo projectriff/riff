@@ -744,7 +744,7 @@ type RecognitionMetadata struct {
 	// Mime type of the original audio file.  For example `audio/m4a`,
 	// `audio/x-alaw-basic`, `audio/mp3`, `audio/3gpp`.
 	// A list of possible audio mime types is maintained at
-	// http://www.iana.org/assignments/media-types/media-types.xhtml#audio
+	// https://www.iana.org/assignments/media-types/media-types.xhtml#audio
 	OriginalMimeType string `protobuf:"bytes,9,opt,name=original_mime_type,json=originalMimeType" json:"original_mime_type,omitempty"`
 	// Obfuscated (privacy-protected) ID of the user, to identify number of
 	// unique users using the service.

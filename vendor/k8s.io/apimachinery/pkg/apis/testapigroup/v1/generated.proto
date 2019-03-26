@@ -53,12 +53,12 @@ message Carp {
 message CarpCondition {
   // Type is the type of the condition.
   // Currently only Ready.
-  // More info: http://kubernetes.io/docs/user-guide/carp-states#carp-conditions
+  // More info: https://kubernetes.io/docs/user-guide/carp-states#carp-conditions
   optional string type = 1;
 
   // Status is the status of the condition.
   // Can be True, False, Unknown.
-  // More info: http://kubernetes.io/docs/user-guide/carp-states#carp-conditions
+  // More info: https://kubernetes.io/docs/user-guide/carp-states#carp-conditions
   optional string status = 2;
 
   // Last time we probed the condition.
@@ -86,7 +86,7 @@ message CarpList {
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
   // List of carps.
-  // More info: http://kubernetes.io/docs/user-guide/carps
+  // More info: https://kubernetes.io/docs/user-guide/carps
   repeated Carp items = 2;
 }
 
@@ -95,7 +95,7 @@ message CarpSpec {
   // Restart policy for all containers within the carp.
   // One of Always, OnFailure, Never.
   // Default to Always.
-  // More info: http://kubernetes.io/docs/user-guide/carp-states#restartpolicy
+  // More info: https://kubernetes.io/docs/user-guide/carp-states#restartpolicy
   // +optional
   optional string restartPolicy = 3;
 
@@ -117,12 +117,12 @@ message CarpSpec {
 
   // NodeSelector is a selector which must be true for the carp to fit on a node.
   // Selector which must match a node's labels for the carp to be scheduled on that node.
-  // More info: http://kubernetes.io/docs/user-guide/node-selection/README
+  // More info: https://kubernetes.io/docs/user-guide/node-selection/README
   // +optional
   map<string, string> nodeSelector = 7;
 
   // ServiceAccountName is the name of the ServiceAccount to use to run this carp.
-  // More info: http://releases.k8s.io/HEAD/docs/design/service_accounts.md
+  // More info: https://releases.k8s.io/HEAD/docs/design/service_accounts.md
   // +optional
   optional string serviceAccountName = 8;
 
@@ -177,12 +177,12 @@ message CarpSpec {
 // state of a system.
 message CarpStatus {
   // Current condition of the carp.
-  // More info: http://kubernetes.io/docs/user-guide/carp-states#carp-phase
+  // More info: https://kubernetes.io/docs/user-guide/carp-states#carp-phase
   // +optional
   optional string phase = 1;
 
   // Current service state of carp.
-  // More info: http://kubernetes.io/docs/user-guide/carp-states#carp-conditions
+  // More info: https://kubernetes.io/docs/user-guide/carp-states#carp-conditions
   // +optional
   repeated CarpCondition conditions = 2;
 

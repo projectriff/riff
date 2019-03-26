@@ -257,7 +257,7 @@ func TestSlowPublicSuffix(t *testing.T) {
 }
 
 // slowPublicSuffix implements the canonical (but O(number of rules)) public
-// suffix algorithm described at http://publicsuffix.org/list/.
+// suffix algorithm described at https://publicsuffix.org/list/.
 //
 // 1. Match domain against all rules and take note of the matching ones.
 // 2. If no rules match, the prevailing rule is "*".

@@ -1,6 +1,6 @@
 //
 // Blackfriday Markdown Processor
-// Available at http://github.com/russross/blackfriday
+// Available at https://github.com/russross/blackfriday
 //
 // Copyright © 2011 Russ Ross <russ@russross.com>.
 // Distributed under the Simplified BSD License.
@@ -79,16 +79,16 @@ func TestEmphasis(t *testing.T) {
 func TestReferenceOverride(t *testing.T) {
 	var tests = []string{
 		"test [ref1][]\n",
-		"<p>test <a href=\"http://www.ref1.com/\" title=\"Reference 1\">ref1</a></p>\n",
+		"<p>test <a href=\"https://www.ref1.com/\" title=\"Reference 1\">ref1</a></p>\n",
 
 		"test [my ref][ref1]\n",
-		"<p>test <a href=\"http://www.ref1.com/\" title=\"Reference 1\">my ref</a></p>\n",
+		"<p>test <a href=\"https://www.ref1.com/\" title=\"Reference 1\">my ref</a></p>\n",
 
-		"test [ref2][]\n\n[ref2]: http://www.leftalone.com/ (Ref left alone)\n",
+		"test [ref2][]\n\n[ref2]: http://findingresult.com/?dn=leftalone.com&pid=9POLOCM60&_glst=0&rpid=9PO13PP3V (Ref left alone)\n",
 		"<p>test <a href=\"http://www.overridden.com/\" title=\"Reference Overridden\">ref2</a></p>\n",
 
-		"test [ref3][]\n\n[ref3]: http://www.leftalone.com/ (Ref left alone)\n",
-		"<p>test <a href=\"http://www.leftalone.com/\" title=\"Ref left alone\">ref3</a></p>\n",
+		"test [ref3][]\n\n[ref3]: http://findingresult.com/?dn=leftalone.com&pid=9POLOCM60&_glst=0&rpid=9PO13PP3V (Ref left alone)\n",
+		"<p>test <a href=\"http://findingresult.com/?dn=leftalone.com&pid=9POLOCM60&_glst=0&rpid=9PO13PP3V\" title=\"Ref left alone\">ref3</a></p>\n",
 
 		"test [ref4][]\n\n[ref4]: http://zombo.com/ (You can do anything)\n",
 		"<p>test [ref4][]</p>\n",
@@ -97,7 +97,7 @@ func TestReferenceOverride(t *testing.T) {
 		"<p>test <a href=\"http://localhost:6060/pkg/net/http/#ServeMux.ServeHTTP\" title=\"ServeHTTP docs\">!(*http.ServeMux).ServeHTTP</a> complicated ref</p>\n",
 
 		"test [ref5][]\n",
-		"<p>test <a href=\"http://www.ref5.com/\" title=\"Reference 5\">Moo</a></p>\n",
+		"<p>test <a href=\"https://www.ref5.com/\" title=\"Reference 5\">Moo</a></p>\n",
 	}
 	doTestsInlineParam(t, tests, TestParams{
 		referenceOverride: func(reference string) (rv *Reference, overridden bool) {
@@ -105,7 +105,7 @@ func TestReferenceOverride(t *testing.T) {
 			case "ref1":
 				// just an overridden reference exists without definition
 				return &Reference{
-					Link:  "http://www.ref1.com/",
+					Link:  "https://www.ref1.com/",
 					Title: "Reference 1"}, true
 			case "ref2":
 				// overridden exists and reference defined
@@ -124,7 +124,7 @@ func TestReferenceOverride(t *testing.T) {
 					Title: "ServeHTTP docs"}, true
 			case "ref5":
 				return &Reference{
-					Link:  "http://www.ref5.com/",
+					Link:  "https://www.ref5.com/",
 					Title: "Reference 5",
 					Text:  "Moo",
 				}, true
@@ -464,8 +464,8 @@ func TestInlineLink(t *testing.T) {
 
 func TestRelAttrLink(t *testing.T) {
 	var nofollowTests = []string{
-		"[foo](http://bar.com/foo/)\n",
-		"<p><a href=\"http://bar.com/foo/\" rel=\"nofollow\">foo</a></p>\n",
+		"[foo](https://bar.com/foo/)\n",
+		"<p><a href=\"https://bar.com/foo/\" rel=\"nofollow\">foo</a></p>\n",
 
 		"[foo](/bar/)\n",
 		"<p><a href=\"/bar/\">foo</a></p>\n",
@@ -487,8 +487,8 @@ func TestRelAttrLink(t *testing.T) {
 	})
 
 	var noreferrerTests = []string{
-		"[foo](http://bar.com/foo/)\n",
-		"<p><a href=\"http://bar.com/foo/\" rel=\"noreferrer\">foo</a></p>\n",
+		"[foo](https://bar.com/foo/)\n",
+		"<p><a href=\"https://bar.com/foo/\" rel=\"noreferrer\">foo</a></p>\n",
 
 		"[foo](/bar/)\n",
 		"<p><a href=\"/bar/\">foo</a></p>\n",
@@ -498,8 +498,8 @@ func TestRelAttrLink(t *testing.T) {
 	})
 
 	var nofollownoreferrerTests = []string{
-		"[foo](http://bar.com/foo/)\n",
-		"<p><a href=\"http://bar.com/foo/\" rel=\"nofollow noreferrer\">foo</a></p>\n",
+		"[foo](https://bar.com/foo/)\n",
+		"<p><a href=\"https://bar.com/foo/\" rel=\"nofollow noreferrer\">foo</a></p>\n",
 
 		"[foo](/bar/)\n",
 		"<p><a href=\"/bar/\">foo</a></p>\n",
@@ -530,8 +530,8 @@ func TestHrefTargetBlank(t *testing.T) {
 		"[foo](../bar)\n",
 		"<p><a href=\"../bar\">foo</a></p>\n",
 
-		"[foo](http://example.com)\n",
-		"<p><a href=\"http://example.com\" target=\"_blank\">foo</a></p>\n",
+		"[foo](https://example.com)\n",
+		"<p><a href=\"https://example.com\" target=\"_blank\">foo</a></p>\n",
 	}
 	doTestsInlineParam(t, tests, TestParams{
 		HTMLFlags: Safelink | HrefTargetBlank,
@@ -628,47 +628,47 @@ func TestTags(t *testing.T) {
 
 func TestAutoLink(t *testing.T) {
 	var tests = []string{
-		"http://foo.com/\n",
-		"<p><a href=\"http://foo.com/\">http://foo.com/</a></p>\n",
+		"http://www.foo.com/\n",
+		"<p><a href=\"http://www.foo.com/\">http://www.foo.com/</a></p>\n",
 
-		"1 http://foo.com/\n",
-		"<p>1 <a href=\"http://foo.com/\">http://foo.com/</a></p>\n",
+		"1 http://www.foo.com/\n",
+		"<p>1 <a href=\"http://www.foo.com/\">http://www.foo.com/</a></p>\n",
 
 		"1http://foo.com/\n",
-		"<p>1<a href=\"http://foo.com/\">http://foo.com/</a></p>\n",
+		"<p>1<a href=\"http://www.foo.com/\">http://www.foo.com/</a></p>\n",
 
-		"1.http://foo.com/\n",
-		"<p>1.<a href=\"http://foo.com/\">http://foo.com/</a></p>\n",
+		"1.http://www.foo.com/\n",
+		"<p>1.<a href=\"http://www.foo.com/\">http://www.foo.com/</a></p>\n",
 
-		"1. http://foo.com/\n",
-		"<ol>\n<li><a href=\"http://foo.com/\">http://foo.com/</a></li>\n</ol>\n",
+		"1. http://www.foo.com/\n",
+		"<ol>\n<li><a href=\"http://www.foo.com/\">http://www.foo.com/</a></li>\n</ol>\n",
 
-		"-http://foo.com/\n",
-		"<p>-<a href=\"http://foo.com/\">http://foo.com/</a></p>\n",
+		"-http://www.foo.com/\n",
+		"<p>-<a href=\"http://www.foo.com/\">http://www.foo.com/</a></p>\n",
 
-		"- http://foo.com/\n",
-		"<ul>\n<li><a href=\"http://foo.com/\">http://foo.com/</a></li>\n</ul>\n",
+		"- http://www.foo.com/\n",
+		"<ul>\n<li><a href=\"http://www.foo.com/\">http://www.foo.com/</a></li>\n</ul>\n",
 
 		"_http://foo.com/\n",
-		"<p>_<a href=\"http://foo.com/\">http://foo.com/</a></p>\n",
+		"<p>_<a href=\"http://www.foo.com/\">http://www.foo.com/</a></p>\n",
 
 		"令狐http://foo.com/\n",
-		"<p>令狐<a href=\"http://foo.com/\">http://foo.com/</a></p>\n",
+		"<p>令狐<a href=\"http://www.foo.com/\">http://www.foo.com/</a></p>\n",
 
-		"令狐 http://foo.com/\n",
-		"<p>令狐 <a href=\"http://foo.com/\">http://foo.com/</a></p>\n",
+		"令狐 http://www.foo.com/\n",
+		"<p>令狐 <a href=\"http://www.foo.com/\">http://www.foo.com/</a></p>\n",
 
 		"ahttp://foo.com/\n",
 		"<p>ahttp://foo.com/</p>\n",
 
-		">http://foo.com/\n",
-		"<blockquote>\n<p><a href=\"http://foo.com/\">http://foo.com/</a></p>\n</blockquote>\n",
+		">http://www.foo.com/\n",
+		"<blockquote>\n<p><a href=\"http://www.foo.com/\">http://www.foo.com/</a></p>\n</blockquote>\n",
 
-		"> http://foo.com/\n",
-		"<blockquote>\n<p><a href=\"http://foo.com/\">http://foo.com/</a></p>\n</blockquote>\n",
+		"> http://www.foo.com/\n",
+		"<blockquote>\n<p><a href=\"http://www.foo.com/\">http://www.foo.com/</a></p>\n</blockquote>\n",
 
-		"go to <http://foo.com/>\n",
-		"<p>go to <a href=\"http://foo.com/\">http://foo.com/</a></p>\n",
+		"go to <http://www.foo.com/>\n",
+		"<p>go to <a href=\"http://www.foo.com/\">http://www.foo.com/</a></p>\n",
 
 		"a secure <https://link.org>\n",
 		"<p>a secure <a href=\"https://link.org\">https://link.org</a></p>\n",
@@ -706,32 +706,32 @@ func TestAutoLink(t *testing.T) {
 		"<p>even a &gt; can be escaped <a href=\"http://new.com?q=&gt;&amp;etc\">" +
 			"http://new.com?q=&gt;&amp;etc</a></p>\n",
 
-		"<a href=\"http://fancy.com\">http://fancy.com</a>\n",
-		"<p><a href=\"http://fancy.com\">http://fancy.com</a></p>\n",
+		"<a href=\"https://fancy.com\">https://fancy.com</a>\n",
+		"<p><a href=\"https://fancy.com\">https://fancy.com</a></p>\n",
 
-		"<a href=\"http://fancy.com\">This is a link</a>\n",
-		"<p><a href=\"http://fancy.com\">This is a link</a></p>\n",
+		"<a href=\"https://fancy.com\">This is a link</a>\n",
+		"<p><a href=\"https://fancy.com\">This is a link</a></p>\n",
 
-		"<a href=\"http://www.fancy.com/A_B.pdf\">http://www.fancy.com/A_B.pdf</a>\n",
-		"<p><a href=\"http://www.fancy.com/A_B.pdf\">http://www.fancy.com/A_B.pdf</a></p>\n",
+		"<a href=\"https://www.fancy.com/A_B.pdf\">https://www.fancy.com/A_B.pdf</a>\n",
+		"<p><a href=\"https://www.fancy.com/A_B.pdf\">https://www.fancy.com/A_B.pdf</a></p>\n",
 
-		"(<a href=\"http://www.fancy.com/A_B\">http://www.fancy.com/A_B</a> (\n",
-		"<p>(<a href=\"http://www.fancy.com/A_B\">http://www.fancy.com/A_B</a> (</p>\n",
+		"(<a href=\"https://www.fancy.com/A_B\">https://www.fancy.com/A_B</a> (\n",
+		"<p>(<a href=\"https://www.fancy.com/A_B\">https://www.fancy.com/A_B</a> (</p>\n",
 
-		"(<a href=\"http://www.fancy.com/A_B\">http://www.fancy.com/A_B</a> (part two: <a href=\"http://www.fancy.com/A_B\">http://www.fancy.com/A_B</a>)).\n",
-		"<p>(<a href=\"http://www.fancy.com/A_B\">http://www.fancy.com/A_B</a> (part two: <a href=\"http://www.fancy.com/A_B\">http://www.fancy.com/A_B</a>)).</p>\n",
+		"(<a href=\"https://www.fancy.com/A_B\">https://www.fancy.com/A_B</a> (part two: <a href=\"https://www.fancy.com/A_B\">https://www.fancy.com/A_B</a>)).\n",
+		"<p>(<a href=\"https://www.fancy.com/A_B\">https://www.fancy.com/A_B</a> (part two: <a href=\"https://www.fancy.com/A_B\">https://www.fancy.com/A_B</a>)).</p>\n",
 
 		"http://www.foo.com<br />\n",
 		"<p><a href=\"http://www.foo.com\">http://www.foo.com</a><br /></p>\n",
 
-		"http://foo.com/viewtopic.php?f=18&amp;t=297",
-		"<p><a href=\"http://foo.com/viewtopic.php?f=18&amp;t=297\">http://foo.com/viewtopic.php?f=18&amp;t=297</a></p>\n",
+		"https://foo.com/viewtopic.php?f=18&amp;t=297",
+		"<p><a href=\"https://foo.com/viewtopic.php?f=18&amp;t=297\">https://foo.com/viewtopic.php?f=18&amp;t=297</a></p>\n",
 
-		"http://foo.com/viewtopic.php?param=&quot;18&quot;zz",
-		"<p><a href=\"http://foo.com/viewtopic.php?param=&quot;18&quot;zz\">http://foo.com/viewtopic.php?param=&quot;18&quot;zz</a></p>\n",
+		"https://foo.com/viewtopic.php?param=&quot;18&quot;zz",
+		"<p><a href=\"https://foo.com/viewtopic.php?param=&quot;18&quot;zz\">https://foo.com/viewtopic.php?param=&quot;18&quot;zz</a></p>\n",
 
-		"http://foo.com/viewtopic.php?param=&quot;18&quot;",
-		"<p><a href=\"http://foo.com/viewtopic.php?param=&quot;18&quot;\">http://foo.com/viewtopic.php?param=&quot;18&quot;</a></p>\n",
+		"https://foo.com/viewtopic.php?param=&quot;18&quot;",
+		"<p><a href=\"https://foo.com/viewtopic.php?param=&quot;18&quot;\">https://foo.com/viewtopic.php?param=&quot;18&quot;</a></p>\n",
 
 		"<a href=\"https://fancy.com\">https://fancy.com</a>\n",
 		"<p><a href=\"https://fancy.com\">https://fancy.com</a></p>\n",
@@ -892,9 +892,9 @@ what happens here
 
 [^1]: This is a footnote
 
-[w3]: http://www.w3.org/
+[w3]: https://www.w3.org/
 `,
-	`<p>Bla bla <sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup> <a href="http://www.w3.org/">WWW</a></p>
+	`<p>Bla bla <sup class="footnote-ref" id="fnref:1"><a rel="footnote" href="#fn:1">1</a></sup> <a href="https://www.w3.org/">WWW</a></p>
 
 <div class="footnotes">
 

@@ -6,7 +6,7 @@ Introduction
 The yaml package enables Go programs to comfortably encode and decode YAML
 values. It was developed within [Canonical](https://www.canonical.com) as
 part of the [juju](https://juju.ubuntu.com) project, and is based on a
-pure Go port of the well-known [libyaml](http://pyyaml.org/wiki/LibYAML)
+pure Go port of the well-known [libyaml](https://pyyaml.org/wiki/LibYAML)
 C library to parse and generate YAML data quickly and reliably.
 
 Compatibility

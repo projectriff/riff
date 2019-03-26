@@ -556,7 +556,7 @@ func (sc *serverConn) HeaderEncoder() (*hpack.Encoder, *bytes.Buffer) {
 
 func (sc *serverConn) state(streamID uint32) (streamState, *stream) {
 	sc.serveG.check()
-	// http://tools.ietf.org/html/rfc7540#section-5.1
+	// https://tools.ietf.org/html/rfc7540#section-5.1
 	if st, ok := sc.streams[streamID]; ok {
 		return st.state, st
 	}
@@ -1636,7 +1636,7 @@ func (sc *serverConn) processGoAway(f *GoAwayFrame) error {
 		sc.vlogf("http2: received GOAWAY %+v, starting graceful shutdown", f)
 	}
 	sc.startGracefulShutdownInternal()
-	// http://tools.ietf.org/html/rfc7540#section-6.8
+	// https://tools.ietf.org/html/rfc7540#section-6.8
 	// We should not create any new streams, which means we should disable push.
 	sc.pushEnabled = false
 	return nil
@@ -1687,7 +1687,7 @@ func (sc *serverConn) processHeaders(f *MetaHeadersFrame) error {
 		// Ignore.
 		return nil
 	}
-	// http://tools.ietf.org/html/rfc7540#section-5.1.1
+	// https://tools.ietf.org/html/rfc7540#section-5.1.1
 	// Streams initiated by a client MUST use odd-numbered stream
 	// identifiers. [...] An endpoint that receives an unexpected
 	// stream identifier MUST respond with a connection error
@@ -1722,7 +1722,7 @@ func (sc *serverConn) processHeaders(f *MetaHeadersFrame) error {
 		sc.idleTimer.Stop()
 	}
 
-	// http://tools.ietf.org/html/rfc7540#section-5.1.2
+	// https://tools.ietf.org/html/rfc7540#section-5.1.2
 	// [...] Endpoints MUST NOT exceed the limit set by their peer. An
 	// endpoint that receives a HEADERS frame that causes their
 	// advertised concurrent stream limit to be exceeded MUST treat
@@ -2583,7 +2583,7 @@ func (w *responseWriter) push(target string, opts pushOptions) error {
 	sc.serveG.checkNotOn()
 
 	// No recursive pushes: "PUSH_PROMISE frames MUST only be sent on a peer-initiated stream."
-	// http://tools.ietf.org/html/rfc7540#section-6.6
+	// https://tools.ietf.org/html/rfc7540#section-6.6
 	if st.isPushed() {
 		return ErrRecursivePush
 	}
@@ -2625,7 +2625,7 @@ func (w *responseWriter) push(target string, opts pushOptions) error {
 		}
 		// These headers are meaningful only if the request has a body,
 		// but PUSH_PROMISE requests cannot have a body.
-		// http://tools.ietf.org/html/rfc7540#section-8.2
+		// https://tools.ietf.org/html/rfc7540#section-8.2
 		// Also disallow Host, since the promised URL must be absolute.
 		switch strings.ToLower(k) {
 		case "content-length", "content-encoding", "trailer", "te", "expect", "host":
@@ -2638,7 +2638,7 @@ func (w *responseWriter) push(target string, opts pushOptions) error {
 
 	// The RFC effectively limits promised requests to GET and HEAD:
 	// "Promised requests MUST be cacheable [GET, HEAD, or POST], and MUST be safe [GET or HEAD]"
-	// http://tools.ietf.org/html/rfc7540#section-8.2
+	// https://tools.ietf.org/html/rfc7540#section-8.2
 	if opts.Method != "GET" && opts.Method != "HEAD" {
 		return fmt.Errorf("method %q must be GET or HEAD", opts.Method)
 	}
@@ -2681,7 +2681,7 @@ type startPushRequest struct {
 func (sc *serverConn) startPush(msg *startPushRequest) {
 	sc.serveG.check()
 
-	// http://tools.ietf.org/html/rfc7540#section-6.6.
+	// https://tools.ietf.org/html/rfc7540#section-6.6.
 	// PUSH_PROMISE frames MUST only be sent on a peer-initiated stream that
 	// is in either the "open" or "half-closed (remote)" state.
 	if msg.parent.state != stateOpen && msg.parent.state != stateHalfClosedRemote {
@@ -2690,7 +2690,7 @@ func (sc *serverConn) startPush(msg *startPushRequest) {
 		return
 	}
 
-	// http://tools.ietf.org/html/rfc7540#section-6.6.
+	// https://tools.ietf.org/html/rfc7540#section-6.6.
 	if !sc.pushEnabled {
 		msg.done <- http.ErrNotSupported
 		return
@@ -2707,12 +2707,12 @@ func (sc *serverConn) startPush(msg *startPushRequest) {
 		if !sc.pushEnabled {
 			return 0, http.ErrNotSupported
 		}
-		// http://tools.ietf.org/html/rfc7540#section-6.5.2.
+		// https://tools.ietf.org/html/rfc7540#section-6.5.2.
 		if sc.curPushedStreams+1 > sc.clientMaxStreams {
 			return 0, ErrPushLimitReached
 		}
 
-		// http://tools.ietf.org/html/rfc7540#section-5.1.1.
+		// https://tools.ietf.org/html/rfc7540#section-5.1.1.
 		// Streams initiated by the server MUST use even-numbered identifiers.
 		// A server that is unable to establish a new stream identifier can send a GOAWAY
 		// frame so that the client is forced to open a new connection for new streams.
@@ -2723,7 +2723,7 @@ func (sc *serverConn) startPush(msg *startPushRequest) {
 		sc.maxPushPromiseID += 2
 		promisedID := sc.maxPushPromiseID
 
-		// http://tools.ietf.org/html/rfc7540#section-8.2.
+		// https://tools.ietf.org/html/rfc7540#section-8.2.
 		// Strictly speaking, the new stream should start in "reserved (local)", then
 		// transition to "half closed (remote)" after sending the initial HEADERS, but
 		// we start in "half closed (remote)" for simplicity.
@@ -2776,7 +2776,7 @@ func foreachHeaderElement(v string, fn func(string)) {
 	}
 }
 
-// From http://httpwg.org/specs/rfc7540.html#rfc.section.8.1.2.2
+// From https://httpwg.org/specs/rfc7540.html#rfc.section.8.1.2.2
 var connHeaders = []string{
 	"Connection",
 	"Keep-Alive",
@@ -2809,7 +2809,7 @@ func new400Handler(err error) http.HandlerFunc {
 
 // ValidTrailerHeader reports whether name is a valid header field name to appear
 // in trailers.
-// See: http://tools.ietf.org/html/rfc7230#section-4.1.2
+// See: https://tools.ietf.org/html/rfc7230#section-4.1.2
 func ValidTrailerHeader(name string) bool {
 	name = http.CanonicalHeaderKey(name)
 	if strings.HasPrefix(name, "If-") || badTrailer[name] {

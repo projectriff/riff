@@ -40,8 +40,8 @@ func main() {
 		url  string
 		name string
 	}{
-		{"http://encoding.spec.whatwg.org/index-jis0208.txt", "0208"},
-		{"http://encoding.spec.whatwg.org/index-jis0212.txt", "0212"},
+		{"https://encoding.spec.whatwg.org/index-jis0208.txt", "0208"},
+		{"https://encoding.spec.whatwg.org/index-jis0212.txt", "0212"},
 	}
 	for i, table := range tables {
 		res, err := http.Get(table.url)

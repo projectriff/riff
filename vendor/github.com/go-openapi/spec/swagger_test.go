@@ -70,12 +70,12 @@ var specJSON = `{
 	"info": {
 		"contact": {
 			"name": "wordnik api team",
-			"url": "http://developer.wordnik.com"
+			"url": "https://developer.wordnik.com"
 		},
 		"description": "A sample API that uses a petstore as an example to demonstrate features in the swagger-2.0 specification",
 		"license": {
 			"name": "Creative Commons 4.0 International",
-			"url": "http://creativecommons.org/licenses/by/4.0/"
+			"url": "https://creativecommons.org/licenses/by/4.0/"
 		},
 		"termsOfService": "http://helloreverb.com/terms/",
 		"title": "Swagger Sample API",

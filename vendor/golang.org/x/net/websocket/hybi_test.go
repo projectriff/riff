@@ -16,7 +16,7 @@ import (
 )
 
 // Test the getNonceAccept function with values in
-// http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-17
+// https://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-17
 func TestSecWebSocketAccept(t *testing.T) {
 	nonce := []byte("dGhlIHNhbXBsZSBub25jZQ==")
 	expected := []byte("s3pPLMBiTxaQ9kYGzzhZRbK+xOo=")
@@ -58,7 +58,7 @@ Sec-WebSocket-Protocol: chat
 		if err != nil {
 			t.Fatal("location url", err)
 		}
-		config.Origin, err = url.ParseRequestURI("http://example.com")
+		config.Origin, err = url.ParseRequestURI("https://example.com")
 		if err != nil {
 			t.Fatal("origin url", err)
 		}
@@ -119,7 +119,7 @@ Sec-WebSocket-Protocol: chat
 	if err != nil {
 		t.Fatal("location url", err)
 	}
-	config.Origin, err = url.ParseRequestURI("http://example.com")
+	config.Origin, err = url.ParseRequestURI("https://example.com")
 	if err != nil {
 		t.Fatal("origin url", err)
 	}
@@ -176,7 +176,7 @@ Host: server.example.com
 Upgrade: websocket
 Connection: Upgrade
 Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
-Origin: http://example.com
+Origin: https://example.com
 Sec-WebSocket-Protocol: chat, superchat
 Sec-WebSocket-Version: 13
 
@@ -226,7 +226,7 @@ Host: server.example.com
 Upgrade: websocket
 Connection: Upgrade
 Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
-Origin: http://example.com
+Origin: https://example.com
 Sec-WebSocket-Version: 13
 
 `))
@@ -271,7 +271,7 @@ Host: server.example.com
 Upgrade: websocket
 Connection: Upgrade
 Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
-Sec-WebSocket-Origin: http://example.com
+Sec-WebSocket-Origin: https://example.com
 Sec-WebSocket-Protocol: chat, superchat
 Sec-WebSocket-Version: 9
 
@@ -569,7 +569,7 @@ Host: server.example.com
 Upgrade: websocket
 Connection: keep-alive, upgrade
 Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
-Origin: http://example.com
+Origin: https://example.com
 Sec-WebSocket-Protocol: chat, superchat
 Sec-WebSocket-Version: 13
 

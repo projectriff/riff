@@ -378,7 +378,7 @@ func TestTag(t *testing.T) {
 			// There are inconsistencies w.r.t. capitalization in the tests
 			// due to CLDR's update procedure which treats modern and other
 			// languages differently.
-			// See http://unicode.org/cldr/trac/ticket/8051.
+			// See https://unicode.org/cldr/trac/ticket/8051.
 			// TODO: use language capitalization to sanitize the strings.
 			t.Errorf("%d:%s:%s: was %q; want %q", i, tt.dict, tt.tag, n, tt.name)
 		}
@@ -563,7 +563,7 @@ func TestSelf(t *testing.T) {
 		// Take the entry for sr which has the matching script.
 		// TODO: Capitalization changed as of CLDR 26, but change seems
 		// arbitrary. Revisit capitalization with revision 27. See
-		// http://unicode.org/cldr/trac/ticket/8051.
+		// https://unicode.org/cldr/trac/ticket/8051.
 		{"sr", "српски"},
 		// TODO: sr-ME should show up as Serbian or Montenegrin, not Serbo-
 		// Croatian. This is an artifact of the current algorithm, which is the

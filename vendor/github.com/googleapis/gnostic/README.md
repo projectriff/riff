@@ -39,7 +39,7 @@ function or stability.
 
 ## Requirements
 
-**gnostic** can be run in any environment that supports [Go](http://golang.org)
+**gnostic** can be run in any environment that supports [Go](https://golang.org)
 and the [Google Protocol Buffer Compiler](https://github.com/google/protobuf).
 
 ## Installation

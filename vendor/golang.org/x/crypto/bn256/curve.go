@@ -84,7 +84,7 @@ func (c *curvePoint) Add(a, b *curvePoint, pool *bnPool) {
 		return
 	}
 
-	// See http://hyperelliptic.org/EFD/g1p/auto-code/shortw/jacobian-0/addition/add-2007-bl.op3
+	// See https://hyperelliptic.org/EFD/g1p/auto-code/shortw/jacobian-0/addition/add-2007-bl.op3
 
 	// Normalize the points by replacing a = [x1:y1:z1] and b = [x2:y2:z2]
 	// by [u1:s1:z1·z2] and [u2:s2:z1·z2]
@@ -181,7 +181,7 @@ func (c *curvePoint) Add(a, b *curvePoint, pool *bnPool) {
 }
 
 func (c *curvePoint) Double(a *curvePoint, pool *bnPool) {
-	// See http://hyperelliptic.org/EFD/g1p/auto-code/shortw/jacobian-0/doubling/dbl-2009-l.op3
+	// See https://hyperelliptic.org/EFD/g1p/auto-code/shortw/jacobian-0/doubling/dbl-2009-l.op3
 	A := pool.Get().Mul(a.x, a.x)
 	A.Mod(A, p)
 	B := pool.Get().Mul(a.y, a.y)

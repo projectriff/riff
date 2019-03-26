@@ -32,7 +32,7 @@
 // The same Context may be passed to functions running in different goroutines;
 // Contexts are safe for simultaneous use by multiple goroutines.
 //
-// See http://blog.golang.org/context for example code for a server that uses
+// See https://blog.golang.org/context for example code for a server that uses
 // Contexts.
 package context // import "golang.org/x/net/context"
 

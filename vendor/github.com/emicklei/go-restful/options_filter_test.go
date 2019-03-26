@@ -16,7 +16,7 @@ func TestOptionsFilter(t *testing.T) {
 	Add(ws)
 	Filter(OPTIONSFilter())
 
-	httpRequest, _ := http.NewRequest("OPTIONS", "http://here.io/candy/gum", nil)
+	httpRequest, _ := http.NewRequest("OPTIONS", "https://here.io/candy/gum", nil)
 	httpWriter := httptest.NewRecorder()
 	DefaultContainer.dispatch(httpWriter, httpRequest)
 	actual := httpWriter.Header().Get(HEADER_Allow)
@@ -24,7 +24,7 @@ func TestOptionsFilter(t *testing.T) {
 		t.Fatal("expected: GET,DELETE but got:" + actual)
 	}
 
-	httpRequest, _ = http.NewRequest("OPTIONS", "http://here.io/candies", nil)
+	httpRequest, _ = http.NewRequest("OPTIONS", "https://here.io/candies", nil)
 	httpWriter = httptest.NewRecorder()
 	DefaultContainer.dispatch(httpWriter, httpRequest)
 	actual = httpWriter.Header().Get(HEADER_Allow)

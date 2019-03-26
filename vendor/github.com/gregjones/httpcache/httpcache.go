@@ -501,7 +501,7 @@ func parseCacheControl(headers http.Header) cacheControl {
 // headerAllCommaSepValues returns all comma-separated values (each
 // with whitespace trimmed) for header name in headers. According to
 // Section 4.2 of the HTTP/1.1 spec
-// (http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2),
+// (https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2),
 // values from multiple occurrences of a header should be concatenated, if
 // the header's value is a comma-separated list.
 func headerAllCommaSepValues(headers http.Header, name string) []string {

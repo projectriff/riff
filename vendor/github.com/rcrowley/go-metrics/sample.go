@@ -396,7 +396,7 @@ func SampleVariance(values []int64) float64 {
 
 // A uniform sample using Vitter's Algorithm R.
 //
-// <http://www.cs.umd.edu/~samir/498/vitter.pdf>
+// <https://www.cs.umd.edu/~samir/498/vitter.pdf>
 type UniformSample struct {
 	count         int64
 	mutex         sync.Mutex

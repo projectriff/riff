@@ -6,7 +6,7 @@ package bn256
 
 // For details of the algorithms used, see "Multiplication and Squaring on
 // Pairing-Friendly Fields, Devegili et al.
-// http://eprint.iacr.org/2006/471.pdf.
+// https://eprint.iacr.org/2006/471.pdf.
 
 import (
 	"math/big"
@@ -118,7 +118,7 @@ func (e *gfP6) Double(a *gfP6) *gfP6 {
 func (e *gfP6) Mul(a, b *gfP6, pool *bnPool) *gfP6 {
 	// "Multiplication and Squaring on Pairing-Friendly Fields"
 	// Section 4, Karatsuba method.
-	// http://eprint.iacr.org/2006/471.pdf
+	// https://eprint.iacr.org/2006/471.pdf
 
 	v0 := newGFp2(pool)
 	v0.Mul(a.z, b.z, pool)

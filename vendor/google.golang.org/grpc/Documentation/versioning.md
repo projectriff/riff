@@ -1,6 +1,6 @@
 # Versioning and Releases
 
-Note: This document references terminology defined at http://semver.org.
+Note: This document references terminology defined at https://semver.org.
 
 ## Release Frequency
 

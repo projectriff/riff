@@ -22,7 +22,7 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 // The Log4j level for job execution. When running an
-// [Apache Hive](http://hive.apache.org/) job, Cloud
+// [Apache Hive](https://hive.apache.org/) job, Cloud
 // Dataproc configures the Hive client to an equivalent verbosity level.
 type LoggingConfig_Level int32
 
@@ -467,7 +467,7 @@ func _HadoopJob_OneofSizer(msg proto.Message) (n int) {
 	return n
 }
 
-// A Cloud Dataproc job for running [Apache Spark](http://spark.apache.org/)
+// A Cloud Dataproc job for running [Apache Spark](https://spark.apache.org/)
 // applications on YARN.
 type SparkJob struct {
 	// Required. The specification of the main method to call to drive the job.
@@ -940,7 +940,7 @@ func _HiveJob_OneofSizer(msg proto.Message) (n int) {
 	return n
 }
 
-// A Cloud Dataproc job for running [Apache Spark SQL](http://spark.apache.org/sql/)
+// A Cloud Dataproc job for running [Apache Spark SQL](https://spark.apache.org/sql/)
 // queries.
 type SparkSqlJob struct {
 	// Required. The sequence of Spark SQL queries to execute, specified as

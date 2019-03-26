@@ -14,7 +14,7 @@ import (
 )
 
 // freebsdVersion is set in sys_freebsd.go.
-// See http://www.freebsd.org/doc/en/books/porters-handbook/freebsd-versions.html.
+// See https://www.freebsd.org/doc/en/books/porters-handbook/freebsd-versions.html.
 var freebsdVersion uint32
 
 // ParseIPv4Header parses b as an IPv4 header of ICMP error message

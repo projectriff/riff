@@ -27,13 +27,13 @@
 
 ### [1.7.3](https://github.com/magiconair/properties/tree/v1.7.3) - 10 Jul 2017
 
- * [Issue #17](https://github.com/magiconair/properties/issues/17): Add [SetValue()](http://godoc.org/github.com/magiconair/properties#Properties.SetValue) method to set values generically
- * [Issue #22](https://github.com/magiconair/properties/issues/22): Add [LoadMap()](http://godoc.org/github.com/magiconair/properties#LoadMap) function to load properties from a string map
+ * [Issue #17](https://github.com/magiconair/properties/issues/17): Add [SetValue()](https://godoc.org/github.com/magiconair/properties#Properties.SetValue) method to set values generically
+ * [Issue #22](https://github.com/magiconair/properties/issues/22): Add [LoadMap()](https://godoc.org/github.com/magiconair/properties#LoadMap) function to load properties from a string map
 
 ### [1.7.2](https://github.com/magiconair/properties/tree/v1.7.2) - 20 Mar 2017
 
  * [Issue #15](https://github.com/magiconair/properties/issues/15): Drop gocheck dependency
- * [PR #21](https://github.com/magiconair/properties/pull/21): Add [Map()](http://godoc.org/github.com/magiconair/properties#Properties.Map) and [FilterFunc()](http://godoc.org/github.com/magiconair/properties#Properties.FilterFunc)
+ * [PR #21](https://github.com/magiconair/properties/pull/21): Add [Map()](https://godoc.org/github.com/magiconair/properties#Properties.Map) and [FilterFunc()](https://godoc.org/github.com/magiconair/properties#Properties.FilterFunc)
 
 ### [1.7.1](https://github.com/magiconair/properties/tree/v1.7.1) - 13 Jan 2017
 
@@ -44,13 +44,13 @@
 
 ### [1.7.0](https://github.com/magiconair/properties/tree/v1.7.0) - 20 Mar 2016
 
- * [Issue #10](https://github.com/magiconair/properties/issues/10): Add [LoadURL,LoadURLs,MustLoadURL,MustLoadURLs](http://godoc.org/github.com/magiconair/properties#LoadURL) method to load properties from a URL.
- * [Issue #11](https://github.com/magiconair/properties/issues/11): Add [LoadString,MustLoadString](http://godoc.org/github.com/magiconair/properties#LoadString) method to load properties from an UTF8 string.
- * [PR #8](https://github.com/magiconair/properties/pull/8): Add [MustFlag](http://godoc.org/github.com/magiconair/properties#Properties.MustFlag) method to provide overrides via command line flags. (@pascaldekloe)
+ * [Issue #10](https://github.com/magiconair/properties/issues/10): Add [LoadURL,LoadURLs,MustLoadURL,MustLoadURLs](https://godoc.org/github.com/magiconair/properties#LoadURL) method to load properties from a URL.
+ * [Issue #11](https://github.com/magiconair/properties/issues/11): Add [LoadString,MustLoadString](https://godoc.org/github.com/magiconair/properties#LoadString) method to load properties from an UTF8 string.
+ * [PR #8](https://github.com/magiconair/properties/pull/8): Add [MustFlag](https://godoc.org/github.com/magiconair/properties#Properties.MustFlag) method to provide overrides via command line flags. (@pascaldekloe)
 
 ### [1.6.0](https://github.com/magiconair/properties/tree/v1.6.0) - 11 Dec 2015
 
- * Add [Decode](http://godoc.org/github.com/magiconair/properties#Properties.Decode) method to populate struct from properties via tags.
+ * Add [Decode](https://godoc.org/github.com/magiconair/properties#Properties.Decode) method to populate struct from properties via tags.
 
 ### [1.5.6](https://github.com/magiconair/properties/tree/v1.5.6) - 18 Oct 2015
 
@@ -58,33 +58,33 @@
 
 ### [1.5.5](https://github.com/magiconair/properties/tree/v1.5.5) - 31 Jul 2015
 
- * [PR #6](https://github.com/magiconair/properties/pull/6): Add [Delete](http://godoc.org/github.com/magiconair/properties#Properties.Delete) method to remove keys including comments. (@gerbenjacobs)
+ * [PR #6](https://github.com/magiconair/properties/pull/6): Add [Delete](https://godoc.org/github.com/magiconair/properties#Properties.Delete) method to remove keys including comments. (@gerbenjacobs)
 
 ### [1.5.4](https://github.com/magiconair/properties/tree/v1.5.4) - 23 Jun 2015
 
- * [Issue #5](https://github.com/magiconair/properties/issues/5): Allow disabling of property expansion [DisableExpansion](http://godoc.org/github.com/magiconair/properties#Properties.DisableExpansion). When property expansion is disabled Properties become a simple key/value store and don't check for circular references.
+ * [Issue #5](https://github.com/magiconair/properties/issues/5): Allow disabling of property expansion [DisableExpansion](https://godoc.org/github.com/magiconair/properties#Properties.DisableExpansion). When property expansion is disabled Properties become a simple key/value store and don't check for circular references.
 
 ### [1.5.3](https://github.com/magiconair/properties/tree/v1.5.3) - 02 Jun 2015
 
- * [Issue #4](https://github.com/magiconair/properties/issues/4): Maintain key order in [Filter()](http://godoc.org/github.com/magiconair/properties#Properties.Filter), [FilterPrefix()](http://godoc.org/github.com/magiconair/properties#Properties.FilterPrefix) and [FilterRegexp()](http://godoc.org/github.com/magiconair/properties#Properties.FilterRegexp)
+ * [Issue #4](https://github.com/magiconair/properties/issues/4): Maintain key order in [Filter()](https://godoc.org/github.com/magiconair/properties#Properties.Filter), [FilterPrefix()](https://godoc.org/github.com/magiconair/properties#Properties.FilterPrefix) and [FilterRegexp()](https://godoc.org/github.com/magiconair/properties#Properties.FilterRegexp)
 
 ### [1.5.2](https://github.com/magiconair/properties/tree/v1.5.2) - 10 Apr 2015
 
- * [Issue #3](https://github.com/magiconair/properties/issues/3): Don't print comments in [WriteComment()](http://godoc.org/github.com/magiconair/properties#Properties.WriteComment) if they are all empty
+ * [Issue #3](https://github.com/magiconair/properties/issues/3): Don't print comments in [WriteComment()](https://godoc.org/github.com/magiconair/properties#Properties.WriteComment) if they are all empty
  * Add clickable links to README
 
 ### [1.5.1](https://github.com/magiconair/properties/tree/v1.5.1) - 08 Dec 2014
 
- * Added [GetParsedDuration()](http://godoc.org/github.com/magiconair/properties#Properties.GetParsedDuration) and [MustGetParsedDuration()](http://godoc.org/github.com/magiconair/properties#Properties.MustGetParsedDuration) for values specified compatible with
-   [time.ParseDuration()](http://golang.org/pkg/time/#ParseDuration).
+ * Added [GetParsedDuration()](https://godoc.org/github.com/magiconair/properties#Properties.GetParsedDuration) and [MustGetParsedDuration()](https://godoc.org/github.com/magiconair/properties#Properties.MustGetParsedDuration) for values specified compatible with
+   [time.ParseDuration()](https://golang.org/pkg/time/#ParseDuration).
 
 ### [1.5.0](https://github.com/magiconair/properties/tree/v1.5.0) - 18 Nov 2014
 
  * Added support for single and multi-line comments (reading, writing and updating)
  * The order of keys is now preserved
- * Calling [Set()](http://godoc.org/github.com/magiconair/properties#Properties.Set) with an empty key now silently ignores the call and does not create a new entry
- * Added a [MustSet()](http://godoc.org/github.com/magiconair/properties#Properties.MustSet) method
- * Migrated test library from launchpad.net/gocheck to [gopkg.in/check.v1](http://gopkg.in/check.v1)
+ * Calling [Set()](https://godoc.org/github.com/magiconair/properties#Properties.Set) with an empty key now silently ignores the call and does not create a new entry
+ * Added a [MustSet()](https://godoc.org/github.com/magiconair/properties#Properties.MustSet) method
+ * Migrated test library from launchpad.net/gocheck to [gopkg.in/check.v1](https://gopkg.in/check.v1)
 
 ### [1.4.2](https://github.com/magiconair/properties/tree/v1.4.2) - 15 Nov 2014
 
@@ -96,8 +96,8 @@
 
 ### [1.4.0](https://github.com/magiconair/properties/tree/v1.4.0) - 23 Sep 2014
 
- * Added [Keys()](http://godoc.org/github.com/magiconair/properties#Properties.Keys) to get the keys
- * Added [Filter()](http://godoc.org/github.com/magiconair/properties#Properties.Filter), [FilterRegexp()](http://godoc.org/github.com/magiconair/properties#Properties.FilterRegexp) and [FilterPrefix()](http://godoc.org/github.com/magiconair/properties#Properties.FilterPrefix) to get a subset of the properties
+ * Added [Keys()](https://godoc.org/github.com/magiconair/properties#Properties.Keys) to get the keys
+ * Added [Filter()](https://godoc.org/github.com/magiconair/properties#Properties.Filter), [FilterRegexp()](https://godoc.org/github.com/magiconair/properties#Properties.FilterRegexp) and [FilterPrefix()](https://godoc.org/github.com/magiconair/properties#Properties.FilterPrefix) to get a subset of the properties
 
 ### [1.3.0](https://github.com/magiconair/properties/tree/v1.3.0) - 18 Mar 2014
 

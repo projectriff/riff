@@ -143,7 +143,7 @@ var testCases = []testCase{
 
 	// Note: this specification is not currently part of CLDR. The same holds
 	// for the leading apostrophe handling for Dutch.
-	// See http://unicode.org/cldr/trac/ticket/7078.
+	// See https://unicode.org/cldr/trac/ticket/7078.
 	10: {
 		lang:  "af",
 		src:   "wag 'n bietjie",
@@ -848,7 +848,7 @@ func TestSpan(t *testing.T) {
 
 var txtASCII = strings.Repeat("The quick brown fox jumps over the lazy dog. ", 50)
 
-// Taken from http://creativecommons.org/licenses/by-sa/3.0/vn/
+// Taken from https://creativecommons.org/licenses/by-sa/3.0/vn/
 const txt_vn = `Với các điều kiện sau: Ghi nhận công của tác giả.  Nếu bạn sử
 dụng, chuyển đổi, hoặc xây dựng dự án từ  nội dung được chia sẻ này, bạn phải áp
 dụng giấy phép này hoặc  một giấy phép khác có các điều khoản tương tự như giấy
@@ -858,7 +858,7 @@ Phạm vi công chúng — Khi tác phẩm hoặc bất kỳ chương nào của
 vùng dành cho công chúng theo quy định của pháp luật thì tình trạng của nó không
 bị ảnh hưởng bởi giấy phép trong bất kỳ trường hợp nào.`
 
-// http://creativecommons.org/licenses/by-sa/2.5/cn/
+// https://creativecommons.org/licenses/by-sa/2.5/cn/
 const txt_cn = `您可以自由： 复制、发行、展览、表演、放映、
 广播或通过信息网络传播本作品 创作演绎作品
 对本作品进行商业性使用 惟须遵守下列条件：
@@ -866,14 +866,14 @@ const txt_cn = `您可以自由： 复制、发行、展览、表演、放映、
 相同方式共享 — 如果您改变、转换本作品或者以本作品为基础进行创作，
 您只能采用与本协议相同的许可协议发布基于本作品的演绎作品。`
 
-// Taken from http://creativecommons.org/licenses/by-sa/1.0/deed.ru
+// Taken from https://creativecommons.org/licenses/by-sa/1.0/deed.ru
 const txt_ru = `При обязательном соблюдении следующих условий: Attribution — Вы
 должны атрибутировать произведение (указывать автора и источник) в порядке,
 предусмотренном автором или лицензиаром (но только так, чтобы никоим образом не
 подразумевалось, что они поддерживают вас или использование вами данного
 произведения). Υπό τις ακόλουθες προϋποθέσεις:`
 
-// Taken from http://creativecommons.org/licenses/by-sa/3.0/gr/
+// Taken from https://creativecommons.org/licenses/by-sa/3.0/gr/
 const txt_gr = `Αναφορά Δημιουργού — Θα πρέπει να κάνετε την αναφορά στο έργο με
 τον τρόπο που έχει οριστεί από το δημιουργό ή το χορηγούντο την άδεια (χωρίς
 όμως να εννοείται με οποιονδήποτε τρόπο ότι εγκρίνουν εσάς ή τη χρήση του έργου

@@ -51,7 +51,7 @@ var _ = Describe("RequestsHandler", func() {
 
 	BeforeEach(func() {
 		mockProducer = new(mocktransport.Producer)
-		req = httptest.NewRequest("GET", "http://example.com", nil)
+		req = httptest.NewRequest("GET", "https://example.com", nil)
 		req.URL.Path = "/requests/testtopic"
 		mockResponseWriter = httptest.NewRecorder()
 		testError = errors.New(errorMessage)

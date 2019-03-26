@@ -6,7 +6,7 @@
 // 1997 technical report, "Tea extensions."
 package xtea // import "golang.org/x/crypto/xtea"
 
-// For details, see http://www.cix.co.uk/~klockstone/xtea.pdf
+// For details, see https://www.cix.co.uk/~klockstone/xtea.pdf
 
 import "strconv"
 

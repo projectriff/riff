@@ -22,7 +22,7 @@ import (
 // OsFs is a Fs implementation that uses functions provided by the os package.
 //
 // For details in any method, check the documentation of the os package
-// (http://golang.org/pkg/os/).
+// (https://golang.org/pkg/os/).
 type OsFs struct{}
 
 func NewOsFs() Fs {

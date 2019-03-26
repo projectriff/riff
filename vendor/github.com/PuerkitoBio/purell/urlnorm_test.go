@@ -26,19 +26,19 @@ func assertMap(t *testing.T, cases map[string]string, f NormalizationFlags) {
 // test ip word handling, ipv6 address handling, and trailing domain periods
 // in general, this matches google chromes unescaping for things in the address bar.
 // spaces are converted to '+' (perhaphs controversial)
-// http://code.google.com/p/google-url/ probably is another good reference for this approach
+// https://code.google.com/p/google-url/ probably is another good reference for this approach
 func TestUrlnorm(t *testing.T) {
 	testcases := map[string]string{
 		"http://test.example/?a=%e3%82%82%26": "http://test.example/?a=%e3%82%82%26",
 		//"http://test.example/?a=%e3%82%82%26": "http://test.example/?a=\xe3\x82\x82%26", //should return a unicode character
-		"http://s.xn--q-bga.DE/":    "http://s.xn--q-bga.de/",       //should be in idna format
-		"http://XBLA\u306eXbox.com": "http://xn--xblaxbox-jf4g.com", //test utf8 and unicode
-		"http://президент.рф":       "http://xn--d1abbgf6aiiy.xn--p1ai",
-		"http://ПРЕЗИДЕНТ.РФ":       "http://xn--d1abbgf6aiiy.xn--p1ai",
+		"https://s.xn--q-bga.DE/":    "https://s.xn--q-bga.de/",       //should be in idna format
+		"http://XBLA\u306eXbox.com": "https://xn--xblaxbox-jf4g.com", //test utf8 and unicode
+		"http://президент.рф":       "http://kremlin.ru/",
+		"http://ПРЕЗИДЕНТ.РФ":       "http://kremlin.ru/",
 		"http://\u00e9.com":         "http://xn--9ca.com",
 		"http://e\u0301.com":        "http://xn--9ca.com",
-		"http://ja.wikipedia.org/wiki/%E3%82%AD%E3%83%A3%E3%82%BF%E3%83%94%E3%83%A9%E3%83%BC%E3%82%B8%E3%83%A3%E3%83%91%E3%83%B3": "http://ja.wikipedia.org/wiki/%E3%82%AD%E3%83%A3%E3%82%BF%E3%83%94%E3%83%A9%E3%83%BC%E3%82%B8%E3%83%A3%E3%83%91%E3%83%B3",
-		//"http://ja.wikipedia.org/wiki/%E3%82%AD%E3%83%A3%E3%82%BF%E3%83%94%E3%83%A9%E3%83%BC%E3%82%B8%E3%83%A3%E3%83%91%E3%83%B3": "http://ja.wikipedia.org/wiki/\xe3\x82\xad\xe3\x83\xa3\xe3\x82\xbf\xe3\x83\x94\xe3\x83\xa9\xe3\x83\xbc\xe3\x82\xb8\xe3\x83\xa3\xe3\x83\x91\xe3\x83\xb3",
+		"https://ja.wikipedia.org/wiki/%25E3%2582%25AD%25E3%2583%25A3%25E3%2582%25BF%25E3%2583%2594%25E3%2583%25A9%25E3%2583%25BC%25E3%2582%25B8%25E3%2583%25A3%25E3%2583%2591%25E3%2583%25B3": "https://ja.wikipedia.org/wiki/%25E3%2582%25AD%25E3%2583%25A3%25E3%2582%25BF%25E3%2583%2594%25E3%2583%25A9%25E3%2583%25BC%25E3%2582%25B8%25E3%2583%25A3%25E3%2583%2591%25E3%2583%25B3",
+		//"https://ja.wikipedia.org/wiki/%25E3%2582%25AD%25E3%2583%25A3%25E3%2582%25BF%25E3%2583%2594%25E3%2583%25A9%25E3%2583%25BC%25E3%2582%25B8%25E3%2583%25A3%25E3%2583%2591%25E3%2583%25B3": "https://ja.wikipedia.org/wiki/\xe3\x82\xad\xe3\x83\xa3\xe3\x82\xbf\xe3\x83\x94\xe3\x83\xa9\xe3\x83\xbc\xe3\x82\xb8\xe3\x83\xa3\xe3\x83\x91\xe3\x83\xb3",
 
 		"http://test.example/\xe3\x82\xad": "http://test.example/%E3%82%AD",
 		//"http://test.example/\xe3\x82\xad":              "http://test.example/\xe3\x82\xad",

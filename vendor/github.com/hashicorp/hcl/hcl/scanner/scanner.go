@@ -510,7 +510,7 @@ func (s *Scanner) scanString() {
 
 // scanEscape scans an escape sequence
 func (s *Scanner) scanEscape() rune {
-	// http://en.cppreference.com/w/cpp/language/escape
+	// https://en.cppreference.com/w/cpp/language/escape
 	ch := s.next() // read character after '/'
 	switch ch {
 	case 'a', 'b', 'f', 'n', 'r', 't', 'v', '\\', '"':

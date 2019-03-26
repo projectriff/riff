@@ -812,7 +812,7 @@ func (s *S) TestUnmarshalerRetry(c *C) {
 	c.Assert(su, DeepEquals, sliceUnmarshaler([]int{1}))
 }
 
-// From http://yaml.org/type/merge.html
+// From https://yaml.org/type/merge.html
 var mergeTests = `
 anchors:
   list:

@@ -642,8 +642,8 @@ func main() {
 
 	// manually set a few fields
 	schema.Title = stringptr("A JSON Schema for OpenAPI 3.0.")
-	schema.ID = stringptr("http://openapis.org/v3/schema.json#")
-	schema.Schema = stringptr("http://json-schema.org/draft-04/schema#")
+	schema.ID = stringptr("https://openapis.org/v3/schema.json#")
+	schema.Schema = stringptr("https://json-schema.org/draft-04/schema#")
 
 	// loop over all models and create the corresponding schema objects
 	definitions := make([]*jsonschema.NamedSchema, 0)

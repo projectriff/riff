@@ -47,7 +47,7 @@ type SpdyRoundTripper struct {
 	//to the remote server.
 	tlsConfig *tls.Config
 
-	/* TODO according to http://golang.org/pkg/net/http/#RoundTripper, a RoundTripper
+	/* TODO according to https://golang.org/pkg/net/http/#RoundTripper, a RoundTripper
 	   must be safe for use by multiple concurrent goroutines. If this is absolutely
 	   necessary, we could keep a map from http.Request to net.Conn. In practice,
 	   a client will create an http.Client, set the transport to a new insteace of
@@ -124,7 +124,7 @@ func (s *SpdyRoundTripper) dial(req *http.Request) (net.Conn, error) {
 	// ensure we use a canonical host with proxyReq
 	targetHost := netutil.CanonicalAddr(req.URL)
 
-	// proxying logic adapted from http://blog.h6t.eu/post/74098062923/golang-websocket-with-http-proxy-support
+	// proxying logic adapted from https://blog.h6t.eu/post/74098062923/golang-websocket-with-http-proxy-support
 	proxyReq := http.Request{
 		Method: "CONNECT",
 		URL:    &url.URL{},

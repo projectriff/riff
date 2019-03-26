@@ -513,7 +513,7 @@ func (m *SequenceMatcher) RealQuickRatio() float64 {
 
 // Convert range to the "ed" format
 func formatRangeUnified(start, stop int) string {
-	// Per the diff spec at http://www.unix.org/single_unix_specification/
+	// Per the diff spec at https://www.opengroup.org/bookstore/catalog/t101.htm/
 	beginning := start + 1 // lines start numbering with one
 	length := stop - start
 	if length == 1 {
@@ -634,7 +634,7 @@ func GetUnifiedDiffString(diff UnifiedDiff) (string, error) {
 
 // Convert range to the "ed" format.
 func formatRangeContext(start, stop int) string {
-	// Per the diff spec at http://www.unix.org/single_unix_specification/
+	// Per the diff spec at https://www.opengroup.org/bookstore/catalog/t101.htm/
 	beginning := start + 1 // lines start numbering with one
 	length := stop - start
 	if length == 0 {

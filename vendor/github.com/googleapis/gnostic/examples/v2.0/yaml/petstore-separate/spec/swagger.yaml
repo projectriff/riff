@@ -7,10 +7,10 @@ info:
   contact:
     name: Wordnik API Team
     email: foo@example.com
-    url: http://madskristensen.net
+    url: https://madskristensen.net
   license:
     name: MIT
-    url: http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT
+    url: https://github.com/gruntjs/grunt/blob/master/LICENSE-MIT
 host: petstore.swagger.wordnik.com
 basePath: /api
 schemes:

@@ -19,7 +19,7 @@ type testVector struct {
 	output   []byte
 }
 
-// Test vectors from RFC 6070, http://tools.ietf.org/html/rfc6070
+// Test vectors from RFC 6070, https://tools.ietf.org/html/rfc6070
 var sha1TestVectors = []testVector{
 	{
 		"password",
@@ -85,7 +85,7 @@ var sha1TestVectors = []testVector{
 }
 
 // Test vectors from
-// http://stackoverflow.com/questions/5130513/pbkdf2-hmac-sha2-test-vectors
+// https://stackoverflow.com/questions/5130513/pbkdf2-hmac-sha2-test-vectors
 var sha256TestVectors = []testVector{
 	{
 		"password",

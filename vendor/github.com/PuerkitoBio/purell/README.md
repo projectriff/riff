@@ -4,7 +4,7 @@ Purell is a tiny Go library to normalize URLs. It returns a pure URL. Pure-ell. 
 
 Based on the [wikipedia paper][wiki] and the [RFC 3986 document][rfc].
 
-[![build status](https://secure.travis-ci.org/PuerkitoBio/purell.png)](http://travis-ci.org/PuerkitoBio/purell)
+[![build status](https://secure.travis-ci.org/PuerkitoBio/purell.png)](https://travis-ci.org/PuerkitoBio/purell)
 
 ## Install
 
@@ -36,7 +36,7 @@ func ExampleNormalizeURLString() {
   } else {
     fmt.Print(normalized)
   }
-  // Output: http://somewebsite.com:80/Amazing%3F/url/
+  // Output: https://somewebsite.com:80/Amazing%3F/url/
 }
 
 func ExampleMustNormalizeURLString() {
@@ -44,7 +44,7 @@ func ExampleMustNormalizeURLString() {
     FlagsUnsafeGreedy)
   fmt.Print(normalized)
 
-  // Output: http://somewebsite.com/Amazing%FA/url
+  // Output: https://somewebsite.com/Amazing%FA/url
 }
 
 func ExampleNormalizeURL() {
@@ -55,7 +55,7 @@ func ExampleNormalizeURL() {
     fmt.Print(normalized)
   }
 
-  // Output: http://someurl.com:8080/a/c/g?c=3&a=1&b=9&c=0
+  // Output: https://someurl.com:8080/a/c/g?c=3&a=1&b=9&c=0
 }
 ```
 
@@ -77,23 +77,23 @@ const (
 	// Usually safe normalizations
 	FlagRemoveTrailingSlash // http://host/path/ -> http://host/path
 	FlagAddTrailingSlash    // http://host/path -> http://host/path/ (should choose only one of these add/remove trailing slash flags)
-	FlagRemoveDotSegments   // http://host/path/./a/b/../c -> http://host/path/a/c
+	FlagRemoveDotSegments   // https://host/path/./a/b/../c -> http://host/path/a/c
 
 	// Unsafe normalizations
-	FlagRemoveDirectoryIndex   // http://host/path/index.html -> http://host/path/
+	FlagRemoveDirectoryIndex   // https://host/path/index.html -> http://host/path/
 	FlagRemoveFragment         // http://host/path#fragment -> http://host/path
 	FlagForceHTTP              // https://host -> http://host
 	FlagRemoveDuplicateSlashes // http://host/path//a///b -> http://host/path/a/b
-	FlagRemoveWWW              // http://www.host/ -> http://host/
-	FlagAddWWW                 // http://host/ -> http://www.host/ (should choose only one of these add/remove WWW flags)
+	FlagRemoveWWW              // https://www.host/ -> http://host/
+	FlagAddWWW                 // http://host/ -> https://www.host/ (should choose only one of these add/remove WWW flags)
 	FlagSortQuery              // http://host/path?c=3&b=2&a=1&b=1 -> http://host/path?a=1&b=1&b=2&c=3
 
 	// Normalizations not in the wikipedia article, required to cover tests cases
 	// submitted by jehiah
-	FlagDecodeDWORDHost           // http://1113982867 -> http://66.102.7.147
-	FlagDecodeOctalHost           // http://0102.0146.07.0223 -> http://66.102.7.147
-	FlagDecodeHexHost             // http://0x42660793 -> http://66.102.7.147
-	FlagRemoveUnnecessaryHostDots // http://.host../path -> http://host/path
+	FlagDecodeDWORDHost           // http://1113982867 -> https://66.102.7.147
+	FlagDecodeOctalHost           // https://0102.0146.07.0223 -> https://66.102.7.147
+	FlagDecodeHexHost             // http://0x42660793 -> https://66.102.7.147
+	FlagRemoveUnnecessaryHostDots // https://.host../path -> http://host/path
 	FlagRemoveEmptyPortSeparator  // http://host:/path -> http://host/path
 
 	// Convenience set of safe normalizations
@@ -137,7 +137,7 @@ Some things to note:
 
 *    When the `NormalizeURL` function is used (passing an URL object), this source URL object is modified (that is, after the call, the URL object will be modified to reflect the normalization).
 
-*    The *replace IP with domain name* normalization (`http://208.77.188.166/ → http://www.example.com/`) is obviously not possible for a library without making some network requests. This is not implemented in purell.
+*    The *replace IP with domain name* normalization (`https://208.77.188.166/ → https://www.example.com/`) is obviously not possible for a library without making some network requests. This is not implemented in purell.
 
 *    The *remove unused query string parameters* and *remove default query parameters* are also not implemented, since this is a very case-specific normalization, and it is quite trivial to do with an URL object.
 
@@ -159,7 +159,7 @@ With the `FlagsUsuallySafeGreedy`:
 
 And with `FlagsUnsafeGreedy`:
 
-`http://root.com/toto/tE%1F/a/c?a=4&w=1&w=2&z=3`
+`https://root.com/toto/tE%1F/a/c?a=4&w=1&w=2&z=3`
 
 ## TODOs
 
@@ -177,9 +177,9 @@ And with `FlagsUnsafeGreedy`:
 
 The [BSD 3-Clause license][bsd].
 
-[bsd]: http://opensource.org/licenses/BSD-3-Clause
-[wiki]: http://en.wikipedia.org/wiki/URL_normalization
-[rfc]: http://tools.ietf.org/html/rfc3986#section-6
-[godoc]: http://go.pkgdoc.org/github.com/PuerkitoBio/purell
+[bsd]: https://opensource.org/licenses/BSD-3-Clause
+[wiki]: https://en.wikipedia.org/wiki/URL_normalization
+[rfc]: https://tools.ietf.org/html/rfc3986#section-6
+[godoc]: https://go.pkgdoc.org/github.com/PuerkitoBio/purell
 [pr5]: https://github.com/PuerkitoBio/purell/pull/5
 [iss7]: https://github.com/PuerkitoBio/purell/issues/7

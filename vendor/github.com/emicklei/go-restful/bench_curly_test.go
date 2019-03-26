@@ -22,7 +22,7 @@ func setupCurly(container *Container) []string {
 		}
 		container.Add(ws)
 		for _, each := range ws.Routes() {
-			urisCurly = append(urisCurly, "http://bench.com"+each.Path)
+			urisCurly = append(urisCurly, "https://www.bench.com"+each.Path)
 		}
 	}
 	return urisCurly

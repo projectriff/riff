@@ -246,11 +246,11 @@ type SwaggerSchemaProps struct {
 
 // Schema the schema object allows the definition of input and output data types.
 // These types can be objects, but also primitives and arrays.
-// This object is based on the [JSON Schema Specification Draft 4](http://json-schema.org/)
+// This object is based on the [JSON Schema Specification Draft 4](https://json-schema.org/)
 // and uses a predefined subset of it.
 // On top of this subset, there are extensions provided by this specification to allow for more complete documentation.
 //
-// For more information: http://goo.gl/8us55a#schemaObject
+// For more information: https://goo.gl/8us55a#schemaObject
 type Schema struct {
 	VendorExtensible
 	SchemaProps

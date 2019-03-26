@@ -19,7 +19,7 @@ $ go get github.com/mitchellh/mapstructure
 
 ## Usage & Example
 
-For usage and examples see the [Godoc](http://godoc.org/github.com/mitchellh/mapstructure).
+For usage and examples see the [Godoc](https://godoc.org/github.com/mitchellh/mapstructure).
 
 The `Decode` function has examples associated with it there.
 

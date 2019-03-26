@@ -1,6 +1,6 @@
 /*
 Package purell offers URL normalization as described on the wikipedia page:
-http://en.wikipedia.org/wiki/URL_normalization
+https://en.wikipedia.org/wiki/URL_normalization
 */
 package purell
 
@@ -36,23 +36,23 @@ const (
 	// Usually safe normalizations
 	FlagRemoveTrailingSlash // http://host/path/ -> http://host/path
 	FlagAddTrailingSlash    // http://host/path -> http://host/path/ (should choose only one of these add/remove trailing slash flags)
-	FlagRemoveDotSegments   // http://host/path/./a/b/../c -> http://host/path/a/c
+	FlagRemoveDotSegments   // https://host/path/./a/b/../c -> http://host/path/a/c
 
 	// Unsafe normalizations
-	FlagRemoveDirectoryIndex   // http://host/path/index.html -> http://host/path/
+	FlagRemoveDirectoryIndex   // https://host/path/index.html -> http://host/path/
 	FlagRemoveFragment         // http://host/path#fragment -> http://host/path
 	FlagForceHTTP              // https://host -> http://host
 	FlagRemoveDuplicateSlashes // http://host/path//a///b -> http://host/path/a/b
-	FlagRemoveWWW              // http://www.host/ -> http://host/
-	FlagAddWWW                 // http://host/ -> http://www.host/ (should choose only one of these add/remove WWW flags)
+	FlagRemoveWWW              // https://www.host/ -> http://host/
+	FlagAddWWW                 // http://host/ -> https://www.host/ (should choose only one of these add/remove WWW flags)
 	FlagSortQuery              // http://host/path?c=3&b=2&a=1&b=1 -> http://host/path?a=1&b=1&b=2&c=3
 
 	// Normalizations not in the wikipedia article, required to cover tests cases
 	// submitted by jehiah
-	FlagDecodeDWORDHost           // http://1113982867 -> http://66.102.7.147
-	FlagDecodeOctalHost           // http://0102.0146.07.0223 -> http://66.102.7.147
-	FlagDecodeHexHost             // http://0x42660793 -> http://66.102.7.147
-	FlagRemoveUnnecessaryHostDots // http://.host../path -> http://host/path
+	FlagDecodeDWORDHost           // http://1113982867 -> https://66.102.7.147
+	FlagDecodeOctalHost           // https://0102.0146.07.0223 -> https://66.102.7.147
+	FlagDecodeHexHost             // http://0x42660793 -> https://66.102.7.147
+	FlagRemoveUnnecessaryHostDots // https://.host../path -> http://host/path
 	FlagRemoveEmptyPortSeparator  // http://host:/path -> http://host/path
 
 	// Convenience set of safe normalizations

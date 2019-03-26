@@ -6,7 +6,7 @@ package bn256
 
 // For details of the algorithms used, see "Multiplication and Squaring on
 // Pairing-Friendly Fields, Devegili et al.
-// http://eprint.iacr.org/2006/471.pdf.
+// https://eprint.iacr.org/2006/471.pdf.
 
 import (
 	"math/big"
@@ -125,7 +125,7 @@ func (c *gfP2) Exp(a *gfP2, power *big.Int, pool *bnPool) *gfP2 {
 }
 
 // See "Multiplication and Squaring in Pairing-Friendly Fields",
-// http://eprint.iacr.org/2006/471.pdf
+// https://eprint.iacr.org/2006/471.pdf
 func (e *gfP2) Mul(a, b *gfP2, pool *bnPool) *gfP2 {
 	tx := pool.Get().Mul(a.x, b.y)
 	t := pool.Get().Mul(b.x, a.y)

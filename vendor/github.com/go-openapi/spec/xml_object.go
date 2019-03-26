@@ -16,7 +16,7 @@ package spec
 
 // XMLObject a metadata object that allows for more fine-tuned XML model definitions.
 //
-// For more information: http://goo.gl/8us55a#xmlObject
+// For more information: https://goo.gl/8us55a#xmlObject
 type XMLObject struct {
 	Name      string `json:"name,omitempty"`
 	Namespace string `json:"namespace,omitempty"`

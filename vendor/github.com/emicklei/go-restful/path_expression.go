@@ -32,7 +32,7 @@ func newPathExpression(path string) (*pathExpression, error) {
 	return &pathExpression{literalCount, varCount, compiled, expression, tokens}, nil
 }
 
-// http://jsr311.java.net/nonav/releases/1.1/spec/spec3.html#x3-370003.7.3
+// https://jsr311.java.net/nonav/releases/1.1/spec/spec3.html#x3-370003.7.3
 func templateToRegularExpression(template string) (expression string, literalCount int, varCount int, tokens []string) {
 	var buffer bytes.Buffer
 	buffer.WriteString("^")

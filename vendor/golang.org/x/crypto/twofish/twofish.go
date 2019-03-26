@@ -8,7 +8,7 @@ package twofish // import "golang.org/x/crypto/twofish"
 // Twofish is defined in https://www.schneier.com/paper-twofish-paper.pdf [TWOFISH]
 
 // This code is a port of the LibTom C implementation.
-// See http://libtom.org/?page=features&newsitems=5&whatfile=crypt.
+// See http://www.libtom.org/?page=features&newsitems=5&whatfile=crypt.
 // LibTomCrypt is free for all purposes under the public domain.
 // It was heavily inspired by the go blowfish package.
 

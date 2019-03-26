@@ -7,7 +7,7 @@ info:
   contact:
     email: api@clickmeter.com
     name: Api Support
-    url: 'http://www.clickmeter.com/api'
+    url: 'https://www.clickmeter.com/api'
   description: Api dashboard for ClickMeter API
   title: ClickMeter
   version: v2

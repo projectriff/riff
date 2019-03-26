@@ -5,7 +5,7 @@ Go library for the [TOML](https://github.com/mojombo/toml) format.
 This library supports TOML version
 [v0.4.0](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.4.0.md)
 
-[![GoDoc](https://godoc.org/github.com/pelletier/go-toml?status.svg)](http://godoc.org/github.com/pelletier/go-toml)
+[![GoDoc](https://godoc.org/github.com/pelletier/go-toml?status.svg)](https://godoc.org/github.com/pelletier/go-toml)
 [![license](https://img.shields.io/github/license/pelletier/go-toml.svg)](https://github.com/pelletier/go-toml/blob/master/LICENSE)
 [![Build Status](https://travis-ci.org/pelletier/go-toml.svg?branch=master)](https://travis-ci.org/pelletier/go-toml)
 [![Coverage Status](https://coveralls.io/repos/github/pelletier/go-toml/badge.svg?branch=master)](https://coveralls.io/github/pelletier/go-toml?branch=master)
@@ -80,7 +80,7 @@ for ii, item := range results.Values() {
 ## Documentation
 
 The documentation and additional examples are available at
-[godoc.org](http://godoc.org/github.com/pelletier/go-toml).
+[godoc.org](https://godoc.org/github.com/pelletier/go-toml).
 
 ## Tools
 
@@ -121,7 +121,7 @@ run [go-fuzz](https://github.com/dvyukov/go-fuzz) on go-toml.
 
 ## Versioning
 
-Go-toml follows [Semantic Versioning](http://semver.org/). The supported version
+Go-toml follows [Semantic Versioning](https://semver.org/). The supported version
 of [TOML](https://github.com/toml-lang/toml) is indicated at the beginning of
 this document. The last two major versions of Go are supported
 (see [Go Release Policy](https://golang.org/doc/devel/release.html#policy)).

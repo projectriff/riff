@@ -1,6 +1,6 @@
 # client-go
 
-Go clients for talking to a [kubernetes](http://kubernetes.io/) cluster.
+Go clients for talking to a [kubernetes](https://kubernetes.io/) cluster.
 
 We currently recommend using the v4.0.0 tag. See [INSTALL.md](/INSTALL.md) for
 detailed installation instructions. `go get k8s.io/client-go/...` works, but
@@ -32,7 +32,7 @@ will give you head and doesn't handle the dependencies well.
 
 ### Versioning
 
-`client-go` follows [semver](http://semver.org/). We will not make
+`client-go` follows [semver](https://semver.org/). We will not make
 backwards-incompatible changes without incrementing the major version number. A
 change is backwards-incompatible either if it *i)* changes the public interfaces
 of `client-go`, or *ii)* makes `client-go` incompatible with otherwise supported
@@ -53,7 +53,7 @@ Kubernetes version numbers.
 
 We will create a new branch and tag for each increment in the major version number or
 minor version number. We will create only a new tag for each increment in the patch
-version number. See [semver](http://semver.org/) for definitions of major,
+version number. See [semver](https://semver.org/) for definitions of major,
 minor, and patch.
 
 The master branch will track HEAD in the main Kubernetes repo and
@@ -63,7 +63,7 @@ not), where `x` and `y` are the current major and minor versions.
 
 #### Compatibility: your code <-> client-go
 
-`client-go` follows [semver](http://semver.org/), so until the major version of
+`client-go` follows [semver](https://semver.org/), so until the major version of
 client-go gets increased, your code will compile and will continue to work with
 explicitly supported versions of Kubernetes clusters. You must use a dependency
 management system and pin a specific major version of `client-go` to get this

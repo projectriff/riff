@@ -276,7 +276,7 @@ func consumeAll(r io.Reader) (n int64, err error) {
 }
 
 // packetType represents the numeric ids of the different OpenPGP packet types. See
-// http://www.iana.org/assignments/pgp-parameters/pgp-parameters.xhtml#pgp-parameters-2
+// https://www.iana.org/assignments/pgp-parameters/pgp-parameters.xhtml#pgp-parameters-2
 type packetType uint8
 
 const (
@@ -398,7 +398,7 @@ const (
 
 // PublicKeyAlgorithm represents the different public key system specified for
 // OpenPGP. See
-// http://www.iana.org/assignments/pgp-parameters/pgp-parameters.xhtml#pgp-parameters-12
+// https://www.iana.org/assignments/pgp-parameters/pgp-parameters.xhtml#pgp-parameters-12
 type PublicKeyAlgorithm uint8
 
 const (
@@ -433,7 +433,7 @@ func (pka PublicKeyAlgorithm) CanSign() bool {
 }
 
 // CipherFunction represents the different block ciphers specified for OpenPGP. See
-// http://www.iana.org/assignments/pgp-parameters/pgp-parameters.xhtml#pgp-parameters-13
+// https://www.iana.org/assignments/pgp-parameters/pgp-parameters.xhtml#pgp-parameters-13
 type CipherFunction uint8
 
 const (

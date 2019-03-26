@@ -406,7 +406,7 @@ func HTTPRedirectf(t TestingT, handler http.HandlerFunc, method string, url stri
 
 // HTTPSuccess asserts that a specified handler returns a success status code.
 //
-//  assert.HTTPSuccess(t, myHandler, "POST", "http://www.google.com", nil)
+//  assert.HTTPSuccess(t, myHandler, "POST", "https://www.google.com", nil)
 //
 // Returns whether the assertion was successful (true) or not (false).
 func HTTPSuccess(t TestingT, handler http.HandlerFunc, method string, url string, values url.Values, msgAndArgs ...interface{}) {
@@ -417,7 +417,7 @@ func HTTPSuccess(t TestingT, handler http.HandlerFunc, method string, url string
 
 // HTTPSuccessf asserts that a specified handler returns a success status code.
 //
-//  assert.HTTPSuccessf(t, myHandler, "POST", "http://www.google.com", nil, "error message %s", "formatted")
+//  assert.HTTPSuccessf(t, myHandler, "POST", "https://www.google.com", nil, "error message %s", "formatted")
 //
 // Returns whether the assertion was successful (true) or not (false).
 func HTTPSuccessf(t TestingT, handler http.HandlerFunc, method string, url string, values url.Values, msg string, args ...interface{}) {

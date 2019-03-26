@@ -64,7 +64,7 @@ func routeFilter(req *Request, resp *Response, chain *FilterChain) {
 func TestNoFilter(t *testing.T) {
 	tearDown()
 	setupServices(false, false, false)
-	actual := sendIt("http://example.com/foo")
+	actual := sendIt("https://example.com/foo")
 	if "foo" != actual {
 		t.Fatal("expected: foo but got:" + actual)
 	}
@@ -73,7 +73,7 @@ func TestNoFilter(t *testing.T) {
 func TestGlobalFilter(t *testing.T) {
 	tearDown()
 	setupServices(true, false, false)
-	actual := sendIt("http://example.com/foo")
+	actual := sendIt("https://example.com/foo")
 	if "global-foo" != actual {
 		t.Fatal("expected: global-foo but got:" + actual)
 	}
@@ -82,7 +82,7 @@ func TestGlobalFilter(t *testing.T) {
 func TestWebServiceFilter(t *testing.T) {
 	tearDown()
 	setupServices(true, true, false)
-	actual := sendIt("http://example.com/foo")
+	actual := sendIt("https://example.com/foo")
 	if "global-service-foo" != actual {
 		t.Fatal("expected: global-service-foo but got:" + actual)
 	}
@@ -91,7 +91,7 @@ func TestWebServiceFilter(t *testing.T) {
 func TestRouteFilter(t *testing.T) {
 	tearDown()
 	setupServices(true, true, true)
-	actual := sendIt("http://example.com/foo")
+	actual := sendIt("https://example.com/foo")
 	if "global-service-route-foo" != actual {
 		t.Fatal("expected: global-service-route-foo but got:" + actual)
 	}
@@ -100,7 +100,7 @@ func TestRouteFilter(t *testing.T) {
 func TestRouteFilterOnly(t *testing.T) {
 	tearDown()
 	setupServices(false, false, true)
-	actual := sendIt("http://example.com/foo")
+	actual := sendIt("https://example.com/foo")
 	if "route-foo" != actual {
 		t.Fatal("expected: route-foo but got:" + actual)
 	}
@@ -109,7 +109,7 @@ func TestRouteFilterOnly(t *testing.T) {
 func TestBar(t *testing.T) {
 	tearDown()
 	setupServices(false, true, false)
-	actual := sendIt("http://example.com/bar")
+	actual := sendIt("https://example.com/bar")
 	if "service-bar" != actual {
 		t.Fatal("expected: service-bar but got:" + actual)
 	}
@@ -118,7 +118,7 @@ func TestBar(t *testing.T) {
 func TestAllFiltersBar(t *testing.T) {
 	tearDown()
 	setupServices(true, true, true)
-	actual := sendIt("http://example.com/bar")
+	actual := sendIt("https://example.com/bar")
 	if "global-service-bar" != actual {
 		t.Fatal("expected: global-service-bar but got:" + actual)
 	}

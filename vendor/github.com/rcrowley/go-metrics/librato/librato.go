@@ -59,7 +59,7 @@ func (self *Reporter) Run() {
 }
 
 // calculate sum of squares from data provided by metrics.Histogram
-// see http://en.wikipedia.org/wiki/Standard_deviation#Rapid_calculation_methods
+// see https://en.wikipedia.org/wiki/Standard_deviation#Rapid_calculation_methods
 func sumSquares(s metrics.Sample) float64 {
 	count := float64(s.Count())
 	sumSquared := math.Pow(count*s.Mean(), 2)

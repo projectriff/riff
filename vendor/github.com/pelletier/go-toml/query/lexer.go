@@ -1,7 +1,7 @@
 // TOML JSONPath lexer.
 //
 // Written using the principles developed by Rob Pike in
-// http://www.youtube.com/watch?v=HxaD_trXwRE
+// https://www.youtube.com/watch?v=HxaD_trXwRE
 
 package query
 

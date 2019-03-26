@@ -1062,12 +1062,12 @@ var marshalTests = []struct {
 		Value:     &NestedAndComment{AB: make([]string, 2), Comment: "test"},
 	},
 	{
-		ExpectXML: `<XMLNSFieldStruct xmlns="http://example.com/ns"><Body>hello world</Body></XMLNSFieldStruct>`,
-		Value:     &XMLNSFieldStruct{Ns: "http://example.com/ns", Body: "hello world"},
+		ExpectXML: `<XMLNSFieldStruct xmlns="https://example.com/ns"><Body>hello world</Body></XMLNSFieldStruct>`,
+		Value:     &XMLNSFieldStruct{Ns: "https://example.com/ns", Body: "hello world"},
 	},
 	{
-		ExpectXML: `<testns:test xmlns:testns="testns" xmlns="http://example.com/ns"><Body>hello world</Body></testns:test>`,
-		Value:     &NamedXMLNSFieldStruct{Ns: "http://example.com/ns", Body: "hello world"},
+		ExpectXML: `<testns:test xmlns:testns="testns" xmlns="https://example.com/ns"><Body>hello world</Body></testns:test>`,
+		Value:     &NamedXMLNSFieldStruct{Ns: "https://example.com/ns", Body: "hello world"},
 	},
 	{
 		ExpectXML: `<testns:test xmlns:testns="testns"><Body>hello world</Body></testns:test>`,

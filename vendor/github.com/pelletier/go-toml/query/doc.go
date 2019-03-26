@@ -1,7 +1,7 @@
 // Package query performs JSONPath-like queries on a TOML document.
 //
 // The query path implementation is based loosely on the JSONPath specification:
-// http://goessner.net/articles/JsonPath/.
+// https://goessner.net/articles/JsonPath/.
 //
 // The idea behind a query path is to allow quick access to any element, or set
 // of elements within TOML document, with a single expression.

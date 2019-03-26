@@ -2,7 +2,7 @@
 
 A helper to merge structs and maps in Golang. Useful for configuration default values, avoiding messy if-statements.
 
-Also a lovely [comune](http://en.wikipedia.org/wiki/Mergo) (municipality) in the Province of Ancona in the Italian region Marche.
+Also a lovely [comune](https://en.wikipedia.org/wiki/Mergo) (municipality) in the Province of Ancona in the Italian region Marche.
 
 ![Mergo dall'alto](http://www.comune.mergo.an.it/Siti/Mergo/Immagini/Foto/mergo_dall_alto.jpg)
 
@@ -49,7 +49,7 @@ Additionally, you can map a map[string]interface{} to a struct (and otherwise, f
 
 Warning: if you map a struct to map, it won't do it recursively. Don't expect Mergo to map struct members of your struct as map[string]interface{}. They will be just assigned as values.
 
-More information and examples in [godoc documentation](http://godoc.org/github.com/imdario/mergo).
+More information and examples in [godoc documentation](https://godoc.org/github.com/imdario/mergo).
 
 Note: if test are failing due missing package, please execute:
 
@@ -61,8 +61,8 @@ If I can help you, you have an idea or you are using Mergo in your projects, don
 
 ## About
 
-Written by [Dario Castañé](http://dario.im).
+Written by [Dario Castañé](https://dario.im).
 
 ## License
 
-[BSD 3-Clause](http://opensource.org/licenses/BSD-3-Clause) license, as [Go language](http://golang.org/LICENSE).
+[BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause) license, as [Go language](https://golang.org/LICENSE).

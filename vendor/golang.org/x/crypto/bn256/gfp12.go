@@ -6,7 +6,7 @@ package bn256
 
 // For details of the algorithms used, see "Multiplication and Squaring on
 // Pairing-Friendly Fields, Devegili et al.
-// http://eprint.iacr.org/2006/471.pdf.
+// https://eprint.iacr.org/2006/471.pdf.
 
 import (
 	"math/big"

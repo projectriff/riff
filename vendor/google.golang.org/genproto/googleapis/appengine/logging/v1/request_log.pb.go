@@ -176,7 +176,7 @@ type RequestLog struct {
 	// Request method. Example: `"GET"`, `"HEAD"`, `"PUT"`, `"POST"`, `"DELETE"`.
 	Method string `protobuf:"bytes,10,opt,name=method" json:"method,omitempty"`
 	// Contains the path and query portion of the URL that was requested. For
-	// example, if the URL was "http://example.com/app?name=val", the resource
+	// example, if the URL was "https://example.com/app?name=val", the resource
 	// would be "/app?name=val".  The fragment identifier, which is identified by
 	// the `#` character, is not included.
 	Resource string `protobuf:"bytes,11,opt,name=resource" json:"resource,omitempty"`

@@ -20,112 +20,112 @@ var (
 			"LowerScheme",
 			"HTTP://www.SRC.ca",
 			FlagLowercaseScheme,
-			"http://www.SRC.ca",
+			"https://ici.radio-canada.ca/",
 			false,
 		},
 		&testCase{
 			"LowerScheme2",
-			"http://www.SRC.ca",
+			"https://ici.radio-canada.ca/",
 			FlagLowercaseScheme,
-			"http://www.SRC.ca",
+			"https://ici.radio-canada.ca/",
 			false,
 		},
 		&testCase{
 			"LowerHost",
 			"HTTP://www.SRC.ca/",
 			FlagLowercaseHost,
-			"http://www.src.ca/", // Since Go1.1, scheme is automatically lowercased
+			"https://ici.radio-canada.ca/", // Since Go1.1, scheme is automatically lowercased
 			false,
 		},
 		&testCase{
 			"UpperEscapes",
-			`http://www.whatever.com/Some%aa%20Special%8Ecases/`,
+			`https://www.whatever.com/Some%aa%20Special%8Ecases/`,
 			FlagUppercaseEscapes,
-			"http://www.whatever.com/Some%AA%20Special%8Ecases/",
+			"https://www.whatever.com/Some%AA%20Special%8Ecases/",
 			false,
 		},
 		&testCase{
 			"UnnecessaryEscapes",
-			`http://www.toto.com/%41%42%2E%44/%32%33%52%2D/%5f%7E`,
+			`https://www.toto.com/%2541%2542%252E%2544/%2532%2533%2552%252D/%255f%257E`,
 			FlagDecodeUnnecessaryEscapes,
-			"http://www.toto.com/AB.D/23R-/_~",
+			"https://www.toto.com/AB.D/23R-/_~",
 			false,
 		},
 		&testCase{
 			"RemoveDefaultPort",
 			"HTTP://www.SRC.ca:80/",
 			FlagRemoveDefaultPort,
-			"http://www.SRC.ca/", // Since Go1.1, scheme is automatically lowercased
+			"https://ici.radio-canada.ca/", // Since Go1.1, scheme is automatically lowercased
 			false,
 		},
 		&testCase{
 			"RemoveDefaultPort2",
 			"HTTP://www.SRC.ca:80",
 			FlagRemoveDefaultPort,
-			"http://www.SRC.ca", // Since Go1.1, scheme is automatically lowercased
+			"https://ici.radio-canada.ca/", // Since Go1.1, scheme is automatically lowercased
 			false,
 		},
 		&testCase{
 			"RemoveDefaultPort3",
 			"HTTP://www.SRC.ca:8080",
 			FlagRemoveDefaultPort,
-			"http://www.SRC.ca:8080", // Since Go1.1, scheme is automatically lowercased
+			"https://www.SRC.ca:8080", // Since Go1.1, scheme is automatically lowercased
 			false,
 		},
 		&testCase{
 			"Safe",
 			"HTTP://www.SRC.ca:80/to%1ato%8b%ee/OKnow%41%42%43%7e",
 			FlagsSafe,
-			"http://www.src.ca/to%1Ato%8B%EE/OKnowABC~",
+			"https://ici.radio-canada.ca/to%25251Ato%25258B%2525EE/OKnowABC~",
 			false,
 		},
 		&testCase{
 			"BothLower",
 			"HTTP://www.SRC.ca:80/to%1ato%8b%ee/OKnow%41%42%43%7e",
 			FlagLowercaseHost | FlagLowercaseScheme,
-			"http://www.src.ca:80/to%1Ato%8B%EE/OKnowABC~",
+			"https://ici.radio-canada.ca/to%25251Ato%25258B%2525EE/OKnowABC~",
 			false,
 		},
 		&testCase{
 			"RemoveTrailingSlash",
 			"HTTP://www.SRC.ca:80/",
 			FlagRemoveTrailingSlash,
-			"http://www.SRC.ca:80", // Since Go1.1, scheme is automatically lowercased
+			"https://ici.radio-canada.ca/", // Since Go1.1, scheme is automatically lowercased
 			false,
 		},
 		&testCase{
 			"RemoveTrailingSlash2",
 			"HTTP://www.SRC.ca:80/toto/titi/",
 			FlagRemoveTrailingSlash,
-			"http://www.SRC.ca:80/toto/titi", // Since Go1.1, scheme is automatically lowercased
+			"https://ici.radio-canada.ca/toto/titi", // Since Go1.1, scheme is automatically lowercased
 			false,
 		},
 		&testCase{
 			"RemoveTrailingSlash3",
 			"HTTP://www.SRC.ca:80/toto/titi/fin/?a=1",
 			FlagRemoveTrailingSlash,
-			"http://www.SRC.ca:80/toto/titi/fin?a=1", // Since Go1.1, scheme is automatically lowercased
+			"https://ici.radio-canada.ca/toto/titi/fin?a=1", // Since Go1.1, scheme is automatically lowercased
 			false,
 		},
 		&testCase{
 			"AddTrailingSlash",
 			"HTTP://www.SRC.ca:80",
 			FlagAddTrailingSlash,
-			"http://www.SRC.ca:80/", // Since Go1.1, scheme is automatically lowercased
+			"https://ici.radio-canada.ca/", // Since Go1.1, scheme is automatically lowercased
 			false,
 		},
 		&testCase{
 			"AddTrailingSlash2",
 			"HTTP://www.SRC.ca:80/toto/titi.html",
 			FlagAddTrailingSlash,
-			"http://www.SRC.ca:80/toto/titi.html/", // Since Go1.1, scheme is automatically lowercased
+			"https://ici.radio-canada.ca/toto/titi.html/", // Since Go1.1, scheme is automatically lowercased
 			false,
 		},
 		&testCase{
 			"AddTrailingSlash3",
 			"HTTP://www.SRC.ca:80/toto/titi/fin?a=1",
 			FlagAddTrailingSlash,
-			"http://www.SRC.ca:80/toto/titi/fin/?a=1", // Since Go1.1, scheme is automatically lowercased
+			"https://ici.radio-canada.ca/toto/titi/fin/?a=1", // Since Go1.1, scheme is automatically lowercased
 			false,
 		},
 		&testCase{
@@ -146,7 +146,7 @@ var (
 			"UsuallySafe",
 			"HTTP://www.SRC.ca:80/to%1ato%8b%ee/./c/d/../OKnow%41%42%43%7e/?a=b#test",
 			FlagsUsuallySafeGreedy,
-			"http://www.src.ca/to%1Ato%8B%EE/c/OKnowABC~?a=b#test",
+			"https://ici.radio-canada.ca/to%25251Ato%25258B%2525EE/c/OKnowABC~?a=b#test",
 			false,
 		},
 		&testCase{
@@ -230,7 +230,7 @@ var (
 			"Unsafe",
 			"HTTPS://www.RooT.com/toto/t%45%1f///a/./b/../c/?z=3&w=2&a=4&w=1#invalid",
 			FlagsUnsafeGreedy,
-			"http://root.com/toto/tE%1F/a/c?a=4&w=1&w=2&z=3",
+			"https://root.com/toto/tE%1F/a/c?a=4&w=1&w=2&z=3",
 			false,
 		},
 		&testCase{
@@ -249,16 +249,16 @@ var (
 		},
 		&testCase{
 			"AddTrailingSlashBug",
-			"http://src.ca/",
+			"https://ici.radio-canada.ca/",
 			FlagsAllNonGreedy,
-			"http://www.src.ca/",
+			"https://ici.radio-canada.ca/",
 			false,
 		},
 		&testCase{
 			"SourceModified",
 			"HTTPS://www.RooT.com/toto/t%45%1f///a/./b/../c/?z=3&w=2&a=4&w=1#invalid",
 			FlagsUnsafeGreedy,
-			"http://root.com/toto/tE%1F/a/c?a=4&w=1&w=2&z=3",
+			"https://root.com/toto/tE%1F/a/c?a=4&w=1&w=2&z=3",
 			true,
 		},
 		&testCase{
@@ -305,9 +305,9 @@ var (
 		},
 		&testCase{
 			"Standard-2",
-			"http://www.foo.com:8000/foo",
+			"https://www.foo.com:8000/foo",
 			FlagsSafe | FlagRemoveDotSegments,
-			"http://www.foo.com:8000/foo",
+			"https://www.foo.com:8000/foo",
 			false,
 		},
 		&testCase{
@@ -326,9 +326,9 @@ var (
 		},
 		&testCase{
 			"Standard-5",
-			"http://USER:pass@www.Example.COM/foo/bar",
+			"https://USER:pass@www.Example.COM/foo/bar",
 			FlagsSafe | FlagRemoveDotSegments,
-			"http://USER:pass@www.example.com/foo/bar",
+			"https://USER:pass@www.example.com/foo/bar",
 			false,
 		},
 		&testCase{
@@ -361,9 +361,9 @@ var (
 		},
 		&testCase{
 			"Standard-10",
-			"http://a.COM/path/?b&a",
+			"https://a.COM/path/?b&a",
 			FlagsSafe | FlagRemoveDotSegments,
-			"http://a.com/path/?b&a",
+			"https://a.com/path/?b&a",
 			false,
 		},
 		&testCase{
@@ -375,91 +375,91 @@ var (
 		},
 		&testCase{
 			"OctalIP-1",
-			"http://0123.011.0.4/",
+			"https://0123.011.0.4/",
 			FlagsSafe | FlagDecodeOctalHost,
-			"http://0123.011.0.4/",
+			"https://0123.011.0.4/",
 			false,
 		},
 		&testCase{
 			"OctalIP-2",
-			"http://0102.0146.07.0223/",
+			"https://0102.0146.07.0223/",
 			FlagsSafe | FlagDecodeOctalHost,
-			"http://66.102.7.147/",
+			"https://66.102.7.147/",
 			false,
 		},
 		&testCase{
 			"OctalIP-3",
-			"http://0102.0146.07.0223.:23/",
+			"https://0102.0146.07.0223.:23/",
 			FlagsSafe | FlagDecodeOctalHost,
-			"http://66.102.7.147.:23/",
+			"https://66.102.7.147.:23/",
 			false,
 		},
 		&testCase{
 			"OctalIP-4",
-			"http://USER:pass@0102.0146.07.0223../",
+			"https://USER:pass@0102.0146.07.0223../",
 			FlagsSafe | FlagDecodeOctalHost,
-			"http://USER:pass@66.102.7.147../",
+			"https://USER:pass@66.102.7.147../",
 			false,
 		},
 		&testCase{
 			"DWORDIP-1",
-			"http://123.1113982867/",
+			"https://123.1113982867/",
 			FlagsSafe | FlagDecodeDWORDHost,
-			"http://123.1113982867/",
+			"https://123.1113982867/",
 			false,
 		},
 		&testCase{
 			"DWORDIP-2",
 			"http://1113982867/",
 			FlagsSafe | FlagDecodeDWORDHost,
-			"http://66.102.7.147/",
+			"https://66.102.7.147/",
 			false,
 		},
 		&testCase{
 			"DWORDIP-3",
-			"http://1113982867.:23/",
+			"https://1113982867.:23/",
 			FlagsSafe | FlagDecodeDWORDHost,
-			"http://66.102.7.147.:23/",
+			"https://66.102.7.147.:23/",
 			false,
 		},
 		&testCase{
 			"DWORDIP-4",
-			"http://USER:pass@1113982867../",
+			"https://USER:pass@1113982867../",
 			FlagsSafe | FlagDecodeDWORDHost,
-			"http://USER:pass@66.102.7.147../",
+			"https://USER:pass@66.102.7.147../",
 			false,
 		},
 		&testCase{
 			"HexIP-1",
-			"http://0x123.1113982867/",
+			"https://0x123.1113982867/",
 			FlagsSafe | FlagDecodeHexHost,
-			"http://0x123.1113982867/",
+			"https://0x123.1113982867/",
 			false,
 		},
 		&testCase{
 			"HexIP-2",
 			"http://0x42660793/",
 			FlagsSafe | FlagDecodeHexHost,
-			"http://66.102.7.147/",
+			"https://66.102.7.147/",
 			false,
 		},
 		&testCase{
 			"HexIP-3",
-			"http://0x42660793.:23/",
+			"https://0x42660793.:23/",
 			FlagsSafe | FlagDecodeHexHost,
-			"http://66.102.7.147.:23/",
+			"https://66.102.7.147.:23/",
 			false,
 		},
 		&testCase{
 			"HexIP-4",
-			"http://USER:pass@0x42660793../",
+			"https://USER:pass@0x42660793../",
 			FlagsSafe | FlagDecodeHexHost,
-			"http://USER:pass@66.102.7.147../",
+			"https://USER:pass@66.102.7.147../",
 			false,
 		},
 		&testCase{
 			"UnnecessaryHostDots-1",
-			"http://.www.foo.com../foo/bar.html",
+			"https://.www.foo.com../foo/bar.html",
 			FlagsSafe | FlagRemoveUnnecessaryHostDots,
 			"http://www.foo.com/foo/bar.html",
 			false,
@@ -473,30 +473,30 @@ var (
 		},
 		&testCase{
 			"UnnecessaryHostDots-3",
-			"http://www.foo.com.:81/foo",
+			"https://www.foo.com.:81/foo",
 			FlagsSafe | FlagRemoveUnnecessaryHostDots,
-			"http://www.foo.com:81/foo",
+			"https://www.foo.com:81/foo",
 			false,
 		},
 		&testCase{
 			"UnnecessaryHostDots-4",
 			"http://www.example.com./",
 			FlagsSafe | FlagRemoveUnnecessaryHostDots,
-			"http://www.example.com/",
+			"https://www.example.com/",
 			false,
 		},
 		&testCase{
 			"EmptyPort-1",
-			"http://www.thedraymin.co.uk:/main/?p=308",
+			"https://www.thedraymin.co.uk:/main/?p=308",
 			FlagsSafe | FlagRemoveEmptyPortSeparator,
-			"http://www.thedraymin.co.uk/main/?p=308",
+			"https://www.thedraymin.co.uk/main/?p=308",
 			false,
 		},
 		&testCase{
 			"EmptyPort-2",
-			"http://www.src.ca:",
+			"https://ici.radio-canada.ca/:",
 			FlagsSafe | FlagRemoveEmptyPortSeparator,
-			"http://www.src.ca",
+			"https://ici.radio-canada.ca/",
 			false,
 		},
 		&testCase{
@@ -690,9 +690,9 @@ var (
 		},
 		/*&testCase{
 			"UrlNorm-5",
-			"http://ja.wikipedia.org/wiki/%E3%82%AD%E3%83%A3%E3%82%BF%E3%83%94%E3%83%A9%E3%83%BC%E3%82%B8%E3%83%A3%E3%83%91%E3%83%B3",
+			"https://ja.wikipedia.org/wiki/%25E3%2582%25AD%25E3%2583%25A3%25E3%2582%25BF%25E3%2583%2594%25E3%2583%25A9%25E3%2583%25BC%25E3%2582%25B8%25E3%2583%25A3%25E3%2583%2591%25E3%2583%25B3",
 			FlagsSafe | FlagRemoveDotSegments,
-			"http://ja.wikipedia.org/wiki/\xe3\x82\xad\xe3\x83\xa3\xe3\x82\xbf\xe3\x83\x94\xe3\x83\xa9\xe3\x83\xbc\xe3\x82\xb8\xe3\x83\xa3\xe3\x83\x91\xe3\x83\xb3",
+			"https://ja.wikipedia.org/wiki/\xe3\x82\xad\xe3\x83\xa3\xe3\x82\xbf\xe3\x83\x94\xe3\x83\xa9\xe3\x83\xbc\xe3\x82\xb8\xe3\x83\xa3\xe3\x83\x91\xe3\x83\xb3",
 			false,
 		},
 		&testCase{

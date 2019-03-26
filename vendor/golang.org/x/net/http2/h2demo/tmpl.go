@@ -64,7 +64,7 @@ Note: This page exists for demonstration purposes. For the actual cmd/go docs, g
 <a href="/help/">Help</a>
 <a href="/blog/">Blog</a>
 
-<a id="playgroundButton" href="http://play.golang.org/" title="Show Go Playground">Play</a>
+<a id="playgroundButton" href="https://play.golang.org/" title="Show Go Playground">Play</a>
 
 <input type="text" id="search" name="q" class="inactive" value="Search" placeholder="Search">
 </div>
@@ -1554,7 +1554,7 @@ For example,
 will result in the following requests:
 </p>
 <pre><a href="https://example.org/pkg/foo?go-get=1">https://example.org/pkg/foo?go-get=1</a> (preferred)
-<a href="http://example.org/pkg/foo?go-get=1">http://example.org/pkg/foo?go-get=1</a>  (fallback, only with -insecure)
+<a href="https://example.org/pkg/foo?go-get=1">https://example.org/pkg/foo?go-get=1</a>  (fallback, only with -insecure)
 </pre>
 <p>
 If that page contains the meta tag
@@ -1975,7 +1975,7 @@ the content of this page is licensed under the
 Creative Commons Attribution 3.0 License,
 and code is licensed under a <a href="/LICENSE">BSD license</a>.<br>
 <a href="/doc/tos.html">Terms of Service</a> | 
-<a href="http://www.google.com/intl/en/policies/privacy/">Privacy Policy</a>
+<a href="https://www.google.com/intl/en/policies/privacy/">Privacy Policy</a>
 </div>
 
 </div><!-- .container -->

@@ -383,7 +383,7 @@ func stringptr(input string) (output *string) {
 func (schema *Schema) CopyOfficialSchemaProperty(name string) {
 	*schema.Properties = append(*schema.Properties,
 		NewNamedSchema(name,
-			&Schema{Ref: stringptr("http://json-schema.org/draft-04/schema#/properties/" + name)}))
+			&Schema{Ref: stringptr("https://json-schema.org/draft-04/schema#/properties/" + name)}))
 }
 
 // CopyOfficialSchemaProperties copies named properties from the official JSON Schema definition

@@ -105,17 +105,17 @@ paths:
                               "rel": "self"
                           },
                           {
-                              "href": "http://docs.openstack.org/api/openstack-compute/2/os-compute-devguide-2.pdf",
+                              "href": "https://docs.openstack.org/api/openstack-compute/2/os-compute-devguide-2.pdf",
                               "type": "application/pdf",
                               "rel": "describedby"
                           },
                           {
-                              "href": "http://docs.openstack.org/api/openstack-compute/2/wadl/os-compute-2.wadl",
+                              "href": "https://docs.openstack.org/api/openstack-compute/2/wadl/os-compute-2.wadl",
                               "type": "application/vnd.sun.wadl+xml",
                               "rel": "describedby"
                           },
                           {
-                            "href": "http://docs.openstack.org/api/openstack-compute/2/wadl/os-compute-2.wadl",
+                            "href": "https://docs.openstack.org/api/openstack-compute/2/wadl/os-compute-2.wadl",
                             "type": "application/vnd.sun.wadl+xml",
                             "rel": "describedby"
                           }
@@ -144,16 +144,16 @@ paths:
                       "id": "v2.0",
                       "links": [
                           {
-                              "href": "http://23.253.228.211:8774/v2/",
+                              "href": "https://23.253.228.211:8774/v2/",
                               "rel": "self"
                           },
                           {
-                              "href": "http://docs.openstack.org/api/openstack-compute/2/os-compute-devguide-2.pdf",
+                              "href": "https://docs.openstack.org/api/openstack-compute/2/os-compute-devguide-2.pdf",
                               "type": "application/pdf",
                               "rel": "describedby"
                           },
                           {
-                              "href": "http://docs.openstack.org/api/openstack-compute/2/wadl/os-compute-2.wadl",
+                              "href": "https://docs.openstack.org/api/openstack-compute/2/wadl/os-compute-2.wadl",
                               "type": "application/vnd.sun.wadl+xml",
                               "rel": "describedby"
                           }

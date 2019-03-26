@@ -27,7 +27,7 @@ func IsTerminal(fd int) bool {
 // is commonly used for inputting passwords and other sensitive data. The slice
 // returned does not include the \n.
 func ReadPassword(fd int) ([]byte, error) {
-	// see also: http://src.illumos.org/source/xref/illumos-gate/usr/src/lib/libast/common/uwin/getpass.c
+	// see also: https://src.illumos.org/source/xref/illumos-gate/usr/src/lib/libast/common/uwin/getpass.c
 	val, err := unix.IoctlGetTermios(fd, unix.TCGETS)
 	if err != nil {
 		return nil, err

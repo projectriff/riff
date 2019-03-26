@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	c := xkcd.NewClient("http://xkcd.com")
+	c := xkcd.NewClient("https://xkcd.com")
 
 	comic, err := c.Get_info_0_json()
 	if err != nil {

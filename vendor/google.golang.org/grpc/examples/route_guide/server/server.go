@@ -167,7 +167,7 @@ func toRadians(num float64) float64 {
 }
 
 // calcDistance calculates the distance between two points using the "haversine" formula.
-// This code was taken from http://www.movable-type.co.uk/scripts/latlong.html.
+// This code was taken from https://www.movable-type.co.uk/scripts/latlong.html.
 func calcDistance(p1 *pb.Point, p2 *pb.Point) int32 {
 	const CordFactor float64 = 1e7
 	const R float64 = float64(6371000) // metres

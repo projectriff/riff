@@ -61,7 +61,7 @@ loop:
 			if i := int(c0-0x81)*157 + int(c1); i < len(decode) {
 				if 1133 <= i && i < 1167 {
 					// The two-rune special cases for LATIN CAPITAL / SMALL E WITH CIRCUMFLEX
-					// AND MACRON / CARON are from http://encoding.spec.whatwg.org/#big5
+					// AND MACRON / CARON are from https://encoding.spec.whatwg.org/#big5
 					switch i {
 					case 1133:
 						s = "\u00CA\u0304"

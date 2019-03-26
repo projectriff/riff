@@ -408,7 +408,7 @@ func (m *Help_Link) GetUrl() string {
 // which can be attached to an RPC error.
 type LocalizedMessage struct {
 	// The locale used following the specification defined at
-	// http://www.rfc-editor.org/rfc/bcp/bcp47.txt.
+	// https://www.rfc-editor.org/rfc/bcp/bcp47.txt.
 	// Examples are: "en-US", "fr-CH", "es-MX"
 	Locale string `protobuf:"bytes,1,opt,name=locale" json:"locale,omitempty"`
 	// The localized error message in the above locale.

@@ -8,7 +8,7 @@ POSIX/GNU-style --flags.
 
 pflag is compatible with the GNU extensions to the POSIX recommendations
 for command-line options. See
-http://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
+https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
 
 Usage:
 

@@ -5,7 +5,7 @@
 //go:generate go run gen.go
 
 // Package publicsuffix provides a public suffix list based on data from
-// http://publicsuffix.org/. A public suffix is one under which Internet users
+// https://publicsuffix.org/. A public suffix is one under which Internet users
 // can directly register names.
 package publicsuffix // import "golang.org/x/net/publicsuffix"
 

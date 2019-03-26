@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package otr implements the Off The Record protocol as specified in
-// http://www.cypherpunks.ca/otr/Protocol-v2-3.1.0.html
+// https://www.cypherpunks.ca/otr/Protocol-v2-3.1.0.html
 package otr // import "golang.org/x/crypto/otr"
 
 import (

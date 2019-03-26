@@ -8,7 +8,7 @@
 //
 // The definitions in this package are based on the plural rule handling defined
 // in CLDR. See
-// http://unicode.org/reports/tr35/tr35-numbers.html#Language_Plural_Rules for
+// https://unicode.org/reports/tr35/tr35-numbers.html#Language_Plural_Rules for
 // details.
 package plural
 

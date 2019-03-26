@@ -1,5 +1,5 @@
-GoGoProtobuf http://github.com/gogo/protobuf extends 
-GoProtobuf http://github.com/golang/protobuf
+GoGoProtobuf https://github.com/gogo/protobuf extends 
+GoProtobuf https://github.com/golang/protobuf
 
 # Go support for Protocol Buffers
 
@@ -42,7 +42,7 @@ See the note at the bottom of this file for details.
 There are no insertion points in the plugin.
 
 GoGoProtobuf provides extensions for protocol buffers and GoProtobuf
-see http://github.com/gogo/protobuf/gogoproto/doc.go
+see https://github.com/gogo/protobuf/gogoproto/doc.go
 
 ## Using protocol buffers with Go ##
 
@@ -201,7 +201,7 @@ parameter list separated from the output directory by a colon:
 ## gRPC Support ##
 
 If a proto file specifies RPC services, protoc-gen-go can be instructed to
-generate code compatible with gRPC (http://www.grpc.io/). To do this, pass
+generate code compatible with gRPC (https://www.grpc.io/). To do this, pass
 the `plugins` parameter to protoc-gen-go; the usual way is to insert it into
 the --go_out argument to protoc:
 

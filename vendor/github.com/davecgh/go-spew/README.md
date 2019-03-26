@@ -3,7 +3,7 @@ go-spew
 
 [![Build Status](https://img.shields.io/travis/davecgh/go-spew.svg)]
 (https://travis-ci.org/davecgh/go-spew) [![ISC License]
-(http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org) [![Coverage Status]
+(https://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org) [![Coverage Status]
 (https://img.shields.io/coveralls/davecgh/go-spew.svg)]
 (https://coveralls.io/r/davecgh/go-spew?branch=master)
 
@@ -22,11 +22,11 @@ post about it
 ## Documentation
 
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)]
-(http://godoc.org/github.com/davecgh/go-spew/spew)
+(https://godoc.org/github.com/davecgh/go-spew/spew)
 
 Full `go doc` style documentation for the project can be viewed online without
 installing this package by using the excellent GoDoc site here:
-http://godoc.org/github.com/davecgh/go-spew/spew
+https://godoc.org/github.com/davecgh/go-spew/spew
 
 You can also view the documentation locally once the package is installed with
 the `godoc` tool by running `godoc -http=":6060"` and pointing your browser to

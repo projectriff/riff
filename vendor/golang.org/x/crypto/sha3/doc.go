@@ -6,7 +6,7 @@
 // the SHAKE variable-output-length hash functions defined by FIPS-202.
 //
 // Both types of hash function use the "sponge" construction and the Keccak
-// permutation. For a detailed specification see http://keccak.noekeon.org/
+// permutation. For a detailed specification see https://keccak.team/keccak.noekeon.org/
 //
 //
 // Guidance

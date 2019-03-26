@@ -25,7 +25,7 @@ type Schema struct {
 	ID     *string // id keyword used for $ref resolution scope
 	Ref    *string // $ref, i.e. JSON Pointers
 
-	// http://json-schema.org/latest/json-schema-validation.html
+	// https://json-schema.org/latest/json-schema-validation.html
 	// 5.1.  Validation keywords for numeric instances (number and integer)
 	MultipleOf       *SchemaNumber
 	Maximum          *SchemaNumber

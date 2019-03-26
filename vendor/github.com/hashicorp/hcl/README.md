@@ -20,7 +20,7 @@ nginx configuration, and others similar.
 A common question when viewing HCL is to ask the question: why not
 JSON, YAML, etc.?
 
-Prior to HCL, the tools we built at [HashiCorp](http://www.hashicorp.com)
+Prior to HCL, the tools we built at [HashiCorp](https://www.hashicorp.com)
 used a variety of configuration languages from full programming languages
 such as Ruby to complete data structure languages such as JSON. What we
 learned is that some people wanted human-friendly configuration languages

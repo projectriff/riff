@@ -5,7 +5,7 @@
 //go:generate go run gen.go
 
 // Package htmlindex maps character set encoding names to Encodings as
-// recommended by the W3C for use in HTML 5. See http://www.w3.org/TR/encoding.
+// recommended by the W3C for use in HTML 5. See https://www.w3.org/TR/encoding.
 package htmlindex
 
 // TODO: perhaps have a "bare" version of the index (used by this package) that
@@ -57,7 +57,7 @@ func LanguageDefault(tag language.Tag) string {
 }
 
 // Get returns an Encoding for one of the names listed in
-// http://www.w3.org/TR/encoding using the Default Index. Matching is case-
+// https://www.w3.org/TR/encoding using the Default Index. Matching is case-
 // insensitive.
 func Get(name string) (encoding.Encoding, error) {
 	x, ok := nameMap[strings.ToLower(strings.TrimSpace(name))]

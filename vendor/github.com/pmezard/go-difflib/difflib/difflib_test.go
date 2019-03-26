@@ -237,7 +237,7 @@ func TestSFBugsComparingEmptyLists(t *testing.T) {
 }
 
 func TestOutputFormatRangeFormatUnified(t *testing.T) {
-	// Per the diff spec at http://www.unix.org/single_unix_specification/
+	// Per the diff spec at https://www.opengroup.org/bookstore/catalog/t101.htm/
 	//
 	// Each <range> field shall be of the form:
 	//   %1d", <beginning line number>  if the range contains exactly one line,
@@ -254,7 +254,7 @@ func TestOutputFormatRangeFormatUnified(t *testing.T) {
 }
 
 func TestOutputFormatRangeFormatContext(t *testing.T) {
-	// Per the diff spec at http://www.unix.org/single_unix_specification/
+	// Per the diff spec at https://www.opengroup.org/bookstore/catalog/t101.htm/
 	//
 	// The range of lines in file1 shall be written in the following format
 	// if the range contains two or more lines:

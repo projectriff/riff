@@ -62,7 +62,7 @@ var schema = Schema{
 		XML:           &XMLObject{"sch", "io", "sw", true, true},
 		ExternalDocs: &ExternalDocumentation{
 			Description: "the documentation etc",
-			URL:         "http://readthedocs.org/swagger",
+			URL:         "https://readthedocs.org/swagger",
 		},
 		Example: []interface{}{
 			map[string]interface{}{
@@ -128,7 +128,7 @@ var schemaJSON = `{
   },
   "externalDocs": {
     "description": "the documentation etc",
-    "url": "http://readthedocs.org/swagger"
+    "url": "https://readthedocs.org/swagger"
   },
   "example": [
     {

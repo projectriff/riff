@@ -38,7 +38,7 @@ type HttpRequest struct {
 	RequestMethod string `protobuf:"bytes,1,opt,name=request_method,json=requestMethod" json:"request_method,omitempty"`
 	// The scheme (http, https), the host name, the path and the query
 	// portion of the URL that was requested.
-	// Example: `"http://example.com/some/info?color=red"`.
+	// Example: `"https://example.com/some/info?color=red"`.
 	RequestUrl string `protobuf:"bytes,2,opt,name=request_url,json=requestUrl" json:"request_url,omitempty"`
 	// The size of the HTTP request message in bytes, including the request
 	// headers and the request body.
@@ -59,7 +59,7 @@ type HttpRequest struct {
 	// sent to.
 	ServerIp string `protobuf:"bytes,13,opt,name=server_ip,json=serverIp" json:"server_ip,omitempty"`
 	// The referer URL of the request, as defined in
-	// [HTTP/1.1 Header Field Definitions](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html).
+	// [HTTP/1.1 Header Field Definitions](https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html).
 	Referer string `protobuf:"bytes,8,opt,name=referer" json:"referer,omitempty"`
 	// The request processing latency on the server, from the time the request was
 	// received until the response was sent.

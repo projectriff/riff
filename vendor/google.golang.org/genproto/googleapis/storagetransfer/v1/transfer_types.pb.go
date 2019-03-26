@@ -111,7 +111,7 @@ func (m *GoogleServiceAccount) GetAccountEmail() string {
 }
 
 // AWS access key (see
-// [AWS Security Credentials](http://docs.aws.amazon.com/general/latest/gr/aws-security-credentials.html)).
+// [AWS Security Credentials](https://docs.aws.amazon.com/general/latest/gr/aws-security-credentials.html)).
 type AwsAccessKey struct {
 	// AWS access key ID.
 	// Required.
@@ -253,7 +253,7 @@ func (m *GcsData) GetBucketName() string {
 // In an AwsS3Data, an object's name is the S3 object's key name.
 type AwsS3Data struct {
 	// S3 Bucket name (see
-	// [Creating a bucket](http://docs.aws.amazon.com/AmazonS3/latest/dev/create-bucket-get-location-example.html)).
+	// [Creating a bucket](https://docs.aws.amazon.com/AmazonS3/latest/dev/create-bucket-get-location-example.html)).
 	// Required.
 	BucketName string `protobuf:"bytes,1,opt,name=bucket_name,json=bucketName" json:"bucket_name,omitempty"`
 	// AWS access key used to sign the API requests to the AWS S3 bucket.

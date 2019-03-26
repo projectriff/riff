@@ -53,7 +53,7 @@ loop:
 			r, size = rune(c0), 1
 
 		// Microsoft's Code Page 936 extends GBK 1.0 to encode the euro sign U+20AC
-		// as 0x80. The HTML5 specification at http://encoding.spec.whatwg.org/#gbk
+		// as 0x80. The HTML5 specification at https://encoding.spec.whatwg.org/#gbk
 		// says to treat "gbk" as Code Page 936.
 		case c0 == 0x80:
 			r, size = '€', 1
@@ -178,7 +178,7 @@ func (e gbkEncoder) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err 
 				}
 			case encode1Low <= r && r < encode1High:
 				// Microsoft's Code Page 936 extends GBK 1.0 to encode the euro sign U+20AC
-				// as 0x80. The HTML5 specification at http://encoding.spec.whatwg.org/#gbk
+				// as 0x80. The HTML5 specification at https://encoding.spec.whatwg.org/#gbk
 				// says to treat "gbk" as Code Page 936.
 				if r == '€' {
 					r = 0x80

@@ -30,7 +30,7 @@ type ResponseProps struct {
 
 // Response describes a single response from an API Operation.
 //
-// For more information: http://goo.gl/8us55a#responseObject
+// For more information: https://goo.gl/8us55a#responseObject
 type Response struct {
 	Refable
 	ResponseProps

@@ -21,9 +21,9 @@ import "encoding/json"
 
 const (
 	// SwaggerSchemaURL the url for the swagger 2.0 schema to validate specs
-	SwaggerSchemaURL = "http://swagger.io/v2/schema.json#"
+	SwaggerSchemaURL = "https://swagger.io/v2/schema.json#"
 	// JSONSchemaURL the url for the json schema schema
-	JSONSchemaURL = "http://json-schema.org/draft-04/schema#"
+	JSONSchemaURL = "https://json-schema.org/draft-04/schema#"
 )
 
 var (

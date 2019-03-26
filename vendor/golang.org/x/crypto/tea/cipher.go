@@ -4,7 +4,7 @@
 
 // Package tea implements the TEA algorithm, as defined in Needham and
 // Wheeler's 1994 technical report, “TEA, a Tiny Encryption Algorithm”. See
-// http://www.cix.co.uk/~klockstone/tea.pdf for details.
+// https://www.cix.co.uk/~klockstone/tea.pdf for details.
 
 package tea
 

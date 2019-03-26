@@ -55,11 +55,11 @@ type Carp struct {
 // state of a system.
 type CarpStatus struct {
 	// Current condition of the carp.
-	// More info: http://kubernetes.io/docs/user-guide/carp-states#carp-phase
+	// More info: https://kubernetes.io/docs/user-guide/carp-states#carp-phase
 	// +optional
 	Phase CarpPhase `json:"phase,omitempty" protobuf:"bytes,1,opt,name=phase,casttype=CarpPhase"`
 	// Current service state of carp.
-	// More info: http://kubernetes.io/docs/user-guide/carp-states#carp-conditions
+	// More info: https://kubernetes.io/docs/user-guide/carp-states#carp-conditions
 	// +optional
 	Conditions []CarpCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type" protobuf:"bytes,2,rep,name=conditions"`
 	// A human readable message indicating details about why the carp is in this condition.
@@ -87,11 +87,11 @@ type CarpStatus struct {
 type CarpCondition struct {
 	// Type is the type of the condition.
 	// Currently only Ready.
-	// More info: http://kubernetes.io/docs/user-guide/carp-states#carp-conditions
+	// More info: https://kubernetes.io/docs/user-guide/carp-states#carp-conditions
 	Type CarpConditionType `json:"type" protobuf:"bytes,1,opt,name=type,casttype=CarpConditionType"`
 	// Status is the status of the condition.
 	// Can be True, False, Unknown.
-	// More info: http://kubernetes.io/docs/user-guide/carp-states#carp-conditions
+	// More info: https://kubernetes.io/docs/user-guide/carp-states#carp-conditions
 	Status ConditionStatus `json:"status" protobuf:"bytes,2,opt,name=status,casttype=ConditionStatus"`
 	// Last time we probed the condition.
 	// +optional
@@ -112,7 +112,7 @@ type CarpSpec struct {
 	// Restart policy for all containers within the carp.
 	// One of Always, OnFailure, Never.
 	// Default to Always.
-	// More info: http://kubernetes.io/docs/user-guide/carp-states#restartpolicy
+	// More info: https://kubernetes.io/docs/user-guide/carp-states#restartpolicy
 	// +optional
 	RestartPolicy RestartPolicy `json:"restartPolicy,omitempty" protobuf:"bytes,3,opt,name=restartPolicy,casttype=RestartPolicy"`
 	// Optional duration in seconds the carp needs to terminate gracefully. May be decreased in delete request.
@@ -131,12 +131,12 @@ type CarpSpec struct {
 	ActiveDeadlineSeconds *int64 `json:"activeDeadlineSeconds,omitempty" protobuf:"varint,5,opt,name=activeDeadlineSeconds"`
 	// NodeSelector is a selector which must be true for the carp to fit on a node.
 	// Selector which must match a node's labels for the carp to be scheduled on that node.
-	// More info: http://kubernetes.io/docs/user-guide/node-selection/README
+	// More info: https://kubernetes.io/docs/user-guide/node-selection/README
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,7,rep,name=nodeSelector"`
 
 	// ServiceAccountName is the name of the ServiceAccount to use to run this carp.
-	// More info: http://releases.k8s.io/HEAD/docs/design/service_accounts.md
+	// More info: https://releases.k8s.io/HEAD/docs/design/service_accounts.md
 	// +optional
 	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,8,opt,name=serviceAccountName"`
 	// DeprecatedServiceAccount is a depreciated alias for ServiceAccountName.
@@ -191,6 +191,6 @@ type CarpList struct {
 	metav1.ListMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 
 	// List of carps.
-	// More info: http://kubernetes.io/docs/user-guide/carps
+	// More info: https://kubernetes.io/docs/user-guide/carps
 	Items []Carp `json:"items" protobuf:"bytes,2,rep,name=items"`
 }

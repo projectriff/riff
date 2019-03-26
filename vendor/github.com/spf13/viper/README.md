@@ -4,8 +4,8 @@ Go configuration with fangs!
 
 Many Go projects are built using Viper including:
 
-* [Hugo](http://gohugo.io)
-* [EMC RexRay](http://rexray.readthedocs.org/en/stable/)
+* [Hugo](https://gohugo.io)
+* [EMC RexRay](https://rexray.readthedocs.org/en/stable/)
 * [Imgur’s Incus](https://github.com/Imgur/incus)
 * [Nanobox](https://github.com/nanobox-io/nanobox)/[Nanopack](https://github.com/nanopack)
 * [Docker Notary](https://github.com/docker/Notary)
@@ -633,11 +633,11 @@ which formats your application will permit.
 
 Q: Why is it called “Viper”?
 
-A: Viper is designed to be a [companion](http://en.wikipedia.org/wiki/Viper_(G.I._Joe))
+A: Viper is designed to be a [companion](https://en.wikipedia.org/wiki/Viper_(G.I._Joe))
 to [Cobra](https://github.com/spf13/cobra). While both can operate completely
 independently, together they make a powerful pair to handle much of your
 application foundation needs.
 
 Q: Why is it called “Cobra”?
 
-A: Is there a better name for a [commander](http://en.wikipedia.org/wiki/Cobra_Commander)?
+A: Is there a better name for a [commander](https://en.wikipedia.org/wiki/Cobra_Commander)?

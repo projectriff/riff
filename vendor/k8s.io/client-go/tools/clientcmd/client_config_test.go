@@ -284,10 +284,10 @@ func TestCreateCleanWithPrefix(t *testing.T) {
 		host   string
 	}{
 		{"https://anything.com:8080/foo/bar", "https://anything.com:8080/foo/bar"},
-		{"http://anything.com:8080/foo/bar", "http://anything.com:8080/foo/bar"},
-		{"http://anything.com:8080/foo/bar/", "http://anything.com:8080/foo/bar/"},
-		{"http://anything.com:8080/", "http://anything.com:8080/"},
-		{"http://anything.com:8080//", "http://anything.com:8080//"},
+		{"https://anything.com:8080/foo/bar", "https://anything.com:8080/foo/bar"},
+		{"https://anything.com:8080/foo/bar/", "https://anything.com:8080/foo/bar/"},
+		{"https://anything.com:8080/", "https://anything.com:8080/"},
+		{"https://anything.com:8080//", "https://anything.com:8080//"},
 		{"anything.com:8080/foo/bar", "anything.com:8080/foo/bar"},
 		{"anything.com:8080", "anything.com:8080"},
 		{"anything.com", "anything.com"},

@@ -102,7 +102,7 @@ func TestReadLockInfo(t *testing.T) {
 			"  <D:lockscope><D:exclusive/></D:lockscope>\n" +
 			"  <D:locktype><D:write/></D:locktype>\n" +
 			"  <D:owner>\n" +
-			"    <D:href>http://example.org/~ejw/contact.html</D:href>\n" +
+			"    <D:href>https://example.org/~ejw/contact.html</D:href>\n" +
 			"  </D:owner>\n" +
 			"</D:lockinfo>",
 		lockInfo{
@@ -110,7 +110,7 @@ func TestReadLockInfo(t *testing.T) {
 			Exclusive: new(struct{}),
 			Write:     new(struct{}),
 			Owner: owner{
-				InnerXML: "\n    <D:href>http://example.org/~ejw/contact.html</D:href>\n  ",
+				InnerXML: "\n    <D:href>https://example.org/~ejw/contact.html</D:href>\n  ",
 			},
 		},
 		0,
@@ -362,11 +362,11 @@ func TestMultistatusWriter(t *testing.T) {
 	}{{
 		desc: "section 9.2.2 (failed dependency)",
 		responses: []response{{
-			Href: []string{"http://example.com/foo"},
+			Href: []string{"https://example.com/foo"},
 			Propstat: []propstat{{
 				Prop: []Property{{
 					XMLName: xml.Name{
-						Space: "http://ns.example.com/",
+						Space: "https://ns.example.com/",
 						Local: "Authors",
 					},
 				}},
@@ -374,7 +374,7 @@ func TestMultistatusWriter(t *testing.T) {
 			}, {
 				Prop: []Property{{
 					XMLName: xml.Name{
-						Space: "http://ns.example.com/",
+						Space: "https://ns.example.com/",
 						Local: "Copyright-Owner",
 					},
 				}},
@@ -386,16 +386,16 @@ func TestMultistatusWriter(t *testing.T) {
 			`<?xml version="1.0" encoding="UTF-8"?>` +
 			`<multistatus xmlns="DAV:">` +
 			`  <response>` +
-			`    <href>http://example.com/foo</href>` +
+			`    <href>https://example.com/foo</href>` +
 			`    <propstat>` +
 			`      <prop>` +
-			`        <Authors xmlns="http://ns.example.com/"></Authors>` +
+			`        <Authors xmlns="https://ns.example.com/"></Authors>` +
 			`      </prop>` +
 			`      <status>HTTP/1.1 424 Failed Dependency</status>` +
 			`    </propstat>` +
 			`    <propstat xmlns="DAV:">` +
 			`      <prop>` +
-			`        <Copyright-Owner xmlns="http://ns.example.com/"></Copyright-Owner>` +
+			`        <Copyright-Owner xmlns="https://ns.example.com/"></Copyright-Owner>` +
 			`      </prop>` +
 			`      <status>HTTP/1.1 409 Conflict</status>` +
 			`    </propstat>` +
@@ -406,7 +406,7 @@ func TestMultistatusWriter(t *testing.T) {
 	}, {
 		desc: "section 9.6.2 (lock-token-submitted)",
 		responses: []response{{
-			Href:   []string{"http://example.com/foo"},
+			Href:   []string{"https://example.com/foo"},
 			Status: "HTTP/1.1 423 Locked",
 			Error: &xmlError{
 				InnerXML: []byte(`<lock-token-submitted xmlns="DAV:"/>`),
@@ -416,7 +416,7 @@ func TestMultistatusWriter(t *testing.T) {
 			`<?xml version="1.0" encoding="UTF-8"?>` +
 			`<multistatus xmlns="DAV:">` +
 			`  <response>` +
-			`    <href>http://example.com/foo</href>` +
+			`    <href>https://example.com/foo</href>` +
 			`    <status>HTTP/1.1 423 Locked</status>` +
 			`    <error><lock-token-submitted xmlns="DAV:"/></error>` +
 			`  </response>` +
@@ -425,27 +425,27 @@ func TestMultistatusWriter(t *testing.T) {
 	}, {
 		desc: "section 9.1.3",
 		responses: []response{{
-			Href: []string{"http://example.com/foo"},
+			Href: []string{"https://example.com/foo"},
 			Propstat: []propstat{{
 				Prop: []Property{{
-					XMLName: xml.Name{Space: "http://ns.example.com/boxschema/", Local: "bigbox"},
+					XMLName: xml.Name{Space: "https://ns.example.com/boxschema/", Local: "bigbox"},
 					InnerXML: []byte(`` +
-						`<BoxType xmlns="http://ns.example.com/boxschema/">` +
+						`<BoxType xmlns="https://ns.example.com/boxschema/">` +
 						`Box type A` +
 						`</BoxType>`),
 				}, {
-					XMLName: xml.Name{Space: "http://ns.example.com/boxschema/", Local: "author"},
+					XMLName: xml.Name{Space: "https://ns.example.com/boxschema/", Local: "author"},
 					InnerXML: []byte(`` +
-						`<Name xmlns="http://ns.example.com/boxschema/">` +
+						`<Name xmlns="https://ns.example.com/boxschema/">` +
 						`J.J. Johnson` +
 						`</Name>`),
 				}},
 				Status: "HTTP/1.1 200 OK",
 			}, {
 				Prop: []Property{{
-					XMLName: xml.Name{Space: "http://ns.example.com/boxschema/", Local: "DingALing"},
+					XMLName: xml.Name{Space: "https://ns.example.com/boxschema/", Local: "DingALing"},
 				}, {
-					XMLName: xml.Name{Space: "http://ns.example.com/boxschema/", Local: "Random"},
+					XMLName: xml.Name{Space: "https://ns.example.com/boxschema/", Local: "Random"},
 				}},
 				Status:              "HTTP/1.1 403 Forbidden",
 				ResponseDescription: "The user does not have access to the DingALing property.",
@@ -454,9 +454,9 @@ func TestMultistatusWriter(t *testing.T) {
 		respdesc: "There has been an access violation error.",
 		wantXML: `` +
 			`<?xml version="1.0" encoding="UTF-8"?>` +
-			`<multistatus xmlns="DAV:" xmlns:B="http://ns.example.com/boxschema/">` +
+			`<multistatus xmlns="DAV:" xmlns:B="https://ns.example.com/boxschema/">` +
 			`  <response>` +
-			`    <href>http://example.com/foo</href>` +
+			`    <href>https://example.com/foo</href>` +
 			`    <propstat>` +
 			`      <prop>` +
 			`        <B:bigbox><B:BoxType>Box type A</B:BoxType></B:bigbox>` +
@@ -496,7 +496,7 @@ func TestMultistatusWriter(t *testing.T) {
 			Propstat: []propstat{{
 				Prop: []Property{{
 					XMLName: xml.Name{
-						Space: "http://example.com/",
+						Space: "https://example.com/",
 						Local: "foo",
 					},
 				}},
@@ -509,7 +509,7 @@ func TestMultistatusWriter(t *testing.T) {
 	}, {
 		desc: "bad: multiple hrefs and no status",
 		responses: []response{{
-			Href: []string{"http://example.com/foo", "http://example.com/bar"},
+			Href: []string{"https://example.com/foo", "https://example.com/bar"},
 		}},
 		wantErr: errInvalidResponse,
 		// default of http.responseWriter
@@ -517,7 +517,7 @@ func TestMultistatusWriter(t *testing.T) {
 	}, {
 		desc: "bad: one href and no propstat",
 		responses: []response{{
-			Href: []string{"http://example.com/foo"},
+			Href: []string{"https://example.com/foo"},
 		}},
 		wantErr: errInvalidResponse,
 		// default of http.responseWriter
@@ -525,11 +525,11 @@ func TestMultistatusWriter(t *testing.T) {
 	}, {
 		desc: "bad: status with one href and propstat",
 		responses: []response{{
-			Href: []string{"http://example.com/foo"},
+			Href: []string{"https://example.com/foo"},
 			Propstat: []propstat{{
 				Prop: []Property{{
 					XMLName: xml.Name{
-						Space: "http://example.com/",
+						Space: "https://example.com/",
 						Local: "foo",
 					},
 				}},
@@ -544,13 +544,13 @@ func TestMultistatusWriter(t *testing.T) {
 		desc: "bad: multiple hrefs and propstat",
 		responses: []response{{
 			Href: []string{
-				"http://example.com/foo",
-				"http://example.com/bar",
+				"https://example.com/foo",
+				"https://example.com/bar",
 			},
 			Propstat: []propstat{{
 				Prop: []Property{{
 					XMLName: xml.Name{
-						Space: "http://example.com/",
+						Space: "https://example.com/",
 						Local: "foo",
 					},
 				}},
@@ -629,7 +629,7 @@ func TestReadProppatch(t *testing.T) {
 		input: `` +
 			`<?xml version="1.0" encoding="utf-8" ?>` +
 			`<D:propertyupdate xmlns:D="DAV:"` +
-			`                  xmlns:Z="http://ns.example.com/z/">` +
+			`                  xmlns:Z="https://ns.example.com/z/">` +
 			`    <D:set>` +
 			`         <D:prop><Z:Authors>somevalue</Z:Authors></D:prop>` +
 			`    </D:set>` +
@@ -639,14 +639,14 @@ func TestReadProppatch(t *testing.T) {
 			`</D:propertyupdate>`,
 		wantPP: []Proppatch{{
 			Props: []Property{{
-				xml.Name{Space: "http://ns.example.com/z/", Local: "Authors"},
+				xml.Name{Space: "https://ns.example.com/z/", Local: "Authors"},
 				"",
 				[]byte(`somevalue`),
 			}},
 		}, {
 			Remove: true,
 			Props: []Property{{
-				xml.Name{Space: "http://ns.example.com/z/", Local: "Copyright-Owner"},
+				xml.Name{Space: "https://ns.example.com/z/", Local: "Copyright-Owner"},
 				"",
 				nil,
 			}},
@@ -658,13 +658,13 @@ func TestReadProppatch(t *testing.T) {
 			`<D:propertyupdate xmlns:D="DAV:">` +
 			`    <D:set>` +
 			`         <D:prop xml:lang="en">` +
-			`              <foo xmlns="http://example.com/ns"/>` +
+			`              <foo xmlns="https://example.com/ns"/>` +
 			`         </D:prop>` +
 			`    </D:set>` +
 			`</D:propertyupdate>`,
 		wantPP: []Proppatch{{
 			Props: []Property{{
-				xml.Name{Space: "http://example.com/ns", Local: "foo"},
+				xml.Name{Space: "https://example.com/ns", Local: "foo"},
 				"en",
 				nil,
 			}},
@@ -674,7 +674,7 @@ func TestReadProppatch(t *testing.T) {
 		input: `` +
 			`<?xml version="1.0" encoding="utf-8" ?>` +
 			`<D:propertyupdate xmlns:D="DAV:"` +
-			`                  xmlns:Z="http://ns.example.com/z/">` +
+			`                  xmlns:Z="https://ns.example.com/z/">` +
 			`    <D:remove>` +
 			`         <D:prop>` +
 			`              <Z:Authors>` +
@@ -696,7 +696,7 @@ func TestReadProppatch(t *testing.T) {
 		input: `` +
 			`<?xml version="1.0" encoding="utf-8" ?>` +
 			`<D:propertyupdate xmlns:D="DAV:"` +
-			`                  xmlns:Z="http://ns.example.com/z/">` +
+			`                  xmlns:Z="https://ns.example.com/z/">` +
 			`    <D:remove>` +
 			`        <D:prop/>` +
 			`    </D:remove>` +
@@ -757,40 +757,40 @@ func TestUnmarshalXMLValue(t *testing.T) {
 	}, {
 		desc: "section 9.2",
 		input: `` +
-			`<Z:Authors xmlns:Z="http://ns.example.com/z/">` +
+			`<Z:Authors xmlns:Z="https://ns.example.com/z/">` +
 			`  <Z:Author>Jim Whitehead</Z:Author>` +
 			`  <Z:Author>Roy Fielding</Z:Author>` +
 			`</Z:Authors>`,
 		wantVal: `` +
-			`  <Author xmlns="http://ns.example.com/z/">Jim Whitehead</Author>` +
-			`  <Author xmlns="http://ns.example.com/z/">Roy Fielding</Author>`,
+			`  <Author xmlns="https://ns.example.com/z/">Jim Whitehead</Author>` +
+			`  <Author xmlns="https://ns.example.com/z/">Roy Fielding</Author>`,
 	}, {
 		desc: "section 4.3.1 (mixed content)",
 		input: `` +
 			`<x:author ` +
-			`    xmlns:x='http://example.com/ns' ` +
+			`    xmlns:x='https://example.com/ns' ` +
 			`    xmlns:D="DAV:">` +
 			`  <x:name>Jane Doe</x:name>` +
 			`  <!-- Jane's contact info -->` +
 			`  <x:uri type='email'` +
 			`         added='2005-11-26'>mailto:jane.doe@example.com</x:uri>` +
 			`  <x:uri type='web'` +
-			`         added='2005-11-27'>http://www.example.com</x:uri>` +
+			`         added='2005-11-27'>https://www.example.com</x:uri>` +
 			`  <x:notes xmlns:h='http://www.w3.org/1999/xhtml'>` +
 			`    Jane has been working way <h:em>too</h:em> long on the` +
 			`    long-awaited revision of <![CDATA[<RFC2518>]]>.` +
 			`  </x:notes>` +
 			`</x:author>`,
 		wantVal: `` +
-			`  <name xmlns="http://example.com/ns">Jane Doe</name>` +
+			`  <name xmlns="https://example.com/ns">Jane Doe</name>` +
 			`  ` +
 			`  <uri type='email'` +
-			`       xmlns="http://example.com/ns" ` +
+			`       xmlns="https://example.com/ns" ` +
 			`       added='2005-11-26'>mailto:jane.doe@example.com</uri>` +
 			`  <uri added='2005-11-27'` +
 			`       type='web'` +
-			`       xmlns="http://example.com/ns">http://www.example.com</uri>` +
-			`  <notes xmlns="http://example.com/ns" ` +
+			`       xmlns="https://example.com/ns">https://www.example.com</uri>` +
+			`  <notes xmlns="https://example.com/ns" ` +
 			`         xmlns:h="http://www.w3.org/1999/xhtml">` +
 			`    Jane has been working way <h:em>too</h:em> long on the` +
 			`    long-awaited revision of &lt;RFC2518&gt;.` +

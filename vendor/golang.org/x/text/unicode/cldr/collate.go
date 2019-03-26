@@ -27,7 +27,7 @@ const (
 	// cldrIndex is a Unicode-reserved sentinel value used to mark the start
 	// of a grouping within an index.
 	// We ignore any rule that starts with this rune.
-	// See http://unicode.org/reports/tr35/#Collation_Elements for details.
+	// See https://unicode.org/reports/tr35/#Collation_Elements for details.
 	cldrIndex = "\uFDD0"
 
 	// specialAnchor is the format in which to represent logical reset positions,

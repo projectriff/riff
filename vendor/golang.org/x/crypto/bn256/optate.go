@@ -6,7 +6,7 @@ package bn256
 
 func lineFunctionAdd(r, p *twistPoint, q *curvePoint, r2 *gfP2, pool *bnPool) (a, b, c *gfP2, rOut *twistPoint) {
 	// See the mixed addition algorithm from "Faster Computation of the
-	// Tate Pairing", http://arxiv.org/pdf/0904.0854v3.pdf
+	// Tate Pairing", https://arxiv.org/pdf/0904.0854v3.pdf
 
 	B := newGFp2(pool).Mul(p.x, r.t, pool)
 
@@ -84,7 +84,7 @@ func lineFunctionAdd(r, p *twistPoint, q *curvePoint, r2 *gfP2, pool *bnPool) (a
 
 func lineFunctionDouble(r *twistPoint, q *curvePoint, pool *bnPool) (a, b, c *gfP2, rOut *twistPoint) {
 	// See the doubling algorithm for a=0 from "Faster Computation of the
-	// Tate Pairing", http://arxiv.org/pdf/0904.0854v3.pdf
+	// Tate Pairing", https://arxiv.org/pdf/0904.0854v3.pdf
 
 	A := newGFp2(pool).Square(r.x, pool)
 	B := newGFp2(pool).Square(r.y, pool)
@@ -185,7 +185,7 @@ func mulLine(ret *gfP12, a, b, c *gfP2, pool *bnPool) {
 var sixuPlus2NAF = []int8{0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, -1, 0, 1, 0, 0, 0, 1, 0, -1, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 1}
 
 // miller implements the Miller loop for calculating the Optimal Ate pairing.
-// See algorithm 1 from http://cryptojedi.org/papers/dclxvi-20100714.pdf
+// See algorithm 1 from https://cryptojedi.org/papers/dclxvi-20100714.pdf
 func miller(q *twistPoint, p *curvePoint, pool *bnPool) *gfP12 {
 	ret := newGFp12(pool)
 	ret.SetOne()
@@ -301,7 +301,7 @@ func miller(q *twistPoint, p *curvePoint, pool *bnPool) *gfP12 {
 
 // finalExponentiation computes the (p¹²-1)/Order-th power of an element of
 // GF(p¹²) to obtain an element of GT (steps 13-15 of algorithm 1 from
-// http://cryptojedi.org/papers/dclxvi-20100714.pdf)
+// https://cryptojedi.org/papers/dclxvi-20100714.pdf)
 func finalExponentiation(in *gfP12, pool *bnPool) *gfP12 {
 	t1 := newGFp12(pool)
 

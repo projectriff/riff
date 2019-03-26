@@ -475,7 +475,7 @@ func (m *Lease) GetInlineAssignment() *google_protobuf1.Any {
 //
 // Keys are not context sensitive.
 //
-// See http://goo.gl/NurY8g for more information on the Worker message.
+// See https://goo.gl/NurY8g for more information on the Worker message.
 type Worker struct {
 	// A list of devices; the first device is the primary device. See the `Device`
 	// message for more information.
@@ -638,7 +638,7 @@ func (m *Device_Property) GetValue() string {
 // be `"admin"` in these cases.
 //
 // This message is heavily based on Swarming administration tasks from the LUCI
-// project (http://github.com/luci/luci-py/appengine/swarming).
+// project (https://github.com/luci/luci-py/appengine/swarming).
 type AdminTemp struct {
 	// The admin action; see `Command` for legal values.
 	Command AdminTemp_Command `protobuf:"varint,1,opt,name=command,enum=google.devtools.remoteworkers.v1test2.AdminTemp_Command" json:"command,omitempty"`

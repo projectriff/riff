@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // This file implements the Socialist Millionaires Protocol as described in
-// http://www.cypherpunks.ca/otr/Protocol-v2-3.1.0.html. The protocol
+// https://www.cypherpunks.ca/otr/Protocol-v2-3.1.0.html. The protocol
 // specification is required in order to understand this code and, where
 // possible, the variable names in the code match up with the spec.
 

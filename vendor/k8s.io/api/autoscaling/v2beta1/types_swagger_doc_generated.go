@@ -30,7 +30,7 @@ package v2beta1
 var map_CrossVersionObjectReference = map[string]string{
 	"":           "CrossVersionObjectReference contains enough information to let you identify the referred resource.",
 	"kind":       "Kind of the referent; More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds\"",
-	"name":       "Name of the referent; More info: http://kubernetes.io/docs/user-guide/identifiers#names",
+	"name":       "Name of the referent; More info: https://kubernetes.io/docs/user-guide/identifiers#names",
 	"apiVersion": "API version of the referent",
 }
 

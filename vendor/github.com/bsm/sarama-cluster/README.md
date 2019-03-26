@@ -9,7 +9,7 @@ Cluster extensions for [Sarama](https://github.com/Shopify/sarama), the Go clien
 
 ## Documentation
 
-Documentation and example are available via godoc at http://godoc.org/github.com/bsm/sarama-cluster
+Documentation and example are available via godoc at https://godoc.org/github.com/bsm/sarama-cluster
 
 ## Examples
 
@@ -136,7 +136,7 @@ func main() {
 ## Running tests
 
 You need to install Ginkgo & Gomega to run tests. Please see
-http://onsi.github.io/ginkgo for more details.
+https://onsi.github.io/ginkgo for more details.
 
 To run tests, call:
 
