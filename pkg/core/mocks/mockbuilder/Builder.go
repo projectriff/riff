@@ -2,6 +2,7 @@
 
 package mockbuilder
 
+import core "github.com/projectriff/riff/pkg/core"
 import io "io"
 import mock "github.com/stretchr/testify/mock"
 
@@ -10,13 +11,13 @@ type Builder struct {
 	mock.Mock
 }
 
-// Build provides a mock function with given fields: appDir, buildImage, runImage, repoName, log
-func (_m *Builder) Build(appDir string, buildImage string, runImage string, repoName string, log io.Writer) error {
-	ret := _m.Called(appDir, buildImage, runImage, repoName, log)
+// Build provides a mock function with given fields: repoName, options, log
+func (_m *Builder) Build(repoName string, options core.BuildOptions, log io.Writer) error {
+	ret := _m.Called(repoName, options, log)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string, string, string, io.Writer) error); ok {
-		r0 = rf(appDir, buildImage, runImage, repoName, log)
+	if rf, ok := ret.Get(0).(func(string, core.BuildOptions, io.Writer) error); ok {
+		r0 = rf(repoName, options, log)
 	} else {
 		r0 = ret.Error(0)
 	}

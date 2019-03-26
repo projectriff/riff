@@ -23,12 +23,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
 	"time"
 
 	logutil "github.com/boz/go-logutil"
-
-	"github.com/BurntSushi/toml"
 
 	"github.com/boz/kail"
 	"github.com/boz/kcache/types/pod"
@@ -606,53 +603,13 @@ func (c *client) BuildFunction(buildpackBuilder Builder, options BuildFunctionOp
 }
 
 func (c *client) doBuildLocally(builder Builder, image string, options BuildOptions, log io.Writer) error {
-	return doLocally(options, func() error {
-		if options.BuildpackImage == "" || options.RunImage == "" {
-			config, err := c.FetchPackConfig()
-			if err != nil {
-				return fmt.Errorf("unable to load pack config: %s", err)
-			}
-			options.BuildpackImage = config.BuilderImage
-			options.RunImage = config.RunImage
+	if options.BuildpackImage == "" || options.RunImage == "" {
+		config, err := c.FetchPackConfig()
+		if err != nil {
+			return fmt.Errorf("unable to load pack config: %s", err)
 		}
-		return builder.Build(options.LocalPath, options.BuildpackImage, options.RunImage, image, log)
-	})
-}
-
-func doLocally(options BuildOptions, doer func() error) error {
-	if err := writeRiffToml(options); err != nil {
-		return err
+		options.BuildpackImage = config.BuilderImage
+		options.RunImage = config.RunImage
 	}
-	defer func() { _ = deleteRiffToml(options) }()
-	return doer()
-}
-
-func writeRiffToml(options BuildOptions) error {
-	t := struct {
-		Override string `toml:"override"`
-		Handler  string `toml:"handler"`
-		Artifact string `toml:"artifact"`
-	}{
-		Override: options.Invoker,
-		Handler:  options.Handler,
-		Artifact: options.Artifact,
-	}
-	path := filepath.Join(options.LocalPath, "riff.toml")
-	if _, err := os.Stat(path); err != nil && !os.IsNotExist(err) {
-		return err
-	} else if err == nil {
-		return fmt.Errorf("found riff.toml file in local path. Please delete this file and let the CLI create it from flags")
-	}
-
-	f, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	return toml.NewEncoder(f).Encode(t)
-}
-
-func deleteRiffToml(options BuildOptions) error {
-	path := filepath.Join(options.LocalPath, "riff.toml")
-	return os.Remove(path)
+	return builder.Build(image, options, log)
 }

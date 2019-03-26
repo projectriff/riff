@@ -40,7 +40,7 @@ var (
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/eventing.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/in-memory-channel.yaml",
 				// TODO update to a release version before releasing riff
-				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-0.2.0-snapshot-ci-92b29a6fb99c.yaml",
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-0.2.0-snapshot-ci-c957e7e83d23.yaml",
 			},
 		},
 		// most recent release of Knative. This manifest is not tested
