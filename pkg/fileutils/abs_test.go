@@ -56,7 +56,7 @@ var _ = Describe("IsAbsFile", func() {
 
 	Context("when the input path is a http URL", func() {
 		BeforeEach(func() {
-			path = "http://projectriff.io"
+			path = "https://projectriff.io"
 		})
 
 		checkAbsolute()
@@ -159,7 +159,7 @@ var _ = Describe("AbsFile", func() {
 
 	Context("when the input path is a http URL", func() {
 		BeforeEach(func() {
-			path = "http://projectriff.io"
+			path = "https://projectriff.io"
 		})
 
 		checkAbsolute()
