@@ -28,13 +28,13 @@ func main() {
 }
 
 func printGB18030() {
-	res, err := http.Get("http://encoding.spec.whatwg.org/index-gb18030.txt")
+	res, err := http.Get("https://encoding.spec.whatwg.org/index-gb18030.txt")
 	if err != nil {
 		log.Fatalf("Get: %v", err)
 	}
 	defer res.Body.Close()
 
-	fmt.Printf("// gb18030 is the table from http://encoding.spec.whatwg.org/index-gb18030.txt\n")
+	fmt.Printf("// gb18030 is the table from https://encoding.spec.whatwg.org/index-gb18030.txt\n")
 	fmt.Printf("var gb18030 = [...][2]uint16{\n")
 	scanner := bufio.NewScanner(res.Body)
 	for scanner.Scan() {
@@ -54,7 +54,7 @@ func printGB18030() {
 }
 
 func printGBK() {
-	res, err := http.Get("http://encoding.spec.whatwg.org/index-gbk.txt")
+	res, err := http.Get("https://encoding.spec.whatwg.org/index-gbk.txt")
 	if err != nil {
 		log.Fatalf("Get: %v", err)
 	}
@@ -90,7 +90,7 @@ func printGBK() {
 	}
 
 	fmt.Printf("// decode is the decoding table from GBK code to Unicode.\n")
-	fmt.Printf("// It is defined at http://encoding.spec.whatwg.org/index-gbk.txt\n")
+	fmt.Printf("// It is defined at https://encoding.spec.whatwg.org/index-gbk.txt\n")
 	fmt.Printf("var decode = [...]uint16{\n")
 	for i, v := range mapping {
 		if v != 0 {

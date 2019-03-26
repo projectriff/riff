@@ -4,7 +4,7 @@
 package japanese // import "golang.org/x/text/encoding/japanese"
 
 // jis0208Decode is the decoding table from JIS 0208 code to Unicode.
-// It is defined at http://encoding.spec.whatwg.org/index-jis0208.txt
+// It is defined at https://encoding.spec.whatwg.org/index-jis0208.txt
 var jis0208Decode = [...]uint16{
 	0:     0x3000,
 	1:     0x3001,
@@ -7733,7 +7733,7 @@ var jis0208Decode = [...]uint16{
 }
 
 // jis0212Decode is the decoding table from JIS 0212 code to Unicode.
-// It is defined at http://encoding.spec.whatwg.org/index-jis0212.txt
+// It is defined at https://encoding.spec.whatwg.org/index-jis0212.txt
 var jis0212Decode = [...]uint16{
 	108:  0x02D8,
 	109:  0x02C7,

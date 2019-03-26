@@ -59,7 +59,7 @@ func (r Registry) String() string {
 
 // Scope returns the scope required to access the registry.
 func (r Registry) Scope(string) string {
-	// The only resource under 'registry' is 'catalog'. http://goo.gl/N9cN9Z
+	// The only resource under 'registry' is 'catalog'. https://goo.gl/N9cN9Z
 	return "registry:catalog:*"
 }
 

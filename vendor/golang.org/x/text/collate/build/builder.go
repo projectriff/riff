@@ -53,7 +53,7 @@ type Builder struct {
 
 // A Tailoring builds a collation table based on another collation table.
 // The table is defined by specifying tailorings to the underlying table.
-// See http://unicode.org/reports/tr35/ for an overview of tailoring
+// See https://unicode.org/reports/tr35/ for an overview of tailoring
 // collation tables.  The CLDR contains pre-defined tailorings for a variety
 // of languages (See http://www.unicode.org/Public/cldr/<version>/core.zip.)
 type Tailoring struct {
@@ -220,7 +220,7 @@ func (t *Tailoring) SetAnchorBefore(anchor string) error {
 // to the collation elements generated for the entry added by Insert.
 // This has the same net effect as sorting str after the string anchor+extend.
 // See http://www.unicode.org/reports/tr10/#Tailoring_Example for details
-// on parametric tailoring and http://unicode.org/reports/tr35/#Collation_Elements
+// on parametric tailoring and https://unicode.org/reports/tr35/#Collation_Elements
 // for full details on LDML.
 //
 // Examples: create a tailoring for Swedish, where "ä" is ordered after "z"
@@ -262,7 +262,7 @@ func (t *Tailoring) Insert(level colltab.Level, str, extend string) error {
 	a := t.anchor
 	// Find the first element after the anchor which differs at a level smaller or
 	// equal to the given level.  Then insert at this position.
-	// See http://unicode.org/reports/tr35/#Collation_Elements, Section 5.14.5 for details.
+	// See https://unicode.org/reports/tr35/#Collation_Elements, Section 5.14.5 for details.
 	e.before = t.before
 	if t.before {
 		t.before = false

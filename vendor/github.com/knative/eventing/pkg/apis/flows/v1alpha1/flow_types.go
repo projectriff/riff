@@ -89,7 +89,7 @@ type FlowAction struct {
 
 	// Reference to a 'known' endpoint where no resolving be done.
 	// http://k8s-service for example
-	// http://myexternalhandler.example.com/foo/bar
+	// https://myexternalhandler.example.com/foo/bar
 	// +optional
 	TargetURI *string `json:"targetURI,omitempty"`
 }

@@ -1,6 +1,6 @@
 //
 // Blackfriday Markdown Processor
-// Available at http://github.com/russross/blackfriday
+// Available at https://github.com/russross/blackfriday
 //
 // Copyright © 2011 Russ Ross <russ@russross.com>.
 // Distributed under the Simplified BSD License.
@@ -678,7 +678,7 @@ func (options *Html) DocumentHeader(out *bytes.Buffer) {
 	ending := ""
 	if options.flags&HTML_USE_XHTML != 0 {
 		out.WriteString("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" ")
-		out.WriteString("\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n")
+		out.WriteString("\"https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n")
 		out.WriteString("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n")
 		ending = " /"
 	} else {

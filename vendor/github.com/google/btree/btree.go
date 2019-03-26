@@ -20,7 +20,7 @@
 // It has a flatter structure than an equivalent red-black or other binary tree,
 // which in some cases yields better memory usage and/or performance.
 // See some discussion on the matter here:
-//   http://google-opensource.blogspot.com/2013/01/c-containers-that-save-memory-and-time.html
+//   https://google-opensource.blogspot.com/2013/01/c-containers-that-save-memory-and-time.html
 // Note, though, that this project is in no way related to the C++ B-Tree
 // implementation written about there.
 //
@@ -40,7 +40,7 @@
 // pointers and also distribute their values across the heap.
 //
 // This implementation is designed to be a drop-in replacement to gollrb.LLRB
-// trees, (http://github.com/petar/gollrb), an excellent and probably the most
+// trees, (https://github.com/petar/gollrb), an excellent and probably the most
 // widely used ordered tree implementation in the Go ecosystem currently.
 // Its functions, therefore, exactly mirror those of
 // llrb.LLRB where possible.  Unlike gollrb, though, we currently don't

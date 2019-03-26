@@ -465,7 +465,7 @@ func (DownwardAPIVolumeSource) SwaggerDoc() map[string]string {
 var map_EmptyDirVolumeSource = map[string]string{
 	"":          "Represents an empty directory for a pod. Empty directory volumes support ownership management and SELinux relabeling.",
 	"medium":    "What type of storage medium should back this directory. The default is \"\" which means to use the node's default medium. Must be an empty string (default) or Memory. More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir",
-	"sizeLimit": "Total amount of local storage required for this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. The default is nil which means that the limit is undefined. More info: http://kubernetes.io/docs/user-guide/volumes#emptydir",
+	"sizeLimit": "Total amount of local storage required for this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/user-guide/volumes#emptydir",
 }
 
 func (EmptyDirVolumeSource) SwaggerDoc() map[string]string {
@@ -1044,7 +1044,7 @@ func (NodeProxyOptions) SwaggerDoc() map[string]string {
 }
 
 var map_NodeResources = map[string]string{
-	"":         "NodeResources is an object for conveying resource information about a node. see http://releases.k8s.io/HEAD/docs/design/resources.md for more details.",
+	"":         "NodeResources is an object for conveying resource information about a node. see https://releases.k8s.io/HEAD/docs/design/resources.md for more details.",
 	"Capacity": "Capacity represents the available resources of a node",
 }
 

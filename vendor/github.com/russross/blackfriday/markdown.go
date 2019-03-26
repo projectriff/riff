@@ -1,6 +1,6 @@
 //
 // Blackfriday Markdown Processor
-// Available at http://github.com/russross/blackfriday
+// Available at https://github.com/russross/blackfriday
 //
 // Copyright © 2011 Russ Ross <russ@russross.com>.
 // Distributed under the Simplified BSD License.
@@ -494,8 +494,8 @@ func secondPass(p *parser, input []byte) []byte {
 // as footnotes in a document, and can be referenced anywhere in the document.
 // The basic format is:
 //
-//    [1]: http://www.google.com/ "Google"
-//    [2]: http://www.github.com/ "Github"
+//    [1]: https://www.google.com/ "Google"
+//    [2]: https://www.github.com/ "Github"
 //
 // Anywhere in the document, the reference can be linked by referring to its
 // label, i.e., 1 and 2 in this example, as in:

@@ -173,11 +173,11 @@ func (e *iso2022JPEncoder) Transform(dst, src []byte, atEOF bool) (nDst, nSrc in
 
 			// func init checks that the switch covers all tables.
 			//
-			// http://encoding.spec.whatwg.org/#iso-2022-jp says that "the index jis0212
+			// https://encoding.spec.whatwg.org/#iso-2022-jp says that "the index jis0212
 			// is not used by the iso-2022-jp encoder due to lack of widespread support".
 			//
 			// TODO: do we have to special-case U+00A5 and U+203E, as per
-			// http://encoding.spec.whatwg.org/#iso-2022-jp
+			// https://encoding.spec.whatwg.org/#iso-2022-jp
 			// Doing so would mean that "\u00a5" would not be preserved
 			// after an encode-decode round trip.
 			switch {

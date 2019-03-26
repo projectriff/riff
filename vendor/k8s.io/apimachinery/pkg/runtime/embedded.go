@@ -51,7 +51,7 @@ func (re encodable) UnmarshalJSON(in []byte) error {
 }
 
 // Marshal may get called on pointers or values, so implement MarshalJSON on value.
-// http://stackoverflow.com/questions/21390979/custom-marshaljson-never-gets-called-in-go
+// https://stackoverflow.com/questions/21390979/custom-marshaljson-never-gets-called-in-go
 func (re encodable) MarshalJSON() ([]byte, error) {
 	return Encode(re.E, re.obj)
 }
@@ -82,7 +82,7 @@ func (re *Unknown) UnmarshalJSON(in []byte) error {
 }
 
 // Marshal may get called on pointers or values, so implement MarshalJSON on value.
-// http://stackoverflow.com/questions/21390979/custom-marshaljson-never-gets-called-in-go
+// https://stackoverflow.com/questions/21390979/custom-marshaljson-never-gets-called-in-go
 func (re Unknown) MarshalJSON() ([]byte, error) {
 	// If ContentType is unset, we assume this is JSON.
 	if re.ContentType != "" && re.ContentType != ContentTypeJSON {

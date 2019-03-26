@@ -4,7 +4,7 @@
 package traditionalchinese // import "golang.org/x/text/encoding/traditionalchinese"
 
 // decode is the decoding table from Big5 code to Unicode.
-// It is defined at http://encoding.spec.whatwg.org/index-big5.txt
+// It is defined at https://encoding.spec.whatwg.org/index-big5.txt
 var decode = [...]uint32{
 	942:   0x000043F0,
 	943:   0x00004C32,

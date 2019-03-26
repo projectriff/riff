@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// See: http://en.wikipedia.org/wiki/Binary_prefix
+// See: https://en.wikipedia.org/wiki/Binary_prefix
 const (
 	// Decimal
 

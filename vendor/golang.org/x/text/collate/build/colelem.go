@@ -140,7 +140,7 @@ const (
 // implicitPrimary returns the primary weight for the a rune
 // for which there is no entry for the rune in the collation table.
 // We take a different approach from the one specified in
-// http://unicode.org/reports/tr10/#Implicit_Weights,
+// https://unicode.org/reports/tr10/#Implicit_Weights,
 // but preserve the resulting relative ordering of the runes.
 func implicitPrimary(r rune) int {
 	if unicode.Is(unicode.Ideographic, r) {
@@ -165,7 +165,7 @@ func implicitPrimary(r rune) int {
 //   [.FBxx.0020.0002.C][.BBBB.0000.0000.C]
 // We will rewrite these characters to a single CE.
 // We assume the CJK values start at 0x8000.
-// See http://unicode.org/reports/tr10/#Implicit_Weights
+// See https://unicode.org/reports/tr10/#Implicit_Weights
 func convertLargeWeights(elems []rawCE) (res []rawCE, err error) {
 	const (
 		cjkPrimaryStart   = 0xFB40

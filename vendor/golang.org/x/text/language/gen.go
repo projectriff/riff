@@ -291,7 +291,7 @@ func (ss *stringSet) join() string {
 
 // ianaEntry holds information for an entry in the IANA Language Subtag Repository.
 // All types use the same entry.
-// See http://tools.ietf.org/html/bcp47#section-5.1 for a description of the various
+// See https://tools.ietf.org/html/bcp47#section-5.1 for a description of the various
 // fields.
 type ianaEntry struct {
 	typ            string

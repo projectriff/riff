@@ -1,6 +1,6 @@
 //
 // Blackfriday Markdown Processor
-// Available at http://github.com/russross/blackfriday
+// Available at https://github.com/russross/blackfriday
 //
 // Copyright © 2011 Russ Ross <russ@russross.com>.
 // Distributed under the Simplified BSD License.
@@ -167,7 +167,7 @@ func lineBreak(p *parser, out *bytes.Buffer, data []byte, offset int) int {
 	out.Truncate(eol)
 
 	precededByTwoSpaces := offset >= 2 && data[offset-2] == ' ' && data[offset-1] == ' '
-	precededByBackslash := offset >= 1 && data[offset-1] == '\\' // see http://spec.commonmark.org/0.18/#example-527
+	precededByBackslash := offset >= 1 && data[offset-1] == '\\' // see https://spec.commonmark.org/0.18/#example-527
 	precededByBackslash = precededByBackslash && p.flags&EXTENSION_BACKSLASH_LINE_BREAK != 0
 
 	if p.flags&EXTENSION_JOIN_LINES != 0 {
@@ -772,17 +772,17 @@ func autoLink(p *parser, out *bytes.Buffer, data []byte, offset int) int {
 		 *
 		 * Examples:
 		 *
-		 *      foo http://www.pokemon.com/Pikachu_(Electric) bar
-		 *              => http://www.pokemon.com/Pikachu_(Electric)
+		 *      foo https://www.pokemon.com/Pikachu_(Electric) bar
+		 *              => https://www.pokemon.com/Pikachu_(Electric)
 		 *
-		 *      foo (http://www.pokemon.com/Pikachu_(Electric)) bar
-		 *              => http://www.pokemon.com/Pikachu_(Electric)
+		 *      foo (https://www.pokemon.com/Pikachu_(Electric)) bar
+		 *              => https://www.pokemon.com/Pikachu_(Electric)
 		 *
-		 *      foo http://www.pokemon.com/Pikachu_(Electric)) bar
-		 *              => http://www.pokemon.com/Pikachu_(Electric))
+		 *      foo https://www.pokemon.com/Pikachu_(Electric)) bar
+		 *              => https://www.pokemon.com/Pikachu_(Electric))
 		 *
-		 *      (foo http://www.pokemon.com/Pikachu_(Electric)) bar
-		 *              => foo http://www.pokemon.com/Pikachu_(Electric)
+		 *      (foo https://www.pokemon.com/Pikachu_(Electric)) bar
+		 *              => foo https://www.pokemon.com/Pikachu_(Electric)
 		 */
 
 		for bufEnd >= 0 && origData[bufEnd] != '\n' && openDelim != 0 {

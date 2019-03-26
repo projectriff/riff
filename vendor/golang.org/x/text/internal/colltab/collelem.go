@@ -352,7 +352,7 @@ const (
 // implicitPrimary returns the primary weight for the a rune
 // for which there is no entry for the rune in the collation table.
 // We take a different approach from the one specified in
-// http://unicode.org/reports/tr10/#Implicit_Weights,
+// https://unicode.org/reports/tr10/#Implicit_Weights,
 // but preserve the resulting relative ordering of the runes.
 func implicitPrimary(r rune) int {
 	if unicode.Is(unicode.Ideographic, r) {

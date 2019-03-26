@@ -7184,7 +7184,7 @@ var windows1258 = Charmap{
 
 // XUserDefined is the X-User-Defined encoding.
 //
-// It is defined at http://encoding.spec.whatwg.org/#x-user-defined
+// It is defined at https://encoding.spec.whatwg.org/#x-user-defined
 var XUserDefined *Charmap = &xUserDefined
 
 var xUserDefined = Charmap{

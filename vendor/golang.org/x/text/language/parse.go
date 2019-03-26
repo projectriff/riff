@@ -313,7 +313,7 @@ func parseTag(scan *scanner) (t Tag, end int) {
 	langStart := scan.start
 	end = scan.scan()
 	for len(scan.token) == 3 && isAlpha(scan.token[0]) {
-		// From http://tools.ietf.org/html/bcp47, <lang>-<extlang> tags are equivalent
+		// From https://tools.ietf.org/html/bcp47, <lang>-<extlang> tags are equivalent
 		// to a tag of the form <extlang>.
 		lang, e := getLangID(scan.token)
 		if lang != 0 {
@@ -766,7 +766,7 @@ func nextExtension(s string, p int) int {
 var errInvalidWeight = errors.New("ParseAcceptLanguage: invalid weight")
 
 // ParseAcceptLanguage parses the contents of an Accept-Language header as
-// defined in http://www.ietf.org/rfc/rfc2616.txt and returns a list of Tags and
+// defined in https://www.ietf.org/rfc/rfc2616.txt and returns a list of Tags and
 // a list of corresponding quality weights. It is more permissive than RFC 2616
 // and may return non-nil slices even if the input is not valid.
 // The Tags will be sorted by highest weight first and then by first occurrence.

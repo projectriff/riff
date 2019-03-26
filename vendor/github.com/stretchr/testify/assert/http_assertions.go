@@ -23,7 +23,7 @@ func httpCode(handler http.HandlerFunc, method, url string, values url.Values) (
 
 // HTTPSuccess asserts that a specified handler returns a success status code.
 //
-//  assert.HTTPSuccess(t, myHandler, "POST", "http://www.google.com", nil)
+//  assert.HTTPSuccess(t, myHandler, "POST", "https://www.google.com", nil)
 //
 // Returns whether the assertion was successful (true) or not (false).
 func HTTPSuccess(t TestingT, handler http.HandlerFunc, method, url string, values url.Values, msgAndArgs ...interface{}) bool {

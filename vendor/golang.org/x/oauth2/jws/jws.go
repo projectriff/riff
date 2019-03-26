@@ -46,7 +46,7 @@ type ClaimSet struct {
 	// complaint with legacy OAuth 2.0 providers. (Optional)
 	Prn string `json:"prn,omitempty"`
 
-	// See http://tools.ietf.org/html/draft-jones-json-web-token-10#section-4.3
+	// See https://tools.ietf.org/html/draft-jones-json-web-token-10#section-4.3
 	// This array is marshalled using custom code (see (c *ClaimSet) encode()).
 	PrivateClaims map[string]interface{} `json:"-"`
 }

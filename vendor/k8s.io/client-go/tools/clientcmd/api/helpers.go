@@ -85,7 +85,7 @@ var redactedBytes []byte
 func ShortenConfig(config *Config) {
 	// trick json encoder into printing a human readable string in the raw data
 	// by base64 decoding what we want to print. Relies on implementation of
-	// http://golang.org/pkg/encoding/json/#Marshal using base64 to encode []byte
+	// https://golang.org/pkg/encoding/json/#Marshal using base64 to encode []byte
 	for key, authInfo := range config.AuthInfos {
 		if len(authInfo.ClientKeyData) > 0 {
 			authInfo.ClientKeyData = redactedBytes

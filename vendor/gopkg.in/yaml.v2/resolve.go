@@ -222,7 +222,7 @@ func encodeBase64(s string) string {
 }
 
 // This is a subset of the formats allowed by the regular expression
-// defined at http://yaml.org/type/timestamp.html.
+// defined at https://yaml.org/type/timestamp.html.
 var allowedTimestampFormats = []string{
 	"2006-1-2T15:4:5.999999999Z07:00", // RCF3339Nano with short date fields.
 	"2006-1-2t15:4:5.999999999Z07:00", // RFC3339Nano with short date fields and lower-case "t".
@@ -234,10 +234,10 @@ var allowedTimestampFormats = []string{
 
 // parseTimestamp parses s as a timestamp string and
 // returns the timestamp and reports whether it succeeded.
-// Timestamp formats are defined at http://yaml.org/type/timestamp.html
+// Timestamp formats are defined at https://yaml.org/type/timestamp.html
 func parseTimestamp(s string) (time.Time, bool) {
 	// TODO write code to check all the formats supported by
-	// http://yaml.org/type/timestamp.html instead of using time.Parse.
+	// https://yaml.org/type/timestamp.html instead of using time.Parse.
 
 	// Quick check: all date formats start with YYYY-.
 	i := 0

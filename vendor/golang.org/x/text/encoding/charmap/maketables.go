@@ -119,7 +119,7 @@ var encodings = []struct {
 		"",
 		"CodePage866",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-ibm866.txt",
+		"https://encoding.spec.whatwg.org/index-ibm866.txt",
 	},
 	{
 		"IBM Code Page 1047",
@@ -151,7 +151,7 @@ var encodings = []struct {
 		"",
 		"ISO8859_2",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-iso-8859-2.txt",
+		"https://encoding.spec.whatwg.org/index-iso-8859-2.txt",
 	},
 	{
 		"ISO 8859-3",
@@ -159,7 +159,7 @@ var encodings = []struct {
 		"",
 		"ISO8859_3",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-iso-8859-3.txt",
+		"https://encoding.spec.whatwg.org/index-iso-8859-3.txt",
 	},
 	{
 		"ISO 8859-4",
@@ -167,7 +167,7 @@ var encodings = []struct {
 		"",
 		"ISO8859_4",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-iso-8859-4.txt",
+		"https://encoding.spec.whatwg.org/index-iso-8859-4.txt",
 	},
 	{
 		"ISO 8859-5",
@@ -175,7 +175,7 @@ var encodings = []struct {
 		"",
 		"ISO8859_5",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-iso-8859-5.txt",
+		"https://encoding.spec.whatwg.org/index-iso-8859-5.txt",
 	},
 	{
 		"ISO 8859-6",
@@ -183,7 +183,7 @@ var encodings = []struct {
 		"",
 		"ISO8859_6,ISO8859_6E,ISO8859_6I",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-iso-8859-6.txt",
+		"https://encoding.spec.whatwg.org/index-iso-8859-6.txt",
 	},
 	{
 		"ISO 8859-7",
@@ -191,7 +191,7 @@ var encodings = []struct {
 		"",
 		"ISO8859_7",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-iso-8859-7.txt",
+		"https://encoding.spec.whatwg.org/index-iso-8859-7.txt",
 	},
 	{
 		"ISO 8859-8",
@@ -199,7 +199,7 @@ var encodings = []struct {
 		"",
 		"ISO8859_8,ISO8859_8E,ISO8859_8I",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-iso-8859-8.txt",
+		"https://encoding.spec.whatwg.org/index-iso-8859-8.txt",
 	},
 	{
 		"ISO 8859-9",
@@ -215,7 +215,7 @@ var encodings = []struct {
 		"",
 		"ISO8859_10",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-iso-8859-10.txt",
+		"https://encoding.spec.whatwg.org/index-iso-8859-10.txt",
 	},
 	{
 		"ISO 8859-13",
@@ -223,7 +223,7 @@ var encodings = []struct {
 		"",
 		"ISO8859_13",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-iso-8859-13.txt",
+		"https://encoding.spec.whatwg.org/index-iso-8859-13.txt",
 	},
 	{
 		"ISO 8859-14",
@@ -231,7 +231,7 @@ var encodings = []struct {
 		"",
 		"ISO8859_14",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-iso-8859-14.txt",
+		"https://encoding.spec.whatwg.org/index-iso-8859-14.txt",
 	},
 	{
 		"ISO 8859-15",
@@ -239,7 +239,7 @@ var encodings = []struct {
 		"",
 		"ISO8859_15",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-iso-8859-15.txt",
+		"https://encoding.spec.whatwg.org/index-iso-8859-15.txt",
 	},
 	{
 		"ISO 8859-16",
@@ -247,7 +247,7 @@ var encodings = []struct {
 		"",
 		"ISO8859_16",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-iso-8859-16.txt",
+		"https://encoding.spec.whatwg.org/index-iso-8859-16.txt",
 	},
 	{
 		"KOI8-R",
@@ -255,7 +255,7 @@ var encodings = []struct {
 		"",
 		"KOI8R",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-koi8-r.txt",
+		"https://encoding.spec.whatwg.org/index-koi8-r.txt",
 	},
 	{
 		"KOI8-U",
@@ -263,7 +263,7 @@ var encodings = []struct {
 		"",
 		"KOI8U",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-koi8-u.txt",
+		"https://encoding.spec.whatwg.org/index-koi8-u.txt",
 	},
 	{
 		"Macintosh",
@@ -271,7 +271,7 @@ var encodings = []struct {
 		"",
 		"Macintosh",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-macintosh.txt",
+		"https://encoding.spec.whatwg.org/index-macintosh.txt",
 	},
 	{
 		"Macintosh Cyrillic",
@@ -279,7 +279,7 @@ var encodings = []struct {
 		"",
 		"MacintoshCyrillic",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-x-mac-cyrillic.txt",
+		"https://encoding.spec.whatwg.org/index-x-mac-cyrillic.txt",
 	},
 	{
 		"Windows 874",
@@ -287,7 +287,7 @@ var encodings = []struct {
 		"",
 		"Windows874",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-windows-874.txt",
+		"https://encoding.spec.whatwg.org/index-windows-874.txt",
 	},
 	{
 		"Windows 1250",
@@ -295,7 +295,7 @@ var encodings = []struct {
 		"",
 		"Windows1250",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-windows-1250.txt",
+		"https://encoding.spec.whatwg.org/index-windows-1250.txt",
 	},
 	{
 		"Windows 1251",
@@ -303,7 +303,7 @@ var encodings = []struct {
 		"",
 		"Windows1251",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-windows-1251.txt",
+		"https://encoding.spec.whatwg.org/index-windows-1251.txt",
 	},
 	{
 		"Windows 1252",
@@ -311,7 +311,7 @@ var encodings = []struct {
 		"",
 		"Windows1252",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-windows-1252.txt",
+		"https://encoding.spec.whatwg.org/index-windows-1252.txt",
 	},
 	{
 		"Windows 1253",
@@ -319,7 +319,7 @@ var encodings = []struct {
 		"",
 		"Windows1253",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-windows-1253.txt",
+		"https://encoding.spec.whatwg.org/index-windows-1253.txt",
 	},
 	{
 		"Windows 1254",
@@ -327,7 +327,7 @@ var encodings = []struct {
 		"",
 		"Windows1254",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-windows-1254.txt",
+		"https://encoding.spec.whatwg.org/index-windows-1254.txt",
 	},
 	{
 		"Windows 1255",
@@ -335,7 +335,7 @@ var encodings = []struct {
 		"",
 		"Windows1255",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-windows-1255.txt",
+		"https://encoding.spec.whatwg.org/index-windows-1255.txt",
 	},
 	{
 		"Windows 1256",
@@ -343,7 +343,7 @@ var encodings = []struct {
 		"",
 		"Windows1256",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-windows-1256.txt",
+		"https://encoding.spec.whatwg.org/index-windows-1256.txt",
 	},
 	{
 		"Windows 1257",
@@ -351,7 +351,7 @@ var encodings = []struct {
 		"",
 		"Windows1257",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-windows-1257.txt",
+		"https://encoding.spec.whatwg.org/index-windows-1257.txt",
 	},
 	{
 		"Windows 1258",
@@ -359,12 +359,12 @@ var encodings = []struct {
 		"",
 		"Windows1258",
 		encoding.ASCIISub,
-		"http://encoding.spec.whatwg.org/index-windows-1258.txt",
+		"https://encoding.spec.whatwg.org/index-windows-1258.txt",
 	},
 	{
 		"X-User-Defined",
 		"XUserDefined",
-		"It is defined at http://encoding.spec.whatwg.org/#x-user-defined",
+		"It is defined at https://encoding.spec.whatwg.org/#x-user-defined",
 		"XUserDefined",
 		encoding.ASCIISub,
 		ascii +
@@ -475,7 +475,7 @@ func main() {
 		all = append(all, varNames...)
 		varName := varNames[0]
 		switch {
-		case strings.HasPrefix(e.mapping, "http://encoding.spec.whatwg.org/"):
+		case strings.HasPrefix(e.mapping, "https://encoding.spec.whatwg.org/"):
 			e.mapping = getWHATWG(e.mapping)
 		case strings.HasPrefix(e.mapping, "http://source.icu-project.org/repos/icu/data/trunk/charset/data/ucm/"):
 			e.mapping = getUCM(e.mapping)

@@ -94,7 +94,7 @@
 //
 // References
 //
-// BCP 47 - Tags for Identifying Languages http://tools.ietf.org/html/bcp47
+// BCP 47 - Tags for Identifying Languages https://tools.ietf.org/html/bcp47
 //
 package language // import "golang.org/x/text/language"
 

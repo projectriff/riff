@@ -124,7 +124,7 @@ func (e *Encoder) Writer(w io.Writer) io.Writer {
 }
 
 // ASCIISub is the ASCII substitute character, as recommended by
-// http://unicode.org/reports/tr36/#Text_Comparison
+// https://unicode.org/reports/tr36/#Text_Comparison
 const ASCIISub = '\x1a'
 
 // Nop is the nop encoding. Its transformed bytes are the same as the source
@@ -145,7 +145,7 @@ func (nop) NewEncoder() *Encoder {
 // the replacement encoding yields the same as the source bytes except that
 // invalid UTF-8 is converted to '\uFFFD'.
 //
-// It is defined at http://encoding.spec.whatwg.org/#replacement
+// It is defined at https://encoding.spec.whatwg.org/#replacement
 var Replacement Encoding = replacement{}
 
 type replacement struct{}

@@ -108,7 +108,7 @@ var methodAcceptsRequestBody = map[string]bool{
 
 // urlString returns a valid string given a URL. This function is necessary because
 // the String method of URL doesn't correctly handle URLs with non-empty Opaque values.
-// See http://code.google.com/p/go/issues/detail?id=4860.
+// See https://code.google.com/p/go/issues/detail?id=4860.
 func urlString(u *url.URL) string {
 	if u.Opaque == "" || strings.HasPrefix(u.Opaque, "//") {
 		return u.String()
