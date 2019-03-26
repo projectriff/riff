@@ -27,10 +27,14 @@ import (
 	"github.com/projectriff/riff/pkg/fileutils"
 	"github.com/projectriff/riff/pkg/kubectl"
 
+	lcimg "github.com/buildpack/lifecycle/image"
 	"github.com/buildpack/pack"
-	build "github.com/knative/build/pkg/client/clientset/versioned"
-	eventing "github.com/knative/eventing/pkg/client/clientset/versioned"
-	serving "github.com/knative/serving/pkg/client/clientset/versioned"
+	"github.com/buildpack/pack/cache"
+	"github.com/buildpack/pack/docker"
+	"github.com/buildpack/pack/logging"
+	kbuild "github.com/knative/build/pkg/client/clientset/versioned"
+	keventing "github.com/knative/eventing/pkg/client/clientset/versioned"
+	kserving "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/core/kustomize"
 	"github.com/projectriff/riff/pkg/env"
@@ -42,7 +46,7 @@ import (
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.ClientConfig, kubernetes.Interface, eventing.Interface, serving.Interface, build.Interface, error) {
+var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.ClientConfig, kubernetes.Interface, keventing.Interface, kserving.Interface, kbuild.Interface, error) {
 
 	kubeconfig, err := resolveHomePath(kubeconfig)
 	if err != nil {
@@ -61,15 +65,15 @@ var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
-	eventingClientSet, err := eventing.NewForConfig(cfg)
+	eventingClientSet, err := keventing.NewForConfig(cfg)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
-	servingClientSet, err := serving.NewForConfig(cfg)
+	servingClientSet, err := kserving.NewForConfig(cfg)
 	if err != nil {
 		return nil, nil, nil, nil, nil, err
 	}
-	buildClientSet, err := build.NewForConfig(cfg)
+	buildClientSet, err := kbuild.NewForConfig(cfg)
 
 	return clientConfig, kubeClientSet, eventingClientSet, servingClientSet, buildClientSet, err
 }
@@ -228,7 +232,57 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client) {
 
 type buildpackBuilder struct{}
 
-func (*buildpackBuilder) Build(appDir, buildImage, runImage, repoName string, log io.Writer) error {
+func (*buildpackBuilder) Build(repoName string, options core.BuildOptions, log io.Writer) error {
 	ctx := context.TODO()
-	return pack.Build(ctx, log, log, appDir, buildImage, runImage, repoName, true, false)
+	appDir := options.LocalPath
+	builderImage := options.BuildpackImage
+	runImage := options.RunImage
+	publish := true
+	clearCache := false
+	outWriter := log
+	errWriter := log
+	// NOTE below this line is copied directly from github.com/buildpack/pack.Build, once pack offers a proper client we can consume it
+	// TODO: Receive Cache as an argument of this function
+	dockerClient, err := docker.New()
+	if err != nil {
+		return err
+	}
+	c, err := cache.New(repoName, dockerClient)
+	if err != nil {
+		return err
+	}
+	imageFactory, err := lcimg.NewFactory(lcimg.WithOutWriter(outWriter))
+	if err != nil {
+		return err
+	}
+	imageFetcher := &pack.ImageFetcher{
+		Factory: imageFactory,
+		Docker:  dockerClient,
+	}
+	logger := logging.NewLogger(outWriter, errWriter, true, false)
+	bf, err := pack.DefaultBuildFactory(logger, c, dockerClient, imageFetcher)
+	if err != nil {
+		return err
+	}
+	b, err := bf.BuildConfigFromFlags(ctx,
+		&pack.BuildFlags{
+			AppDir:     appDir,
+			Builder:    builderImage,
+			RunImage:   runImage,
+			RepoName:   repoName,
+			Publish:    publish,
+			ClearCache: clearCache,
+			// riff: add Env support
+			Env: []string{
+				fmt.Sprintf("%s=%s", "RIFF", "true"),
+				fmt.Sprintf("%s=%s", "RIFF_ARTIFACT", options.Artifact),
+				fmt.Sprintf("%s=%s", "RIFF_HANDLER", options.Handler),
+				fmt.Sprintf("%s=%s", "RIFF_OVERRIDE", options.Invoker),
+			},
+			// /riff
+		})
+	if err != nil {
+		return err
+	}
+	return b.Run(ctx)
 }

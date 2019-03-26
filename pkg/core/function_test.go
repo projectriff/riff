@@ -18,8 +18,6 @@ package core_test
 
 import (
 	"io/ioutil"
-	"os"
-	"path/filepath"
 
 	build "github.com/knative/build/pkg/apis/build/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
@@ -113,7 +111,7 @@ var _ = Describe("Function", func() {
 
 			BeforeEach(func() {
 				createFunctionOptions.LocalPath = workDir
-				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			})
 
 			Context("when buildpack and run images are provided", func() {
@@ -155,32 +153,6 @@ var _ = Describe("Function", func() {
 					// The returned service should be the input to service create, not the output.
 					Expect(service).To(Equal(createdService))
 					Expect(cache).To(BeNil())
-				})
-			})
-
-			Context("when riff.toml is already present", func() {
-				BeforeEach(func() {
-					if err := ioutil.WriteFile(filepath.Join(workDir, "riff.toml"), []byte{}, os.FileMode(0400)); err != nil {
-						panic(err)
-					}
-				})
-
-				It("should fail", func() {
-					msg := "found riff.toml file in local path. Please delete this file and let the CLI create it from flags"
-					Expect(err).To(MatchError(msg))
-				})
-			})
-
-			Context("when riff.toml is not initially present", func() {
-				BeforeEach(func() {
-					createFunctionOptions.BuildpackImage = "some/buildpack"
-					createFunctionOptions.RunImage = "some/run"
-				})
-
-				It("should clean up created riff.toml upon function creation", func() {
-					Expect(err).To(Not(HaveOccurred()))
-					Expect(test_support.FileExists(filepath.Join(workDir, "riff.toml"))).To(BeFalse(),
-						"expected riff.toml to be deleted upon function creation completion")
 				})
 			})
 		})
@@ -230,7 +202,7 @@ var _ = Describe("Function", func() {
 					},
 				}
 				updateFunctionOptions.LocalPath = workDir
-				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			})
 
 			It("should succeed", func() {
@@ -284,37 +256,11 @@ var _ = Describe("Function", func() {
 		Context("when building locally", func() {
 			BeforeEach(func() {
 				buildFunctionOptions.LocalPath = workDir
-				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			})
 
 			It("should succeed", func() {
 				Expect(err).NotTo(HaveOccurred())
-			})
-
-			Context("when riff.toml is already present", func() {
-				BeforeEach(func() {
-					if err := ioutil.WriteFile(filepath.Join(workDir, "riff.toml"), []byte{}, os.FileMode(0400)); err != nil {
-						panic(err)
-					}
-				})
-
-				It("should fail", func() {
-					msg := "found riff.toml file in local path. Please delete this file and let the CLI create it from flags"
-					Expect(err).To(MatchError(msg))
-				})
-			})
-
-			Context("when riff.toml is not initially present", func() {
-				BeforeEach(func() {
-					buildFunctionOptions.BuildpackImage = "some/buildpack"
-					buildFunctionOptions.RunImage = "some/run"
-				})
-
-				It("should clean up created riff.toml upon function creation", func() {
-					Expect(err).To(Not(HaveOccurred()))
-					Expect(test_support.FileExists(filepath.Join(workDir, "riff.toml"))).To(BeFalse(),
-						"expected riff.toml to be deleted upon function creation completion")
-				})
 			})
 		})
 
