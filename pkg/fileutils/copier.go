@@ -41,7 +41,7 @@ const (
 type Copier interface {
 	/*
 		Copy copies a source file to a destination file. File contents are copied. File mode and permissions
-		(as described in http://golang.org/pkg/os/#FileMode) are copied.
+		(as described in https://golang.org/pkg/os/#FileMode) are copied.
 
 		Directories are copied, along with their contents.
 
