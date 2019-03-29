@@ -46,7 +46,7 @@ steps:
     go get github.com/jstemmer/go-junit-report
     go get github.com/axw/gocov/gocov
     go get github.com/AlekSi/gocov-xml
-    go get -u gopkg.in/matm/v1/gocov-html
+    go get -u github.com/matm/gocov-html
 
     go build -v ./cmd/riff
     go test -v -coverprofile=coverage.txt -covermode count ./... 2>&1 | tee >(go-junit-report > report.xml)
