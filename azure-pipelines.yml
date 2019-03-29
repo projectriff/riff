@@ -38,33 +38,53 @@ steps:
     mv !(gopath) '$(modulePath)'
     echo '##vso[task.prependpath]$(GOBIN)'
     echo '##vso[task.prependpath]$(GOROOT)/bin'
-  displayName: 'Set up the Go workspace'
 
-- bash: |
-    go version
+    set -o errexit
+    set -o nounset
+    set -o pipefail
 
     go get github.com/jstemmer/go-junit-report
     go get github.com/axw/gocov/gocov
     go get github.com/AlekSi/gocov-xml
     go get -u github.com/matm/gocov-html
+  displayName: 'Set up the Go workspace'
+
+- bash: |
+    set -o errexit
+    set -o nounset
+    set -o pipefail
+
+    go version
 
     go build -v ./cmd/riff
     go test -v -coverprofile=coverage.txt -covermode count ./... 2>&1 | tee >(go-junit-report > report.xml)
-
-    gocov convert coverage.txt > coverage.json
-    gocov-xml < coverage.json > coverage.xml
-    mkdir coverage
-    gocov-html < coverage.json > coverage/index.html
   workingDirectory: '$(modulePath)'
   displayName: 'Run unit test'
 
+- bash: |
+    set -o errexit
+    set -o nounset
+    set -o pipefail
+
+    if [ -f "coverage.txt" ]; then
+      gocov convert coverage.txt > coverage.json
+      gocov-xml < coverage.json > coverage.xml
+      mkdir coverage
+      gocov-html < coverage.json > coverage/index.html
+    fi
+  condition: succeededOrFailed()
+  workingDirectory: '$(modulePath)'
+  displayName: 'Process test coverage'
+
 - task: PublishTestResults@2
+  condition: succeededOrFailed()
   inputs:
     testRunner: JUnit
     testResultsFiles: $(System.DefaultWorkingDirectory)/**/report.xml
 
 - task: PublishCodeCoverageResults@1
+  condition: succeededOrFailed()
   inputs:
-    codeCoverageTool: Cobertura 
+    codeCoverageTool: Cobertura
     summaryFileLocation: $(System.DefaultWorkingDirectory)/**/coverage.xml
     reportDirectory: $(System.DefaultWorkingDirectory)/**/coverage
