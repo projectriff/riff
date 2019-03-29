@@ -22,8 +22,7 @@ variables:
   GOBIN:  '$(GOPATH)/bin' # Go binaries path
   GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
   GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
-  GO111MODULE: 'on'
-  modulePath: '$(GOPATH)/src/github.com/$(build.repository.name)' # Path to the module's code
+  modulePath: '$(build.repository.name)' # Path to the module's code
 
 steps:
 - task: GoTool@0
