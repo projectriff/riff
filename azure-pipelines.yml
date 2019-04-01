@@ -29,6 +29,8 @@ jobs:
   steps:
   - template: ci/install-go-steps.yml
   - template: ci/install-gcloud.yml
+    parameters:
+      workingDirectory: '$(modulePath)'
   - bash: ./ci/stage.sh
     env:
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
