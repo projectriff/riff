@@ -43,7 +43,21 @@ jobs:
     GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
     modulePath: '$(build.repository.name)' # Path to the module's code
   steps:
-  - template: ci/stage-steps.yml
+  - task: GoTool@0
+    inputs:
+      version: 1.12
+  - bash: |
+      mkdir -p '$(GOBIN)'
+      mkdir -p '$(GOPATH)/pkg'
+      mkdir -p '$(modulePath)'
+      shopt -s extglob
+      shopt -s dotglob
+      mv !(gopath) '$(modulePath)'
+      echo '##vso[task.prependpath]$(GOBIN)'
+      echo '##vso[task.prependpath]$(GOROOT)/bin'
+    displayName: 'Set up the Go workspace'
+  - script: .travis/stage.sh
+    displayName: 'Stage riff release artifacts'
 - job: fats
   dependsOn: stage
   strategy:
@@ -67,13 +81,13 @@ jobs:
   - script: sudo apt-get update && sudo apt-get install docker.io=18.06.1-0ubuntu1.2~16.04.1
     condition: and(succeeded(), eq(variables['CLUSTER'], 'minikube'))
     displayName: 'Downgrade Docker'
-  - bash: ./tests/run.sh
+  - bash: ./.travis/fats.sh
     env:
       DOCKER_USERNAME: '$(DockerUsername)'
       DOCKER_PASSWORD: '$(DockerPassword)'
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
     displayName: 'Run FATS'
-  - bash: ./tests/cleanup.sh
+  - bash: ./.travis/fats-cleanup.sh
     env:
       DOCKER_USERNAME: '$(DockerUsername)'
       DOCKER_PASSWORD: '$(DockerPassword)'

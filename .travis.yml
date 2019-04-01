@@ -18,27 +18,27 @@ matrix:
     before_script: make gen-mocks && test $(git status --porcelain | wc -l) -eq 0 || exit 1
     script: make build test verify-docs
   - stage: fats-lite
-    script: .travis/fats.sh lite
-    after_script: .travis/fats-cleanup.sh
+    script: ci/fats.sh lite
+    after_script: ci/fats-cleanup.sh
     env:
     - CLUSTER=minikube
     - REGISTRY=minikube
   - stage: stage
-    script: .travis/stage.sh
+    script: ci/stage.sh
   - stage: fats
-    script: .travis/fats.sh
-    after_script: .travis/fats-cleanup.sh
+    script: ci/fats.sh
+    after_script: ci/fats-cleanup.sh
     env:
     - CLUSTER=minikube
     - REGISTRY=dockerhub
   - stage: fats
-    script: .travis/fats.sh
-    after_script: .travis/fats-cleanup.sh
+    script: ci/fats.sh
+    after_script: ci/fats-cleanup.sh
     env:
     - CLUSTER=gke
     - REGISTRY=gcr
   - stage: publish
-    script: .travis/publish.sh
+    script: ci/publish.sh
 stages:
 - test
 - name: fats-lite
