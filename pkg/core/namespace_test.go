@@ -361,6 +361,36 @@ var _ = Describe("namespace", func() {
 			Expect(err).To(MatchError(expectedError))
 		})
 
+		It("should not fail if the image prefix deletion returns a not found error", func() {
+			options := core.NamespaceInitOptions{
+				Manifest:      "stable",
+				NamespaceName: "foo",
+				NoSecret:      true,
+			}
+			namespaceResource := unsafeAbs("fixtures/initial_pvc.yaml")
+			manifests["stable"] = &core.Manifest{
+				Namespace: []string{namespaceResource},
+			}
+			namespace := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "foo"}}
+			mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
+
+			serviceAccount := &v1.ServiceAccount{}
+			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
+			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+			mockConfigMaps.On("Delete", core.BuildConfigMapName, mock.Anything).Return(notFound())
+			customizedResourceContents := contentsOf("fixtures/kustom_pvc.yaml")
+			mockKustomizer.On("ApplyLabels",
+				mock.MatchedBy(urlPath(namespaceResource)),
+				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
+				Return(customizedResourceContents, nil)
+			kubeCtl.On("ExecStdin", []string{"apply", "-n", "foo", "-f", "-"}, &customizedResourceContents).
+				Return("done!", nil)
+
+			err := client.NamespaceInit(manifests, options)
+
+			Expect(err).To(BeNil())
+		})
+
 		It("should fail if the PVC label kustomization fails", func() {
 			options := core.NamespaceInitOptions{
 				Manifest:      "stable",

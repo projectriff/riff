@@ -234,7 +234,10 @@ func (c *client) initImagePrefix(options *NamespaceInitOptions) error {
 	}
 
 	fmt.Printf("No image prefix set, resetting possibly existing ones. The --image argument will be required for commands\n")
-	return c.DeleteDefaultBuildImagePrefix(options.NamespaceName)
+	if err := c.DeleteDefaultBuildImagePrefix(options.NamespaceName); err != nil && !errors.IsNotFound(err) {
+		return err
+	}
+	return nil
 }
 
 func (c *client) applyManifest(manifest *Manifest, options *NamespaceInitOptions, initLabels map[string]string) error {
