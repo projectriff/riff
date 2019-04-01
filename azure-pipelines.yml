@@ -59,7 +59,7 @@ steps:
     go build -v ./cmd/riff
     go test -v -coverprofile=coverage.txt -covermode count ./... 2>&1 | tee >(go-junit-report > report.xml)
   # TODO drop this condition once windows tests are passing
-  condition: and(succeeded(), nq(variables['Agent.OS'], 'Windows_NT'))
+  condition: and(succeeded(), ne(variables['Agent.OS'], 'Windows_NT'))
   workingDirectory: '$(modulePath)'
   displayName: 'Run unit test'
 
