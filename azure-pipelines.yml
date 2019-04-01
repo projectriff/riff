@@ -7,13 +7,13 @@ strategy:
   matrix:
     linux:
       imageName: 'ubuntu-16.04'
-      continueOnUnitTestError: 'false'
+      continueOnError: 'false'
     mac:
       imageName: 'macos-10.13'
-      continueOnUnitTestError: 'false'
+      continueOnError: 'false'
     windows:
       imageName: 'vs2017-win2016'
-      continueOnUnitTestError: 'true'
+      continueOnError: 'true'
 
 trigger:
 - master
@@ -26,6 +26,7 @@ variables:
   GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
   GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
   modulePath: '$(build.repository.name)' # Path to the module's code
+  continueOnUnitTestError: '$(continueOnError)'
 
 steps:
 - task: GoTool@0
