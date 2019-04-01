@@ -1,28 +1,19 @@
-# Go
-# Build your Go project.
-# Add steps that test, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/go
-
-strategy:
-  matrix:
-    linux:
-      imageName: 'ubuntu-16.04'
-    mac:
-      imageName: 'macos-10.13'
-    windows:
-      imageName: 'vs2017-win2016'
-
-trigger:
-- master
-
-pool:
-  vmImage: $(imageName)
-
-variables:
-  GOBIN:  '$(GOPATH)/bin' # Go binaries path
-  GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
-  GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
-  modulePath: '$(build.repository.name)' # Path to the module's code
-
-steps:
-- template: ci/unit-test-steps.yml
+jobs:
+- job: unit
+  strategy:
+    matrix:
+      linux:
+        imageName: 'ubuntu-16.04'
+      mac:
+        imageName: 'macos-10.13'
+      windows:
+        imageName: 'vs2017-win2016'
+  pool:
+    vmImage: $(imageName)
+  variables:
+    GOBIN:  '$(GOPATH)/bin' # Go binaries path
+    GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
+    GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
+    modulePath: '$(build.repository.name)' # Path to the module's code
+  steps:
+  - template: ci/unit-test-steps.yml
