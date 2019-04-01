@@ -35,6 +35,8 @@ jobs:
       ./ci/fats-fetch.sh $fats_dir $fats_refspec $fats_repo
 
       $fats_dir/install.sh gcloud
+    env:
+      GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
     workingDirectory: '$(modulePath)'
     displayName: 'Install gcloud'
   - bash: ./ci/stage.sh
