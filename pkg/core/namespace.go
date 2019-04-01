@@ -191,7 +191,10 @@ func (c *client) NamespaceInit(manifests map[string]*Manifest, options Namespace
 			return err
 		}
 	} else {
-		fmt.Printf("Skipping setting default image prefix, the --image argument will be required for commands\n")
+		fmt.Printf("No image prefix set, resetting possibly existing ones. The --image argument will be required for commands\n")
+		if err := c.DeleteDefaultBuildImagePrefix(options.NamespaceName); err != nil {
+			return err
+		}
 	}
 
 	for _, release := range manifest.Namespace {
