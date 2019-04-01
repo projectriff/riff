@@ -28,17 +28,7 @@ jobs:
     modulePath: '$(build.repository.name)' # Path to the module's code
   steps:
   - template: ci/install-go-steps.yml
-  - bash: |
-      fats_dir=`pwd`/fats
-      fats_repo="projectriff/fats"
-      fats_refspec=61c490713c71c354051534349e3ba0c99191ae7d # projectriff/fats master as of 2019-03-31
-      ./ci/fats-fetch.sh $fats_dir $fats_refspec $fats_repo
-
-      $fats_dir/install.sh gcloud
-    env:
-      GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
-    workingDirectory: '$(modulePath)'
-    displayName: 'Install gcloud'
+  - template: ci/install-gcloud.yml
   - bash: ./ci/stage.sh
     env:
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
@@ -64,6 +54,7 @@ jobs:
     CLUSTER_NAME: 'fats-$(Build.BuildId)'
     NAMESPACE: '$(CLUSTER_NAME)'
   steps:
+  - template: ci/install-gcloud.yml
   - script: sudo apt-get update && sudo apt-get install docker.io=18.06.1-0ubuntu1.2~16.04.1
     condition: and(succeeded(), eq(variables['CLUSTER'], 'minikube'))
     displayName: 'Downgrade Docker'
