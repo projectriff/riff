@@ -7,13 +7,13 @@ strategy:
   matrix:
     linux:
       imageName: 'ubuntu-16.04'
-      continueOnUnitTestError: false
+      continueOnUnitTestError: 'false'
     mac:
       imageName: 'macos-10.13'
-      continueOnUnitTestError: false
+      continueOnUnitTestError: 'false'
     windows:
       imageName: 'vs2017-win2016'
-      continueOnUnitTestError: true
+      continueOnUnitTestError: 'true'
 
 trigger:
 - master
