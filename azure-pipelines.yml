@@ -1,27 +1,15 @@
 jobs:
-- job: 'unit_linux'
+- job: unit
+  strategy:
+    matrix:
+      linux:
+        imageName: 'ubuntu-16.04'
+      mac:
+        imageName: 'macos-10.13'
+      windows:
+        imageName: 'vs2017-win2016'
   pool:
-    vmImage: 'ubuntu-16.04'
-  variables:
-    GOBIN:  '$(GOPATH)/bin' # Go binaries path
-    GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
-    GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
-    modulePath: '$(build.repository.name)' # Path to the module's code
-  steps:
-  - template: ci/unit-test-steps.yml
-- job: 'unit_mac'
-  pool:
-    vmImage: 'macos-10.13'
-  variables:
-    GOBIN:  '$(GOPATH)/bin' # Go binaries path
-    GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
-    GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
-    modulePath: '$(build.repository.name)' # Path to the module's code
-  steps:
-  - template: ci/unit-test-steps.yml
-- job: 'unit_windows'
-  pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: $(imageName)
   variables:
     GOBIN:  '$(GOPATH)/bin' # Go binaries path
     GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
@@ -30,11 +18,7 @@ jobs:
   steps:
   - template: ci/unit-test-steps.yml
 - job: stage
-  dependsOn:
-  # yes, we must specify each unit test jobs
-  - 'unit_linux'
-  - 'unit_mac'
-  - 'unit_windows'
+  dependsOn: unit
   pool:
     vmImage: ubuntu-16.04
   variables:
@@ -56,7 +40,7 @@ jobs:
       echo '##vso[task.prependpath]$(GOBIN)'
       echo '##vso[task.prependpath]$(GOROOT)/bin'
     displayName: 'Set up the Go workspace'
-  - script: .travis/stage.sh
+  - script: ./ci/stage.sh
     displayName: 'Stage riff release artifacts'
 - job: fats
   dependsOn: stage
@@ -81,13 +65,13 @@ jobs:
   - script: sudo apt-get update && sudo apt-get install docker.io=18.06.1-0ubuntu1.2~16.04.1
     condition: and(succeeded(), eq(variables['CLUSTER'], 'minikube'))
     displayName: 'Downgrade Docker'
-  - bash: ./.travis/fats.sh
+  - bash: ./ci/fats.sh
     env:
       DOCKER_USERNAME: '$(DockerUsername)'
       DOCKER_PASSWORD: '$(DockerPassword)'
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
     displayName: 'Run FATS'
-  - bash: ./.travis/fats-cleanup.sh
+  - bash: ./ci/fats-cleanup.sh
     env:
       DOCKER_USERNAME: '$(DockerUsername)'
       DOCKER_PASSWORD: '$(DockerPassword)'
