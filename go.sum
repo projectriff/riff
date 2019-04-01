@@ -14,8 +14,6 @@ github.com/PuerkitoBio/purell v1.1.0/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbt
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 h1:d+Bc7a5rLufV/sSk/8dngufqelfh6jnri85riMAaF/M=
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
 github.com/ajg/form v0.0.0-20160822230020-523a5da1a92f/go.mod h1:uL1WgH+h2mgNtvBq0339dVnzXdBETtL2LeUXaIv25UY=
-github.com/axw/gocov v0.0.0-20170322000131-3a69a0d2a4ef h1:kh7Fi8sfEY7aCl42VEEvGv7lez2YCOmO120N1fASWGc=
-github.com/axw/gocov v0.0.0-20170322000131-3a69a0d2a4ef/go.mod h1:pc6XrbIn8RLeVSNzXCZKXNst+RTE5Ju/nySYl1Wc0B4=
 github.com/boz/go-lifecycle v0.0.0-20170921044039-c39961a5a0ce h1:0JwNiZHJYMnm4iegzsrD8e4gf/KOgcL9p40K2JuHCXQ=
 github.com/boz/go-lifecycle v0.0.0-20170921044039-c39961a5a0ce/go.mod h1:G79hJVWe2mWH8TqGZP0wFm+RtZkh5t2AOCYz3z7nhjQ=
 github.com/boz/go-logutil v0.0.0-20170814044541-9d21a9e4757d h1:BO66h+W5/FyxkVJW0gJSstHU7peSTlf9IYEv/aotlUA=
@@ -309,8 +307,6 @@ github.com/markbates/safe v1.0.0/go.mod h1:nAqgmRi7cY2nqMc92/bSEeQA+R4OheNU2T1kN
 github.com/markbates/safe v1.0.1/go.mod h1:nAqgmRi7cY2nqMc92/bSEeQA+R4OheNU2T1kNSCBdG0=
 github.com/markbates/sigtx v1.0.0/go.mod h1:QF1Hv6Ic6Ca6W+T+DL0Y/ypborFKyvUY9HmuCD4VeTc=
 github.com/markbates/willie v1.0.9/go.mod h1:fsrFVWl91+gXpx/6dv715j7i11fYPfZ9ZGfH0DQzY7w=
-github.com/matm/gocov-html v0.0.0-20160206185555-f6dd0fd0ebc7 h1:IpusRbIZ1Z5j96YpxRD7vTwpfR7Cv3vgETmilcHF5BE=
-github.com/matm/gocov-html v0.0.0-20160206185555-f6dd0fd0ebc7/go.mod h1:2amKdhwK7Jz2kRhLYmUH2NIOeBs6Tmhpy5UgDXhRbHc=
 github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a h1:+J2gw7Bw77w/fbK7wnNJJDKmw1IbWft2Ul5BzrG1Qm8=
 github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a/go.mod h1:M1qoD/MqPgTZIk0EWKB38wE28ACRfVcn+cU08jyArI0=
 github.com/mattn/go-colorable v0.0.9 h1:UVL0vNpWh04HeJXV0KLcaT7r06gOH2l4OW6ddYRUIY4=

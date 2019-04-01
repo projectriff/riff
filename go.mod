@@ -1,7 +1,6 @@
 module github.com/projectriff/riff
 
 require (
-	github.com/axw/gocov v0.0.0-20170322000131-3a69a0d2a4ef // indirect
 	github.com/boz/go-lifecycle v0.0.0-20170921044039-c39961a5a0ce // indirect
 	github.com/boz/go-logutil v0.0.0-20170814044541-9d21a9e4757d
 	github.com/boz/kail v0.6.0
@@ -28,7 +27,6 @@ require (
 	github.com/knative/pkg v0.0.0-20190219005745-729d5ada5f62
 	github.com/knative/serving v0.4.0
 	github.com/markbates/inflect v1.0.4 // indirect
-	github.com/matm/gocov-html v0.0.0-20160206185555-f6dd0fd0ebc7 // indirect
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742 // indirect
