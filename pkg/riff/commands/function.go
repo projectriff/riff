@@ -114,7 +114,7 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.C
 					return err
 				}
 			} else {
-				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "\nriff function create: built image %s for service %s.\n", f.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Image, f.Name)
+				_, _ = fmt.Fprintf(cmd.OutOrStdout(), "\n%s function create: built image %s for service %s.\n", env.Cli.Name, f.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Image, f.Name)
 				PrintSuccessfulCompletion(cmd)
 
 				if !createFunctionOptions.Verbose && !createFunctionOptions.Wait {
