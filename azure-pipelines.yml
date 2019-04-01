@@ -32,6 +32,7 @@ jobs:
       pwd
       find .
       ./ci/stage.sh
+    workingDirectory: '$(modulePath)'
     displayName: 'Stage riff release artifacts'
 - job: fats
   dependsOn: stage
@@ -61,6 +62,7 @@ jobs:
       DOCKER_USERNAME: '$(DockerUsername)'
       DOCKER_PASSWORD: '$(DockerPassword)'
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
+    workingDirectory: '$(modulePath)'
     displayName: 'Run FATS'
   - bash: ./ci/fats-cleanup.sh
     env:
@@ -68,4 +70,5 @@ jobs:
       DOCKER_PASSWORD: '$(DockerPassword)'
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
     condition: always()
+    workingDirectory: '$(modulePath)'
     displayName: 'Cleanup FATS'
