@@ -28,10 +28,10 @@ jobs:
     modulePath: '$(build.repository.name)' # Path to the module's code
   steps:
   - template: ci/install-go-steps.yml
-  - bash: |
-      pwd
-      find .
-      ./ci/stage.sh
+  - bash: curl https://sdk.cloud.google.com | bash
+  - bash: ./ci/stage.sh
+    env:
+      GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
     workingDirectory: '$(modulePath)'
     displayName: 'Stage riff release artifacts'
 - job: fats
