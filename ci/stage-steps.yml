@@ -14,5 +14,5 @@ steps:
     echo '##vso[task.prependpath]$(GOROOT)/bin'
   displayName: 'Set up the Go workspace'
 
-- script: .travis/stage.sh
+- script: ../.travis/stage.sh
   displayName: 'Stage riff release artifacts'

@@ -7,10 +7,10 @@ echo "Eventing"
 
 test_name=echo
 
-kail --ns $NAMESPACE > $test_name.logs &
+kail --ns $NAMESPACE > $test_name.logs 2>&1 &
 kail_test_pid=$!
 
-kail --ns knative-serving --ns knative-eventing > $test_name.controller.logs &
+kail --ns knative-serving --ns knative-eventing > $test_name.controller.logs 2>&1 &
 kail_controller_pid=$!
 
 kubectl apply -f https://storage.googleapis.com/knative-releases/eventing-sources/previous/v0.3.0/release.yaml
