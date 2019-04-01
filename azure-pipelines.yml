@@ -7,13 +7,10 @@ strategy:
   matrix:
     linux:
       imageName: 'ubuntu-16.04'
-      continueOnError: 'false'
     mac:
       imageName: 'macos-10.13'
-      continueOnError: 'false'
     windows:
       imageName: 'vs2017-win2016'
-      continueOnError: 'true'
 
 trigger:
 - master
@@ -26,7 +23,6 @@ variables:
   GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
   GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
   modulePath: '$(build.repository.name)' # Path to the module's code
-  continueOnUnitTestError: '$(continueOnError)'
 
 steps:
 - task: GoTool@0
@@ -62,9 +58,25 @@ steps:
 
     go build -v ./cmd/riff
     go test -v -coverprofile=coverage.txt -covermode count ./... 2>&1 | tee >(go-junit-report > report.xml)
-  continueOnError: '$(continueOnUnitTestError)'
+  # TODO drop this condition once windows tests are passing
+  condition: and(succeeded(), nq(variables['Agent.OS'], 'Windows_NT'))
   workingDirectory: '$(modulePath)'
   displayName: 'Run unit test'
+
+# TODO drop this step once windows tests are passing
+- bash: |
+    set -o errexit
+    set -o nounset
+    set -o pipefail
+
+    go version
+
+    go build -v ./cmd/riff
+    go test -v -coverprofile=coverage.txt -covermode count ./... 2>&1 | tee >(go-junit-report > report.xml)
+  condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))
+  continueOnError: true
+  workingDirectory: '$(modulePath)'
+  displayName: 'Run unit test Windows'
 
 - bash: |
     set -o errexit
