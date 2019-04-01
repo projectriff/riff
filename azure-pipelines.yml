@@ -29,12 +29,13 @@ jobs:
   steps:
   - template: ci/install-go-steps.yml
   - bash: |
-      local fats_dir=`pwd`/fats
-      local fats_repo="projectriff/fats"
-      local fats_refspec=61c490713c71c354051534349e3ba0c99191ae7d # projectriff/fats master as of 2019-03-31
+      fats_dir=`pwd`/fats
+      fats_repo="projectriff/fats"
+      fats_refspec=61c490713c71c354051534349e3ba0c99191ae7d # projectriff/fats master as of 2019-03-31
       ./ci/fats-fetch.sh $fats_dir $fats_refspec $fats_repo
 
       $fats_dir/install.sh kubectl
+    workingDirectory: '$(modulePath)'
     displayName: 'Install gcloud'
   - bash: ./ci/stage.sh
     env:
