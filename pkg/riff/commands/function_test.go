@@ -117,7 +117,7 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{}
 			options.EnvFrom = []string{}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -137,7 +137,7 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{}
 			options.EnvFrom = []string{}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -154,7 +154,7 @@ var _ = Describe("The riff function create command", func() {
 			options.EnvFrom = []string{}
 
 			asMock.On("DefaultBuildImagePrefix", "").Return("defaulted-prefix", nil)
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("defaulted-prefix/square"), nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -171,7 +171,7 @@ var _ = Describe("The riff function create command", func() {
 			options.EnvFrom = []string{}
 
 			asMock.On("DefaultBuildImagePrefix", "").Return("defaulted-prefix", nil)
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("defaulted-prefix/square-custom"), nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -204,7 +204,7 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{"FOO=bar", "BAZ=qux"}
 			options.EnvFrom = []string{"secretKeyRef:foo:bar"}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(nil, nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -246,11 +246,11 @@ var _ = Describe("The riff function create command", func() {
 			options.Image = "foo/bar"
 			options.Env = []string{}
 			options.EnvFrom = []string{}
-			function := v1alpha1.Service{}
+			function := svcWithBuiltImage("foo/bar")
 			function.Name = "square"
 			cache := corev1.PersistentVolumeClaim{}
 			cache.Name = "square-build-cache"
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&function, &cache, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(function, &cache, nil)
 			stdout := &strings.Builder{}
 			fc.SetOutput(stdout)
 
@@ -273,13 +273,13 @@ var _ = Describe("The riff function create command", func() {
 			options.Image = "foo/bar"
 			options.Env = []string{}
 			options.EnvFrom = []string{}
-			function := v1alpha1.Service{}
+			function := svcWithBuiltImage("foo/bar")
 			function.Name = "square"
 			function.Namespace = "ns"
 			cache := corev1.PersistentVolumeClaim{}
 			cache.Name = "square-build-cache"
 			cache.Namespace = "ns"
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&function, &cache, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(function, &cache, nil)
 			stdout := &strings.Builder{}
 			fc.SetOutput(stdout)
 
@@ -462,3 +462,21 @@ var _ = Describe("The riff function build command", func() {
 
 	})
 })
+
+func svcWithBuiltImage(img string) *v1alpha1.Service {
+	return &v1alpha1.Service{
+		Spec: v1alpha1.ServiceSpec{
+			RunLatest: &v1alpha1.RunLatestType{
+				Configuration: v1alpha1.ConfigurationSpec{
+					RevisionTemplate: v1alpha1.RevisionTemplateSpec{
+						Spec: v1alpha1.RevisionSpec{
+							Container: corev1.Container{
+								Image: img,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
