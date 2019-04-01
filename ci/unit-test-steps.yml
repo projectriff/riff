@@ -1,27 +1,7 @@
 steps:
-- task: GoTool@0
-  inputs:
-    version: 1.12
+- template: install-go-steps.yml
 
-- bash: |
-    mkdir -p '$(GOBIN)'
-    mkdir -p '$(GOPATH)/pkg'
-    mkdir -p '$(modulePath)'
-    shopt -s extglob
-    shopt -s dotglob
-    mv !(gopath) '$(modulePath)'
-    echo '##vso[task.prependpath]$(GOBIN)'
-    echo '##vso[task.prependpath]$(GOROOT)/bin'
-
-    set -o errexit
-    set -o nounset
-    set -o pipefail
-
-    go get github.com/jstemmer/go-junit-report
-    go get github.com/axw/gocov/gocov
-    go get github.com/AlekSi/gocov-xml
-    go get -u github.com/matm/gocov-html
-  displayName: 'Set up the Go workspace'
+- template: install-coverage-steps.yml
 
 - bash: |
     set -o errexit
@@ -52,30 +32,4 @@ steps:
   workingDirectory: '$(modulePath)'
   displayName: 'Run unit test Windows'
 
-- bash: |
-    set -o errexit
-    set -o nounset
-    set -o pipefail
-
-    if [ -f "coverage.txt" ]; then
-      gocov convert coverage.txt > coverage.json
-      gocov-xml < coverage.json > coverage.xml
-      mkdir coverage
-      gocov-html < coverage.json > coverage/index.html
-    fi
-  condition: succeededOrFailed()
-  workingDirectory: '$(modulePath)'
-  displayName: 'Process test coverage'
-
-- task: PublishTestResults@2
-  condition: succeededOrFailed()
-  inputs:
-    testRunner: JUnit
-    testResultsFiles: $(System.DefaultWorkingDirectory)/**/report.xml
-
-- task: PublishCodeCoverageResults@1
-  condition: succeededOrFailed()
-  inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: $(System.DefaultWorkingDirectory)/**/coverage.xml
-    reportDirectory: $(System.DefaultWorkingDirectory)/**/coverage
+- template: report-coverage-steps.yml

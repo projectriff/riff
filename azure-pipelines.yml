@@ -27,20 +27,11 @@ jobs:
     GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
     modulePath: '$(build.repository.name)' # Path to the module's code
   steps:
-  - task: GoTool@0
-    inputs:
-      version: 1.12
+  - template: ci/install-go-steps.yml
   - bash: |
-      mkdir -p '$(GOBIN)'
-      mkdir -p '$(GOPATH)/pkg'
-      mkdir -p '$(modulePath)'
-      shopt -s extglob
-      shopt -s dotglob
-      mv !(gopath) '$(modulePath)'
-      echo '##vso[task.prependpath]$(GOBIN)'
-      echo '##vso[task.prependpath]$(GOROOT)/bin'
-    displayName: 'Set up the Go workspace'
-  - script: ./ci/stage.sh
+      pwd
+      find .
+      ./ci/stage.sh
     displayName: 'Stage riff release artifacts'
 - job: fats
   dependsOn: stage
