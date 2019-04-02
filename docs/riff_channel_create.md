@@ -1,10 +1,10 @@
 ## riff channel create
 
-Create a new channel
+[DEPRECATED] Create a new channel
 
 ### Synopsis
 
-Create a new channel
+[DEPRECATED] Create a new channel
 
 ```
 riff channel create [flags]
@@ -35,5 +35,5 @@ riff channel create [flags]
 
 ### SEE ALSO
 
-* [riff channel](riff_channel.md)	 - Interact with channel related resources
+* [riff channel](riff_channel.md)	 - [DEPRECATED] Interact with channel related resources
 

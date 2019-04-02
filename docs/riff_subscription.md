@@ -1,10 +1,10 @@
 ## riff subscription
 
-Interact with subscription-related resources
+[DEPRECATED] Interact with subscription-related resources
 
 ### Synopsis
 
-Interact with subscription-related resources
+[DEPRECATED] Interact with subscription-related resources
 
 ### Options
 
@@ -17,7 +17,7 @@ Interact with subscription-related resources
 ### SEE ALSO
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
-* [riff subscription create](riff_subscription_create.md)	 - Create a new subscription, binding a service to an input channel
-* [riff subscription delete](riff_subscription_delete.md)	 - Delete existing subscriptions
-* [riff subscription list](riff_subscription_list.md)	 - List existing subscriptions
+* [riff subscription create](riff_subscription_create.md)	 - [DEPRECATED] Create a new subscription, binding a service to an input channel
+* [riff subscription delete](riff_subscription_delete.md)	 - [DEPRECATED] Delete existing subscriptions
+* [riff subscription list](riff_subscription_list.md)	 - [DEPRECATED] List existing subscriptions
 

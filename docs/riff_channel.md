@@ -1,10 +1,10 @@
 ## riff channel
 
-Interact with channel related resources
+[DEPRECATED] Interact with channel related resources
 
 ### Synopsis
 
-Interact with channel related resources
+[DEPRECATED] Interact with channel related resources
 
 ### Options
 
@@ -17,7 +17,7 @@ Interact with channel related resources
 ### SEE ALSO
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
-* [riff channel create](riff_channel_create.md)	 - Create a new channel
-* [riff channel delete](riff_channel_delete.md)	 - Delete existing channels
-* [riff channel list](riff_channel_list.md)	 - List channels
+* [riff channel create](riff_channel_create.md)	 - [DEPRECATED] Create a new channel
+* [riff channel delete](riff_channel_delete.md)	 - [DEPRECATED] Delete existing channels
+* [riff channel list](riff_channel_list.md)	 - [DEPRECATED] List channels
 

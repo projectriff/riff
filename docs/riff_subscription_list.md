@@ -1,10 +1,10 @@
 ## riff subscription list
 
-List existing subscriptions
+[DEPRECATED] List existing subscriptions
 
 ### Synopsis
 
-List existing subscriptions
+[DEPRECATED] List existing subscriptions
 
 ```
 riff subscription list [flags]
@@ -34,5 +34,5 @@ riff subscription list [flags]
 
 ### SEE ALSO
 
-* [riff subscription](riff_subscription.md)	 - Interact with subscription-related resources
+* [riff subscription](riff_subscription.md)	 - [DEPRECATED] Interact with subscription-related resources
 
