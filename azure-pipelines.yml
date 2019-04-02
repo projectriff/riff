@@ -121,7 +121,6 @@ jobs:
       ne(variables['Build.Reason'], 'PullRequest'),
       or(
         eq(variables['Build.SourceBranch'], 'refs/heads/master'),
-        # release branch
         and(
           startsWith(variables['Build.SourceBranch'], 'refs/heads/v'),
           endsWith(variables['Build.SourceBranch'], 'x')
