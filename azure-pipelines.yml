@@ -1,4 +1,5 @@
 jobs:
+
 - job: unit
   strategy:
     matrix:
@@ -17,6 +18,38 @@ jobs:
     modulePath: '$(build.repository.name)' # Path to the module's code
   steps:
   - template: ci/unit-test-steps.yml
+  displayName: 'Unit test'
+
+- job: fats-lite
+  dependsOn: stage
+  strategy:
+    matrix:
+      minikube:
+        imageName: ubuntu-16.04
+        cluster: minikube
+        registry: minikube
+  pool:
+    vmImage: $(imageName)
+  variables:
+    CLUSTER:  '$(cluster)'
+    REGISTRY: '$(registry)'
+    CLUSTER_NAME: 'fats-$(Build.BuildId)'
+    NAMESPACE: '$(CLUSTER_NAME)'
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+  steps:
+  - template: ci/install-gcloud.yml
+  - script: sudo apt-get update && sudo apt-get install docker.io=18.06.1-0ubuntu1.2~16.04.1
+    condition: and(succeeded(), eq(variables['CLUSTER'], 'minikube'))
+    displayName: 'Downgrade Docker'
+  - bash: ./ci/fats.sh lite
+    displayName: 'Run FATS'
+  - bash: ./ci/fats-cleanup.sh
+    env:
+      TRAVIS_TEST_RESULT: '' # TODO remove this
+    condition: always()
+    displayName: 'Cleanup FATS'
+  displayName: 'FATS lite'
+
 - job: stage
   dependsOn: unit
   pool:
@@ -26,16 +59,17 @@ jobs:
     GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
     GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
     modulePath: '$(build.repository.name)' # Path to the module's code
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   steps:
   - template: ci/install-go-steps.yml
   - template: ci/install-gcloud.yml
-    parameters:
-      workingDirectory: '$(modulePath)'
   - bash: ./ci/stage.sh
     env:
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
     workingDirectory: '$(modulePath)'
     displayName: 'Stage riff release artifacts'
+  displayName: 'Stage'
+
 - job: fats
   dependsOn: stage
   strategy:
@@ -55,6 +89,7 @@ jobs:
     REGISTRY: '$(registry)'
     CLUSTER_NAME: 'fats-$(Build.BuildId)'
     NAMESPACE: '$(CLUSTER_NAME)'
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   steps:
   - template: ci/install-gcloud.yml
   - script: sudo apt-get update && sudo apt-get install docker.io=18.06.1-0ubuntu1.2~16.04.1
@@ -74,3 +109,29 @@ jobs:
       TRAVIS_TEST_RESULT: '' # TODO remove this
     condition: always()
     displayName: 'Cleanup FATS'
+  displayName: 'FATS'
+
+- job: publish
+  dependsOn: fats
+  pool:
+    vmImage: ubuntu-16.04
+  condition: |
+    and(
+      succeeded(),
+      ne(variables['Build.Reason'], 'PullRequest'),
+      or(
+        eq(variables['Build.SourceBranch'], 'refs/heads/master'),
+        # release branch
+        and(
+          startsWith(variables['Build.SourceBranch'], 'refs/heads/v'),
+          endsWith(variables['Build.SourceBranch'], 'x')
+        )
+      )
+    )
+  steps:
+  - template: ci/install-gcloud.yml
+  - bash: ./ci/publish.sh
+    env:
+      GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
+    displayName: 'Publish riff release artifacts'
+  displayName: 'Publish'
