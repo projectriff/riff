@@ -19,7 +19,7 @@ wait_pod_selector_ready control-plane=controller-manager knative-sources
 kubectl apply -n $NAMESPACE -f https://storage.googleapis.com/knative-releases/eventing-sources/previous/v0.3.0/message-dumper.yaml
 wait_kservice_ready message-dumper $NAMESPACE
 
-kail --ns $NAMESPACE --label serving.knative.dev/service=message-dumper -c user-container > $test_name.output.logs &
+kail --ns $NAMESPACE --label serving.knative.dev/service=message-dumper -c user-container > $test_name.output.logs 2>&1 &
 kail_output_pid=$!
 
 riff channel create $test_name --namespace $NAMESPACE
