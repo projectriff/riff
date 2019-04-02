@@ -94,6 +94,7 @@ var _ = Describe("The riff function create command", func() {
 			client  core.Client
 			asMock  *mocks.Client
 			fc      *cobra.Command
+			output  *strings.Builder
 		)
 		BeforeEach(func() {
 			builder = new(mockbuilder.Builder)
@@ -101,6 +102,9 @@ var _ = Describe("The riff function create command", func() {
 			asMock = client.(*mocks.Client)
 
 			fc = commands.FunctionCreate(builder, &client)
+
+			output = &strings.Builder{}
+			fc.SetOutput(output)
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
@@ -157,6 +161,7 @@ var _ = Describe("The riff function create command", func() {
 			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("defaulted-prefix/square"), nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
+			Expect(output.String()).To(ContainSubstring("Applied default --image=\"defaulted-prefix/square\""))
 		})
 		It("should apply the image prefix with a custom repo name", func() {
 			fc.SetArgs([]string{"square", "--git-repo", "https://github.com/repo", "--image", "_/square-custom"})
@@ -174,6 +179,7 @@ var _ = Describe("The riff function create command", func() {
 			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("defaulted-prefix/square-custom"), nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
+			Expect(output.String()).To(ContainSubstring("Applied default --image=\"defaulted-prefix/square-custom\""))
 		})
 		It("should propagate core.Client errors", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
@@ -190,6 +196,7 @@ var _ = Describe("The riff function create command", func() {
 			asMock.On("DefaultBuildImagePrefix", "").Return("", e)
 			err := fc.Execute()
 			Expect(err).To(MatchError("unable to default image: some error"))
+			Expect(output.String()).ToNot(ContainSubstring("Applied default --image"))
 		})
 		It("should add env vars when asked to", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
@@ -227,13 +234,10 @@ var _ = Describe("The riff function create command", func() {
 			cache.Name = "square-build-cache"
 			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&f, &cache, nil)
 
-			stdout := &strings.Builder{}
-			fc.SetOutput(stdout)
-
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout.String()).To(Equal(fnCreateDryRun))
+			Expect(output.String()).To(Equal(fnCreateDryRun))
 		})
 
 		It("should display the status hint", func() {
@@ -251,14 +255,11 @@ var _ = Describe("The riff function create command", func() {
 			cache := corev1.PersistentVolumeClaim{}
 			cache.Name = "square-build-cache"
 			asMock.On("CreateFunction", builder, options, mock.Anything).Return(function, &cache, nil)
-			stdout := &strings.Builder{}
-			fc.SetOutput(stdout)
 
 			err := fc.Execute()
 
 			Expect(err).NotTo(HaveOccurred())
-			fmt.Println(stdout.String())
-			Expect(stdout.String()).To(HaveSuffix("Issue `riff service status square` to see the status of the function\n"))
+			Expect(output.String()).To(HaveSuffix("Issue `riff service status square` to see the status of the function\n"))
 		})
 
 		It("should include the nondefault namespace in the status hint", func() {
@@ -280,14 +281,11 @@ var _ = Describe("The riff function create command", func() {
 			cache.Name = "square-build-cache"
 			cache.Namespace = "ns"
 			asMock.On("CreateFunction", builder, options, mock.Anything).Return(function, &cache, nil)
-			stdout := &strings.Builder{}
-			fc.SetOutput(stdout)
 
 			err := fc.Execute()
 
 			Expect(err).NotTo(HaveOccurred())
-			fmt.Println(stdout.String())
-			Expect(stdout.String()).To(HaveSuffix("Issue `riff service status square -n ns` to see the status of the function\n"))
+			Expect(output.String()).To(HaveSuffix("Issue `riff service status square -n ns` to see the status of the function\n"))
 		})
 
 	})
