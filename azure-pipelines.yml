@@ -1,24 +1,24 @@
 jobs:
-# - job: unit
-#   strategy:
-#     matrix:
-#       linux:
-#         imageName: 'ubuntu-16.04'
-#       mac:
-#         imageName: 'macos-10.13'
-#       windows:
-#         imageName: 'vs2017-win2016'
-#   pool:
-#     vmImage: $(imageName)
-#   variables:
-#     GOBIN:  '$(GOPATH)/bin' # Go binaries path
-#     GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
-#     GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
-#     modulePath: '$(build.repository.name)' # Path to the module's code
-#   steps:
-#   - template: ci/unit-test-steps.yml
+- job: unit
+  strategy:
+    matrix:
+      linux:
+        imageName: 'ubuntu-16.04'
+      mac:
+        imageName: 'macos-10.13'
+      windows:
+        imageName: 'vs2017-win2016'
+  pool:
+    vmImage: $(imageName)
+  variables:
+    GOBIN:  '$(GOPATH)/bin' # Go binaries path
+    GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
+    GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
+    modulePath: '$(build.repository.name)' # Path to the module's code
+  steps:
+  - template: ci/unit-test-steps.yml
 - job: stage
-  # dependsOn: unit
+  dependsOn: unit
   pool:
     vmImage: ubuntu-16.04
   variables:
@@ -71,5 +71,6 @@ jobs:
       DOCKER_USERNAME: '$(DockerUsername)'
       DOCKER_PASSWORD: '$(DockerPassword)'
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
+      TRAVIS_TEST_RESULT: '' # TODO remove this
     condition: always()
     displayName: 'Cleanup FATS'
