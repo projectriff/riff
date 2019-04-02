@@ -20,7 +20,7 @@ jobs:
   - template: ci/unit-test-steps.yml
   displayName: 'Unit test'
 
-- job: fats-lite
+- job: fats_lite
   dependsOn: stage
   strategy:
     matrix:
