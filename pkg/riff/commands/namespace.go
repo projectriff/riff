@@ -111,6 +111,7 @@ func NamespaceInit(manifests map[string]*core.Manifest, c *core.Client) *cobra.C
 	// ToDo: remove this deprecated flag in favor of --docker-hub
 	command.Flags().StringVar(&options.DockerHubId, "dockerhub", "", "dockerhub username for authentication; password will be read from stdin")
 	command.Flags().MarkHidden("dockerhub")
+	command.Flags().MarkDeprecated("dockerhub", "use --docker-hub instead")
 	command.Flags().StringVar(&options.DockerHubId, "docker-hub", "", "Docker ID for authenticating with Docker Hub; password will be read from stdin")
 	command.Flags().StringVar(&options.Registry, "registry", "", "registry server host, scheme must be \"http\" or \"https\" (default \"https\")")
 	command.Flags().StringVar(&options.RegistryUser, "registry-user", "", "registry username; password will be read from stdin")
