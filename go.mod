@@ -5,8 +5,8 @@ require (
 	github.com/boz/go-logutil v0.0.0-20170814044541-9d21a9e4757d
 	github.com/boz/kail v0.6.0
 	github.com/boz/kcache v0.0.0-20171103002618-fb1338d32301
-	github.com/buildpack/lifecycle v0.0.0-20190314183328-a6ea5e18de72
-	github.com/buildpack/pack v0.0.10-0.20190326142214-ebc7c99fc236
+	github.com/buildpack/lifecycle v0.0.0-20190327221653-eecd1c5c1b4c
+	github.com/buildpack/pack v0.1.0
 	github.com/cpuguy83/go-md2man v1.0.8 // indirect
 	github.com/emicklei/go-restful v2.8.1+incompatible // indirect
 	github.com/evanphx/json-patch v4.1.0+incompatible // indirect
