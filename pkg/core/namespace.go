@@ -54,10 +54,10 @@ type NamespaceInitOptions struct {
 
 	ImagePrefix string
 
-	NoSecret          bool
-	SecretName        string
-	GcrTokenPath      string
-	DockerHubUsername string
+	NoSecret     bool
+	SecretName   string
+	GcrTokenPath string
+	DockerHubId  string
 
 	Registry     string
 	RegistryUser string
@@ -73,7 +73,7 @@ func (o *NamespaceInitOptions) secretType() secretType {
 	switch {
 	case o.NoSecret:
 		return secretTypeNone
-	case o.DockerHubUsername != "":
+	case o.DockerHubId != "":
 		return secretTypeDockerHub
 	case o.GcrTokenPath != "":
 		return secretTypeGcr
@@ -257,7 +257,7 @@ func (c *client) checkSecretExists(options NamespaceInitOptions) error {
 }
 
 func (c *client) createDockerHubSecret(options NamespaceInitOptions, labels map[string]string) error {
-	username := options.DockerHubUsername
+	username := options.DockerHubId
 	password, err := readPassword(fmt.Sprintf("Enter password for user %q", username))
 	if err != nil {
 		return err
@@ -266,7 +266,7 @@ func (c *client) createDockerHubSecret(options NamespaceInitOptions, labels map[
 }
 
 func (c *client) dockerHubImagePrefix(options NamespaceInitOptions) string {
-	return fmt.Sprintf("docker.io/%s", options.DockerHubUsername)
+	return fmt.Sprintf("docker.io/%s", options.DockerHubId)
 }
 
 func (c *client) createGcrSecret(options NamespaceInitOptions, labels map[string]string) error {

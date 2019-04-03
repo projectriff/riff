@@ -19,10 +19,10 @@ riff namespace init [flags]
 ### Options
 
 ```
-      --dockerhub string       dockerhub username for authentication; password will be read from stdin
+      --docker-hub string      Docker ID for authenticating with Docker Hub; password will be read from stdin
       --gcr string             path to a file containing Google Container Registry credentials
   -h, --help                   help for init
-      --image-prefix string    image prefix to use for commands that would otherwise require an --image argument. If not set, this value will be derived for DockerHub and GCR
+      --image-prefix string    image prefix to use for commands that would otherwise require an --image argument. If not set, this value will be derived for Docker Hub and GCR
   -m, --manifest string        manifest of kubernetes configuration files to be applied; can be a named manifest (latest, nightly, stable) or a path of a manifest file (default "stable")
       --no-secret              no secret required for the image registry
       --registry string        registry server host, scheme must be "http" or "https" (default "https")
