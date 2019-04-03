@@ -129,8 +129,8 @@ func (c *client) NamespaceCleanup(options NamespaceCleanupOptions) error {
 		return err
 	}
 
-	fmt.Printf("Removing \"default-image-prefix\" defined for namespace %q\n", ns)
-	if err := c.DeleteDefaultBuildImagePrefix(options.NamespaceName); err != nil && !errors.IsNotFound(err) {
+	fmt.Printf("Deleting configmaps matching label keys %v in namespace %q\n", initLabelKeys, ns)
+	if err := c.deleteMatchingConfigMaps(ns, initLabelSelector); err != nil {
 		return err
 	}
 
@@ -419,6 +419,25 @@ func (c *client) deleteMatchingSecrets(ns string, initLabelSelector string) erro
 	})
 }
 
+func (c *client) deleteMatchingConfigMaps(ns string, initLabelSelector string) error {
+	maps, err := c.kubeClient.CoreV1().ConfigMaps(ns).List(v1.ListOptions{
+		LabelSelector: initLabelSelector,
+	})
+	if err != nil {
+		return err
+	}
+	deletionResults := tasks.ApplyInParallel(configMapsNamesOf(maps.Items), func(name string) error {
+		return c.kubeClient.CoreV1().ConfigMaps(ns).Delete(name, &v1.DeleteOptions{})
+	})
+	return tasks.MergeResults(deletionResults, func(result tasks.CorrelatedResult) string {
+		err := result.Error
+		if err == nil {
+			return ""
+		}
+		return fmt.Sprintf("Unable to delete configmap %s: %v", result.Input, err)
+	})
+}
+
 func serviceAccountNamesOf(items []corev1.ServiceAccount) []string {
 	result := make([]string, len(items))
 	for i, item := range items {
@@ -428,6 +447,14 @@ func serviceAccountNamesOf(items []corev1.ServiceAccount) []string {
 }
 
 func secretNamesOf(items []corev1.Secret) []string {
+	result := make([]string, len(items))
+	for i, item := range items {
+		result[i] = item.Name
+	}
+	return result
+}
+
+func configMapsNamesOf(items []corev1.ConfigMap) []string {
 	result := make([]string, len(items))
 	for i, item := range items {
 		result[i] = item.Name

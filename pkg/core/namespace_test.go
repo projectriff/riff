@@ -527,6 +527,10 @@ var _ = Describe("namespace", func() {
 				Items: []v1.Secret{secret(secretName)},
 			}, nil)
 			mockSecrets.On("Delete", secretName, mock.Anything).Return(nil)
+			configMapName := "riff-build"
+			mockConfigMaps.On("List", expectedListOptions).Return(&v1.ConfigMapList{
+				Items: []v1.ConfigMap{configMap(configMapName)},
+			}, nil)
 			mockConfigMaps.On("Delete", core.BuildConfigMapName, mock.Anything).Return(nil)
 			expectedError := fmt.Errorf("namespace deletion failed")
 			mockNamespaces.On("Delete", namespace, mock.Anything).Return(expectedError)
@@ -546,6 +550,10 @@ var _ = Describe("namespace", func() {
 				Items: []v1.Secret{secret(secretName)},
 			}, nil)
 			mockSecrets.On("Delete", secretName, mock.Anything).Return(nil)
+			configMapName := "riff-build"
+			mockConfigMaps.On("List", expectedListOptions).Return(&v1.ConfigMapList{
+				Items: []v1.ConfigMap{configMap(configMapName)},
+			}, nil)
 			mockConfigMaps.On("Delete", core.BuildConfigMapName, mock.Anything).Return(nil)
 
 			err := client.NamespaceCleanup(options)
@@ -564,6 +572,10 @@ var _ = Describe("namespace", func() {
 				Items: []v1.Secret{secret(secretName)},
 			}, nil)
 			mockSecrets.On("Delete", secretName, mock.Anything).Return(nil)
+			configMapName := "riff-build"
+			mockConfigMaps.On("List", expectedListOptions).Return(&v1.ConfigMapList{
+				Items: []v1.ConfigMap{configMap(configMapName)},
+			}, nil)
 			mockConfigMaps.On("Delete", core.BuildConfigMapName, mock.Anything).Return(nil)
 			mockNamespaces.On("Delete", namespace, mock.Anything).Return(nil)
 
@@ -639,6 +651,12 @@ func serviceAccount(name string) v1.ServiceAccount {
 
 func secret(name string) v1.Secret {
 	return v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{Name: name},
+	}
+}
+
+func configMap(name string) v1.ConfigMap {
+	return v1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{Name: name},
 	}
 }
