@@ -98,133 +98,20 @@ func (c *client) NamespaceInit(manifests map[string]*Manifest, options Namespace
 	if err != nil {
 		return err
 	}
-
-	ns := options.NamespaceName
-
-	fmt.Printf("Initializing namespace %q\n\n", ns)
-
-	namespace, err := c.kubeClient.CoreV1().Namespaces().Get(ns, v1.GetOptions{})
-	if errors.IsNotFound(err) {
-		fmt.Printf("Creating namespace %q \n", ns)
-		namespace = &corev1.Namespace{}
-		namespace.Name = ns
-		namespace, err = c.kubeClient.CoreV1().Namespaces().Create(namespace)
-		if err != nil {
-			return err
-		}
-	} else if err != nil {
+	if _, err = c.initNamespace(options.NamespaceName); err != nil {
 		return err
 	}
-
 	initLabels := getInitLabels()
-
-	switch options.secretType() {
-	case secretTypeGcr:
-		if err := c.createGcrSecret(options, initLabels); err != nil {
-			return err
-		}
-		if options.ImagePrefix == "" {
-			prefix, err := c.gcrImagePrefix(options)
-			if err != nil {
-				return err
-			}
-			options.ImagePrefix = prefix
-		}
-	case secretTypeDockerHub:
-		if err := c.createDockerHubSecret(options, initLabels); err != nil {
-			return err
-		}
-		if options.ImagePrefix == "" {
-			options.ImagePrefix = c.dockerHubImagePrefix(options)
-		}
-	case secretTypeBasicAuth:
-		if err := c.createRegistrySecret(options, initLabels); err != nil {
-			return err
-		}
-	case secretTypeUserProvided:
-		if err = c.checkSecretExists(options); err != nil {
-			return err
-		}
-	}
-
-	sa, err := c.kubeClient.CoreV1().ServiceAccounts(ns).Get(BuildServiceAccountName, v1.GetOptions{})
-	if errors.IsNotFound(err) {
-		sa = &corev1.ServiceAccount{}
-		sa.Name = BuildServiceAccountName
-		sa.Labels = initLabels
-		if options.secretType() != secretTypeNone {
-			secretName := options.SecretName
-			sa.Secrets = append(sa.Secrets, corev1.ObjectReference{Name: secretName})
-			fmt.Printf("Creating serviceaccount %q using secret %q in namespace %q\n", sa.Name, secretName, ns)
-		} else {
-			fmt.Printf("Creating unauthenticated serviceaccount %q in namespace %q\n", sa.Name, ns)
-		}
-		_, err = c.kubeClient.CoreV1().ServiceAccounts(ns).Create(sa)
-		if err != nil {
-			return err
-		}
-	} else if err != nil {
+	if err = c.createSecret(&options, initLabels); err != nil {
 		return err
-	} else if options.secretType() != secretTypeNone {
-		secretName := options.SecretName
-		secretAlreadyPresent := false
-		for _, s := range sa.Secrets {
-			if s.Name == secretName {
-				secretAlreadyPresent = true
-				break
-			}
-		}
-		if secretAlreadyPresent {
-			fmt.Printf("Serviceaccount %q already exists in namespace %q with secret %q. Skipping.\n", sa.Name, ns, secretName)
-		} else {
-			sa.Secrets = append(sa.Secrets, corev1.ObjectReference{Name: secretName})
-			fmt.Printf("Adding secret %q to serviceaccount %q in namespace %q\n", secretName, sa.Name, ns)
-			_, err = c.kubeClient.CoreV1().ServiceAccounts(ns).Update(sa)
-			if err != nil {
-				return err
-			}
-		}
 	}
-
-	if options.ImagePrefix != "" {
-		if err := c.SetDefaultBuildImagePrefix(options.NamespaceName, options.ImagePrefix); err != nil {
-			return err
-		}
-	} else {
-		fmt.Printf("Skipping setting default image prefix, the --image argument will be required for commands\n")
+	if err = c.initServiceAccount(&options, initLabels); err != nil {
+		return err
 	}
-
-	for _, release := range manifest.Namespace {
-		res, err := manifest.ResourceAbsolutePath(release)
-		if err != nil {
-			return err
-		}
-
-		// Replace any file URL with the corresponding absolute file path.
-		absolute, resource, err := fileutils.IsAbsFile(res)
-		if err != nil {
-			return err
-		}
-		if !absolute {
-			panic(fmt.Sprintf("manifest.ResourceAbsolutePath returned a non-absolute path: %s", res))
-		}
-
-		fmt.Printf("Applying %s in namespace %q\n", release, ns)
-		resourceUrl, _ := url.Parse(resource)
-		if resourceUrl.Scheme == "" {
-			resourceUrl.Scheme = "file"
-		}
-		labeledContent, err := c.kustomizer.ApplyLabels(resourceUrl, initLabels)
-		if err != nil {
-			return err
-		}
-		log, err := c.kubeCtl.ExecStdin([]string{"apply", "-n", ns, "-f", "-"}, &labeledContent)
-		fmt.Printf("%s\n", log)
-		if err != nil {
-			return err
-		}
+	if err = c.initImagePrefix(&options); err != nil {
+		return err
 	}
-	return nil
+	return c.applyManifest(manifest, &options, initLabels)
 }
 
 func (c *client) NamespaceCleanup(options NamespaceCleanupOptions) error {
@@ -245,6 +132,141 @@ func (c *client) NamespaceCleanup(options NamespaceCleanupOptions) error {
 	if options.RemoveNamespace {
 		fmt.Printf("Deleting namespace %q\n", ns)
 		if err := c.kubeClient.CoreV1().Namespaces().Delete(ns, &v1.DeleteOptions{}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *client) initNamespace(ns string) (*corev1.Namespace, error) {
+	fmt.Printf("Initializing namespace %q\n\n", ns)
+	namespace, err := c.kubeClient.CoreV1().Namespaces().Get(ns, v1.GetOptions{})
+	if errors.IsNotFound(err) {
+		fmt.Printf("Creating namespace %q \n", ns)
+		namespace = &corev1.Namespace{}
+		namespace.Name = ns
+		namespace, err = c.kubeClient.CoreV1().Namespaces().Create(namespace)
+		if err != nil {
+			return nil, err
+		}
+	} else if err != nil {
+		return nil, err
+	}
+	return namespace, nil
+}
+
+func (c *client) createSecret(options *NamespaceInitOptions, initLabels map[string]string) error {
+	switch options.secretType() {
+	case secretTypeGcr:
+		if err := c.createGcrSecret(*options, initLabels); err != nil {
+			return err
+		}
+		if options.ImagePrefix == "" {
+			prefix, err := c.gcrImagePrefix(*options)
+			if err != nil {
+				return err
+			}
+			options.ImagePrefix = prefix
+		}
+	case secretTypeDockerHub:
+		if err := c.createDockerHubSecret(*options, initLabels); err != nil {
+			return err
+		}
+		if options.ImagePrefix == "" {
+			options.ImagePrefix = c.dockerHubImagePrefix(*options)
+		}
+	case secretTypeBasicAuth:
+		return c.createRegistrySecret(*options, initLabels)
+	case secretTypeUserProvided:
+		return c.checkSecretExists(*options)
+	}
+	return nil
+}
+
+func (c *client) initServiceAccount(options *NamespaceInitOptions, initLabels map[string]string) error {
+	ns := options.NamespaceName
+	serviceAccount, err := c.kubeClient.CoreV1().ServiceAccounts(ns).Get(BuildServiceAccountName, v1.GetOptions{})
+	if errors.IsNotFound(err) {
+		serviceAccount = &corev1.ServiceAccount{}
+		serviceAccount.Name = BuildServiceAccountName
+		serviceAccount.Labels = initLabels
+		if options.secretType() != secretTypeNone {
+			secretName := options.SecretName
+			serviceAccount.Secrets = append(serviceAccount.Secrets, corev1.ObjectReference{Name: secretName})
+			fmt.Printf("Creating serviceaccount %q using secret %q in namespace %q\n", serviceAccount.Name, secretName, ns)
+		} else {
+			fmt.Printf("Creating unauthenticated serviceaccount %q in namespace %q\n", serviceAccount.Name, ns)
+		}
+		if _, err = c.kubeClient.CoreV1().ServiceAccounts(ns).Create(serviceAccount); err != nil {
+			return err
+		}
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if options.secretType() != secretTypeNone {
+		secretName := options.SecretName
+		secretAlreadyPresent := false
+		for _, s := range serviceAccount.Secrets {
+			if s.Name == secretName {
+				secretAlreadyPresent = true
+				break
+			}
+		}
+		if secretAlreadyPresent {
+			fmt.Printf("Serviceaccount %q already exists in namespace %q with secret %q. Skipping.\n", serviceAccount.Name, ns, secretName)
+		} else {
+			serviceAccount.Secrets = append(serviceAccount.Secrets, corev1.ObjectReference{Name: secretName})
+			fmt.Printf("Adding secret %q to serviceaccount %q in namespace %q\n", secretName, serviceAccount.Name, ns)
+			_, err = c.kubeClient.CoreV1().ServiceAccounts(ns).Update(serviceAccount)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (c *client) initImagePrefix(options *NamespaceInitOptions) error {
+	if options.ImagePrefix != "" {
+		return c.SetDefaultBuildImagePrefix(options.NamespaceName, options.ImagePrefix)
+	}
+
+	fmt.Printf("No image prefix set, resetting possibly existing ones. The --image argument will be required for commands\n")
+	if err := c.DeleteDefaultBuildImagePrefix(options.NamespaceName); err != nil && !errors.IsNotFound(err) {
+		return err
+	}
+	return nil
+}
+
+func (c *client) applyManifest(manifest *Manifest, options *NamespaceInitOptions, initLabels map[string]string) error {
+	for _, release := range manifest.Namespace {
+		res, err := manifest.ResourceAbsolutePath(release)
+		if err != nil {
+			return err
+		}
+		// Replace any file URL with the corresponding absolute file path.
+		absolute, resource, err := fileutils.IsAbsFile(res)
+		if err != nil {
+			return err
+		}
+		if !absolute {
+			panic(fmt.Sprintf("manifest.ResourceAbsolutePath returned a non-absolute path: %s", res))
+		}
+
+		fmt.Printf("Applying %s in namespace %q\n", release, options.NamespaceName)
+		resourceUrl, _ := url.Parse(resource)
+		if resourceUrl.Scheme == "" {
+			resourceUrl.Scheme = "file"
+		}
+		labeledContent, err := c.kustomizer.ApplyLabels(resourceUrl, initLabels)
+		if err != nil {
+			return err
+		}
+		log, err := c.kubeCtl.ExecStdin([]string{"apply", "-n", options.NamespaceName, "-f", "-"}, &labeledContent)
+		fmt.Printf("%s\n", log)
+		if err != nil {
 			return err
 		}
 	}
@@ -393,14 +415,6 @@ func (c *client) deleteMatchingSecrets(ns string, initLabelSelector string) erro
 }
 
 func serviceAccountNamesOf(items []corev1.ServiceAccount) []string {
-	result := make([]string, len(items))
-	for i, item := range items {
-		result[i] = item.Name
-	}
-	return result
-}
-
-func persistentVolumeClaimNamesOf(items []corev1.PersistentVolumeClaim) []string {
 	result := make([]string, len(items))
 	for i, item := range items {
 		result[i] = item.Name
