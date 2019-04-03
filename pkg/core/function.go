@@ -25,7 +25,7 @@ import (
 	"os"
 	"time"
 
-	logutil "github.com/boz/go-logutil"
+	"github.com/boz/go-logutil"
 
 	"github.com/boz/kail"
 	"github.com/boz/kcache/types/pod"
@@ -35,21 +35,21 @@ import (
 	"github.com/projectriff/riff/pkg/env"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 const (
-	functionLabel              = "riff.projectriff.io/function"
-	buildAnnotation            = "riff.projectriff.io/build"
-	functionArtifactAnnotation = "riff.projectriff.io/artifact"
-	functionOverrideAnnotation = "riff.projectriff.io/override"
-	functionHandlerAnnotation  = "riff.projectriff.io/handler"
-	buildTemplateName          = "riff-cnb"
-	pollServiceTimeout         = 10 * time.Minute
-	pollServicePollingInterval = time.Second
+	functionLabel                = "riff.projectriff.io/function"
+	buildAnnotation              = "riff.projectriff.io/build"
+	functionArtifactAnnotation   = "riff.projectriff.io/artifact"
+	functionOverrideAnnotation   = "riff.projectriff.io/override"
+	functionHandlerAnnotation    = "riff.projectriff.io/handler"
+	buildTemplateName            = "riff-cnb"
+	pollServiceTimeout           = 10 * time.Minute
+	pollServicePollingInterval   = time.Second
+	waitForMoreLogsBeforeExiting = time.Second
 )
 
 type BuildOptions struct {
@@ -185,21 +185,27 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 
 		if options.Verbose || options.Wait {
 			stopChan := make(chan struct{})
-			errChan := make(chan error)
+			loggingTerminationChan := make(chan error)
 			if options.Verbose {
-				go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, errChan)
+				go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, loggingTerminationChan)
 			}
-			err := c.waitForSuccessOrFailure(ns, s.Name, 1, stopChan, errChan, options.Verbose)
+			err := c.waitForSuccessOrFailure(ns, s.Name, 1, stopChan, loggingTerminationChan, options.Verbose)
+			if options.Verbose {
+				// wait until log printing has finished before returning as this will terminate the process
+				if logErr := <-loggingTerminationChan; logErr != nil && err == nil {
+					return nil, nil, nil, logErr
+				}
+			}
 			if err != nil {
 				return nil, nil, nil, err
 			}
 
 			// fetch latest Service and Revision, ignore errors
-			s1, err := c.serving.ServingV1alpha1().Services(s.Namespace).Get(s.Name, metav1.GetOptions{})
+			s1, err := c.serving.ServingV1alpha1().Services(s.Namespace).Get(s.Name, v1.GetOptions{})
 			if s1 != nil && err == nil {
 				s = s1
 				if s.Status.LatestCreatedRevisionName != "" {
-					r, _ = c.serving.ServingV1alpha1().Revisions(s.Namespace).Get(s.Status.LatestCreatedRevisionName, metav1.GetOptions{})
+					r, _ = c.serving.ServingV1alpha1().Revisions(s.Namespace).Get(s.Status.LatestCreatedRevisionName, v1.GetOptions{})
 				}
 			}
 		}
@@ -242,6 +248,7 @@ func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.Sourc
 }
 
 func (c *client) displayFunctionCreationProgress(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}, errChan chan<- error) {
+	defer close(errChan)
 	revName, err := c.revisionName(serviceNamespace, serviceName, logWriter, stopChan)
 	if err != nil {
 		errChan <- err
@@ -277,8 +284,10 @@ func (c *client) displayFunctionCreationProgress(serviceNamespace string, servic
 		return
 	}
 
-	streamLogs(logWriter, controller, stopChan)
-	close(errChan)
+	if err := streamLogs(logWriter, controller, stopChan); err != nil {
+		errChan <- err
+		return
+	}
 }
 
 func (c *client) revisionName(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}) (string, error) {
@@ -344,28 +353,50 @@ func (c *client) podController(buildName string, serviceName string, ctx context
 	return ds.Pods(), nil
 }
 
-func streamLogs(log io.Writer, controller kail.Controller, stopChan <-chan struct{}) {
+func streamLogs(log io.Writer, controller kail.Controller, stopChan <-chan struct{}) error {
 	events := controller.Events()
 	done := controller.Done()
 	writer := NewWriter(log)
 	for {
 		select {
 		case ev := <-events:
-			// filter out sidecar logs
-			container := ev.Source().Container()
-			switch container {
-			case "queue-proxy":
-			case "istio-init":
-			case "istio-proxy":
-			default:
-				writer.Print(ev)
+			if err := printEvent(ev, writer); err != nil {
+				return err
 			}
 		case <-done:
-			return
+			return nil
 		case <-stopChan:
-			return
+			// wait until logs have not arrived for a given period before exiting
+			timer := time.NewTimer(waitForMoreLogsBeforeExiting)
+			for {
+				select {
+				case ev := <-events:
+					if err := printEvent(ev, writer); err != nil {
+						return err
+					}
+					// reset the timer since a log arrived
+					timer = time.NewTimer(waitForMoreLogsBeforeExiting)
+				case <-done:
+					return nil
+				case <-timer.C:
+					return nil
+				}
+			}
 		}
 	}
+}
+
+func printEvent(ev kail.Event, w Writer) error {
+	// filter out sidecar logs
+	container := ev.Source().Container()
+	switch container {
+	case "queue-proxy":
+	case "istio-init":
+	case "istio-proxy":
+	default:
+		return w.Print(ev)
+	}
+	return nil
 }
 
 type serviceChecker func() (transientErr error, err error)
@@ -572,8 +603,6 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 	}
 
 	if options.Verbose || options.Wait {
-		stopChan := make(chan struct{})
-		errChan := make(chan error)
 		var (
 			nextGen int64
 			err     error
@@ -591,10 +620,19 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 				break
 			}
 		}
+
+		stopChan := make(chan struct{})
+		loggingTerminationChan := make(chan error)
 		if options.Verbose {
-			go c.displayFunctionCreationProgress(ns, service.Name, log, stopChan, errChan)
+			go c.displayFunctionCreationProgress(ns, service.Name, log, stopChan, loggingTerminationChan)
 		}
-		err = c.waitForSuccessOrFailure(ns, service.Name, nextGen, stopChan, errChan, options.Verbose)
+		err = c.waitForSuccessOrFailure(ns, service.Name, nextGen, stopChan, loggingTerminationChan, options.Verbose)
+		if options.Verbose {
+			// wait until log printing has finished before returning as this will terminate the process
+			if logErr := <-loggingTerminationChan; logErr != nil && err == nil {
+				return logErr
+			}
+		}
 		if err != nil {
 			return err
 		}
