@@ -234,7 +234,7 @@ func (c *client) initImagePrefix(options *NamespaceInitOptions) error {
 	}
 
 	fmt.Printf("No image prefix set, resetting possibly existing ones. The --image argument will be required for commands\n")
-	if err := c.DeleteDefaultBuildImagePrefix(options.NamespaceName); err != nil && !errors.IsNotFound(err) {
+	if err := c.SetDefaultBuildImagePrefix(options.NamespaceName, ""); err != nil {
 		return err
 	}
 	return nil

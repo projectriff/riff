@@ -80,10 +80,6 @@ func (c *client) SetDefaultBuildImagePrefix(namespace, prefix string) error {
 	return c.saveBuildConfigMap(cm)
 }
 
-func (c *client) DeleteDefaultBuildImagePrefix(namespace string) error {
-	return c.kubeClient.CoreV1().ConfigMaps(namespace).Delete(BuildConfigMapName, &meta_v1.DeleteOptions{})
-}
-
 func (c *client) buildConfigMap(namespace string) (*core_v1.ConfigMap, error) {
 	ns := c.explicitOrConfigNamespace(namespace)
 	cm, err := c.kubeClient.CoreV1().ConfigMaps(ns).Get(BuildConfigMapName, meta_v1.GetOptions{})

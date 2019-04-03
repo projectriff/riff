@@ -77,6 +77,7 @@ type client struct {
 	kubeCtl      kubectl.KubeCtl
 	kustomizer   kustomize.Kustomizer
 }
+
 func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface, build build_cs.Interface, kubeCtl kubectl.KubeCtl, kustomizer kustomize.Kustomizer) Client {
 	return &client{
 		clientConfig: clientConfig,
