@@ -4,12 +4,12 @@
 
 #### Initialize a namespace
 
-When you initialize the namespace use the `--dockerhub` flag together with your Docker ID.
+When you initialize the namespace use the `--docker-hub` flag together with your Docker ID.
 
 If you are initializing the `default` namespace with Docker Hub, then you can use:
 
 ```
-riff namespace init default --dockerhub <docker-id>
+riff namespace init default --docker-hub <docker-id>
 ```
 
 ### Using Google Container Registry (GCR) with builds
