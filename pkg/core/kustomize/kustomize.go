@@ -19,7 +19,7 @@ package kustomize
 import (
 	"bytes"
 	"fmt"
-	"github.com/projectriff/riff/pkg/fileutils"
+	"github.com/pivotal/go-ape"
 	"io/ioutil"
 	"net/url"
 	"sigs.k8s.io/kustomize/k8sdeps"

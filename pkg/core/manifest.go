@@ -19,10 +19,9 @@ package core
 import (
 	"errors"
 	"fmt"
+	"github.com/pivotal/go-ape"
 	"net/url"
 	"path/filepath"
-
-	"github.com/projectriff/riff/pkg/fileutils"
 
 	"github.com/ghodss/yaml"
 )

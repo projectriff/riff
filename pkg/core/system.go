@@ -21,11 +21,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/pivotal/go-ape"
 	"os"
 	"strings"
 	"time"
-
-	"github.com/projectriff/riff/pkg/fileutils"
 
 	"github.com/projectriff/riff/pkg/env"
 

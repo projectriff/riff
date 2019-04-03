@@ -27,9 +27,9 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/pivotal/go-ape"
 	"github.com/projectriff/riff/pkg/core/tasks"
 	"github.com/projectriff/riff/pkg/env"
-	"github.com/projectriff/riff/pkg/fileutils"
 	"golang.org/x/crypto/ssh/terminal"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
