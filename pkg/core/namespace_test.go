@@ -527,6 +527,7 @@ var _ = Describe("namespace", func() {
 				Items: []v1.Secret{secret(secretName)},
 			}, nil)
 			mockSecrets.On("Delete", secretName, mock.Anything).Return(nil)
+			mockConfigMaps.On("Delete", core.BuildConfigMapName, mock.Anything).Return(nil)
 			expectedError := fmt.Errorf("namespace deletion failed")
 			mockNamespaces.On("Delete", namespace, mock.Anything).Return(expectedError)
 
@@ -545,6 +546,7 @@ var _ = Describe("namespace", func() {
 				Items: []v1.Secret{secret(secretName)},
 			}, nil)
 			mockSecrets.On("Delete", secretName, mock.Anything).Return(nil)
+			mockConfigMaps.On("Delete", core.BuildConfigMapName, mock.Anything).Return(nil)
 
 			err := client.NamespaceCleanup(options)
 
@@ -562,6 +564,7 @@ var _ = Describe("namespace", func() {
 				Items: []v1.Secret{secret(secretName)},
 			}, nil)
 			mockSecrets.On("Delete", secretName, mock.Anything).Return(nil)
+			mockConfigMaps.On("Delete", core.BuildConfigMapName, mock.Anything).Return(nil)
 			mockNamespaces.On("Delete", namespace, mock.Anything).Return(nil)
 
 			err := client.NamespaceCleanup(options)

@@ -129,6 +129,11 @@ func (c *client) NamespaceCleanup(options NamespaceCleanupOptions) error {
 		return err
 	}
 
+	fmt.Printf("Removing \"default-image-prefix\" defined for namespace %q\n", ns)
+	if err := c.DeleteDefaultBuildImagePrefix(options.NamespaceName); err != nil && !errors.IsNotFound(err) {
+		return err
+	}
+
 	if options.RemoveNamespace {
 		fmt.Printf("Deleting namespace %q\n", ns)
 		if err := c.kubeClient.CoreV1().Namespaces().Delete(ns, &v1.DeleteOptions{}); err != nil {
