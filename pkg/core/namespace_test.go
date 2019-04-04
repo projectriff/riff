@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -653,7 +654,11 @@ func keys(keys ...string) func(dict map[string]string) bool {
 
 func urlPath(path string) func(url *url.URL) bool {
 	return func(url *url.URL) bool {
-		return url.Path == path
+		if runtime.GOOS == "windows" && len(url.Scheme) == 1 {
+			return strings.ToUpper(url.Scheme) + url.String()[1:] == path
+		} else {
+			return url.Path == path
+		}
 	}
 }
 
