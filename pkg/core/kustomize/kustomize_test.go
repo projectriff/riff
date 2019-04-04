@@ -24,6 +24,7 @@ import (
 	"github.com/projectriff/riff/pkg/test_support"
 	"net"
 	"net/url"
+	"runtime"
 	"time"
 )
 
@@ -79,29 +80,34 @@ spec:
 		test_support.CleanupDirs(GinkgoT(), workDir)
 	})
 
-	It("customizes remote resources with provided labels", func() {
-		resourceListener, _ := net.Listen("tcp", "127.0.0.1:0")
-		go func() {
-			err := test_support.Serve(resourceListener, httpResponse)
+	// ToDo: figure out how to run the kustomize tests on Windows https://github.com/projectriff/riff/issues/1226
+	if runtime.GOOS != "windows" {
+
+		It("customizes remote resources with provided labels", func() {
+			resourceListener, _ := net.Listen("tcp", "127.0.0.1:0")
+			go func() {
+				err := test_support.Serve(resourceListener, httpResponse)
+				Expect(err).NotTo(HaveOccurred())
+			}()
+			resourceUrl := unsafeParseUrl(fmt.Sprintf("http://%s/%s", resourceListener.Addr().String(), "pvc.yaml"))
+
+			result, err := kustomizer.ApplyLabels(resourceUrl, initLabels)
+
 			Expect(err).NotTo(HaveOccurred())
-		}()
-		resourceUrl := unsafeParseUrl(fmt.Sprintf("http://%s/%s", resourceListener.Addr().String(), "pvc.yaml"))
+			Expect(string(result)).To(Equal(expectedResourceContent))
+		})
 
-		result, err := kustomizer.ApplyLabels(resourceUrl, initLabels)
+		It("customizes local resources with provided labels", func() {
+			file := test_support.CreateFile(workDir, "pvc.yaml", initialResourceContent)
+			resourceUrl := unsafeParseUrl(test_support.FileURL(test_support.AbsolutePath(file)))
 
-		Expect(err).NotTo(HaveOccurred())
-		Expect(string(result)).To(Equal(expectedResourceContent))
-	})
+			result, err := kustomizer.ApplyLabels(resourceUrl, initLabels)
 
-	It("customizes local resources with provided labels", func() {
-		file := test_support.CreateFile(workDir, "pvc.yaml", initialResourceContent)
-		resourceUrl := unsafeParseUrl(test_support.FileURL(test_support.AbsolutePath(file)))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(result)).To(Equal(expectedResourceContent))
+		})
 
-		result, err := kustomizer.ApplyLabels(resourceUrl, initLabels)
-
-		Expect(err).NotTo(HaveOccurred())
-		Expect(string(result)).To(Equal(expectedResourceContent))
-	})
+	}
 
 	It("fails on unsupported scheme", func() {
 		resourceUrl := unsafeParseUrl("ftp://127.0.0.1/goodluck.yaml")
