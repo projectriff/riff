@@ -32,7 +32,7 @@ func Channel() *cobra.Command {
 		Use:   "channel",
 		Short: "[DEPRECATED] Interact with channel related resources",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			cmd.OutOrStderr().Write([]byte("Knative eventing is deprecated, and will be removed in a future release\n"))
+			fmt.Fprintln(cmd.OutOrStderr(), "Channels are deprecated, and will be removed in a future release. Follow https://github.com/projectriff/riff/issues/1159 for detail.")
 			return nil
 		},
 	}

@@ -48,7 +48,7 @@ func Subscription() *Command {
 		Use:   "subscription",
 		Short: "[DEPRECATED] Interact with subscription-related resources",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			cmd.OutOrStderr().Write([]byte("Knative eventing is deprecated, and will be removed in a future release\n"))
+			fmt.Fprintln(cmd.OutOrStderr(), "Subscriptions are deprecated, and will be removed in a future release. Follow https://github.com/projectriff/riff/issues/1159 for detail.")
 			return nil
 		},
 	}
