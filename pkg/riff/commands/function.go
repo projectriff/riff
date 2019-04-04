@@ -89,7 +89,7 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.C
 					return fmt.Errorf("Unknown image prefix syntax, expected %q, found: %q", "_/", createFunctionOptions.Image)
 				}
 
-				fmt.Fprintf(cmd.OutOrStdout(), "Applied default --image=%q\n", createFunctionOptions.Image)
+				fmt.Fprintf(cmd.OutOrStderr(), "Applied default --image=%q\n", createFunctionOptions.Image)
 			}
 
 			return nil
@@ -102,7 +102,7 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.C
 			fnName := args[functionCreateFunctionNameIndex]
 
 			createFunctionOptions.Name = fnName
-			f, pvc, err := (*fcTool).CreateFunction(buildpackBuilder, createFunctionOptions, cmd.OutOrStdout())
+			f, r, pvc, err := (*fcTool).CreateFunction(buildpackBuilder, createFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err
 			}
@@ -117,6 +117,14 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.C
 				}
 			} else {
 				PrintSuccessfulCompletion(cmd)
+
+				if r != nil {
+					image := r.Status.ImageDigest
+					if image == "" {
+						image = r.Spec.Container.Image
+					}
+					fmt.Fprintf(cmd.OutOrStdout(), "Deployed image %q\n", image)
+				}
 
 				if !createFunctionOptions.Verbose && !createFunctionOptions.Wait {
 					namespaceOption := ""

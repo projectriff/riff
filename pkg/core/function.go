@@ -35,6 +35,7 @@ import (
 	"github.com/projectriff/riff/pkg/env"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -68,18 +69,18 @@ type CreateFunctionOptions struct {
 	SubPath     string
 }
 
-func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, *corev1.PersistentVolumeClaim, error) {
+func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, *v1alpha1.Revision, *corev1.PersistentVolumeClaim, error) {
 	var buildCache *corev1.PersistentVolumeClaim
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 	functionName := options.Name
 	_, err := c.serving.ServingV1alpha1().Services(ns).Get(functionName, v1.GetOptions{})
 	if err == nil {
-		return nil, nil, fmt.Errorf("service '%s' already exists in namespace '%s'", functionName, ns)
+		return nil, nil, nil, fmt.Errorf("service '%s' already exists in namespace '%s'", functionName, ns)
 	}
 
 	s, err := newService(options.CreateOrUpdateServiceOptions)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	labels := s.Spec.RunLatest.Configuration.RevisionTemplate.Labels
@@ -102,7 +103,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			log.Write([]byte("Skipping local build\n"))
 		} else {
 			if err := c.doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions, log); err != nil {
-				return nil, nil, err
+				return nil, nil, nil, err
 			}
 		}
 		c.bumpBuildAnnotationForRevision(s)
@@ -161,23 +162,24 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 		c.bumpBuildAnnotationForBuild(s)
 	}
 
+	var r *v1alpha1.Revision
 	if !options.DryRun {
 		if buildCache != nil {
 			buildCache, err = c.kubeClient.CoreV1().PersistentVolumeClaims(ns).Create(buildCache)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, nil, err
 			}
 		}
 
 		s, err := c.serving.ServingV1alpha1().Services(ns).Create(s)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
 
 		if buildCache != nil {
 			// add service as owner of build cache so that deleting the service, deletes the cache
 			if _, err = c.addOwnerReferenceToCacheWithRetry(3, buildCache, s); err != nil {
-				return nil, nil, err
+				return nil, nil, nil, err
 			}
 		}
 
@@ -189,12 +191,21 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			}
 			err := c.waitForSuccessOrFailure(ns, s.Name, 1, stopChan, errChan, options.Verbose)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, nil, err
+			}
+
+			// fetch latest Service and Revision, ignore errors
+			s1, err := c.serving.ServingV1alpha1().Services(s.Namespace).Get(s.Name, metav1.GetOptions{})
+			if s1 != nil && err == nil {
+				s = s1
+				if s.Status.LatestCreatedRevisionName != "" {
+					r, _ = c.serving.ServingV1alpha1().Revisions(s.Namespace).Get(s.Status.LatestCreatedRevisionName, metav1.GetOptions{})
+				}
 			}
 		}
 	}
 
-	return s, buildCache, nil
+	return s, r, buildCache, nil
 }
 
 func (c *client) addOwnerReferenceToCacheWithRetry(attempts int, cache *corev1.PersistentVolumeClaim, svc *v1alpha1.Service) (*corev1.PersistentVolumeClaim, error) {

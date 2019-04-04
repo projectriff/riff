@@ -45,12 +45,15 @@ var _ = Describe("Function", func() {
 		mockServing                       *mockserving.Interface
 		mockServingV1alpha1               *mockserving.ServingV1alpha1Interface
 		mockServiceInterface              *mockserving.ServiceInterface
+		mockRevisionInterface             *mockserving.RevisionInterface
 		mockBuild                         *mockbuild.Interface
 		mockBuildV1alpha1                 *mockbuild.BuildV1alpha1Interface
 		mockClusterBuildTemplateInterface *mockbuild.ClusterBuildTemplateInterface
 		workDir                           string
 		service                           *v1alpha1.Service
 		testService                       *v1alpha1.Service
+		revision                          *v1alpha1.Revision
+		testRevision                      *v1alpha1.Revision
 		cache                             *corev1.PersistentVolumeClaim
 		err                               error
 	)
@@ -61,8 +64,10 @@ var _ = Describe("Function", func() {
 		mockServing = &mockserving.Interface{}
 		mockServingV1alpha1 = &mockserving.ServingV1alpha1Interface{}
 		mockServiceInterface = &mockserving.ServiceInterface{}
+		mockRevisionInterface = &mockserving.RevisionInterface{}
 		mockServing.On("ServingV1alpha1").Return(mockServingV1alpha1)
 		mockServingV1alpha1.On("Services", mock.Anything).Return(mockServiceInterface)
+		mockServingV1alpha1.On("Revisions", mock.Anything).Return(mockRevisionInterface)
 		mockBuild = &mockbuild.Interface{}
 		mockBuildV1alpha1 = &mockbuild.BuildV1alpha1Interface{}
 		mockClusterBuildTemplateInterface = &mockbuild.ClusterBuildTemplateInterface{}
@@ -97,16 +102,21 @@ var _ = Describe("Function", func() {
 		)
 
 		JustBeforeEach(func() {
-			service, cache, err = client.CreateFunction(mockBuilder, createFunctionOptions, ioutil.Discard)
+			service, revision, cache, err = client.CreateFunction(mockBuilder, createFunctionOptions, ioutil.Discard)
 		})
 
 		Context("when building locally", func() {
 			BeforeEach(func() {
+				mockServiceInterface.On("Get", mock.Anything, mock.Anything).
+					Return(nil, notFound()).Once()
 				mockServiceInterface.On("Create", mock.Anything).Run(func(args mock.Arguments) {
 					createdService = args.Get(0).(*v1alpha1.Service)
-				}).Return(testService, nil)
+				}).Return(testService, nil).Once()
 				mockServiceInterface.On("Get", mock.Anything, mock.Anything).
-					Return(nil, notFound())
+					Return(testService, nil).Once()
+
+				mockRevisionInterface.On("Get", testService.Status.LatestCreatedRevisionName, mock.Anything).
+					Return(testRevision, nil).Once()
 			})
 
 			BeforeEach(func() {
@@ -124,6 +134,7 @@ var _ = Describe("Function", func() {
 					Expect(err).NotTo(HaveOccurred())
 					// The returned service should be the input to service create, not the output.
 					Expect(service).To(Equal(createdService))
+					Expect(revision).To(BeNil())
 					Expect(cache).To(BeNil())
 				})
 			})
@@ -138,6 +149,7 @@ var _ = Describe("Function", func() {
 					Expect(err).NotTo(HaveOccurred())
 					// The returned service should be the input to service create, not the output.
 					Expect(service).To(Equal(createdService))
+					Expect(revision).To(BeNil())
 					Expect(cache).To(BeNil())
 				})
 			})
@@ -152,9 +164,12 @@ var _ = Describe("Function", func() {
 					Expect(err).NotTo(HaveOccurred())
 					// The returned service should be the input to service create, not the output.
 					Expect(service).To(Equal(createdService))
+					Expect(revision).To(BeNil())
 					Expect(cache).To(BeNil())
 				})
 			})
+
+			// TODO add tests for --wait and --verbose
 		})
 
 		Context("when a service with the same name already exists", func() {

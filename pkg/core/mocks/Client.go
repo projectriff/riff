@@ -53,7 +53,7 @@ func (_m *Client) CreateChannel(options core.CreateChannelOptions) (*v1alpha1.Ch
 }
 
 // CreateFunction provides a mock function with given fields: builder, options, log
-func (_m *Client) CreateFunction(builder core.Builder, options core.CreateFunctionOptions, log io.Writer) (*servingv1alpha1.Service, *v1.PersistentVolumeClaim, error) {
+func (_m *Client) CreateFunction(builder core.Builder, options core.CreateFunctionOptions, log io.Writer) (*servingv1alpha1.Service, *servingv1alpha1.Revision, *v1.PersistentVolumeClaim, error) {
 	ret := _m.Called(builder, options, log)
 
 	var r0 *servingv1alpha1.Service
@@ -65,23 +65,32 @@ func (_m *Client) CreateFunction(builder core.Builder, options core.CreateFuncti
 		}
 	}
 
-	var r1 *v1.PersistentVolumeClaim
-	if rf, ok := ret.Get(1).(func(core.Builder, core.CreateFunctionOptions, io.Writer) *v1.PersistentVolumeClaim); ok {
+	var r1 *servingv1alpha1.Revision
+	if rf, ok := ret.Get(1).(func(core.Builder, core.CreateFunctionOptions, io.Writer) *servingv1alpha1.Revision); ok {
 		r1 = rf(builder, options, log)
 	} else {
 		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*v1.PersistentVolumeClaim)
+			r1 = ret.Get(1).(*servingv1alpha1.Revision)
 		}
 	}
 
-	var r2 error
-	if rf, ok := ret.Get(2).(func(core.Builder, core.CreateFunctionOptions, io.Writer) error); ok {
+	var r2 *v1.PersistentVolumeClaim
+	if rf, ok := ret.Get(2).(func(core.Builder, core.CreateFunctionOptions, io.Writer) *v1.PersistentVolumeClaim); ok {
 		r2 = rf(builder, options, log)
 	} else {
-		r2 = ret.Error(2)
+		if ret.Get(2) != nil {
+			r2 = ret.Get(2).(*v1.PersistentVolumeClaim)
+		}
 	}
 
-	return r0, r1, r2
+	var r3 error
+	if rf, ok := ret.Get(3).(func(core.Builder, core.CreateFunctionOptions, io.Writer) error); ok {
+		r3 = rf(builder, options, log)
+	} else {
+		r3 = ret.Error(3)
+	}
+
+	return r0, r1, r2, r3
 }
 
 // CreateService provides a mock function with given fields: options
