@@ -25,8 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/projectriff/riff/pkg/fileutils"
-
+	"github.com/pivotal/go-ape/pkg/furl"
 	"github.com/projectriff/riff/pkg/env"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -136,11 +135,11 @@ func retry(duration time.Duration, steps int, condition func() (done bool, err e
 }
 
 func (c *client) applyRelease(release string, options SystemInstallOptions, willRetry bool) (bool, error) {
-	dir, err := fileutils.Dir(options.Manifest)
+	dir, err := furl.Dir(options.Manifest)
 	if err != nil {
 		return false, err // hard error
 	}
-	yaml, err := fileutils.Read(release, dir)
+	yaml, err := furl.Read(release, dir)
 	if err != nil {
 		return false, err // hard error
 	}
