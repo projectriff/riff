@@ -468,7 +468,12 @@ var _ = Describe("namespace", func() {
 
 			mockKustomizer.On("ApplyLabels",
 				mock.MatchedBy(func(resourceUri *url.URL) bool {
-					return resourceUri.Scheme == "file" && resourceUri.Path == unsafeAbs("fixtures/local-yaml/buildtemplate.yaml")
+					path := unsafeAbs("fixtures/local-yaml/buildtemplate.yaml")
+					if runtime.GOOS == "windows" && len(resourceUri.Scheme) == 1 {
+						return strings.ToUpper(resourceUri.Scheme) + resourceUri.String()[1:] == path
+					} else {
+						return resourceUri.Scheme == "file" && resourceUri.Path == path
+					}
 				}),
 				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
 				Return([]byte("customised content"), nil)
