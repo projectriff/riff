@@ -327,7 +327,7 @@ var _ = Describe("namespace", func() {
 				NamespaceName: "foo",
 				NoSecret:      true,
 			}
-			namespaceResource := unsafeAbs("fixtures/initial_pvc.yaml")
+			namespaceResource := unsafeAbs("fixtures" + string(os.PathSeparator) + "initial_pvc.yaml")
 			manifests["stable"] = &core.Manifest{
 				Namespace: []string{namespaceResource},
 			}
@@ -342,7 +342,7 @@ var _ = Describe("namespace", func() {
 			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
 			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
 
-			customizedResourceContents := contentsOf("fixtures/kustom_pvc.yaml")
+			customizedResourceContents := contentsOf("fixtures" + string(os.PathSeparator) + "kustom_pvc.yaml")
 			mockKustomizer.On("ApplyLabels",
 				mock.MatchedBy(urlPath(namespaceResource)),
 				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
