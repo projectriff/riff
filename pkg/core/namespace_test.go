@@ -23,6 +23,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -134,7 +135,13 @@ var _ = Describe("namespace", func() {
 			mockSecrets.On("Create", mock.Anything).Run(func(args mock.Arguments) {
 				s := args[0].(*v1.Secret)
 				Expect(s.StringData).To(HaveKeyWithValue("username", "_json_key"))
-				Expect(s.StringData).To(HaveKeyWithValue("password", "{ \"project_id\": \"gcp-project-id\" }\n"))
+				var expectedPassword string
+				if runtime.GOOS == "windows" {
+					expectedPassword = "{ \"project_id\": \"gcp-project-id\" }\r\n"
+				} else {
+					expectedPassword = "{ \"project_id\": \"gcp-project-id\" }\n"
+				}
+				Expect(s.StringData).To(HaveKeyWithValue("password", expectedPassword))
 				Expect(s.Labels).To(HaveLen(2))
 				Expect(s.Labels["projectriff.io/installer"]).To(Equal(env.Cli.Name))
 				Expect(s.Labels["projectriff.io/version"]).To(Equal(env.Cli.Version))
