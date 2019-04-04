@@ -1,107 +1,133 @@
-# Go
-# Build your Go project.
-# Add steps that test, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/go
+jobs:
 
-strategy:
-  matrix:
-    linux:
-      imageName: 'ubuntu-16.04'
-    mac:
-      imageName: 'macos-10.13'
-    windows:
-      imageName: 'vs2017-win2016'
+- job: unit
+  strategy:
+    matrix:
+      linux:
+        imageName: 'ubuntu-16.04'
+      mac:
+        imageName: 'macos-10.13'
+      windows:
+        imageName: 'vs2017-win2016'
+  pool:
+    vmImage: $(imageName)
+  variables:
+    GOBIN:  '$(GOPATH)/bin' # Go binaries path
+    GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
+    GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
+    modulePath: '$(build.repository.name)' # Path to the module's code
+  steps:
+  - template: ci/unit-test-steps.yml
+  displayName: 'Unit test'
 
-trigger:
-- master
+- job: fats_lite
+  dependsOn: unit
+  strategy:
+    matrix:
+      minikube:
+        imageName: ubuntu-16.04
+        cluster: minikube
+        registry: minikube
+  pool:
+    vmImage: $(imageName)
+  variables:
+    CLUSTER:  '$(cluster)'
+    REGISTRY: '$(registry)'
+    CLUSTER_NAME: 'fats-$(Build.BuildId)'
+    NAMESPACE: '$(CLUSTER_NAME)'
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+  steps:
+  - template: ci/install-gcloud.yml
+  - template: ci/downgrade-docker.yml
+  - bash: ./ci/fats.sh lite
+    displayName: 'Run FATS'
+  - bash: ./ci/fats-cleanup.sh
+    env:
+      TRAVIS_TEST_RESULT: '' # TODO remove this
+    condition: always()
+    displayName: 'Cleanup FATS'
+  displayName: 'FATS lite'
 
-pool:
-  vmImage: $(imageName)
+- job: stage
+  dependsOn: unit
+  pool:
+    vmImage: ubuntu-16.04
+  variables:
+    GOBIN:  '$(GOPATH)/bin' # Go binaries path
+    GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
+    GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
+    modulePath: '$(build.repository.name)' # Path to the module's code
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  steps:
+  - template: ci/install-go-steps.yml
+  - template: ci/install-gcloud.yml
+  - bash: ./ci/stage.sh
+    env:
+      GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
+    workingDirectory: '$(modulePath)'
+    displayName: 'Stage riff release artifacts'
+  displayName: 'Stage'
 
-variables:
-  GOBIN:  '$(GOPATH)/bin' # Go binaries path
-  GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
-  GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
-  modulePath: '$(build.repository.name)' # Path to the module's code
+- job: fats
+  dependsOn: stage
+  strategy:
+    matrix:
+      minikube:
+        imageName: ubuntu-16.04
+        cluster: minikube
+        registry: dockerhub
+      gke:
+        imageName: ubuntu-16.04
+        cluster: gke
+        registry: gcr
+  pool:
+    vmImage: $(imageName)
+  variables:
+    CLUSTER:  '$(cluster)'
+    REGISTRY: '$(registry)'
+    CLUSTER_NAME: 'fats-$(Build.BuildId)'
+    NAMESPACE: '$(CLUSTER_NAME)'
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  steps:
+  - template: ci/install-gcloud.yml
+  - template: ci/downgrade-docker.yml
+  - bash: ./ci/fats.sh
+    env:
+      DOCKER_USERNAME: '$(DockerUsername)'
+      DOCKER_PASSWORD: '$(DockerPassword)'
+      GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
+    displayName: 'Run FATS'
+  - bash: ./ci/fats-cleanup.sh
+    env:
+      DOCKER_USERNAME: '$(DockerUsername)'
+      DOCKER_PASSWORD: '$(DockerPassword)'
+      GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
+      TRAVIS_TEST_RESULT: '' # TODO remove this
+    condition: always()
+    displayName: 'Cleanup FATS'
+  displayName: 'FATS'
 
-steps:
-- task: GoTool@0
-  inputs:
-    version: 1.12
+- job: publish
+  dependsOn: fats
+  pool:
+    vmImage: ubuntu-16.04
+  condition: |
+    and(
+      succeeded(),
+      ne(variables['Build.Reason'], 'PullRequest'),
+      or(
+        eq(variables['Build.SourceBranch'], 'refs/heads/master'),
+        and(
+          startsWith(variables['Build.SourceBranch'], 'refs/heads/v'),
+          endsWith(variables['Build.SourceBranch'], 'x')
+        )
+      )
+    )
+  steps:
+  - template: ci/install-gcloud.yml
+  - bash: ./ci/publish.sh
+    env:
+      GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
+    displayName: 'Publish riff release artifacts'
+  displayName: 'Publish'
 
-- bash: |
-    mkdir -p '$(GOBIN)'
-    mkdir -p '$(GOPATH)/pkg'
-    mkdir -p '$(modulePath)'
-    shopt -s extglob
-    shopt -s dotglob
-    mv !(gopath) '$(modulePath)'
-    echo '##vso[task.prependpath]$(GOBIN)'
-    echo '##vso[task.prependpath]$(GOROOT)/bin'
-
-    set -o errexit
-    set -o nounset
-    set -o pipefail
-
-    go get github.com/jstemmer/go-junit-report
-    go get github.com/axw/gocov/gocov
-    go get github.com/AlekSi/gocov-xml
-    go get -u github.com/matm/gocov-html
-  displayName: 'Set up the Go workspace'
-
-- bash: |
-    set -o errexit
-    set -o nounset
-    set -o pipefail
-
-    go version
-
-    go build -v ./cmd/riff
-    go test -v -coverprofile=coverage.txt -covermode count ./... 2>&1 | tee >(go-junit-report > report.xml)
-  # TODO drop this condition once windows tests are passing
-  condition: and(succeeded(), ne(variables['Agent.OS'], 'Windows_NT'))
-  workingDirectory: '$(modulePath)'
-  displayName: 'Run unit test'
-
-# TODO drop this step once windows tests are passing
-- bash: |
-    set -o errexit
-    set -o nounset
-    set -o pipefail
-
-    go version
-
-    go build -v ./cmd/riff
-    go test -v -coverprofile=coverage.txt -covermode count ./... 2>&1 | tee >(go-junit-report > report.xml)
-  condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))
-  continueOnError: true
-  workingDirectory: '$(modulePath)'
-  displayName: 'Run unit test Windows'
-
-- bash: |
-    set -o errexit
-    set -o nounset
-    set -o pipefail
-
-    if [ -f "coverage.txt" ]; then
-      gocov convert coverage.txt > coverage.json
-      gocov-xml < coverage.json > coverage.xml
-      mkdir coverage
-      gocov-html < coverage.json > coverage/index.html
-    fi
-  condition: succeededOrFailed()
-  workingDirectory: '$(modulePath)'
-  displayName: 'Process test coverage'
-
-- task: PublishTestResults@2
-  condition: succeededOrFailed()
-  inputs:
-    testRunner: JUnit
-    testResultsFiles: $(System.DefaultWorkingDirectory)/**/report.xml
-
-- task: PublishCodeCoverageResults@1
-  condition: succeededOrFailed()
-  inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: $(System.DefaultWorkingDirectory)/**/coverage.xml
-    reportDirectory: $(System.DefaultWorkingDirectory)/**/coverage

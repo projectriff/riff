@@ -62,7 +62,7 @@ func NamespaceInit(manifests map[string]*core.Manifest, c *core.Client) *cobra.C
 		),
 		PreRunE: FlagsValidatorAsCobraRunE(
 			FlagsValidationConjunction(
-				AtMostOneOf("gcr", "dockerhub", "no-secret", "registry-user"),
+				AtMostOneOf("gcr", "docker-hub", "dockerhub", "no-secret", "registry-user"),
 				AtMostOneOf("secret", "no-secret"),
 				NotBlank("secret"),
 				FlagsDependency(Set("registry-user"), NotBlank("registry")),
@@ -108,10 +108,14 @@ func NamespaceInit(manifests map[string]*core.Manifest, c *core.Client) *cobra.C
 	command.Flags().BoolVarP(&options.NoSecret, "no-secret", "", false, "no secret required for the image registry")
 	command.Flags().StringVarP(&options.SecretName, "secret", "s", "push-credentials", "the name of a `secret` containing credentials for the image registry")
 	command.Flags().StringVar(&options.GcrTokenPath, "gcr", "", "path to a file containing Google Container Registry credentials")
-	command.Flags().StringVar(&options.DockerHubUsername, "dockerhub", "", "dockerhub username for authentication; password will be read from stdin")
+	// ToDo: remove this deprecated flag in favor of --docker-hub
+	command.Flags().StringVar(&options.DockerHubId, "dockerhub", "", "dockerhub username for authentication; password will be read from stdin")
+	command.Flags().MarkHidden("dockerhub")
+	command.Flags().MarkDeprecated("dockerhub", "use --docker-hub instead")
+	command.Flags().StringVar(&options.DockerHubId, "docker-hub", "", "Docker ID for authenticating with Docker Hub; password will be read from stdin")
 	command.Flags().StringVar(&options.Registry, "registry", "", "registry server host, scheme must be \"http\" or \"https\" (default \"https\")")
 	command.Flags().StringVar(&options.RegistryUser, "registry-user", "", "registry username; password will be read from stdin")
-	command.Flags().StringVar(&options.ImagePrefix, "image-prefix", "", "image prefix to use for commands that would otherwise require an --image argument. If not set, this value will be derived for DockerHub and GCR")
+	command.Flags().StringVar(&options.ImagePrefix, "image-prefix", "", "image prefix to use for commands that would otherwise require an --image argument. If not set, this value will be derived for Docker Hub and GCR")
 
 	return command
 }

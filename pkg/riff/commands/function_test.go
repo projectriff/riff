@@ -94,6 +94,7 @@ var _ = Describe("The riff function create command", func() {
 			client  core.Client
 			asMock  *mocks.Client
 			fc      *cobra.Command
+			output  *strings.Builder
 		)
 		BeforeEach(func() {
 			builder = new(mockbuilder.Builder)
@@ -101,6 +102,9 @@ var _ = Describe("The riff function create command", func() {
 			asMock = client.(*mocks.Client)
 
 			fc = commands.FunctionCreate(builder, &client)
+
+			output = &strings.Builder{}
+			fc.SetOutput(output)
 		})
 		AfterEach(func() {
 			asMock.AssertExpectations(GinkgoT())
@@ -117,7 +121,7 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{}
 			options.EnvFrom = []string{}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -137,7 +141,7 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{}
 			options.EnvFrom = []string{}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -154,9 +158,10 @@ var _ = Describe("The riff function create command", func() {
 			options.EnvFrom = []string{}
 
 			asMock.On("DefaultBuildImagePrefix", "").Return("defaulted-prefix", nil)
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("defaulted-prefix/square"), nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("defaulted-prefix/square"), nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
+			Expect(output.String()).To(ContainSubstring("Applied default --image=\"defaulted-prefix/square\""))
 		})
 		It("should apply the image prefix with a custom repo name", func() {
 			fc.SetArgs([]string{"square", "--git-repo", "https://github.com/repo", "--image", "_/square-custom"})
@@ -171,15 +176,16 @@ var _ = Describe("The riff function create command", func() {
 			options.EnvFrom = []string{}
 
 			asMock.On("DefaultBuildImagePrefix", "").Return("defaulted-prefix", nil)
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("defaulted-prefix/square-custom"), nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("defaulted-prefix/square-custom"), nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
+			Expect(output.String()).To(ContainSubstring("Applied default --image=\"defaulted-prefix/square-custom\""))
 		})
 		It("should propagate core.Client errors", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 
 			e := fmt.Errorf("some error")
-			asMock.On("CreateFunction", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, e)
+			asMock.On("CreateFunction", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, nil, e)
 			err := fc.Execute()
 			Expect(err).To(MatchError(e))
 		})
@@ -190,6 +196,7 @@ var _ = Describe("The riff function create command", func() {
 			asMock.On("DefaultBuildImagePrefix", "").Return("", e)
 			err := fc.Execute()
 			Expect(err).To(MatchError("unable to default image: some error"))
+			Expect(output.String()).ToNot(ContainSubstring("Applied default --image"))
 		})
 		It("should add env vars when asked to", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo",
@@ -204,7 +211,7 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{"FOO=bar", "BAZ=qux"}
 			options.EnvFrom = []string{"secretKeyRef:foo:bar"}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -225,15 +232,12 @@ var _ = Describe("The riff function create command", func() {
 			f.Name = "square"
 			cache := corev1.PersistentVolumeClaim{}
 			cache.Name = "square-build-cache"
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&f, &cache, nil)
-
-			stdout := &strings.Builder{}
-			fc.SetOutput(stdout)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&f, nil, &cache, nil)
 
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(stdout.String()).To(Equal(fnCreateDryRun))
+			Expect(output.String()).To(Equal(fnCreateDryRun))
 		})
 
 		It("should display the status hint", func() {
@@ -250,15 +254,12 @@ var _ = Describe("The riff function create command", func() {
 			function.Name = "square"
 			cache := corev1.PersistentVolumeClaim{}
 			cache.Name = "square-build-cache"
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(function, &cache, nil)
-			stdout := &strings.Builder{}
-			fc.SetOutput(stdout)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(function, nil, &cache, nil)
 
 			err := fc.Execute()
 
 			Expect(err).NotTo(HaveOccurred())
-			fmt.Println(stdout.String())
-			Expect(stdout.String()).To(HaveSuffix("Issue `riff service status square` to see the status of the function\n"))
+			Expect(output.String()).To(HaveSuffix("Issue `riff service status square` to see the status of the function\n"))
 		})
 
 		It("should include the nondefault namespace in the status hint", func() {
@@ -279,15 +280,69 @@ var _ = Describe("The riff function create command", func() {
 			cache := corev1.PersistentVolumeClaim{}
 			cache.Name = "square-build-cache"
 			cache.Namespace = "ns"
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(function, &cache, nil)
-			stdout := &strings.Builder{}
-			fc.SetOutput(stdout)
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(function, nil, &cache, nil)
 
 			err := fc.Execute()
 
 			Expect(err).NotTo(HaveOccurred())
-			fmt.Println(stdout.String())
-			Expect(stdout.String()).To(HaveSuffix("Issue `riff service status square -n ns` to see the status of the function\n"))
+			Expect(output.String()).To(HaveSuffix("Issue `riff service status square -n ns` to see the status of the function\n"))
+		})
+
+		It("should not print resolved image without a revision", func() {
+			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo", "--verbose"})
+
+			options := core.CreateFunctionOptions{
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+			}
+			options.Name = "square"
+			options.Image = "foo/bar"
+			options.Env = []string{}
+			options.EnvFrom = []string{}
+			options.Verbose = true
+
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil, nil)
+			err := fc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(output.String()).ToNot(ContainSubstring("Deployed image"))
+		})
+
+		It("should print resolved image when waiting", func() {
+			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo", "--verbose"})
+
+			options := core.CreateFunctionOptions{
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+			}
+			options.Name = "square"
+			options.Image = "foo/bar"
+			options.Env = []string{}
+			options.EnvFrom = []string{}
+			options.Verbose = true
+
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), revisionWithBuiltImage("foo/bar", "deadbeef"), nil, nil)
+			err := fc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(output.String()).To(ContainSubstring("Deployed image \"foo/bar@sha256:deadbeef\"\n"))
+		})
+
+		It("should print resolved image when waiting without a digest when not available", func() {
+			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo", "--verbose"})
+
+			options := core.CreateFunctionOptions{
+				GitRepo:     "https://github.com/repo",
+				GitRevision: "master",
+			}
+			options.Name = "square"
+			options.Image = "foo/bar"
+			options.Env = []string{}
+			options.EnvFrom = []string{}
+			options.Verbose = true
+
+			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), revisionWithBuiltImage("foo/bar", ""), nil, nil)
+			err := fc.Execute()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(output.String()).To(ContainSubstring("Deployed image \"foo/bar\"\n"))
 		})
 
 	})
@@ -479,4 +534,18 @@ func svcWithBuiltImage(img string) *v1alpha1.Service {
 			},
 		},
 	}
+}
+
+func revisionWithBuiltImage(img string, digest string) *v1alpha1.Revision {
+	rev := &v1alpha1.Revision{
+		Spec: v1alpha1.RevisionSpec{
+			Container: corev1.Container{
+				Image: img,
+			},
+		},
+	}
+	if digest != "" {
+		rev.Status.ImageDigest = fmt.Sprintf("%s@sha256:%s", img, digest)
+	}
+	return rev
 }

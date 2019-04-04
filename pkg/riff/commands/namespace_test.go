@@ -65,7 +65,7 @@ var _ = Describe("The riff namespace init command", func() {
 			Expect(err).To(MatchError(ContainSubstring("must start and end with an alphanumeric character")))
 		})
 
-		dockerHubArgs := []string{"--dockerhub", "projectriff"}
+		dockerHubArgs := []string{"--docker-hub", "projectriff"}
 		gcrArgs := []string{"--gcr", "/path/to/gcr.json"}
 		noSecretArgs := []string{"--no-secret"}
 		basicAuthArgs := []string{"--registry", "registry.example.com", "--registry-user", "beth"}
@@ -75,7 +75,7 @@ var _ = Describe("The riff namespace init command", func() {
 
 				err := namespaceInit.Execute()
 
-				Expect(err).To(MatchError("at most one of --gcr, --dockerhub, --no-secret, --registry-user may be set"))
+				Expect(err).To(MatchError("at most one of --gcr, --docker-hub, --dockerhub, --no-secret, --registry-user may be set"))
 			},
 			Entry("all modes                =>", dockerHubArgs, gcrArgs, noSecretArgs, basicAuthArgs),
 			Entry("docker+grc+nosecret      =>", dockerHubArgs, gcrArgs, noSecretArgs),
@@ -170,12 +170,26 @@ var _ = Describe("The riff namespace init command", func() {
 		})
 
 		It("involves the core.Client with Dockerhub config", func() {
+			namespaceInit.SetArgs([]string{"ns", "--manifest", "some-path", "--docker-hub", "username"})
+			clientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
+				NamespaceName: "ns",
+				Manifest:      "some-path",
+				DockerHubId:   "username",
+				SecretName:    "push-credentials",
+			}).Return(nil)
+
+			err := namespaceInit.Execute()
+
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("involves the core.Client with deprecated dockerhub flag", func() {
 			namespaceInit.SetArgs([]string{"ns", "--manifest", "some-path", "--dockerhub", "username"})
 			clientMock.On("NamespaceInit", manifests, core.NamespaceInitOptions{
-				NamespaceName:     "ns",
-				Manifest:          "some-path",
-				DockerHubUsername: "username",
-				SecretName:        "push-credentials",
+				NamespaceName: "ns",
+				Manifest:      "some-path",
+				DockerHubId:   "username",
+				SecretName:    "push-credentials",
 			}).Return(nil)
 
 			err := namespaceInit.Execute()

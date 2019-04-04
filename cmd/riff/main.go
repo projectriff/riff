@@ -30,17 +30,17 @@ var (
 		"stable": {
 			ManifestVersion: "0.1",
 			Istio: []string{
-				// diff https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-4-1.diff
-				"https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-4-1.yaml",
+				// diff https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-5-0.diff
+				"https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-5-0.yaml",
 			},
 			Knative: []string{
-				"https://storage.googleapis.com/knative-releases/build/previous/v0.4.0/build.yaml",
-				"https://storage.googleapis.com/knative-releases/serving/previous/v0.4.1/serving.yaml",
-				"https://raw.githubusercontent.com/knative/serving/v0.4.1/third_party/config/build/clusterrole.yaml",
+				"https://storage.googleapis.com/knative-releases/build/previous/v0.5.0/build.yaml",
+				"https://storage.googleapis.com/knative-releases/serving/previous/v0.5.0/serving.yaml",
+				"https://raw.githubusercontent.com/knative/serving/v0.5.0/third_party/config/build/clusterrole.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/eventing.yaml",
 				"https://storage.googleapis.com/knative-releases/eventing/previous/v0.4.0/in-memory-channel.yaml",
 				// TODO update to a release version before releasing riff
-				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-0.2.0-snapshot-ci-c957e7e83d23.yaml",
+				"https://storage.googleapis.com/projectriff/riff-buildtemplate/riff-cnb-clusterbuildtemplate-0.2.0-snapshot-ci-4bcb3aa75da4.yaml",
 			},
 		},
 		// most recent release of Knative. This manifest is not tested

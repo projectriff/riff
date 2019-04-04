@@ -1,0 +1,35 @@
+steps:
+- template: install-go-steps.yml
+
+- template: install-coverage-steps.yml
+
+- bash: |
+    set -o errexit
+    set -o nounset
+    set -o pipefail
+
+    go version
+
+    go build -v ./cmd/riff
+    go test -v -coverprofile=coverage.txt -covermode count ./... 2>&1 | tee >(go-junit-report > report.xml)
+  # TODO drop this condition once windows tests are passing
+  condition: and(succeeded(), ne(variables['Agent.OS'], 'Windows_NT'))
+  workingDirectory: '$(modulePath)'
+  displayName: 'Run unit test'
+
+# TODO drop this step once windows tests are passing
+- bash: |
+    set -o errexit
+    set -o nounset
+    set -o pipefail
+
+    go version
+
+    go build -v ./cmd/riff
+    go test -v -coverprofile=coverage.txt -covermode count ./... 2>&1 | tee >(go-junit-report > report.xml)
+  condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))
+  continueOnError: true
+  workingDirectory: '$(modulePath)'
+  displayName: 'Run unit test Windows'
+
+- template: report-coverage-steps.yml

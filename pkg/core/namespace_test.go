@@ -28,12 +28,12 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	"github.com/projectriff/riff/pkg/core"
-	"github.com/projectriff/riff/pkg/core/kustomize/mocks"
+	mockkustomize "github.com/projectriff/riff/pkg/core/kustomize/mocks"
 	"github.com/projectriff/riff/pkg/core/vendor_mocks"
 	"github.com/projectriff/riff/pkg/env"
-	"github.com/projectriff/riff/pkg/kubectl/mocks"
+	mockkubectl "github.com/projectriff/riff/pkg/kubectl/mocks"
 	"github.com/stretchr/testify/mock"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -76,6 +76,8 @@ var _ = Describe("namespace", func() {
 		mockNamespaces.AssertExpectations(GinkgoT())
 		mockServiceAccounts.AssertExpectations(GinkgoT())
 		mockSecrets.AssertExpectations(GinkgoT())
+		mockConfigMaps.AssertExpectations(GinkgoT())
+		mockKustomizer.AssertExpectations(GinkgoT())
 	})
 
 	Describe("NamespaceInit", func() {
@@ -104,13 +106,16 @@ var _ = Describe("namespace", func() {
 			}
 			mockServiceAccounts.On("Create", mock.MatchedBy(namedAndLabelled(core.BuildServiceAccountName, labels))).Return(serviceAccount, nil)
 
+			configMap := &v1.ConfigMap{}
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
+			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
+
 			err := client.NamespaceInit(manifests, options)
 
 			Expect(err).To(Not(HaveOccurred()))
 		})
 
 		It("should create secret for gcr", func() {
-
 			options := core.NamespaceInitOptions{
 				Manifest:      "fixtures/empty.yaml",
 				NamespaceName: "foo",
@@ -167,10 +172,10 @@ var _ = Describe("namespace", func() {
 			It("should create secret for dockerhub", func() {
 
 				options := core.NamespaceInitOptions{
-					Manifest:          "fixtures/empty.yaml",
-					NamespaceName:     "foo",
-					DockerHubUsername: "roger",
-					SecretName:        "push-credentials",
+					Manifest:      "fixtures/empty.yaml",
+					NamespaceName: "foo",
+					DockerHubId:   "roger",
+					SecretName:    "push-credentials",
 				}
 
 				namespace := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "foo"}}
@@ -255,6 +260,10 @@ var _ = Describe("namespace", func() {
 					})))
 				}).Return(serviceAccount, nil)
 
+				configMap := &v1.ConfigMap{}
+				mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
+				mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
+
 				err := client.NamespaceInit(manifests, options)
 				Expect(err).To(Not(HaveOccurred()))
 			})
@@ -273,6 +282,10 @@ var _ = Describe("namespace", func() {
 			serviceAccount := &v1.ServiceAccount{}
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
 			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+
+			configMap := &v1.ConfigMap{}
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
+			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
 
 			err := client.NamespaceInit(manifests, options)
 			Expect(err).To(Not(HaveOccurred()))
@@ -317,6 +330,11 @@ var _ = Describe("namespace", func() {
 			serviceAccount := &v1.ServiceAccount{}
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
 			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+
+			configMap := &v1.ConfigMap{}
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
+			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
+
 			customizedResourceContents := contentsOf("fixtures/kustom_pvc.yaml")
 			mockKustomizer.On("ApplyLabels",
 				mock.MatchedBy(urlPath(namespaceResource)),
@@ -328,6 +346,66 @@ var _ = Describe("namespace", func() {
 			err := client.NamespaceInit(manifests, options)
 
 			Expect(err).To(Not(HaveOccurred()))
+		})
+
+		It("should fail if the image prefix deletion fails", func() {
+			options := core.NamespaceInitOptions{
+				Manifest:      "stable",
+				NamespaceName: "foo",
+				NoSecret:      true,
+			}
+			namespaceResource := unsafeAbs("fixtures/initial_pvc.yaml")
+			manifests["stable"] = &core.Manifest{
+				Namespace: []string{namespaceResource},
+			}
+			namespace := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "foo"}}
+			mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
+
+			serviceAccount := &v1.ServiceAccount{}
+			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
+			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+			expectedError := fmt.Errorf("image prefix deletion failed")
+
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
+			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(nil, expectedError)
+
+			err := client.NamespaceInit(manifests, options)
+
+			Expect(err).To(MatchError(expectedError))
+		})
+
+		It("should not fail if the image prefix deletion returns a not found error", func() {
+			options := core.NamespaceInitOptions{
+				Manifest:      "stable",
+				NamespaceName: "foo",
+				NoSecret:      true,
+			}
+			namespaceResource := unsafeAbs("fixtures/initial_pvc.yaml")
+			manifests["stable"] = &core.Manifest{
+				Namespace: []string{namespaceResource},
+			}
+			namespace := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "foo"}}
+			mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
+
+			serviceAccount := &v1.ServiceAccount{}
+			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
+			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+
+			configMap := &v1.ConfigMap{}
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
+			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
+
+			customizedResourceContents := contentsOf("fixtures/kustom_pvc.yaml")
+			mockKustomizer.On("ApplyLabels",
+				mock.MatchedBy(urlPath(namespaceResource)),
+				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
+				Return(customizedResourceContents, nil)
+			kubeCtl.On("ExecStdin", []string{"apply", "-n", "foo", "-f", "-"}, &customizedResourceContents).
+				Return("done!", nil)
+
+			err := client.NamespaceInit(manifests, options)
+
+			Expect(err).To(BeNil())
 		})
 
 		It("should fail if the PVC label kustomization fails", func() {
@@ -346,6 +424,11 @@ var _ = Describe("namespace", func() {
 			serviceAccount := &v1.ServiceAccount{}
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
 			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+
+			configMap := &v1.ConfigMap{}
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
+			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
+
 			expectedError := fmt.Errorf("kustomization failed")
 			mockKustomizer.On("ApplyLabels",
 				mock.MatchedBy(urlPath(namespaceResource)),
@@ -370,6 +453,10 @@ var _ = Describe("namespace", func() {
 			serviceAccount := &v1.ServiceAccount{}
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
 			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+
+			configMap := &v1.ConfigMap{}
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
+			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
 
 			mockKustomizer.On("ApplyLabels",
 				mock.MatchedBy(func(resourceUri *url.URL) bool {
@@ -464,6 +551,11 @@ var _ = Describe("namespace", func() {
 				Items: []v1.Secret{secret(secretName)},
 			}, nil)
 			mockSecrets.On("Delete", secretName, mock.Anything).Return(nil)
+			configMapName := "riff-build"
+			mockConfigMaps.On("List", expectedListOptions).Return(&v1.ConfigMapList{
+				Items: []v1.ConfigMap{configMap(configMapName)},
+			}, nil)
+			mockConfigMaps.On("Delete", core.BuildConfigMapName, mock.Anything).Return(nil)
 			expectedError := fmt.Errorf("namespace deletion failed")
 			mockNamespaces.On("Delete", namespace, mock.Anything).Return(expectedError)
 
@@ -482,6 +574,11 @@ var _ = Describe("namespace", func() {
 				Items: []v1.Secret{secret(secretName)},
 			}, nil)
 			mockSecrets.On("Delete", secretName, mock.Anything).Return(nil)
+			configMapName := "riff-build"
+			mockConfigMaps.On("List", expectedListOptions).Return(&v1.ConfigMapList{
+				Items: []v1.ConfigMap{configMap(configMapName)},
+			}, nil)
+			mockConfigMaps.On("Delete", core.BuildConfigMapName, mock.Anything).Return(nil)
 
 			err := client.NamespaceCleanup(options)
 
@@ -499,6 +596,11 @@ var _ = Describe("namespace", func() {
 				Items: []v1.Secret{secret(secretName)},
 			}, nil)
 			mockSecrets.On("Delete", secretName, mock.Anything).Return(nil)
+			configMapName := "riff-build"
+			mockConfigMaps.On("List", expectedListOptions).Return(&v1.ConfigMapList{
+				Items: []v1.ConfigMap{configMap(configMapName)},
+			}, nil)
+			mockConfigMaps.On("Delete", core.BuildConfigMapName, mock.Anything).Return(nil)
 			mockNamespaces.On("Delete", namespace, mock.Anything).Return(nil)
 
 			err := client.NamespaceCleanup(options)
@@ -573,6 +675,12 @@ func serviceAccount(name string) v1.ServiceAccount {
 
 func secret(name string) v1.Secret {
 	return v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{Name: name},
+	}
+}
+
+func configMap(name string) v1.ConfigMap {
+	return v1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{Name: name},
 	}
 }
