@@ -19,7 +19,7 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/pivotal/go-ape"
+	"github.com/pivotal/go-ape/pkg/furl"
 	"io"
 	"os/user"
 	"strings"
@@ -211,7 +211,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client) {
 			return err
 		}
 
-		configPath, err := fileutils.ResolveTilde(kubeConfigPath)
+		configPath, err := furl.ResolveTilde(kubeConfigPath)
 		if err != nil {
 			return err
 		}

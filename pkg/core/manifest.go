@@ -19,7 +19,7 @@ package core
 import (
 	"errors"
 	"fmt"
-	"github.com/pivotal/go-ape"
+	"github.com/pivotal/go-ape/pkg/furl"
 	"net/url"
 	"path/filepath"
 
@@ -46,7 +46,7 @@ func ResolveManifest(manifests map[string]*Manifest, path string) (*Manifest, er
 
 func NewManifest(path string) (*Manifest, error) {
 	var m Manifest
-	yamlFile, err := fileutils.Read(path, "")
+	yamlFile, err := furl.Read(path, "")
 	if err != nil {
 		return nil, fmt.Errorf("Error reading manifest file: %v", err)
 	}
@@ -70,7 +70,7 @@ func NewManifest(path string) (*Manifest, error) {
 		return nil, err
 	}
 
-	m.manifestDir, err = fileutils.Dir(path)
+	m.manifestDir, err = furl.Dir(path)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (m *Manifest) VisitResources(f func(resource string) error) error {
 // manifest was read (and if the manifest was not read from a directory, an error is returned) and the corresponding
 // absolute file path is returned.
 func (m *Manifest) ResourceAbsolutePath(path string) (string, error) {
-	absolute, canonicalPath, err := fileutils.IsAbsFile(path)
+	absolute, canonicalPath, err := furl.IsAbsFile(path)
 	if err != nil {
 		return "", err
 	}
@@ -110,7 +110,7 @@ func (m *Manifest) ResourceAbsolutePath(path string) (string, error) {
 		return "", errors.New("relative path undefined since manifest was not read from a directory")
 	}
 
-	return fileutils.AbsFile(path, m.manifestDir)
+	return furl.AbsFile(path, m.manifestDir)
 }
 
 func checkCompleteness(m Manifest) error {

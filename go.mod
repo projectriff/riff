@@ -33,7 +33,7 @@ require (
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
-	github.com/pivotal/go-ape v0.0.0-20190403185827-ef05bc4458bf
+	github.com/pivotal/go-ape v0.0.0-20190404203804-81ff0d7e7716
 	github.com/pkg/errors v0.8.1
 	github.com/russross/blackfriday v1.5.1 // indirect
 	github.com/spf13/cobra v0.0.3

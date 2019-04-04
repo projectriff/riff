@@ -342,8 +342,8 @@ github.com/opencontainers/image-spec v1.0.1/go.mod h1:BtxoFyWECRxE4U/7sNtV5W15zM
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/peterbourgon/diskv v2.0.1+incompatible h1:UBdAOUP5p4RWqPBg048CAvpKN+vxiaj6gdUUzhl4XmI=
 github.com/peterbourgon/diskv v2.0.1+incompatible/go.mod h1:uqqh8zWWbv1HBMNONnaR/tNboyR3/BZd58JJSHlUSCU=
-github.com/pivotal/go-ape v0.0.0-20190403185827-ef05bc4458bf h1:jj5jxkVM3SZK65bM7E5Mxg1A2Hhpe7cBZS11X1OwhEY=
-github.com/pivotal/go-ape v0.0.0-20190403185827-ef05bc4458bf/go.mod h1:WRTmFu8GsOA1bSwOUVchskvhrQA9gIZiZV2U+WOW2wY=
+github.com/pivotal/go-ape v0.0.0-20190404203804-81ff0d7e7716 h1:2thc2e0pNH/rqWqZoHEo+Dsf4LybZ1wYyRDKYHvZR1Q=
+github.com/pivotal/go-ape v0.0.0-20190404203804-81ff0d7e7716/go.mod h1:WRTmFu8GsOA1bSwOUVchskvhrQA9gIZiZV2U+WOW2wY=
 github.com/pkg/errors v0.8.0 h1:WdK/asTD0HN+q6hsWO3/vpuAkAr+tw6aNJNDFFf0+qw=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=

@@ -19,7 +19,7 @@ package kustomize
 import (
 	"bytes"
 	"fmt"
-	"github.com/pivotal/go-ape"
+	"github.com/pivotal/go-ape/pkg/furl"
 	"io/ioutil"
 	"net/url"
 	"sigs.k8s.io/kustomize/k8sdeps"
@@ -68,7 +68,7 @@ func (kust *kustomizer) ApplyLabels(resourceUri *url.URL, labels map[string]stri
 }
 
 func (kust *kustomizer) writeResourceFile(resourceUri *url.URL) (string, error) {
-	resourceContents, err := fileutils.ReadUrl(resourceUri, kust.httpTimeout)
+	resourceContents, err := furl.ReadUrl(resourceUri, kust.httpTimeout)
 	if err != nil {
 		return "", err
 	}
