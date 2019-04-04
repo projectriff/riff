@@ -18,20 +18,23 @@ package commands
 
 import (
 	"fmt"
-	"github.com/projectriff/riff/pkg/core/tasks"
 
 	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	"k8s.io/api/core/v1"
-
 	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/core/tasks"
 	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
+	v1 "k8s.io/api/core/v1"
 )
 
 func Channel() *cobra.Command {
 	return &cobra.Command{
 		Use:   "channel",
-		Short: "Interact with channel related resources",
+		Short: "[DEPRECATED] Interact with channel related resources",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Fprintln(cmd.OutOrStderr(), "Channels are deprecated, and will be removed in a future release. Follow https://github.com/projectriff/riff/issues/1159 for detail.")
+			return nil
+		},
 	}
 }
 
@@ -54,7 +57,7 @@ func ChannelCreate(fcTool *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "create",
-		Short: "Create a new channel",
+		Short: "[DEPRECATED] Create a new channel",
 		Args: ArgValidationConjunction(
 			cobra.ExactArgs(channelCreateNumberOfArgs),
 			AtPosition(channelCreateNameIndex, ValidName())),
@@ -96,7 +99,7 @@ func ChannelList(fcTool *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "list",
-		Short: "List channels",
+		Short: "[DEPRECATED] List channels",
 		Example: `  ` + env.Cli.Name + ` channel list
   ` + env.Cli.Name + ` channel list --namespace joseph-ns`,
 		Args: cobra.ExactArgs(channelListNumberOfArgs),
@@ -124,7 +127,7 @@ func ChannelDelete(riffClient *core.Client) *cobra.Command {
 
 	command := &cobra.Command{
 		Use:   "delete",
-		Short: "Delete existing channels",
+		Short: "[DEPRECATED] Delete existing channels",
 		Args: ArgValidationConjunction(
 			cobra.MinimumNArgs(channelDeleteMinNumberOfArgs),
 			StartingAtPosition(channelDeleteNameStartIndex, ValidName())),
