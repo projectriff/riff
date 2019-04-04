@@ -21,11 +21,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/pivotal/go-ape/pkg/furl"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/pivotal/go-ape/pkg/furl"
 	"github.com/projectriff/riff/pkg/env"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

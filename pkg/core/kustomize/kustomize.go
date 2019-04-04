@@ -19,15 +19,16 @@ package kustomize
 import (
 	"bytes"
 	"fmt"
-	"github.com/pivotal/go-ape/pkg/furl"
 	"io/ioutil"
 	"net/url"
-	"sigs.k8s.io/kustomize/k8sdeps"
-	"sigs.k8s.io/kustomize/pkg/commands/build"
-	"sigs.k8s.io/kustomize/pkg/fs"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/pivotal/go-ape/pkg/furl"
+	"sigs.k8s.io/kustomize/k8sdeps"
+	"sigs.k8s.io/kustomize/pkg/commands/build"
+	"sigs.k8s.io/kustomize/pkg/fs"
 )
 
 type Kustomizer interface {

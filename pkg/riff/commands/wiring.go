@@ -19,12 +19,12 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/pivotal/go-ape/pkg/furl"
 	"io"
 	"os/user"
 	"strings"
 	"time"
 
+	"github.com/pivotal/go-ape/pkg/furl"
 	"github.com/projectriff/riff/pkg/kubectl"
 
 	lcimg "github.com/buildpack/lifecycle/image"

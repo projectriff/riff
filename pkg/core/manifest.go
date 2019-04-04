@@ -19,11 +19,11 @@ package core
 import (
 	"errors"
 	"fmt"
-	"github.com/pivotal/go-ape/pkg/furl"
 	"net/url"
 	"path/filepath"
 
 	"github.com/ghodss/yaml"
+	"github.com/pivotal/go-ape/pkg/furl"
 )
 
 const manifestVersion_0_1 = "0.1"
