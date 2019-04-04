@@ -128,6 +128,7 @@ jobs:
   - bash: ./ci/publish.sh
     env:
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
+      TRAVIS_BRANCH: '$(Build.SourceBranchName)'
     displayName: 'Publish riff release artifacts'
   displayName: 'Publish'
 
