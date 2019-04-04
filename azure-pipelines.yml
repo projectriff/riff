@@ -134,3 +134,4 @@ jobs:
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
     displayName: 'Publish riff release artifacts'
   displayName: 'Publish'
+
