@@ -466,15 +466,9 @@ var _ = Describe("namespace", func() {
 			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
 			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
 
+			resource := unsafeAbs("fixtures/local-yaml/buildtemplate.yaml")
 			mockKustomizer.On("ApplyLabels",
-				mock.MatchedBy(func(resourceUri *url.URL) bool {
-					path := unsafeAbs("fixtures/local-yaml/buildtemplate.yaml")
-					if runtime.GOOS == "windows" && len(resourceUri.Scheme) == 1 {
-						return strings.ToUpper(resourceUri.Scheme) + resourceUri.String()[1:] == path
-					} else {
-						return resourceUri.Scheme == "file" && resourceUri.Path == path
-					}
-				}),
+				mock.MatchedBy(urlPath(resource)),
 				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
 				Return([]byte("customised content"), nil)
 
@@ -660,7 +654,13 @@ func keys(keys ...string) func(dict map[string]string) bool {
 func urlPath(path string) func(url *url.URL) bool {
 	return func(url *url.URL) bool {
 		if runtime.GOOS == "windows" && len(url.Scheme) == 1 {
-			return strings.ToUpper(url.Scheme) + url.String()[1:] == path
+			var drive string
+			if url.Scheme == path[0:1] {
+				drive = url.Scheme
+			} else {
+				drive = strings.ToUpper(url.Scheme)
+			}
+			return drive + url.String()[1:] == path
 		} else {
 			return url.Path == path
 		}
