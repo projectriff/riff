@@ -53,7 +53,7 @@ var _ = Describe("Manifest", func() {
 
 		Context("when the file contains invalid YAML", func() {
 			BeforeEach(func() {
-				manifestPath = "./fixtures/manifest/invalid.yaml"
+				manifestPath = filepath.FromSlash("./fixtures/manifest/invalid.yaml")
 			})
 
 			It("should return a suitable error", func() {
@@ -63,7 +63,7 @@ var _ = Describe("Manifest", func() {
 
 		Context("when the manifest has the wrong version", func() {
 			BeforeEach(func() {
-				manifestPath = "./fixtures/manifest/wrongversion.yaml"
+				manifestPath = filepath.FromSlash("./fixtures/manifest/wrongversion.yaml")
 			})
 
 			It("should return a suitable error", func() {
@@ -73,7 +73,7 @@ var _ = Describe("Manifest", func() {
 
 		Context("when the manifest does not specify the istio array", func() {
 			BeforeEach(func() {
-				manifestPath = "./fixtures/manifest/noistio.yaml"
+				manifestPath = filepath.FromSlash("./fixtures/manifest/noistio.yaml")
 			})
 
 			It("should return a suitable error", func() {
@@ -83,7 +83,7 @@ var _ = Describe("Manifest", func() {
 
 		Context("when the manifest does not specify the knative array", func() {
 			BeforeEach(func() {
-				manifestPath = "./fixtures/manifest/noknative.yaml"
+				manifestPath = filepath.FromSlash("./fixtures/manifest/noknative.yaml")
 			})
 
 			It("should return a suitable error", func() {
@@ -93,7 +93,7 @@ var _ = Describe("Manifest", func() {
 
 		Context("when the manifest does not specify the namespace array", func() {
 			BeforeEach(func() {
-				manifestPath = "./fixtures/manifest/nonamespace.yaml"
+				manifestPath = filepath.FromSlash("./fixtures/manifest/nonamespace.yaml")
 			})
 
 			It("should return a suitable error", func() {
@@ -118,7 +118,7 @@ var _ = Describe("Manifest", func() {
 
 		Context("when the manifest contains a resource with unsupported URL scheme", func() {
 			BeforeEach(func() {
-				manifestPath = "./fixtures/manifest/invalidscheme.yaml"
+				manifestPath = filepath.FromSlash("./fixtures/manifest/invalidscheme.yaml")
 			})
 
 			It("should return a suitable error", func() {
@@ -128,7 +128,7 @@ var _ = Describe("Manifest", func() {
 
 		Context("when the manifest is valid", func() {
 			BeforeEach(func() {
-				manifestPath = "./fixtures/manifest/valid.yaml"
+				manifestPath = filepath.FromSlash("./fixtures/manifest/valid.yaml")
 			})
 
 			It("should return with no error", func() {
