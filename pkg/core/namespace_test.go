@@ -136,13 +136,7 @@ var _ = Describe("namespace", func() {
 			mockSecrets.On("Create", mock.Anything).Run(func(args mock.Arguments) {
 				s := args[0].(*v1.Secret)
 				Expect(s.StringData).To(HaveKeyWithValue("username", "_json_key"))
-				var expectedPassword string
-				if runtime.GOOS == "windows" {
-					expectedPassword = "{ \"project_id\": \"gcp-project-id\" }\r\n"
-				} else {
-					expectedPassword = "{ \"project_id\": \"gcp-project-id\" }\n"
-				}
-				Expect(s.StringData).To(HaveKeyWithValue("password", expectedPassword))
+				Expect(s.StringData).To(HaveKeyWithValue("password", lineFromFile("{ \"project_id\": \"gcp-project-id\" }")))
 				Expect(s.Labels).To(HaveLen(2))
 				Expect(s.Labels["projectriff.io/installer"]).To(Equal(env.Cli.Name))
 				Expect(s.Labels["projectriff.io/version"]).To(Equal(env.Cli.Version))
@@ -664,6 +658,14 @@ func urlPath(path string) func(url *url.URL) bool {
 		} else {
 			return url.Path == path
 		}
+	}
+}
+
+func lineFromFile(line string) string {
+	if runtime.GOOS == "windows" {
+		return line + "\r\n"
+	} else {
+		return line + "\n"
 	}
 }
 
