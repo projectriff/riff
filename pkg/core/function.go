@@ -428,7 +428,9 @@ func pollService(check serviceChecker, errChan <-chan error, timeout time.Durati
 	for {
 		select {
 		case err := <-errChan:
-			return err
+			if err != nil {
+				return err
+			}
 		default:
 		}
 
