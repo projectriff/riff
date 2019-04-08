@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/projectriff/riff/pkg/fileutils"
+	"github.com/pivotal/go-ape/pkg/furl"
 	"github.com/projectriff/riff/pkg/kubectl"
 
 	lcimg "github.com/buildpack/lifecycle/image"
@@ -211,7 +211,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client) {
 			return err
 		}
 
-		configPath, err := fileutils.ResolveTilde(kubeConfigPath)
+		configPath, err := furl.ResolveTilde(kubeConfigPath)
 		if err != nil {
 			return err
 		}

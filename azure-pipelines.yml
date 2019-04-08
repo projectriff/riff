@@ -8,7 +8,7 @@ jobs:
       mac:
         imageName: 'macos-10.13'
       windows:
-        imageName: 'vs2017-win2016'
+        imageName: 'windows-2019'
   pool:
     vmImage: $(imageName)
   variables:

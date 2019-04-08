@@ -1,10 +1,10 @@
 ## riff channel list
 
-List channels
+[DEPRECATED] List channels
 
 ### Synopsis
 
-List channels
+[DEPRECATED] List channels
 
 ```
 riff channel list [flags]
@@ -33,5 +33,5 @@ riff channel list [flags]
 
 ### SEE ALSO
 
-* [riff channel](riff_channel.md)	 - Interact with channel related resources
+* [riff channel](riff_channel.md)	 - [DEPRECATED] Interact with channel related resources
 

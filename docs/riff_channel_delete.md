@@ -1,10 +1,10 @@
 ## riff channel delete
 
-Delete existing channels
+[DEPRECATED] Delete existing channels
 
 ### Synopsis
 
-Delete existing channels
+[DEPRECATED] Delete existing channels
 
 ```
 riff channel delete [flags]
@@ -33,5 +33,5 @@ riff channel delete [flags]
 
 ### SEE ALSO
 
-* [riff channel](riff_channel.md)	 - Interact with channel related resources
+* [riff channel](riff_channel.md)	 - [DEPRECATED] Interact with channel related resources
 

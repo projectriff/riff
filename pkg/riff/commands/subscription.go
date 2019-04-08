@@ -18,14 +18,15 @@ package commands
 
 import (
 	"fmt"
-	"github.com/projectriff/riff/pkg/core/tasks"
 	"io"
 	"strings"
 	"text/template"
 
 	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/core/tasks"
 	"github.com/projectriff/riff/pkg/env"
+	"github.com/spf13/cobra"
 	. "github.com/spf13/cobra"
 )
 
@@ -45,7 +46,11 @@ const (
 func Subscription() *Command {
 	return &Command{
 		Use:   "subscription",
-		Short: "Interact with subscription-related resources",
+		Short: "[DEPRECATED] Interact with subscription-related resources",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Fprintln(cmd.OutOrStderr(), "Subscriptions are deprecated, and will be removed in a future release. Follow https://github.com/projectriff/riff/issues/1159 for detail.")
+			return nil
+		},
 	}
 }
 
@@ -54,7 +59,7 @@ func SubscriptionCreate(client *core.Client) *Command {
 
 	command := &Command{
 		Use:   "create",
-		Short: "Create a new subscription, binding a service to an input channel",
+		Short: "[DEPRECATED] Create a new subscription, binding a service to an input channel",
 		Long: "Create a new, optionally named subscription, binding a service to an input channel. " +
 			"The default name of the subscription is the provided subscriber name. " +
 			"The subscription can optionally be bound to an output channel.",
@@ -86,7 +91,7 @@ func SubscriptionDelete(riffClient *core.Client) *Command {
 
 	command := &Command{
 		Use:   "delete",
-		Short: "Delete existing subscriptions",
+		Short: "[DEPRECATED] Delete existing subscriptions",
 		Example: "  " + env.Cli.Name + " subscription delete my-subscription --namespace joseph-ns\n" +
 			"  " + env.Cli.Name + " subscription delete my-subscription-1 my-subscription-2",
 		Args: ArgValidationConjunction(
@@ -128,7 +133,7 @@ func SubscriptionList(client *core.Client) *Command {
 
 	command := &Command{
 		Use:   "list",
-		Short: "List existing subscriptions",
+		Short: "[DEPRECATED] List existing subscriptions",
 		Example: `  ` + env.Cli.Name + ` subscription list
   ` + env.Cli.Name + ` subscription list --namespace joseph-ns`,
 		Args: ExactArgs(subscriptionListNumberOfArgs),

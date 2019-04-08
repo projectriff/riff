@@ -23,6 +23,8 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
+	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -134,7 +136,7 @@ var _ = Describe("namespace", func() {
 			mockSecrets.On("Create", mock.Anything).Run(func(args mock.Arguments) {
 				s := args[0].(*v1.Secret)
 				Expect(s.StringData).To(HaveKeyWithValue("username", "_json_key"))
-				Expect(s.StringData).To(HaveKeyWithValue("password", "{ \"project_id\": \"gcp-project-id\" }\n"))
+				Expect(s.StringData).To(HaveKeyWithValue("password", lineFromFile("{ \"project_id\": \"gcp-project-id\" }")))
 				Expect(s.Labels).To(HaveLen(2))
 				Expect(s.Labels["projectriff.io/installer"]).To(Equal(env.Cli.Name))
 				Expect(s.Labels["projectriff.io/version"]).To(Equal(env.Cli.Version))
@@ -320,7 +322,7 @@ var _ = Describe("namespace", func() {
 				NamespaceName: "foo",
 				NoSecret:      true,
 			}
-			namespaceResource := unsafeAbs("fixtures/initial_pvc.yaml")
+			namespaceResource := unsafeAbs(filepath.FromSlash("fixtures/initial_pvc.yaml"))
 			manifests["stable"] = &core.Manifest{
 				Namespace: []string{namespaceResource},
 			}
@@ -335,7 +337,7 @@ var _ = Describe("namespace", func() {
 			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
 			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
 
-			customizedResourceContents := contentsOf("fixtures/kustom_pvc.yaml")
+			customizedResourceContents := contentsOf(filepath.FromSlash("fixtures/kustom_pvc.yaml"))
 			mockKustomizer.On("ApplyLabels",
 				mock.MatchedBy(urlPath(namespaceResource)),
 				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
@@ -458,10 +460,9 @@ var _ = Describe("namespace", func() {
 			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
 			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
 
+			resource := unsafeAbs("fixtures/local-yaml/buildtemplate.yaml")
 			mockKustomizer.On("ApplyLabels",
-				mock.MatchedBy(func(resourceUri *url.URL) bool {
-					return resourceUri.Scheme == "file" && resourceUri.Path == unsafeAbs("fixtures/local-yaml/buildtemplate.yaml")
-				}),
+				mock.MatchedBy(urlPath(resource)),
 				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
 				Return([]byte("customised content"), nil)
 
@@ -646,7 +647,25 @@ func keys(keys ...string) func(dict map[string]string) bool {
 
 func urlPath(path string) func(url *url.URL) bool {
 	return func(url *url.URL) bool {
-		return url.Path == path
+		if runtime.GOOS == "windows" && len(url.Scheme) == 1 {
+			var drive string
+			if url.Scheme == path[0:1] {
+				drive = url.Scheme
+			} else {
+				drive = strings.ToUpper(url.Scheme)
+			}
+			return drive + url.String()[1:] == path
+		} else {
+			return url.Path == path
+		}
+	}
+}
+
+func lineFromFile(line string) string {
+	if runtime.GOOS == "windows" {
+		return line + "\r\n"
+	} else {
+		return line + "\n"
 	}
 }
 

@@ -1,10 +1,10 @@
 ## riff subscription delete
 
-Delete existing subscriptions
+[DEPRECATED] Delete existing subscriptions
 
 ### Synopsis
 
-Delete existing subscriptions
+[DEPRECATED] Delete existing subscriptions
 
 ```
 riff subscription delete [flags]
@@ -33,5 +33,5 @@ riff subscription delete [flags]
 
 ### SEE ALSO
 
-* [riff subscription](riff_subscription.md)	 - Interact with subscription-related resources
+* [riff subscription](riff_subscription.md)	 - [DEPRECATED] Interact with subscription-related resources
 

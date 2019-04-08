@@ -27,9 +27,9 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/pivotal/go-ape/pkg/furl"
 	"github.com/projectriff/riff/pkg/core/tasks"
 	"github.com/projectriff/riff/pkg/env"
-	"github.com/projectriff/riff/pkg/fileutils"
 	"golang.org/x/crypto/ssh/terminal"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -252,7 +252,7 @@ func (c *client) applyManifest(manifest *Manifest, options *NamespaceInitOptions
 			return err
 		}
 		// Replace any file URL with the corresponding absolute file path.
-		absolute, resource, err := fileutils.IsAbsFile(res)
+		absolute, resource, err := furl.IsAbsFile(res)
 		if err != nil {
 			return err
 		}

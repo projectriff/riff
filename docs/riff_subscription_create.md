@@ -1,6 +1,6 @@
 ## riff subscription create
 
-Create a new subscription, binding a service to an input channel
+[DEPRECATED] Create a new subscription, binding a service to an input channel
 
 ### Synopsis
 
@@ -37,5 +37,5 @@ riff subscription create [flags]
 
 ### SEE ALSO
 
-* [riff subscription](riff_subscription.md)	 - Interact with subscription-related resources
+* [riff subscription](riff_subscription.md)	 - [DEPRECATED] Interact with subscription-related resources
 
