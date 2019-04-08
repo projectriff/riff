@@ -11,7 +11,7 @@ commit=$(git rev-parse HEAD)
 # fetch FATS scripts
 fats_dir=`dirname "${BASH_SOURCE[0]}"`/fats
 fats_repo="projectriff/fats"
-fats_refspec=61c490713c71c354051534349e3ba0c99191ae7d # projectriff/fats master as of 2019-03-31
+fats_refspec=c7c3eb7461afb68d9266e31fc43460d8a5f23da5 # projectriff/fats master as of 2019-04-08
 source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $fats_dir $fats_refspec $fats_repo
 source $fats_dir/.util.sh
 
@@ -44,10 +44,6 @@ wait_pod_selector_ready 'app=controller' 'knative-serving'
 wait_pod_selector_ready 'app=webhook' 'knative-serving'
 wait_pod_selector_ready 'app=build-controller' 'knative-build'
 wait_pod_selector_ready 'app=build-webhook' 'knative-build'
-wait_pod_selector_ready 'app=eventing-controller' 'knative-eventing'
-wait_pod_selector_ready 'app=webhook' 'knative-eventing'
-wait_pod_selector_ready 'clusterChannelProvisioner=in-memory-channel,role=controller' 'knative-eventing'
-wait_pod_selector_ready 'clusterChannelProvisioner=in-memory-channel,role=dispatcher' 'knative-eventing'
 echo "Checking for ready ingress"
 wait_for_ingress_ready 'istio-ingressgateway' 'istio-system'
 
@@ -81,5 +77,3 @@ for test in node command; do
 
   run_function $path $function_name $image "${create_args}" $input_data $expected_data
 done
-
-source `dirname "${BASH_SOURCE[0]}"`/fats-channels.sh
