@@ -25,7 +25,7 @@ import (
 	"os"
 	"time"
 
-	logutil "github.com/boz/go-logutil"
+	"github.com/boz/go-logutil"
 
 	"github.com/boz/kail"
 	"github.com/boz/kcache/types/pod"
@@ -36,20 +36,20 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 const (
-	functionLabel              = "riff.projectriff.io/function"
-	buildAnnotation            = "riff.projectriff.io/build"
-	functionArtifactAnnotation = "riff.projectriff.io/artifact"
-	functionOverrideAnnotation = "riff.projectriff.io/override"
-	functionHandlerAnnotation  = "riff.projectriff.io/handler"
-	buildTemplateName          = "riff-cnb"
-	pollServiceTimeout         = 10 * time.Minute
-	pollServicePollingInterval = time.Second
+	functionLabel                = "riff.projectriff.io/function"
+	buildAnnotation              = "riff.projectriff.io/build"
+	functionArtifactAnnotation   = "riff.projectriff.io/artifact"
+	functionOverrideAnnotation   = "riff.projectriff.io/override"
+	functionHandlerAnnotation    = "riff.projectriff.io/handler"
+	buildTemplateName            = "riff-cnb"
+	pollServiceTimeout           = 10 * time.Minute
+	pollServicePollingInterval   = time.Second
+	waitForMoreLogsBeforeExiting = time.Second
 )
 
 type BuildOptions struct {
@@ -73,7 +73,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 	var buildCache *corev1.PersistentVolumeClaim
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 	functionName := options.Name
-	_, err := c.serving.ServingV1alpha1().Services(ns).Get(functionName, v1.GetOptions{})
+	_, err := c.serving.ServingV1alpha1().Services(ns).Get(functionName, metav1.GetOptions{})
 	if err == nil {
 		return nil, nil, nil, fmt.Errorf("service '%s' already exists in namespace '%s'", functionName, ns)
 	}
@@ -110,11 +110,11 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 	} else {
 		// create build cache for service
 		buildCache = &corev1.PersistentVolumeClaim{
-			TypeMeta: v1.TypeMeta{
+			TypeMeta: metav1.TypeMeta{
 				APIVersion: "v1",
 				Kind:       "PersistentVolumeClaim",
 			},
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: fmt.Sprintf("%s-build-cache", options.Name),
 			},
 			Spec: corev1.PersistentVolumeClaimSpec{
@@ -130,7 +130,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 		// buildpack based cluster build
 		s.Spec.RunLatest.Configuration.Build = &v1alpha1.RawExtension{
 			Object: &build.Build{
-				TypeMeta: v1.TypeMeta{
+				TypeMeta: metav1.TypeMeta{
 					APIVersion: "build.knative.dev/v1alpha1",
 					Kind:       "Build",
 				},
@@ -185,11 +185,17 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 
 		if options.Verbose || options.Wait {
 			stopChan := make(chan struct{})
-			errChan := make(chan error)
+			loggingTerminationChan := make(chan error)
 			if options.Verbose {
-				go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, errChan)
+				go c.displayFunctionCreationProgress(ns, s.Name, log, stopChan, loggingTerminationChan)
 			}
-			err := c.waitForSuccessOrFailure(ns, s.Name, 1, stopChan, errChan, options.Verbose)
+			err := c.waitForSuccessOrFailure(ns, s.Name, 1, stopChan, loggingTerminationChan, options.Verbose)
+			if options.Verbose {
+				// wait until log printing has finished before returning as this will terminate the process
+				if logErr := <-loggingTerminationChan; logErr != nil && err == nil {
+					return nil, nil, nil, logErr
+				}
+			}
 			if err != nil {
 				return nil, nil, nil, err
 			}
@@ -217,12 +223,12 @@ func (c *client) addOwnerReferenceToCacheWithRetry(attempts int, cache *corev1.P
 }
 
 func (c *client) addOwnerReferenceToCache(cache *corev1.PersistentVolumeClaim, svc *v1alpha1.Service) (*corev1.PersistentVolumeClaim, error) {
-	cache, err := c.kubeClient.CoreV1().PersistentVolumeClaims(cache.Namespace).Get(cache.Name, v1.GetOptions{})
+	cache, err := c.kubeClient.CoreV1().PersistentVolumeClaims(cache.Namespace).Get(cache.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
-	cache.ObjectMeta.OwnerReferences = []v1.OwnerReference{
-		*v1.NewControllerRef(svc, schema.GroupVersionKind{
+	cache.ObjectMeta.OwnerReferences = []metav1.OwnerReference{
+		*metav1.NewControllerRef(svc, schema.GroupVersionKind{
 			Group:   v1alpha1.SchemeGroupVersion.Group,
 			Version: v1alpha1.SchemeGroupVersion.Version,
 			Kind:    "Service",
@@ -242,6 +248,7 @@ func (c *client) makeBuildSourceSpec(options CreateFunctionOptions) *build.Sourc
 }
 
 func (c *client) displayFunctionCreationProgress(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}, errChan chan<- error) {
+	defer close(errChan)
 	revName, err := c.revisionName(serviceNamespace, serviceName, logWriter, stopChan)
 	if err != nil {
 		errChan <- err
@@ -277,15 +284,17 @@ func (c *client) displayFunctionCreationProgress(serviceNamespace string, servic
 		return
 	}
 
-	streamLogs(logWriter, controller, stopChan)
-	close(errChan)
+	if err := streamLogs(logWriter, controller, stopChan); err != nil {
+		errChan <- err
+		return
+	}
 }
 
 func (c *client) revisionName(serviceNamespace string, serviceName string, logWriter io.Writer, stopChan <-chan struct{}) (string, error) {
 	fmt.Fprintf(logWriter, "Waiting for LatestCreatedRevisionName\n")
 	revName := ""
 	for {
-		serviceObj, err := c.serving.ServingV1alpha1().Services(serviceNamespace).Get(serviceName, v1.GetOptions{})
+		serviceObj, err := c.serving.ServingV1alpha1().Services(serviceNamespace).Get(serviceName, metav1.GetOptions{})
 		if err != nil {
 			return "", err
 		}
@@ -306,7 +315,7 @@ func (c *client) revisionName(serviceNamespace string, serviceName string, logWr
 }
 
 func (c *client) buildName(ns string, revName string, logWriter io.Writer, stopChan <-chan struct{}) (string, error) {
-	revObj, err := c.serving.ServingV1alpha1().Revisions(ns).Get(revName, v1.GetOptions{})
+	revObj, err := c.serving.ServingV1alpha1().Revisions(ns).Get(revName, metav1.GetOptions{})
 	if err != nil {
 		return "", err
 	}
@@ -344,28 +353,50 @@ func (c *client) podController(buildName string, serviceName string, ctx context
 	return ds.Pods(), nil
 }
 
-func streamLogs(log io.Writer, controller kail.Controller, stopChan <-chan struct{}) {
+func streamLogs(log io.Writer, controller kail.Controller, stopChan <-chan struct{}) error {
 	events := controller.Events()
 	done := controller.Done()
 	writer := NewWriter(log)
 	for {
 		select {
 		case ev := <-events:
-			// filter out sidecar logs
-			container := ev.Source().Container()
-			switch container {
-			case "queue-proxy":
-			case "istio-init":
-			case "istio-proxy":
-			default:
-				writer.Print(ev)
+			if err := printEvent(ev, writer); err != nil {
+				return err
 			}
 		case <-done:
-			return
+			return nil
 		case <-stopChan:
-			return
+			// wait until logs have not arrived for a given period before exiting
+			timer := time.NewTimer(waitForMoreLogsBeforeExiting)
+			for {
+				select {
+				case ev := <-events:
+					if err := printEvent(ev, writer); err != nil {
+						return err
+					}
+					// reset the timer since a log arrived
+					timer = time.NewTimer(waitForMoreLogsBeforeExiting)
+				case <-done:
+					return nil
+				case <-timer.C:
+					return nil
+				}
+			}
 		}
 	}
+}
+
+func printEvent(ev kail.Event, w Writer) error {
+	// filter out sidecar logs
+	container := ev.Source().Container()
+	switch container {
+	case "queue-proxy":
+	case "istio-init":
+	case "istio-proxy":
+	default:
+		return w.Print(ev)
+	}
+	return nil
 }
 
 type serviceChecker func() (transientErr error, err error)
@@ -397,7 +428,9 @@ func pollService(check serviceChecker, errChan <-chan error, timeout time.Durati
 	for {
 		select {
 		case err := <-errChan:
-			return err
+			if err != nil {
+				return err
+			}
 		default:
 		}
 
@@ -572,8 +605,6 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 	}
 
 	if options.Verbose || options.Wait {
-		stopChan := make(chan struct{})
-		errChan := make(chan error)
 		var (
 			nextGen int64
 			err     error
@@ -591,10 +622,19 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 				break
 			}
 		}
+
+		stopChan := make(chan struct{})
+		loggingTerminationChan := make(chan error)
 		if options.Verbose {
-			go c.displayFunctionCreationProgress(ns, service.Name, log, stopChan, errChan)
+			go c.displayFunctionCreationProgress(ns, service.Name, log, stopChan, loggingTerminationChan)
 		}
-		err = c.waitForSuccessOrFailure(ns, service.Name, nextGen, stopChan, errChan, options.Verbose)
+		err = c.waitForSuccessOrFailure(ns, service.Name, nextGen, stopChan, loggingTerminationChan, options.Verbose)
+		if options.Verbose {
+			// wait until log printing has finished before returning as this will terminate the process
+			if logErr := <-loggingTerminationChan; logErr != nil && err == nil {
+				return logErr
+			}
+		}
 		if err != nil {
 			return err
 		}
