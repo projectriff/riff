@@ -30,8 +30,8 @@ var (
 		"stable": {
 			ManifestVersion: "0.1",
 			Istio: []string{
-				// diff https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-5-0.diff
-				"https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-5-0.yaml",
+				// diff https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-5-1.diff
+				"https://storage.googleapis.com/projectriff/istio/istio-riff-knative-serving-v0-5-1.yaml",
 			},
 			Knative: []string{
 				"https://storage.googleapis.com/knative-releases/build/previous/v0.5.0/build.yaml",
