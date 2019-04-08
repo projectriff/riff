@@ -35,7 +35,7 @@ import (
 	"github.com/projectriff/riff/pkg/env"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -73,7 +73,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 	var buildCache *corev1.PersistentVolumeClaim
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 	functionName := options.Name
-	_, err := c.serving.ServingV1alpha1().Services(ns).Get(functionName, v1.GetOptions{})
+	_, err := c.serving.ServingV1alpha1().Services(ns).Get(functionName, metav1.GetOptions{})
 	if err == nil {
 		return nil, nil, nil, fmt.Errorf("service '%s' already exists in namespace '%s'", functionName, ns)
 	}
@@ -110,11 +110,11 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 	} else {
 		// create build cache for service
 		buildCache = &corev1.PersistentVolumeClaim{
-			TypeMeta: v1.TypeMeta{
+			TypeMeta: metav1.TypeMeta{
 				APIVersion: "v1",
 				Kind:       "PersistentVolumeClaim",
 			},
-			ObjectMeta: v1.ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: fmt.Sprintf("%s-build-cache", options.Name),
 			},
 			Spec: corev1.PersistentVolumeClaimSpec{
@@ -130,7 +130,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 		// buildpack based cluster build
 		s.Spec.RunLatest.Configuration.Build = &v1alpha1.RawExtension{
 			Object: &build.Build{
-				TypeMeta: v1.TypeMeta{
+				TypeMeta: metav1.TypeMeta{
 					APIVersion: "build.knative.dev/v1alpha1",
 					Kind:       "Build",
 				},
@@ -201,11 +201,11 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			}
 
 			// fetch latest Service and Revision, ignore errors
-			s1, err := c.serving.ServingV1alpha1().Services(s.Namespace).Get(s.Name, v1.GetOptions{})
+			s1, err := c.serving.ServingV1alpha1().Services(s.Namespace).Get(s.Name, metav1.GetOptions{})
 			if s1 != nil && err == nil {
 				s = s1
 				if s.Status.LatestCreatedRevisionName != "" {
-					r, _ = c.serving.ServingV1alpha1().Revisions(s.Namespace).Get(s.Status.LatestCreatedRevisionName, v1.GetOptions{})
+					r, _ = c.serving.ServingV1alpha1().Revisions(s.Namespace).Get(s.Status.LatestCreatedRevisionName, metav1.GetOptions{})
 				}
 			}
 		}
@@ -223,12 +223,12 @@ func (c *client) addOwnerReferenceToCacheWithRetry(attempts int, cache *corev1.P
 }
 
 func (c *client) addOwnerReferenceToCache(cache *corev1.PersistentVolumeClaim, svc *v1alpha1.Service) (*corev1.PersistentVolumeClaim, error) {
-	cache, err := c.kubeClient.CoreV1().PersistentVolumeClaims(cache.Namespace).Get(cache.Name, v1.GetOptions{})
+	cache, err := c.kubeClient.CoreV1().PersistentVolumeClaims(cache.Namespace).Get(cache.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
-	cache.ObjectMeta.OwnerReferences = []v1.OwnerReference{
-		*v1.NewControllerRef(svc, schema.GroupVersionKind{
+	cache.ObjectMeta.OwnerReferences = []metav1.OwnerReference{
+		*metav1.NewControllerRef(svc, schema.GroupVersionKind{
 			Group:   v1alpha1.SchemeGroupVersion.Group,
 			Version: v1alpha1.SchemeGroupVersion.Version,
 			Kind:    "Service",
@@ -294,7 +294,7 @@ func (c *client) revisionName(serviceNamespace string, serviceName string, logWr
 	fmt.Fprintf(logWriter, "Waiting for LatestCreatedRevisionName\n")
 	revName := ""
 	for {
-		serviceObj, err := c.serving.ServingV1alpha1().Services(serviceNamespace).Get(serviceName, v1.GetOptions{})
+		serviceObj, err := c.serving.ServingV1alpha1().Services(serviceNamespace).Get(serviceName, metav1.GetOptions{})
 		if err != nil {
 			return "", err
 		}
@@ -315,7 +315,7 @@ func (c *client) revisionName(serviceNamespace string, serviceName string, logWr
 }
 
 func (c *client) buildName(ns string, revName string, logWriter io.Writer, stopChan <-chan struct{}) (string, error) {
-	revObj, err := c.serving.ServingV1alpha1().Revisions(ns).Get(revName, v1.GetOptions{})
+	revObj, err := c.serving.ServingV1alpha1().Revisions(ns).Get(revName, metav1.GetOptions{})
 	if err != nil {
 		return "", err
 	}
