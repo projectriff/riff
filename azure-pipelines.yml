@@ -33,7 +33,7 @@ jobs:
   variables:
     CLUSTER:  '$(cluster)'
     REGISTRY: '$(registry)'
-    CLUSTER_NAME: 'fats-$(Build.BuildId)'
+    CLUSTER_NAME: 'riff-$(Build.BuildId)-$(Agent.JobName)'
     NAMESPACE: '$(CLUSTER_NAME)'
   condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
   steps:
