@@ -48,3 +48,5 @@ require (
 )
 
 replace github.com/Nvveen/Gotty => github.com/ijc/Gotty v0.0.0-20170406111628-a8b993ba6abd
+
+replace google.golang.org/api => google.golang.org/api v0.3.1
