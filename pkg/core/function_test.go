@@ -76,7 +76,7 @@ var _ = Describe("Function", func() {
 		testService = &v1alpha1.Service{}
 		workDir = test_support.CreateTempDir()
 		mockClientConfig.On("Namespace").Return("default", false, nil)
-		client = core.NewClient(mockClientConfig, nil, nil, mockServing, mockBuild, nil, nil)
+		client = core.NewClient(mockClientConfig, nil, nil, mockServing, mockBuild, nil)
 
 		runImage := "packs/run:testing"
 		builderImage := "projectriff/builder:testing"

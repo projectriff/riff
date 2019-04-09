@@ -25,7 +25,6 @@ import (
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	serving_cs "github.com/knative/serving/pkg/client/clientset/versioned"
-	"github.com/projectriff/riff/pkg/core/kustomize"
 	"github.com/projectriff/riff/pkg/kubectl"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
@@ -75,10 +74,9 @@ type client struct {
 	build        build_cs.Interface
 	clientConfig clientcmd.ClientConfig
 	kubeCtl      kubectl.KubeCtl
-	kustomizer   kustomize.Kustomizer
 }
 
-func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface, build build_cs.Interface, kubeCtl kubectl.KubeCtl, kustomizer kustomize.Kustomizer) Client {
+func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface, build build_cs.Interface, kubeCtl kubectl.KubeCtl) Client {
 	return &client{
 		clientConfig: clientConfig,
 		kubeClient:   kubeClient,
@@ -86,6 +84,5 @@ func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interf
 		serving:      serving,
 		build:        build,
 		kubeCtl:      kubeCtl,
-		kustomizer:   kustomizer,
 	}
 }

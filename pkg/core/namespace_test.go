@@ -30,7 +30,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	"github.com/projectriff/riff/pkg/core"
-	mockkustomize "github.com/projectriff/riff/pkg/core/kustomize/mocks"
 	"github.com/projectriff/riff/pkg/core/vendor_mocks"
 	"github.com/projectriff/riff/pkg/env"
 	mockkubectl "github.com/projectriff/riff/pkg/kubectl/mocks"
@@ -50,7 +49,6 @@ var _ = Describe("namespace", func() {
 		mockServiceAccounts *vendor_mocks.ServiceAccountInterface
 		mockConfigMaps      *vendor_mocks.ConfigMapInterface
 		mockSecrets         *vendor_mocks.SecretInterface
-		mockKustomizer      *mockkustomize.Kustomizer
 		manifests           map[string]*core.Manifest
 	)
 
@@ -62,7 +60,6 @@ var _ = Describe("namespace", func() {
 		mockServiceAccounts = new(vendor_mocks.ServiceAccountInterface)
 		mockConfigMaps = new(vendor_mocks.ConfigMapInterface)
 		mockSecrets = new(vendor_mocks.SecretInterface)
-		mockKustomizer = new(mockkustomize.Kustomizer)
 		manifests = map[string]*core.Manifest{}
 
 		kubeClient.On("CoreV1").Return(mockCore)
@@ -71,7 +68,7 @@ var _ = Describe("namespace", func() {
 		mockCore.On("ConfigMaps", mock.Anything).Return(mockConfigMaps)
 		mockCore.On("Secrets", mock.Anything).Return(mockSecrets)
 
-		client = core.NewClient(nil, kubeClient, nil, nil, nil, kubeCtl, mockKustomizer)
+		client = core.NewClient(nil, kubeClient, nil, nil, nil, kubeCtl)
 	})
 
 	AfterEach(func() {
@@ -79,7 +76,6 @@ var _ = Describe("namespace", func() {
 		mockServiceAccounts.AssertExpectations(GinkgoT())
 		mockSecrets.AssertExpectations(GinkgoT())
 		mockConfigMaps.AssertExpectations(GinkgoT())
-		mockKustomizer.AssertExpectations(GinkgoT())
 	})
 
 	Describe("NamespaceInit", func() {
@@ -316,40 +312,6 @@ var _ = Describe("namespace", func() {
 			Expect(err).To(Not(HaveOccurred()))
 		})
 
-		It("should apply label to namespace resources", func() {
-			options := core.NamespaceInitOptions{
-				Manifest:      "stable",
-				NamespaceName: "foo",
-				NoSecret:      true,
-			}
-			namespaceResource := unsafeAbs(filepath.FromSlash("fixtures/initial_pvc.yaml"))
-			manifests["stable"] = &core.Manifest{
-				Namespace: []string{namespaceResource},
-			}
-			namespace := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "foo"}}
-			mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
-
-			serviceAccount := &v1.ServiceAccount{}
-			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
-			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
-
-			configMap := &v1.ConfigMap{}
-			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
-			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
-
-			customizedResourceContents := contentsOf(filepath.FromSlash("fixtures/kustom_pvc.yaml"))
-			mockKustomizer.On("ApplyLabels",
-				mock.MatchedBy(urlPath(namespaceResource)),
-				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
-				Return(customizedResourceContents, nil)
-			kubeCtl.On("ExecStdin", []string{"apply", "-n", "foo", "-f", "-"}, &customizedResourceContents).
-				Return("done!", nil)
-
-			err := client.NamespaceInit(manifests, options)
-
-			Expect(err).To(Not(HaveOccurred()))
-		})
-
 		It("should fail if the image prefix deletion fails", func() {
 			options := core.NamespaceInitOptions{
 				Manifest:      "stable",
@@ -397,49 +359,12 @@ var _ = Describe("namespace", func() {
 			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
 			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
 
-			customizedResourceContents := contentsOf("fixtures/kustom_pvc.yaml")
-			mockKustomizer.On("ApplyLabels",
-				mock.MatchedBy(urlPath(namespaceResource)),
-				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
-				Return(customizedResourceContents, nil)
-			kubeCtl.On("ExecStdin", []string{"apply", "-n", "foo", "-f", "-"}, &customizedResourceContents).
+			kubeCtl.On("Exec", []string{"apply", "-n", "foo", "-f", namespaceResource}).
 				Return("done!", nil)
 
 			err := client.NamespaceInit(manifests, options)
 
 			Expect(err).To(BeNil())
-		})
-
-		It("should fail if the PVC label kustomization fails", func() {
-			options := core.NamespaceInitOptions{
-				Manifest:      "stable",
-				NamespaceName: "foo",
-				NoSecret:      true,
-			}
-			namespaceResource := unsafeAbs("fixtures/initial_pvc.yaml")
-			manifests["stable"] = &core.Manifest{
-				Namespace: []string{namespaceResource},
-			}
-			namespace := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "foo"}}
-			mockNamespaces.On("Get", "foo", mock.Anything).Return(namespace, nil)
-
-			serviceAccount := &v1.ServiceAccount{}
-			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
-			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
-
-			configMap := &v1.ConfigMap{}
-			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
-			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
-
-			expectedError := fmt.Errorf("kustomization failed")
-			mockKustomizer.On("ApplyLabels",
-				mock.MatchedBy(urlPath(namespaceResource)),
-				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
-				Return(nil, expectedError)
-
-			err := client.NamespaceInit(manifests, options)
-
-			Expect(err).To(MatchError(expectedError))
 		})
 
 		It("should support local kubernetes configuration files", func() {
@@ -461,12 +386,8 @@ var _ = Describe("namespace", func() {
 			mockConfigMaps.On("Create", mock.MatchedBy(buildConfig(""))).Return(configMap, nil)
 
 			resource := unsafeAbs("fixtures/local-yaml/buildtemplate.yaml")
-			mockKustomizer.On("ApplyLabels",
-				mock.MatchedBy(urlPath(resource)),
-				mock.MatchedBy(keys("projectriff.io/installer", "projectriff.io/version"))).
-				Return([]byte("customised content"), nil)
 
-			kubeCtl.On("ExecStdin", []string{"apply", "-n", "foo", "-f", "-"}, mock.Anything).
+			kubeCtl.On("Exec", []string{"apply", "-n", "foo", "-f", resource}, mock.Anything).
 				Return("done!", nil)
 
 			err := client.NamespaceInit(manifests, options)
@@ -654,7 +575,7 @@ func urlPath(path string) func(url *url.URL) bool {
 			} else {
 				drive = strings.ToUpper(url.Scheme)
 			}
-			return drive + url.String()[1:] == path
+			return drive+url.String()[1:] == path
 		} else {
 			return url.Path == path
 		}
