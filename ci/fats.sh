@@ -17,12 +17,12 @@ source $fats_dir/.util.sh
 
 $fats_dir/install.sh kubectl
 $fats_dir/install.sh kail
-$fats_dir/install.sh gcloud
 
 # install riff-cli
 travis_fold start install-riff
 echo "Installing riff"
 if [ "$mode" = "full" ]; then
+  $fats_dir/install.sh gcloud
   if [ "$machine" == "MinGw" ]; then
     gsutil cat gs://projectriff/riff-cli/releases/builds/v${version}-${commit}/riff-windows-amd64.zip > riff.zip
     unzip riff.zip -d /usr/bin/
