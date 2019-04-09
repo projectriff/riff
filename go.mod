@@ -9,8 +9,8 @@ require (
 	github.com/frioux/shellquote v0.0.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/knative/build v0.5.0
-	github.com/knative/pkg v0.0.0-20190408172658-2b574edcd712
-	github.com/knative/serving v0.5.0
+	github.com/knative/pkg v0.0.0-20190330034653-916205998db9
+	github.com/knative/serving v0.5.1
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
 	github.com/pivotal/go-ape v0.0.0-20190405150324-756013ecae13
@@ -48,5 +48,3 @@ require (
 )
 
 replace github.com/Nvveen/Gotty => github.com/ijc/Gotty v0.0.0-20170406111628-a8b993ba6abd
-
-replace google.golang.org/api => google.golang.org/api v0.3.1
