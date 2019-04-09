@@ -11,23 +11,31 @@ commit=$(git rev-parse HEAD)
 # fetch FATS scripts
 fats_dir=`dirname "${BASH_SOURCE[0]}"`/fats
 fats_repo="projectriff/fats"
-fats_refspec=61c490713c71c354051534349e3ba0c99191ae7d # projectriff/fats master as of 2019-03-31
+fats_refspec=2234005739491f39fabaa75098b19c6d521af324 # projectriff/fats master as of 2019-04-09
 source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $fats_dir $fats_refspec $fats_repo
 source $fats_dir/.util.sh
 
 $fats_dir/install.sh kubectl
 $fats_dir/install.sh kail
+$fats_dir/install.sh gcloud
 
 # install riff-cli
 travis_fold start install-riff
 echo "Installing riff"
 if [ "$mode" = "full" ]; then
-  gsutil cat gs://projectriff/riff-cli/releases/builds/v${version}-${commit}/riff-linux-amd64.tgz | tar xz
-  chmod +x riff
+  if [ "$machine" == "MinGw" ]; then
+    gsutil cat gs://projectriff/riff-cli/releases/builds/v${version}-${commit}/riff-windows-amd64.zip > riff.zip
+    unzip riff.zip -d /usr/bin/
+    rm riff.zip
+  else
+    gsutil cat gs://projectriff/riff-cli/releases/builds/v${version}-${commit}/riff-linux-amd64.tgz | tar xz
+    chmod +x riff
+    sudo cp riff /usr/bin/riff
+  fi
 else
   make build
+  sudo cp riff /usr/bin/riff
 fi
-sudo cp riff /usr/local/bin/riff
 travis_fold end install-riff
 
 # start FATS
@@ -82,4 +90,6 @@ for test in node command; do
   run_function $path $function_name $image "${create_args}" $input_data $expected_data
 done
 
-source `dirname "${BASH_SOURCE[0]}"`/fats-channels.sh
+if [ "$machine" != "MinGw" ]; then
+  source `dirname "${BASH_SOURCE[0]}"`/fats-channels.sh
+fi
