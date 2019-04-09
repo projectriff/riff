@@ -111,7 +111,7 @@ func (c *client) NamespaceInit(manifests map[string]*Manifest, options Namespace
 	if err = c.initImagePrefix(&options); err != nil {
 		return err
 	}
-	return c.applyManifest(manifest, &options, initLabels)
+	return c.applyManifest(manifest, &options)
 }
 
 func (c *client) NamespaceCleanup(options NamespaceCleanupOptions) error {
@@ -245,7 +245,7 @@ func (c *client) initImagePrefix(options *NamespaceInitOptions) error {
 	return nil
 }
 
-func (c *client) applyManifest(manifest *Manifest, options *NamespaceInitOptions, initLabels map[string]string) error {
+func (c *client) applyManifest(manifest *Manifest, options *NamespaceInitOptions) error {
 	for _, release := range manifest.Namespace {
 		res, err := manifest.ResourceAbsolutePath(release)
 		if err != nil {
@@ -265,11 +265,7 @@ func (c *client) applyManifest(manifest *Manifest, options *NamespaceInitOptions
 		if resourceUrl.Scheme == "" {
 			resourceUrl.Scheme = "file"
 		}
-		labeledContent, err := c.kustomizer.ApplyLabels(resourceUrl, initLabels)
-		if err != nil {
-			return err
-		}
-		log, err := c.kubeCtl.ExecStdin([]string{"apply", "-n", options.NamespaceName, "-f", "-"}, &labeledContent)
+		log, err := c.kubeCtl.Exec([]string{"apply", "-n", options.NamespaceName, "-f", resource})
 		fmt.Printf("%s\n", log)
 		if err != nil {
 			return err

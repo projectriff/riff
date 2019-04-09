@@ -19,13 +19,11 @@ package commands
 import (
 	"context"
 	"fmt"
+	"github.com/pivotal/go-ape/pkg/furl"
+	"github.com/projectriff/riff/pkg/kubectl"
 	"io"
 	"os/user"
 	"strings"
-	"time"
-
-	"github.com/pivotal/go-ape/pkg/furl"
-	"github.com/projectriff/riff/pkg/kubectl"
 
 	lcimg "github.com/buildpack/lifecycle/image"
 	"github.com/buildpack/pack"
@@ -36,7 +34,6 @@ import (
 	keventing "github.com/knative/eventing/pkg/client/clientset/versioned"
 	kserving "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/projectriff/riff/pkg/core"
-	"github.com/projectriff/riff/pkg/core/kustomize"
 	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
@@ -217,7 +214,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client) {
 		}
 		kubeCtl := kubectl.RealKubeCtl(configPath, masterURL)
 
-		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, buildClientSet, kubeCtl, kustomize.MakeKustomizer(30*time.Second))
+		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, buildClientSet, kubeCtl)
 		if err != nil {
 			return err
 		}

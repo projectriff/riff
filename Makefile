@@ -27,7 +27,6 @@ check-jq:
 gen-mocks: check-mockery check-jq
 	GO111MODULE=on mockery -output pkg/core/mocks/mockbuilder        -outpkg mockbuilder   -dir pkg/core                                                                                           -name Builder
 	GO111MODULE=on mockery -output pkg/core/mocks                    -outpkg mocks         -dir pkg/core                                                                                           -name Client
-	GO111MODULE=on mockery -output pkg/core/kustomize/mocks          -outpkg mockkustomize -dir pkg/core/kustomize                                                                                 -name Kustomizer
 	GO111MODULE=on mockery -output pkg/core/vendor_mocks/mockbuild   -outpkg mockbuild     -dir $(call source_of,github.com/knative/build)/pkg/client/clientset/versioned                          -name Interface
 	GO111MODULE=on mockery -output pkg/core/vendor_mocks/mockbuild   -outpkg mockbuild     -dir $(call source_of,github.com/knative/build)/pkg/client/clientset/versioned/typed/build/v1alpha1     -name BuildV1alpha1Interface
 	GO111MODULE=on mockery -output pkg/core/vendor_mocks/mockbuild   -outpkg mockbuild     -dir $(call source_of,github.com/knative/build)/pkg/client/clientset/versioned/typed/build/v1alpha1     -name ClusterBuildTemplateInterface
