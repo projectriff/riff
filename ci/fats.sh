@@ -78,16 +78,18 @@ for test in java java-boot node npm command; do
   run_function $path $function_name $image "${create_args}" $input_data $expected_data
 done
 
-for test in node command; do
-  path=${fats_dir}/functions/uppercase/${test}
-  function_name=fats-local-uppercase-${test}
-  image=$(fats_image_repo ${function_name})
-  create_args="--local-path ."
-  input_data=riff
-  expected_data=RIFF
+if [ "$machine" != "MinGw" ]; then
+  for test in node command; do
+    path=${fats_dir}/functions/uppercase/${test}
+    function_name=fats-local-uppercase-${test}
+    image=$(fats_image_repo ${function_name})
+    create_args="--local-path ."
+    input_data=riff
+    expected_data=RIFF
 
-  run_function $path $function_name $image "${create_args}" $input_data $expected_data
-done
+    run_function $path $function_name $image "${create_args}" $input_data $expected_data
+  done
+fi
 
 if [ "$machine" != "MinGw" ]; then
   source `dirname "${BASH_SOURCE[0]}"`/fats-channels.sh
