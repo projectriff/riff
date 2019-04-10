@@ -25,8 +25,8 @@ kail_output_pid=$!
 riff channel create $test_name --namespace $NAMESPACE
 riff subscription create $test_name --channel $test_name --subscriber message-dumper --namespace $NAMESPACE
 
-wait_channel_ready $test_name $NAMESPACE
-wait_subscription_ready $test_name $NAMESPACE
+wait_knative_ready channels.eventing.knative.dev $test_name $NAMESPACE
+wait_knative_ready subscriptions.eventing.knative.dev $test_name $NAMESPACE
 
 cat <<EOF | kubectl apply -f -
 apiVersion: sources.eventing.knative.dev/v1alpha1
