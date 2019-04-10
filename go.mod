@@ -26,6 +26,7 @@ require (
 	github.com/knative/eventing v0.4.0
 	github.com/knative/pkg v0.0.0-20190219005745-729d5ada5f62
 	github.com/knative/serving v0.4.0
+	github.com/kubernetes-sigs/kustomize v2.0.3+incompatible
 	github.com/markbates/inflect v1.0.4 // indirect
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -47,7 +48,7 @@ require (
 	k8s.io/apimachinery v0.0.0-20180904193909-def12e63c512
 	k8s.io/client-go v0.0.0-20180910083459-2cefa64ff137
 	k8s.io/kube-openapi v0.0.0-20181114233023-0317810137be // indirect
-	sigs.k8s.io/kustomize v1.0.11
+	sigs.k8s.io/kustomize v2.0.3+incompatible
 )
 
 replace github.com/Nvveen/Gotty => github.com/ijc/Gotty v0.0.0-20170406111628-a8b993ba6abd
