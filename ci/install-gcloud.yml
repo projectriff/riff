@@ -1,7 +1,7 @@
 steps:
 - bash: |
     # TODO consume from FATS (if we could assume FATS was loaded)
-    
+
     if hash choco 2>/dev/null; then
       choco install gcloudsdk
 
@@ -13,12 +13,12 @@ steps:
       cat <<EOF > /usr/bin/gsutil
     #!/bin/bash
 
-    "/c/Program Files (x86)/Google/Cloud SDK/google-cloud-sdk/bin/gsutil" \$@
+    "/c/Program Files (x86)/Google/Cloud SDK/google-cloud-sdk/bin/gsutil.cmd" \$@
     EOF
       cat <<EOF > /usr/bin/docker-credential-gcloud
     #!/bin/bash
 
-    "/c/Program Files (x86)/Google/Cloud SDK/google-cloud-sdk/bin/docker-credential-gcloud" \$@
+    "/c/Program Files (x86)/Google/Cloud SDK/google-cloud-sdk/bin/docker-credential-gcloud.cmd" \$@
     EOF
     else
       # Create environment variable for correct distribution
