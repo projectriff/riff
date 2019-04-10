@@ -37,7 +37,6 @@ jobs:
     NAMESPACE: '$(CLUSTER_NAME)'
   condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
   steps:
-  - template: ci/install-gcloud.yml
   - template: ci/downgrade-docker.yml
   - bash: ./ci/fats.sh lite
     displayName: 'Run FATS'
@@ -93,7 +92,6 @@ jobs:
     NAMESPACE: '$(CLUSTER_NAME)'
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   steps:
-  - template: ci/install-gcloud.yml
   - template: ci/downgrade-docker.yml
   - bash: ./ci/fats.sh
     env:
