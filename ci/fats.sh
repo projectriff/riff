@@ -22,13 +22,12 @@ $fats_dir/install.sh kail
 travis_fold start install-riff
 echo "Installing riff"
 if [ "$mode" = "full" ]; then
-  $fats_dir/install.sh gcloud
   if [ "$machine" == "MinGw" ]; then
-    gsutil cat gs://projectriff/riff-cli/releases/builds/v${version}-${commit}/riff-windows-amd64.zip > riff.zip
+    curl https://storage.googleapis.com/projectriff/riff-cli/releases/builds/v${version}-${commit}/riff-windows-amd64.zip > riff.zip
     unzip riff.zip -d /usr/bin/
     rm riff.zip
   else
-    gsutil cat gs://projectriff/riff-cli/releases/builds/v${version}-${commit}/riff-linux-amd64.tgz | tar xz
+    curl https://storage.googleapis.com/projectriff/riff-cli/releases/builds/v${version}-${commit}/riff-linux-amd64.tgz | tar xz
     chmod +x riff
     sudo cp riff /usr/bin/riff
   fi
