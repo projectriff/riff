@@ -47,7 +47,7 @@ require (
 	k8s.io/apimachinery v0.0.0-20180904193909-def12e63c512
 	k8s.io/client-go v0.0.0-20180910083459-2cefa64ff137
 	k8s.io/kube-openapi v0.0.0-20181114233023-0317810137be // indirect
-	sigs.k8s.io/kustomize v1.0.11
+	sigs.k8s.io/kustomize v2.0.3+incompatible
 )
 
 replace github.com/Nvveen/Gotty => github.com/ijc/Gotty v0.0.0-20170406111628-a8b993ba6abd

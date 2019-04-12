@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/url"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -51,7 +52,7 @@ type kustomizer struct {
 func MakeKustomizer(timeout time.Duration) Kustomizer {
 	return &kustomizer{
 		fs:          fs.MakeFakeFS(), // keep contents in-memory
-		fakeDir:     "/",
+		fakeDir:     filepath.FromSlash("/"),
 		httpTimeout: timeout,
 	}
 }
