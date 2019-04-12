@@ -5,6 +5,5 @@ istio:
 knative:
   - build-release
   - https://serving-release
-  - eventing-release
 namespace:
   - buildtemplate-release

@@ -20,8 +20,6 @@ import (
 	"io"
 
 	build_cs "github.com/knative/build/pkg/client/clientset/versioned"
-	eventing "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	eventing_cs "github.com/knative/eventing/pkg/client/clientset/versioned"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	serving_cs "github.com/knative/serving/pkg/client/clientset/versioned"
@@ -36,14 +34,6 @@ type Client interface {
 	CreateFunction(builder Builder, options CreateFunctionOptions, log io.Writer) (*serving.Service, *serving.Revision, *corev1.PersistentVolumeClaim, error)
 	UpdateFunction(builder Builder, options UpdateFunctionOptions, log io.Writer) error
 	BuildFunction(builder Builder, options BuildFunctionOptions, log io.Writer) error
-
-	CreateSubscription(options CreateSubscriptionOptions) (*eventing.Subscription, error)
-	DeleteSubscription(options DeleteSubscriptionOptions) error
-	ListSubscriptions(options ListSubscriptionsOptions) (*eventing.SubscriptionList, error)
-
-	ListChannels(options ListChannelOptions) (*eventing.ChannelList, error)
-	CreateChannel(options CreateChannelOptions) (*eventing.Channel, error)
-	DeleteChannel(options DeleteChannelOptions) error
 
 	ListServices(options ListServiceOptions) (*serving.ServiceList, error)
 	CreateService(options CreateOrUpdateServiceOptions) (*serving.Service, error)
@@ -70,7 +60,6 @@ type Builder interface {
 
 type client struct {
 	kubeClient   kubernetes.Interface
-	eventing     eventing_cs.Interface
 	serving      serving_cs.Interface
 	build        build_cs.Interface
 	clientConfig clientcmd.ClientConfig
@@ -78,11 +67,10 @@ type client struct {
 	kustomizer   kustomize.Kustomizer
 }
 
-func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, eventing eventing_cs.Interface, serving serving_cs.Interface, build build_cs.Interface, kubeCtl kubectl.KubeCtl, kustomizer kustomize.Kustomizer) Client {
+func NewClient(clientConfig clientcmd.ClientConfig, kubeClient kubernetes.Interface, serving serving_cs.Interface, build build_cs.Interface, kubeCtl kubectl.KubeCtl, kustomizer kustomize.Kustomizer) Client {
 	return &client{
 		clientConfig: clientConfig,
 		kubeClient:   kubeClient,
-		eventing:     eventing,
 		serving:      serving,
 		build:        build,
 		kubeCtl:      kubeCtl,

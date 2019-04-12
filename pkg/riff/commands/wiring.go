@@ -33,7 +33,6 @@ import (
 	"github.com/buildpack/pack/docker"
 	"github.com/buildpack/pack/logging"
 	kbuild "github.com/knative/build/pkg/client/clientset/versioned"
-	keventing "github.com/knative/eventing/pkg/client/clientset/versioned"
 	kserving "github.com/knative/serving/pkg/client/clientset/versioned"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/core/kustomize"
@@ -46,11 +45,11 @@ import (
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.ClientConfig, kubernetes.Interface, keventing.Interface, kserving.Interface, kbuild.Interface, error) {
+var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.ClientConfig, kubernetes.Interface, kserving.Interface, kbuild.Interface, error) {
 
 	kubeconfig, err := resolveHomePath(kubeconfig)
 	if err != nil {
-		return nil, nil, nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	clientConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
@@ -59,23 +58,19 @@ var realClientSetFactory = func(kubeconfig string, masterURL string) (clientcmd.
 
 	cfg, err := clientConfig.ClientConfig()
 	if err != nil {
-		return nil, nil, nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	kubeClientSet, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
-		return nil, nil, nil, nil, nil, err
-	}
-	eventingClientSet, err := keventing.NewForConfig(cfg)
-	if err != nil {
-		return nil, nil, nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	servingClientSet, err := kserving.NewForConfig(cfg)
 	if err != nil {
-		return nil, nil, nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	buildClientSet, err := kbuild.NewForConfig(cfg)
 
-	return clientConfig, kubeClientSet, eventingClientSet, servingClientSet, buildClientSet, err
+	return clientConfig, kubeClientSet, servingClientSet, buildClientSet, err
 }
 
 func resolveHomePath(p string) (string, error) {
@@ -134,14 +129,6 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		ServiceDelete(&client),
 	)
 
-	channel := Channel()
-	installKubeConfigSupport(channel, &client)
-	channel.AddCommand(
-		ChannelList(&client),
-		ChannelCreate(&client),
-		ChannelDelete(&client),
-	)
-
 	namespace := Namespace()
 	installKubeConfigSupport(namespace, &client)
 	namespace.AddCommand(
@@ -156,21 +143,11 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		SystemUninstall(&client),
 	)
 
-	subscription := Subscription()
-	installKubeConfigSupport(subscription, &client)
-	subscription.AddCommand(
-		SubscriptionCreate(&client),
-		SubscriptionDelete(&client),
-		SubscriptionList(&client),
-	)
-
 	rootCmd.AddCommand(
 		function,
 		service,
-		channel,
 		namespace,
 		system,
-		subscription,
 		Docs(rootCmd, LocalFs{}),
 		Version(),
 		Completion(rootCmd),
@@ -206,7 +183,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client) {
 
 	oldPersistentPreRunE := command.PersistentPreRunE
 	command.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
-		clientConfig, kubeClientSet, eventingClientSet, servingClientSet, buildClientSet, err := realClientSetFactory(kubeConfigPath, masterURL)
+		clientConfig, kubeClientSet, servingClientSet, buildClientSet, err := realClientSetFactory(kubeConfigPath, masterURL)
 		if err != nil {
 			return err
 		}
@@ -217,7 +194,7 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client) {
 		}
 		kubeCtl := kubectl.RealKubeCtl(configPath, masterURL)
 
-		*client = core.NewClient(clientConfig, kubeClientSet, eventingClientSet, servingClientSet, buildClientSet, kubeCtl, kustomize.MakeKustomizer(30*time.Second))
+		*client = core.NewClient(clientConfig, kubeClientSet, servingClientSet, buildClientSet, kubeCtl, kustomize.MakeKustomizer(30*time.Second))
 		if err != nil {
 			return err
 		}

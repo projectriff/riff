@@ -50,7 +50,7 @@ type SystemUninstallOptions struct {
 }
 
 var (
-	knativeNamespaces = []string{"knative-eventing", "knative-serving", "knative-build", "knative-monitoring"}
+	knativeNamespaces = []string{"knative-serving", "knative-build", "knative-monitoring"}
 	allNameSpaces     = append(knativeNamespaces, istioNamespace)
 )
 
@@ -210,18 +210,6 @@ func (c *client) SystemUninstall(options SystemUninstallOptions) (bool, error) {
 			return false, err
 		}
 		err = deleteClusterResources(c, "clusterrolebinding", "build-controller-")
-		if err != nil {
-			return false, err
-		}
-		err = deleteClusterResources(c, "clusterrolebinding", "eventing-controller-")
-		if err != nil {
-			return false, err
-		}
-		err = deleteClusterResources(c, "clusterrolebinding", "in-memory-channel-")
-		if err != nil {
-			return false, err
-		}
-		err = deleteClusterResources(c, "clusterrole", "in-memory-channel-")
 		if err != nil {
 			return false, err
 		}

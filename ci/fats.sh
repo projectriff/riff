@@ -51,10 +51,6 @@ wait_pod_selector_ready 'app=controller' 'knative-serving'
 wait_pod_selector_ready 'app=webhook' 'knative-serving'
 wait_pod_selector_ready 'app=build-controller' 'knative-build'
 wait_pod_selector_ready 'app=build-webhook' 'knative-build'
-wait_pod_selector_ready 'app=eventing-controller' 'knative-eventing'
-wait_pod_selector_ready 'app=webhook' 'knative-eventing'
-wait_pod_selector_ready 'clusterChannelProvisioner=in-memory-channel,role=controller' 'knative-eventing'
-wait_pod_selector_ready 'clusterChannelProvisioner=in-memory-channel,role=dispatcher' 'knative-eventing'
 echo "Checking for ready ingress"
 wait_for_ingress_ready 'istio-ingressgateway' 'istio-system'
 
@@ -89,8 +85,4 @@ if [ "$machine" != "MinGw" ]; then
 
     run_function $path $function_name $image "${create_args}" $input_data $expected_data
   done
-fi
-
-if [ "$machine" != "MinGw" ]; then
-  source `dirname "${BASH_SOURCE[0]}"`/fats-channels.sh
 fi

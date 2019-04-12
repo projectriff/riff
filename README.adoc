@@ -33,7 +33,7 @@ choco install riff
 
 == Developer installation of Knative
 
-The code for Knative serving and eventing and build lives in repos under the link:https://github.com/knative[knative] GitHub organization. Developers can use the riff CLI against their own Knative builds, by installing a link:https://github.com/knative/eventing/blob/master/DEVELOPMENT.md[Knative development environment].
+The code for Knative serving and build lives in repos under the link:https://github.com/knative[knative] GitHub organization. Developers can use the riff CLI against their own Knative builds, by installing a link:https://www.knative.dev/docs/install/[Knative development environment].
 
 == [[manual]] Manual build of the riff CLI
 
