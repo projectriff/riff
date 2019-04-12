@@ -66,7 +66,6 @@ func SystemInstall(manifests map[string]*core.Manifest, c *core.Client) *cobra.C
     knative:
     - https://path/to/build-release.yaml
     - https://path/to/serving-release.yaml
-    - https://path/to/eventing-release.yaml
     namespace:
     - https://path/to/buildtemplate-release.yaml
 ` +

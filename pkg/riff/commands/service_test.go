@@ -26,7 +26,6 @@ import (
 
 	"time"
 
-	eventingv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/knative/pkg/apis"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1alpha1"
@@ -136,10 +135,6 @@ var _ = Describe("The riff service create command", func() {
 
 			svc := v1alpha1.Service{}
 			svc.Name = "square"
-			c := eventingv1alpha1.Channel{}
-			c.Name = "my-channel"
-			s := eventingv1alpha1.Subscription{}
-			s.Name = "square"
 			asMock.On("CreateService", serviceOptions).Return(&svc, nil)
 
 			stdout := &strings.Builder{}
@@ -423,23 +418,27 @@ var _ = Describe("The riff service list command", func() {
 				Items: []v1alpha1.Service{
 					{
 						ObjectMeta: meta_v1.ObjectMeta{Name: "foo"},
-						Status: v1alpha1.ServiceStatus{Conditions: duckv1alpha1.Conditions{
-							{
-								Type:    v1alpha1.ServiceConditionReady,
-								Reason:  "Failed",
-								Message: "It's dead, Jim",
-								Status:  v1.ConditionFalse,
+						Status: v1alpha1.ServiceStatus{
+							Status: duckv1alpha1.Status{
+								Conditions: duckv1alpha1.Conditions{{
+									Type:    v1alpha1.ServiceConditionReady,
+									Reason:  "Failed",
+									Message: "It's dead, Jim",
+									Status:  v1.ConditionFalse,
+								}},
 							},
-						}},
+						},
 					},
 					{
 						ObjectMeta: meta_v1.ObjectMeta{Name: "wizz"},
-						Status: v1alpha1.ServiceStatus{Conditions: duckv1alpha1.Conditions{
-							{
-								Type:   v1alpha1.ServiceConditionReady,
-								Status: v1.ConditionTrue,
+						Status: v1alpha1.ServiceStatus{
+							Status: duckv1alpha1.Status{
+								Conditions: duckv1alpha1.Conditions{{
+									Type:   v1alpha1.ServiceConditionReady,
+									Status: v1.ConditionTrue,
+								}},
 							},
-						}},
+						},
 					},
 				},
 			}

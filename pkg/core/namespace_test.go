@@ -71,7 +71,7 @@ var _ = Describe("namespace", func() {
 		mockCore.On("ConfigMaps", mock.Anything).Return(mockConfigMaps)
 		mockCore.On("Secrets", mock.Anything).Return(mockSecrets)
 
-		client = core.NewClient(nil, kubeClient, nil, nil, nil, kubeCtl, mockKustomizer)
+		client = core.NewClient(nil, kubeClient, nil, nil, kubeCtl, mockKustomizer)
 	})
 
 	AfterEach(func() {
@@ -654,7 +654,7 @@ func urlPath(path string) func(url *url.URL) bool {
 			} else {
 				drive = strings.ToUpper(url.Scheme)
 			}
-			return drive + url.String()[1:] == path
+			return drive+url.String()[1:] == path
 		} else {
 			return url.Path == path
 		}
