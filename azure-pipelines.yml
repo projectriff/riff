@@ -33,11 +33,10 @@ jobs:
   variables:
     CLUSTER:  '$(cluster)'
     REGISTRY: '$(registry)'
-    CLUSTER_NAME: 'fats-$(Build.BuildId)'
+    CLUSTER_NAME: 'riff-$(Build.BuildId)-$(Agent.JobName)'
     NAMESPACE: '$(CLUSTER_NAME)'
   condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
   steps:
-  - template: ci/install-gcloud.yml
   - template: ci/downgrade-docker.yml
   - bash: ./ci/fats.sh lite
     displayName: 'Run FATS'
@@ -80,16 +79,19 @@ jobs:
         imageName: ubuntu-16.04
         cluster: gke
         registry: gcr
+      windows:
+        imageName: windows-2019
+        cluster: gke
+        registry: gcr
   pool:
     vmImage: $(imageName)
   variables:
     CLUSTER:  '$(cluster)'
     REGISTRY: '$(registry)'
-    CLUSTER_NAME: 'fats-$(Build.BuildId)'
+    CLUSTER_NAME: 'riff-$(Build.BuildId)-$(Agent.JobName)'
     NAMESPACE: '$(CLUSTER_NAME)'
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   steps:
-  - template: ci/install-gcloud.yml
   - template: ci/downgrade-docker.yml
   - bash: ./ci/fats.sh
     env:
