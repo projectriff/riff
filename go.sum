@@ -346,8 +346,6 @@ github.com/pelletier/go-toml v1.2.0 h1:T5zMGML61Wp+FlcbWjRDT7yAxhJNAiPPLOFECq181
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/peterbourgon/diskv v2.0.1+incompatible h1:UBdAOUP5p4RWqPBg048CAvpKN+vxiaj6gdUUzhl4XmI=
 github.com/peterbourgon/diskv v2.0.1+incompatible/go.mod h1:uqqh8zWWbv1HBMNONnaR/tNboyR3/BZd58JJSHlUSCU=
-github.com/pivotal/go-ape v0.0.0-20190404203804-81ff0d7e7716 h1:2thc2e0pNH/rqWqZoHEo+Dsf4LybZ1wYyRDKYHvZR1Q=
-github.com/pivotal/go-ape v0.0.0-20190404203804-81ff0d7e7716/go.mod h1:WRTmFu8GsOA1bSwOUVchskvhrQA9gIZiZV2U+WOW2wY=
 github.com/pivotal/go-ape v0.0.0-20190405150324-756013ecae13 h1:Wg9lCEP1JL6E2Ip6wCTD1W3+8R8v9DML/xZo5pk7rpk=
 github.com/pivotal/go-ape v0.0.0-20190405150324-756013ecae13/go.mod h1:WRTmFu8GsOA1bSwOUVchskvhrQA9gIZiZV2U+WOW2wY=
 github.com/pkg/errors v0.8.0 h1:WdK/asTD0HN+q6hsWO3/vpuAkAr+tw6aNJNDFFf0+qw=
@@ -544,5 +542,5 @@ k8s.io/client-go v0.0.0-20180910083459-2cefa64ff137 h1:4DIWGqvAjLME47asVwjb14H+6
 k8s.io/client-go v0.0.0-20180910083459-2cefa64ff137/go.mod h1:7vJpHMYJwNQCWgzmNV+VYUl1zCObLyodBc8nIyt8L5s=
 k8s.io/kube-openapi v0.0.0-20181114233023-0317810137be h1:aWEq4nbj7HRJ0mtKYjNSk/7X28Tl6TI6FeG8gKF+r7Q=
 k8s.io/kube-openapi v0.0.0-20181114233023-0317810137be/go.mod h1:BXM9ceUBTj2QnfH2MK1odQs778ajze1RxcmP6S8RVVc=
-sigs.k8s.io/kustomize v1.0.11 h1:Yb+6DDt9+aR2AvQApvUaKS/ugteeG4MPyoFeUHiPOjk=
-sigs.k8s.io/kustomize v1.0.11/go.mod h1:MkjgH3RdOWrievjo6c9T245dYlB5QeXV4WCbnt/PEpU=
+sigs.k8s.io/kustomize v2.0.3+incompatible h1:JUufWFNlI44MdtnjUqVnvh29rR37PQFzPbLXqhyOyX0=
+sigs.k8s.io/kustomize v2.0.3+incompatible/go.mod h1:MkjgH3RdOWrievjo6c9T245dYlB5QeXV4WCbnt/PEpU=
