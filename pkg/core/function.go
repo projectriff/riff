@@ -145,6 +145,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 							{Name: "FUNCTION_ARTIFACT", Value: options.Artifact},
 							{Name: "FUNCTION_HANDLER", Value: options.Handler},
 							{Name: "FUNCTION_LANGUAGE", Value: options.Invoker},
+							{Name: "USE_CRED_HELPERS", Value: "false"},
 							{Name: "CACHE", Value: "cache"},
 						},
 					},
