@@ -109,6 +109,15 @@ func ValidName() PositionalArg {
 	return KubernetesValidation(validation.IsDNS1123Subdomain)
 }
 
+func ArgNotBlank() PositionalArg {
+	return func(cmd *cobra.Command, arg string) error {
+		if len(strings.TrimSpace(arg)) == 0 {
+			return fmt.Errorf("argument cannot be empty")
+		}
+		return nil
+	}
+}
+
 func LabelArgs(cmd *cobra.Command, labels ...string) {
 	if cmd.Annotations == nil {
 		cmd.Annotations = make(map[string]string)
@@ -239,6 +248,17 @@ func NotBlank(flagName string) FlagsValidator {
 		flag := cmd.Flag(flagName)
 		if flag == nil || strings.TrimSpace(flag.Value.String()) == "" {
 			return fmt.Errorf("flag --%s cannot be empty", flagName)
+		}
+		return nil
+	}
+}
+
+// ValidDnsSubdomain returns a FlagsValidator that asserts that the given flag value is valid DNS subdomain.
+func ValidDnsSubdomain(flagName string) FlagsValidator {
+	return func(cmd *cobra.Command) error {
+		flag := cmd.Flag(flagName)
+		if flag == nil || len(validation.IsDNS1123Subdomain(flag.Value.String())) > 0 {
+			return fmt.Errorf("flag --%s must be a valid DNS subdomain", flagName)
 		}
 		return nil
 	}

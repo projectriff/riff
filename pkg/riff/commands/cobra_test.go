@@ -32,7 +32,7 @@ var _ = Describe("The cobra extensions", func() {
 
 	Context("the argument validation framework", func() {
 
-		Context("NotBlank", func() {
+		Context("OptionalAtPosition", func() {
 
 			It("should not fail if an optional argument to validate is not provided", func() {
 				command := &Command{
@@ -51,6 +51,9 @@ var _ = Describe("The cobra extensions", func() {
 
 				Expect(command.Execute()).NotTo(HaveOccurred())
 			})
+		})
+
+		Context("StartingAtPosition", func() {
 
 			It("should fail if one argument is invalid", func() {
 				command := &Command{
@@ -67,6 +70,23 @@ var _ = Describe("The cobra extensions", func() {
 				command.SetOutput(ioutil.Discard)
 
 				Expect(command.Execute()).To(MatchError("3 should be even\n7 should be even\n"))
+			})
+		})
+
+		Context("ArgNotBlank", func() {
+
+			It("should fail if one argument is blank", func() {
+				command := &Command{
+					Use: "some-command",
+					Args: commands.AtPosition(0, commands.ArgNotBlank()),
+					RunE: func(cmd *Command, args []string) error {
+						return nil
+					},
+				}
+				command.SetArgs([]string{" "})
+				command.SetOutput(ioutil.Discard)
+
+				Expect(command.Execute()).To(MatchError("argument cannot be empty"))
 			})
 		})
 	})
@@ -162,6 +182,26 @@ var _ = Describe("The cobra extensions", func() {
 
 				Expect(command.Execute()).
 					To(MatchError(`flag --foobar cannot have value "http://example.com", it should not start with "http://" nor "https://"`))
+			})
+		})
+
+		Context("ValidDnsSubdomain", func() {
+
+			It("should fail if the flag to validate is not valid subdomain", func() {
+				var foobar string
+				command := &Command{
+					Use:     "some-command",
+					PreRunE: commands.FlagsValidatorAsCobraRunE(commands.ValidDnsSubdomain("foobar")),
+					RunE: func(cmd *Command, args []string) error {
+						return nil
+					},
+				}
+				command.Flags().StringVar(&foobar, "foobar", "", "some meaningful flag")
+				command.SetArgs([]string{"--foobar", "notgonna@work!"})
+				command.SetOutput(ioutil.Discard)
+
+				Expect(command.Execute()).
+					To(MatchError("flag --foobar must be a valid DNS subdomain"))
 			})
 		})
 	})

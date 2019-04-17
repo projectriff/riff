@@ -143,11 +143,18 @@ See https://projectriff.io and https://github.com/knative/docs`,
 		SystemUninstall(&client),
 	)
 
+	credentials := Credentials()
+	installKubeConfigSupport(credentials, &client)
+	credentials.AddCommand(
+		CredentialsSet(&client),
+	)
+
 	rootCmd.AddCommand(
 		function,
 		service,
 		namespace,
 		system,
+		credentials,
 		Docs(rootCmd, LocalFs{}),
 		Version(),
 		Completion(rootCmd),
@@ -195,9 +202,6 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client) {
 		kubeCtl := kubectl.RealKubeCtl(configPath, masterURL)
 
 		*client = core.NewClient(clientConfig, kubeClientSet, servingClientSet, buildClientSet, kubeCtl, kustomize.MakeKustomizer(30*time.Second))
-		if err != nil {
-			return err
-		}
 
 		if oldPersistentPreRunE != nil {
 			return oldPersistentPreRunE(cmd, args)

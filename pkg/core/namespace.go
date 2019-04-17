@@ -17,23 +17,18 @@
 package core
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/url"
-	"os"
-	"sort"
-	"strings"
-	"syscall"
-
 	"github.com/pivotal/go-ape/pkg/furl"
 	"github.com/projectriff/riff/pkg/core/tasks"
 	"github.com/projectriff/riff/pkg/env"
-	"golang.org/x/crypto/ssh/terminal"
+	"io/ioutil"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"net/url"
+	"sort"
+	"strings"
 )
 
 const BuildServiceAccountName = "riff-build"
@@ -69,7 +64,7 @@ type NamespaceCleanupOptions struct {
 	RemoveNamespace bool
 }
 
-func (o *NamespaceInitOptions) secretType() secretType {
+func (o *NamespaceInitOptions) initSecretType() secretType {
 	switch {
 	case o.NoSecret:
 		return secretTypeNone
@@ -102,7 +97,7 @@ func (c *client) NamespaceInit(manifests map[string]*Manifest, options Namespace
 		return err
 	}
 	initLabels := getInitLabels()
-	if err = c.createSecret(&options, initLabels); err != nil {
+	if err = c.createInitialSecret(&options, initLabels); err != nil {
 		return err
 	}
 	if err = c.initServiceAccount(&options, initLabels); err != nil {
@@ -160,32 +155,53 @@ func (c *client) initNamespace(ns string) (*corev1.Namespace, error) {
 	return namespace, nil
 }
 
-func (c *client) createSecret(options *NamespaceInitOptions, initLabels map[string]string) error {
-	switch options.secretType() {
+func (c *client) createInitialSecret(options *NamespaceInitOptions, initLabels map[string]string) error {
+	secret, err := c.convertInitialSecret(options, initLabels)
+	if err != nil {
+		return err
+	}
+	if secret == nil {
+		return nil
+	}
+	return c.resetBasicSecret(options.NamespaceName, secret)
+}
+
+func (c *client) convertInitialSecret(options *NamespaceInitOptions, initLabels map[string]string) (*corev1.Secret, error) {
+	namespace := options.NamespaceName
+	secretName := options.SecretName
+	switch options.initSecretType() {
 	case secretTypeGcr:
-		if err := c.createGcrSecret(*options, initLabels); err != nil {
-			return err
+		return c.convertGcrSecret(namespace, secretName, options.GcrTokenPath, initLabels)
+	case secretTypeDockerHub:
+		return c.convertDockerHubSecret(namespace, secretName, options.DockerHubId, initLabels)
+	case secretTypeBasicAuth:
+		return c.convertRegistrySecret(namespace, secretName, options.RegistryUser, options.Registry, initLabels)
+	case secretTypeUserProvided:
+		err := c.checkSecretExists(options)
+		if err != nil {
+			return nil, err
 		}
+		return nil, nil
+	}
+	return nil, nil
+}
+
+func (c *client) determineImagePrefix(options *NamespaceInitOptions) (string, error) {
+	switch options.initSecretType() {
+	case secretTypeGcr:
 		if options.ImagePrefix == "" {
 			prefix, err := c.gcrImagePrefix(*options)
 			if err != nil {
-				return err
+				return "", err
 			}
-			options.ImagePrefix = prefix
+			return prefix, nil
 		}
 	case secretTypeDockerHub:
-		if err := c.createDockerHubSecret(*options, initLabels); err != nil {
-			return err
-		}
 		if options.ImagePrefix == "" {
-			options.ImagePrefix = c.dockerHubImagePrefix(*options)
+			return c.dockerHubImagePrefix(*options), nil
 		}
-	case secretTypeBasicAuth:
-		return c.createRegistrySecret(*options, initLabels)
-	case secretTypeUserProvided:
-		return c.checkSecretExists(*options)
 	}
-	return nil
+	return options.ImagePrefix, nil
 }
 
 func (c *client) initServiceAccount(options *NamespaceInitOptions, initLabels map[string]string) error {
@@ -195,7 +211,7 @@ func (c *client) initServiceAccount(options *NamespaceInitOptions, initLabels ma
 		serviceAccount = &corev1.ServiceAccount{}
 		serviceAccount.Name = BuildServiceAccountName
 		serviceAccount.Labels = initLabels
-		if options.secretType() != secretTypeNone {
+		if options.initSecretType() != secretTypeNone {
 			secretName := options.SecretName
 			serviceAccount.Secrets = append(serviceAccount.Secrets, corev1.ObjectReference{Name: secretName})
 			fmt.Printf("Creating serviceaccount %q using secret %q in namespace %q\n", serviceAccount.Name, secretName, ns)
@@ -210,30 +226,20 @@ func (c *client) initServiceAccount(options *NamespaceInitOptions, initLabels ma
 	if err != nil {
 		return err
 	}
-	if options.secretType() != secretTypeNone {
+	if options.initSecretType() != secretTypeNone {
 		secretName := options.SecretName
-		secretAlreadyPresent := false
-		for _, s := range serviceAccount.Secrets {
-			if s.Name == secretName {
-				secretAlreadyPresent = true
-				break
-			}
-		}
-		if secretAlreadyPresent {
-			fmt.Printf("Serviceaccount %q already exists in namespace %q with secret %q. Skipping.\n", serviceAccount.Name, ns, secretName)
-		} else {
-			serviceAccount.Secrets = append(serviceAccount.Secrets, corev1.ObjectReference{Name: secretName})
-			fmt.Printf("Adding secret %q to serviceaccount %q in namespace %q\n", secretName, serviceAccount.Name, ns)
-			_, err = c.kubeClient.CoreV1().ServiceAccounts(ns).Update(serviceAccount)
-			if err != nil {
-				return err
-			}
-		}
+		return c.appendNewSecretToServiceAccount(ns, secretName, serviceAccount)
 	}
 	return nil
 }
 
 func (c *client) initImagePrefix(options *NamespaceInitOptions) error {
+	imagePrefix, err := c.determineImagePrefix(options)
+	if err != nil {
+		return err
+	}
+	options.ImagePrefix = imagePrefix
+
 	if options.ImagePrefix != "" {
 		return c.SetDefaultBuildImagePrefix(options.NamespaceName, options.ImagePrefix)
 	}
@@ -278,30 +284,13 @@ func (c *client) applyManifest(manifest *Manifest, options *NamespaceInitOptions
 	return nil
 }
 
-func (c *client) checkSecretExists(options NamespaceInitOptions) error {
+func (c *client) checkSecretExists(options *NamespaceInitOptions) error {
 	_, err := c.kubeClient.CoreV1().Secrets(options.NamespaceName).Get(options.SecretName, v1.GetOptions{})
 	return err
 }
 
-func (c *client) createDockerHubSecret(options NamespaceInitOptions, labels map[string]string) error {
-	username := options.DockerHubId
-	password, err := readPassword(fmt.Sprintf("Enter password for user %q", username))
-	if err != nil {
-		return err
-	}
-	return c.createBasicAuthSecret(options.NamespaceName, options.SecretName, username, password, "https://index.docker.io/v1/", labels)
-}
-
 func (c *client) dockerHubImagePrefix(options NamespaceInitOptions) string {
 	return fmt.Sprintf("docker.io/%s", options.DockerHubId)
-}
-
-func (c *client) createGcrSecret(options NamespaceInitOptions, labels map[string]string) error {
-	token, err := ioutil.ReadFile(options.GcrTokenPath)
-	if err != nil {
-		return err
-	}
-	return c.createBasicAuthSecret(options.NamespaceName, options.SecretName, "_json_key", string(token), "https://gcr.io", labels)
 }
 
 func (c *client) gcrImagePrefix(options NamespaceInitOptions) (string, error) {
@@ -317,60 +306,30 @@ func (c *client) gcrImagePrefix(options NamespaceInitOptions) (string, error) {
 	return fmt.Sprintf("gcr.io/%s", tokenMap["project_id"]), nil
 }
 
-func (c *client) createRegistrySecret(options NamespaceInitOptions, labels map[string]string) error {
-	username := options.RegistryUser
-	password, err := readPassword(fmt.Sprintf("Enter password for user %q", username))
-	if err != nil {
-		return err
-	}
-	return c.createBasicAuthSecret(options.NamespaceName, options.SecretName, username, password, options.Registry, labels)
-}
-
-func (c *client) createBasicAuthSecret(namespace string,
-	secretName string,
-	username string,
-	password string,
-	serverAddress string,
-	initLabels map[string]string) error {
-
-	_ = c.kubeClient.CoreV1().Secrets(namespace).Delete(secretName, &v1.DeleteOptions{})
-
-	secret := &corev1.Secret{
-		ObjectMeta: v1.ObjectMeta{
-			Name:        secretName,
-			Annotations: map[string]string{"build.knative.dev/docker-0": serverAddress},
-			Labels:      initLabels,
-		},
-		Type: corev1.SecretTypeBasicAuth,
-		StringData: map[string]string{
-			"username": username,
-			"password": password,
-		},
-	}
-	fmt.Printf("Creating secret %q with basic authentication to server %q for user %q\n", secretName, serverAddress, username)
-
-	_, err := c.kubeClient.CoreV1().Secrets(namespace).Create(secret)
-	return err
-}
-
-func readPassword(prompt string) (string, error) {
-	fmt.Print(prompt)
-	if terminal.IsTerminal(int(syscall.Stdin)) {
-		res, err := terminal.ReadPassword(int(syscall.Stdin))
-		fmt.Print("\n")
-		return string(res), err
-	} else {
-		reader := bufio.NewReader(os.Stdin)
-		res, err := ioutil.ReadAll(reader)
-		return string(res), err
-	}
-}
-
 func getInitLabels() map[string]string {
 	return map[string]string{
 		"projectriff.io/installer": env.Cli.Name,
 		"projectriff.io/version":   env.Cli.Version,
 	}
+}
+
+func (c *client) appendNewSecretToServiceAccount(namespace, secretName string, serviceAccount *corev1.ServiceAccount) error {
+	secretAlreadyPresent := false
+	for _, s := range serviceAccount.Secrets {
+		if s.Name == secretName {
+			secretAlreadyPresent = true
+			break
+		}
+	}
+	if secretAlreadyPresent {
+		fmt.Printf("Serviceaccount %q already exists in namespace %q with secret %q. Skipping.\n", serviceAccount.Name, namespace, secretName)
+		return nil
+	}
+
+	serviceAccount.Secrets = append(serviceAccount.Secrets, corev1.ObjectReference{Name: secretName})
+	fmt.Printf("Adding secret %q to serviceaccount %q in namespace %q\n", secretName, serviceAccount.Name, namespace)
+	_, err := c.kubeClient.CoreV1().ServiceAccounts(namespace).Update(serviceAccount)
+	return err
 }
 
 func existsSelectors(labelKeys []string) string {

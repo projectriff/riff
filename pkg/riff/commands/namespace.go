@@ -68,12 +68,9 @@ func NamespaceInit(manifests map[string]*core.Manifest, c *core.Client) *cobra.C
 				FlagsDependency(Set("registry-user"), NotBlank("registry")),
 				// NOTE this should be relaxed when we add support for bearer auth
 				FlagsDependency(Set("registry"), NotBlank("registry-user")),
-				FlagsDependency(Set("registry"), func(cmd *cobra.Command) error {
-					if parts := strings.SplitN(options.Registry, "://", 2); len(parts) == 2 && parts[0] != "http" && parts[0] != "https" {
-						return fmt.Errorf("valid protocols are: %q, %q, found: %q", "http", "https", parts[0])
-					}
-					return nil
-				}),
+				FlagsDependency(Set("registry"), SupportedRegistryProtocol(func() string {
+					return options.Registry
+				})),
 			),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -152,4 +149,14 @@ func NamespaceCleanup(c *core.Client) *cobra.Command {
 	command.Flags().BoolVarP(&options.RemoveNamespace, "remove-ns", "", false, "removes the (non-default) namespace as well")
 
 	return command
+}
+
+func SupportedRegistryProtocol(getRegistry func() string) func(cmd *cobra.Command) error {
+	return func(cmd *cobra.Command) error {
+		registry := getRegistry()
+		if parts := strings.SplitN(registry, "://", 2); len(parts) == 2 && parts[0] != "http" && parts[0] != "https" {
+			return fmt.Errorf("valid protocols are: %q, %q, found: %q", "http", "https", parts[0])
+		}
+		return nil
+	}
 }

@@ -48,6 +48,8 @@ type Client interface {
 	NamespaceInit(manifests map[string]*Manifest, options NamespaceInitOptions) error
 	NamespaceCleanup(options NamespaceCleanupOptions) error
 
+	SetCredentials(options SetCredentialsOptions) error
+
 	// helpers
 	FetchPackConfig() (*PackConfig, error)
 	DefaultBuildImagePrefix(namespace string) (string, error)

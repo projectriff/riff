@@ -252,6 +252,20 @@ func (_m *Client) ServiceStatus(options core.ServiceStatusOptions) (*duckv1alpha
 	return r0, r1
 }
 
+// SetCredentials provides a mock function with given fields: options
+func (_m *Client) SetCredentials(options core.SetCredentialsOptions) error {
+	ret := _m.Called(options)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(core.SetCredentialsOptions) error); ok {
+		r0 = rf(options)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // SetDefaultBuildImagePrefix provides a mock function with given fields: namespace, prefix
 func (_m *Client) SetDefaultBuildImagePrefix(namespace string, prefix string) error {
 	ret := _m.Called(namespace, prefix)

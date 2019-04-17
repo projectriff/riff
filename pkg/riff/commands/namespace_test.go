@@ -307,8 +307,7 @@ var _ = Describe("The riff namespace cleanup command", func() {
 			err := command.Execute()
 
 			Expect(err).To(BeNil())
-			s := outWriter.String()
-			Expect(s).To(HaveSuffix("cleanup completed successfully\n"))
+			Expect(outWriter.String()).To(HaveSuffix("cleanup completed successfully\n"))
 		})
 
 		It("should involve the kubectl client with the explicit remove-ns option", func() {
@@ -320,8 +319,7 @@ var _ = Describe("The riff namespace cleanup command", func() {
 			err := command.Execute()
 
 			Expect(err).To(BeNil())
-			s := outWriter.String()
-			Expect(s).To(HaveSuffix("cleanup completed successfully\n"))
+			Expect(outWriter.String()).To(HaveSuffix("cleanup completed successfully\n"))
 		})
 
 		It("should propagate kubectl client errors", func() {

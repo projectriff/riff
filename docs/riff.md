@@ -18,6 +18,7 @@ See https://projectriff.io and https://github.com/knative/docs
 ### SEE ALSO
 
 * [riff completion](riff_completion.md)	 - Generate shell completion scripts
+* [riff credentials](riff_credentials.md)	 - Interact with credentials related resources
 * [riff function](riff_function.md)	 - Interact with function related resources
 * [riff namespace](riff_namespace.md)	 - Manage namespaces used for riff resources
 * [riff service](riff_service.md)	 - Interact with service related resources
