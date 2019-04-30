@@ -3,6 +3,7 @@ package commands
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/core/mocks"
 	"github.com/spf13/cobra"
@@ -46,19 +47,19 @@ var _ = Describe("The riff credentials set command", func() {
 
 			err := command.Execute()
 
-			Expect(err).To(MatchError("accepts 1 arg(s), received 0"))
+			Expect(err).To(MatchError("flag --secret cannot be empty"))
 		})
 
-		It("should fail with extra args", func() {
-			command.SetArgs([]string{"secret", "unexpected-args"})
+		It("should fail with any args", func() {
+			command.SetArgs([]string{"--namespace", "ns", "unexpected-args"})
 
 			err := command.Execute()
 
-			Expect(err).To(MatchError("accepts 1 arg(s), received 2"))
+			Expect(err).To(MatchError("accepts 0 arg(s), received 1"))
 		})
 
 		It("should fail with an invalid namespace name", func() {
-			command.SetArgs([]string{"shhh", "--namespace", "inv@l1d!ns", "--gcr", "~/path/to/file", "--docker-hub", "alice"})
+			command.SetArgs([]string{"--secret", "shhh", "--namespace", "inv@l1d!ns", "--gcr", "~/path/to/file", "--docker-hub", "alice"})
 
 			err := command.Execute()
 
@@ -66,7 +67,7 @@ var _ = Describe("The riff credentials set command", func() {
 		})
 
 		It("should fail with conflicting options", func() {
-			command.SetArgs([]string{"shhh", "--namespace", "ns", "--gcr", "~/path/to/file", "--docker-hub", "alice", "--registry-user", "bob", "--registry", "http://example.com"})
+			command.SetArgs([]string{"--secret", "shhh", "--namespace", "ns", "--gcr", "~/path/to/file", "--docker-hub", "alice", "--registry-user", "bob", "--registry", "http://example.com"})
 
 			err := command.Execute()
 
@@ -74,7 +75,7 @@ var _ = Describe("The riff credentials set command", func() {
 		})
 
 		It("should fail if registry user is set without registry", func() {
-			command.SetArgs([]string{"shhh", "--namespace", "ns", "--registry-user", "bob"})
+			command.SetArgs([]string{"--secret", "shhh", "--namespace", "ns", "--registry-user", "bob"})
 
 			err := command.Execute()
 
@@ -82,7 +83,7 @@ var _ = Describe("The riff credentials set command", func() {
 		})
 
 		It("should fail if registry is set without registry user", func() {
-			command.SetArgs([]string{"shhh", "--namespace", "ns", "--registry", "http://example.com"})
+			command.SetArgs([]string{"--secret", "shhh", "--namespace", "ns", "--registry", "http://example.com"})
 
 			err := command.Execute()
 
@@ -90,7 +91,7 @@ var _ = Describe("The riff credentials set command", func() {
 		})
 
 		It("should fail if the registry protocol is not supported", func() {
-			command.SetArgs([]string{"shhh", "--namespace", "ns", "--registry", "ftp://example.com", "--registry-user", "alice"})
+			command.SetArgs([]string{"--secret", "shhh", "--namespace", "ns", "--registry", "ftp://example.com", "--registry-user", "alice"})
 
 			err := command.Execute()
 
@@ -98,18 +99,18 @@ var _ = Describe("The riff credentials set command", func() {
 		})
 
 		It("should fail if the secret name is blank", func() {
-			command.SetArgs([]string{"", "--namespace", "ns", "--registry", "http://example.com", "--registry-user", "alice"})
+			command.SetArgs([]string{"--secret", "", "--namespace", "ns", "--registry", "http://example.com", "--registry-user", "alice"})
 
 			err := command.Execute()
 
-			Expect(err).To(MatchError("argument cannot be empty"))
+			Expect(err).To(MatchError("flag --secret cannot be empty"))
 		})
 	})
 
 	Context("when given suitable args and flags", func() {
 
 		It("involves the client", func() {
-			command.SetArgs([]string{"s3cr3t", "--namespace", "ns", "--docker-hub", "janedoe"})
+			command.SetArgs([]string{"--secret", "s3cr3t", "--namespace", "ns", "--docker-hub", "janedoe"})
 			options := core.SetCredentialsOptions{
 				SecretName:    "s3cr3t",
 				NamespaceName: "ns",
@@ -124,7 +125,7 @@ var _ = Describe("The riff credentials set command", func() {
 		})
 
 		It("propagates the client errors", func() {
-			command.SetArgs([]string{"s3cr3t", "--namespace", "ns", "--docker-hub", "janedoe"})
+			command.SetArgs([]string{"--secret", "s3cr3t", "--namespace", "ns", "--docker-hub", "janedoe"})
 			expectedError := fmt.Errorf("oopsie")
 			clientMock.On("SetCredentials", mock.Anything).Return(expectedError)
 

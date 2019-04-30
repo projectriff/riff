@@ -7,8 +7,7 @@ import (
 )
 
 const (
-	secretNameIndex = iota
-	credentialsSetNumberOfArgs
+	credentialsSetNumberOfArgs = iota
 )
 
 func Credentials() *cobra.Command {
@@ -25,13 +24,11 @@ func CredentialsSet(c *core.Client) *cobra.Command {
 		Use:     "set",
 		Short:   "create or update secret and bind it to the " + env.Cli.Name + " service account",
 		Example: `  ` + env.Cli.Name + ` credentials set build-secret --namespace default --docker-hub johndoe`,
-		Args: ArgValidationConjunction(
-			cobra.ExactArgs(credentialsSetNumberOfArgs),
-			AtPosition(secretNameIndex, ArgNotBlank()),
-		),
+		Args:    cobra.ExactArgs(credentialsSetNumberOfArgs),
 		PreRunE: FlagsValidatorAsCobraRunE(
 			FlagsValidationConjunction(
 				FlagsDependency(Set("namespace"), ValidDnsSubdomain("namespace")),
+				NotBlank("secret"),
 				AtMostOneOf("gcr", "docker-hub", "registry-user"),
 				FlagsDependency(Set("registry-user"), NotBlank("registry")),
 				FlagsDependency(Set("registry"),
@@ -41,7 +38,6 @@ func CredentialsSet(c *core.Client) *cobra.Command {
 					}))),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			options.SecretName = args[secretNameIndex]
 			if err := (*c).SetCredentials(options); err != nil {
 				return err
 			}
