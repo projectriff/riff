@@ -26,6 +26,7 @@ jobs:
     matrix:
       minikube:
         imageName: ubuntu-16.04
+        qualifier: minikube
         cluster: minikube
         registry: minikube
   pool:
@@ -33,7 +34,7 @@ jobs:
   variables:
     CLUSTER:  '$(cluster)'
     REGISTRY: '$(registry)'
-    CLUSTER_NAME: 'riff-$(Build.BuildId)-$(Agent.JobName)'
+    CLUSTER_NAME: 'riff-$(Build.BuildId)-$(qualifier)'
     NAMESPACE: '$(CLUSTER_NAME)'
   condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
   steps:
@@ -73,14 +74,17 @@ jobs:
     matrix:
       minikube:
         imageName: ubuntu-16.04
+        qualifier: minikube
         cluster: minikube
         registry: dockerhub
       gke:
         imageName: ubuntu-16.04
+        qualifier: gke
         cluster: gke
         registry: gcr
       windows:
         imageName: windows-2019
+        qualifier: windows
         cluster: gke
         registry: gcr
   pool:
@@ -88,7 +92,7 @@ jobs:
   variables:
     CLUSTER:  '$(cluster)'
     REGISTRY: '$(registry)'
-    CLUSTER_NAME: 'riff-$(Build.BuildId)-$(Agent.JobName)'
+    CLUSTER_NAME: 'riff-$(Build.BuildId)-$(qualifier)'
     NAMESPACE: '$(CLUSTER_NAME)'
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   steps:
