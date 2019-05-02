@@ -23,6 +23,10 @@ type SetCredentialsOptions struct {
 	RegistryUser string
 }
 
+type ListCredentialsOptions struct {
+	NamespaceName string
+}
+
 func (o *SetCredentialsOptions) secretType() secretType {
 	switch {
 	case o.DockerHubId != "":
@@ -62,6 +66,16 @@ func (c *client) SetCredentials(options SetCredentialsOptions) error {
 		return err
 	}
 	return c.updateServiceAccount(namespace, secret.Name, serviceAccount)
+}
+
+func (c *client) ListCredentials(options ListCredentialsOptions) (*corev1.SecretList, error) {
+	namespace := c.explicitOrConfigNamespace(options.NamespaceName)
+	initLabelKeys := sortedKeysOf(getInitLabels())
+
+	fmt.Printf("Listing secrets matching label keys %v in namespace %q\n", initLabelKeys, namespace)
+	return c.kubeClient.CoreV1().Secrets(namespace).List(v1.ListOptions{
+		LabelSelector: existsSelectors(initLabelKeys),
+	})
 }
 
 func (c *client) convertDockerHubSecret(namespace, secret, username string, labels map[string]string) (*corev1.Secret, error) {

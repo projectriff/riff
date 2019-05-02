@@ -11,6 +11,7 @@ import (
 	mockkubectl "github.com/projectriff/riff/pkg/kubectl/mocks"
 	"github.com/stretchr/testify/mock"
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"reflect"
 )
 
@@ -23,19 +24,21 @@ var _ = Describe("credentials", func() {
 		mockCore            *vendor_mocks.CoreV1Interface
 		mockSecrets         *vendor_mocks.SecretInterface
 		mockServiceAccounts *vendor_mocks.ServiceAccountInterface
+		mockClientConfig    *vendor_mocks.ClientConfig
 	)
 
-	JustBeforeEach(func() {
+	BeforeEach(func() {
 		kubeClient = new(vendor_mocks.Interface)
 		kubeCtl = new(mockkubectl.KubeCtl)
 		mockCore = new(vendor_mocks.CoreV1Interface)
 		mockSecrets = new(vendor_mocks.SecretInterface)
 		mockServiceAccounts = new(vendor_mocks.ServiceAccountInterface)
+		mockClientConfig = new(vendor_mocks.ClientConfig)
 		kubeClient.On("CoreV1").Return(mockCore)
 		mockCore.On("ServiceAccounts", mock.Anything).Return(mockServiceAccounts)
 		mockCore.On("Secrets", mock.Anything).Return(mockSecrets)
 
-		client = core.NewClient(nil, kubeClient, nil, nil, kubeCtl, new(mockkustomize.Kustomizer))
+		client = core.NewClient(mockClientConfig, kubeClient, nil, nil, kubeCtl, new(mockkustomize.Kustomizer))
 	})
 
 	AfterEach(func() {
@@ -187,6 +190,32 @@ var _ = Describe("credentials", func() {
 			})
 
 			Expect(err).NotTo(HaveOccurred())
+		})
+	})
+
+	Describe("ListCredentials", func() {
+
+		BeforeEach(func() {
+			mockClientConfig.On("Namespace").Return("default", false, nil)
+		})
+
+		It("propagates the underlying client error", func() {
+			expectedError := fmt.Errorf("oopsie")
+			mockSecrets.On("List", mock.Anything).Return(nil, expectedError)
+
+			_, err := client.ListCredentials(core.ListCredentialsOptions{})
+
+			Expect(err).To(MatchError(expectedError))
+		})
+
+		It("returns the matching secrets", func() {
+			secrets := &v1.SecretList{}
+			mockSecrets.On("List", metav1.ListOptions{LabelSelector: "projectriff.io/installer,projectriff.io/version"}).Return(secrets, nil)
+
+			result, err := client.ListCredentials(core.ListCredentialsOptions{})
+
+			Expect(err).To(Not(HaveOccurred()))
+			Expect(result).To(Equal(secrets))
 		})
 	})
 })

@@ -3,11 +3,11 @@ package commands
 import (
 	"bytes"
 	"fmt"
-
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/core/mocks"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/mock"
+	v1 "k8s.io/api/core/v1"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -142,3 +142,101 @@ var _ = Describe("The riff credentials set command", func() {
 		})
 	})
 })
+
+var _ = Describe("The riff credentials list command", func() {
+
+	var (
+		outWriter  bytes.Buffer
+		client     core.Client
+		clientMock *mocks.Client
+		command    *cobra.Command
+	)
+
+	BeforeEach(func() {
+		client = new(mocks.Client)
+		clientMock = client.(*mocks.Client)
+		command = CredentialsList(&client)
+		command.SetOutput(&outWriter)
+	})
+
+	AfterEach(func() {
+		outWriter.Reset()
+		clientMock.AssertExpectations(GinkgoT())
+	})
+
+	It("should be documented", func() {
+		Expect(command.Use).To(Equal("list"))
+		Expect(command.Short).To(Not(BeEmpty()))
+		Expect(command.Example).To(Not(BeEmpty()))
+	})
+
+	Context("when given wrong args or flags", func() {
+
+		It("should fail with args", func() {
+			command.SetArgs([]string{"something"})
+
+			err := command.Execute()
+
+			Expect(err).To(MatchError("accepts 0 arg(s), received 1"))
+		})
+
+		It("should fail with an invalid namespace name", func() {
+			command.SetArgs([]string{"--namespace", "inv@l1d!ns"})
+
+			err := command.Execute()
+
+			Expect(err).To(MatchError("when --namespace is set, flag --namespace must be a valid DNS subdomain"))
+		})
+	})
+
+	const credentialsListOutput = `NAME 
+foo  
+bar  
+baz  
+`
+
+	Context("when given suitable args and flags", func() {
+		It("should list the credentials of the default namespace", func() {
+			command.SetArgs([]string{})
+			options := core.ListCredentialsOptions{}
+			clientMock.On("ListCredentials", options).Return(&v1.SecretList{
+				Items: []v1.Secret{secret("foo"), secret("bar"), secret("baz")},
+			}, nil)
+
+			err := command.Execute()
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(outWriter.String()).To(Equal(credentialsListOutput))
+		})
+
+		It("should list the credentials of the specified namespace", func() {
+			command.SetArgs([]string{"--namespace", "ns"})
+			options := core.ListCredentialsOptions{NamespaceName: "ns"}
+			clientMock.On("ListCredentials", options).Return(&v1.SecretList{
+				Items: []v1.Secret{secret("foo"), secret("bar"), secret("baz")},
+			}, nil)
+
+			err := command.Execute()
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(outWriter.String()).To(Equal(credentialsListOutput))
+		})
+
+		It("should propagate the client error", func() {
+			expectedError := fmt.Errorf("oopsie")
+			options := core.ListCredentialsOptions{}
+			clientMock.On("ListCredentials", options).Return(nil, expectedError)
+
+			err := command.Execute()
+
+			Expect(err).To(MatchError(expectedError))
+		})
+	})
+
+})
+
+func secret(name string) v1.Secret {
+	result := v1.Secret{}
+	result.Name = name
+	return result
+}

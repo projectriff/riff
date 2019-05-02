@@ -150,6 +150,29 @@ func (_m *Client) FetchPackConfig() (*core.PackConfig, error) {
 	return r0, r1
 }
 
+// ListCredentials provides a mock function with given fields: options
+func (_m *Client) ListCredentials(options core.ListCredentialsOptions) (*v1.SecretList, error) {
+	ret := _m.Called(options)
+
+	var r0 *v1.SecretList
+	if rf, ok := ret.Get(0).(func(core.ListCredentialsOptions) *v1.SecretList); ok {
+		r0 = rf(options)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1.SecretList)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(core.ListCredentialsOptions) error); ok {
+		r1 = rf(options)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListServices provides a mock function with given fields: options
 func (_m *Client) ListServices(options core.ListServiceOptions) (*v1alpha1.ServiceList, error) {
 	ret := _m.Called(options)

@@ -48,6 +48,7 @@ var _ = Describe("`riff` root command", func() {
 			errMsg := "`%s` should be wired to root command"
 			Expect(FindSubcommand(rootCommand, "credentials")).NotTo(BeNil(), fmt.Sprintf(errMsg, "credentials"))
 			Expect(FindSubcommand(rootCommand, "credentials", "set")).NotTo(BeNil(), fmt.Sprintf(errMsg, "credentials set"))
+			Expect(FindSubcommand(rootCommand, "credentials", "list")).NotTo(BeNil(), fmt.Sprintf(errMsg, "credentials list"))
 		})
 
 	})

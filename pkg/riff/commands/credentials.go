@@ -4,10 +4,15 @@ import (
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
+	"k8s.io/api/core/v1"
 )
 
 const (
 	credentialsSetNumberOfArgs = iota
+)
+
+const (
+	credentialsListNumberOfArgs = iota
 )
 
 func Credentials() *cobra.Command {
@@ -54,4 +59,47 @@ func CredentialsSet(c *core.Client) *cobra.Command {
 	command.Flags().StringVar(&options.RegistryUser, "registry-user", "", "registry username; password will be read from stdin")
 
 	return command
+}
+
+func CredentialsList(c *core.Client) *cobra.Command {
+	options := core.ListCredentialsOptions{}
+
+	command := &cobra.Command{
+		Use:   "list",
+		Short: "List credentials resources",
+		Example: `  ` + env.Cli.Name + ` credentials list
+  ` + env.Cli.Name + ` credentials list --namespace joseph-ns`,
+		Args: cobra.ExactArgs(credentialsListNumberOfArgs),
+		PreRunE: FlagsValidatorAsCobraRunE(
+			FlagsDependency(Set("namespace"), ValidDnsSubdomain("namespace")),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			credentialsList, err := (*c).ListCredentials(options)
+			if err != nil {
+				return err
+			}
+			Display(cmd.OutOrStdout(), secretToInterfaceSlice(credentialsList.Items), makeSecretExtractors())
+			return nil
+		},
+	}
+
+	command.Flags().StringVarP(&options.NamespaceName, "namespace", "n", "", "the `namespace` of the credentials to be listed")
+	return command
+}
+
+func secretToInterfaceSlice(items []v1.Secret) []interface{} {
+	result := make([]interface{}, len(items))
+	for i := range items {
+		result[i] = items[i]
+	}
+	return result
+}
+
+func makeSecretExtractors() []NamedExtractor {
+	return []NamedExtractor{
+		{
+			name: "NAME",
+			fn:   func(s interface{}) string { return s.(v1.Secret).Name },
+		},
+	}
 }

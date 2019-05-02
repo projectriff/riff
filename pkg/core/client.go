@@ -49,6 +49,7 @@ type Client interface {
 	NamespaceCleanup(options NamespaceCleanupOptions) error
 
 	SetCredentials(options SetCredentialsOptions) error
+	ListCredentials(options ListCredentialsOptions) (*corev1.SecretList, error)
 
 	// helpers
 	FetchPackConfig() (*PackConfig, error)

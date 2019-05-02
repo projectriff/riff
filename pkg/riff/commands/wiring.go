@@ -147,6 +147,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	installKubeConfigSupport(credentials, &client)
 	credentials.AddCommand(
 		CredentialsSet(&client),
+		CredentialsList(&client),
 	)
 
 	rootCmd.AddCommand(
