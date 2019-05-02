@@ -113,6 +113,20 @@ func (_m *Client) DefaultBuildImagePrefix(namespace string) (string, error) {
 	return r0, r1
 }
 
+// DeleteCredentials provides a mock function with given fields: options
+func (_m *Client) DeleteCredentials(options core.DeleteCredentialsOptions) error {
+	ret := _m.Called(options)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(core.DeleteCredentialsOptions) error); ok {
+		r0 = rf(options)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DeleteService provides a mock function with given fields: options
 func (_m *Client) DeleteService(options core.DeleteServiceOptions) error {
 	ret := _m.Called(options)

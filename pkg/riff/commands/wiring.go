@@ -148,6 +148,7 @@ See https://projectriff.io and https://github.com/knative/docs`,
 	credentials.AddCommand(
 		CredentialsSet(&client),
 		CredentialsList(&client),
+		CredentialsDelete(&client),
 	)
 
 	rootCmd.AddCommand(

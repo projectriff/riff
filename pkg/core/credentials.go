@@ -27,6 +27,11 @@ type ListCredentialsOptions struct {
 	NamespaceName string
 }
 
+type DeleteCredentialsOptions struct {
+	NamespaceName string
+	Name          string
+}
+
 func (o *SetCredentialsOptions) secretType() secretType {
 	switch {
 	case o.DockerHubId != "":
@@ -76,6 +81,11 @@ func (c *client) ListCredentials(options ListCredentialsOptions) (*corev1.Secret
 	return c.kubeClient.CoreV1().Secrets(namespace).List(v1.ListOptions{
 		LabelSelector: existsSelectors(initLabelKeys),
 	})
+}
+
+func (c *client) DeleteCredentials(options DeleteCredentialsOptions) error {
+	namespace := c.explicitOrConfigNamespace(options.NamespaceName)
+	return c.kubeClient.CoreV1().Secrets(namespace).Delete(options.Name, &v1.DeleteOptions{})
 }
 
 func (c *client) convertDockerHubSecret(namespace, secret, username string, labels map[string]string) (*corev1.Secret, error) {

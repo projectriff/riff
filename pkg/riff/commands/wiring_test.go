@@ -18,6 +18,7 @@ package commands_test
 
 import (
 	"fmt"
+	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -27,6 +28,7 @@ import (
 )
 
 var _ = Describe("`riff` root command", func() {
+
 	Context("should wire subcommands", func() {
 		var (
 			rootCommand *cobra.Command
@@ -38,19 +40,24 @@ var _ = Describe("`riff` root command", func() {
 		})
 
 		It("including `riff namespace`", func() {
-			errMsg := "`%s` should be wired to root command"
-			Expect(FindSubcommand(rootCommand, "namespace")).NotTo(BeNil(), fmt.Sprintf(errMsg, "namespace"))
-			Expect(FindSubcommand(rootCommand, "namespace", "init")).NotTo(BeNil(), fmt.Sprintf(errMsg, "namespace init"))
-			Expect(FindSubcommand(rootCommand, "namespace", "cleanup")).NotTo(BeNil(), fmt.Sprintf(errMsg, "namespace cleanup"))
+			expectSubcommandToBeWired(rootCommand, "namespace")
+			expectSubcommandToBeWired(rootCommand, "namespace", "init")
+			expectSubcommandToBeWired(rootCommand, "namespace", "cleanup")
 		})
 
 		It("including `riff credentials`", func() {
-			errMsg := "`%s` should be wired to root command"
-			Expect(FindSubcommand(rootCommand, "credentials")).NotTo(BeNil(), fmt.Sprintf(errMsg, "credentials"))
-			Expect(FindSubcommand(rootCommand, "credentials", "set")).NotTo(BeNil(), fmt.Sprintf(errMsg, "credentials set"))
-			Expect(FindSubcommand(rootCommand, "credentials", "list")).NotTo(BeNil(), fmt.Sprintf(errMsg, "credentials list"))
+			expectSubcommandToBeWired(rootCommand, "credentials")
+			expectSubcommandToBeWired(rootCommand, "credentials", "set")
+			expectSubcommandToBeWired(rootCommand, "credentials", "list")
+			expectSubcommandToBeWired(rootCommand, "credentials", "delete")
 		})
 
 	})
 
 })
+
+func expectSubcommandToBeWired(rootCommand *cobra.Command, subCommandParts ...string) {
+	Expect(FindSubcommand(rootCommand, subCommandParts...)).NotTo(
+		BeNil(),
+		fmt.Sprintf("`%s` should be wired to root command", strings.Join(subCommandParts, " ")))
+}

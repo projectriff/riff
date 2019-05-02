@@ -78,7 +78,7 @@ var _ = Describe("The cobra extensions", func() {
 			It("should fail if one argument is blank", func() {
 				command := &Command{
 					Use: "some-command",
-					Args: commands.AtPosition(0, commands.ArgNotBlank()),
+					Args: commands.AtPosition(0, commands.ArgNotBlank("some-resource")),
 					RunE: func(cmd *Command, args []string) error {
 						return nil
 					},
@@ -86,7 +86,7 @@ var _ = Describe("The cobra extensions", func() {
 				command.SetArgs([]string{" "})
 				command.SetOutput(ioutil.Discard)
 
-				Expect(command.Execute()).To(MatchError("argument cannot be empty"))
+				Expect(command.Execute()).To(MatchError("some-resource cannot be empty"))
 			})
 		})
 	})

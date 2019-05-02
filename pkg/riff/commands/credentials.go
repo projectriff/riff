@@ -1,7 +1,9 @@
 package commands
 
 import (
+	"fmt"
 	"github.com/projectriff/riff/pkg/core"
+	"github.com/projectriff/riff/pkg/core/tasks"
 	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
 	"k8s.io/api/core/v1"
@@ -13,6 +15,11 @@ const (
 
 const (
 	credentialsListNumberOfArgs = iota
+)
+
+const (
+	credentialsDeleteSecretNameStartIndex = iota
+	credentialsDeleteMinNumberOfArgs
 )
 
 func Credentials() *cobra.Command {
@@ -84,6 +91,50 @@ func CredentialsList(c *core.Client) *cobra.Command {
 	}
 
 	command.Flags().StringVarP(&options.NamespaceName, "namespace", "n", "", "the `namespace` of the credentials to be listed")
+	return command
+}
+
+type DeleteCredentialsCliOptions struct {
+	NamespaceName string
+}
+
+func CredentialsDelete(c *core.Client) *cobra.Command {
+	cliOptions := DeleteCredentialsCliOptions{}
+
+	command := &cobra.Command{
+		Use:   "delete",
+		Short: "Delete specified credentials",
+		Example: `  ` + env.Cli.Name + ` credentials delete secret1 secret2
+  ` + env.Cli.Name + ` credentials delete --namespace joseph-ns secret`,
+		Args: ArgValidationConjunction(
+			cobra.MinimumNArgs(credentialsDeleteMinNumberOfArgs),
+			StartingAtPosition(credentialsDeleteSecretNameStartIndex, ArgNotBlank("secret")),
+		),
+		PreRunE: FlagsValidatorAsCobraRunE(
+			FlagsDependency(Set("namespace"), ValidDnsSubdomain("namespace")),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			names := args[credentialsDeleteSecretNameStartIndex:]
+			results := tasks.ApplyInParallel(names, func(name string) error {
+				options := core.DeleteCredentialsOptions{NamespaceName: cliOptions.NamespaceName, Name: name}
+				return (*c).DeleteCredentials(options)
+			})
+			err := tasks.MergeResults(results, func(result tasks.CorrelatedResult) string {
+				err := result.Error
+				if err == nil {
+					return ""
+				}
+				return fmt.Sprintf("Unable to delete credentials %s: %v", result.Input, err)
+			})
+			if err != nil {
+				return err
+			}
+
+			PrintSuccessfulCompletion(cmd)
+			return nil
+		},
+	}
+	command.Flags().StringVarP(&cliOptions.NamespaceName, "namespace", "n", "", "the `namespace` of the credentials to be deleted")
 	return command
 }
 

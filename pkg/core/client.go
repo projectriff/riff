@@ -50,6 +50,7 @@ type Client interface {
 
 	SetCredentials(options SetCredentialsOptions) error
 	ListCredentials(options ListCredentialsOptions) (*corev1.SecretList, error)
+	DeleteCredentials(options DeleteCredentialsOptions) error
 
 	// helpers
 	FetchPackConfig() (*PackConfig, error)

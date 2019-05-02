@@ -1,27 +1,27 @@
-## riff credentials list
+## riff credentials delete
 
-List credentials resources
+Delete specified credentials
 
 ### Synopsis
 
-List credentials resources
+Delete specified credentials
 
 ```
-riff credentials list [flags]
+riff credentials delete [flags]
 ```
 
 ### Examples
 
 ```
-  riff credentials list
-  riff credentials list --namespace joseph-ns
+  riff credentials delete secret1 secret2
+  riff credentials delete --namespace joseph-ns secret
 ```
 
 ### Options
 
 ```
-  -h, --help                  help for list
-  -n, --namespace namespace   the namespace of the credentials to be listed
+  -h, --help                  help for delete
+  -n, --namespace namespace   the namespace of the credentials to be deleted
 ```
 
 ### Options inherited from parent commands

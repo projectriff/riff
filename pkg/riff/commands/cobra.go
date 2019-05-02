@@ -109,10 +109,10 @@ func ValidName() PositionalArg {
 	return KubernetesValidation(validation.IsDNS1123Subdomain)
 }
 
-func ArgNotBlank() PositionalArg {
+func ArgNotBlank(resourceName string) PositionalArg {
 	return func(cmd *cobra.Command, arg string) error {
 		if len(strings.TrimSpace(arg)) == 0 {
-			return fmt.Errorf("argument cannot be empty")
+			return fmt.Errorf("%s cannot be empty", resourceName)
 		}
 		return nil
 	}

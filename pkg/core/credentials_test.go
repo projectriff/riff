@@ -218,6 +218,30 @@ var _ = Describe("credentials", func() {
 			Expect(result).To(Equal(secrets))
 		})
 	})
+
+	Describe("DeleteCredentials", func() {
+
+		BeforeEach(func() {
+			mockClientConfig.On("Namespace").Return("default", false, nil)
+		})
+
+		It("propagates the underlying client error", func() {
+			expectedError := fmt.Errorf("oopsie")
+			mockSecrets.On("Delete", "secret", mock.Anything).Return(expectedError)
+
+			err := client.DeleteCredentials(core.DeleteCredentialsOptions{Name: "secret"})
+
+			Expect(err).To(MatchError(expectedError))
+		})
+
+		It("returns the underlying client result", func() {
+			mockSecrets.On("Delete", "secret", mock.Anything).Return(nil)
+
+			err := client.DeleteCredentials(core.DeleteCredentialsOptions{Name: "secret"})
+
+			Expect(err).To(Not(HaveOccurred()))
+		})
+	})
 })
 
 func andPredicates(predicates ...func(*v1.ServiceAccount) bool) func(*v1.ServiceAccount) bool {

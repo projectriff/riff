@@ -112,7 +112,7 @@ var _ = Describe("The riff credentials set command", func() {
 
 			err := command.Execute()
 
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 			Expect(outWriter.String()).To(HaveSuffix("set completed successfully\n"))
 		})
 
@@ -127,7 +127,7 @@ var _ = Describe("The riff credentials set command", func() {
 
 			err := command.Execute()
 
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 			Expect(outWriter.String()).To(HaveSuffix("set completed successfully\n"))
 		})
 
@@ -233,6 +233,98 @@ baz
 		})
 	})
 
+})
+
+var _ = Describe("The riff credentials delete command", func() {
+
+	var (
+		outWriter  bytes.Buffer
+		client     core.Client
+		clientMock *mocks.Client
+		command    *cobra.Command
+	)
+
+	BeforeEach(func() {
+		client = new(mocks.Client)
+		clientMock = client.(*mocks.Client)
+		command = CredentialsDelete(&client)
+		command.SetOutput(&outWriter)
+	})
+
+	AfterEach(func() {
+		outWriter.Reset()
+		clientMock.AssertExpectations(GinkgoT())
+	})
+
+	It("should be documented", func() {
+		Expect(command.Use).To(Equal("delete"))
+		Expect(command.Short).To(Not(BeEmpty()))
+		Expect(command.Example).To(Not(BeEmpty()))
+	})
+
+
+	Context("when given wrong args or flags", func() {
+		It("should fail without args", func() {
+			command.SetArgs([]string{"--namespace", "ns"})
+
+			err := command.Execute()
+
+			Expect(err).To(MatchError("requires at least 1 arg(s), only received 0"))
+		})
+
+		It("should fail if one of the secret names is blank", func() {
+			command.SetArgs([]string{"--namespace", "ns", "secret1", "", "secret3"})
+
+			err := command.Execute()
+
+			Expect(err).To(MatchError("secret cannot be empty\n"))
+		})
+
+		It("should fail with an invalid namespace name", func() {
+			command.SetArgs([]string{"--namespace", "inv@l1d!ns", "secret"})
+
+			err := command.Execute()
+
+			Expect(err).To(MatchError("when --namespace is set, flag --namespace must be a valid DNS subdomain"))
+		})
+	})
+
+
+	Context("when given suitable args and flags", func() {
+		It("should involve the client without any explicit namespace", func() {
+			command.SetArgs([]string{"secret1"})
+			options := core.DeleteCredentialsOptions{Name: "secret1"}
+			clientMock.On("DeleteCredentials", options).Return(nil)
+
+			err := command.Execute()
+
+			Expect(err).To(BeNil())
+			Expect(outWriter.String()).To(HaveSuffix("delete completed successfully\n"))
+		})
+
+		It("should involve the client with several secrets", func() {
+			command.SetArgs([]string{"secret1", "secret2", "secret3"})
+			clientMock.On("DeleteCredentials", core.DeleteCredentialsOptions{Name: "secret1"}).Return(nil)
+			clientMock.On("DeleteCredentials", core.DeleteCredentialsOptions{Name: "secret2"}).Return(nil)
+			clientMock.On("DeleteCredentials", core.DeleteCredentialsOptions{Name: "secret3"}).Return(nil)
+
+			err := command.Execute()
+
+			Expect(err).To(BeNil())
+			Expect(outWriter.String()).To(HaveSuffix("delete completed successfully\n"))
+		})
+
+		It("should propagate the client errors", func() {
+			command.SetArgs([]string{"secret1", "secret2", "secret3"})
+			clientMock.On("DeleteCredentials", core.DeleteCredentialsOptions{Name: "secret1"}).Return(nil)
+			clientMock.On("DeleteCredentials", core.DeleteCredentialsOptions{Name: "secret2"}).Return(fmt.Errorf("oopsie"))
+			clientMock.On("DeleteCredentials", core.DeleteCredentialsOptions{Name: "secret3"}).Return(fmt.Errorf("oh no"))
+
+			err := command.Execute()
+
+			Expect(err).To(MatchError("Unable to delete credentials secret2: oopsie\nUnable to delete credentials secret3: oh no"))
+		})
+	})
 })
 
 func secret(name string) v1.Secret {
