@@ -47,7 +47,7 @@ func CredentialsSet(c *core.Client) *cobra.Command {
 	}
 
 	command.Flags().StringVar(&options.NamespaceName, "namespace", "", "the `namespace` of the credentials to be added")
-	command.Flags().StringVarP(&options.SecretName, "secret", "s", "", "the name of a `secret` containing credentials for the image registry")
+	command.Flags().StringVarP(&options.SecretName, "secret", "s", "push-credentials", "the name of a `secret` containing credentials for the image registry")
 	command.Flags().StringVar(&options.GcrTokenPath, "gcr", "", "path to a file containing Google Container Registry credentials")
 	command.Flags().StringVar(&options.DockerHubId, "docker-hub", "", "Docker ID for authenticating with Docker Hub; password will be read from stdin")
 	command.Flags().StringVar(&options.Registry, "registry", "", "registry server host, scheme must be \"http\" or \"https\" (default \"https\")")

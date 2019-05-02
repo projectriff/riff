@@ -25,7 +25,7 @@ riff credentials set [flags]
       --namespace namespace    the namespace of the credentials to be added
       --registry string        registry server host, scheme must be "http" or "https" (default "https")
       --registry-user string   registry username; password will be read from stdin
-  -s, --secret secret          the name of a secret containing credentials for the image registry
+  -s, --secret secret          the name of a secret containing credentials for the image registry (default "push-credentials")
 ```
 
 ### Options inherited from parent commands

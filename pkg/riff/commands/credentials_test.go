@@ -42,8 +42,8 @@ var _ = Describe("The riff credentials set command", func() {
 
 	Context("when given wrong args or flags", func() {
 
-		It("should fail if the secret name is not set", func() {
-			command.SetArgs([]string{"--namespace", "ns", "--registry", "http://example.com", "--registry-user", "alice"})
+		It("should fail if the secret name is blank", func() {
+			command.SetArgs([]string{"--secret", "", "--namespace", "ns", "--registry", "http://example.com", "--registry-user", "alice"})
 
 			err := command.Execute()
 
@@ -97,14 +97,6 @@ var _ = Describe("The riff credentials set command", func() {
 
 			Expect(err).To(MatchError("when --registry is set, valid protocols are: \"http\", \"https\", found: \"ftp\""))
 		})
-
-		It("should fail if the secret name is blank", func() {
-			command.SetArgs([]string{"--secret", "", "--namespace", "ns", "--registry", "http://example.com", "--registry-user", "alice"})
-
-			err := command.Execute()
-
-			Expect(err).To(MatchError("flag --secret cannot be empty"))
-		})
 	})
 
 	Context("when given suitable args and flags", func() {
@@ -113,6 +105,21 @@ var _ = Describe("The riff credentials set command", func() {
 			command.SetArgs([]string{"--secret", "s3cr3t", "--namespace", "ns", "--docker-hub", "janedoe"})
 			options := core.SetCredentialsOptions{
 				SecretName:    "s3cr3t",
+				NamespaceName: "ns",
+				DockerHubId:   "janedoe",
+			}
+			clientMock.On("SetCredentials", options).Return(nil)
+
+			err := command.Execute()
+
+			Expect(err).To(BeNil())
+			Expect(outWriter.String()).To(HaveSuffix("set completed successfully\n"))
+		})
+
+		It("involves the client with the default secret name", func() {
+			command.SetArgs([]string{"--namespace", "ns", "--docker-hub", "janedoe"})
+			options := core.SetCredentialsOptions{
+				SecretName:    "push-credentials",
 				NamespaceName: "ns",
 				DockerHubId:   "janedoe",
 			}
