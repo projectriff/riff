@@ -190,7 +190,7 @@ func (c *client) determineImagePrefix(options *NamespaceInitOptions) (string, er
 	switch options.initSecretType() {
 	case secretTypeGcr:
 		if options.ImagePrefix == "" {
-			prefix, err := c.gcrImagePrefix(*options)
+			prefix, err := c.gcrImagePrefix(options.GcrTokenPath)
 			if err != nil {
 				return "", err
 			}
@@ -198,7 +198,7 @@ func (c *client) determineImagePrefix(options *NamespaceInitOptions) (string, er
 		}
 	case secretTypeDockerHub:
 		if options.ImagePrefix == "" {
-			return c.dockerHubImagePrefix(*options), nil
+			return c.dockerHubImagePrefix(options.DockerHubId), nil
 		}
 	}
 	return options.ImagePrefix, nil
@@ -289,12 +289,12 @@ func (c *client) checkSecretExists(options *NamespaceInitOptions) error {
 	return err
 }
 
-func (c *client) dockerHubImagePrefix(options NamespaceInitOptions) string {
-	return fmt.Sprintf("docker.io/%s", options.DockerHubId)
+func (c *client) dockerHubImagePrefix(dockerHubId string) string {
+	return fmt.Sprintf("docker.io/%s", dockerHubId)
 }
 
-func (c *client) gcrImagePrefix(options NamespaceInitOptions) (string, error) {
-	token, err := ioutil.ReadFile(options.GcrTokenPath)
+func (c *client) gcrImagePrefix(gcrTokenPath string) (string, error) {
+	token, err := ioutil.ReadFile(gcrTokenPath)
 	if err != nil {
 		return "", err
 	}

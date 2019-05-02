@@ -11,6 +11,7 @@ import (
 	mockkubectl "github.com/projectriff/riff/pkg/kubectl/mocks"
 	"github.com/stretchr/testify/mock"
 	v1 "k8s.io/api/core/v1"
+	"reflect"
 )
 
 var _ = Describe("credentials", func() {
@@ -57,21 +58,6 @@ var _ = Describe("credentials", func() {
 			})
 
 			Expect(err).To(MatchError(expectedError))
-		})
-
-		It("fails if the service account does not exist", func() {
-			mockSecrets.On("Get", secretName, mock.Anything).Return(nil, notFound())
-			secret := secret(secretName)
-			mockSecrets.On("Create", mock.MatchedBy(secretNamed(secretName))).Return(&secret, nil)
-			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
-
-			err := client.SetCredentials(core.SetCredentialsOptions{
-				NamespaceName: "ns",
-				SecretName:    secretName,
-				DockerHubId:   "janedoe",
-			})
-
-			Expect(err).To(MatchError(env.Cli.Name + ` service account not found. Please run "` + env.Cli.Name + ` namespace init" first`))
 		})
 
 		It("fails if the service account check fails", func() {
@@ -122,6 +108,21 @@ var _ = Describe("credentials", func() {
 			Expect(err).To(MatchError(expectedError))
 		})
 
+		It("fails to update the secret if the deletion fails", func() {
+			expectedError := fmt.Errorf("oopsie")
+			secret := secret(secretName)
+			mockSecrets.On("Get", secretName, mock.Anything).Return(&secret, nil)
+			mockSecrets.On("Delete", secretName, mock.Anything).Return(expectedError)
+
+			err := client.SetCredentials(core.SetCredentialsOptions{
+				NamespaceName: "ns",
+				SecretName:    secretName,
+				GcrTokenPath:  "fixtures/gcr-creds",
+			})
+
+			Expect(err).To(MatchError(expectedError))
+		})
+
 		It("successfully creates and binds the secret to the build service account", func() {
 			mockSecrets.On("Get", secretName, mock.Anything).Return(nil, notFound())
 			secret := secret(secretName)
@@ -143,21 +144,6 @@ var _ = Describe("credentials", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("fails to update the secret if the deletion fails", func() {
-			expectedError := fmt.Errorf("oopsie")
-			secret := secret(secretName)
-			mockSecrets.On("Get", secretName, mock.Anything).Return(&secret, nil)
-			mockSecrets.On("Delete", secretName, mock.Anything).Return(expectedError)
-
-			err := client.SetCredentials(core.SetCredentialsOptions{
-				NamespaceName: "ns",
-				SecretName:    secretName,
-				GcrTokenPath:  "fixtures/gcr-creds",
-			})
-
-			Expect(err).To(MatchError(expectedError))
-		})
-
 		It("successfully updates and binds the secret to the build service account", func() {
 			secret := secret(secretName)
 			mockSecrets.On("Get", secretName, mock.Anything).Return(&secret, nil)
@@ -168,6 +154,29 @@ var _ = Describe("credentials", func() {
 			mockServiceAccounts.On("Update",
 				mock.MatchedBy(andPredicates(
 					named(core.BuildServiceAccountName),
+					withSingleSecret(secretName),
+				))).Return(&serviceAccount, nil)
+
+			err := client.SetCredentials(core.SetCredentialsOptions{
+				NamespaceName: "ns",
+				SecretName:    secretName,
+				GcrTokenPath:  "fixtures/gcr-creds",
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("successfully updates and binds the secret to the newly created service account", func() {
+			secret := secret(secretName)
+			mockSecrets.On("Get", secretName, mock.Anything).Return(&secret, nil)
+			mockSecrets.On("Delete", secretName, mock.Anything).Return(nil)
+			mockSecrets.On("Create", mock.Anything).Return(&secret, nil)
+			serviceAccount := serviceAccount(core.BuildServiceAccountName)
+			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
+			mockServiceAccounts.On("Create",
+				mock.MatchedBy(andPredicates(
+					named(core.BuildServiceAccountName),
+					withLabels(map[string]string{"projectriff.io/installer": env.Cli.Name, "projectriff.io/version": env.Cli.Version}),
 					withSingleSecret(secretName),
 				))).Return(&serviceAccount, nil)
 
@@ -208,5 +217,11 @@ func withSingleSecret(secretName string) func(*v1.ServiceAccount) bool {
 func secretNamed(secretName string) func(*v1.Secret) bool {
 	return func(secret *v1.Secret) bool {
 		return secret.Name == secretName
+	}
+}
+
+func withLabels(labels map[string]string) func(*v1.ServiceAccount) bool {
+	return func(account *v1.ServiceAccount) bool {
+		return reflect.DeepEqual(labels, account.Labels)
 	}
 }

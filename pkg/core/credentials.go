@@ -3,7 +3,6 @@ package core
 import (
 	"bufio"
 	"fmt"
-	"github.com/projectriff/riff/pkg/env"
 	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	corev1 "k8s.io/api/core/v1"
@@ -57,7 +56,7 @@ func (c *client) SetCredentials(options SetCredentialsOptions) error {
 
 	serviceAccount, err := c.kubeClient.CoreV1().ServiceAccounts(namespace).Get(BuildServiceAccountName, v1.GetOptions{});
 	if errors.IsNotFound(err) {
-		return fmt.Errorf(`%[1]s service account not found. Please run "%[1]s namespace init" first`, env.Cli.Name)
+		return c.createServiceAccount(namespace, secret.Name, initLabels)
 	}
 	if err != nil {
 		return err
@@ -148,9 +147,19 @@ func (c *client) convertAdditionalSecret(options *SetCredentialsOptions, initLab
 	return nil, nil
 }
 
+func (c *client) createServiceAccount(namespace, secretName string, initLabels map[string]string) error {
+	serviceAccount := &corev1.ServiceAccount{}
+	serviceAccount.Name = BuildServiceAccountName
+	serviceAccount.Labels = initLabels
+	serviceAccount.Secrets = updatedSecrets(corev1.ObjectReference{Name: secretName}, serviceAccount.Secrets)
+
+	fmt.Printf("Creating serviceaccount %q with secret %q in namespace %q\n", serviceAccount.Name, secretName, namespace)
+	_, err := c.kubeClient.CoreV1().ServiceAccounts(namespace).Create(serviceAccount)
+	return err
+}
+
 func (c *client) updateServiceAccount(namespace, secretName string, serviceAccount *corev1.ServiceAccount) error {
-	newSecret := corev1.ObjectReference{Name: secretName}
-	serviceAccount.Secrets = updatedSecrets(newSecret, serviceAccount.Secrets)
+	serviceAccount.Secrets = updatedSecrets(corev1.ObjectReference{Name: secretName}, serviceAccount.Secrets)
 
 	fmt.Printf("Adding secret %q to serviceaccount %q in namespace %q\n", secretName, serviceAccount.Name, namespace)
 	_, err := c.kubeClient.CoreV1().ServiceAccounts(namespace).Update(serviceAccount)

@@ -17,5 +17,5 @@ Interact with credentials related resources
 ### SEE ALSO
 
 * [riff](riff.md)	 - Commands for creating and managing function resources
-* [riff credentials set](riff_credentials_set.md)	 - create or update secret and bind it to the riff service account
+* [riff credentials set](riff_credentials_set.md)	 - create or update secret and bind it to the riff service account (created if not found)
 

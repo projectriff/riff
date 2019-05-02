@@ -1,10 +1,10 @@
 ## riff credentials set
 
-create or update secret and bind it to the riff service account
+create or update secret and bind it to the riff service account (created if not found)
 
 ### Synopsis
 
-create or update secret and bind it to the riff service account
+create or update secret and bind it to the riff service account (created if not found)
 
 ```
 riff credentials set [flags]
