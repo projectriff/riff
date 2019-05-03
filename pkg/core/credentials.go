@@ -46,12 +46,12 @@ func (o *SetCredentialsOptions) secretType() secretType {
 }
 
 func (c *client) SetCredentials(options SetCredentialsOptions) error {
-	namespace := options.NamespaceName
+	namespace := c.explicitOrConfigNamespace(options.NamespaceName)
 	secret, err := c.kubeClient.CoreV1().Secrets(namespace).Get(options.SecretName, v1.GetOptions{})
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	}
-	if secret != nil {
+	if err == nil {
 		fmt.Printf("Deleting existing secret %q in namespace %q\n", secret.ObjectMeta.Name, namespace)
 		if err = c.kubeClient.CoreV1().Secrets(namespace).Delete(secret.Name, &v1.DeleteOptions{}); err != nil {
 			return err

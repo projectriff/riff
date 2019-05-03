@@ -13,7 +13,7 @@ riff credentials set [flags]
 ### Examples
 
 ```
-  riff credentials set build-secret --namespace default --docker-hub johndoe
+  riff credentials set --secret mysecret --namespace default --docker-hub johndoe
 ```
 
 ### Options

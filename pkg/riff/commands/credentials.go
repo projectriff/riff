@@ -35,7 +35,7 @@ func CredentialsSet(c *core.Client) *cobra.Command {
 	command := &cobra.Command{
 		Use:     "set",
 		Short:   "create or update secret and bind it to the " + env.Cli.Name + " service account (created if not found)",
-		Example: `  ` + env.Cli.Name + ` credentials set build-secret --namespace default --docker-hub johndoe`,
+		Example: `  ` + env.Cli.Name + ` credentials set --secret mysecret --namespace default --docker-hub johndoe`,
 		Args:    cobra.ExactArgs(credentialsSetNumberOfArgs),
 		PreRunE: FlagsValidatorAsCobraRunE(
 			FlagsValidationConjunction(
