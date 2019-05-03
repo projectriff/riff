@@ -91,6 +91,7 @@ func (c *client) buildConfigMap(namespace string) (*core_v1.ConfigMap, error) {
 			ObjectMeta: meta_v1.ObjectMeta{
 				Name:      BuildConfigMapName,
 				Namespace: ns,
+				// TODO: extract these labels into a parameter
 				Labels: map[string]string{
 					"projectriff.io/installer": env.Cli.Name,
 					"projectriff.io/version":   env.Cli.Version,
