@@ -121,7 +121,7 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{}
 			options.EnvFrom = []string{}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil, nil)
+			asMock.On("CreateFunction", mock.Anything, builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -141,7 +141,7 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{}
 			options.EnvFrom = []string{}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil, nil)
+			asMock.On("CreateFunction", mock.Anything, builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -158,7 +158,7 @@ var _ = Describe("The riff function create command", func() {
 			options.EnvFrom = []string{}
 
 			asMock.On("DefaultBuildImagePrefix", "").Return("defaulted-prefix", nil)
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("defaulted-prefix/square"), nil, nil, nil)
+			asMock.On("CreateFunction", mock.Anything, builder, options, mock.Anything).Return(svcWithBuiltImage("defaulted-prefix/square"), nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 			Expect(output.String()).To(ContainSubstring("Applied default --image=\"defaulted-prefix/square\""))
@@ -176,7 +176,7 @@ var _ = Describe("The riff function create command", func() {
 			options.EnvFrom = []string{}
 
 			asMock.On("DefaultBuildImagePrefix", "").Return("defaulted-prefix", nil)
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("defaulted-prefix/square-custom"), nil, nil, nil)
+			asMock.On("CreateFunction", mock.Anything, builder, options, mock.Anything).Return(svcWithBuiltImage("defaulted-prefix/square-custom"), nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 			Expect(output.String()).To(ContainSubstring("Applied default --image=\"defaulted-prefix/square-custom\""))
@@ -185,7 +185,7 @@ var _ = Describe("The riff function create command", func() {
 			fc.SetArgs([]string{"square", "--image", "foo/bar", "--git-repo", "https://github.com/repo"})
 
 			e := fmt.Errorf("some error")
-			asMock.On("CreateFunction", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, nil, e)
+			asMock.On("CreateFunction", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, nil, e)
 			err := fc.Execute()
 			Expect(err).To(MatchError(e))
 		})
@@ -211,7 +211,7 @@ var _ = Describe("The riff function create command", func() {
 			options.Env = []string{"FOO=bar", "BAZ=qux"}
 			options.EnvFrom = []string{"secretKeyRef:foo:bar"}
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil, nil)
+			asMock.On("CreateFunction", mock.Anything, builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -232,7 +232,7 @@ var _ = Describe("The riff function create command", func() {
 			f.Name = "square"
 			cache := corev1.PersistentVolumeClaim{}
 			cache.Name = "square-build-cache"
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(&f, nil, &cache, nil)
+			asMock.On("CreateFunction", mock.Anything, builder, options, mock.Anything).Return(&f, nil, &cache, nil)
 
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
@@ -254,7 +254,7 @@ var _ = Describe("The riff function create command", func() {
 			function.Name = "square"
 			cache := corev1.PersistentVolumeClaim{}
 			cache.Name = "square-build-cache"
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(function, nil, &cache, nil)
+			asMock.On("CreateFunction", mock.Anything, builder, options, mock.Anything).Return(function, nil, &cache, nil)
 
 			err := fc.Execute()
 
@@ -280,7 +280,7 @@ var _ = Describe("The riff function create command", func() {
 			cache := corev1.PersistentVolumeClaim{}
 			cache.Name = "square-build-cache"
 			cache.Namespace = "ns"
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(function, nil, &cache, nil)
+			asMock.On("CreateFunction", mock.Anything, builder, options, mock.Anything).Return(function, nil, &cache, nil)
 
 			err := fc.Execute()
 
@@ -301,7 +301,7 @@ var _ = Describe("The riff function create command", func() {
 			options.EnvFrom = []string{}
 			options.Verbose = true
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil, nil)
+			asMock.On("CreateFunction", mock.Anything, builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), nil, nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 			Expect(output.String()).ToNot(ContainSubstring("Deployed image"))
@@ -320,7 +320,7 @@ var _ = Describe("The riff function create command", func() {
 			options.EnvFrom = []string{}
 			options.Verbose = true
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), revisionWithBuiltImage("foo/bar", "deadbeef"), nil, nil)
+			asMock.On("CreateFunction", mock.Anything, builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), revisionWithBuiltImage("foo/bar", "deadbeef"), nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 			Expect(output.String()).To(ContainSubstring("Deployed image \"foo/bar@sha256:deadbeef\"\n"))
@@ -339,7 +339,7 @@ var _ = Describe("The riff function create command", func() {
 			options.EnvFrom = []string{}
 			options.Verbose = true
 
-			asMock.On("CreateFunction", builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), revisionWithBuiltImage("foo/bar", ""), nil, nil)
+			asMock.On("CreateFunction", mock.Anything, builder, options, mock.Anything).Return(svcWithBuiltImage("foo/bar"), revisionWithBuiltImage("foo/bar", ""), nil, nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 			Expect(output.String()).To(ContainSubstring("Deployed image \"foo/bar\"\n"))
@@ -413,7 +413,7 @@ var _ = Describe("The riff function update command", func() {
 			options.Name = "square"
 			options.Namespace = "ns"
 
-			clientMock.On("UpdateFunction", builder, options, mock.Anything).Return(nil)
+			clientMock.On("UpdateFunction", mock.Anything, builder, options, mock.Anything).Return(nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -421,7 +421,7 @@ var _ = Describe("The riff function update command", func() {
 			fc.SetArgs([]string{"square", "--namespace", "ns"})
 
 			e := fmt.Errorf("some error")
-			clientMock.On("UpdateFunction", mock.Anything, mock.Anything, mock.Anything).Return(e)
+			clientMock.On("UpdateFunction", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(e)
 			err := fc.Execute()
 			Expect(err).To(MatchError(e))
 		})
@@ -487,7 +487,7 @@ var _ = Describe("The riff function build command", func() {
 				Image: "foo/bar",
 			}
 
-			asMock.On("BuildFunction", builder, options, mock.Anything).Return(nil)
+			asMock.On("BuildFunction", mock.Anything, builder, options, mock.Anything).Return(nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -502,7 +502,7 @@ var _ = Describe("The riff function build command", func() {
 				Image: "foo/bar",
 			}
 
-			asMock.On("BuildFunction", builder, options, mock.Anything).Return(nil)
+			asMock.On("BuildFunction", mock.Anything, builder, options, mock.Anything).Return(nil)
 			err := fc.Execute()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -510,7 +510,7 @@ var _ = Describe("The riff function build command", func() {
 			fc.SetArgs([]string{"--image", "foo/bar", "--local-path", "."})
 
 			e := fmt.Errorf("some error")
-			asMock.On("BuildFunction", mock.Anything, mock.Anything, mock.Anything).Return(e)
+			asMock.On("BuildFunction", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(e)
 			err := fc.Execute()
 			Expect(err).To(MatchError(e))
 		})

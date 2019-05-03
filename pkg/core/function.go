@@ -69,7 +69,7 @@ type CreateFunctionOptions struct {
 	SubPath     string
 }
 
-func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, *v1alpha1.Revision, *corev1.PersistentVolumeClaim, error) {
+func (c *client) CreateFunction(ctx context.Context, buildpackBuilder Builder, options CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, *v1alpha1.Revision, *corev1.PersistentVolumeClaim, error) {
 	var buildCache *corev1.PersistentVolumeClaim
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 	functionName := options.Name
@@ -102,7 +102,7 @@ func (c *client) CreateFunction(buildpackBuilder Builder, options CreateFunction
 			// skip build for a dry run
 			log.Write([]byte("Skipping local build\n"))
 		} else {
-			if err := c.doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions, log); err != nil {
+			if err := c.doBuildLocally(ctx, buildpackBuilder, options.Image, options.BuildOptions, log); err != nil {
 				return nil, nil, nil, err
 			}
 		}
@@ -550,7 +550,7 @@ func (c *client) getServiceSpecGeneration(namespace string, name string) (int64,
 	return s.Generation, nil
 }
 
-func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunctionOptions, log io.Writer) error {
+func (c *client) UpdateFunction(ctx context.Context, buildpackBuilder Builder, options UpdateFunctionOptions, log io.Writer) error {
 	ns := c.explicitOrConfigNamespace(options.Namespace)
 
 	service, err := c.service(ns, options.Name)
@@ -591,7 +591,7 @@ func (c *client) UpdateFunction(buildpackBuilder Builder, options UpdateFunction
 			return fmt.Errorf("local-path must be specified to rebuild function from source")
 		}
 
-		err := c.doBuildLocally(buildpackBuilder, repoName, localBuild, log)
+		err := c.doBuildLocally(ctx, buildpackBuilder, repoName, localBuild, log)
 		if err != nil {
 			return err
 		}
@@ -650,11 +650,11 @@ type BuildFunctionOptions struct {
 	Image string
 }
 
-func (c *client) BuildFunction(buildpackBuilder Builder, options BuildFunctionOptions, log io.Writer) error {
-	return c.doBuildLocally(buildpackBuilder, options.Image, options.BuildOptions, log)
+func (c *client) BuildFunction(ctx context.Context, buildpackBuilder Builder, options BuildFunctionOptions, log io.Writer) error {
+	return c.doBuildLocally(ctx, buildpackBuilder, options.Image, options.BuildOptions, log)
 }
 
-func (c *client) doBuildLocally(builder Builder, image string, options BuildOptions, log io.Writer) error {
+func (c *client) doBuildLocally(ctx context.Context, builder Builder, image string, options BuildOptions, log io.Writer) error {
 	if options.BuildpackImage == "" || options.RunImage == "" {
 		config, err := c.FetchPackConfig()
 		if err != nil {
@@ -663,5 +663,5 @@ func (c *client) doBuildLocally(builder Builder, image string, options BuildOpti
 		options.BuildpackImage = config.BuilderImage
 		options.RunImage = config.RunImage
 	}
-	return builder.Build(image, options, log)
+	return builder.Build(ctx, image, options, log)
 }

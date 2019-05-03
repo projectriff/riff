@@ -17,6 +17,7 @@
 package core
 
 import (
+	"context"
 	"io"
 
 	build_cs "github.com/knative/build/pkg/client/clientset/versioned"
@@ -31,9 +32,9 @@ import (
 )
 
 type Client interface {
-	CreateFunction(builder Builder, options CreateFunctionOptions, log io.Writer) (*serving.Service, *serving.Revision, *corev1.PersistentVolumeClaim, error)
-	UpdateFunction(builder Builder, options UpdateFunctionOptions, log io.Writer) error
-	BuildFunction(builder Builder, options BuildFunctionOptions, log io.Writer) error
+	CreateFunction(ctx context.Context, builder Builder, options CreateFunctionOptions, log io.Writer) (*serving.Service, *serving.Revision, *corev1.PersistentVolumeClaim, error)
+	UpdateFunction(ctx context.Context, builder Builder, options UpdateFunctionOptions, log io.Writer) error
+	BuildFunction(ctx context.Context, builder Builder, options BuildFunctionOptions, log io.Writer) error
 
 	ListServices(options ListServiceOptions) (*serving.ServiceList, error)
 	CreateService(options CreateOrUpdateServiceOptions) (*serving.Service, error)
@@ -55,7 +56,7 @@ type Client interface {
 }
 
 type Builder interface {
-	Build(repoName string, options BuildOptions, log io.Writer) error
+	Build(ctx context.Context, repoName string, options BuildOptions, log io.Writer) error
 }
 
 type client struct {

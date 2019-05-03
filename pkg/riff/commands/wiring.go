@@ -24,19 +24,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pivotal/go-ape/pkg/furl"
-	"github.com/projectriff/riff/pkg/kubectl"
-
-	lcimg "github.com/buildpack/lifecycle/image"
 	"github.com/buildpack/pack"
-	"github.com/buildpack/pack/cache"
-	"github.com/buildpack/pack/docker"
+	"github.com/buildpack/pack/config"
 	"github.com/buildpack/pack/logging"
 	kbuild "github.com/knative/build/pkg/client/clientset/versioned"
 	kserving "github.com/knative/serving/pkg/client/clientset/versioned"
+	"github.com/pivotal/go-ape/pkg/furl"
 	"github.com/projectriff/riff/pkg/core"
 	"github.com/projectriff/riff/pkg/core/kustomize"
 	"github.com/projectriff/riff/pkg/env"
+	"github.com/projectriff/riff/pkg/kubectl"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -209,57 +206,33 @@ func installKubeConfigSupport(command *cobra.Command, client *core.Client) {
 
 type buildpackBuilder struct{}
 
-func (*buildpackBuilder) Build(repoName string, options core.BuildOptions, log io.Writer) error {
-	ctx := context.TODO()
-	appDir := options.LocalPath
-	builderImage := options.BuildpackImage
-	runImage := options.RunImage
-	publish := true
-	clearCache := false
-	outWriter := log
-	errWriter := log
-	// NOTE below this line is copied directly from github.com/buildpack/pack.Build, once pack offers a proper client we can consume it
-	// TODO: Receive Cache as an argument of this function
-	dockerClient, err := docker.New()
+func (*buildpackBuilder) client(log io.Writer) (*pack.Client, error) {
+	config, err := config.NewDefault()
+	if err != nil {
+		return nil, err
+	}
+	return pack.DefaultClient(config, logging.NewLogger(log, log, true, true))
+}
+
+func (b *buildpackBuilder) Build(ctx context.Context, repoName string, options core.BuildOptions, log io.Writer) error {
+	client, err := b.client(log)
 	if err != nil {
 		return err
 	}
-	c, err := cache.New(repoName, dockerClient)
-	if err != nil {
-		return err
-	}
-	imageFactory, err := lcimg.NewFactory(lcimg.WithOutWriter(outWriter))
-	if err != nil {
-		return err
-	}
-	imageFetcher := &pack.ImageFetcher{
-		Factory: imageFactory,
-		Docker:  dockerClient,
-	}
-	logger := logging.NewLogger(outWriter, errWriter, true, false)
-	bf, err := pack.DefaultBuildFactory(logger, c, dockerClient, imageFetcher)
-	if err != nil {
-		return err
-	}
-	b, err := bf.BuildConfigFromFlags(ctx,
-		&pack.BuildFlags{
-			AppDir:     appDir,
-			Builder:    builderImage,
-			RunImage:   runImage,
-			RepoName:   repoName,
-			Publish:    publish,
-			ClearCache: clearCache,
-			// riff: add Env support
-			Env: []string{
-				fmt.Sprintf("%s=%s", "RIFF", "true"),
-				fmt.Sprintf("%s=%s", "RIFF_ARTIFACT", options.Artifact),
-				fmt.Sprintf("%s=%s", "RIFF_HANDLER", options.Handler),
-				fmt.Sprintf("%s=%s", "RIFF_OVERRIDE", options.Invoker),
-			},
-			// /riff
-		})
-	if err != nil {
-		return err
-	}
-	return b.Run(ctx)
+
+	return client.Build(ctx, pack.BuildOptions{
+		AppDir:   options.LocalPath,
+		Builder:  options.BuildpackImage,
+		RunImage: options.RunImage,
+		Env: map[string]string{
+			"RIFF":          "true",
+			"RIFF_ARTIFACT": options.Artifact,
+			"RIFF_HANDLER":  options.Handler,
+			"RIFF_OVERRIDE": options.Invoker,
+		},
+		Image:      repoName,
+		Publish:    true,
+		NoPull:     false,
+		ClearCache: false,
+	})
 }

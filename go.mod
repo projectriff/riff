@@ -4,8 +4,7 @@ require (
 	github.com/boz/go-logutil v0.0.0-20170814044541-9d21a9e4757d
 	github.com/boz/kail v0.6.0
 	github.com/boz/kcache v0.0.0-20171103002618-fb1338d32301
-	github.com/buildpack/lifecycle v0.0.0-20190327221653-eecd1c5c1b4c
-	github.com/buildpack/pack v0.1.0
+	github.com/buildpack/pack v0.1.1-0.20190502210008-8ee1cf5bb284
 	github.com/frioux/shellquote v0.0.1
 	github.com/ghodss/yaml v1.0.0
 	github.com/knative/build v0.5.0

@@ -2,6 +2,7 @@
 
 package mocks
 
+import context "context"
 import core "github.com/projectriff/riff/pkg/core"
 import duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 import io "io"
@@ -14,13 +15,13 @@ type Client struct {
 	mock.Mock
 }
 
-// BuildFunction provides a mock function with given fields: builder, options, log
-func (_m *Client) BuildFunction(builder core.Builder, options core.BuildFunctionOptions, log io.Writer) error {
-	ret := _m.Called(builder, options, log)
+// BuildFunction provides a mock function with given fields: ctx, builder, options, log
+func (_m *Client) BuildFunction(ctx context.Context, builder core.Builder, options core.BuildFunctionOptions, log io.Writer) error {
+	ret := _m.Called(ctx, builder, options, log)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(core.Builder, core.BuildFunctionOptions, io.Writer) error); ok {
-		r0 = rf(builder, options, log)
+	if rf, ok := ret.Get(0).(func(context.Context, core.Builder, core.BuildFunctionOptions, io.Writer) error); ok {
+		r0 = rf(ctx, builder, options, log)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -28,13 +29,13 @@ func (_m *Client) BuildFunction(builder core.Builder, options core.BuildFunction
 	return r0
 }
 
-// CreateFunction provides a mock function with given fields: builder, options, log
-func (_m *Client) CreateFunction(builder core.Builder, options core.CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, *v1alpha1.Revision, *v1.PersistentVolumeClaim, error) {
-	ret := _m.Called(builder, options, log)
+// CreateFunction provides a mock function with given fields: ctx, builder, options, log
+func (_m *Client) CreateFunction(ctx context.Context, builder core.Builder, options core.CreateFunctionOptions, log io.Writer) (*v1alpha1.Service, *v1alpha1.Revision, *v1.PersistentVolumeClaim, error) {
+	ret := _m.Called(ctx, builder, options, log)
 
 	var r0 *v1alpha1.Service
-	if rf, ok := ret.Get(0).(func(core.Builder, core.CreateFunctionOptions, io.Writer) *v1alpha1.Service); ok {
-		r0 = rf(builder, options, log)
+	if rf, ok := ret.Get(0).(func(context.Context, core.Builder, core.CreateFunctionOptions, io.Writer) *v1alpha1.Service); ok {
+		r0 = rf(ctx, builder, options, log)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha1.Service)
@@ -42,8 +43,8 @@ func (_m *Client) CreateFunction(builder core.Builder, options core.CreateFuncti
 	}
 
 	var r1 *v1alpha1.Revision
-	if rf, ok := ret.Get(1).(func(core.Builder, core.CreateFunctionOptions, io.Writer) *v1alpha1.Revision); ok {
-		r1 = rf(builder, options, log)
+	if rf, ok := ret.Get(1).(func(context.Context, core.Builder, core.CreateFunctionOptions, io.Writer) *v1alpha1.Revision); ok {
+		r1 = rf(ctx, builder, options, log)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(*v1alpha1.Revision)
@@ -51,8 +52,8 @@ func (_m *Client) CreateFunction(builder core.Builder, options core.CreateFuncti
 	}
 
 	var r2 *v1.PersistentVolumeClaim
-	if rf, ok := ret.Get(2).(func(core.Builder, core.CreateFunctionOptions, io.Writer) *v1.PersistentVolumeClaim); ok {
-		r2 = rf(builder, options, log)
+	if rf, ok := ret.Get(2).(func(context.Context, core.Builder, core.CreateFunctionOptions, io.Writer) *v1.PersistentVolumeClaim); ok {
+		r2 = rf(ctx, builder, options, log)
 	} else {
 		if ret.Get(2) != nil {
 			r2 = ret.Get(2).(*v1.PersistentVolumeClaim)
@@ -60,8 +61,8 @@ func (_m *Client) CreateFunction(builder core.Builder, options core.CreateFuncti
 	}
 
 	var r3 error
-	if rf, ok := ret.Get(3).(func(core.Builder, core.CreateFunctionOptions, io.Writer) error); ok {
-		r3 = rf(builder, options, log)
+	if rf, ok := ret.Get(3).(func(context.Context, core.Builder, core.CreateFunctionOptions, io.Writer) error); ok {
+		r3 = rf(ctx, builder, options, log)
 	} else {
 		r3 = ret.Error(3)
 	}
@@ -308,13 +309,13 @@ func (_m *Client) SystemUninstall(options core.SystemUninstallOptions) (bool, er
 	return r0, r1
 }
 
-// UpdateFunction provides a mock function with given fields: builder, options, log
-func (_m *Client) UpdateFunction(builder core.Builder, options core.UpdateFunctionOptions, log io.Writer) error {
-	ret := _m.Called(builder, options, log)
+// UpdateFunction provides a mock function with given fields: ctx, builder, options, log
+func (_m *Client) UpdateFunction(ctx context.Context, builder core.Builder, options core.UpdateFunctionOptions, log io.Writer) error {
+	ret := _m.Called(ctx, builder, options, log)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(core.Builder, core.UpdateFunctionOptions, io.Writer) error); ok {
-		r0 = rf(builder, options, log)
+	if rf, ok := ret.Get(0).(func(context.Context, core.Builder, core.UpdateFunctionOptions, io.Writer) error); ok {
+		r0 = rf(ctx, builder, options, log)
 	} else {
 		r0 = ret.Error(0)
 	}

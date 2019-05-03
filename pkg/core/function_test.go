@@ -17,6 +17,7 @@
 package core_test
 
 import (
+	"context"
 	"io/ioutil"
 
 	build "github.com/knative/build/pkg/apis/build/v1alpha1"
@@ -102,7 +103,7 @@ var _ = Describe("Function", func() {
 		)
 
 		JustBeforeEach(func() {
-			service, revision, cache, err = client.CreateFunction(mockBuilder, createFunctionOptions, ioutil.Discard)
+			service, revision, cache, err = client.CreateFunction(context.TODO(), mockBuilder, createFunctionOptions, ioutil.Discard)
 		})
 
 		Context("when building locally", func() {
@@ -121,7 +122,7 @@ var _ = Describe("Function", func() {
 
 			BeforeEach(func() {
 				createFunctionOptions.LocalPath = workDir
-				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			})
 
 			Context("when buildpack and run images are provided", func() {
@@ -198,7 +199,7 @@ var _ = Describe("Function", func() {
 		})
 
 		JustBeforeEach(func() {
-			err = client.UpdateFunction(mockBuilder, updateFunctionOptions, ioutil.Discard)
+			err = client.UpdateFunction(context.TODO(), mockBuilder, updateFunctionOptions, ioutil.Discard)
 		})
 
 		Context("when building locally", func() {
@@ -217,7 +218,7 @@ var _ = Describe("Function", func() {
 					},
 				}
 				updateFunctionOptions.LocalPath = workDir
-				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			})
 
 			It("should succeed", func() {
@@ -265,13 +266,13 @@ var _ = Describe("Function", func() {
 		)
 
 		JustBeforeEach(func() {
-			err = client.BuildFunction(mockBuilder, buildFunctionOptions, ioutil.Discard)
+			err = client.BuildFunction(context.TODO(), mockBuilder, buildFunctionOptions, ioutil.Discard)
 		})
 
 		Context("when building locally", func() {
 			BeforeEach(func() {
 				buildFunctionOptions.LocalPath = workDir
-				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			})
 
 			It("should succeed", func() {

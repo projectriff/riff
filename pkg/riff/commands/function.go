@@ -17,6 +17,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -99,10 +100,12 @@ func FunctionCreate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.C
 			AtPosition(functionCreateFunctionNameIndex, ValidName()),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+
 			fnName := args[functionCreateFunctionNameIndex]
 
 			createFunctionOptions.Name = fnName
-			f, r, pvc, err := (*fcTool).CreateFunction(buildpackBuilder, createFunctionOptions, cmd.OutOrStdout())
+			f, r, pvc, err := (*fcTool).CreateFunction(ctx, buildpackBuilder, createFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err
 			}
@@ -171,11 +174,12 @@ func FunctionUpdate(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.C
 			AtPosition(functionUpdateFunctionNameIndex, ValidName()),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
 
 			fnName := args[functionUpdateFunctionNameIndex]
 
 			updateFunctionOptions.Name = fnName
-			err := (*fcTool).UpdateFunction(buildpackBuilder, updateFunctionOptions, cmd.OutOrStdout())
+			err := (*fcTool).UpdateFunction(ctx, buildpackBuilder, updateFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err
 			}
@@ -204,7 +208,9 @@ func FunctionBuild(buildpackBuilder core.Builder, fcTool *core.Client) *cobra.Co
 		Short: "Build a function container from local source",
 		Args:  cobra.ExactArgs(functionBuildNumberOfArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := (*fcTool).BuildFunction(buildpackBuilder, buildFunctionOptions, cmd.OutOrStdout())
+			ctx := context.Background()
+
+			err := (*fcTool).BuildFunction(ctx, buildpackBuilder, buildFunctionOptions, cmd.OutOrStdout())
 			if err != nil {
 				return err
 			}
