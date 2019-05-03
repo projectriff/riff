@@ -140,6 +140,21 @@ var _ = Describe("The riff credentials set command", func() {
 
 			Expect(err).To(MatchError(expectedError))
 		})
+
+		It("should involve the client with https as default protocol for registry", func() {
+			command.SetArgs([]string{"--secret", "secret", "--registry", "registry.example.com", "--registry-user", "johndoe"})
+			options := core.SetCredentialsOptions{
+				Registry:     "https://registry.example.com",
+				RegistryUser: "johndoe",
+				SecretName:   "secret",
+			}
+			clientMock.On("SetCredentials", options).Return(nil)
+
+			err := command.Execute()
+
+			Expect(err).To(BeNil())
+			Expect(outWriter.String()).To(HaveSuffix("set completed successfully\n"))
+		})
 	})
 })
 

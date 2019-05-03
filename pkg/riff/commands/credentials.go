@@ -7,6 +7,7 @@ import (
 	"github.com/projectriff/riff/pkg/env"
 	"github.com/spf13/cobra"
 	"k8s.io/api/core/v1"
+	"strings"
 )
 
 const (
@@ -50,6 +51,10 @@ func CredentialsSet(c *core.Client) *cobra.Command {
 					}))),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if options.Registry != "" && !strings.Contains(options.Registry, "://") {
+				options.Registry = fmt.Sprintf("https://%s", options.Registry)
+			}
+
 			if err := (*c).SetCredentials(options); err != nil {
 				return err
 			}
