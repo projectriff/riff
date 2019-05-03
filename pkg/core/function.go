@@ -58,7 +58,6 @@ type BuildOptions struct {
 	Artifact       string
 	LocalPath      string
 	BuildpackImage string
-	RunImage       string
 }
 type CreateFunctionOptions struct {
 	CreateOrUpdateServiceOptions
@@ -655,13 +654,12 @@ func (c *client) BuildFunction(ctx context.Context, buildpackBuilder Builder, op
 }
 
 func (c *client) doBuildLocally(ctx context.Context, builder Builder, image string, options BuildOptions, log io.Writer) error {
-	if options.BuildpackImage == "" || options.RunImage == "" {
+	if options.BuildpackImage == "" {
 		config, err := c.FetchPackConfig()
 		if err != nil {
 			return fmt.Errorf("unable to load pack config: %s", err)
 		}
 		options.BuildpackImage = config.BuilderImage
-		options.RunImage = config.RunImage
 	}
 	return builder.Build(ctx, image, options, log)
 }

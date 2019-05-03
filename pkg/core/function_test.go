@@ -79,13 +79,11 @@ var _ = Describe("Function", func() {
 		mockClientConfig.On("Namespace").Return("default", false, nil)
 		client = core.NewClient(mockClientConfig, nil, mockServing, mockBuild, nil, nil)
 
-		runImage := "packs/run:testing"
 		builderImage := "projectriff/builder:testing"
 		mockClusterBuildTemplateInterface.On("Get", mock.Anything, mock.Anything).
 			Return(&build.ClusterBuildTemplate{
 				Spec: build.BuildTemplateSpec{
 					Parameters: []build.ParameterSpec{
-						{Name: "RUN_IMAGE", Default: &runImage},
 						{Name: "BUILDER_IMAGE", Default: &builderImage},
 					},
 				},
@@ -125,10 +123,9 @@ var _ = Describe("Function", func() {
 				mockBuilder.On("Build", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			})
 
-			Context("when buildpack and run images are provided", func() {
+			Context("when buildpack image is provided", func() {
 				BeforeEach(func() {
 					createFunctionOptions.BuildpackImage = "some/buildpack"
-					createFunctionOptions.RunImage = "some/run"
 				})
 
 				It("should succeed", func() {
@@ -143,22 +140,6 @@ var _ = Describe("Function", func() {
 			Context("when buildpack image is omitted", func() {
 				BeforeEach(func() {
 					createFunctionOptions.BuildpackImage = ""
-					createFunctionOptions.RunImage = "some/run"
-				})
-
-				It("should succeed", func() {
-					Expect(err).NotTo(HaveOccurred())
-					// The returned service should be the input to service create, not the output.
-					Expect(service).To(Equal(createdService))
-					Expect(revision).To(BeNil())
-					Expect(cache).To(BeNil())
-				})
-			})
-
-			Context("when run image is omitted", func() {
-				BeforeEach(func() {
-					createFunctionOptions.BuildpackImage = "some/buildpack"
-					createFunctionOptions.RunImage = ""
 				})
 
 				It("should succeed", func() {

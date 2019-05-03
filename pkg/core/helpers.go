@@ -30,12 +30,10 @@ const (
 	BuildConfigMapName    = "riff-build"
 	DefaultImagePrefixKey = "default-image-prefix"
 	builderImageParamName = "BUILDER_IMAGE"
-	runImageParamName     = "RUN_IMAGE"
 )
 
 type PackConfig struct {
 	BuilderImage string
-	RunImage     string
 }
 
 func (c *client) FetchPackConfig() (*PackConfig, error) {
@@ -51,13 +49,11 @@ func (c *client) FetchPackConfig() (*PackConfig, error) {
 		switch param.Name {
 		case builderImageParamName:
 			config.BuilderImage = *param.Default
-		case runImageParamName:
-			config.RunImage = *param.Default
 		}
 	}
-	if config.BuilderImage == "" || config.RunImage == "" {
+	if config.BuilderImage == "" {
 		// should never get here
-		return nil, fmt.Errorf("unable to find builder and run images in cluster")
+		return nil, fmt.Errorf("unable to find builder image in cluster")
 	}
 	return config, nil
 }

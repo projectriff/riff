@@ -221,9 +221,8 @@ func (b *buildpackBuilder) Build(ctx context.Context, repoName string, options c
 	}
 
 	return client.Build(ctx, pack.BuildOptions{
-		AppDir:   options.LocalPath,
-		Builder:  options.BuildpackImage,
-		RunImage: options.RunImage,
+		AppDir:  options.LocalPath,
+		Builder: options.BuildpackImage,
 		Env: map[string]string{
 			"RIFF":          "true",
 			"RIFF_ARTIFACT": options.Artifact,
