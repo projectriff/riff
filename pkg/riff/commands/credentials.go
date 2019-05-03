@@ -43,6 +43,8 @@ func CredentialsSet(c *core.Client) *cobra.Command {
 				FlagsDependency(Set("namespace"), ValidDnsSubdomain("namespace")),
 				NotBlank("secret"),
 				AtMostOneOf("gcr", "docker-hub", "registry-user"),
+				FlagsDependency(Set("image-prefix"), NotBlank("image-prefix")),
+				FlagsDependency(Set("image-prefix"), IsTrue("enable-image-prefix")),
 				FlagsDependency(Set("registry-user"), NotBlank("registry")),
 				FlagsDependency(Set("registry"),
 					NotBlank("registry-user"),
@@ -69,6 +71,8 @@ func CredentialsSet(c *core.Client) *cobra.Command {
 	command.Flags().StringVar(&options.DockerHubId, "docker-hub", "", "Docker ID for authenticating with Docker Hub; password will be read from stdin")
 	command.Flags().StringVar(&options.Registry, "registry", "", "registry server host, scheme must be \"http\" or \"https\" (default \"https\")")
 	command.Flags().StringVar(&options.RegistryUser, "registry-user", "", "registry username; password will be read from stdin")
+	command.Flags().BoolVar(&options.EnableImagePrefix, "enable-image-prefix", false, "allow image prefix creation/update")
+	command.Flags().StringVar(&options.ImagePrefix, "image-prefix", "", "image prefix to use for commands that would otherwise require an --image argument (needs --enable-image-prefix). If not set but --enable-image-prefix is, this value will be derived for Docker Hub and GCR")
 
 	return command
 }

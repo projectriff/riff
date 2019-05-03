@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"reflect"
 )
 
@@ -25,6 +26,7 @@ var _ = Describe("credentials", func() {
 		mockSecrets         *vendor_mocks.SecretInterface
 		mockServiceAccounts *vendor_mocks.ServiceAccountInterface
 		mockClientConfig    *vendor_mocks.ClientConfig
+		mockConfigMaps      *vendor_mocks.ConfigMapInterface
 	)
 
 	BeforeEach(func() {
@@ -34,9 +36,11 @@ var _ = Describe("credentials", func() {
 		mockSecrets = new(vendor_mocks.SecretInterface)
 		mockServiceAccounts = new(vendor_mocks.ServiceAccountInterface)
 		mockClientConfig = new(vendor_mocks.ClientConfig)
+		mockConfigMaps = new(vendor_mocks.ConfigMapInterface)
 		kubeClient.On("CoreV1").Return(mockCore)
 		mockCore.On("ServiceAccounts", mock.Anything).Return(mockServiceAccounts)
 		mockCore.On("Secrets", mock.Anything).Return(mockSecrets)
+		mockCore.On("ConfigMaps", mock.Anything).Return(mockConfigMaps)
 
 		client = core.NewClient(mockClientConfig, kubeClient, nil, nil, kubeCtl, new(mockkustomize.Kustomizer))
 	})
@@ -44,6 +48,7 @@ var _ = Describe("credentials", func() {
 	AfterEach(func() {
 		mockSecrets.AssertExpectations(GinkgoT())
 		mockServiceAccounts.AssertExpectations(GinkgoT())
+		mockConfigMaps.AssertExpectations(GinkgoT())
 	})
 
 	Describe("SetCredentials", func() {
@@ -100,7 +105,7 @@ var _ = Describe("credentials", func() {
 			mockSecrets.On("Create", mock.Anything).Return(&secret, nil)
 			serviceAccount := serviceAccount(core.BuildServiceAccountName)
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(&serviceAccount, nil)
-			mockServiceAccounts.On("Update", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(nil, expectedError)
+			mockServiceAccounts.On("Update", mock.MatchedBy(serviceAccountNamed(core.BuildServiceAccountName))).Return(nil, expectedError)
 
 			err := client.SetCredentials(core.SetCredentialsOptions{
 				NamespaceName: "ns",
@@ -126,6 +131,59 @@ var _ = Describe("credentials", func() {
 			Expect(err).To(MatchError(expectedError))
 		})
 
+		It("fails to update the secret if the image prefix retrieval fails", func() {
+			mockSecrets.On("Get", secretName, mock.Anything).Return(nil, notFound())
+			secret := secret(secretName)
+			mockSecrets.On("Create", mock.Anything).Return(&secret, nil)
+			serviceAccount := serviceAccount(core.BuildServiceAccountName)
+			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(&serviceAccount, nil)
+			mockServiceAccounts.On("Update",
+				mock.MatchedBy(andServiceAccountPredicates(
+					serviceAccountNamed(core.BuildServiceAccountName),
+					withSingleSecret(secretName),
+				))).Return(&serviceAccount, nil)
+			expectedError := fmt.Errorf("oopsie")
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, expectedError)
+
+			err := client.SetCredentials(core.SetCredentialsOptions{
+				EnableImagePrefix: true,
+				NamespaceName:     "ns",
+				SecretName:        secretName,
+				GcrTokenPath:      "fixtures/gcr-creds",
+			})
+
+			Expect(err).To(MatchError(expectedError))
+		})
+
+		It("fails to update the secret if the image prefix creation fails", func() {
+			mockSecrets.On("Get", secretName, mock.Anything).Return(nil, notFound())
+			secret := secret(secretName)
+			mockSecrets.On("Create", mock.Anything).Return(&secret, nil)
+			serviceAccount := serviceAccount(core.BuildServiceAccountName)
+			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(&serviceAccount, nil)
+			mockServiceAccounts.On("Update",
+				mock.MatchedBy(andServiceAccountPredicates(
+					serviceAccountNamed(core.BuildServiceAccountName),
+					withSingleSecret(secretName),
+				))).Return(&serviceAccount, nil)
+			configMap := existingConfigMap(core.BuildConfigMapName)
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(&configMap, nil)
+			expectedError := fmt.Errorf("oopsie")
+			mockConfigMaps.On("Update", mock.MatchedBy(andConfigMapPredicates(
+				configMapNamed(core.BuildConfigMapName),
+				configMapWithData(map[string]string{core.DefaultImagePrefixKey: "gcr.io/gcp-project-id"}),
+			))).Return(nil, expectedError)
+
+			err := client.SetCredentials(core.SetCredentialsOptions{
+				EnableImagePrefix: true,
+				NamespaceName:     "ns",
+				SecretName:        secretName,
+				GcrTokenPath:      "fixtures/gcr-creds",
+			})
+
+			Expect(err).To(MatchError(expectedError))
+		})
+
 		It("successfully creates and binds the secret to the build service account", func() {
 			mockSecrets.On("Get", secretName, mock.Anything).Return(nil, notFound())
 			secret := secret(secretName)
@@ -133,8 +191,36 @@ var _ = Describe("credentials", func() {
 			serviceAccount := serviceAccount(core.BuildServiceAccountName)
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(&serviceAccount, nil)
 			mockServiceAccounts.On("Update",
-				mock.MatchedBy(andPredicates(
-					named(core.BuildServiceAccountName),
+				mock.MatchedBy(andServiceAccountPredicates(
+					serviceAccountNamed(core.BuildServiceAccountName),
+					withSingleSecret(secretName),
+				))).Return(&serviceAccount, nil)
+			configMap := existingConfigMap(core.BuildConfigMapName)
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(&configMap, nil)
+			mockConfigMaps.On("Update", mock.MatchedBy(andConfigMapPredicates(
+				configMapNamed(core.BuildConfigMapName),
+				configMapWithData(map[string]string{core.DefaultImagePrefixKey: "gcr.io/gcp-project-id"}),
+			))).Return(&configMap, nil)
+
+			err := client.SetCredentials(core.SetCredentialsOptions{
+				EnableImagePrefix: true,
+				NamespaceName:     "ns",
+				SecretName:        secretName,
+				GcrTokenPath:      "fixtures/gcr-creds",
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("successfully creates and binds the secret to the build service account without image prefix change", func() {
+			mockSecrets.On("Get", secretName, mock.Anything).Return(nil, notFound())
+			secret := secret(secretName)
+			mockSecrets.On("Create", mock.Anything).Return(&secret, nil)
+			serviceAccount := serviceAccount(core.BuildServiceAccountName)
+			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(&serviceAccount, nil)
+			mockServiceAccounts.On("Update",
+				mock.MatchedBy(andServiceAccountPredicates(
+					serviceAccountNamed(core.BuildServiceAccountName),
 					withSingleSecret(secretName),
 				))).Return(&serviceAccount, nil)
 
@@ -142,6 +228,34 @@ var _ = Describe("credentials", func() {
 				NamespaceName: "ns",
 				SecretName:    secretName,
 				GcrTokenPath:  "fixtures/gcr-creds",
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("successfully creates the config map and secret and binds the latter to the build service account", func() {
+			mockSecrets.On("Get", secretName, mock.Anything).Return(nil, notFound())
+			secret := secret(secretName)
+			mockSecrets.On("Create", mock.Anything).Return(&secret, nil)
+			serviceAccount := serviceAccount(core.BuildServiceAccountName)
+			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(&serviceAccount, nil)
+			mockServiceAccounts.On("Update",
+				mock.MatchedBy(andServiceAccountPredicates(
+					serviceAccountNamed(core.BuildServiceAccountName),
+					withSingleSecret(secretName),
+				))).Return(&serviceAccount, nil)
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
+			configMap := existingConfigMap(core.BuildConfigMapName)
+			mockConfigMaps.On("Create", mock.MatchedBy(andConfigMapPredicates(
+				configMapNamed(core.BuildConfigMapName),
+				configMapWithData(map[string]string{core.DefaultImagePrefixKey: "gcr.io/gcp-project-id"}),
+			))).Return(&configMap, nil)
+
+			err := client.SetCredentials(core.SetCredentialsOptions{
+				EnableImagePrefix: true,
+				NamespaceName:     "ns",
+				SecretName:        secretName,
+				GcrTokenPath:      "fixtures/gcr-creds",
 			})
 
 			Expect(err).NotTo(HaveOccurred())
@@ -155,15 +269,22 @@ var _ = Describe("credentials", func() {
 			serviceAccount := serviceAccount(core.BuildServiceAccountName)
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(&serviceAccount, nil)
 			mockServiceAccounts.On("Update",
-				mock.MatchedBy(andPredicates(
-					named(core.BuildServiceAccountName),
+				mock.MatchedBy(andServiceAccountPredicates(
+					serviceAccountNamed(core.BuildServiceAccountName),
 					withSingleSecret(secretName),
 				))).Return(&serviceAccount, nil)
+			configMap := existingConfigMap(core.BuildConfigMapName)
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(&configMap, nil)
+			mockConfigMaps.On("Update", mock.MatchedBy(andConfigMapPredicates(
+				configMapNamed(core.BuildConfigMapName),
+				configMapWithData(map[string]string{core.DefaultImagePrefixKey: "gcr.io/gcp-project-id"}),
+			))).Return(&configMap, nil)
 
 			err := client.SetCredentials(core.SetCredentialsOptions{
-				NamespaceName: "ns",
-				SecretName:    secretName,
-				GcrTokenPath:  "fixtures/gcr-creds",
+				EnableImagePrefix: true,
+				NamespaceName:     "ns",
+				SecretName:        secretName,
+				GcrTokenPath:      "fixtures/gcr-creds",
 			})
 
 			Expect(err).NotTo(HaveOccurred())
@@ -177,8 +298,8 @@ var _ = Describe("credentials", func() {
 			serviceAccount := serviceAccount(core.BuildServiceAccountName)
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
 			mockServiceAccounts.On("Create",
-				mock.MatchedBy(andPredicates(
-					named(core.BuildServiceAccountName),
+				mock.MatchedBy(andServiceAccountPredicates(
+					serviceAccountNamed(core.BuildServiceAccountName),
 					withLabels(map[string]string{"projectriff.io/installer": env.Cli.Name, "projectriff.io/version": env.Cli.Version}),
 					withSingleSecret(secretName),
 				))).Return(&serviceAccount, nil)
@@ -244,10 +365,33 @@ var _ = Describe("credentials", func() {
 	})
 })
 
-func andPredicates(predicates ...func(*v1.ServiceAccount) bool) func(*v1.ServiceAccount) bool {
+func configMapNamed(name string) func(*v1.ConfigMap) bool {
+	return func(cm *v1.ConfigMap) bool {
+		return cm.Name == name
+	}
+}
+
+func configMapWithData(data map[string]string) func(*v1.ConfigMap) bool {
+	return func(cm *v1.ConfigMap) bool {
+		return reflect.DeepEqual(cm.Data, data)
+	}
+}
+
+func andServiceAccountPredicates(predicates ...func(*v1.ServiceAccount) bool) func(*v1.ServiceAccount) bool {
 	return func(sa *v1.ServiceAccount) bool {
 		for _, predicate := range predicates {
 			if !predicate(sa) {
+				return false
+			}
+		}
+		return true
+	}
+}
+
+func andConfigMapPredicates(predicates ...func(*v1.ConfigMap) bool) func(*v1.ConfigMap) bool {
+	return func(resource *v1.ConfigMap) bool {
+		for _, predicate := range predicates {
+			if !predicate(resource) {
 				return false
 			}
 		}
@@ -276,5 +420,12 @@ func secretNamed(secretName string) func(*v1.Secret) bool {
 func withLabels(labels map[string]string) func(*v1.ServiceAccount) bool {
 	return func(account *v1.ServiceAccount) bool {
 		return reflect.DeepEqual(labels, account.Labels)
+	}
+}
+
+func existingConfigMap(name string) v1.ConfigMap {
+	return v1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{UID: types.UID(name), Name: name},
+		Data:       map[string]string{},
 	}
 }

@@ -17,12 +17,10 @@
 package core
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/pivotal/go-ape/pkg/furl"
 	"github.com/projectriff/riff/pkg/core/tasks"
 	"github.com/projectriff/riff/pkg/env"
-	"io/ioutil"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -186,24 +184,6 @@ func (c *client) convertInitialSecret(options *NamespaceInitOptions, initLabels 
 	return nil, nil
 }
 
-func (c *client) determineImagePrefix(options *NamespaceInitOptions) (string, error) {
-	switch options.initSecretType() {
-	case secretTypeGcr:
-		if options.ImagePrefix == "" {
-			prefix, err := c.gcrImagePrefix(options.GcrTokenPath)
-			if err != nil {
-				return "", err
-			}
-			return prefix, nil
-		}
-	case secretTypeDockerHub:
-		if options.ImagePrefix == "" {
-			return c.dockerHubImagePrefix(options.DockerHubId), nil
-		}
-	}
-	return options.ImagePrefix, nil
-}
-
 func (c *client) initServiceAccount(options *NamespaceInitOptions, initLabels map[string]string) error {
 	ns := options.NamespaceName
 	serviceAccount, err := c.kubeClient.CoreV1().ServiceAccounts(ns).Get(BuildServiceAccountName, v1.GetOptions{})
@@ -234,14 +214,13 @@ func (c *client) initServiceAccount(options *NamespaceInitOptions, initLabels ma
 }
 
 func (c *client) initImagePrefix(options *NamespaceInitOptions) error {
-	imagePrefix, err := c.determineImagePrefix(options)
+	imagePrefix, err := DetermineImagePrefix(options.ImagePrefix, options.DockerHubId, options.GcrTokenPath)
 	if err != nil {
 		return err
 	}
-	options.ImagePrefix = imagePrefix
 
-	if options.ImagePrefix != "" {
-		return c.SetDefaultBuildImagePrefix(options.NamespaceName, options.ImagePrefix)
+	if imagePrefix != "" {
+		return c.SetDefaultBuildImagePrefix(options.NamespaceName, imagePrefix)
 	}
 
 	fmt.Printf("No image prefix set, resetting possibly existing ones. The --image argument will be required for commands\n")
@@ -287,23 +266,6 @@ func (c *client) applyManifest(manifest *Manifest, options *NamespaceInitOptions
 func (c *client) checkSecretExists(options *NamespaceInitOptions) error {
 	_, err := c.kubeClient.CoreV1().Secrets(options.NamespaceName).Get(options.SecretName, v1.GetOptions{})
 	return err
-}
-
-func (c *client) dockerHubImagePrefix(dockerHubId string) string {
-	return fmt.Sprintf("docker.io/%s", dockerHubId)
-}
-
-func (c *client) gcrImagePrefix(gcrTokenPath string) (string, error) {
-	token, err := ioutil.ReadFile(gcrTokenPath)
-	if err != nil {
-		return "", err
-	}
-	tokenMap := map[string]string{}
-	err = json.Unmarshal(token, &tokenMap)
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("gcr.io/%s", tokenMap["project_id"]), nil
 }
 
 func getInitLabels() map[string]string {

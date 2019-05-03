@@ -15,6 +15,9 @@ import (
 type SetCredentialsOptions struct {
 	NamespaceName string
 
+	EnableImagePrefix bool
+	ImagePrefix       string
+
 	SecretName   string
 	GcrTokenPath string
 	DockerHubId  string
@@ -65,12 +68,29 @@ func (c *client) SetCredentials(options SetCredentialsOptions) error {
 
 	serviceAccount, err := c.kubeClient.CoreV1().ServiceAccounts(namespace).Get(BuildServiceAccountName, v1.GetOptions{});
 	if errors.IsNotFound(err) {
-		return c.createServiceAccount(namespace, secret.Name, initLabels)
-	}
-	if err != nil {
+		if err = c.createServiceAccount(namespace, secret.Name, initLabels); err != nil {
+			return err
+		}
+	} else if err != nil {
 		return err
+	} else {
+		err = c.updateServiceAccount(namespace, secret.Name, serviceAccount)
+		if err != nil {
+			return err
+		}
 	}
-	return c.updateServiceAccount(namespace, secret.Name, serviceAccount)
+
+	if options.EnableImagePrefix {
+		imagePrefix, err := DetermineImagePrefix(options.ImagePrefix, options.DockerHubId, options.GcrTokenPath)
+		if err != nil {
+			return err
+		}
+		if imagePrefix == "" {
+			return nil
+		}
+		return c.SetDefaultBuildImagePrefix(namespace, imagePrefix)
+	}
+	return nil
 }
 
 func (c *client) ListCredentials(options ListCredentialsOptions) (*corev1.SecretList, error) {

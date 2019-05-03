@@ -97,6 +97,22 @@ var _ = Describe("The riff credentials set command", func() {
 
 			Expect(err).To(MatchError("when --registry is set, valid protocols are: \"http\", \"https\", found: \"ftp\""))
 		})
+
+		It("should fail if the image prefix creation/update is disabled and an explicit image prefix is set", func() {
+			command.SetArgs([]string{"--secret", "shhh", "--namespace", "ns", "--docker-hub", "johndoe", "--image-prefix", "registry.example.com/project"})
+
+			err := command.Execute()
+
+			Expect(err).To(MatchError("when --image-prefix is set, flag --enable-image-prefix must be true"))
+		})
+
+		It("should fail if the image prefix creation/update is ensabled but an explicit image prefix is blank", func() {
+			command.SetArgs([]string{"--secret", "shhh", "--namespace", "ns", "--docker-hub", "johndoe", "--enable-image-prefix", "--image-prefix", ""})
+
+			err := command.Execute()
+
+			Expect(err).To(MatchError("when --image-prefix is set, flag --image-prefix cannot be empty"))
+		})
 	})
 
 	Context("when given suitable args and flags", func() {
@@ -277,7 +293,6 @@ var _ = Describe("The riff credentials delete command", func() {
 		Expect(command.Example).To(Not(BeEmpty()))
 	})
 
-
 	Context("when given wrong args or flags", func() {
 		It("should fail without args", func() {
 			command.SetArgs([]string{"--namespace", "ns"})
@@ -303,7 +318,6 @@ var _ = Describe("The riff credentials delete command", func() {
 			Expect(err).To(MatchError("when --namespace is set, flag --namespace must be a valid DNS subdomain"))
 		})
 	})
-
 
 	Context("when given suitable args and flags", func() {
 		It("should involve the client without any explicit namespace", func() {

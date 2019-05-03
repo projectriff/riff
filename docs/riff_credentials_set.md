@@ -20,8 +20,10 @@ riff credentials set [flags]
 
 ```
       --docker-hub string      Docker ID for authenticating with Docker Hub; password will be read from stdin
+      --enable-image-prefix    allow image prefix creation/update
       --gcr string             path to a file containing Google Container Registry credentials
   -h, --help                   help for set
+      --image-prefix string    image prefix to use for commands that would otherwise require an --image argument (needs --enable-image-prefix). If not set but --enable-image-prefix is, this value will be derived for Docker Hub and GCR
       --namespace namespace    the namespace of the credentials to be added
       --registry string        registry server host, scheme must be "http" or "https" (default "https")
       --registry-user string   registry username; password will be read from stdin

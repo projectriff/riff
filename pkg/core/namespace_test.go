@@ -283,7 +283,7 @@ var _ = Describe("namespace", func() {
 
 			serviceAccount := &v1.ServiceAccount{}
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
-			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+			mockServiceAccounts.On("Create", mock.MatchedBy(serviceAccountNamed(core.BuildServiceAccountName))).Return(serviceAccount, nil)
 
 			configMap := &v1.ConfigMap{}
 			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
@@ -306,7 +306,7 @@ var _ = Describe("namespace", func() {
 
 			serviceAccount := &v1.ServiceAccount{}
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
-			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+			mockServiceAccounts.On("Create", mock.MatchedBy(serviceAccountNamed(core.BuildServiceAccountName))).Return(serviceAccount, nil)
 
 			configMap := &v1.ConfigMap{}
 			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
@@ -331,7 +331,7 @@ var _ = Describe("namespace", func() {
 
 			serviceAccount := &v1.ServiceAccount{}
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
-			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+			mockServiceAccounts.On("Create", mock.MatchedBy(serviceAccountNamed(core.BuildServiceAccountName))).Return(serviceAccount, nil)
 
 			configMap := &v1.ConfigMap{}
 			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
@@ -365,7 +365,7 @@ var _ = Describe("namespace", func() {
 
 			serviceAccount := &v1.ServiceAccount{}
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
-			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+			mockServiceAccounts.On("Create", mock.MatchedBy(serviceAccountNamed(core.BuildServiceAccountName))).Return(serviceAccount, nil)
 			expectedError := fmt.Errorf("image prefix deletion failed")
 
 			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
@@ -391,7 +391,7 @@ var _ = Describe("namespace", func() {
 
 			serviceAccount := &v1.ServiceAccount{}
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
-			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+			mockServiceAccounts.On("Create", mock.MatchedBy(serviceAccountNamed(core.BuildServiceAccountName))).Return(serviceAccount, nil)
 
 			configMap := &v1.ConfigMap{}
 			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
@@ -425,7 +425,7 @@ var _ = Describe("namespace", func() {
 
 			serviceAccount := &v1.ServiceAccount{}
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
-			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+			mockServiceAccounts.On("Create", mock.MatchedBy(serviceAccountNamed(core.BuildServiceAccountName))).Return(serviceAccount, nil)
 
 			configMap := &v1.ConfigMap{}
 			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
@@ -454,7 +454,7 @@ var _ = Describe("namespace", func() {
 
 			serviceAccount := &v1.ServiceAccount{}
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
-			mockServiceAccounts.On("Create", mock.MatchedBy(named(core.BuildServiceAccountName))).Return(serviceAccount, nil)
+			mockServiceAccounts.On("Create", mock.MatchedBy(serviceAccountNamed(core.BuildServiceAccountName))).Return(serviceAccount, nil)
 
 			configMap := &v1.ConfigMap{}
 			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(nil, notFound())
@@ -617,7 +617,7 @@ func namedAndLabelled(name string, labels map[string]string) func(sa *v1.Service
 	}
 }
 
-func named(name string) func(sa *v1.ServiceAccount) bool {
+func serviceAccountNamed(name string) func(sa *v1.ServiceAccount) bool {
 	return func(sa *v1.ServiceAccount) bool {
 		return sa.Name == name
 	}

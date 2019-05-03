@@ -242,6 +242,17 @@ func AtMostOneOf(flagNames ...string) FlagsValidator {
 	}
 }
 
+// IsTrue returns a FlagsValidator that asserts that the given flag is boolean and valued to true.
+func IsTrue(flagName string) FlagsValidator {
+	return func(cmd *cobra.Command) error {
+		flag := cmd.Flag(flagName)
+		if flag == nil || flag.Value.Type() != "bool" || flag.Value.String() != "true" {
+			return fmt.Errorf("flag --%s must be true", flagName)
+		}
+		return nil
+	}
+}
+
 // NotBlank returns a FlagsValidator that asserts that the given flag is not made entirely of space characters.
 func NotBlank(flagName string) FlagsValidator {
 	return func(cmd *cobra.Command) error {
