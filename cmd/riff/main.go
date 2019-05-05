@@ -20,18 +20,20 @@ import (
 	"fmt"
 	"os"
 
+	// load credential helpers
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
+
+	"github.com/projectriff/riff/pkg/riff"
 	"github.com/projectriff/riff/pkg/riff/commands"
 )
 
 func main() {
-	cmd := commands.NewRiffCommand()
+	p := riff.Initialize()
+	cmd := commands.NewRiffCommand(p)
 
 	if err := cmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-}
-
-func init() {
-	commands.Initialize()
 }

@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-package commands
+package riff
 
 import (
-	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
-func NewRiffCommand(p *riff.Params) *cobra.Command {
-	var rootCmd = &cobra.Command{
-		Use: "riff",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
-		},
+func NamespaceFlag(cmd *cobra.Command, p *Params, namespace *string) {
+	prior := cmd.PersistentPreRunE
+	cmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		if *namespace == "" {
+			*namespace = p.Client.DefaultNamespace
+		}
+		if prior != nil {
+			return prior(cmd, args)
+		}
+		return nil
 	}
 
-	rootCmd.PersistentFlags().StringVar(&p.ConfigFile, "config", "", "config file (default is $HOME/.riff.yaml)")
-	rootCmd.PersistentFlags().StringVar(&p.KubeConfigFile, "kubeconfig", "", "kubectl config file (default is $HOME/.kube/config)")
-
-	rootCmd.AddCommand(NewCredentialCommand(p))
-
-	return rootCmd
+	cmd.Flags().StringVarP(namespace, "namespace", "n", "", "the kubernetes namespace")
 }

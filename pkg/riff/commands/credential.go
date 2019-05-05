@@ -16,24 +16,15 @@
 
 package commands
 
-import (
-	"github.com/projectriff/riff/pkg/riff"
-	"github.com/spf13/cobra"
-)
+import "github.com/spf13/cobra"
+import "github.com/projectriff/riff/pkg/riff"
 
-// rootCmd represents the base command when called without any subcommands
-func NewRiffCommand(p *riff.Params) *cobra.Command {
-	var rootCmd = &cobra.Command{
-		Use: "riff",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
-		},
+func NewCredentialCommand(p *riff.Params) *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "credential",
 	}
 
-	rootCmd.PersistentFlags().StringVar(&p.ConfigFile, "config", "", "config file (default is $HOME/.riff.yaml)")
-	rootCmd.PersistentFlags().StringVar(&p.KubeConfigFile, "kubeconfig", "", "kubectl config file (default is $HOME/.kube/config)")
+	cmd.AddCommand(NewCredentialListCommand(p))
 
-	rootCmd.AddCommand(NewCredentialCommand(p))
-
-	return rootCmd
+	return cmd
 }

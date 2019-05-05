@@ -17,23 +17,36 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// rootCmd represents the base command when called without any subcommands
-func NewRiffCommand(p *riff.Params) *cobra.Command {
-	var rootCmd = &cobra.Command{
-		Use: "riff",
+type CredentialListOptions struct {
+	Namespace string
+}
+
+func NewCredentialListCommand(p *riff.Params) *cobra.Command {
+	opt := &CredentialListOptions{}
+
+	cmd := &cobra.Command{
+		Use: "list",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// TODO replace with a real impl
+			secrets, err := p.Client.KubeClient.CoreV1().Secrets(opt.Namespace).List(metav1.ListOptions{})
+			if err != nil {
+				return err
+			}
+			for _, secret := range secrets.Items {
+				fmt.Fprintln(cmd.OutOrStdout(), secret.Name)
+			}
 			return nil
 		},
 	}
 
-	rootCmd.PersistentFlags().StringVar(&p.ConfigFile, "config", "", "config file (default is $HOME/.riff.yaml)")
-	rootCmd.PersistentFlags().StringVar(&p.KubeConfigFile, "kubeconfig", "", "kubectl config file (default is $HOME/.kube/config)")
+	riff.NamespaceFlag(cmd, p, &opt.Namespace)
 
-	rootCmd.AddCommand(NewCredentialCommand(p))
-
-	return rootCmd
+	return cmd
 }
