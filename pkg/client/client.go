@@ -17,17 +17,20 @@
 package client
 
 import (
+	projectriffclientset "github.com/projectriff/system/pkg/client/clientset/versioned"
+	buildv1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/build/v1alpha1"
+	runv1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/run/v1alpha1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
 type Client struct {
-	kubeConfig       clientcmd.ClientConfig
 	DefaultNamespace string
-	RestClient       rest.Interface
-	KubeClient       kubernetes.Interface
+	Core             corev1.CoreV1Interface
+	Build            buildv1alpha1.BuildV1alpha1Interface
+	Run              runv1alpha1.RunV1alpha1Interface
 }
 
 func NewClient(kubeCfgFile string) *Client {
@@ -37,10 +40,14 @@ func NewClient(kubeCfgFile string) *Client {
 		panic(err)
 	}
 
+	kubeClient := kubernetes.NewForConfigOrDie(config)
+	riffClient := projectriffclientset.NewForConfigOrDie(config)
+
 	return &Client{
-		kubeConfig:       kubeConfig,
 		DefaultNamespace: getDefaultNamespaceOrDie(kubeConfig),
-		KubeClient:       kubernetes.NewForConfigOrDie(config),
+		Core:             kubeClient.CoreV1(),
+		Build:            riffClient.BuildV1alpha1(),
+		Run:              riffClient.RunV1alpha1(),
 	}
 }
 
@@ -57,12 +64,4 @@ func getDefaultNamespaceOrDie(kubeConfig clientcmd.ClientConfig) string {
 		panic(err)
 	}
 	return namespace
-}
-
-func getRestConfigOrDie(kubeConfig clientcmd.ClientConfig) *rest.Config {
-	config, err := kubeConfig.ClientConfig()
-	if err != nil {
-		panic(err)
-	}
-	return config
 }

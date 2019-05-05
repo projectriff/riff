@@ -1,17 +1,46 @@
-.PHONY: all clean build test
-
+OUTPUT = ./riff
 GO_SOURCES = $(shell find . -type f -name '*.go')
-OUTPUT = riff
+VERSION ?= $(shell cat VERSION)
+GITSHA = $(shell git rev-parse HEAD)
+GITDIRTY = $(shell git diff --quiet HEAD || echo "dirty")
+LDFLAGS_VERSION = -X github.com/projectriff/riff/pkg/env.cli_name=riff \
+				  -X github.com/projectriff/riff/pkg/env.cli_version=$(VERSION) \
+				  -X github.com/projectriff/riff/pkg/env.cli_gitsha=$(GITSHA) \
+				  -X github.com/projectriff/riff/pkg/env.cli_gitdirty=$(GITDIRTY)
 
-all: test build
+.PHONY: all
+all: build test docs
 
+.PHONY: clean
 clean:
 	rm riff
+	rm -f riff-darwin-amd64.tgz
+	rm -f riff-linux-amd64.tgz
+	rm -f riff-windows-amd64.zip
 
+.PHONY: build
 build: $(OUTPUT)
 
-$(OUTPUT): $(GO_SOURCES)
-	go build ./cmd/riff
-
+.PHONY: test
 test:
 	go test -v ./...
+
+$(OUTPUT): $(GO_SOURCES) VERSION
+	go build -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)" ./cmd/riff
+
+.PHONY: release
+release: $(GO_SOURCES) VERSION
+	GOOS=darwin   GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     ./cmd/riff && tar -czf riff-darwin-amd64.tgz $(OUTPUT)     && rm -f $(OUTPUT)
+	GOOS=linux    GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     ./cmd/riff && tar -czf riff-linux-amd64.tgz  $(OUTPUT)     && rm -f $(OUTPUT)
+	GOOS=windows  GOARCH=amd64 go build -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT).exe ./cmd/riff && zip -mq riff-windows-amd64.zip $(OUTPUT).exe && rm -f $(OUTPUT).exe
+
+docs: $(OUTPUT) clean-docs
+	$(OUTPUT) docs
+
+.PHONY: verify-docs
+verify-docs: docs
+	git diff --exit-code docs
+
+.PHONY: clean-docs
+clean-docs:
+	rm -fR docs

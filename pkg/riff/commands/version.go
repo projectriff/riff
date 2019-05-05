@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
-package riff
+package commands
 
 import (
+	"fmt"
+
+	"github.com/projectriff/riff/pkg/env"
+	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 )
 
-func NamespaceFlag(cmd *cobra.Command, p *Params, namespace *string) {
-	prior := cmd.PersistentPreRunE
-	cmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
-		if *namespace == "" {
-			*namespace = p.DefaultNamespace
-		}
-		if prior != nil {
-			return prior(cmd, args)
-		}
-		return nil
+func NewVersionCommand(p *riff.Params) *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "version",
+		Run: func(cmd *cobra.Command, args []string) {
+			dirtyMsg := ""
+			if env.Cli.GitDirty != "" {
+				dirtyMsg = ", with local modifications"
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "Version\n  %s cli: %s (%s%s)\n", env.Cli.Name, env.Cli.Version, env.Cli.GitSha, dirtyMsg)
+		},
 	}
 
-	cmd.Flags().StringVarP(namespace, "namespace", "n", "", "the kubernetes namespace")
+	return cmd
 }

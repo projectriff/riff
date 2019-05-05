@@ -14,23 +14,33 @@
  * limitations under the License.
  */
 
-package riff
+package commands
 
 import (
+	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 )
 
-func NamespaceFlag(cmd *cobra.Command, p *Params, namespace *string) {
-	prior := cmd.PersistentPreRunE
-	cmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
-		if *namespace == "" {
-			*namespace = p.DefaultNamespace
-		}
-		if prior != nil {
-			return prior(cmd, args)
-		}
-		return nil
+type DocsOptions struct {
+	Directory string
+}
+
+func NewDocsCommand(p *riff.Params) *cobra.Command {
+	opt := &DocsOptions{}
+
+	cmd := &cobra.Command{
+		Use:    "docs",
+		Hidden: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := p.FileSystem.MkdirAll(opt.Directory, 0744); err != nil {
+				return err
+			}
+			return doc.GenMarkdownTree(cmd.Root(), opt.Directory)
+		},
 	}
 
-	cmd.Flags().StringVarP(namespace, "namespace", "n", "", "the kubernetes namespace")
+	cmd.Flags().StringVarP(&opt.Directory, "dir", "d", "docs", "the output directory for the docs.")
+
+	return cmd
 }

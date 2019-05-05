@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2018 The original author or authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      https://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,25 +14,30 @@
  * limitations under the License.
  */
 
-package main
+package env
 
-import (
-	"fmt"
-	"os"
-
-	// load credential helpers
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
-
-	"github.com/projectriff/riff/pkg/riff"
-	"github.com/projectriff/riff/pkg/riff/commands"
+var (
+	cli_name     = "riff"
+	cli_version  = "unknown"
+	cli_gitsha   = "unknown sha"
+	cli_gitdirty = ""
 )
 
-func main() {
-	cmd := commands.NewRootCommand(riff.Initialize())
+type CliEnv struct {
+	Name     string
+	Version  string
+	GitSha   string
+	GitDirty string
+}
 
-	if err := cmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+var Cli CliEnv
+
+func init() {
+	// must be created inside the init function to pickup build specific params
+	Cli = CliEnv{
+		Name:     cli_name,
+		Version:  cli_version,
+		GitSha:   cli_gitsha,
+		GitDirty: cli_gitdirty,
 	}
 }

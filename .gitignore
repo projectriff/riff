@@ -1,2 +1,4 @@
 # built artifacts
 /riff
+/riff-*.tgz
+/riff-*.zip

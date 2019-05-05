@@ -23,6 +23,7 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/projectriff/riff/pkg/client"
+	"github.com/projectriff/riff/pkg/fs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -30,14 +31,8 @@ import (
 type Params struct {
 	ConfigFile     string
 	KubeConfigFile string
-	Client         *client.Client
-}
-
-func (p *Params) Initialize() {
-	if p.Client == nil {
-		c := client.NewClient(p.KubeConfigFile)
-		p.Client = c
-	}
+	*client.Client
+	FileSystem fs.FileSystem
 }
 
 func Initialize() *Params {
@@ -45,7 +40,7 @@ func Initialize() *Params {
 
 	cobra.OnInitialize(p.initConfig)
 	cobra.OnInitialize(p.initKubeConfig)
-	cobra.OnInitialize(p.Initialize)
+	cobra.OnInitialize(p.init)
 
 	return p
 }
@@ -90,5 +85,14 @@ func (p *Params) initKubeConfig() {
 			os.Exit(1)
 		}
 		p.KubeConfigFile = filepath.Join(home, ".kube", "config")
+	}
+}
+
+func (p *Params) init() {
+	if p.FileSystem == nil {
+		p.FileSystem = &fs.Local{}
+	}
+	if p.Client == nil {
+		p.Client = client.NewClient(p.KubeConfigFile)
 	}
 }

@@ -17,23 +17,27 @@
 package commands
 
 import (
+	"github.com/projectriff/riff/pkg/env"
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
-func NewRiffCommand(p *riff.Params) *cobra.Command {
-	var rootCmd = &cobra.Command{
-		Use: "riff",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
-		},
+func NewRootCommand(p *riff.Params) *cobra.Command {
+	var cmd = &cobra.Command{
+		Use: env.Cli.Name,
 	}
 
-	rootCmd.PersistentFlags().StringVar(&p.ConfigFile, "config", "", "config file (default is $HOME/.riff.yaml)")
-	rootCmd.PersistentFlags().StringVar(&p.KubeConfigFile, "kubeconfig", "", "kubectl config file (default is $HOME/.kube/config)")
+	cmd.PersistentFlags().StringVar(&p.ConfigFile, "config", "", "config file (default is $HOME/.riff.yaml)")
+	cmd.PersistentFlags().StringVar(&p.KubeConfigFile, "kubeconfig", "", "kubectl config file (default is $HOME/.kube/config)")
 
-	rootCmd.AddCommand(NewCredentialCommand(p))
+	cmd.AddCommand(NewCredentialCommand(p))
+	cmd.AddCommand(NewApplicationCommand(p))
+	cmd.AddCommand(NewFunctionCommand(p))
+	cmd.AddCommand(NewRequestProcessorCommand(p))
 
-	return rootCmd
+	cmd.AddCommand(NewCompletionCommand(p))
+	cmd.AddCommand(NewDocsCommand(p))
+	cmd.AddCommand(NewVersionCommand(p))
+
+	return cmd
 }
