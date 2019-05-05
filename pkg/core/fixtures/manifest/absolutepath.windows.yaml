@@ -1,7 +1,0 @@
-manifestVersion: 0.1
-istio:
-  - C:\x
-knative:
-  - y
-namespace:
-  - y
