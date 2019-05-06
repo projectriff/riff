@@ -44,7 +44,6 @@ func CredentialsSet(c *core.Client) *cobra.Command {
 				NotBlank("secret"),
 				AtMostOneOf("gcr", "docker-hub", "registry-user"),
 				FlagsDependency(Set("image-prefix"), NotBlank("image-prefix")),
-				FlagsDependency(Set("image-prefix"), IsTrue("enable-image-prefix")),
 				FlagsDependency(Set("registry-user"), NotBlank("registry")),
 				FlagsDependency(Set("registry"),
 					NotBlank("registry-user"),
@@ -53,6 +52,9 @@ func CredentialsSet(c *core.Client) *cobra.Command {
 					}))),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if options.ImagePrefix != "" {
+				options.EnableImagePrefix = true
+			}
 			if options.Registry != "" && !strings.Contains(options.Registry, "://") {
 				options.Registry = fmt.Sprintf("https://%s", options.Registry)
 			}

@@ -90,14 +90,6 @@ var _ = Describe("The riff credentials set command", func() {
 			Expect(err).To(MatchError("when --registry is set, valid protocols are: \"http\", \"https\", found: \"ftp\""))
 		})
 
-		It("should fail if the image prefix creation/update is disabled and an explicit image prefix is set", func() {
-			command.SetArgs([]string{"--secret", "shhh", "--namespace", "ns", "--docker-hub", "johndoe", "--image-prefix", "registry.example.com/project"})
-
-			err := command.Execute()
-
-			Expect(err).To(MatchError("when --image-prefix is set, flag --enable-image-prefix must be true"))
-		})
-
 		It("should fail if the image prefix creation/update is ensabled but an explicit image prefix is blank", func() {
 			command.SetArgs([]string{"--secret", "shhh", "--namespace", "ns", "--docker-hub", "johndoe", "--enable-image-prefix", "--image-prefix", ""})
 
@@ -139,16 +131,6 @@ var _ = Describe("The riff credentials set command", func() {
 			Expect(outWriter.String()).To(HaveSuffix("set completed successfully\n"))
 		})
 
-		It("propagates the client errors", func() {
-			command.SetArgs([]string{"--secret", "s3cr3t", "--namespace", "ns", "--docker-hub", "janedoe"})
-			expectedError := fmt.Errorf("oopsie")
-			clientMock.On("SetCredentials", mock.Anything).Return(expectedError)
-
-			err := command.Execute()
-
-			Expect(err).To(MatchError(expectedError))
-		})
-
 		It("should involve the client with https as default protocol for registry", func() {
 			command.SetArgs([]string{"--secret", "secret", "--registry", "registry.example.com", "--registry-user", "johndoe"})
 			options := core.SetCredentialsOptions{
@@ -162,6 +144,32 @@ var _ = Describe("The riff credentials set command", func() {
 
 			Expect(err).To(BeNil())
 			Expect(outWriter.String()).To(HaveSuffix("set completed successfully\n"))
+		})
+
+		It("should involve the client with the image prefix computation enabled if a prefix is passed", func() {
+			command.SetArgs([]string{"--secret", "secret", "--docker-hub", "janedoe", "--image-prefix", "reg.example.com/project"})
+			options := core.SetCredentialsOptions{
+				SecretName:        "secret",
+				DockerHubId:       "janedoe",
+				EnableImagePrefix: true,
+				ImagePrefix:       "reg.example.com/project",
+			}
+			clientMock.On("SetCredentials", options).Return(nil)
+
+			err := command.Execute()
+
+			Expect(err).To(BeNil())
+			Expect(outWriter.String()).To(HaveSuffix("set completed successfully\n"))
+		})
+
+		It("propagates the client errors", func() {
+			command.SetArgs([]string{"--secret", "s3cr3t", "--namespace", "ns", "--docker-hub", "janedoe"})
+			expectedError := fmt.Errorf("oopsie")
+			clientMock.On("SetCredentials", mock.Anything).Return(expectedError)
+
+			err := command.Execute()
+
+			Expect(err).To(MatchError(expectedError))
 		})
 	})
 })
