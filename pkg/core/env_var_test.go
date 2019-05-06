@@ -52,7 +52,7 @@ var _ = Describe("Environment variable parsing", func() {
 			})
 
 			It("should fail with a suitable error", func() {
-				Expect(err).To(MatchError("unable to parse 'FOO:BAR', environment variables must be provided as 'key=value'"))
+				Expect(err).To(MatchError("unable to parse 'FOO:BAR', environment variables must be provided as 'key=Value'"))
 			})
 		})
 
@@ -127,7 +127,7 @@ var _ = Describe("Environment variable parsing", func() {
 			})
 
 			It("should fail with a suitable error", func() {
-				Expect(err).To(MatchError("unable to parse 'FOO:BAR', environment variables must be provided as 'key=value'"))
+				Expect(err).To(MatchError("unable to parse 'FOO:BAR', environment variables must be provided as 'key=Value'"))
 			})
 		})
 

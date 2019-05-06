@@ -214,7 +214,11 @@ func (c *client) initServiceAccount(options *NamespaceInitOptions, initLabels ma
 }
 
 func (c *client) initImagePrefix(options *NamespaceInitOptions) error {
-	imagePrefix, err := DetermineImagePrefix(options.ImagePrefix, options.DockerHubId, options.GcrTokenPath)
+	imagePrefix, err := DetermineImagePrefix(
+		options.ImagePrefix,
+		DockerRegistryOption(options.DockerHubId),
+		GoogleContainerRegistryOption(options.GcrTokenPath))
+
 	if err != nil {
 		return err
 	}

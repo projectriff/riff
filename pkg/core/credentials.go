@@ -81,7 +81,11 @@ func (c *client) SetCredentials(options SetCredentialsOptions) error {
 	}
 
 	if options.EnableImagePrefix {
-		imagePrefix, err := DetermineImagePrefix(options.ImagePrefix, options.DockerHubId, options.GcrTokenPath)
+		imagePrefix, err := DetermineImagePrefix(
+			options.ImagePrefix,
+			DockerRegistryOption(options.DockerHubId),
+			GoogleContainerRegistryOption(options.GcrTokenPath))
+
 		if err != nil {
 			return err
 		}

@@ -6,21 +6,40 @@ import (
 	"io/ioutil"
 )
 
-func DetermineImagePrefix(userDefinedPrefix string, dockerHubId string, gcrTokenPath string) (string, error) {
+type RegistryOption struct {
+	Value               string
+	ImagePrefixSupplier func(string) (string, error)
+}
+
+func DockerRegistryOption(value string) *RegistryOption {
+	return &RegistryOption{
+		Value:               value,
+		ImagePrefixSupplier: dockerHubImagePrefix,
+	}
+}
+
+func GoogleContainerRegistryOption(value string) *RegistryOption {
+	return &RegistryOption{
+		Value:               value,
+		ImagePrefixSupplier: gcrImagePrefix,
+	}
+}
+
+func DetermineImagePrefix(userDefinedPrefix string, registryOptions ...*RegistryOption) (string, error) {
 	if userDefinedPrefix != "" {
 		return userDefinedPrefix, nil
 	}
-	if dockerHubId != "" {
-		return dockerHubImagePrefix(dockerHubId), nil
-	}
-	if gcrTokenPath != "" {
-		return gcrImagePrefix(gcrTokenPath)
+	for _, registryOption := range registryOptions {
+		value := registryOption.Value
+		if value != "" {
+			return registryOption.ImagePrefixSupplier(value)
+		}
 	}
 	return "", nil
 }
 
-func dockerHubImagePrefix(dockerHubId string) string {
-	return fmt.Sprintf("docker.io/%s", dockerHubId)
+func dockerHubImagePrefix(dockerHubId string) (string, error) {
+	return fmt.Sprintf("docker.io/%s", dockerHubId), nil
 }
 
 func gcrImagePrefix(gcrTokenPath string) (string, error) {

@@ -85,7 +85,7 @@ func ParseEnvVarSource(envVarsFrom []string) ([]v1.EnvVar, error) {
 func splitEnvVarEntry(env string) ([]string, error) {
 	envEntry := strings.SplitN(env, "=", 2)
 	if len(envEntry) != 2 {
-		return nil, errors.New(fmt.Sprintf("unable to parse '%s', environment variables must be provided as 'key=value'", env))
+		return nil, errors.New(fmt.Sprintf("unable to parse '%s', environment variables must be provided as 'key=Value'", env))
 	}
 	if len(envEntry[0]) < 1 {
 		return nil, errors.New(fmt.Sprintf("unable to parse '%s', the key part is missing", env))
