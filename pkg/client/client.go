@@ -26,14 +26,37 @@ import (
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-type Client struct {
-	DefaultNamespace string
-	Core             corev1.CoreV1Interface
-	Build            buildv1alpha1.BuildV1alpha1Interface
-	Run              runv1alpha1.RunV1alpha1Interface
+type Client interface {
+	DefaultNamespace() string
+	Core() corev1.CoreV1Interface
+	Build() buildv1alpha1.BuildV1alpha1Interface
+	Run() runv1alpha1.RunV1alpha1Interface
 }
 
-func NewClient(kubeCfgFile string) *Client {
+type client struct {
+	defaultNamespace string
+	core             corev1.CoreV1Interface
+	build            buildv1alpha1.BuildV1alpha1Interface
+	run              runv1alpha1.RunV1alpha1Interface
+}
+
+func (c *client) DefaultNamespace() string {
+	return c.defaultNamespace
+}
+
+func (c *client) Core() corev1.CoreV1Interface {
+	return c.core
+}
+
+func (c *client) Build() buildv1alpha1.BuildV1alpha1Interface {
+	return c.build
+}
+
+func (c *client) Run() runv1alpha1.RunV1alpha1Interface {
+	return c.run
+}
+
+func NewClient(kubeCfgFile string) Client {
 	kubeConfig := getKubeConfig(kubeCfgFile)
 	config, err := kubeConfig.ClientConfig()
 	if err != nil {
@@ -43,11 +66,11 @@ func NewClient(kubeCfgFile string) *Client {
 	kubeClient := kubernetes.NewForConfigOrDie(config)
 	riffClient := projectriffclientset.NewForConfigOrDie(config)
 
-	return &Client{
-		DefaultNamespace: getDefaultNamespaceOrDie(kubeConfig),
-		Core:             kubeClient.CoreV1(),
-		Build:            riffClient.BuildV1alpha1(),
-		Run:              riffClient.RunV1alpha1(),
+	return &client{
+		defaultNamespace: getDefaultNamespaceOrDie(kubeConfig),
+		core:             kubeClient.CoreV1(),
+		build:            riffClient.BuildV1alpha1(),
+		run:              riffClient.RunV1alpha1(),
 	}
 }
 

@@ -24,7 +24,7 @@ func NamespaceFlag(cmd *cobra.Command, p *Params, namespace *string) {
 	prior := cmd.PersistentPreRunE
 	cmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		if *namespace == "" {
-			*namespace = p.DefaultNamespace
+			*namespace = p.DefaultNamespace()
 		}
 		if prior != nil {
 			return prior(cmd, args)

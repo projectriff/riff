@@ -35,7 +35,7 @@ func NewCredentialListCommand(p *riff.Params) *cobra.Command {
 		Use: "list",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// TODO replace with a real impl
-			secrets, err := p.Core.Secrets(opt.Namespace).List(metav1.ListOptions{})
+			secrets, err := p.Core().Secrets(opt.Namespace).List(metav1.ListOptions{})
 			if err != nil {
 				return err
 			}

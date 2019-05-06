@@ -31,7 +31,7 @@ import (
 type Params struct {
 	ConfigFile     string
 	KubeConfigFile string
-	*client.Client
+	client.Client
 	FileSystem fs.FileSystem
 }
 
