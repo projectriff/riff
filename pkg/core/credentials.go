@@ -216,7 +216,7 @@ func (c *client) createServiceAccount(namespace, secretName string, initLabels m
 	serviceAccount := &corev1.ServiceAccount{}
 	serviceAccount.Name = BuildServiceAccountName
 	serviceAccount.Labels = initLabels
-	serviceAccount.Secrets = updatedSecrets(corev1.ObjectReference{Name: secretName}, serviceAccount.Secrets)
+	serviceAccount.Secrets = []corev1.ObjectReference{{Name: secretName}}
 
 	fmt.Printf("Creating serviceaccount %q with secret %q in namespace %q\n", serviceAccount.Name, secretName, namespace)
 	_, err := c.kubeClient.CoreV1().ServiceAccounts(namespace).Create(serviceAccount)
@@ -224,26 +224,22 @@ func (c *client) createServiceAccount(namespace, secretName string, initLabels m
 }
 
 func (c *client) updateServiceAccount(namespace, secretName string, serviceAccount *corev1.ServiceAccount) error {
-	serviceAccount.Secrets = updatedSecrets(corev1.ObjectReference{Name: secretName}, serviceAccount.Secrets)
+	updatedSecrets := updatedSecrets(corev1.ObjectReference{Name: secretName}, serviceAccount.Secrets)
 
-	fmt.Printf("Adding secret %q to serviceaccount %q in namespace %q\n", secretName, serviceAccount.Name, namespace)
-	_, err := c.kubeClient.CoreV1().ServiceAccounts(namespace).Update(serviceAccount)
-	return err
+	if len(updatedSecrets) > len(serviceAccount.Secrets) {
+		fmt.Printf("Binding new secret %q to existing serviceaccount %q in namespace %q\n", secretName, serviceAccount.Name, namespace)
+		serviceAccount.Secrets = updatedSecrets
+		_, err := c.kubeClient.CoreV1().ServiceAccounts(namespace).Update(serviceAccount)
+		return err
+	}
+	return nil
 }
 
 func updatedSecrets(newSecret corev1.ObjectReference, boundSecrets []corev1.ObjectReference) []corev1.ObjectReference {
-	var secrets []corev1.ObjectReference
-	matched := false
 	for _, boundSecret := range boundSecrets {
-		secret := boundSecret
 		if boundSecret.Name == newSecret.Name {
-			matched = true
-			secret = newSecret
+			return boundSecrets
 		}
-		secrets = append(secrets, secret)
 	}
-	if !matched {
-		secrets = append(secrets, newSecret)
-	}
-	return secrets
+	return append(boundSecrets, newSecret)
 }

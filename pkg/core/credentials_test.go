@@ -289,6 +289,30 @@ var _ = Describe("credentials", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
+		It("does not bind the secret when it is already bound to the build service account", func() {
+			secret := secret(secretName)
+			mockSecrets.On("Get", secretName, mock.Anything).Return(&secret, nil)
+			mockSecrets.On("Update", mock.MatchedBy(secretNamed(secretName))).Return(&secret, nil)
+			serviceAccount := serviceAccount(core.BuildServiceAccountName)
+			serviceAccount.Secrets = []v1.ObjectReference{{Name: secretName}}
+			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(&serviceAccount, nil)
+			configMap := existingConfigMap(core.BuildConfigMapName)
+			mockConfigMaps.On("Get", core.BuildConfigMapName, mock.Anything).Return(&configMap, nil)
+			mockConfigMaps.On("Update", mock.MatchedBy(andConfigMapPredicates(
+				configMapNamed(core.BuildConfigMapName),
+				configMapWithData(map[string]string{core.DefaultImagePrefixKey: "gcr.io/gcp-project-id"}),
+			))).Return(&configMap, nil)
+
+			err := client.SetCredentials(core.SetCredentialsOptions{
+				EnableImagePrefix: true,
+				NamespaceName:     "ns",
+				SecretName:        secretName,
+				GcrTokenPath:      "fixtures/gcr-creds",
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+		})
+
 		It("successfully updates and binds the secret to the newly created service account", func() {
 			secret := secret(secretName)
 			mockSecrets.On("Get", secretName, mock.Anything).Return(&secret, nil)
