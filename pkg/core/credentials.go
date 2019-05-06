@@ -50,31 +50,21 @@ func (o *SetCredentialsOptions) secretType() secretType {
 
 func (c *client) SetCredentials(options SetCredentialsOptions) error {
 	namespace := c.explicitOrConfigNamespace(options.NamespaceName)
-	secret, err := c.kubeClient.CoreV1().Secrets(namespace).Get(options.SecretName, v1.GetOptions{})
-	if err != nil && !errors.IsNotFound(err) {
-		return err
-	}
-	if err == nil {
-		fmt.Printf("Deleting existing secret %q in namespace %q\n", secret.ObjectMeta.Name, namespace)
-		if err = c.kubeClient.CoreV1().Secrets(namespace).Delete(secret.Name, &v1.DeleteOptions{}); err != nil {
-			return err
-		}
-	}
 	initLabels := getInitLabels()
-	secret, err = c.convertAdditionalSecret(&options, initLabels)
-	if err = c.createBasicSecret(namespace, secret); err != nil {
+	if err := c.createOrUpdateSecret(namespace, initLabels, options); err != nil {
 		return err
 	}
 
+	secretName := options.SecretName
 	serviceAccount, err := c.kubeClient.CoreV1().ServiceAccounts(namespace).Get(BuildServiceAccountName, v1.GetOptions{});
 	if errors.IsNotFound(err) {
-		if err = c.createServiceAccount(namespace, secret.Name, initLabels); err != nil {
+		if err = c.createServiceAccount(namespace, secretName, initLabels); err != nil {
 			return err
 		}
 	} else if err != nil {
 		return err
 	} else {
-		err = c.updateServiceAccount(namespace, secret.Name, serviceAccount)
+		err = c.updateServiceAccount(namespace, secretName, serviceAccount)
 		if err != nil {
 			return err
 		}
@@ -110,6 +100,23 @@ func (c *client) ListCredentials(options ListCredentialsOptions) (*corev1.Secret
 func (c *client) DeleteCredentials(options DeleteCredentialsOptions) error {
 	namespace := c.explicitOrConfigNamespace(options.NamespaceName)
 	return c.kubeClient.CoreV1().Secrets(namespace).Delete(options.Name, &v1.DeleteOptions{})
+}
+
+func (c *client) createOrUpdateSecret(namespace string, initLabels map[string]string, options SetCredentialsOptions) error {
+	secret, secretGetErr := c.kubeClient.CoreV1().Secrets(namespace).Get(options.SecretName, v1.GetOptions{})
+	if secretGetErr != nil && !errors.IsNotFound(secretGetErr) {
+		return secretGetErr
+	}
+
+	secret, err := c.convertAdditionalSecret(&options, initLabels)
+	if err != nil {
+		return err
+	}
+
+	if errors.IsNotFound(secretGetErr) {
+		return c.createBasicSecret(namespace, secret)
+	}
+	return c.updateBasicSecret(namespace, secret)
 }
 
 func (c *client) convertDockerHubSecret(namespace, secret, username string, labels map[string]string) (*corev1.Secret, error) {
@@ -165,6 +172,16 @@ func (c *client) createBasicSecret(namespace string, secret *corev1.Secret) erro
 		secret.StringData["username"])
 
 	_, err := c.kubeClient.CoreV1().Secrets(namespace).Create(secret)
+	return err
+}
+
+func (c *client) updateBasicSecret(namespace string, secret *corev1.Secret) error {
+	fmt.Printf("Updating secret %q with basic authentication to server %q for user %q\n",
+		secret.ObjectMeta.Name,
+		secret.Annotations["build.knative.dev/docker-0"],
+		secret.StringData["username"])
+
+	_, err := c.kubeClient.CoreV1().Secrets(namespace).Update(secret)
 	return err
 }
 

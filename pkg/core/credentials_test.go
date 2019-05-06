@@ -92,7 +92,7 @@ var _ = Describe("credentials", func() {
 			err := client.SetCredentials(core.SetCredentialsOptions{
 				NamespaceName: "ns",
 				SecretName:    secretName,
-				DockerHubId:   "janedoe",
+				GcrTokenPath:  "fixtures/gcr-creds",
 			})
 
 			Expect(err).To(MatchError(expectedError))
@@ -116,11 +116,11 @@ var _ = Describe("credentials", func() {
 			Expect(err).To(MatchError(expectedError))
 		})
 
-		It("fails to update the secret if the deletion fails", func() {
+		It("fails to update the secret if the update fails", func() {
 			expectedError := fmt.Errorf("oopsie")
 			secret := secret(secretName)
 			mockSecrets.On("Get", secretName, mock.Anything).Return(&secret, nil)
-			mockSecrets.On("Delete", secretName, mock.Anything).Return(expectedError)
+			mockSecrets.On("Update", mock.MatchedBy(secretNamed(secretName))).Return(nil, expectedError)
 
 			err := client.SetCredentials(core.SetCredentialsOptions{
 				NamespaceName: "ns",
@@ -264,8 +264,7 @@ var _ = Describe("credentials", func() {
 		It("successfully updates and binds the secret to the build service account", func() {
 			secret := secret(secretName)
 			mockSecrets.On("Get", secretName, mock.Anything).Return(&secret, nil)
-			mockSecrets.On("Delete", secretName, mock.Anything).Return(nil)
-			mockSecrets.On("Create", mock.Anything).Return(&secret, nil)
+			mockSecrets.On("Update", mock.MatchedBy(secretNamed(secretName))).Return(&secret, nil)
 			serviceAccount := serviceAccount(core.BuildServiceAccountName)
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(&serviceAccount, nil)
 			mockServiceAccounts.On("Update",
@@ -293,8 +292,7 @@ var _ = Describe("credentials", func() {
 		It("successfully updates and binds the secret to the newly created service account", func() {
 			secret := secret(secretName)
 			mockSecrets.On("Get", secretName, mock.Anything).Return(&secret, nil)
-			mockSecrets.On("Delete", secretName, mock.Anything).Return(nil)
-			mockSecrets.On("Create", mock.Anything).Return(&secret, nil)
+			mockSecrets.On("Update", mock.MatchedBy(secretNamed(secretName))).Return(&secret, nil)
 			serviceAccount := serviceAccount(core.BuildServiceAccountName)
 			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, notFound())
 			mockServiceAccounts.On("Create",
