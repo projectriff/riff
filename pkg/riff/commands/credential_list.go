@@ -25,7 +25,8 @@ import (
 )
 
 type CredentialListOptions struct {
-	Namespace string
+	Namespace     string
+	AllNamespaces bool
 }
 
 func NewCredentialListCommand(p *riff.Params) *cobra.Command {
@@ -39,14 +40,20 @@ func NewCredentialListCommand(p *riff.Params) *cobra.Command {
 			if err != nil {
 				return err
 			}
+
+			if len(secrets.Items) == 0 {
+				fmt.Fprintln(cmd.OutOrStdout(), "No credentials found.")
+			}
 			for _, secret := range secrets.Items {
+				// TODO pick a generic table formatter
 				fmt.Fprintln(cmd.OutOrStdout(), secret.Name)
 			}
+
 			return nil
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.AllNamespacesFlag(cmd, p, &opt.Namespace, &opt.AllNamespaces)
 
 	return cmd
 }

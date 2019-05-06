@@ -54,7 +54,7 @@ func NewClient(objects ...runtime.Object) *FakeClient {
 	riffClient := projectriffclientset.NewSimpleClientset(lister.GetProjectriffObjects()...)
 
 	return &FakeClient{
-		Namespace:      "",
+		Namespace:      "default",
 		FakeKubeClient: kubeClient,
 		FakeRiffClient: riffClient,
 	}

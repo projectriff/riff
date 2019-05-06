@@ -13,6 +13,7 @@ riff function list [flags]
 ### Options
 
 ```
+      --all-namespaces     list the requested object(s) across all namespaces
   -h, --help               help for list
   -n, --namespace string   the kubernetes namespace
 ```

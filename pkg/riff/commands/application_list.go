@@ -24,7 +24,8 @@ import (
 )
 
 type ApplicationListOptions struct {
-	Namespace string
+	Namespace     string
+	AllNamespaces bool
 }
 
 func NewApplicationListCommand(p *riff.Params) *cobra.Command {
@@ -37,7 +38,7 @@ func NewApplicationListCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.AllNamespacesFlag(cmd, p, &opt.Namespace, &opt.AllNamespaces)
 
 	return cmd
 }
