@@ -20,6 +20,7 @@ import (
 	projectriffclientset "github.com/projectriff/system/pkg/client/clientset/versioned"
 	buildv1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/build/v1alpha1"
 	runv1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/run/v1alpha1"
+	streamv1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/stream/v1alpha1"
 	"k8s.io/client-go/kubernetes"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
@@ -31,6 +32,7 @@ type Client interface {
 	Core() corev1.CoreV1Interface
 	Build() buildv1alpha1.BuildV1alpha1Interface
 	Run() runv1alpha1.RunV1alpha1Interface
+	Stream() streamv1alpha1.StreamV1alpha1Interface
 }
 
 type client struct {
@@ -38,6 +40,7 @@ type client struct {
 	core             corev1.CoreV1Interface
 	build            buildv1alpha1.BuildV1alpha1Interface
 	run              runv1alpha1.RunV1alpha1Interface
+	stream           streamv1alpha1.StreamV1alpha1Interface
 }
 
 func (c *client) DefaultNamespace() string {
@@ -56,6 +59,10 @@ func (c *client) Run() runv1alpha1.RunV1alpha1Interface {
 	return c.run
 }
 
+func (c *client) Stream() streamv1alpha1.StreamV1alpha1Interface {
+	return c.stream
+}
+
 func NewClient(kubeCfgFile string) Client {
 	kubeConfig := getKubeConfig(kubeCfgFile)
 	config, err := kubeConfig.ClientConfig()
@@ -71,6 +78,7 @@ func NewClient(kubeCfgFile string) Client {
 		core:             kubeClient.CoreV1(),
 		build:            riffClient.BuildV1alpha1(),
 		run:              riffClient.RunV1alpha1(),
+		stream:           riffClient.StreamV1alpha1(),
 	}
 }
 

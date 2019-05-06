@@ -34,6 +34,8 @@ func NewRootCommand(p *riff.Params) *cobra.Command {
 	cmd.AddCommand(NewApplicationCommand(p))
 	cmd.AddCommand(NewFunctionCommand(p))
 	cmd.AddCommand(NewRequestProcessorCommand(p))
+	cmd.AddCommand(NewStreamCommand(p))
+	cmd.AddCommand(NewStreamProcessorCommand(p))
 
 	cmd.AddCommand(NewCompletionCommand(p))
 	cmd.AddCommand(NewDocsCommand(p))
