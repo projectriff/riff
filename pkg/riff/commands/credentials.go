@@ -106,7 +106,7 @@ type DeleteCredentialsCliOptions struct {
 	NamespaceName string
 }
 
-func CredentialsDelete(c *core.Client) *cobra.Command {
+func CredentialsDelete(client *core.Client) *cobra.Command {
 	cliOptions := DeleteCredentialsCliOptions{}
 
 	command := &cobra.Command{
@@ -120,9 +120,13 @@ func CredentialsDelete(c *core.Client) *cobra.Command {
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			names := args[credentialsDeleteSecretNameStartIndex:]
+			if err := (*client).UnbindCredentials(cliOptions.NamespaceName, names); err != nil {
+				return err
+			}
+
 			results := tasks.ApplyInParallel(names, func(name string) error {
 				options := core.DeleteCredentialsOptions{NamespaceName: cliOptions.NamespaceName, Name: name}
-				return (*c).DeleteCredentials(options)
+				return (*client).DeleteCredentials(options)
 			})
 			err := tasks.MergeResults(results, func(result tasks.CorrelatedResult) string {
 				err := result.Error

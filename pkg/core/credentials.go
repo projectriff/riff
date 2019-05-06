@@ -102,6 +102,34 @@ func (c *client) DeleteCredentials(options DeleteCredentialsOptions) error {
 	return c.kubeClient.CoreV1().Secrets(namespace).Delete(options.Name, &v1.DeleteOptions{})
 }
 
+func (c *client) UnbindCredentials(ns string, names []string) error {
+	namespace := c.explicitOrConfigNamespace(ns)
+	serviceAccount, err := c.kubeClient.CoreV1().ServiceAccounts(namespace).Get(BuildServiceAccountName, v1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	var secrets []corev1.ObjectReference
+	for _, secret := range serviceAccount.Secrets {
+		if !contains(names, secret.Name) {
+			secrets = append(secrets, secret)
+		}
+	}
+	serviceAccount.Secrets = secrets
+
+	_, err = c.kubeClient.CoreV1().ServiceAccounts(namespace).Update(serviceAccount)
+	return err
+}
+
+func contains(strings []string, search string) bool {
+	for _, s := range strings {
+		if search == s {
+			return true
+		}
+	}
+	return false
+}
+
 func (c *client) createOrUpdateSecret(namespace string, initLabels map[string]string, options SetCredentialsOptions) error {
 	secret, secretGetErr := c.kubeClient.CoreV1().Secrets(namespace).Get(options.SecretName, v1.GetOptions{})
 	if secretGetErr != nil && !errors.IsNotFound(secretGetErr) {

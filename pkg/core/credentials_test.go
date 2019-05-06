@@ -385,6 +385,49 @@ var _ = Describe("credentials", func() {
 			Expect(err).To(Not(HaveOccurred()))
 		})
 	})
+
+	Describe("UnbindCredentials", func() {
+
+		BeforeEach(func() {
+			mockClientConfig.On("Namespace").Return("default", false, nil)
+		})
+
+		It("propagates the underlying client get error", func() {
+			expectedError := fmt.Errorf("oopsie")
+			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(nil, expectedError)
+
+			err := client.UnbindCredentials("", []string{"secret"})
+
+			Expect(err).To(MatchError(expectedError))
+		})
+
+		It("propagates the underlying client update error", func() {
+			serviceAccount := serviceAccount(core.BuildServiceAccountName)
+			serviceAccount.Secrets = []v1.ObjectReference{{Name: "secret"}}
+			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(&serviceAccount, nil)
+			expectedError := fmt.Errorf("oopsie")
+			mockServiceAccounts.On("Update", mock.MatchedBy(andServiceAccountPredicates(
+				serviceAccountNamed(core.BuildServiceAccountName), withZeroSecret(),
+			))).Return(nil, expectedError)
+
+			err := client.UnbindCredentials("", []string{"secret"})
+
+			Expect(err).To(MatchError(expectedError))
+		})
+
+		It("successfully unbinds the secrets", func() {
+			serviceAccount := serviceAccount(core.BuildServiceAccountName)
+			serviceAccount.Secrets = []v1.ObjectReference{{Name: "secret"}}
+			mockServiceAccounts.On("Get", core.BuildServiceAccountName, mock.Anything).Return(&serviceAccount, nil)
+			mockServiceAccounts.On("Update", mock.MatchedBy(andServiceAccountPredicates(
+				serviceAccountNamed(core.BuildServiceAccountName), withZeroSecret(),
+			))).Return(&serviceAccount, nil)
+
+			err := client.UnbindCredentials("", []string{"secret"})
+
+			Expect(err).To(Not(HaveOccurred()))
+		})
+	})
 })
 
 func configMapNamed(name string) func(*v1.ConfigMap) bool {
@@ -430,6 +473,12 @@ func withSingleSecret(secretName string) func(*v1.ServiceAccount) bool {
 			}
 		}
 		return count == 1
+	}
+}
+
+func withZeroSecret() func(*v1.ServiceAccount) bool {
+	return func(sa *v1.ServiceAccount) bool {
+		return len(sa.Secrets) == 0
 	}
 }
 

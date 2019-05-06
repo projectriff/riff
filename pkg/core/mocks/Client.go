@@ -359,6 +359,20 @@ func (_m *Client) SystemUninstall(options core.SystemUninstallOptions) (bool, er
 	return r0, r1
 }
 
+// UnbindCredentials provides a mock function with given fields: namespace, names
+func (_m *Client) UnbindCredentials(namespace string, names []string) error {
+	ret := _m.Called(namespace, names)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, []string) error); ok {
+		r0 = rf(namespace, names)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // UpdateFunction provides a mock function with given fields: builder, options, log
 func (_m *Client) UpdateFunction(builder core.Builder, options core.UpdateFunctionOptions, log io.Writer) error {
 	ret := _m.Called(builder, options, log)
