@@ -88,9 +88,6 @@ func CredentialsList(c *core.Client) *cobra.Command {
 		Example: `  ` + env.Cli.Name + ` credentials list
   ` + env.Cli.Name + ` credentials list --namespace joseph-ns`,
 		Args: cobra.ExactArgs(credentialsListNumberOfArgs),
-		PreRunE: FlagsValidatorAsCobraRunE(
-			FlagsDependency(Set("namespace"), ValidDnsSubdomain("namespace")),
-		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			credentialsList, err := (*c).ListCredentials(options)
 			if err != nil {
@@ -120,9 +117,6 @@ func CredentialsDelete(c *core.Client) *cobra.Command {
 		Args: ArgValidationConjunction(
 			cobra.MinimumNArgs(credentialsDeleteMinNumberOfArgs),
 			StartingAtPosition(credentialsDeleteSecretNameStartIndex, ArgNotBlank("secret")),
-		),
-		PreRunE: FlagsValidatorAsCobraRunE(
-			FlagsDependency(Set("namespace"), ValidDnsSubdomain("namespace")),
 		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			names := args[credentialsDeleteSecretNameStartIndex:]
