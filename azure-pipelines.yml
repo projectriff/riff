@@ -1,0 +1,21 @@
+jobs:
+
+- job: unit
+  strategy:
+    matrix:
+      linux:
+        imageName: 'ubuntu-16.04'
+      mac:
+        imageName: 'macos-10.13'
+      windows:
+        imageName: 'windows-2019'
+  pool:
+    vmImage: $(imageName)
+  variables:
+    GOBIN:  '$(GOPATH)/bin' # Go binaries path
+    GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
+    GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
+    modulePath: '$(build.repository.name)' # Path to the module's code
+  steps:
+  - template: ci/unit-test-steps.yml
+  displayName: 'Unit test'
