@@ -58,14 +58,6 @@ var _ = Describe("The riff credentials set command", func() {
 			Expect(err).To(MatchError("accepts 0 arg(s), received 1"))
 		})
 
-		It("should fail with an invalid namespace name", func() {
-			command.SetArgs([]string{"--secret", "shhh", "--namespace", "inv@l1d!ns", "--gcr", "~/path/to/file", "--docker-hub", "alice"})
-
-			err := command.Execute()
-
-			Expect(err).To(MatchError("when --namespace is set, flag --namespace must be a valid DNS subdomain"))
-		})
-
 		It("should fail with conflicting options", func() {
 			command.SetArgs([]string{"--secret", "shhh", "--namespace", "ns", "--gcr", "~/path/to/file", "--docker-hub", "alice", "--registry-user", "bob", "--registry", "http://example.com"})
 
