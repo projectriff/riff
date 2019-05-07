@@ -20,18 +20,20 @@ import (
 	"strings"
 	"testing"
 
+	kntesting "github.com/knative/pkg/reconciler/testing"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	rifftesting "github.com/projectriff/riff/pkg/testing"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	clientgotesting "k8s.io/client-go/testing"
 )
 
 func TestCredentialListCommand(t *testing.T) {
 	rifftesting.Table{{
 		Name: "empty",
 		Args: []string{},
-		WithOutput: func(t *testing.T, output string) {
+		WithOutput: func(t *testing.T, output string, err error) {
 			if got, want := output, "No credentials found.\n"; got != want {
 				t.Errorf("expected output %q got %q", want, got)
 			}
@@ -47,7 +49,7 @@ func TestCredentialListCommand(t *testing.T) {
 				},
 			},
 		},
-		WithOutput: func(t *testing.T, output string) {
+		WithOutput: func(t *testing.T, output string, err error) {
 			if got, want := output, "my-secret\n"; got != want {
 				t.Errorf("expected output %q got %q", want, got)
 			}
@@ -63,7 +65,7 @@ func TestCredentialListCommand(t *testing.T) {
 				},
 			},
 		},
-		WithOutput: func(t *testing.T, output string) {
+		WithOutput: func(t *testing.T, output string, err error) {
 			if got, want := output, "No credentials found.\n"; got != want {
 				t.Errorf("expected output %q got %q", want, got)
 			}
@@ -85,7 +87,7 @@ func TestCredentialListCommand(t *testing.T) {
 				},
 			},
 		},
-		WithOutput: func(t *testing.T, got string) {
+		WithOutput: func(t *testing.T, got string, err error) {
 			for _, want := range []string{
 				"my-secret\n",
 				"my-other-secret\n",
@@ -95,5 +97,12 @@ func TestCredentialListCommand(t *testing.T) {
 				}
 			}
 		},
+	}, {
+		Name: "fetch error",
+		Args: []string{},
+		WithReactors: []clientgotesting.ReactionFunc{
+			kntesting.InduceFailure("list", "secrets"),
+		},
+		WantError: true,
 	}}.Run(t, commands.NewCredentialListCommand)
 }

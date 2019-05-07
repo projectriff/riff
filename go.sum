@@ -113,8 +113,11 @@ github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvW
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/knative/build v0.5.0 h1:q2W4+BmT3jEOSOXZ44UXndJUAHLWUd20QtMQAFGWzsU=
 github.com/knative/build v0.5.0/go.mod h1:/sU74ZQkwlYA5FwYDJhYTy61i/Kn+5eWfln2jDbw3Qo=
+github.com/knative/pkg v0.0.0-20190417151928-418e675f88c2 h1:mZG/kVb62pp+3pNVSQ+GKdRfJB1FBRhxxIIHUNtBgFo=
+github.com/knative/pkg v0.0.0-20190417151928-418e675f88c2/go.mod h1:7Ijfhw7rfB+H9VtosIsDYvZQ+qYTz7auK3fHW/5z4ww=
 github.com/knative/pkg v0.0.0-20190503004634-868008d0f8dd h1:HFvRUUfCB0XcjruMmaQAaDvzU8JjEwbfit1XgxEbUeE=
 github.com/knative/pkg v0.0.0-20190503004634-868008d0f8dd/go.mod h1:7Ijfhw7rfB+H9VtosIsDYvZQ+qYTz7auK3fHW/5z4ww=
+github.com/knative/pkg v0.0.0-20190506220336-8777a2e1d518 h1:LFx3SRq9ZMts8T5PkKAz8VXeHpXRGQYieTExd8U7+iM=
 github.com/knative/serving v0.5.2 h1:jsmeIN7B6oDHrK0jmtFRf7hWWr+KrjXVHuArK8jo5Nw=
 github.com/knative/serving v0.5.2/go.mod h1:ljvMfwQy2qanaM/8xnBSK4Mz3Vv2NawC2fo5kFRJS1A=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=

@@ -3,7 +3,7 @@ module github.com/projectriff/riff
 go 1.12
 
 require (
-	github.com/knative/pkg v0.0.0-20190503004634-868008d0f8dd
+	github.com/knative/pkg v0.0.0-20190417151928-418e675f88c2
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/projectriff/system v0.0.0-20190507151708-5b67cb48c8ea
 	github.com/spf13/cobra v0.0.3

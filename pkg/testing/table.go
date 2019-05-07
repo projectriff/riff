@@ -23,21 +23,23 @@ import (
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/runtime"
+	clientgotesting "k8s.io/client-go/testing"
 )
 
 type Table []TableRow
 
 type TableRow struct {
-	Name    string
-	Args    []string
-	Params  *riff.Params
-	Objects []runtime.Object
-	WantErr bool
+	Name         string
+	Args         []string
+	Params       *riff.Params
+	Objects      []runtime.Object
+	WithReactors []clientgotesting.ReactionFunc
 	// WantCreates           []metav1.Object
 	// WantUpdates           []clientgotesting.UpdateActionImpl
 	// WantDeletes           []clientgotesting.DeleteActionImpl
 	// WantDeleteCollections []clientgotesting.DeleteCollectionActionImpl
-	WithOutput func(*testing.T, string)
+	WantError  bool
+	WithOutput func(*testing.T, string, error)
 }
 
 func (tests Table) Run(t *testing.T, cmdFactory func(*riff.Params) *cobra.Command) {
@@ -47,7 +49,14 @@ func (tests Table) Run(t *testing.T, cmdFactory func(*riff.Params) *cobra.Comman
 			if p == nil {
 				p = &riff.Params{}
 			}
-			p.Client = NewClient(test.Objects...)
+			client := NewClient(test.Objects...)
+			p.Client = client
+
+			for i := range test.WithReactors {
+				// in reverse order since we prepend
+				reactor := test.WithReactors[len(test.WithReactors)-1-i]
+				client.PrependReactor("*", "*", reactor)
+			}
 
 			cmd := cmdFactory(p)
 			output := &bytes.Buffer{}
@@ -57,11 +66,15 @@ func (tests Table) Run(t *testing.T, cmdFactory func(*riff.Params) *cobra.Comman
 
 			err := cmd.Execute()
 
-			if got, want := err != nil, test.WantErr; got != want {
-				t.Errorf("Command error = %v, WantErr %v", err, test.WantErr)
+			if want, got := test.WantError, err != nil; want != got {
+				if want {
+					t.Errorf("expected command to error, got %v", got)
+				} else {
+					t.Errorf("expected command not to error, got %v", got)
+				}
 			}
 			if test.WithOutput != nil {
-				test.WithOutput(t, output.String())
+				test.WithOutput(t, output.String(), err)
 			}
 		})
 	}
