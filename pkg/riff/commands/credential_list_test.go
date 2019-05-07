@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/projectriff/riff/pkg/riff/commands"
@@ -84,9 +85,14 @@ func TestCredentialListCommand(t *testing.T) {
 				},
 			},
 		},
-		WithOutput: func(t *testing.T, output string) {
-			if got, want := output, "my-secret\nmy-other-secret\n"; got != want {
-				t.Errorf("expected output %q got %q", want, got)
+		WithOutput: func(t *testing.T, got string) {
+			for _, want := range []string{
+				"my-secret\n",
+				"my-other-secret\n",
+			} {
+				if !strings.Contains(got, want) {
+					t.Errorf("expected command output to contain %q got %q", want, got)
+				}
 			}
 		},
 	}}.Run(t, commands.NewCredentialListCommand)
