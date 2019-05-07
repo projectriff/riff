@@ -165,6 +165,8 @@ github.com/projectriff/system v0.0.0-20190502164831-3585d48f3da3 h1:NTrzi89mXE41
 github.com/projectriff/system v0.0.0-20190502164831-3585d48f3da3/go.mod h1:C2DnqACuw6IrFJudIGhETAlqBkF2KVyKj24VedxZxq0=
 github.com/projectriff/system v0.0.0-20190506221114-ca811d5bcc2e h1:OTwg+CEwJCjsUm/+0o1Ny8U0d1f69SWKrEqe/rcEih4=
 github.com/projectriff/system v0.0.0-20190506221114-ca811d5bcc2e/go.mod h1:C2DnqACuw6IrFJudIGhETAlqBkF2KVyKj24VedxZxq0=
+github.com/projectriff/system v0.0.0-20190507151708-5b67cb48c8ea h1:fntVG8bMG85mv0ly+Kne5kVj8AFsqbyopcmZys8PAwE=
+github.com/projectriff/system v0.0.0-20190507151708-5b67cb48c8ea/go.mod h1:C2DnqACuw6IrFJudIGhETAlqBkF2KVyKj24VedxZxq0=
 github.com/prometheus/client_golang v0.9.1/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=
 github.com/prometheus/client_golang v0.9.3-0.20190127221311-3c4408c8b829 h1:D+CiwcpGTW6pL6bv6KI3KbyEyCKyS+1JWS2h8PNDnGA=
 github.com/prometheus/client_golang v0.9.3-0.20190127221311-3c4408c8b829/go.mod h1:p2iRAGwDERtqlqzRXnrOVns+ignqQo//hLXqYxZYVNs=

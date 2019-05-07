@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/knative/pkg v0.0.0-20190503004634-868008d0f8dd
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/projectriff/system v0.0.0-20190506221114-ca811d5bcc2e
+	github.com/projectriff/system v0.0.0-20190507151708-5b67cb48c8ea
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.2
 	k8s.io/api v0.0.0-20190226173710-145d52631d00

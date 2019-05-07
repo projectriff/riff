@@ -19,10 +19,10 @@ package testing
 import (
 	"github.com/knative/pkg/reconciler/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
-	runv1alpha1 "github.com/projectriff/system/pkg/apis/run/v1alpha1"
+	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
 	fakeprojectriffclientset "github.com/projectriff/system/pkg/client/clientset/versioned/fake"
 	buildlisters "github.com/projectriff/system/pkg/client/listers/build/v1alpha1"
-	runlisters "github.com/projectriff/system/pkg/client/listers/run/v1alpha1"
+	requestlisters "github.com/projectriff/system/pkg/client/listers/request/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -77,8 +77,8 @@ func (l *Listers) GetFunctionLister() buildlisters.FunctionLister {
 	return buildlisters.NewFunctionLister(l.indexerFor(&buildv1alpha1.Function{}))
 }
 
-func (l *Listers) GetRequestProcessorLister() runlisters.RequestProcessorLister {
-	return runlisters.NewRequestProcessorLister(l.indexerFor(&runv1alpha1.RequestProcessor{}))
+func (l *Listers) GetRequestProcessorLister() requestlisters.RequestProcessorLister {
+	return requestlisters.NewRequestProcessorLister(l.indexerFor(&requestv1alpha1.RequestProcessor{}))
 }
 
 func (l *Listers) GetDeploymentLister() appsv1listers.DeploymentLister {

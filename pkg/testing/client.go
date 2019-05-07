@@ -19,7 +19,7 @@ package testing
 import (
 	projectriffclientset "github.com/projectriff/system/pkg/client/clientset/versioned/fake"
 	buildv1alpha1clientset "github.com/projectriff/system/pkg/client/clientset/versioned/typed/build/v1alpha1"
-	runv1alpha1clientset "github.com/projectriff/system/pkg/client/clientset/versioned/typed/run/v1alpha1"
+	requestv1alpha1clientset "github.com/projectriff/system/pkg/client/clientset/versioned/typed/request/v1alpha1"
 	streamv1alpha1clientset "github.com/projectriff/system/pkg/client/clientset/versioned/typed/stream/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	kubernetes "k8s.io/client-go/kubernetes/fake"
@@ -44,8 +44,8 @@ func (c *FakeClient) Build() buildv1alpha1clientset.BuildV1alpha1Interface {
 	return c.FakeRiffClient.BuildV1alpha1()
 }
 
-func (c *FakeClient) Run() runv1alpha1clientset.RunV1alpha1Interface {
-	return c.FakeRiffClient.RunV1alpha1()
+func (c *FakeClient) Request() requestv1alpha1clientset.RequestV1alpha1Interface {
+	return c.FakeRiffClient.RequestV1alpha1()
 }
 
 func (c *FakeClient) Stream() streamv1alpha1clientset.StreamV1alpha1Interface {
