@@ -24,7 +24,8 @@ import (
 
 func NewRootCommand(p *riff.Params) *cobra.Command {
 	var cmd = &cobra.Command{
-		Use: env.Cli.Name,
+		Use:               env.Cli.Name,
+		DisableAutoGenTag: true,
 	}
 
 	cmd.PersistentFlags().StringVar(&p.ConfigFile, "config", "", "config file (default is $HOME/.riff.yaml)")
