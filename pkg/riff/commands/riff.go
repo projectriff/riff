@@ -17,23 +17,21 @@
 package commands
 
 import (
-	"github.com/projectriff/riff/pkg/env"
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 )
 
-func NewRootCommand(p *riff.Params) *cobra.Command {
-	cmd := NewRiffCommand(p)
+func NewRiffCommand(p *riff.Params) *cobra.Command {
+	var cmd = &cobra.Command{
+		Use: "riff",
+	}
 
-	cmd.Use = env.Cli.Name
-	cmd.DisableAutoGenTag = true
-
-	cmd.PersistentFlags().StringVar(&p.ConfigFile, "config", "", "config file (default is $HOME/.riff.yaml)")
-	cmd.PersistentFlags().StringVar(&p.KubeConfigFile, "kubeconfig", "", "kubectl config file (default is $HOME/.kube/config)")
-
-	cmd.AddCommand(NewCompletionCommand(p))
-	cmd.AddCommand(NewDocsCommand(p))
-	cmd.AddCommand(NewVersionCommand(p))
+	cmd.AddCommand(NewCredentialCommand(p))
+	cmd.AddCommand(NewApplicationCommand(p))
+	cmd.AddCommand(NewFunctionCommand(p))
+	cmd.AddCommand(NewRequestProcessorCommand(p))
+	cmd.AddCommand(NewStreamCommand(p))
+	cmd.AddCommand(NewStreamProcessorCommand(p))
 
 	return cmd
 }
