@@ -23,6 +23,7 @@ import (
 	streamv1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/stream/v1alpha1"
 	"k8s.io/client-go/kubernetes"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
@@ -35,64 +36,85 @@ type Client interface {
 	Stream() streamv1alpha1.StreamV1alpha1Interface
 }
 
-type client struct {
-	defaultNamespace string
-	core             corev1.CoreV1Interface
-	build            buildv1alpha1.BuildV1alpha1Interface
-	request          requestv1alpha1.RequestV1alpha1Interface
-	stream           streamv1alpha1.StreamV1alpha1Interface
-}
-
 func (c *client) DefaultNamespace() string {
-	return c.defaultNamespace
+	return c.lazyLoadDefaultNamespaceOrDie()
 }
 
 func (c *client) Core() corev1.CoreV1Interface {
-	return c.core
+	return c.lazyLoadKubernetesClientOrDie().CoreV1()
 }
 
 func (c *client) Build() buildv1alpha1.BuildV1alpha1Interface {
-	return c.build
+	return c.lazyLoadRiffClientOrDie().BuildV1alpha1()
 }
 
 func (c *client) Request() requestv1alpha1.RequestV1alpha1Interface {
-	return c.request
+	return c.lazyLoadRiffClientOrDie().RequestV1alpha1()
 }
 
 func (c *client) Stream() streamv1alpha1.StreamV1alpha1Interface {
-	return c.stream
+	return c.lazyLoadRiffClientOrDie().StreamV1alpha1()
 }
 
-func NewClient(kubeCfgFile string) Client {
-	kubeConfig := getKubeConfig(kubeCfgFile)
-	config, err := kubeConfig.ClientConfig()
-	if err != nil {
-		panic(err)
-	}
-
-	kubeClient := kubernetes.NewForConfigOrDie(config)
-	riffClient := projectriffclientset.NewForConfigOrDie(config)
-
-	return &client{
-		defaultNamespace: getDefaultNamespaceOrDie(kubeConfig),
-		core:             kubeClient.CoreV1(),
-		build:            riffClient.BuildV1alpha1(),
-		request:          riffClient.RequestV1alpha1(),
-		stream:           riffClient.StreamV1alpha1(),
-	}
+func NewClient(kubeConfigFile string) Client {
+	return &client{kubeConfigFile: kubeConfigFile}
 }
 
-func getKubeConfig(kubeCfgFile string) clientcmd.ClientConfig {
-	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeCfgFile},
-		&clientcmd.ConfigOverrides{ClusterInfo: clientcmdapi.Cluster{Server: ""}},
-	)
+type client struct {
+	defaultNamespace string
+	kubeConfigFile   string
+	kubeConfig       clientcmd.ClientConfig
+	restConfig       *rest.Config
+	kubeClient       *kubernetes.Clientset
+	riffClient       *projectriffclientset.Clientset
 }
 
-func getDefaultNamespaceOrDie(kubeConfig clientcmd.ClientConfig) string {
-	namespace, _, err := kubeConfig.Namespace()
-	if err != nil {
-		panic(err)
+func (c *client) lazyLoadKubeConfig() clientcmd.ClientConfig {
+	if c.kubeConfig == nil {
+		c.kubeConfig = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+			&clientcmd.ClientConfigLoadingRules{ExplicitPath: c.kubeConfigFile},
+			&clientcmd.ConfigOverrides{ClusterInfo: clientcmdapi.Cluster{Server: ""}},
+		)
 	}
-	return namespace
+	return c.kubeConfig
+}
+
+func (c *client) lazyLoadRestConfigOrDie() *rest.Config {
+	if c.restConfig == nil {
+		kubeConfig := c.lazyLoadKubeConfig()
+		restConfig, err := kubeConfig.ClientConfig()
+		if err != nil {
+			panic(err)
+		}
+		c.restConfig = restConfig
+	}
+	return c.restConfig
+}
+
+func (c *client) lazyLoadKubernetesClientOrDie() *kubernetes.Clientset {
+	if c.kubeClient == nil {
+		restConfig := c.lazyLoadRestConfigOrDie()
+		c.kubeClient = kubernetes.NewForConfigOrDie(restConfig)
+	}
+	return c.kubeClient
+}
+
+func (c *client) lazyLoadRiffClientOrDie() *projectriffclientset.Clientset {
+	if c.riffClient == nil {
+		restConfig := c.lazyLoadRestConfigOrDie()
+		c.riffClient = projectriffclientset.NewForConfigOrDie(restConfig)
+	}
+	return c.riffClient
+}
+
+func (c *client) lazyLoadDefaultNamespaceOrDie() string {
+	if c.defaultNamespace == "" {
+		kubeConfig := c.lazyLoadKubeConfig()
+		namespace, _, err := kubeConfig.Namespace()
+		if err != nil {
+			panic(err)
+		}
+		c.defaultNamespace = namespace
+	}
+	return c.defaultNamespace
 }
