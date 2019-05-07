@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package client
+package k8s
 
 import (
 	projectriffclientset "github.com/projectriff/system/pkg/client/clientset/versioned"

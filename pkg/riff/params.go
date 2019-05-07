@@ -22,8 +22,8 @@ import (
 	"path/filepath"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/projectriff/riff/pkg/client"
 	"github.com/projectriff/riff/pkg/fs"
+	"github.com/projectriff/riff/pkg/k8s"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -31,7 +31,7 @@ import (
 type Params struct {
 	ConfigFile     string
 	KubeConfigFile string
-	client.Client
+	k8s.Client
 	FileSystem fs.FileSystem
 }
 
@@ -93,6 +93,6 @@ func (p *Params) init() {
 		p.FileSystem = &fs.Local{}
 	}
 	if p.Client == nil {
-		p.Client = client.NewClient(p.KubeConfigFile)
+		p.Client = k8s.NewClient(p.KubeConfigFile)
 	}
 }
