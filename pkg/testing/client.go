@@ -24,7 +24,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	kubernetes "k8s.io/client-go/kubernetes/fake"
 	corev1clientset "k8s.io/client-go/kubernetes/typed/core/v1"
-	testing "k8s.io/client-go/testing"
 )
 
 type FakeClient struct {
@@ -53,7 +52,7 @@ func (c *FakeClient) Stream() streamv1alpha1clientset.StreamV1alpha1Interface {
 	return c.FakeRiffClient.StreamV1alpha1()
 }
 
-func (c *FakeClient) PrependReactor(verb, resource string, reaction testing.ReactionFunc) {
+func (c *FakeClient) PrependReactor(verb, resource string, reaction ReactionFunc) {
 	c.FakeKubeClient.PrependReactor(verb, resource, reaction)
 	c.FakeRiffClient.PrependReactor(verb, resource, reaction)
 }

@@ -17,7 +17,6 @@
 package testing
 
 import (
-	"github.com/knative/pkg/reconciler/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
 	fakeprojectriffclientset "github.com/projectriff/system/pkg/client/clientset/versioned/fake"
@@ -38,7 +37,7 @@ var clientSetSchemes = []func(*runtime.Scheme) error{
 }
 
 type Listers struct {
-	sorter testing.ObjectSorter
+	sorter ObjectSorter
 }
 
 func NewListers(objs []runtime.Object) Listers {
@@ -49,7 +48,7 @@ func NewListers(objs []runtime.Object) Listers {
 	}
 
 	ls := Listers{
-		sorter: testing.NewObjectSorter(scheme),
+		sorter: NewObjectSorter(scheme),
 	}
 
 	ls.sorter.AddObjects(objs...)

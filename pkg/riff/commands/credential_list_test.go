@@ -18,19 +18,16 @@ package commands_test
 
 import (
 	"strings"
-	"testing"
 
-	kntesting "github.com/knative/pkg/reconciler/testing"
 	"github.com/projectriff/riff/pkg/riff/commands"
-	rifftesting "github.com/projectriff/riff/pkg/testing"
+	"github.com/projectriff/riff/pkg/testing"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	clientgotesting "k8s.io/client-go/testing"
 )
 
 func TestCredentialListCommand(t *testing.T) {
-	rifftesting.Table{{
+	testing.Table{{
 		Name: "empty",
 		Args: []string{},
 		WithOutput: func(t *testing.T, output string, err error) {
@@ -100,8 +97,8 @@ func TestCredentialListCommand(t *testing.T) {
 	}, {
 		Name: "fetch error",
 		Args: []string{},
-		WithReactors: []clientgotesting.ReactionFunc{
-			kntesting.InduceFailure("list", "secrets"),
+		WithReactors: []testing.ReactionFunc{
+			testing.InduceFailure("list", "secrets"),
 		},
 		WantError: true,
 	}}.Run(t, commands.NewCredentialListCommand)

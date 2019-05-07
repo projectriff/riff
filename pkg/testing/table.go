@@ -18,12 +18,10 @@ package testing
 
 import (
 	"bytes"
-	"testing"
 
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/runtime"
-	clientgotesting "k8s.io/client-go/testing"
 )
 
 type Table []TableRow
@@ -33,18 +31,18 @@ type TableRow struct {
 	Args         []string
 	Params       *riff.Params
 	Objects      []runtime.Object
-	WithReactors []clientgotesting.ReactionFunc
+	WithReactors []ReactionFunc
 	// WantCreates           []metav1.Object
-	// WantUpdates           []clientgotesting.UpdateActionImpl
-	// WantDeletes           []clientgotesting.DeleteActionImpl
-	// WantDeleteCollections []clientgotesting.DeleteCollectionActionImpl
+	// WantUpdates           []UpdateActionImpl
+	// WantDeletes           []DeleteActionImpl
+	// WantDeleteCollections []DeleteCollectionActionImpl
 	WantError  bool
-	WithOutput func(*testing.T, string, error)
+	WithOutput func(*T, string, error)
 }
 
-func (tests Table) Run(t *testing.T, cmdFactory func(*riff.Params) *cobra.Command) {
+func (tests Table) Run(t *T, cmdFactory func(*riff.Params) *cobra.Command) {
 	for _, test := range tests {
-		t.Run(test.Name, func(t *testing.T) {
+		t.Run(test.Name, func(t *T) {
 			p := test.Params
 			if p == nil {
 				p = &riff.Params{}
@@ -76,6 +74,7 @@ func (tests Table) Run(t *testing.T, cmdFactory func(*riff.Params) *cobra.Comman
 			if test.WithOutput != nil {
 				test.WithOutput(t, output.String(), err)
 			}
+			// TODO assert created, updated and deleted resources
 		})
 	}
 }
