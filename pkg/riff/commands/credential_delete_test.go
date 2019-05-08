@@ -26,10 +26,10 @@ import (
 )
 
 func TestCredentialDeleteCommand(t *testing.T) {
-	testing.Table{{
+	table := testing.CommandTable{{
 		Name: "delete secret",
 		Args: []string{"my-credential"},
-		Objects: []runtime.Object{
+		GivenObjects: []runtime.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "my-credential",
@@ -38,7 +38,7 @@ func TestCredentialDeleteCommand(t *testing.T) {
 				StringData: map[string]string{},
 			},
 		},
-		WantDeletes: []testing.DeleteActionImpl{{
+		ExpectDeletes: []testing.DeleteActionImpl{{
 			Name: "my-credential",
 			ActionImpl: testing.ActionImpl{
 				Namespace: "default",
@@ -51,9 +51,9 @@ func TestCredentialDeleteCommand(t *testing.T) {
 			}},
 		},
 	}, {
-		Name: "secret doens't exist",
+		Name: "secret ds't exist",
 		Args: []string{"my-credential"},
-		WantDeletes: []testing.DeleteActionImpl{{
+		ExpectDeletes: []testing.DeleteActionImpl{{
 			Name: "my-credential",
 			ActionImpl: testing.ActionImpl{
 				Namespace: "default",
@@ -65,11 +65,11 @@ func TestCredentialDeleteCommand(t *testing.T) {
 				},
 			}},
 		},
-		WantError: true,
+		ExpectError: true,
 	}, {
 		Name: "delete error",
 		Args: []string{"my-credential"},
-		Objects: []runtime.Object{
+		GivenObjects: []runtime.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "my-credential",
@@ -81,7 +81,7 @@ func TestCredentialDeleteCommand(t *testing.T) {
 		WithReactors: []testing.ReactionFunc{
 			testing.InduceFailure("delete", "secrets"),
 		},
-		WantDeletes: []testing.DeleteActionImpl{{
+		ExpectDeletes: []testing.DeleteActionImpl{{
 			Name: "my-credential",
 			ActionImpl: testing.ActionImpl{
 				Namespace: "default",
@@ -93,6 +93,8 @@ func TestCredentialDeleteCommand(t *testing.T) {
 				},
 			}},
 		},
-		WantError: true,
-	}}.Run(t, commands.NewCredentialDeleteCommand)
+		ExpectError: true,
+	}}
+
+	table.Run(t, commands.NewCredentialDeleteCommand)
 }

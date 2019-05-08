@@ -20,8 +20,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func AllNamespacesFlag(cmd *cobra.Command, p *Params, namespace *string, allNamespaces *bool) {
-	NamespaceFlag(cmd, p, namespace)
+func AllNamespacesFlag(cmd *cobra.Command, c *Config, namespace *string, allNamespaces *bool) {
+	NamespaceFlag(cmd, c, namespace)
 
 	prior := cmd.PersistentPreRunE
 	cmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
@@ -39,7 +39,7 @@ func AllNamespacesFlag(cmd *cobra.Command, p *Params, namespace *string, allName
 	cmd.Flags().BoolVar(allNamespaces, "all-namespaces", false, "list the requested object(s) across all namespaces")
 }
 
-func NamespaceFlag(cmd *cobra.Command, p *Params, namespace *string) {
+func NamespaceFlag(cmd *cobra.Command, c *Config, namespace *string) {
 	prior := cmd.PersistentPreRunE
 	cmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		if prior != nil {
@@ -48,7 +48,7 @@ func NamespaceFlag(cmd *cobra.Command, p *Params, namespace *string) {
 			}
 		}
 		if *namespace == "" {
-			*namespace = p.DefaultNamespace()
+			*namespace = c.DefaultNamespace()
 		}
 		return nil
 	}

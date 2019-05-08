@@ -27,7 +27,7 @@ type StreamProcessorDeleteOptions struct {
 	Namespace string
 }
 
-func NewStreamProcessorDeleteCommand(p *riff.Params) *cobra.Command {
+func NewStreamProcessorDeleteCommand(c *riff.Config) *cobra.Command {
 	opt := &StreamProcessorDeleteOptions{}
 
 	cmd := &cobra.Command{
@@ -37,7 +37,7 @@ func NewStreamProcessorDeleteCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

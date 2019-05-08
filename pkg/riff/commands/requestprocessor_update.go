@@ -27,7 +27,7 @@ type RequestProcessorUpdateOptions struct {
 	Namespace string
 }
 
-func NewRequestProcessorUpdateCommand(p *riff.Params) *cobra.Command {
+func NewRequestProcessorUpdateCommand(c *riff.Config) *cobra.Command {
 	opt := &RequestProcessorUpdateOptions{}
 
 	cmd := &cobra.Command{
@@ -37,7 +37,7 @@ func NewRequestProcessorUpdateCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

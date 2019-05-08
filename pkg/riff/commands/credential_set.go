@@ -29,7 +29,7 @@ type CredentialSetOptions struct {
 	Name      string
 }
 
-func NewCredentialSetCommand(p *riff.Params) *cobra.Command {
+func NewCredentialSetCommand(c *riff.Config) *cobra.Command {
 	opt := &CredentialSetOptions{}
 
 	cmd := &cobra.Command{
@@ -40,12 +40,12 @@ func NewCredentialSetCommand(p *riff.Params) *cobra.Command {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			secret, err := p.Core().Secrets(opt.Namespace).Get(opt.Name, metav1.GetOptions{})
+			secret, err := c.Core().Secrets(opt.Namespace).Get(opt.Name, metav1.GetOptions{})
 			if err != nil {
 				if !apierrs.IsNotFound(err) {
 					return err
 				}
-				_, err = p.Core().Secrets(opt.Namespace).Create(&corev1.Secret{
+				_, err = c.Core().Secrets(opt.Namespace).Create(&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      opt.Name,
 						Namespace: opt.Namespace,
@@ -56,12 +56,12 @@ func NewCredentialSetCommand(p *riff.Params) *cobra.Command {
 				return err
 			}
 			// TODO mutate secret
-			_, err = p.Core().Secrets(opt.Namespace).Update(secret)
+			_, err = c.Core().Secrets(opt.Namespace).Update(secret)
 			return err
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

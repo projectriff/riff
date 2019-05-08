@@ -28,7 +28,7 @@ type RequestProcessorListOptions struct {
 	AllNamespaces bool
 }
 
-func NewRequestProcessorListCommand(p *riff.Params) *cobra.Command {
+func NewRequestProcessorListCommand(c *riff.Config) *cobra.Command {
 	opt := &RequestProcessorListOptions{}
 
 	cmd := &cobra.Command{
@@ -38,7 +38,7 @@ func NewRequestProcessorListCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.AllNamespacesFlag(cmd, p, &opt.Namespace, &opt.AllNamespaces)
+	riff.AllNamespacesFlag(cmd, c, &opt.Namespace, &opt.AllNamespaces)
 
 	return cmd
 }

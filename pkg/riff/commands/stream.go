@@ -19,17 +19,17 @@ package commands
 import "github.com/spf13/cobra"
 import "github.com/projectriff/riff/pkg/riff"
 
-func NewStreamCommand(p *riff.Params) *cobra.Command {
+func NewStreamCommand(c *riff.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "stream",
 		Aliases: []string{"streams"},
 	}
 
-	cmd.AddCommand(NewStreamListCommand(p))
-	cmd.AddCommand(NewStreamCreateCommand(p))
-	cmd.AddCommand(NewStreamUpdateCommand(p))
-	cmd.AddCommand(NewStreamInvokeCommand(p))
-	cmd.AddCommand(NewStreamDeleteCommand(p))
+	cmd.AddCommand(NewStreamListCommand(c))
+	cmd.AddCommand(NewStreamCreateCommand(c))
+	cmd.AddCommand(NewStreamUpdateCommand(c))
+	cmd.AddCommand(NewStreamInvokeCommand(c))
+	cmd.AddCommand(NewStreamDeleteCommand(c))
 
 	return cmd
 }

@@ -27,7 +27,7 @@ type RequestProcessorCreateOptions struct {
 	Namespace string
 }
 
-func NewRequestProcessorCreateCommand(p *riff.Params) *cobra.Command {
+func NewRequestProcessorCreateCommand(c *riff.Config) *cobra.Command {
 	opt := &RequestProcessorCreateOptions{}
 
 	cmd := &cobra.Command{
@@ -37,7 +37,7 @@ func NewRequestProcessorCreateCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

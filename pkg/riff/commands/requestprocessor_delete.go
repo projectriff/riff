@@ -27,7 +27,7 @@ type RequestProcessorDeleteOptions struct {
 	Namespace string
 }
 
-func NewRequestProcessorDeleteCommand(p *riff.Params) *cobra.Command {
+func NewRequestProcessorDeleteCommand(c *riff.Config) *cobra.Command {
 	opt := &RequestProcessorDeleteOptions{}
 
 	cmd := &cobra.Command{
@@ -37,7 +37,7 @@ func NewRequestProcessorDeleteCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

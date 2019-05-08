@@ -29,13 +29,13 @@ type CredentialListOptions struct {
 	AllNamespaces bool
 }
 
-func NewCredentialListCommand(p *riff.Params) *cobra.Command {
+func NewCredentialListCommand(c *riff.Config) *cobra.Command {
 	opt := &CredentialListOptions{}
 
 	cmd := &cobra.Command{
 		Use: "list",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			secrets, err := p.Core().Secrets(opt.Namespace).List(metav1.ListOptions{})
+			secrets, err := c.Core().Secrets(opt.Namespace).List(metav1.ListOptions{})
 			if err != nil {
 				return err
 			}
@@ -52,7 +52,7 @@ func NewCredentialListCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.AllNamespacesFlag(cmd, p, &opt.Namespace, &opt.AllNamespaces)
+	riff.AllNamespacesFlag(cmd, c, &opt.Namespace, &opt.AllNamespaces)
 
 	return cmd
 }

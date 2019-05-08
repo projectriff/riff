@@ -22,18 +22,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewRootCommand(p *riff.Params) *cobra.Command {
-	cmd := NewRiffCommand(p)
+func NewRootCommand(c *riff.Config) *cobra.Command {
+	cmd := NewRiffCommand(c)
 
 	cmd.Use = env.Cli.Name
 	cmd.DisableAutoGenTag = true
 
-	cmd.PersistentFlags().StringVar(&p.ConfigFile, "config", "", "config file (default is $HOME/.riff.yaml)")
-	cmd.PersistentFlags().StringVar(&p.KubeConfigFile, "kubeconfig", "", "kubectl config file (default is $HOME/.kube/config)")
+	cmd.PersistentFlags().StringVar(&c.ViperConfigFile, "config", "", "config file (default is $HOME/.riff.yaml)")
+	cmd.PersistentFlags().StringVar(&c.KubeConfigFile, "kubeconfig", "", "kubectl config file (default is $HOME/.kube/config)")
 
-	cmd.AddCommand(NewCompletionCommand(p))
-	cmd.AddCommand(NewDocsCommand(p))
-	cmd.AddCommand(NewVersionCommand(p))
+	cmd.AddCommand(NewCompletionCommand(c))
+	cmd.AddCommand(NewDocsCommand(c))
+	cmd.AddCommand(NewVersionCommand(c))
 
 	return cmd
 }

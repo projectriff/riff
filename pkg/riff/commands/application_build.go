@@ -27,7 +27,7 @@ type ApplicationBuildOptions struct {
 	Namespace string
 }
 
-func NewApplicationBuildCommand(p *riff.Params) *cobra.Command {
+func NewApplicationBuildCommand(c *riff.Config) *cobra.Command {
 	opt := &ApplicationBuildOptions{}
 
 	cmd := &cobra.Command{
@@ -37,7 +37,7 @@ func NewApplicationBuildCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

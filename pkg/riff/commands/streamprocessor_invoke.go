@@ -27,7 +27,7 @@ type StreamProcessorInvokeOptions struct {
 	Namespace string
 }
 
-func NewStreamProcessorInvokeCommand(p *riff.Params) *cobra.Command {
+func NewStreamProcessorInvokeCommand(c *riff.Config) *cobra.Command {
 	opt := &StreamProcessorInvokeOptions{}
 
 	cmd := &cobra.Command{
@@ -37,7 +37,7 @@ func NewStreamProcessorInvokeCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

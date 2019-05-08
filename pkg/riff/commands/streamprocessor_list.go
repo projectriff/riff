@@ -28,7 +28,7 @@ type StreamProcessorListOptions struct {
 	AllNamespaces bool
 }
 
-func NewStreamProcessorListCommand(p *riff.Params) *cobra.Command {
+func NewStreamProcessorListCommand(c *riff.Config) *cobra.Command {
 	opt := &StreamProcessorListOptions{}
 
 	cmd := &cobra.Command{
@@ -38,7 +38,7 @@ func NewStreamProcessorListCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.AllNamespacesFlag(cmd, p, &opt.Namespace, &opt.AllNamespaces)
+	riff.AllNamespacesFlag(cmd, c, &opt.Namespace, &opt.AllNamespaces)
 
 	return cmd
 }

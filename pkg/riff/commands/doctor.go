@@ -27,7 +27,7 @@ type DoctorOptions struct {
 	Namespace string
 }
 
-func NewDoctorCommand(p *riff.Params) *cobra.Command {
+func NewDoctorCommand(c *riff.Config) *cobra.Command {
 	opt := &DoctorOptions{}
 
 	cmd := &cobra.Command{
@@ -37,7 +37,7 @@ func NewDoctorCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

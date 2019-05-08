@@ -34,31 +34,49 @@ import (
 	"k8s.io/client-go/testing"
 )
 
-type Table []TableRow
+type CommandTable []CommandTableRow
 
-type TableRow struct {
-	Name                  string
-	Args                  []string
-	Params                *riff.Params
-	Objects               []runtime.Object
-	WithReactors          []ReactionFunc
-	WantCreates           []metav1.Object
-	WantUpdates           []UpdateActionImpl
-	WantDeletes           []DeleteActionImpl
-	WantDeleteCollections []DeleteCollectionActionImpl
-	WantError             bool
-	WithOutput            func(*T, string, error)
+type CommandTableRow struct {
+	Name string
+
+	// environment
+	Config       *riff.Config
+	GivenObjects []runtime.Object
+	WithReactors []ReactionFunc
+
+	// inputs
+	Args []string
+
+	// side effects
+	ExpectCreates           []metav1.Object
+	ExpectUpdates           []UpdateActionImpl
+	ExpectDeletes           []DeleteActionImpl
+	ExpectDeleteCollections []DeleteCollectionActionImpl
+
+	// outputs
+	ExpectError   bool
+	VerifyResults func(*T, string, error)
+
+	// lifecycle
+	Init    func(*riff.Config) error
+	Cleanup func(*riff.Config) error
 }
 
-func (tests Table) Run(t *T, cmdFactory func(*riff.Params) *cobra.Command) {
-	for _, test := range tests {
-		t.Run(test.Name, func(t *T) {
-			p := test.Params
-			if p == nil {
-				p = &riff.Params{}
+func (ct CommandTable) Run(t *T, cmdFactory func(*riff.Config) *cobra.Command) {
+	for _, ctr := range ct {
+		t.Run(ctr.Name, func(t *T) {
+			c := ctr.Config
+			if c == nil {
+				c = &riff.Config{}
 			}
-			client := NewClient(test.Objects...)
-			p.Client = client
+			client := NewClient(ctr.GivenObjects...)
+			c.Client = client
+
+			if ctr.Init != nil {
+				if err := ctr.Init(c); err != nil {
+					t.Errorf("error during init: %s", err)
+				}
+			}
 
 			// Validate all objects that implement Validatable
 			client.PrependReactor("create", "*", func(action testing.Action) (handled bool, ret runtime.Object, err error) {
@@ -68,25 +86,25 @@ func (tests Table) Run(t *T, cmdFactory func(*riff.Params) *cobra.Command) {
 				return ValidateUpdates(context.Background(), action)
 			})
 
-			for i := range test.WithReactors {
+			for i := range ctr.WithReactors {
 				// in reverse order since we prepend
-				reactor := test.WithReactors[len(test.WithReactors)-1-i]
+				reactor := ctr.WithReactors[len(ctr.WithReactors)-1-i]
 				client.PrependReactor("*", "*", reactor)
 			}
 
-			cmd := cmdFactory(p)
+			cmd := cmdFactory(c)
 			output := &bytes.Buffer{}
 
-			cmd.SetArgs(test.Args)
+			cmd.SetArgs(ctr.Args)
 			cmd.SetOutput(output)
 
 			err := cmd.Execute()
 
-			if want, got := test.WantError, err != nil; want != got {
-				if want {
-					t.Errorf("expected command to error, got %v", got)
+			if expected, actual := ctr.ExpectError, err != nil; expected != actual {
+				if expected {
+					t.Errorf("expected command to error, actual %v", actual)
 				} else {
-					t.Errorf("expected command not to error, got %v", got)
+					t.Errorf("expected command not to error, actual %v", actual)
 				}
 			}
 
@@ -97,104 +115,109 @@ func (tests Table) Run(t *T, cmdFactory func(*riff.Params) *cobra.Command) {
 
 			// Previous state is used to diff resource expected state for update requests that were missed.
 			objPrevState := map[string]runtime.Object{}
-			for _, o := range test.Objects {
+			for _, o := range ctr.GivenObjects {
 				objPrevState[objKey(o)] = o
 			}
 
-			for i, want := range test.WantCreates {
+			for i, expected := range ctr.ExpectCreates {
 				if i >= len(actions.Creates) {
-					t.Errorf("Missing create: %#v", want)
+					t.Errorf("Missing create: %#v", expected)
 					continue
 				}
-				got := actions.Creates[i]
-				obj := got.GetObject()
+				actual := actions.Creates[i]
+				obj := actual.GetObject()
 				objPrevState[objKey(obj)] = obj
 
-				if diff := cmp.Diff(want, obj, ignoreLastTransitionTime, safeDeployDiff, cmpopts.EquateEmpty()); diff != "" {
-					t.Errorf("Unexpected create (-want, +got): %s", diff)
+				if diff := cmp.Diff(expected, obj, ignoreLastTransitionTime, safeDeployDiff, cmpopts.EquateEmpty()); diff != "" {
+					t.Errorf("Unexpected create (-expected, +actual): %s", diff)
 				}
 			}
-			if got, want := len(actions.Creates), len(test.WantCreates); got > want {
-				for _, extra := range actions.Creates[want:] {
+			if actual, expected := len(actions.Creates), len(ctr.ExpectCreates); actual > expected {
+				for _, extra := range actions.Creates[expected:] {
 					t.Errorf("Extra create: %#v", extra)
 				}
 			}
 
-			for i, want := range test.WantUpdates {
+			for i, expected := range ctr.ExpectUpdates {
 				if i >= len(actions.Updates) {
-					wo := want.GetObject()
+					wo := expected.GetObject()
 					key := objKey(wo)
 					oldObj, ok := objPrevState[key]
 					if !ok {
-						t.Errorf("Object %s was never created: want: %#v", key, wo)
+						t.Errorf("Object %s was never created: expected: %#v", key, wo)
 						continue
 					}
-					t.Errorf("Missing update for %s (-want, +prevState): %s", key,
+					t.Errorf("Missing update for %s (-expected, +prevState): %s", key,
 						cmp.Diff(wo, oldObj, ignoreLastTransitionTime, safeDeployDiff, cmpopts.EquateEmpty()))
 					continue
 				}
 
-				if want.GetSubresource() != "" {
-					t.Errorf("Expectation was invalid - it should not include a subresource: %#v", want)
+				if expected.GetSubresource() != "" {
+					t.Errorf("Expectation was invalid - it should not include a subresource: %#v", expected)
 				}
 
-				got := actions.Updates[i].GetObject()
+				actual := actions.Updates[i].GetObject()
 
 				// Update the object state.
-				objPrevState[objKey(got)] = got
+				objPrevState[objKey(actual)] = actual
 
-				if diff := cmp.Diff(want.GetObject(), got, ignoreLastTransitionTime, safeDeployDiff, cmpopts.EquateEmpty()); diff != "" {
-					t.Errorf("Unexpected update (-want, +got): %s", diff)
+				if diff := cmp.Diff(expected.GetObject(), actual, ignoreLastTransitionTime, safeDeployDiff, cmpopts.EquateEmpty()); diff != "" {
+					t.Errorf("Unexpected update (-expected, +actual): %s", diff)
 				}
 			}
 
-			if got, want := len(actions.Updates), len(test.WantUpdates); got > want {
-				for _, extra := range actions.Updates[want:] {
+			if actual, expected := len(actions.Updates), len(ctr.ExpectUpdates); actual > expected {
+				for _, extra := range actions.Updates[expected:] {
 					t.Errorf("Extra update: %#v", extra)
 				}
 			}
-			for i, want := range test.WantDeletes {
+			for i, expected := range ctr.ExpectDeletes {
 				if i >= len(actions.Deletes) {
-					t.Errorf("Missing delete: %#v", want)
+					t.Errorf("Missing delete: %#v", expected)
 					continue
 				}
-				got := actions.Deletes[i]
-				if got.GetName() != want.GetName() || got.GetNamespace() != want.GetNamespace() {
-					t.Errorf("Unexpected delete[%d]: %#v", i, got)
+				actual := actions.Deletes[i]
+				if actual.GetName() != expected.GetName() || actual.GetNamespace() != expected.GetNamespace() {
+					t.Errorf("Unexpected delete[%d]: %#v", i, actual)
 				}
-				if diff := cmp.Diff(want.GetResource(), got.GetResource()); diff != "" {
-					t.Errorf("Unexpected delete (-want, +got): %s", diff)
+				if diff := cmp.Diff(expected.GetResource(), actual.GetResource()); diff != "" {
+					t.Errorf("Unexpected delete (-expected, +actual): %s", diff)
 				}
 			}
-			if got, want := len(actions.Deletes), len(test.WantDeletes); got > want {
-				for _, extra := range actions.Deletes[want:] {
+			if actual, expected := len(actions.Deletes), len(ctr.ExpectDeletes); actual > expected {
+				for _, extra := range actions.Deletes[expected:] {
 					t.Errorf("Extra delete: %#v", extra)
 				}
 			}
 
-			for i, want := range test.WantDeleteCollections {
+			for i, expected := range ctr.ExpectDeleteCollections {
 				if i >= len(actions.DeleteCollections) {
-					t.Errorf("Missing delete-collection: %#v", want)
+					t.Errorf("Missing delete-collection: %#v", expected)
 					continue
 				}
-				got := actions.DeleteCollections[i]
-				if got, want := got.GetListRestrictions().Labels, want.GetListRestrictions().Labels; (got != nil) != (want != nil) || got.String() != want.String() {
-					t.Errorf("Unexpected delete-collection[%d].Labels = %v, wanted %v", i, got, want)
+				actual := actions.DeleteCollections[i]
+				if actual, expected := actual.GetListRestrictions().Labels, expected.GetListRestrictions().Labels; (actual != nil) != (expected != nil) || actual.String() != expected.String() {
+					t.Errorf("Unexpected delete-collection[%d].Labels = %v, expected %v", i, actual, expected)
 				}
-				if got, want := got.GetNamespace(), want.GetNamespace(); got != want {
-					t.Errorf("Unexpected delete-collection[%d].Namespace: %#v, wanted %s", i, got, want)
+				if actual, expected := actual.GetNamespace(), expected.GetNamespace(); actual != expected {
+					t.Errorf("Unexpected delete-collection[%d].Namespace: %#v, expected %s", i, actual, expected)
 				}
 			}
-			if got, want := len(actions.DeleteCollections), len(test.WantDeleteCollections); got > want {
-				for _, extra := range actions.DeleteCollections[want:] {
+			if actual, expected := len(actions.DeleteCollections), len(ctr.ExpectDeleteCollections); actual > expected {
+				for _, extra := range actions.DeleteCollections[expected:] {
 					t.Errorf("Extra delete-collection: %#v", extra)
 				}
 			}
 
-			if test.WithOutput != nil {
-				test.WithOutput(t, output.String(), err)
+			if ctr.VerifyResults != nil {
+				ctr.VerifyResults(t, output.String(), err)
 			}
-			// TODO assert created, updated and deleted resources
+
+			if ctr.Cleanup != nil {
+				if err := ctr.Cleanup(c); err != nil {
+					t.Errorf("error during cleanup: %s", err)
+				}
+			}
 		})
 	}
 }

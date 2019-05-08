@@ -21,17 +21,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewRiffCommand(p *riff.Params) *cobra.Command {
+func NewRiffCommand(c *riff.Config) *cobra.Command {
 	var cmd = &cobra.Command{
 		Use: "riff",
 	}
 
-	cmd.AddCommand(NewCredentialCommand(p))
-	cmd.AddCommand(NewApplicationCommand(p))
-	cmd.AddCommand(NewFunctionCommand(p))
-	cmd.AddCommand(NewRequestProcessorCommand(p))
-	cmd.AddCommand(NewStreamCommand(p))
-	cmd.AddCommand(NewStreamProcessorCommand(p))
+	cmd.AddCommand(NewCredentialCommand(c))
+	cmd.AddCommand(NewApplicationCommand(c))
+	cmd.AddCommand(NewFunctionCommand(c))
+	cmd.AddCommand(NewRequestProcessorCommand(c))
+	cmd.AddCommand(NewStreamCommand(c))
+	cmd.AddCommand(NewStreamProcessorCommand(c))
 
 	return cmd
 }

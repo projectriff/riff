@@ -21,7 +21,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCompletionCommand(p *riff.Params) *cobra.Command {
+func NewCompletionCommand(c *riff.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "completion",
 		Run: func(cmd *cobra.Command, args []string) {

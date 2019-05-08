@@ -22,34 +22,35 @@ import (
 	"path/filepath"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/projectriff/riff/pkg/env"
 	"github.com/projectriff/riff/pkg/fs"
 	"github.com/projectriff/riff/pkg/k8s"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-type Params struct {
-	ConfigFile     string
+type Config struct {
+	ViperConfigFile     string
 	KubeConfigFile string
 	k8s.Client
 	FileSystem fs.FileSystem
 }
 
-func Initialize() *Params {
-	p := &Params{}
+func Initialize() *Config {
+	c := &Config{}
 
-	cobra.OnInitialize(p.initConfig)
-	cobra.OnInitialize(p.initKubeConfig)
-	cobra.OnInitialize(p.init)
+	cobra.OnInitialize(c.initViperConfig)
+	cobra.OnInitialize(c.initKubeConfig)
+	cobra.OnInitialize(c.init)
 
-	return p
+	return c
 }
 
-// initConfig reads in config file and ENV variables if set.
-func (p *Params) initConfig() {
-	if p.ConfigFile != "" {
+// initViperConfig reads in config file and ENV variables if set.
+func (c *Config) initViperConfig() {
+	if c.ViperConfigFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(p.ConfigFile)
+		viper.SetConfigFile(c.ViperConfigFile)
 	} else {
 		// Find home directory.
 		home, err := homedir.Dir()
@@ -60,7 +61,7 @@ func (p *Params) initConfig() {
 
 		// Search config in home directory with name ".riff" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".riff")
+		viper.SetConfigName("." + env.Cli.Name)
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -72,27 +73,27 @@ func (p *Params) initConfig() {
 }
 
 // initKubeConfig defines the default location for the kubectl config file
-func (p *Params) initKubeConfig() {
-	if p.KubeConfigFile != "" {
+func (c *Config) initKubeConfig() {
+	if c.KubeConfigFile != "" {
 		return
 	}
 	if kubeEnvConf, ok := os.LookupEnv("KUBECONFIG"); ok {
-		p.KubeConfigFile = kubeEnvConf
+		c.KubeConfigFile = kubeEnvConf
 	} else {
 		home, err := homedir.Dir()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		p.KubeConfigFile = filepath.Join(home, ".kube", "config")
+		c.KubeConfigFile = filepath.Join(home, ".kube", "config")
 	}
 }
 
-func (p *Params) init() {
-	if p.FileSystem == nil {
-		p.FileSystem = &fs.Local{}
+func (c *Config) init() {
+	if c.FileSystem == nil {
+		c.FileSystem = &fs.Local{}
 	}
-	if p.Client == nil {
-		p.Client = k8s.NewClient(p.KubeConfigFile)
+	if c.Client == nil {
+		c.Client = k8s.NewClient(c.KubeConfigFile)
 	}
 }

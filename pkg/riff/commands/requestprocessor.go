@@ -19,17 +19,17 @@ package commands
 import "github.com/spf13/cobra"
 import "github.com/projectriff/riff/pkg/riff"
 
-func NewRequestProcessorCommand(p *riff.Params) *cobra.Command {
+func NewRequestProcessorCommand(c *riff.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "requestprocessor",
 		Aliases: []string{"requestprocessors", "rp"},
 	}
 
-	cmd.AddCommand(NewRequestProcessorListCommand(p))
-	cmd.AddCommand(NewRequestProcessorCreateCommand(p))
-	cmd.AddCommand(NewRequestProcessorUpdateCommand(p))
-	cmd.AddCommand(NewRequestProcessorInvokeCommand(p))
-	cmd.AddCommand(NewRequestProcessorDeleteCommand(p))
+	cmd.AddCommand(NewRequestProcessorListCommand(c))
+	cmd.AddCommand(NewRequestProcessorCreateCommand(c))
+	cmd.AddCommand(NewRequestProcessorUpdateCommand(c))
+	cmd.AddCommand(NewRequestProcessorInvokeCommand(c))
+	cmd.AddCommand(NewRequestProcessorDeleteCommand(c))
 
 	return cmd
 }

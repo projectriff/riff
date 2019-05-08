@@ -27,7 +27,7 @@ type StreamCreateOptions struct {
 	Namespace string
 }
 
-func NewStreamCreateCommand(p *riff.Params) *cobra.Command {
+func NewStreamCreateCommand(c *riff.Config) *cobra.Command {
 	opt := &StreamCreateOptions{}
 
 	cmd := &cobra.Command{
@@ -37,7 +37,7 @@ func NewStreamCreateCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

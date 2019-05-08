@@ -27,7 +27,7 @@ type FunctionDeleteOptions struct {
 	Namespace string
 }
 
-func NewFunctionDeleteCommand(p *riff.Params) *cobra.Command {
+func NewFunctionDeleteCommand(c *riff.Config) *cobra.Command {
 	opt := &FunctionDeleteOptions{}
 
 	cmd := &cobra.Command{
@@ -37,7 +37,7 @@ func NewFunctionDeleteCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

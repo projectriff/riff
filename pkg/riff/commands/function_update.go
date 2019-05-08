@@ -27,7 +27,7 @@ type FunctionUpdateOptions struct {
 	Namespace string
 }
 
-func NewFunctionUpdateCommand(p *riff.Params) *cobra.Command {
+func NewFunctionUpdateCommand(c *riff.Config) *cobra.Command {
 	opt := &FunctionUpdateOptions{}
 
 	cmd := &cobra.Command{
@@ -37,7 +37,7 @@ func NewFunctionUpdateCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

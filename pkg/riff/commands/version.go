@@ -24,7 +24,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewVersionCommand(p *riff.Params) *cobra.Command {
+func NewVersionCommand(c *riff.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "version",
 		Run: func(cmd *cobra.Command, args []string) {

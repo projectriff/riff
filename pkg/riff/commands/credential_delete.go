@@ -26,7 +26,7 @@ type CredentialDeleteOptions struct {
 	Name      string
 }
 
-func NewCredentialDeleteCommand(p *riff.Params) *cobra.Command {
+func NewCredentialDeleteCommand(c *riff.Config) *cobra.Command {
 	opt := &CredentialDeleteOptions{}
 
 	cmd := &cobra.Command{
@@ -37,11 +37,11 @@ func NewCredentialDeleteCommand(p *riff.Params) *cobra.Command {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return p.Core().Secrets(opt.Namespace).Delete(opt.Name, nil)
+			return c.Core().Secrets(opt.Namespace).Delete(opt.Name, nil)
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

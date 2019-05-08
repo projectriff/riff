@@ -19,15 +19,15 @@ package commands
 import "github.com/spf13/cobra"
 import "github.com/projectriff/riff/pkg/riff"
 
-func NewCredentialCommand(p *riff.Params) *cobra.Command {
+func NewCredentialCommand(c *riff.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "credential",
 		Aliases: []string{"credentials", "cred", "creds"},
 	}
 
-	cmd.AddCommand(NewCredentialListCommand(p))
-	cmd.AddCommand(NewCredentialSetCommand(p))
-	cmd.AddCommand(NewCredentialDeleteCommand(p))
+	cmd.AddCommand(NewCredentialListCommand(c))
+	cmd.AddCommand(NewCredentialSetCommand(c))
+	cmd.AddCommand(NewCredentialDeleteCommand(c))
 
 	return cmd
 }

@@ -28,7 +28,7 @@ type StreamListOptions struct {
 	AllNamespaces bool
 }
 
-func NewStreamListCommand(p *riff.Params) *cobra.Command {
+func NewStreamListCommand(c *riff.Config) *cobra.Command {
 	opt := &StreamListOptions{}
 
 	cmd := &cobra.Command{
@@ -38,7 +38,7 @@ func NewStreamListCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.AllNamespacesFlag(cmd, p, &opt.Namespace, &opt.AllNamespaces)
+	riff.AllNamespacesFlag(cmd, c, &opt.Namespace, &opt.AllNamespaces)
 
 	return cmd
 }

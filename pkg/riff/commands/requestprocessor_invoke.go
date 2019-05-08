@@ -27,7 +27,7 @@ type RequestProcessorInvokeOptions struct {
 	Namespace string
 }
 
-func NewRequestProcessorInvokeCommand(p *riff.Params) *cobra.Command {
+func NewRequestProcessorInvokeCommand(c *riff.Config) *cobra.Command {
 	opt := &RequestProcessorInvokeOptions{}
 
 	cmd := &cobra.Command{
@@ -37,7 +37,7 @@ func NewRequestProcessorInvokeCommand(p *riff.Params) *cobra.Command {
 		},
 	}
 
-	riff.NamespaceFlag(cmd, p, &opt.Namespace)
+	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

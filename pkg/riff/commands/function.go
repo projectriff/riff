@@ -19,17 +19,17 @@ package commands
 import "github.com/spf13/cobra"
 import "github.com/projectriff/riff/pkg/riff"
 
-func NewFunctionCommand(p *riff.Params) *cobra.Command {
+func NewFunctionCommand(c *riff.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "function",
 		Aliases: []string{"functions", "func", "fn"},
 	}
 
-	cmd.AddCommand(NewFunctionListCommand(p))
-	cmd.AddCommand(NewFunctionCreateCommand(p))
-	cmd.AddCommand(NewFunctionUpdateCommand(p))
-	cmd.AddCommand(NewFunctionBuildCommand(p))
-	cmd.AddCommand(NewFunctionDeleteCommand(p))
+	cmd.AddCommand(NewFunctionListCommand(c))
+	cmd.AddCommand(NewFunctionCreateCommand(c))
+	cmd.AddCommand(NewFunctionUpdateCommand(c))
+	cmd.AddCommand(NewFunctionBuildCommand(c))
+	cmd.AddCommand(NewFunctionDeleteCommand(c))
 
 	return cmd
 }

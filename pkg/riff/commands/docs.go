@@ -26,14 +26,14 @@ type DocsOptions struct {
 	Directory string
 }
 
-func NewDocsCommand(p *riff.Params) *cobra.Command {
+func NewDocsCommand(c *riff.Config) *cobra.Command {
 	opt := &DocsOptions{}
 
 	cmd := &cobra.Command{
 		Use:    "docs",
 		Hidden: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := p.FileSystem.MkdirAll(opt.Directory, 0744); err != nil {
+			if err := c.FileSystem.MkdirAll(opt.Directory, 0744); err != nil {
 				return err
 			}
 			return doc.GenMarkdownTree(cmd.Root(), opt.Directory)
