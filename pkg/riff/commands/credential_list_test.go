@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/projectriff/riff/pkg/riff/commands"
@@ -27,10 +28,15 @@ import (
 )
 
 func TestCredentialListCommand(t *testing.T) {
+	credentialName := "test-credential"
+	credentialAltName := "test-alt-credential"
+	defaultNamespace := "default"
+	altNamespace := "alt-namespace"
+
 	table := testing.CommandTable{{
 		Name: "empty",
 		Args: []string{},
-		VerifyResults: func(t *testing.T, output string, err error) {
+		Verify: func(t *testing.T, output string, err error) {
 			if expected, actual := output, "No credentials found.\n"; actual != expected {
 				t.Errorf("expected output %q, actually %q", expected, actual)
 			}
@@ -41,28 +47,28 @@ func TestCredentialListCommand(t *testing.T) {
 		GivenObjects: []runtime.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-secret",
-					Namespace: "default",
+					Name:      credentialName,
+					Namespace: defaultNamespace,
 				},
 			},
 		},
-		VerifyResults: func(t *testing.T, output string, err error) {
-			if actual, want := output, "my-secret\n"; actual != want {
+		Verify: func(t *testing.T, output string, err error) {
+			if actual, want := output, fmt.Sprintf("%s\n", credentialName); actual != want {
 				t.Errorf("expected output %q, actually %q", want, actual)
 			}
 		},
 	}, {
 		Name: "filters by namespace",
-		Args: []string{"--namespace", "my-namespace"},
+		Args: []string{"--namespace", altNamespace},
 		GivenObjects: []runtime.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-secret",
-					Namespace: "default",
+					Name:      credentialName,
+					Namespace: defaultNamespace,
 				},
 			},
 		},
-		VerifyResults: func(t *testing.T, output string, err error) {
+		Verify: func(t *testing.T, output string, err error) {
 			if actual, want := output, "No credentials found.\n"; actual != want {
 				t.Errorf("expected output %q, actually %q", want, actual)
 			}
@@ -73,21 +79,21 @@ func TestCredentialListCommand(t *testing.T) {
 		GivenObjects: []runtime.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-secret",
-					Namespace: "default",
+					Name:      credentialName,
+					Namespace: defaultNamespace,
 				},
 			},
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-other-secret",
-					Namespace: "my-namespace",
+					Name:      credentialAltName,
+					Namespace: altNamespace,
 				},
 			},
 		},
-		VerifyResults: func(t *testing.T, output string, err error) {
+		Verify: func(t *testing.T, output string, err error) {
 			for _, expected := range []string{
-				"my-secret\n",
-				"my-other-secret\n",
+				fmt.Sprintf("%s\n", credentialName),
+				fmt.Sprintf("%s\n", credentialAltName),
 			} {
 				if !strings.Contains(output, expected) {
 					t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -100,7 +106,7 @@ func TestCredentialListCommand(t *testing.T) {
 		WithReactors: []testing.ReactionFunc{
 			testing.InduceFailure("list", "secrets"),
 		},
-		ExpectError: true,
+		ShouldError: true,
 	}}
 
 	table.Run(t, commands.NewCredentialListCommand)

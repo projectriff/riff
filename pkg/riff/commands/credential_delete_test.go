@@ -25,42 +25,43 @@ import (
 )
 
 func TestCredentialDeleteCommand(t *testing.T) {
+	credentialName := "test-credential"
+	defaultNamespace := "default"
+
 	table := testing.CommandTable{{
 		Name: "delete secret",
-		Args: []string{"my-credential"},
+		Args: []string{credentialName},
 		GivenObjects: []runtime.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-credential",
-					Namespace: "default",
+					Name:      credentialName,
+					Namespace: defaultNamespace,
 				},
 				StringData: map[string]string{},
 			},
 		},
 		ExpectDeletes: []testing.DeleteRef{{
-			Version:   "v1",
 			Resource:  "secrets",
-			Namespace: "default",
-			Name:      "my-credential",
+			Namespace: defaultNamespace,
+			Name:      credentialName,
 		}},
 	}, {
-		Name: "secret ds't exist",
-		Args: []string{"my-credential"},
+		Name: "secret does not exist",
+		Args: []string{credentialName},
 		ExpectDeletes: []testing.DeleteRef{{
-			Version:   "v1",
 			Resource:  "secrets",
-			Namespace: "default",
-			Name:      "my-credential",
+			Namespace: defaultNamespace,
+			Name:      credentialName,
 		}},
-		ExpectError: true,
+		ShouldError: true,
 	}, {
 		Name: "delete error",
-		Args: []string{"my-credential"},
+		Args: []string{credentialName},
 		GivenObjects: []runtime.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-credential",
-					Namespace: "default",
+					Name:      credentialName,
+					Namespace: defaultNamespace,
 				},
 				StringData: map[string]string{},
 			},
@@ -69,12 +70,12 @@ func TestCredentialDeleteCommand(t *testing.T) {
 			testing.InduceFailure("delete", "secrets"),
 		},
 		ExpectDeletes: []testing.DeleteRef{{
-			Version:   "v1",
+			Group:     "",
 			Resource:  "secrets",
-			Namespace: "default",
-			Name:      "my-credential",
+			Namespace: defaultNamespace,
+			Name:      credentialName,
 		}},
-		ExpectError: true,
+		ShouldError: true,
 	}}
 
 	table.Run(t, commands.NewCredentialDeleteCommand)

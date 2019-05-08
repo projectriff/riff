@@ -55,11 +55,11 @@ type CommandTableRow struct {
 	ExpectDeleteCollections []DeleteCollectionRef
 
 	// outputs
-	ExpectError   bool
-	VerifyResults func(*T, string, error)
+	ShouldError bool
+	Verify      func(*T, string, error)
 
 	// lifecycle
-	Init    func(*riff.Config) error
+	Prepare func(*riff.Config) error
 	Cleanup func(*riff.Config) error
 }
 
@@ -73,9 +73,9 @@ func (ct CommandTable) Run(t *T, cmdFactory func(*riff.Config) *cobra.Command) {
 			client := NewClient(ctr.GivenObjects...)
 			c.Client = client
 
-			if ctr.Init != nil {
-				if err := ctr.Init(c); err != nil {
-					t.Errorf("error during init: %s", err)
+			if ctr.Prepare != nil {
+				if err := ctr.Prepare(c); err != nil {
+					t.Errorf("error during prepare: %s", err)
 				}
 			}
 
@@ -101,11 +101,11 @@ func (ct CommandTable) Run(t *T, cmdFactory func(*riff.Config) *cobra.Command) {
 
 			err := cmd.Execute()
 
-			if expected, actual := ctr.ExpectError, err != nil; expected != actual {
+			if expected, actual := ctr.ShouldError, err != nil; expected != actual {
 				if expected {
-					t.Errorf("expected command to error, actual %v", actual)
+					t.Errorf("expected command to error, actual %v", err)
 				} else {
-					t.Errorf("expected command not to error, actual %v", actual)
+					t.Errorf("expected command not to error, actual %q", err)
 				}
 			}
 
@@ -208,8 +208,8 @@ func (ct CommandTable) Run(t *T, cmdFactory func(*riff.Config) *cobra.Command) {
 				}
 			}
 
-			if ctr.VerifyResults != nil {
-				ctr.VerifyResults(t, output.String(), err)
+			if ctr.Verify != nil {
+				ctr.Verify(t, output.String(), err)
 			}
 
 			if ctr.Cleanup != nil {
@@ -238,7 +238,6 @@ var (
 
 type DeleteRef struct {
 	Group     string
-	Version   string
 	Resource  string
 	Namespace string
 	Name      string
@@ -247,7 +246,6 @@ type DeleteRef struct {
 func NewDeleteRef(action DeleteAction) DeleteRef {
 	return DeleteRef{
 		Group:     action.GetResource().Group,
-		Version:   action.GetResource().Version,
 		Resource:  action.GetResource().Resource,
 		Namespace: action.GetNamespace(),
 		Name:      action.GetName(),
@@ -256,7 +254,6 @@ func NewDeleteRef(action DeleteAction) DeleteRef {
 
 type DeleteCollectionRef struct {
 	Group     string
-	Version   string
 	Resource  string
 	Namespace string
 	Labels    labels.Selector
@@ -265,7 +262,6 @@ type DeleteCollectionRef struct {
 func NewDeleteCollectionRef(action DeleteCollectionAction) DeleteCollectionRef {
 	return DeleteCollectionRef{
 		Group:     action.GetResource().Group,
-		Version:   action.GetResource().Version,
 		Resource:  action.GetResource().Resource,
 		Namespace: action.GetNamespace(),
 		Labels:    action.GetListRestrictions().Labels,

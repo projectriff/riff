@@ -25,27 +25,29 @@ import (
 )
 
 func TestCredentialSetCommand(t *testing.T) {
+	credentialName := "test-credential"
+	defaultNamespace := "default"
+
 	table := testing.CommandTable{{
-		Name:         "create secret",
-		Args:         []string{"my-credential"},
-		GivenObjects: []runtime.Object{},
+		Name: "create secret",
+		Args: []string{credentialName},
 		ExpectCreates: []metav1.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-credential",
-					Namespace: "default",
+					Name:      credentialName,
+					Namespace: defaultNamespace,
 				},
 				StringData: map[string]string{},
 			},
 		},
 	}, {
 		Name: "update secret",
-		Args: []string{"my-credential"},
+		Args: []string{credentialName},
 		GivenObjects: []runtime.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-credential",
-					Namespace: "default",
+					Name:      credentialName,
+					Namespace: defaultNamespace,
 				},
 				StringData: map[string]string{},
 			},
@@ -53,20 +55,20 @@ func TestCredentialSetCommand(t *testing.T) {
 		ExpectUpdates: []runtime.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-credential",
-					Namespace: "default",
+					Name:      credentialName,
+					Namespace: defaultNamespace,
 				},
 				StringData: map[string]string{},
 			},
 		},
 	}, {
 		Name: "get error",
-		Args: []string{"my-credential"},
+		Args: []string{credentialName},
 		GivenObjects: []runtime.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-credential",
-					Namespace: "default",
+					Name:      credentialName,
+					Namespace: defaultNamespace,
 				},
 				StringData: map[string]string{},
 			},
@@ -74,32 +76,31 @@ func TestCredentialSetCommand(t *testing.T) {
 		WithReactors: []testing.ReactionFunc{
 			testing.InduceFailure("get", "secrets"),
 		},
-		ExpectError: true,
+		ShouldError: true,
 	}, {
-		Name:         "create error",
-		Args:         []string{"my-credential"},
-		GivenObjects: []runtime.Object{},
+		Name: "create error",
+		Args: []string{credentialName},
 		WithReactors: []testing.ReactionFunc{
 			testing.InduceFailure("create", "secrets"),
 		},
 		ExpectCreates: []metav1.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-credential",
-					Namespace: "default",
+					Name:      credentialName,
+					Namespace: defaultNamespace,
 				},
 				StringData: map[string]string{},
 			},
 		},
-		ExpectError: true,
+		ShouldError: true,
 	}, {
 		Name: "update error",
-		Args: []string{"my-credential"},
+		Args: []string{credentialName},
 		GivenObjects: []runtime.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-credential",
-					Namespace: "default",
+					Name:      credentialName,
+					Namespace: defaultNamespace,
 				},
 				StringData: map[string]string{},
 			},
@@ -110,13 +111,13 @@ func TestCredentialSetCommand(t *testing.T) {
 		ExpectUpdates: []runtime.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "my-credential",
-					Namespace: "default",
+					Name:      credentialName,
+					Namespace: defaultNamespace,
 				},
 				StringData: map[string]string{},
 			},
 		},
-		ExpectError: true,
+		ShouldError: true,
 	}}
 
 	table.Run(t, commands.NewCredentialSetCommand)
