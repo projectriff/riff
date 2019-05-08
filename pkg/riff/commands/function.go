@@ -21,7 +21,8 @@ import "github.com/projectriff/riff/pkg/riff"
 
 func NewFunctionCommand(p *riff.Params) *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "function",
+		Use:     "function",
+		Aliases: []string{"functions", "func", "fn"},
 	}
 
 	cmd.AddCommand(NewFunctionListCommand(p))

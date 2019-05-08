@@ -21,7 +21,8 @@ import "github.com/projectriff/riff/pkg/riff"
 
 func NewStreamProcessorCommand(p *riff.Params) *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "streamprocessor",
+		Use:     "streamprocessor",
+		Aliases: []string{"streamprocessors", "sp"},
 	}
 
 	cmd.AddCommand(NewStreamProcessorListCommand(p))
