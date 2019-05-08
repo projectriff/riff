@@ -27,10 +27,19 @@ type T = testing.T
 
 type ObjectSorter = kntesting.ObjectSorter
 
-var NewObjectSorter = kntesting.NewObjectSorter
-var InduceFailure = kntesting.InduceFailure
+var (
+	NewObjectSorter = kntesting.NewObjectSorter
+	InduceFailure   = kntesting.InduceFailure
+	ValidateCreates = kntesting.ValidateCreates
+	ValidateUpdates = kntesting.ValidateUpdates
+)
+
+type Action = clientgotesting.Action
+type ActionRecorder = kntesting.ActionRecorder
+type ActionRecorderList = kntesting.ActionRecorderList
 
 type ReactionFunc = clientgotesting.ReactionFunc
+type ActionImpl = clientgotesting.ActionImpl
 type UpdateActionImpl = clientgotesting.UpdateActionImpl
 type DeleteActionImpl = clientgotesting.DeleteActionImpl
 type DeleteCollectionActionImpl = clientgotesting.DeleteCollectionActionImpl

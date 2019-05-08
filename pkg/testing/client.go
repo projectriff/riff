@@ -27,9 +27,10 @@ import (
 )
 
 type FakeClient struct {
-	Namespace      string
-	FakeKubeClient *kubernetes.Clientset
-	FakeRiffClient *projectriffclientset.Clientset
+	Namespace          string
+	FakeKubeClient     *kubernetes.Clientset
+	FakeRiffClient     *projectriffclientset.Clientset
+	ActionRecorderList ActionRecorderList
 }
 
 func (c *FakeClient) DefaultNamespace() string {
@@ -63,9 +64,12 @@ func NewClient(objects ...runtime.Object) *FakeClient {
 	kubeClient := kubernetes.NewSimpleClientset(lister.GetKubeObjects()...)
 	riffClient := projectriffclientset.NewSimpleClientset(lister.GetProjectriffObjects()...)
 
+	actionRecorderList := ActionRecorderList{kubeClient, riffClient}
+
 	return &FakeClient{
-		Namespace:      "default",
-		FakeKubeClient: kubeClient,
-		FakeRiffClient: riffClient,
+		Namespace:          "default",
+		FakeKubeClient:     kubeClient,
+		FakeRiffClient:     riffClient,
+		ActionRecorderList: actionRecorderList,
 	}
 }

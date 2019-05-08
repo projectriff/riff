@@ -17,14 +17,16 @@
 package commands
 
 import (
-	"fmt"
-
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
+	corev1 "k8s.io/api/core/v1"
+	apierrs "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type CredentialSetOptions struct {
 	Namespace string
+	Name      string
 }
 
 func NewCredentialSetCommand(p *riff.Params) *cobra.Command {
@@ -32,8 +34,30 @@ func NewCredentialSetCommand(p *riff.Params) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use: "set",
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			// TODO validate arg
+			opt.Name = args[0]
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return fmt.Errorf("not implemented")
+			secret, err := p.Core().Secrets(opt.Namespace).Get(opt.Name, metav1.GetOptions{})
+			if err != nil {
+				if !apierrs.IsNotFound(err) {
+					return err
+				}
+				_, err = p.Core().Secrets(opt.Namespace).Create(&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      opt.Name,
+						Namespace: opt.Namespace,
+					},
+					// TODO define secret data
+					StringData: map[string]string{},
+				})
+				return err
+			}
+			// TODO mutate secret
+			_, err = p.Core().Secrets(opt.Namespace).Update(secret)
+			return err
 		},
 	}
 

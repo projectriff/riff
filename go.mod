@@ -3,6 +3,7 @@ module github.com/projectriff/riff
 go 1.12
 
 require (
+	github.com/google/go-cmp v0.3.0
 	github.com/knative/pkg v0.0.0-20190417151928-418e675f88c2
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/projectriff/system v0.0.0-20190507151708-5b67cb48c8ea
@@ -20,7 +21,6 @@ require (
 	github.com/gogo/protobuf v1.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20190129154638-5b532d6fd5ef // indirect
 	github.com/google/btree v1.0.0 // indirect
-	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/google/go-containerregistry v0.0.0-20190503220729-1c6c7f61e8a5 // indirect
 	github.com/google/gofuzz v1.0.0 // indirect
 	github.com/googleapis/gnostic v0.2.0 // indirect

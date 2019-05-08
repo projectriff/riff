@@ -95,7 +95,7 @@ func TestCredentialListCommand(t *testing.T) {
 			}
 		},
 	}, {
-		Name: "fetch error",
+		Name: "list error",
 		Args: []string{},
 		WithReactors: []testing.ReactionFunc{
 			testing.InduceFailure("list", "secrets"),

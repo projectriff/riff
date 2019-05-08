@@ -17,14 +17,13 @@
 package commands
 
 import (
-	"fmt"
-
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 )
 
 type CredentialDeleteOptions struct {
 	Namespace string
+	Name      string
 }
 
 func NewCredentialDeleteCommand(p *riff.Params) *cobra.Command {
@@ -32,8 +31,13 @@ func NewCredentialDeleteCommand(p *riff.Params) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use: "delete",
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			// TODO validate arg
+			opt.Name = args[0]
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return fmt.Errorf("not implemented")
+			return p.Core().Secrets(opt.Namespace).Delete(opt.Name, nil)
 		},
 	}
 
