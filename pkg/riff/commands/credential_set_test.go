@@ -22,7 +22,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func TestCredentialSetCommand(t *testing.T) {
@@ -51,24 +50,15 @@ func TestCredentialSetCommand(t *testing.T) {
 				StringData: map[string]string{},
 			},
 		},
-		ExpectUpdates: []testing.UpdateActionImpl{{
-			ActionImpl: testing.ActionImpl{
-				Namespace: "default",
-				Verb:      "update",
-				Resource: schema.GroupVersionResource{
-					Group:    "",
-					Version:  "v1",
-					Resource: "secrets",
-				},
-			},
-			Object: &corev1.Secret{
+		ExpectUpdates: []runtime.Object{
+			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "my-credential",
 					Namespace: "default",
 				},
 				StringData: map[string]string{},
 			},
-		}},
+		},
 	}, {
 		Name: "get error",
 		Args: []string{"my-credential"},
@@ -117,24 +107,15 @@ func TestCredentialSetCommand(t *testing.T) {
 		WithReactors: []testing.ReactionFunc{
 			testing.InduceFailure("update", "secrets"),
 		},
-		ExpectUpdates: []testing.UpdateActionImpl{{
-			ActionImpl: testing.ActionImpl{
-				Namespace: "default",
-				Verb:      "update",
-				Resource: schema.GroupVersionResource{
-					Group:    "",
-					Version:  "v1",
-					Resource: "secrets",
-				},
-			},
-			Object: &corev1.Secret{
+		ExpectUpdates: []runtime.Object{
+			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "my-credential",
 					Namespace: "default",
 				},
 				StringData: map[string]string{},
 			},
-		}},
+		},
 		ExpectError: true,
 	}}
 

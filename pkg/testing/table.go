@@ -30,6 +30,7 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/testing"
 )
@@ -49,9 +50,9 @@ type CommandTableRow struct {
 
 	// side effects
 	ExpectCreates           []metav1.Object
-	ExpectUpdates           []UpdateActionImpl
-	ExpectDeletes           []DeleteActionImpl
-	ExpectDeleteCollections []DeleteCollectionActionImpl
+	ExpectUpdates           []runtime.Object
+	ExpectDeletes           []DeleteRef
+	ExpectDeleteCollections []DeleteCollectionRef
 
 	// outputs
 	ExpectError   bool
@@ -128,7 +129,9 @@ func (ct CommandTable) Run(t *T, cmdFactory func(*riff.Config) *cobra.Command) {
 				obj := actual.GetObject()
 				objPrevState[objKey(obj)] = obj
 
-				if diff := cmp.Diff(expected, obj, ignoreLastTransitionTime, safeDeployDiff, cmpopts.EquateEmpty()); diff != "" {
+				if at, et := reflect.TypeOf(obj).String(), reflect.TypeOf(expected).String(); at != et {
+					t.Errorf("Unexpected create expected type %q, actually %q", et, at)
+				} else if diff := cmp.Diff(expected, obj, ignoreLastTransitionTime, safeDeployDiff, cmpopts.EquateEmpty()); diff != "" {
 					t.Errorf("Unexpected create (-expected, +actual): %s", diff)
 				}
 			}
@@ -140,28 +143,30 @@ func (ct CommandTable) Run(t *T, cmdFactory func(*riff.Config) *cobra.Command) {
 
 			for i, expected := range ctr.ExpectUpdates {
 				if i >= len(actions.Updates) {
-					wo := expected.GetObject()
-					key := objKey(wo)
+					key := objKey(expected)
 					oldObj, ok := objPrevState[key]
 					if !ok {
-						t.Errorf("Object %s was never created: expected: %#v", key, wo)
+						t.Errorf("Object %s was never created: expected: %#v", key, expected)
 						continue
 					}
 					t.Errorf("Missing update for %s (-expected, +prevState): %s", key,
-						cmp.Diff(wo, oldObj, ignoreLastTransitionTime, safeDeployDiff, cmpopts.EquateEmpty()))
+						cmp.Diff(expected, oldObj, ignoreLastTransitionTime, safeDeployDiff, cmpopts.EquateEmpty()))
 					continue
 				}
 
-				if expected.GetSubresource() != "" {
-					t.Errorf("Expectation was invalid - it should not include a subresource: %#v", expected)
+				actual := actions.Updates[i]
+				obj := actual.GetObject()
+
+				if actual.GetSubresource() != "" {
+					t.Errorf("Update was invalid - it should not include a subresource: %#v", actual)
 				}
 
-				actual := actions.Updates[i].GetObject()
-
 				// Update the object state.
-				objPrevState[objKey(actual)] = actual
+				objPrevState[objKey(obj)] = obj
 
-				if diff := cmp.Diff(expected.GetObject(), actual, ignoreLastTransitionTime, safeDeployDiff, cmpopts.EquateEmpty()); diff != "" {
+				if at, et := reflect.TypeOf(obj).String(), reflect.TypeOf(expected).String(); at != et {
+					t.Errorf("Unexpected update expected type %q, actually %q", et, at)
+				} else if diff := cmp.Diff(expected, obj, ignoreLastTransitionTime, safeDeployDiff, cmpopts.EquateEmpty()); diff != "" {
 					t.Errorf("Unexpected update (-expected, +actual): %s", diff)
 				}
 			}
@@ -176,11 +181,8 @@ func (ct CommandTable) Run(t *T, cmdFactory func(*riff.Config) *cobra.Command) {
 					t.Errorf("Missing delete: %#v", expected)
 					continue
 				}
-				actual := actions.Deletes[i]
-				if actual.GetName() != expected.GetName() || actual.GetNamespace() != expected.GetNamespace() {
-					t.Errorf("Unexpected delete[%d]: %#v", i, actual)
-				}
-				if diff := cmp.Diff(expected.GetResource(), actual.GetResource()); diff != "" {
+				actual := NewDeleteRef(actions.Deletes[i])
+				if diff := cmp.Diff(expected, actual); diff != "" {
 					t.Errorf("Unexpected delete (-expected, +actual): %s", diff)
 				}
 			}
@@ -195,12 +197,9 @@ func (ct CommandTable) Run(t *T, cmdFactory func(*riff.Config) *cobra.Command) {
 					t.Errorf("Missing delete-collection: %#v", expected)
 					continue
 				}
-				actual := actions.DeleteCollections[i]
-				if actual, expected := actual.GetListRestrictions().Labels, expected.GetListRestrictions().Labels; (actual != nil) != (expected != nil) || actual.String() != expected.String() {
-					t.Errorf("Unexpected delete-collection[%d].Labels = %v, expected %v", i, actual, expected)
-				}
-				if actual, expected := actual.GetNamespace(), expected.GetNamespace(); actual != expected {
-					t.Errorf("Unexpected delete-collection[%d].Namespace: %#v, expected %s", i, actual, expected)
+				actual := NewDeleteCollectionRef(actions.DeleteCollections[i])
+				if diff := cmp.Diff(expected, actual); diff != "" {
+					t.Errorf("Unexpected delete collection (-expected, +actual): %s", diff)
 				}
 			}
 			if actual, expected := len(actions.DeleteCollections), len(ctr.ExpectDeleteCollections); actual > expected {
@@ -236,3 +235,39 @@ var (
 
 	safeDeployDiff = cmpopts.IgnoreUnexported(resource.Quantity{})
 )
+
+type DeleteRef struct {
+	Group     string
+	Version   string
+	Resource  string
+	Namespace string
+	Name      string
+}
+
+func NewDeleteRef(action DeleteAction) DeleteRef {
+	return DeleteRef{
+		Group:     action.GetResource().Group,
+		Version:   action.GetResource().Version,
+		Resource:  action.GetResource().Resource,
+		Namespace: action.GetNamespace(),
+		Name:      action.GetName(),
+	}
+}
+
+type DeleteCollectionRef struct {
+	Group     string
+	Version   string
+	Resource  string
+	Namespace string
+	Labels    labels.Selector
+}
+
+func NewDeleteCollectionRef(action DeleteCollectionAction) DeleteCollectionRef {
+	return DeleteCollectionRef{
+		Group:     action.GetResource().Group,
+		Version:   action.GetResource().Version,
+		Resource:  action.GetResource().Resource,
+		Namespace: action.GetNamespace(),
+		Labels:    action.GetListRestrictions().Labels,
+	}
+}

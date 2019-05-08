@@ -40,6 +40,5 @@ type ActionRecorderList = kntesting.ActionRecorderList
 
 type ReactionFunc = clientgotesting.ReactionFunc
 type ActionImpl = clientgotesting.ActionImpl
-type UpdateActionImpl = clientgotesting.UpdateActionImpl
-type DeleteActionImpl = clientgotesting.DeleteActionImpl
-type DeleteCollectionActionImpl = clientgotesting.DeleteCollectionActionImpl
+type DeleteAction = clientgotesting.DeleteAction
+type DeleteCollectionAction = clientgotesting.DeleteCollectionAction

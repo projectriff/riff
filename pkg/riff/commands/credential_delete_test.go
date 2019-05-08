@@ -22,7 +22,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func TestCredentialDeleteCommand(t *testing.T) {
@@ -38,33 +37,21 @@ func TestCredentialDeleteCommand(t *testing.T) {
 				StringData: map[string]string{},
 			},
 		},
-		ExpectDeletes: []testing.DeleteActionImpl{{
-			Name: "my-credential",
-			ActionImpl: testing.ActionImpl{
-				Namespace: "default",
-				Verb:      "delete",
-				Resource: schema.GroupVersionResource{
-					Group:    "",
-					Version:  "v1",
-					Resource: "secrets",
-				},
-			}},
-		},
+		ExpectDeletes: []testing.DeleteRef{{
+			Version:   "v1",
+			Resource:  "secrets",
+			Namespace: "default",
+			Name:      "my-credential",
+		}},
 	}, {
 		Name: "secret ds't exist",
 		Args: []string{"my-credential"},
-		ExpectDeletes: []testing.DeleteActionImpl{{
-			Name: "my-credential",
-			ActionImpl: testing.ActionImpl{
-				Namespace: "default",
-				Verb:      "delete",
-				Resource: schema.GroupVersionResource{
-					Group:    "",
-					Version:  "v1",
-					Resource: "secrets",
-				},
-			}},
-		},
+		ExpectDeletes: []testing.DeleteRef{{
+			Version:   "v1",
+			Resource:  "secrets",
+			Namespace: "default",
+			Name:      "my-credential",
+		}},
 		ExpectError: true,
 	}, {
 		Name: "delete error",
@@ -81,18 +68,12 @@ func TestCredentialDeleteCommand(t *testing.T) {
 		WithReactors: []testing.ReactionFunc{
 			testing.InduceFailure("delete", "secrets"),
 		},
-		ExpectDeletes: []testing.DeleteActionImpl{{
-			Name: "my-credential",
-			ActionImpl: testing.ActionImpl{
-				Namespace: "default",
-				Verb:      "delete",
-				Resource: schema.GroupVersionResource{
-					Group:    "",
-					Version:  "v1",
-					Resource: "secrets",
-				},
-			}},
-		},
+		ExpectDeletes: []testing.DeleteRef{{
+			Version:   "v1",
+			Resource:  "secrets",
+			Namespace: "default",
+			Name:      "my-credential",
+		}},
 		ExpectError: true,
 	}}
 
