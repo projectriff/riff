@@ -28,6 +28,8 @@ import (
 )
 
 func TestCredentialListCommand(t *testing.T) {
+	t.Parallel()
+
 	credentialName := "test-credential"
 	credentialAltName := "test-alt-credential"
 	defaultNamespace := "default"
