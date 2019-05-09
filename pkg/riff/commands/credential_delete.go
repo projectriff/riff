@@ -23,7 +23,7 @@ import (
 
 type CredentialDeleteOptions struct {
 	Namespace string
-	Name      string
+	Names     []string
 }
 
 func NewCredentialDeleteCommand(c *riff.Config) *cobra.Command {
@@ -31,15 +31,18 @@ func NewCredentialDeleteCommand(c *riff.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use: "delete",
-		PreRunE: func(cmd *cobra.Command, args []string) error {
-			// TODO validate arg
-			opt.Name = args[0]
+		RunE: func(cmd *cobra.Command, args []string) error {
+			client := c.Core().Secrets(opt.Namespace)
+			for _, name := range opt.Names {
+				if err := client.Delete(name, nil); err != nil {
+					return err
+				}
+			}
 			return nil
 		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return c.Core().Secrets(opt.Namespace).Delete(opt.Name, nil)
-		},
 	}
+
+	riff.Args(cmd, riff.NamesArg(&opt.Names))
 
 	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 

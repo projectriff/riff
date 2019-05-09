@@ -26,6 +26,7 @@ import (
 
 func TestCredentialDeleteCommand(t *testing.T) {
 	credentialName := "test-credential"
+	credentialAltName := "test-alt-credential"
 	defaultNamespace := "default"
 
 	table := testing.CommandTable{{
@@ -44,6 +45,34 @@ func TestCredentialDeleteCommand(t *testing.T) {
 			Resource:  "secrets",
 			Namespace: defaultNamespace,
 			Name:      credentialName,
+		}},
+	}, {
+		Name: "delete secrets",
+		Args: []string{credentialName, credentialAltName},
+		GivenObjects: []runtime.Object{
+			&corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      credentialName,
+					Namespace: defaultNamespace,
+				},
+				StringData: map[string]string{},
+			},
+			&corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      credentialAltName,
+					Namespace: defaultNamespace,
+				},
+				StringData: map[string]string{},
+			},
+		},
+		ExpectDeletes: []testing.DeleteRef{{
+			Resource:  "secrets",
+			Namespace: defaultNamespace,
+			Name:      credentialName,
+		}, {
+			Resource:  "secrets",
+			Namespace: defaultNamespace,
+			Name:      credentialAltName,
 		}},
 	}, {
 		Name: "secret does not exist",

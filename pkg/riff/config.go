@@ -30,8 +30,8 @@ import (
 )
 
 type Config struct {
-	ViperConfigFile     string
-	KubeConfigFile string
+	ViperConfigFile string
+	KubeConfigFile  string
 	k8s.Client
 	FileSystem fs.FileSystem
 }
