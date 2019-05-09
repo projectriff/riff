@@ -17,8 +17,12 @@
 package commands
 
 import (
+	"context"
+
+	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
+	"k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -28,11 +32,36 @@ type CredentialDeleteOptions struct {
 	All       bool
 }
 
+func (opt *CredentialDeleteOptions) Validate(ctx context.Context) *apis.FieldError {
+	errs := &apis.FieldError{}
+
+	if opt.Namespace == "" {
+		errs = errs.Also(apis.ErrMissingField("namespace"))
+	}
+
+	if opt.All && len(opt.Names) != 0 {
+		errs = errs.Also(apis.ErrMultipleOneOf("all", "names"))
+	}
+	if !opt.All && len(opt.Names) == 0 {
+		errs = errs.Also(apis.ErrMissingOneOf("all", "names"))
+	}
+
+	for i, name := range opt.Names {
+		if out := validation.NameIsDNSSubdomain(name, false); len(out) != 0 || name == "" {
+			// TODO capture info about why the name is invalid
+			errs = errs.Also(apis.ErrInvalidArrayValue(name, "names", i))
+		}
+	}
+
+	return errs
+}
+
 func NewCredentialDeleteCommand(c *riff.Config) *cobra.Command {
 	opt := &CredentialDeleteOptions{}
 
 	cmd := &cobra.Command{
-		Use: "delete",
+		Use:     "delete",
+		PreRunE: riff.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := c.Core().Secrets(opt.Namespace)
 

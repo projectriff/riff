@@ -17,12 +17,15 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -31,11 +34,31 @@ type CredentialSetOptions struct {
 	Name      string
 }
 
+func (opt *CredentialSetOptions) Validate(ctx context.Context) *apis.FieldError {
+	errs := &apis.FieldError{}
+
+	if opt.Namespace == "" {
+		errs = errs.Also(apis.ErrMissingField("namespace"))
+	}
+
+	if opt.Name == "" {
+		errs = errs.Also(apis.ErrMissingField("name"))
+	} else {
+		if out := validation.NameIsDNSSubdomain(opt.Name, false); len(out) != 0 {
+			// TODO capture info about why the name is invalid
+			errs = errs.Also(apis.ErrInvalidValue(opt.Name, "name"))
+		}
+	}
+
+	return errs
+}
+
 func NewCredentialSetCommand(c *riff.Config) *cobra.Command {
 	opt := &CredentialSetOptions{}
 
 	cmd := &cobra.Command{
-		Use: "set",
+		Use:     "set",
+		PreRunE: riff.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			secret, err := c.Core().Secrets(opt.Namespace).Get(opt.Name, metav1.GetOptions{})
 			if err != nil {

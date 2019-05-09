@@ -17,8 +17,10 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,11 +31,25 @@ type CredentialListOptions struct {
 	AllNamespaces bool
 }
 
+func (opt *CredentialListOptions) Validate(ctx context.Context) *apis.FieldError {
+	errs := &apis.FieldError{}
+
+	if opt.Namespace == "" && !opt.AllNamespaces {
+		errs = errs.Also(apis.ErrMissingOneOf("namespace", "all-namespaces"))
+	}
+	if opt.Namespace != "" && opt.AllNamespaces {
+		errs = errs.Also(apis.ErrMultipleOneOf("namespace", "all-namespaces"))
+	}
+
+	return errs
+}
+
 func NewCredentialListCommand(c *riff.Config) *cobra.Command {
 	opt := &CredentialListOptions{}
 
 	cmd := &cobra.Command{
-		Use: "list",
+		Use:     "list",
+		PreRunE: riff.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			secrets, err := c.Core().Secrets(opt.Namespace).List(metav1.ListOptions{
 				// TODO get label from riff system
