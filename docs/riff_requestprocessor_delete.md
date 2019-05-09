@@ -1,20 +1,26 @@
 ## riff requestprocessor delete
 
-
+<todo>
 
 ### Synopsis
 
-
+<todo>
 
 ```
 riff requestprocessor delete [flags]
+```
+
+### Examples
+
+```
+<todo>
 ```
 
 ### Options
 
 ```
   -h, --help               help for delete
-  -n, --namespace string   the kubernetes namespace
+  -n, --namespace string   <todo>
 ```
 
 ### Options inherited from parent commands
@@ -26,5 +32,5 @@ riff requestprocessor delete [flags]
 
 ### SEE ALSO
 
-* [riff requestprocessor](riff_requestprocessor.md)	 - 
+* [riff requestprocessor](riff_requestprocessor.md)	 - <todo>
 

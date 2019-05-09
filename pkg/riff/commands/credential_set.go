@@ -57,7 +57,9 @@ func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 	opts := &CredentialSetOptions{}
 
 	cmd := &cobra.Command{
-		Use: "set",
+		Use:     "set",
+		Short:   "<todo>",
+		Example: "<todo>",
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),

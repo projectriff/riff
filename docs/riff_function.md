@@ -1,10 +1,10 @@
 ## riff function
 
-
+<todo>
 
 ### Synopsis
 
-
+<todo>
 
 ### Options
 
@@ -21,10 +21,10 @@
 
 ### SEE ALSO
 
-* [riff](riff.md)	 - 
-* [riff function build](riff_function_build.md)	 - 
-* [riff function create](riff_function_create.md)	 - 
-* [riff function delete](riff_function_delete.md)	 - 
-* [riff function list](riff_function_list.md)	 - 
-* [riff function update](riff_function_update.md)	 - 
+* [riff](riff.md)	 - <todo>
+* [riff function build](riff_function_build.md)	 - <todo>
+* [riff function create](riff_function_create.md)	 - <todo>
+* [riff function delete](riff_function_delete.md)	 - <todo>
+* [riff function list](riff_function_list.md)	 - <todo>
+* [riff function update](riff_function_update.md)	 - <todo>
 

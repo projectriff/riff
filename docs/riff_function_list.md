@@ -1,21 +1,27 @@
 ## riff function list
 
-
+<todo>
 
 ### Synopsis
 
-
+<todo>
 
 ```
 riff function list [flags]
 ```
 
+### Examples
+
+```
+<todo>
+```
+
 ### Options
 
 ```
-      --all-namespaces     list the requested object(s) across all namespaces
+      --all-namespaces     <todo>
   -h, --help               help for list
-  -n, --namespace string   the kubernetes namespace
+  -n, --namespace string   <todo>
 ```
 
 ### Options inherited from parent commands
@@ -27,5 +33,5 @@ riff function list [flags]
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - 
+* [riff function](riff_function.md)	 - <todo>
 

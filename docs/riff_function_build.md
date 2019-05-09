@@ -1,20 +1,26 @@
 ## riff function build
 
-
+<todo>
 
 ### Synopsis
 
-
+<todo>
 
 ```
 riff function build [flags]
+```
+
+### Examples
+
+```
+<todo>
 ```
 
 ### Options
 
 ```
   -h, --help               help for build
-  -n, --namespace string   the kubernetes namespace
+  -n, --namespace string   <todo>
 ```
 
 ### Options inherited from parent commands
@@ -26,5 +32,5 @@ riff function build [flags]
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - 
+* [riff function](riff_function.md)	 - <todo>
 

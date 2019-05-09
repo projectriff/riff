@@ -39,6 +39,8 @@ func NewRequestProcessorUpdateCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "update",
+		Short:   "<todo>",
+		Example: "<todo>",
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {

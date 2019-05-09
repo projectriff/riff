@@ -39,6 +39,8 @@ func NewStreamProcessorDeleteCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "delete",
+		Short:   "<todo>",
+		Example: "<todo>",
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {

@@ -1,20 +1,26 @@
 ## riff stream update
 
-
+<todo>
 
 ### Synopsis
 
-
+<todo>
 
 ```
 riff stream update [flags]
+```
+
+### Examples
+
+```
+<todo>
 ```
 
 ### Options
 
 ```
   -h, --help               help for update
-  -n, --namespace string   the kubernetes namespace
+  -n, --namespace string   <todo>
 ```
 
 ### Options inherited from parent commands
@@ -26,5 +32,5 @@ riff stream update [flags]
 
 ### SEE ALSO
 
-* [riff stream](riff_stream.md)	 - 
+* [riff stream](riff_stream.md)	 - <todo>
 

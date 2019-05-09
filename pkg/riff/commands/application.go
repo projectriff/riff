@@ -24,6 +24,7 @@ import (
 func NewApplicationCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "application",
+		Short:   "<todo>",
 		Args:    cli.Args(),
 		Aliases: []string{"applications", "app", "apps"},
 	}

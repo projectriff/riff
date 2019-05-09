@@ -1,21 +1,27 @@
 ## riff credential delete
 
-
+<todo>
 
 ### Synopsis
 
-
+<todo>
 
 ```
 riff credential delete [flags]
 ```
 
+### Examples
+
+```
+<todo>
+```
+
 ### Options
 
 ```
-      --all                delete all secrets in the namespace
+      --all                <todo>
   -h, --help               help for delete
-  -n, --namespace string   the kubernetes namespace
+  -n, --namespace string   <todo>
 ```
 
 ### Options inherited from parent commands
@@ -27,5 +33,5 @@ riff credential delete [flags]
 
 ### SEE ALSO
 
-* [riff credential](riff_credential.md)	 - 
+* [riff credential](riff_credential.md)	 - <todo>
 

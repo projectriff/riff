@@ -23,8 +23,10 @@ import (
 
 func NewCompletionCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "completion",
-		Args: cli.Args(),
+		Use:     "completion",
+		Short:   "<todo>",
+		Example: "<todo>",
+		Args:    cli.Args(),
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Root().GenBashCompletion(cmd.OutOrStdout())
 		},

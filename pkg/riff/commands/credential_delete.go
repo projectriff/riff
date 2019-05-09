@@ -60,7 +60,9 @@ func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 	opts := &CredentialDeleteOptions{}
 
 	cmd := &cobra.Command{
-		Use: "delete",
+		Use:     "delete",
+		Short:   "<todo>",
+		Example: "<todo>",
 		Args: cli.Args(
 			cli.NamesArg(&opts.Names),
 		),
@@ -87,7 +89,7 @@ func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().BoolVar(&opts.All, "all", false, "delete all secrets in the namespace")
+	cmd.Flags().BoolVar(&opts.All, "all", false, "<todo>")
 
 	return cmd
 }

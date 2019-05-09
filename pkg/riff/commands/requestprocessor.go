@@ -24,6 +24,8 @@ import (
 func NewRequestProcessorCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "requestprocessor",
+		Short:   "<todo>",
+		Example: "<todo>",
 		Args:    cli.Args(),
 		Aliases: []string{"requestprocessors", "rp"},
 	}

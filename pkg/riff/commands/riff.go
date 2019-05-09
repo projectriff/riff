@@ -23,8 +23,9 @@ import (
 
 func NewRiffCommand(c *cli.Config) *cobra.Command {
 	var cmd = &cobra.Command{
-		Use:  "riff",
-		Args: cli.Args(),
+		Use:   "riff",
+		Short: "<todo>",
+		Args:  cli.Args(),
 	}
 
 	cmd.AddCommand(NewCredentialCommand(c))

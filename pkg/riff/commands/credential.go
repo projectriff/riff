@@ -24,6 +24,7 @@ import (
 func NewCredentialCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "credential",
+		Short:   "<todo>",
 		Args:    cli.Args(),
 		Aliases: []string{"credentials", "cred", "creds"},
 	}

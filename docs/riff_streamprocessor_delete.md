@@ -1,20 +1,26 @@
 ## riff streamprocessor delete
 
-
+<todo>
 
 ### Synopsis
 
-
+<todo>
 
 ```
 riff streamprocessor delete [flags]
+```
+
+### Examples
+
+```
+<todo>
 ```
 
 ### Options
 
 ```
   -h, --help               help for delete
-  -n, --namespace string   the kubernetes namespace
+  -n, --namespace string   <todo>
 ```
 
 ### Options inherited from parent commands
@@ -26,5 +32,5 @@ riff streamprocessor delete [flags]
 
 ### SEE ALSO
 
-* [riff streamprocessor](riff_streamprocessor.md)	 - 
+* [riff streamprocessor](riff_streamprocessor.md)	 - <todo>
 

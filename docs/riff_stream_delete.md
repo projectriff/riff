@@ -1,20 +1,26 @@
 ## riff stream delete
 
-
+<todo>
 
 ### Synopsis
 
-
+<todo>
 
 ```
 riff stream delete [flags]
+```
+
+### Examples
+
+```
+<todo>
 ```
 
 ### Options
 
 ```
   -h, --help               help for delete
-  -n, --namespace string   the kubernetes namespace
+  -n, --namespace string   <todo>
 ```
 
 ### Options inherited from parent commands
@@ -26,5 +32,5 @@ riff stream delete [flags]
 
 ### SEE ALSO
 
-* [riff stream](riff_stream.md)	 - 
+* [riff stream](riff_stream.md)	 - <todo>
 

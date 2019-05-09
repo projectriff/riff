@@ -1,20 +1,26 @@
 ## riff application delete
 
-
+<todo>
 
 ### Synopsis
 
-
+<todo>
 
 ```
 riff application delete [flags]
+```
+
+### Examples
+
+```
+<todo>
 ```
 
 ### Options
 
 ```
   -h, --help               help for delete
-  -n, --namespace string   the kubernetes namespace
+  -n, --namespace string   <todo>
 ```
 
 ### Options inherited from parent commands
@@ -26,5 +32,5 @@ riff application delete [flags]
 
 ### SEE ALSO
 
-* [riff application](riff_application.md)	 - 
+* [riff application](riff_application.md)	 - <todo>
 

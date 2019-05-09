@@ -1,20 +1,26 @@
 ## riff requestprocessor update
 
-
+<todo>
 
 ### Synopsis
 
-
+<todo>
 
 ```
 riff requestprocessor update [flags]
+```
+
+### Examples
+
+```
+<todo>
 ```
 
 ### Options
 
 ```
   -h, --help               help for update
-  -n, --namespace string   the kubernetes namespace
+  -n, --namespace string   <todo>
 ```
 
 ### Options inherited from parent commands
@@ -26,5 +32,5 @@ riff requestprocessor update [flags]
 
 ### SEE ALSO
 
-* [riff requestprocessor](riff_requestprocessor.md)	 - 
+* [riff requestprocessor](riff_requestprocessor.md)	 - <todo>
 

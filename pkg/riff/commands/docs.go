@@ -39,6 +39,8 @@ func NewDocsCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "docs",
+		Short:   "<todo>",
+		Example: "<todo>",
 		Hidden:  true,
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),

@@ -1,20 +1,26 @@
 ## riff credential set
 
-
+<todo>
 
 ### Synopsis
 
-
+<todo>
 
 ```
 riff credential set [flags]
+```
+
+### Examples
+
+```
+<todo>
 ```
 
 ### Options
 
 ```
   -h, --help               help for set
-  -n, --namespace string   the kubernetes namespace
+  -n, --namespace string   <todo>
 ```
 
 ### Options inherited from parent commands
@@ -26,5 +32,5 @@ riff credential set [flags]
 
 ### SEE ALSO
 
-* [riff credential](riff_credential.md)	 - 
+* [riff credential](riff_credential.md)	 - <todo>
 

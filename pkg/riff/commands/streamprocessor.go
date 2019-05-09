@@ -24,6 +24,7 @@ import (
 func NewStreamProcessorCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "streamprocessor",
+		Short:   "<todo>",
 		Args:    cli.Args(),
 		Aliases: []string{"streamprocessors", "sp"},
 	}

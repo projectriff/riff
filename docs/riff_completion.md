@@ -1,13 +1,19 @@
 ## riff completion
 
-
+<todo>
 
 ### Synopsis
 
-
+<todo>
 
 ```
 riff completion [flags]
+```
+
+### Examples
+
+```
+<todo>
 ```
 
 ### Options
@@ -25,5 +31,5 @@ riff completion [flags]
 
 ### SEE ALSO
 
-* [riff](riff.md)	 - 
+* [riff](riff.md)	 - <todo>
 

@@ -1,20 +1,26 @@
 ## riff streamprocessor create
 
-
+<todo>
 
 ### Synopsis
 
-
+<todo>
 
 ```
 riff streamprocessor create [flags]
+```
+
+### Examples
+
+```
+<todo>
 ```
 
 ### Options
 
 ```
   -h, --help               help for create
-  -n, --namespace string   the kubernetes namespace
+  -n, --namespace string   <todo>
 ```
 
 ### Options inherited from parent commands
@@ -26,5 +32,5 @@ riff streamprocessor create [flags]
 
 ### SEE ALSO
 
-* [riff streamprocessor](riff_streamprocessor.md)	 - 
+* [riff streamprocessor](riff_streamprocessor.md)	 - <todo>
 

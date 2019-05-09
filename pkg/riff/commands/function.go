@@ -24,6 +24,7 @@ import (
 func NewFunctionCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "function",
+		Short:   "<todo>",
 		Args:    cli.Args(),
 		Aliases: []string{"functions", "func", "fn"},
 	}
