@@ -17,6 +17,8 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/projectriff/riff/pkg/env"
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
@@ -26,6 +28,11 @@ func NewRootCommand(c *riff.Config) *cobra.Command {
 	cmd := NewRiffCommand(c)
 
 	cmd.Use = env.Cli.Name
+	if env.Cli.GitDirty == "" {
+		cmd.Version = fmt.Sprintf("%s (%s)", env.Cli.Version, env.Cli.GitSha)
+	} else {
+		cmd.Version = fmt.Sprintf("%s (%s, with local modifications)", env.Cli.Version, env.Cli.GitSha)
+	}
 	cmd.DisableAutoGenTag = true
 
 	cmd.PersistentFlags().StringVar(&c.ViperConfigFile, "config", "", "config file (default is $HOME/.riff.yaml)")
@@ -33,7 +40,6 @@ func NewRootCommand(c *riff.Config) *cobra.Command {
 
 	cmd.AddCommand(NewCompletionCommand(c))
 	cmd.AddCommand(NewDocsCommand(c))
-	cmd.AddCommand(NewVersionCommand(c))
 
 	return cmd
 }
