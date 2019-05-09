@@ -47,7 +47,6 @@ func TestCredentialDeleteCommand(t *testing.T) {
 			testing.InduceFailure("delete", "secrets"),
 		},
 		ExpectDeleteCollections: []testing.DeleteCollectionRef{{
-			Group:         "",
 			Resource:      "secrets",
 			Namespace:     defaultNamespace,
 			LabelSelector: credentialLabel,
@@ -126,7 +125,6 @@ func TestCredentialDeleteCommand(t *testing.T) {
 			testing.InduceFailure("delete", "secrets"),
 		},
 		ExpectDeletes: []testing.DeleteRef{{
-			Group:     "",
 			Resource:  "secrets",
 			Namespace: defaultNamespace,
 			Name:      credentialName,

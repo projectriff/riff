@@ -26,12 +26,12 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/knative/pkg/kmeta"
+	kntesting "github.com/knative/pkg/reconciler/testing"
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/testing"
+	clientgotesting "k8s.io/client-go/testing"
 )
 
 type CommandTable []CommandTableRow
@@ -48,7 +48,7 @@ type CommandTableRow struct {
 	Args []string
 
 	// side effects
-	ExpectCreates           []metav1.Object
+	ExpectCreates           []runtime.Object
 	ExpectUpdates           []runtime.Object
 	ExpectDeletes           []DeleteRef
 	ExpectDeleteCollections []DeleteCollectionRef
@@ -79,11 +79,11 @@ func (ct CommandTable) Run(t *T, cmdFactory func(*riff.Config) *cobra.Command) {
 			}
 
 			// Validate all objects that implement Validatable
-			client.PrependReactor("create", "*", func(action testing.Action) (handled bool, ret runtime.Object, err error) {
-				return ValidateCreates(context.Background(), action)
+			client.PrependReactor("create", "*", func(action clientgotesting.Action) (handled bool, ret runtime.Object, err error) {
+				return kntesting.ValidateCreates(context.Background(), action)
 			})
-			client.PrependReactor("update", "*", func(action testing.Action) (handled bool, ret runtime.Object, err error) {
-				return ValidateUpdates(context.Background(), action)
+			client.PrependReactor("update", "*", func(action clientgotesting.Action) (handled bool, ret runtime.Object, err error) {
+				return kntesting.ValidateUpdates(context.Background(), action)
 			})
 
 			for i := range ctr.WithReactors {
@@ -242,7 +242,7 @@ type DeleteRef struct {
 	Name      string
 }
 
-func NewDeleteRef(action DeleteAction) DeleteRef {
+func NewDeleteRef(action clientgotesting.DeleteAction) DeleteRef {
 	return DeleteRef{
 		Group:     action.GetResource().Group,
 		Resource:  action.GetResource().Resource,
@@ -258,7 +258,7 @@ type DeleteCollectionRef struct {
 	LabelSelector string
 }
 
-func NewDeleteCollectionRef(action DeleteCollectionAction) DeleteCollectionRef {
+func NewDeleteCollectionRef(action clientgotesting.DeleteCollectionAction) DeleteCollectionRef {
 	return DeleteCollectionRef{
 		Group:         action.GetResource().Group,
 		Resource:      action.GetResource().Resource,

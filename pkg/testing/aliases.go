@@ -25,20 +25,8 @@ import (
 
 type T = testing.T
 
-type ObjectSorter = kntesting.ObjectSorter
-
 var (
-	NewObjectSorter = kntesting.NewObjectSorter
-	InduceFailure   = kntesting.InduceFailure
-	ValidateCreates = kntesting.ValidateCreates
-	ValidateUpdates = kntesting.ValidateUpdates
+	InduceFailure = kntesting.InduceFailure
 )
 
-type Action = clientgotesting.Action
-type ActionRecorder = kntesting.ActionRecorder
-type ActionRecorderList = kntesting.ActionRecorderList
-
 type ReactionFunc = clientgotesting.ReactionFunc
-type ActionImpl = clientgotesting.ActionImpl
-type DeleteAction = clientgotesting.DeleteAction
-type DeleteCollectionAction = clientgotesting.DeleteCollectionAction

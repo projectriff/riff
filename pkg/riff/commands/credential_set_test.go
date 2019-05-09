@@ -32,7 +32,7 @@ func TestCredentialSetCommand(t *testing.T) {
 	table := testing.CommandTable{{
 		Name: "create secret",
 		Args: []string{credentialName},
-		ExpectCreates: []metav1.Object{
+		ExpectCreates: []runtime.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
@@ -88,7 +88,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		WithReactors: []testing.ReactionFunc{
 			testing.InduceFailure("create", "secrets"),
 		},
-		ExpectCreates: []metav1.Object{
+		ExpectCreates: []runtime.Object{
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
