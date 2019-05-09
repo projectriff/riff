@@ -21,34 +21,33 @@ import (
 )
 
 func AllNamespacesFlag(cmd *cobra.Command, c *Config, namespace *string, allNamespaces *bool) {
-	NamespaceFlag(cmd, c, namespace)
-
-	prior := cmd.PersistentPreRunE
-	cmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+	prior := cmd.PreRunE
+	cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
+		if *allNamespaces == true {
+			*namespace = ""
+		}
 		if prior != nil {
 			if err := prior(cmd, args); err != nil {
 				return err
 			}
-		}
-		if *allNamespaces == true {
-			*namespace = ""
 		}
 		return nil
 	}
 
+	NamespaceFlag(cmd, c, namespace)
 	cmd.Flags().BoolVar(allNamespaces, "all-namespaces", false, "list the requested object(s) across all namespaces")
 }
 
 func NamespaceFlag(cmd *cobra.Command, c *Config, namespace *string) {
-	prior := cmd.PersistentPreRunE
-	cmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+	prior := cmd.PreRunE
+	cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
+		if *namespace == "" {
+			*namespace = c.DefaultNamespace()
+		}
 		if prior != nil {
 			if err := prior(cmd, args); err != nil {
 				return err
 			}
-		}
-		if *namespace == "" {
-			*namespace = c.DefaultNamespace()
 		}
 		return nil
 	}
