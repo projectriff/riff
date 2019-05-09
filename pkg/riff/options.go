@@ -29,6 +29,7 @@ func ValidateOptions(opts apis.Validatable) func(cmd *cobra.Command, args []stri
 		if err := opts.Validate(ctx); err.Error() != "" {
 			return err
 		}
+		cmd.SilenceUsage = true
 		return nil
 	}
 }
