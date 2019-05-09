@@ -27,6 +27,17 @@ import (
 
 type FunctionCreateOptions struct {
 	Namespace string
+	Name      string
+
+	Image    string
+	Artifact string
+	Handler  string
+	Invoker  string
+
+	LocalPath   string
+	GitRepo     string
+	GitRevision string
+	SubPath     string
 }
 
 func (opts *FunctionCreateOptions) Validate(ctx context.Context) *apis.FieldError {
@@ -41,7 +52,9 @@ func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
 		Use:     "create",
 		Short:   "<todo>",
 		Example: "<todo>",
-		Args:    cli.Args(),
+		Args: cli.Args(
+			cli.NameArg(&opts.Name),
+		),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
@@ -49,6 +62,14 @@ func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
+	cmd.Flags().StringVar(&opts.Image, "image", "", "<todo>")
+	cmd.Flags().StringVar(&opts.Artifact, "artifact", "", "<todo>")
+	cmd.Flags().StringVar(&opts.Handler, "handler", "", "<todo>")
+	cmd.Flags().StringVar(&opts.Invoker, "invoker", "", "<todo>")
+	cmd.Flags().StringVar(&opts.LocalPath, "local-path", "", "<todo>")
+	cmd.Flags().StringVar(&opts.LocalPath, "git-repo", "", "<todo>")
+	cmd.Flags().StringVar(&opts.LocalPath, "git-revision", "", "<todo>")
+	cmd.Flags().StringVar(&opts.LocalPath, "sub-path", "", "<todo>")
 
 	return cmd
 }

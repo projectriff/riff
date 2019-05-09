@@ -27,6 +27,7 @@ import (
 
 type FunctionBuildOptions struct {
 	Namespace string
+	Name      string
 }
 
 func (opts *FunctionBuildOptions) Validate(ctx context.Context) *apis.FieldError {
@@ -41,7 +42,9 @@ func NewFunctionBuildCommand(c *cli.Config) *cobra.Command {
 		Use:     "build",
 		Short:   "<todo>",
 		Example: "<todo>",
-		Args:    cli.Args(),
+		Args: cli.Args(
+			cli.NameArg(&opts.Name),
+		),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
