@@ -19,19 +19,18 @@ package commands
 import (
 	"fmt"
 
-	"github.com/projectriff/riff/pkg/env"
-	"github.com/projectriff/riff/pkg/riff"
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
-func NewRootCommand(c *riff.Config) *cobra.Command {
+func NewRootCommand(c *cli.Config) *cobra.Command {
 	cmd := NewRiffCommand(c)
 
-	cmd.Use = env.Cli.Name
-	if env.Cli.GitDirty == "" {
-		cmd.Version = fmt.Sprintf("%s (%s)", env.Cli.Version, env.Cli.GitSha)
+	cmd.Use = c.Name
+	if c.GitDirty == "" {
+		cmd.Version = fmt.Sprintf("%s (%s)", c.Version, c.GitSha)
 	} else {
-		cmd.Version = fmt.Sprintf("%s (%s, with local modifications)", env.Cli.Version, env.Cli.GitSha)
+		cmd.Version = fmt.Sprintf("%s (%s, with local modifications)", c.Version, c.GitSha)
 	}
 	cmd.DisableAutoGenTag = true
 

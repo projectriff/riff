@@ -16,13 +16,15 @@
 
 package commands
 
-import "github.com/spf13/cobra"
-import "github.com/projectriff/riff/pkg/riff"
+import (
+	"github.com/projectriff/riff/pkg/cli"
+	"github.com/spf13/cobra"
+)
 
-func NewRequestProcessorCommand(c *riff.Config) *cobra.Command {
+func NewRequestProcessorCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "requestprocessor",
-		Args:    riff.Args(),
+		Args:    cli.Args(),
 		Aliases: []string{"requestprocessors", "rp"},
 	}
 

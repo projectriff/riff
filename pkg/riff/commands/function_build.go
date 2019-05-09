@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	"github.com/knative/pkg/apis"
-	"github.com/projectriff/riff/pkg/riff"
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -34,19 +34,19 @@ func (opt *FunctionBuildOptions) Validate(ctx context.Context) *apis.FieldError 
 	return nil
 }
 
-func NewFunctionBuildCommand(c *riff.Config) *cobra.Command {
+func NewFunctionBuildCommand(c *cli.Config) *cobra.Command {
 	opt := &FunctionBuildOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "build",
-		Args:    riff.Args(),
-		PreRunE: riff.ValidateOptions(opt),
+		Args:    cli.Args(),
+		PreRunE: cli.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},
 	}
 
-	riff.NamespaceFlag(cmd, c, &opt.Namespace)
+	cli.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

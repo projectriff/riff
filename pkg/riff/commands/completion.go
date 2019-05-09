@@ -17,14 +17,14 @@
 package commands
 
 import (
-	"github.com/projectriff/riff/pkg/riff"
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
-func NewCompletionCommand(c *riff.Config) *cobra.Command {
+func NewCompletionCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "completion",
-		Args: riff.Args(),
+		Args: cli.Args(),
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Root().GenBashCompletion(cmd.OutOrStdout())
 		},

@@ -16,13 +16,15 @@
 
 package commands
 
-import "github.com/spf13/cobra"
-import "github.com/projectriff/riff/pkg/riff"
+import (
+	"github.com/projectriff/riff/pkg/cli"
+	"github.com/spf13/cobra"
+)
 
-func NewApplicationCommand(c *riff.Config) *cobra.Command {
+func NewApplicationCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "application",
-		Args:    riff.Args(),
+		Args:    cli.Args(),
 		Aliases: []string{"applications", "app", "apps"},
 	}
 

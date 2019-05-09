@@ -27,7 +27,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/knative/pkg/kmeta"
 	kntesting "github.com/knative/pkg/reconciler/testing"
-	"github.com/projectriff/riff/pkg/riff"
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -42,7 +42,7 @@ type CommandTableRecord struct {
 	Sequential bool
 
 	// environment
-	Config       *riff.Config
+	Config       *cli.Config
 	GivenObjects []runtime.Object
 	WithReactors []ReactionFunc
 
@@ -60,17 +60,17 @@ type CommandTableRecord struct {
 	Verify      func(*T, string, error)
 
 	// lifecycle
-	Prepare func(*riff.Config) error
-	Cleanup func(*riff.Config) error
+	Prepare func(*cli.Config) error
+	Cleanup func(*cli.Config) error
 }
 
-func (ct CommandTable) Run(t *T, cmdFactory func(*riff.Config) *cobra.Command) {
+func (ct CommandTable) Run(t *T, cmdFactory func(*cli.Config) *cobra.Command) {
 	for _, ctr := range ct {
 		ctr.Run(t, cmdFactory)
 	}
 }
 
-func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*riff.Config) *cobra.Command) {
+func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Command) {
 	t.Run(ctr.Name, func(t *T) {
 		if ctr.Skip {
 			t.SkipNow()
@@ -81,7 +81,7 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*riff.Config) *cobra.Com
 
 		c := ctr.Config
 		if c == nil {
-			c = &riff.Config{}
+			c = cli.NewDefaultConfig()
 		}
 		client := NewClient(ctr.GivenObjects...)
 		c.Client = client

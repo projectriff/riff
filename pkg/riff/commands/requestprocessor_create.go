@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	"github.com/knative/pkg/apis"
-	"github.com/projectriff/riff/pkg/riff"
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -34,19 +34,19 @@ func (opt *RequestProcessorCreateOptions) Validate(ctx context.Context) *apis.Fi
 	return nil
 }
 
-func NewRequestProcessorCreateCommand(c *riff.Config) *cobra.Command {
+func NewRequestProcessorCreateCommand(c *cli.Config) *cobra.Command {
 	opt := &RequestProcessorCreateOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "create",
-		Args:    riff.Args(),
-		PreRunE: riff.ValidateOptions(opt),
+		Args:    cli.Args(),
+		PreRunE: cli.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},
 	}
 
-	riff.NamespaceFlag(cmd, c, &opt.Namespace)
+	cli.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

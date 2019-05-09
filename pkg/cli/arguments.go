@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package riff
+package cli
 
 import (
 	"fmt"

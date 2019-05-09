@@ -20,7 +20,7 @@ import (
 	"context"
 
 	"github.com/knative/pkg/apis"
-	"github.com/projectriff/riff/pkg/riff"
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -56,15 +56,15 @@ func (opt *CredentialDeleteOptions) Validate(ctx context.Context) *apis.FieldErr
 	return errs
 }
 
-func NewCredentialDeleteCommand(c *riff.Config) *cobra.Command {
+func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 	opt := &CredentialDeleteOptions{}
 
 	cmd := &cobra.Command{
 		Use: "delete",
-		Args: riff.Args(
-			riff.NamesArg(&opt.Names),
+		Args: cli.Args(
+			cli.NamesArg(&opt.Names),
 		),
-		PreRunE: riff.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := c.Core().Secrets(opt.Namespace)
 
@@ -86,7 +86,7 @@ func NewCredentialDeleteCommand(c *riff.Config) *cobra.Command {
 		},
 	}
 
-	riff.NamespaceFlag(cmd, c, &opt.Namespace)
+	cli.NamespaceFlag(cmd, c, &opt.Namespace)
 	cmd.Flags().BoolVar(&opt.All, "all", false, "delete all secrets in the namespace")
 
 	return cmd

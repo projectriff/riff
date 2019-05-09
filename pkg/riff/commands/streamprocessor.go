@@ -16,13 +16,15 @@
 
 package commands
 
-import "github.com/spf13/cobra"
-import "github.com/projectriff/riff/pkg/riff"
+import (
+	"github.com/projectriff/riff/pkg/cli"
+	"github.com/spf13/cobra"
+)
 
-func NewStreamProcessorCommand(c *riff.Config) *cobra.Command {
+func NewStreamProcessorCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "streamprocessor",
-		Args:    riff.Args(),
+		Args:    cli.Args(),
 		Aliases: []string{"streamprocessors", "sp"},
 	}
 

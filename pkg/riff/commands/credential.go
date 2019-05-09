@@ -16,13 +16,15 @@
 
 package commands
 
-import "github.com/spf13/cobra"
-import "github.com/projectriff/riff/pkg/riff"
+import (
+	"github.com/projectriff/riff/pkg/cli"
+	"github.com/spf13/cobra"
+)
 
-func NewCredentialCommand(c *riff.Config) *cobra.Command {
+func NewCredentialCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "credential",
-		Args:    riff.Args(),
+		Args:    cli.Args(),
 		Aliases: []string{"credentials", "cred", "creds"},
 	}
 

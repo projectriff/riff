@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package env
+package cli
 
 var (
 	cli_name     = "riff"
@@ -23,18 +23,18 @@ var (
 	cli_gitdirty = ""
 )
 
-type CliEnv struct {
+type CompiledEnv struct {
 	Name     string
 	Version  string
 	GitSha   string
 	GitDirty string
 }
 
-var Cli CliEnv
+var env CompiledEnv
 
 func init() {
 	// must be created inside the init function to pickup build specific params
-	Cli = CliEnv{
+	env = CompiledEnv{
 		Name:     cli_name,
 		Version:  cli_version,
 		GitSha:   cli_gitsha,

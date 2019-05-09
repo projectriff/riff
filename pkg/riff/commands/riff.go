@@ -17,14 +17,14 @@
 package commands
 
 import (
-	"github.com/projectriff/riff/pkg/riff"
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
-func NewRiffCommand(c *riff.Config) *cobra.Command {
+func NewRiffCommand(c *cli.Config) *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:  "riff",
-		Args: riff.Args(),
+		Args: cli.Args(),
 	}
 
 	cmd.AddCommand(NewCredentialCommand(c))

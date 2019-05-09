@@ -25,12 +25,12 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 
-	"github.com/projectriff/riff/pkg/riff"
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 )
 
 func main() {
-	cmd := commands.NewRootCommand(riff.Initialize())
+	cmd := commands.NewRootCommand(cli.Initialize())
 
 	cmd.SilenceErrors = true
 	if err := cmd.Execute(); err != nil {

@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	"github.com/knative/pkg/apis"
-	"github.com/projectriff/riff/pkg/riff"
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
@@ -34,19 +34,19 @@ func (opt *ApplicationUpdateOptions) Validate(ctx context.Context) *apis.FieldEr
 	return nil
 }
 
-func NewApplicationUpdateCommand(c *riff.Config) *cobra.Command {
+func NewApplicationUpdateCommand(c *cli.Config) *cobra.Command {
 	opt := &ApplicationUpdateOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "update",
-		Args:    riff.Args(),
-		PreRunE: riff.ValidateOptions(opt),
+		Args:    cli.Args(),
+		PreRunE: cli.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},
 	}
 
-	riff.NamespaceFlag(cmd, c, &opt.Namespace)
+	cli.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

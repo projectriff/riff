@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	"github.com/knative/pkg/apis"
-	"github.com/projectriff/riff/pkg/riff"
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
@@ -53,15 +53,15 @@ func (opt *CredentialSetOptions) Validate(ctx context.Context) *apis.FieldError 
 	return errs
 }
 
-func NewCredentialSetCommand(c *riff.Config) *cobra.Command {
+func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 	opt := &CredentialSetOptions{}
 
 	cmd := &cobra.Command{
 		Use: "set",
-		Args: riff.Args(
-			riff.NameArg(&opt.Name),
+		Args: cli.Args(
+			cli.NameArg(&opt.Name),
 		),
-		PreRunE: riff.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			secret, err := c.Core().Secrets(opt.Namespace).Get(opt.Name, metav1.GetOptions{})
 			if err != nil {
@@ -96,7 +96,7 @@ func NewCredentialSetCommand(c *riff.Config) *cobra.Command {
 		},
 	}
 
-	riff.NamespaceFlag(cmd, c, &opt.Namespace)
+	cli.NamespaceFlag(cmd, c, &opt.Namespace)
 
 	return cmd
 }

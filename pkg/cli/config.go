@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package riff
+package cli
 
 import (
 	"fmt"
@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/projectriff/riff/pkg/env"
 	"github.com/projectriff/riff/pkg/fs"
 	"github.com/projectriff/riff/pkg/k8s"
 	"github.com/spf13/cobra"
@@ -30,14 +29,21 @@ import (
 )
 
 type Config struct {
+	CompiledEnv
 	ViperConfigFile string
 	KubeConfigFile  string
 	k8s.Client
 	FileSystem fs.FileSystem
 }
 
+func NewDefaultConfig() *Config {
+	return &Config{
+		CompiledEnv: env,
+	}
+}
+
 func Initialize() *Config {
-	c := &Config{}
+	c := NewDefaultConfig()
 
 	cobra.OnInitialize(c.initViperConfig)
 	cobra.OnInitialize(c.initKubeConfig)
@@ -61,7 +67,7 @@ func (c *Config) initViperConfig() {
 
 		// Search config in home directory with name ".riff" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName("." + env.Cli.Name)
+		viper.SetConfigName("." + c.Name)
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
