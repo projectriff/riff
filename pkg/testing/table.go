@@ -37,8 +37,9 @@ import (
 type CommandTable []CommandTableRecord
 
 type CommandTableRecord struct {
-	Name string
-	Skip bool
+	Name       string
+	Skip       bool
+	Sequential bool
 
 	// environment
 	Config       *riff.Config
@@ -73,6 +74,9 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*riff.Config) *cobra.Com
 	t.Run(ctr.Name, func(t *T) {
 		if ctr.Skip {
 			t.SkipNow()
+		}
+		if !ctr.Sequential {
+			t.Parallel()
 		}
 
 		c := ctr.Config
