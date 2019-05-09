@@ -39,6 +39,7 @@ type CommandTable []CommandTableRecord
 type CommandTableRecord struct {
 	Name       string
 	Skip       bool
+	Focus      bool
 	Sequential bool
 
 	// environment
@@ -65,6 +66,20 @@ type CommandTableRecord struct {
 }
 
 func (ct CommandTable) Run(t *T, cmdFactory func(*cli.Config) *cobra.Command) {
+	focusedTable := CommandTable{}
+	for _, ctr := range ct {
+		if ctr.Focus == true {
+			focusedTable = append(focusedTable, ctr)
+		}
+	}
+	if len(focusedTable) != 0 {
+		for _, ctr := range focusedTable {
+			ctr.Run(t, cmdFactory)
+		}
+		t.Errorf("test passed focusing on %d record, skipped %d records", len(focusedTable), len(ct)-len(focusedTable))
+		return
+	}
+
 	for _, ctr := range ct {
 		ctr.Run(t, cmdFactory)
 	}
