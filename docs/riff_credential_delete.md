@@ -13,6 +13,7 @@ riff credential delete [flags]
 ### Options
 
 ```
+      --all                delete all secrets in the namespace
   -h, --help               help for delete
   -n, --namespace string   the kubernetes namespace
 ```

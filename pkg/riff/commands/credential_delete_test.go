@@ -28,8 +28,31 @@ func TestCredentialDeleteCommand(t *testing.T) {
 	credentialName := "test-credential"
 	credentialAltName := "test-alt-credential"
 	defaultNamespace := "default"
+	credentialLabel := "projectriff.io/credential"
 
 	table := testing.CommandTable{{
+		Name: "delete all secrets",
+		Args: []string{"--all"},
+		GivenObjects: []runtime.Object{
+			&corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      credentialName,
+					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
+				},
+				StringData: map[string]string{},
+			},
+		},
+		WithReactors: []testing.ReactionFunc{
+			testing.InduceFailure("delete", "secrets"),
+		},
+		ExpectDeleteCollections: []testing.DeleteCollectionRef{{
+			Group:         "",
+			Resource:      "secrets",
+			Namespace:     defaultNamespace,
+			LabelSelector: credentialLabel,
+		}},
+	}, {
 		Name: "delete secret",
 		Args: []string{credentialName},
 		GivenObjects: []runtime.Object{
@@ -37,6 +60,7 @@ func TestCredentialDeleteCommand(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
 					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
 				},
 				StringData: map[string]string{},
 			},
@@ -54,6 +78,7 @@ func TestCredentialDeleteCommand(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
 					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
 				},
 				StringData: map[string]string{},
 			},
@@ -61,6 +86,7 @@ func TestCredentialDeleteCommand(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialAltName,
 					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
 				},
 				StringData: map[string]string{},
 			},
@@ -91,6 +117,7 @@ func TestCredentialDeleteCommand(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
 					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
 				},
 				StringData: map[string]string{},
 			},

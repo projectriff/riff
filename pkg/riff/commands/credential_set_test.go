@@ -27,6 +27,7 @@ import (
 func TestCredentialSetCommand(t *testing.T) {
 	credentialName := "test-credential"
 	defaultNamespace := "default"
+	credentialLabel := "projectriff.io/credential"
 
 	table := testing.CommandTable{{
 		Name: "create secret",
@@ -36,6 +37,7 @@ func TestCredentialSetCommand(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
 					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
 				},
 				StringData: map[string]string{},
 			},
@@ -48,6 +50,7 @@ func TestCredentialSetCommand(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
 					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
 				},
 				StringData: map[string]string{},
 			},
@@ -57,6 +60,7 @@ func TestCredentialSetCommand(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
 					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
 				},
 				StringData: map[string]string{},
 			},
@@ -69,6 +73,7 @@ func TestCredentialSetCommand(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
 					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
 				},
 				StringData: map[string]string{},
 			},
@@ -88,6 +93,7 @@ func TestCredentialSetCommand(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
 					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
 				},
 				StringData: map[string]string{},
 			},
@@ -101,6 +107,7 @@ func TestCredentialSetCommand(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
 					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
 				},
 				StringData: map[string]string{},
 			},
@@ -112,6 +119,20 @@ func TestCredentialSetCommand(t *testing.T) {
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
+					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
+				},
+				StringData: map[string]string{},
+			},
+		},
+		ShouldError: true,
+	}, {
+		Name: "no clobber",
+		Args: []string{"not-a-credential"},
+		GivenObjects: []runtime.Object{
+			&corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "not-a-credential",
 					Namespace: defaultNamespace,
 				},
 				StringData: map[string]string{},

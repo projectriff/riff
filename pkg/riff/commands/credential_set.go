@@ -17,6 +17,8 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
@@ -40,18 +42,30 @@ func NewCredentialSetCommand(c *riff.Config) *cobra.Command {
 				if !apierrs.IsNotFound(err) {
 					return err
 				}
+
 				_, err = c.Core().Secrets(opt.Namespace).Create(&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      opt.Name,
 						Namespace: opt.Namespace,
+						Labels: map[string]string{
+							// TODO get label from riff system
+							"projectriff.io/credential": "",
+						},
 					},
 					// TODO define secret data
 					StringData: map[string]string{},
 				})
 				return err
 			}
+
+			// ensure we are not mutating a non-riff secret
+			if _, ok := secret.Labels["projectriff.io/credential"]; !ok {
+				return fmt.Errorf("credential %q exists, but is not owned by riff", opt.Name)
+			}
+
 			// TODO mutate secret
 			_, err = c.Core().Secrets(opt.Namespace).Update(secret)
+
 			return err
 		},
 	}

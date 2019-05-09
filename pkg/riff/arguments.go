@@ -33,7 +33,9 @@ func Args(cmd *cobra.Command, argDefs ...Arg) {
 		cmd.Annotations = make(map[string]string)
 	}
 	for i, argDef := range argDefs {
-		cmd.Annotations[fmt.Sprintf("arg%d", i)] = argDef.Name
+		// named arguments are not part of cobra, but other custom tools can consume this metadata
+		cmd.Annotations[fmt.Sprintf("arg-%d-name", i)] = argDef.Name
+		cmd.Annotations[fmt.Sprintf("arg-%d-arity", i)] = fmt.Sprintf("%d", argDef.Arity)
 	}
 
 	cmd.Args = func(cmd *cobra.Command, args []string) error {
@@ -63,15 +65,10 @@ func Args(cmd *cobra.Command, argDefs ...Arg) {
 
 func NameArg(name *string) Arg {
 	return Arg{
-		Name:  "NAME",
+		Name:  "name",
 		Arity: 1,
 		Set: func(args []string) error {
-			arg := args[0]
-			// TODO validate arg
-			if arg == "" {
-				return fmt.Errorf("NAME argument is invalid")
-			}
-			*name = arg
+			*name = args[0]
 			return nil
 		},
 	}
@@ -79,15 +76,9 @@ func NameArg(name *string) Arg {
 
 func NamesArg(names *[]string) Arg {
 	return Arg{
-		Name:  "NAMES",
+		Name:  "name(s)",
 		Arity: -1,
 		Set: func(args []string) error {
-			// TODO validate arg
-			for _, arg := range args {
-				if arg == "" {
-					return fmt.Errorf("NAMES argument is invalid")
-				}
-			}
 			*names = args
 			return nil
 		},

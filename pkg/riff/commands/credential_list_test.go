@@ -32,6 +32,7 @@ func TestCredentialListCommand(t *testing.T) {
 	credentialAltName := "test-alt-credential"
 	defaultNamespace := "default"
 	altNamespace := "alt-namespace"
+	credentialLabel := "projectriff.io/credential"
 
 	table := testing.CommandTable{{
 		Name: "empty",
@@ -49,6 +50,7 @@ func TestCredentialListCommand(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
 					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
 				},
 			},
 		},
@@ -65,6 +67,7 @@ func TestCredentialListCommand(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
 					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
 				},
 			},
 		},
@@ -81,12 +84,14 @@ func TestCredentialListCommand(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialName,
 					Namespace: defaultNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
 				},
 			},
 			&corev1.Secret{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      credentialAltName,
 					Namespace: altNamespace,
+					Labels:    map[string]string{credentialLabel: ""},
 				},
 			},
 		},
@@ -98,6 +103,22 @@ func TestCredentialListCommand(t *testing.T) {
 				if !strings.Contains(output, expected) {
 					t.Errorf("expected command output to contain %q, actually %q", expected, output)
 				}
+			}
+		},
+	}, {
+		Name: "ignore non-riff secrets",
+		Args: []string{},
+		GivenObjects: []runtime.Object{
+			&corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "not-a-credential",
+					Namespace: defaultNamespace,
+				},
+			},
+		},
+		Verify: func(t *testing.T, output string, err error) {
+			if expected, actual := output, "No credentials found.\n"; actual != expected {
+				t.Errorf("expected output %q, actually %q", expected, actual)
 			}
 		},
 	}, {

@@ -19,11 +19,13 @@ package commands
 import (
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type CredentialDeleteOptions struct {
 	Namespace string
 	Names     []string
+	All       bool
 }
 
 func NewCredentialDeleteCommand(c *riff.Config) *cobra.Command {
@@ -33,11 +35,21 @@ func NewCredentialDeleteCommand(c *riff.Config) *cobra.Command {
 		Use: "delete",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := c.Core().Secrets(opt.Namespace)
+
+			if opt.All {
+				return client.DeleteCollection(nil, metav1.ListOptions{
+					// TODO get label from riff system
+					LabelSelector: "projectriff.io/credential",
+				})
+			}
+
 			for _, name := range opt.Names {
+				// TODO check for the matching label before deleting
 				if err := client.Delete(name, nil); err != nil {
 					return err
 				}
 			}
+
 			return nil
 		},
 	}
@@ -45,6 +57,7 @@ func NewCredentialDeleteCommand(c *riff.Config) *cobra.Command {
 	riff.Args(cmd, riff.NamesArg(&opt.Names))
 
 	riff.NamespaceFlag(cmd, c, &opt.Namespace)
+	cmd.Flags().BoolVar(&opt.All, "all", false, "delete all secrets in the namespace")
 
 	return cmd
 }

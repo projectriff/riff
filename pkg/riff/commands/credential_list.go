@@ -35,7 +35,10 @@ func NewCredentialListCommand(c *riff.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "list",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			secrets, err := c.Core().Secrets(opt.Namespace).List(metav1.ListOptions{})
+			secrets, err := c.Core().Secrets(opt.Namespace).List(metav1.ListOptions{
+				// TODO get label from riff system
+				LabelSelector: "projectriff.io/credential",
+			})
 			if err != nil {
 				return err
 			}

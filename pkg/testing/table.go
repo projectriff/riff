@@ -30,7 +30,6 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/testing"
 )
@@ -253,17 +252,17 @@ func NewDeleteRef(action DeleteAction) DeleteRef {
 }
 
 type DeleteCollectionRef struct {
-	Group     string
-	Resource  string
-	Namespace string
-	Labels    labels.Selector
+	Group         string
+	Resource      string
+	Namespace     string
+	LabelSelector string
 }
 
 func NewDeleteCollectionRef(action DeleteCollectionAction) DeleteCollectionRef {
 	return DeleteCollectionRef{
-		Group:     action.GetResource().Group,
-		Resource:  action.GetResource().Resource,
-		Namespace: action.GetNamespace(),
-		Labels:    action.GetListRestrictions().Labels,
+		Group:         action.GetResource().Group,
+		Resource:      action.GetResource().Resource,
+		Namespace:     action.GetNamespace(),
+		LabelSelector: action.GetListRestrictions().Labels.String(),
 	}
 }
