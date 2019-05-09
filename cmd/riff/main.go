@@ -19,6 +19,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	// load credential helpers
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -31,8 +32,13 @@ import (
 func main() {
 	cmd := commands.NewRootCommand(riff.Initialize())
 
+	cmd.SilenceErrors = true
 	if err := cmd.Execute(); err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(cmd.OutOrStderr(), "Error executing command:")
+		// errors can be multiple lines, indent each line
+		for _, line := range strings.Split(err.Error(), "\n") {
+			fmt.Fprintf(cmd.OutOrStderr(), "  %s\n", line)
+		}
 		os.Exit(1)
 	}
 }
