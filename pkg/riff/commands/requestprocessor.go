@@ -22,6 +22,7 @@ import "github.com/projectriff/riff/pkg/riff"
 func NewRequestProcessorCommand(c *riff.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "requestprocessor",
+		Args:    riff.Args(),
 		Aliases: []string{"requestprocessors", "rp"},
 	}
 

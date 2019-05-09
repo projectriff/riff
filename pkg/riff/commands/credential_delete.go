@@ -60,8 +60,10 @@ func NewCredentialDeleteCommand(c *riff.Config) *cobra.Command {
 	opt := &CredentialDeleteOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "delete",
-		Args:    riff.Args(riff.NamesArg(&opt.Names)),
+		Use: "delete",
+		Args: riff.Args(
+			riff.NamesArg(&opt.Names),
+		),
 		PreRunE: riff.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := c.Core().Secrets(opt.Namespace)

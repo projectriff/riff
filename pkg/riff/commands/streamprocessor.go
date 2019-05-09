@@ -22,6 +22,7 @@ import "github.com/projectriff/riff/pkg/riff"
 func NewStreamProcessorCommand(c *riff.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "streamprocessor",
+		Args:    riff.Args(),
 		Aliases: []string{"streamprocessors", "sp"},
 	}
 

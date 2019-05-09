@@ -23,7 +23,8 @@ import (
 
 func NewCompletionCommand(c *riff.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "completion",
+		Use:  "completion",
+		Args: riff.Args(),
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Root().GenBashCompletion(cmd.OutOrStdout())
 		},

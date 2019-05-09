@@ -22,6 +22,7 @@ import "github.com/projectriff/riff/pkg/riff"
 func NewStreamCommand(c *riff.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "stream",
+		Args:    riff.Args(),
 		Aliases: []string{"streams"},
 	}
 

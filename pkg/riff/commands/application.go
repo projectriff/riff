@@ -22,6 +22,7 @@ import "github.com/projectriff/riff/pkg/riff"
 func NewApplicationCommand(c *riff.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "application",
+		Args:    riff.Args(),
 		Aliases: []string{"applications", "app", "apps"},
 	}
 

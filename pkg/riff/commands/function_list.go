@@ -17,8 +17,10 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 )
@@ -28,11 +30,18 @@ type FunctionListOptions struct {
 	AllNamespaces bool
 }
 
+func (opt *FunctionListOptions) Validate(ctx context.Context) *apis.FieldError {
+	// TODO implement
+	return nil
+}
+
 func NewFunctionListCommand(c *riff.Config) *cobra.Command {
 	opt := &FunctionListOptions{}
 
 	cmd := &cobra.Command{
-		Use: "list",
+		Use:     "list",
+		Args:    riff.Args(),
+		PreRunE: riff.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},

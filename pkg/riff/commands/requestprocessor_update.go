@@ -17,8 +17,10 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 )
@@ -27,11 +29,18 @@ type RequestProcessorUpdateOptions struct {
 	Namespace string
 }
 
+func (opt *RequestProcessorUpdateOptions) Validate(ctx context.Context) *apis.FieldError {
+	// TODO implement
+	return nil
+}
+
 func NewRequestProcessorUpdateCommand(c *riff.Config) *cobra.Command {
 	opt := &RequestProcessorUpdateOptions{}
 
 	cmd := &cobra.Command{
-		Use: "update",
+		Use:     "update",
+		Args:    riff.Args(),
+		PreRunE: riff.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},

@@ -22,6 +22,7 @@ import "github.com/projectriff/riff/pkg/riff"
 func NewCredentialCommand(c *riff.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "credential",
+		Args:    riff.Args(),
 		Aliases: []string{"credentials", "cred", "creds"},
 	}
 

@@ -17,6 +17,9 @@
 package commands
 
 import (
+	"context"
+
+	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
@@ -26,12 +29,19 @@ type DocsOptions struct {
 	Directory string
 }
 
+func (opt *DocsOptions) Validate(ctx context.Context) *apis.FieldError {
+	// TODO implement
+	return nil
+}
+
 func NewDocsCommand(c *riff.Config) *cobra.Command {
 	opt := &DocsOptions{}
 
 	cmd := &cobra.Command{
-		Use:    "docs",
-		Hidden: true,
+		Use:     "docs",
+		Hidden:  true,
+		Args:    riff.Args(),
+		PreRunE: riff.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := c.FileSystem.MkdirAll(opt.Directory, 0744); err != nil {
 				return err

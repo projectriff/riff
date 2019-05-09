@@ -17,8 +17,10 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/riff"
 	"github.com/spf13/cobra"
 )
@@ -27,11 +29,18 @@ type StreamDeleteOptions struct {
 	Namespace string
 }
 
+func (opt *StreamDeleteOptions) Validate(ctx context.Context) *apis.FieldError {
+	// TODO implement
+	return nil
+}
+
 func NewStreamDeleteCommand(c *riff.Config) *cobra.Command {
 	opt := &StreamDeleteOptions{}
 
 	cmd := &cobra.Command{
-		Use: "delete",
+		Use:     "delete",
+		Args:    riff.Args(),
+		PreRunE: riff.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},

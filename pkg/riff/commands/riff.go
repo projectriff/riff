@@ -23,7 +23,8 @@ import (
 
 func NewRiffCommand(c *riff.Config) *cobra.Command {
 	var cmd = &cobra.Command{
-		Use: "riff",
+		Use:  "riff",
+		Args: riff.Args(),
 	}
 
 	cmd.AddCommand(NewCredentialCommand(c))

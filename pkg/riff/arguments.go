@@ -50,7 +50,8 @@ func Args(argDefs ...Arg) cobra.PositionalArgs {
 			offset += arity
 		}
 
-		return nil
+		// no additional args
+		return cobra.NoArgs(cmd, args[offset:])
 	}
 }
 
