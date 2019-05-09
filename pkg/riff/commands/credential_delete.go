@@ -61,6 +61,7 @@ func NewCredentialDeleteCommand(c *riff.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "delete",
+		Args:    riff.Args(riff.NamesArg(&opt.Names)),
 		PreRunE: riff.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := c.Core().Secrets(opt.Namespace)
@@ -82,8 +83,6 @@ func NewCredentialDeleteCommand(c *riff.Config) *cobra.Command {
 			return nil
 		},
 	}
-
-	riff.Args(cmd, riff.NamesArg(&opt.Names))
 
 	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 	cmd.Flags().BoolVar(&opt.All, "all", false, "delete all secrets in the namespace")

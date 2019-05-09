@@ -58,6 +58,7 @@ func NewCredentialSetCommand(c *riff.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "set",
+		Args:    riff.Args(riff.NameArg(&opt.Name)),
 		PreRunE: riff.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			secret, err := c.Core().Secrets(opt.Namespace).Get(opt.Name, metav1.GetOptions{})
@@ -92,8 +93,6 @@ func NewCredentialSetCommand(c *riff.Config) *cobra.Command {
 			return err
 		},
 	}
-
-	riff.Args(cmd, riff.NameArg(&opt.Name))
 
 	riff.NamespaceFlag(cmd, c, &opt.Namespace)
 

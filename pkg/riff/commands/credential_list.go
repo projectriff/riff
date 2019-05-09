@@ -49,6 +49,7 @@ func NewCredentialListCommand(c *riff.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "list",
+		Args:    cobra.NoArgs,
 		PreRunE: riff.ValidateOptions(opt),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			secrets, err := c.Core().Secrets(opt.Namespace).List(metav1.ListOptions{

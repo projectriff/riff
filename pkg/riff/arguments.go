@@ -28,17 +28,8 @@ type Arg struct {
 	Set   func(args []string) error
 }
 
-func Args(cmd *cobra.Command, argDefs ...Arg) {
-	if cmd.Annotations == nil {
-		cmd.Annotations = make(map[string]string)
-	}
-	for i, argDef := range argDefs {
-		// named arguments are not part of cobra, but other custom tools can consume this metadata
-		cmd.Annotations[fmt.Sprintf("arg-%d-name", i)] = argDef.Name
-		cmd.Annotations[fmt.Sprintf("arg-%d-arity", i)] = fmt.Sprintf("%d", argDef.Arity)
-	}
-
-	cmd.Args = func(cmd *cobra.Command, args []string) error {
+func Args(argDefs ...Arg) cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
 		offset := 0
 
 		for _, argDef := range argDefs {
