@@ -36,101 +36,108 @@ func TestCredentialListCommand(t *testing.T) {
 	altNamespace := "alt-namespace"
 	credentialLabel := "projectriff.io/credential"
 
-	table := testing.CommandTable{{
-		Name: "empty",
-		Args: []string{},
-		Verify: func(t *testing.T, output string, err error) {
-			if expected, actual := output, "No credentials found.\n"; actual != expected {
-				t.Errorf("expected output %q, actually %q", expected, actual)
-			}
-		},
-	}, {
-		Name: "lists a secret",
-		Args: []string{},
-		GivenObjects: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
-				},
-			},
-		},
-		Verify: func(t *testing.T, output string, err error) {
-			if actual, want := output, fmt.Sprintf("%s\n", credentialName); actual != want {
-				t.Errorf("expected output %q, actually %q", want, actual)
-			}
-		},
-	}, {
-		Name: "filters by namespace",
-		Args: []string{"--namespace", altNamespace},
-		GivenObjects: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
-				},
-			},
-		},
-		Verify: func(t *testing.T, output string, err error) {
-			if actual, want := output, "No credentials found.\n"; actual != want {
-				t.Errorf("expected output %q, actually %q", want, actual)
-			}
-		},
-	}, {
-		Name: "all namespace",
-		Args: []string{"--all-namespaces"},
-		GivenObjects: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
-				},
-			},
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialAltName,
-					Namespace: altNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
-				},
-			},
-		},
-		Verify: func(t *testing.T, output string, err error) {
-			for _, expected := range []string{
-				fmt.Sprintf("%s\n", credentialName),
-				fmt.Sprintf("%s\n", credentialAltName),
-			} {
-				if !strings.Contains(output, expected) {
-					t.Errorf("expected command output to contain %q, actually %q", expected, output)
+	table := testing.CommandTable{
+		{
+			Name: "empty",
+			Args: []string{},
+			Verify: func(t *testing.T, output string, err error) {
+				if expected, actual := output, "No credentials found.\n"; actual != expected {
+					t.Errorf("expected output %q, actually %q", expected, actual)
 				}
-			}
-		},
-	}, {
-		Name: "ignore non-riff secrets",
-		Args: []string{},
-		GivenObjects: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "not-a-credential",
-					Namespace: defaultNamespace,
-				},
 			},
 		},
-		Verify: func(t *testing.T, output string, err error) {
-			if expected, actual := output, "No credentials found.\n"; actual != expected {
-				t.Errorf("expected output %q, actually %q", expected, actual)
-			}
+		{
+			Name: "lists a secret",
+			Args: []string{},
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+				},
+			},
+			Verify: func(t *testing.T, output string, err error) {
+				if actual, want := output, fmt.Sprintf("%s\n", credentialName); actual != want {
+					t.Errorf("expected output %q, actually %q", want, actual)
+				}
+			},
 		},
-	}, {
-		Name: "list error",
-		Args: []string{},
-		WithReactors: []testing.ReactionFunc{
-			testing.InduceFailure("list", "secrets"),
+		{
+			Name: "filters by namespace",
+			Args: []string{"--namespace", altNamespace},
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+				},
+			},
+			Verify: func(t *testing.T, output string, err error) {
+				if actual, want := output, "No credentials found.\n"; actual != want {
+					t.Errorf("expected output %q, actually %q", want, actual)
+				}
+			},
 		},
-		ShouldError: true,
-	}}
+		{
+			Name: "all namespace",
+			Args: []string{"--all-namespaces"},
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+				},
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialAltName,
+						Namespace: altNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+				},
+			},
+			Verify: func(t *testing.T, output string, err error) {
+				for _, expected := range []string{
+					fmt.Sprintf("%s\n", credentialName),
+					fmt.Sprintf("%s\n", credentialAltName),
+				} {
+					if !strings.Contains(output, expected) {
+						t.Errorf("expected command output to contain %q, actually %q", expected, output)
+					}
+				}
+			},
+		},
+		{
+			Name: "ignore non-riff secrets",
+			Args: []string{},
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "not-a-credential",
+						Namespace: defaultNamespace,
+					},
+				},
+			},
+			Verify: func(t *testing.T, output string, err error) {
+				if expected, actual := output, "No credentials found.\n"; actual != expected {
+					t.Errorf("expected output %q, actually %q", expected, actual)
+				}
+			},
+		},
+		{
+			Name: "list error",
+			Args: []string{},
+			WithReactors: []testing.ReactionFunc{
+				testing.InduceFailure("list", "secrets"),
+			},
+			ShouldError: true,
+		},
+	}
 
 	table.Run(t, commands.NewCredentialListCommand)
 }

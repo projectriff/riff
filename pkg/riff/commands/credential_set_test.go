@@ -31,117 +31,124 @@ func TestCredentialSetCommand(t *testing.T) {
 	defaultNamespace := "default"
 	credentialLabel := "projectriff.io/credential"
 
-	table := testing.CommandTable{{
-		Name: "create secret",
-		Args: []string{credentialName},
-		ExpectCreates: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
+	table := testing.CommandTable{
+		{
+			Name: "create secret",
+			Args: []string{credentialName},
+			ExpectCreates: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+					StringData: map[string]string{},
 				},
-				StringData: map[string]string{},
 			},
 		},
-	}, {
-		Name: "update secret",
-		Args: []string{credentialName},
-		GivenObjects: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
+		{
+			Name: "update secret",
+			Args: []string{credentialName},
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+					StringData: map[string]string{},
 				},
-				StringData: map[string]string{},
+			},
+			ExpectUpdates: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+					StringData: map[string]string{},
+				},
 			},
 		},
-		ExpectUpdates: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
+		{
+			Name: "get error",
+			Args: []string{credentialName},
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+					StringData: map[string]string{},
 				},
-				StringData: map[string]string{},
 			},
+			WithReactors: []testing.ReactionFunc{
+				testing.InduceFailure("get", "secrets"),
+			},
+			ShouldError: true,
 		},
-	}, {
-		Name: "get error",
-		Args: []string{credentialName},
-		GivenObjects: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
+		{
+			Name: "create error",
+			Args: []string{credentialName},
+			WithReactors: []testing.ReactionFunc{
+				testing.InduceFailure("create", "secrets"),
+			},
+			ExpectCreates: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+					StringData: map[string]string{},
 				},
-				StringData: map[string]string{},
 			},
+			ShouldError: true,
 		},
-		WithReactors: []testing.ReactionFunc{
-			testing.InduceFailure("get", "secrets"),
-		},
-		ShouldError: true,
-	}, {
-		Name: "create error",
-		Args: []string{credentialName},
-		WithReactors: []testing.ReactionFunc{
-			testing.InduceFailure("create", "secrets"),
-		},
-		ExpectCreates: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
+		{
+			Name: "update error",
+			Args: []string{credentialName},
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+					StringData: map[string]string{},
 				},
-				StringData: map[string]string{},
 			},
-		},
-		ShouldError: true,
-	}, {
-		Name: "update error",
-		Args: []string{credentialName},
-		GivenObjects: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
+			WithReactors: []testing.ReactionFunc{
+				testing.InduceFailure("update", "secrets"),
+			},
+			ExpectUpdates: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+					StringData: map[string]string{},
 				},
-				StringData: map[string]string{},
 			},
+			ShouldError: true,
 		},
-		WithReactors: []testing.ReactionFunc{
-			testing.InduceFailure("update", "secrets"),
-		},
-		ExpectUpdates: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
+		{
+			Name: "no clobber",
+			Args: []string{"not-a-credential"},
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "not-a-credential",
+						Namespace: defaultNamespace,
+					},
+					StringData: map[string]string{},
 				},
-				StringData: map[string]string{},
 			},
+			ShouldError: true,
 		},
-		ShouldError: true,
-	}, {
-		Name: "no clobber",
-		Args: []string{"not-a-credential"},
-		GivenObjects: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "not-a-credential",
-					Namespace: defaultNamespace,
-				},
-				StringData: map[string]string{},
-			},
-		},
-		ShouldError: true,
-	}}
+	}
 
 	table.Run(t, commands.NewCredentialSetCommand)
 }

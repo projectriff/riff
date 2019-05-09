@@ -32,107 +32,113 @@ func TestCredentialDeleteCommand(t *testing.T) {
 	defaultNamespace := "default"
 	credentialLabel := "projectriff.io/credential"
 
-	table := testing.CommandTable{{
-		Name: "delete all secrets",
-		Args: []string{"--all"},
-		GivenObjects: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
+	table := testing.CommandTable{
+		{
+			Name: "delete all secrets",
+			Args: []string{"--all"},
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+					StringData: map[string]string{},
 				},
-				StringData: map[string]string{},
 			},
+			WithReactors: []testing.ReactionFunc{
+				testing.InduceFailure("delete", "secrets"),
+			},
+			ExpectDeleteCollections: []testing.DeleteCollectionRef{{
+				Resource:      "secrets",
+				Namespace:     defaultNamespace,
+				LabelSelector: credentialLabel,
+			}},
 		},
-		WithReactors: []testing.ReactionFunc{
-			testing.InduceFailure("delete", "secrets"),
-		},
-		ExpectDeleteCollections: []testing.DeleteCollectionRef{{
-			Resource:      "secrets",
-			Namespace:     defaultNamespace,
-			LabelSelector: credentialLabel,
-		}},
-	}, {
-		Name: "delete secret",
-		Args: []string{credentialName},
-		GivenObjects: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
+		{
+			Name: "delete secret",
+			Args: []string{credentialName},
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+					StringData: map[string]string{},
 				},
-				StringData: map[string]string{},
 			},
+			ExpectDeletes: []testing.DeleteRef{{
+				Resource:  "secrets",
+				Namespace: defaultNamespace,
+				Name:      credentialName,
+			}},
 		},
-		ExpectDeletes: []testing.DeleteRef{{
-			Resource:  "secrets",
-			Namespace: defaultNamespace,
-			Name:      credentialName,
-		}},
-	}, {
-		Name: "delete secrets",
-		Args: []string{credentialName, credentialAltName},
-		GivenObjects: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
+		{
+			Name: "delete secrets",
+			Args: []string{credentialName, credentialAltName},
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+					StringData: map[string]string{},
 				},
-				StringData: map[string]string{},
-			},
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialAltName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialAltName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+					StringData: map[string]string{},
 				},
-				StringData: map[string]string{},
 			},
+			ExpectDeletes: []testing.DeleteRef{{
+				Resource:  "secrets",
+				Namespace: defaultNamespace,
+				Name:      credentialName,
+			}, {
+				Resource:  "secrets",
+				Namespace: defaultNamespace,
+				Name:      credentialAltName,
+			}},
 		},
-		ExpectDeletes: []testing.DeleteRef{{
-			Resource:  "secrets",
-			Namespace: defaultNamespace,
-			Name:      credentialName,
-		}, {
-			Resource:  "secrets",
-			Namespace: defaultNamespace,
-			Name:      credentialAltName,
-		}},
-	}, {
-		Name: "secret does not exist",
-		Args: []string{credentialName},
-		ExpectDeletes: []testing.DeleteRef{{
-			Resource:  "secrets",
-			Namespace: defaultNamespace,
-			Name:      credentialName,
-		}},
-		ShouldError: true,
-	}, {
-		Name: "delete error",
-		Args: []string{credentialName},
-		GivenObjects: []runtime.Object{
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      credentialName,
-					Namespace: defaultNamespace,
-					Labels:    map[string]string{credentialLabel: ""},
+		{
+			Name: "secret does not exist",
+			Args: []string{credentialName},
+			ExpectDeletes: []testing.DeleteRef{{
+				Resource:  "secrets",
+				Namespace: defaultNamespace,
+				Name:      credentialName,
+			}},
+			ShouldError: true,
+		},
+		{
+			Name: "delete error",
+			Args: []string{credentialName},
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+					StringData: map[string]string{},
 				},
-				StringData: map[string]string{},
 			},
+			WithReactors: []testing.ReactionFunc{
+				testing.InduceFailure("delete", "secrets"),
+			},
+			ExpectDeletes: []testing.DeleteRef{{
+				Resource:  "secrets",
+				Namespace: defaultNamespace,
+				Name:      credentialName,
+			}},
+			ShouldError: true,
 		},
-		WithReactors: []testing.ReactionFunc{
-			testing.InduceFailure("delete", "secrets"),
-		},
-		ExpectDeletes: []testing.DeleteRef{{
-			Resource:  "secrets",
-			Namespace: defaultNamespace,
-			Name:      credentialName,
-		}},
-		ShouldError: true,
-	}}
+	}
 
 	table.Run(t, commands.NewCredentialDeleteCommand)
 }
