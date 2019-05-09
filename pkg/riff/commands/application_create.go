@@ -29,24 +29,24 @@ type ApplicationCreateOptions struct {
 	Namespace string
 }
 
-func (opt *ApplicationCreateOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *ApplicationCreateOptions) Validate(ctx context.Context) *apis.FieldError {
 	// TODO implement
 	return nil
 }
 
 func NewApplicationCreateCommand(c *cli.Config) *cobra.Command {
-	opt := &ApplicationCreateOptions{}
+	opts := &ApplicationCreateOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "create",
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},
 	}
 
-	cli.NamespaceFlag(cmd, c, &opt.Namespace)
+	cli.NamespaceFlag(cmd, c, &opts.Namespace)
 
 	return cmd
 }

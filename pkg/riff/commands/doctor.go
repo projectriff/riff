@@ -29,24 +29,24 @@ type DoctorOptions struct {
 	Namespace string
 }
 
-func (opt *DoctorOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *DoctorOptions) Validate(ctx context.Context) *apis.FieldError {
 	// TODO implement
 	return nil
 }
 
 func NewDoctorCommand(c *cli.Config) *cobra.Command {
-	opt := &DoctorOptions{}
+	opts := &DoctorOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "doctor",
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},
 	}
 
-	cli.NamespaceFlag(cmd, c, &opt.Namespace)
+	cli.NamespaceFlag(cmd, c, &opts.Namespace)
 
 	return cmd
 }

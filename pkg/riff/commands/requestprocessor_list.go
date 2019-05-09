@@ -30,24 +30,24 @@ type RequestProcessorListOptions struct {
 	AllNamespaces bool
 }
 
-func (opt *RequestProcessorListOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *RequestProcessorListOptions) Validate(ctx context.Context) *apis.FieldError {
 	// TODO implement
 	return nil
 }
 
 func NewRequestProcessorListCommand(c *cli.Config) *cobra.Command {
-	opt := &RequestProcessorListOptions{}
+	opts := &RequestProcessorListOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "list",
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},
 	}
 
-	cli.AllNamespacesFlag(cmd, c, &opt.Namespace, &opt.AllNamespaces)
+	cli.AllNamespacesFlag(cmd, c, &opts.Namespace, &opts.AllNamespaces)
 
 	return cmd
 }

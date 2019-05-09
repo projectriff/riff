@@ -29,24 +29,24 @@ type StreamCreateOptions struct {
 	Namespace string
 }
 
-func (opt *StreamCreateOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *StreamCreateOptions) Validate(ctx context.Context) *apis.FieldError {
 	// TODO implement
 	return nil
 }
 
 func NewStreamCreateCommand(c *cli.Config) *cobra.Command {
-	opt := &StreamCreateOptions{}
+	opts := &StreamCreateOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "create",
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},
 	}
 
-	cli.NamespaceFlag(cmd, c, &opt.Namespace)
+	cli.NamespaceFlag(cmd, c, &opts.Namespace)
 
 	return cmd
 }

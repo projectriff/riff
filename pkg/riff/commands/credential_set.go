@@ -34,19 +34,19 @@ type CredentialSetOptions struct {
 	Name      string
 }
 
-func (opt *CredentialSetOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *CredentialSetOptions) Validate(ctx context.Context) *apis.FieldError {
 	errs := &apis.FieldError{}
 
-	if opt.Namespace == "" {
+	if opts.Namespace == "" {
 		errs = errs.Also(apis.ErrMissingField("namespace"))
 	}
 
-	if opt.Name == "" {
+	if opts.Name == "" {
 		errs = errs.Also(apis.ErrMissingField("name"))
 	} else {
-		if out := validation.NameIsDNSSubdomain(opt.Name, false); len(out) != 0 {
+		if out := validation.NameIsDNSSubdomain(opts.Name, false); len(out) != 0 {
 			// TODO capture info about why the name is invalid
-			errs = errs.Also(apis.ErrInvalidValue(opt.Name, "name"))
+			errs = errs.Also(apis.ErrInvalidValue(opts.Name, "name"))
 		}
 	}
 
@@ -54,25 +54,25 @@ func (opt *CredentialSetOptions) Validate(ctx context.Context) *apis.FieldError 
 }
 
 func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
-	opt := &CredentialSetOptions{}
+	opts := &CredentialSetOptions{}
 
 	cmd := &cobra.Command{
 		Use: "set",
 		Args: cli.Args(
-			cli.NameArg(&opt.Name),
+			cli.NameArg(&opts.Name),
 		),
-		PreRunE: cli.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			secret, err := c.Core().Secrets(opt.Namespace).Get(opt.Name, metav1.GetOptions{})
+			secret, err := c.Core().Secrets(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
 			if err != nil {
 				if !apierrs.IsNotFound(err) {
 					return err
 				}
 
-				_, err = c.Core().Secrets(opt.Namespace).Create(&corev1.Secret{
+				_, err = c.Core().Secrets(opts.Namespace).Create(&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      opt.Name,
-						Namespace: opt.Namespace,
+						Name:      opts.Name,
+						Namespace: opts.Namespace,
 						Labels: map[string]string{
 							// TODO get label from riff system
 							"projectriff.io/credential": "",
@@ -86,17 +86,17 @@ func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 
 			// ensure we are not mutating a non-riff secret
 			if _, ok := secret.Labels["projectriff.io/credential"]; !ok {
-				return fmt.Errorf("credential %q exists, but is not owned by riff", opt.Name)
+				return fmt.Errorf("credential %q exists, but is not owned by riff", opts.Name)
 			}
 
 			// TODO mutate secret
-			_, err = c.Core().Secrets(opt.Namespace).Update(secret)
+			_, err = c.Core().Secrets(opts.Namespace).Update(secret)
 
 			return err
 		},
 	}
 
-	cli.NamespaceFlag(cmd, c, &opt.Namespace)
+	cli.NamespaceFlag(cmd, c, &opts.Namespace)
 
 	return cmd
 }

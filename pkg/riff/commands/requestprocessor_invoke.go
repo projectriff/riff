@@ -29,24 +29,24 @@ type RequestProcessorInvokeOptions struct {
 	Namespace string
 }
 
-func (opt *RequestProcessorInvokeOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *RequestProcessorInvokeOptions) Validate(ctx context.Context) *apis.FieldError {
 	// TODO implement
 	return nil
 }
 
 func NewRequestProcessorInvokeCommand(c *cli.Config) *cobra.Command {
-	opt := &RequestProcessorInvokeOptions{}
+	opts := &RequestProcessorInvokeOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "invoke",
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},
 	}
 
-	cli.NamespaceFlag(cmd, c, &opt.Namespace)
+	cli.NamespaceFlag(cmd, c, &opts.Namespace)
 
 	return cmd
 }

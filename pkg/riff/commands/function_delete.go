@@ -29,24 +29,24 @@ type FunctionDeleteOptions struct {
 	Namespace string
 }
 
-func (opt *FunctionDeleteOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *FunctionDeleteOptions) Validate(ctx context.Context) *apis.FieldError {
 	// TODO implement
 	return nil
 }
 
 func NewFunctionDeleteCommand(c *cli.Config) *cobra.Command {
-	opt := &FunctionDeleteOptions{}
+	opts := &FunctionDeleteOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "delete",
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},
 	}
 
-	cli.NamespaceFlag(cmd, c, &opt.Namespace)
+	cli.NamespaceFlag(cmd, c, &opts.Namespace)
 
 	return cmd
 }

@@ -31,13 +31,13 @@ type CredentialListOptions struct {
 	AllNamespaces bool
 }
 
-func (opt *CredentialListOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *CredentialListOptions) Validate(ctx context.Context) *apis.FieldError {
 	errs := &apis.FieldError{}
 
-	if opt.Namespace == "" && !opt.AllNamespaces {
+	if opts.Namespace == "" && !opts.AllNamespaces {
 		errs = errs.Also(apis.ErrMissingOneOf("namespace", "all-namespaces"))
 	}
-	if opt.Namespace != "" && opt.AllNamespaces {
+	if opts.Namespace != "" && opts.AllNamespaces {
 		errs = errs.Also(apis.ErrMultipleOneOf("namespace", "all-namespaces"))
 	}
 
@@ -45,14 +45,14 @@ func (opt *CredentialListOptions) Validate(ctx context.Context) *apis.FieldError
 }
 
 func NewCredentialListCommand(c *cli.Config) *cobra.Command {
-	opt := &CredentialListOptions{}
+	opts := &CredentialListOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "list",
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			secrets, err := c.Core().Secrets(opt.Namespace).List(metav1.ListOptions{
+			secrets, err := c.Core().Secrets(opts.Namespace).List(metav1.ListOptions{
 				// TODO get label from riff system
 				LabelSelector: "projectriff.io/credential",
 			})
@@ -72,7 +72,7 @@ func NewCredentialListCommand(c *cli.Config) *cobra.Command {
 		},
 	}
 
-	cli.AllNamespacesFlag(cmd, c, &opt.Namespace, &opt.AllNamespaces)
+	cli.AllNamespacesFlag(cmd, c, &opts.Namespace, &opts.AllNamespaces)
 
 	return cmd
 }

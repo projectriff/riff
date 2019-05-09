@@ -29,24 +29,24 @@ type StreamProcessorUpdateOptions struct {
 	Namespace string
 }
 
-func (opt *StreamProcessorUpdateOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *StreamProcessorUpdateOptions) Validate(ctx context.Context) *apis.FieldError {
 	// TODO implement
 	return nil
 }
 
 func NewStreamProcessorUpdateCommand(c *cli.Config) *cobra.Command {
-	opt := &StreamProcessorUpdateOptions{}
+	opts := &StreamProcessorUpdateOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "update",
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},
 	}
 
-	cli.NamespaceFlag(cmd, c, &opt.Namespace)
+	cli.NamespaceFlag(cmd, c, &opts.Namespace)
 
 	return cmd
 }

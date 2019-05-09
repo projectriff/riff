@@ -32,21 +32,21 @@ type CredentialDeleteOptions struct {
 	All       bool
 }
 
-func (opt *CredentialDeleteOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *CredentialDeleteOptions) Validate(ctx context.Context) *apis.FieldError {
 	errs := &apis.FieldError{}
 
-	if opt.Namespace == "" {
+	if opts.Namespace == "" {
 		errs = errs.Also(apis.ErrMissingField("namespace"))
 	}
 
-	if opt.All && len(opt.Names) != 0 {
+	if opts.All && len(opts.Names) != 0 {
 		errs = errs.Also(apis.ErrMultipleOneOf("all", "names"))
 	}
-	if !opt.All && len(opt.Names) == 0 {
+	if !opts.All && len(opts.Names) == 0 {
 		errs = errs.Also(apis.ErrMissingOneOf("all", "names"))
 	}
 
-	for i, name := range opt.Names {
+	for i, name := range opts.Names {
 		if out := validation.NameIsDNSSubdomain(name, false); len(out) != 0 || name == "" {
 			// TODO capture info about why the name is invalid
 			errs = errs.Also(apis.ErrInvalidArrayValue(name, "names", i))
@@ -57,25 +57,25 @@ func (opt *CredentialDeleteOptions) Validate(ctx context.Context) *apis.FieldErr
 }
 
 func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
-	opt := &CredentialDeleteOptions{}
+	opts := &CredentialDeleteOptions{}
 
 	cmd := &cobra.Command{
 		Use: "delete",
 		Args: cli.Args(
-			cli.NamesArg(&opt.Names),
+			cli.NamesArg(&opts.Names),
 		),
-		PreRunE: cli.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := c.Core().Secrets(opt.Namespace)
+			client := c.Core().Secrets(opts.Namespace)
 
-			if opt.All {
+			if opts.All {
 				return client.DeleteCollection(nil, metav1.ListOptions{
 					// TODO get label from riff system
 					LabelSelector: "projectriff.io/credential",
 				})
 			}
 
-			for _, name := range opt.Names {
+			for _, name := range opts.Names {
 				// TODO check for the matching label before deleting
 				if err := client.Delete(name, nil); err != nil {
 					return err
@@ -86,8 +86,8 @@ func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 		},
 	}
 
-	cli.NamespaceFlag(cmd, c, &opt.Namespace)
-	cmd.Flags().BoolVar(&opt.All, "all", false, "delete all secrets in the namespace")
+	cli.NamespaceFlag(cmd, c, &opts.Namespace)
+	cmd.Flags().BoolVar(&opts.All, "all", false, "delete all secrets in the namespace")
 
 	return cmd
 }

@@ -29,28 +29,28 @@ type DocsOptions struct {
 	Directory string
 }
 
-func (opt *DocsOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *DocsOptions) Validate(ctx context.Context) *apis.FieldError {
 	// TODO implement
 	return nil
 }
 
 func NewDocsCommand(c *cli.Config) *cobra.Command {
-	opt := &DocsOptions{}
+	opts := &DocsOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "docs",
 		Hidden:  true,
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := c.FileSystem.MkdirAll(opt.Directory, 0744); err != nil {
+			if err := c.FileSystem.MkdirAll(opts.Directory, 0744); err != nil {
 				return err
 			}
-			return doc.GenMarkdownTree(cmd.Root(), opt.Directory)
+			return doc.GenMarkdownTree(cmd.Root(), opts.Directory)
 		},
 	}
 
-	cmd.Flags().StringVarP(&opt.Directory, "dir", "d", "docs", "the output directory for the docs.")
+	cmd.Flags().StringVarP(&opts.Directory, "dir", "d", "docs", "the output directory for the docs.")
 
 	return cmd
 }

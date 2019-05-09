@@ -29,24 +29,24 @@ type RequestProcessorUpdateOptions struct {
 	Namespace string
 }
 
-func (opt *RequestProcessorUpdateOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *RequestProcessorUpdateOptions) Validate(ctx context.Context) *apis.FieldError {
 	// TODO implement
 	return nil
 }
 
 func NewRequestProcessorUpdateCommand(c *cli.Config) *cobra.Command {
-	opt := &RequestProcessorUpdateOptions{}
+	opts := &RequestProcessorUpdateOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "update",
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},
 	}
 
-	cli.NamespaceFlag(cmd, c, &opt.Namespace)
+	cli.NamespaceFlag(cmd, c, &opts.Namespace)
 
 	return cmd
 }

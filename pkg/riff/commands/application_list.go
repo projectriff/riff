@@ -30,24 +30,24 @@ type ApplicationListOptions struct {
 	AllNamespaces bool
 }
 
-func (opt *ApplicationListOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *ApplicationListOptions) Validate(ctx context.Context) *apis.FieldError {
 	// TODO implement
 	return nil
 }
 
 func NewApplicationListCommand(c *cli.Config) *cobra.Command {
-	opt := &ApplicationListOptions{}
+	opts := &ApplicationListOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "list",
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opt),
+		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("not implemented")
 		},
 	}
 
-	cli.AllNamespacesFlag(cmd, c, &opt.Namespace, &opt.AllNamespaces)
+	cli.AllNamespacesFlag(cmd, c, &opts.Namespace, &opts.AllNamespaces)
 
 	return cmd
 }
