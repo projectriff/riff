@@ -35,37 +35,105 @@ import (
 	clientgotesting "k8s.io/client-go/testing"
 )
 
+// CommandTable provides a declarative model for testing interactions with Kubernetes clientsets
+// via Cobra commands.
+//
+// Fake clientsets are used to stub calls to the Kubernetes API server. GivenObjects populate a
+// local cache for clientsets to respond to get and list operations (update and delete will error
+// if the object does not exist and create operations will error if the resource does exist).
+//
+// ExpectCreates and ExpectUpdates each contain objects that are compared directly to resources
+// received by the clientsets. ExpectDeletes and ExpectDeleteCollections contain references to the
+// resource impacted by the call since these calls do not rec
+//
+// Errors can be injected into API calls by reactor functions specified in WithReactors. A
+// ReactionFunc is able to intercept each clientset operation to observe or mutate the request or
+// response.
+//
+// ShouldError must correctly reflect whether the command is expected to return an error,
+// otherwise the testcase will fail. Custom assertions based on the content of the error object
+// and the console output from the command are available with the Verify callback.
+//
+// Advanced state may be configured before and after each record by the Prepare and Cleanup
+// callbacks respectively.
 type CommandTable []CommandTableRecord
 
+// CommandTableRecord is a single test case within a CommandTable. All state and assertions are
+// defined within the record.
 type CommandTableRecord struct {
-	Name       string
-	Skip       bool
-	Focus      bool
+
+	// Name is used to identify the record in the test results. A sub-test is created for each
+	// record with this name.
+	Name string
+	// Skip supresses the execution of this test record.
+	Skip bool
+	// Focus executes only this record. The containing test will fail to prevent accidental
+	// check-in.
+	Focus bool
+	// Sequential disables parallel processing for this record. By default records in a table will
+	// execute in parallel.
 	Sequential bool
 
 	// environment
-	Config       *cli.Config
+
+	// Config is passed into the command factory. Mosts tests should not need to set this field.
+	// If not specified, a default Config is created with a FakeClient. The Config's client will
+	// always be replaced with a FakeClient configured with the given objects and reactors to
+	// intercept all calls to the fake clientsets for comparision with the expected operations.
+	Config *cli.Config
+	// GivenObjects representa resources that would already exist within kubernetes. These
+	// resources are passed directly to the fake clientsets.
 	GivenObjects []runtime.Object
+	// WithReactors installs each ReactionFunc into each fake clientset. ReactionFuncs intercept
+	// each call to the clientset providing the ability to mutate the resource or inject an error.
 	WithReactors []ReactionFunc
 
 	// inputs
+
+	// Args are passed directly to cobra before executing the command. This is the primary
+	// interface to control the behavior of the cli.
 	Args []string
 
 	// side effects
-	ExpectCreates           []runtime.Object
-	ExpectUpdates           []runtime.Object
-	ExpectDeletes           []DeleteRef
+
+	// ExpectCreates asserts each resource with the resources passed to the Create method of the
+	// fake clientsets in order.
+	ExpectCreates []runtime.Object
+	// ExpectUpdates asserts each resource with the resources passed to the Update method of the
+	// fake clientsets in order.
+	ExpectUpdates []runtime.Object
+	// ExpectDeletes asserts referernces to the Delete method of the fake clientsets in order.
+	// Unlike Create and Update, Delete does not recieve a full resource, so a reference is used
+	// instead. The Group will be blank for 'core' resources. The Resource is not a Kind, but
+	// plural lowercase name of the resource.
+	ExpectDeletes []DeleteRef
+	// ExpectDeleteCollectionss asserts referernces to the DeleteCollection method of the fake
+	// clientsets in order. DeleteCollections behaves similarly to Deletes. Unlike Delete,
+	// DeleteCollection does not contain a resource Name, but may contain a LabelSelector.
 	ExpectDeleteCollections []DeleteCollectionRef
 
 	// outputs
+
+	// ShouldError indicates if the table record command execution should return an error. The
+	// test will fail if this value does not reflect the returned error.
 	ShouldError bool
-	Verify      func(*T, string, error)
+	// Verify provides the command output and error for custom assertions.
+	Verify func(t *T, output string, err error)
 
 	// lifecycle
-	Prepare func(*cli.Config) error
-	Cleanup func(*cli.Config) error
+
+	// Prepare is called before the command is executed. It is intended to prepare that broader
+	// environemnt before the specific table record is executed. For example, chaning the working
+	// directory or setting mock expectations.
+	Prepare func(t *T, config *cli.Config) error
+	// Cleanup is called after the table record is finished and all defiend assertions complete.
+	// It is indended to cleanup any state created in the Prepare step or durring the test
+	// execution, or to make assertions for mocks.
+	Cleanup func(t *T, config *cli.Config) error
 }
 
+// Run each records for the table. Tables with a focused record will only run the focused records
+// and then fail to prevent accidental check-in.
 func (ct CommandTable) Run(t *T, cmdFactory func(*cli.Config) *cobra.Command) {
 	focusedTable := CommandTable{}
 	for _, ctr := range ct {
@@ -86,6 +154,7 @@ func (ct CommandTable) Run(t *T, cmdFactory func(*cli.Config) *cobra.Command) {
 	}
 }
 
+// Run a single table record for the command. It is not common to run a record outside of a table.
 func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Command) {
 	t.Run(ctr.Name, func(t *T) {
 		if ctr.Skip {
@@ -103,7 +172,7 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Comm
 		c.Client = client
 
 		if ctr.Prepare != nil {
-			if err := ctr.Prepare(c); err != nil {
+			if err := ctr.Prepare(t, c); err != nil {
 				t.Errorf("error during prepare: %s", err)
 			}
 		}
@@ -248,7 +317,7 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Comm
 		}
 
 		if ctr.Cleanup != nil {
-			if err := ctr.Cleanup(c); err != nil {
+			if err := ctr.Cleanup(t, c); err != nil {
 				t.Errorf("error during cleanup: %s", err)
 			}
 		}
