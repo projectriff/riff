@@ -10,8 +10,9 @@ steps:
 
     go version
 
-    go build -v ./cmd/riff
+    make build
     go test -v -coverprofile=coverage.txt -covermode count ./... 2>&1 | tee >(go-junit-report > report.xml)
+    make verify-docs
   workingDirectory: '$(modulePath)'
   displayName: 'Run unit test'
 

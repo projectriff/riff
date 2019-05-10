@@ -1,23 +1,29 @@
 ## riff function
 
-Interact with function related resources
+<todo>
 
 ### Synopsis
 
-Interact with function related resources
+<todo>
 
 ### Options
 
 ```
-  -h, --help              help for function
-      --kubeconfig path   the path of a kubeconfig (default "~/.kube/config")
-      --master address    the address of the Kubernetes API server; overrides any value in kubeconfig
+  -h, --help   help for function
+```
+
+### Options inherited from parent commands
+
+```
+      --config string       config file (default is $HOME/.riff.yaml)
+      --kubeconfig string   kubectl config file (default is $HOME/.kube/config)
 ```
 
 ### SEE ALSO
 
-* [riff](riff.md)	 - Commands for creating and managing function resources
-* [riff function build](riff_function_build.md)	 - Build a function container from local source
-* [riff function create](riff_function_create.md)	 - Create a new function resource
-* [riff function update](riff_function_update.md)	 - Trigger a build to generate a new revision for a function resource
+* [riff](riff.md)	 - <todo>
+* [riff function create](riff_function_create.md)	 - <todo>
+* [riff function delete](riff_function_delete.md)	 - <todo>
+* [riff function list](riff_function_list.md)	 - <todo>
+* [riff function update](riff_function_update.md)	 - <todo>
 

@@ -1,25 +1,19 @@
 ## riff completion
 
-Generate shell completion scripts
+<todo>
 
 ### Synopsis
 
-Generate shell completion scripts
+<todo>
 
 ```
-riff completion [bash|zsh] [flags]
+riff completion [flags]
 ```
 
 ### Examples
 
 ```
-To install completion for bash, assuming you have `bash-completion` installed:
-
-    riff completion bash > /etc/bash_completion.d/riff
-
-or wherever your `bash_completion.d` is, for example `$(brew --prefix)/etc/bash_completion.d` if using homebrew.
-
-Completion for zsh is a work in progress
+<todo>
 ```
 
 ### Options
@@ -28,7 +22,14 @@ Completion for zsh is a work in progress
   -h, --help   help for completion
 ```
 
+### Options inherited from parent commands
+
+```
+      --config string       config file (default is $HOME/.riff.yaml)
+      --kubeconfig string   kubectl config file (default is $HOME/.kube/config)
+```
+
 ### SEE ALSO
 
-* [riff](riff.md)	 - Commands for creating and managing function resources
+* [riff](riff.md)	 - <todo>
 

@@ -1,9 +1,0 @@
-manifestVersion: "0.0"
-istio:
-  - istio-crds
-  - istio-release
-knative:
-  - build-release
-  - serving-release
-namespace:
-  - buildtemplate-release

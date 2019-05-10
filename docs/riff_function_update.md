@@ -1,10 +1,10 @@
 ## riff function update
 
-Trigger a build to generate a new revision for a function resource
+<todo>
 
 ### Synopsis
 
-Trigger a build to generate a new revision for a function resource
+<todo>
 
 ```
 riff function update [flags]
@@ -13,27 +13,31 @@ riff function update [flags]
 ### Examples
 
 ```
-  riff function update square
+<todo>
 ```
 
 ### Options
 
 ```
+      --artifact string       <todo>
+      --git-repo string       <todo>
+      --git-revision string   <todo>
+      --handler string        <todo>
   -h, --help                  help for update
-  -l, --local-path string     path to local source to build the image from; only build-pack builds are supported at this time
-  -n, --namespace namespace   the namespace of the function
-  -v, --verbose               print details of command progress
-  -w, --wait                  wait until the created resource reaches either a successful or an error state (automatic with --verbose)
+      --image string          <todo>
+      --invoker string        <todo>
+  -n, --namespace string      <todo>
+      --sub-path string       <todo>
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --kubeconfig path   the path of a kubeconfig (default "~/.kube/config")
-      --master address    the address of the Kubernetes API server; overrides any value in kubeconfig
+      --config string       config file (default is $HOME/.riff.yaml)
+      --kubeconfig string   kubectl config file (default is $HOME/.kube/config)
 ```
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - Interact with function related resources
+* [riff function](riff_function.md)	 - <todo>
 

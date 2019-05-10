@@ -1,52 +1,45 @@
 module github.com/projectriff/riff
 
+go 1.12
+
 require (
-	github.com/boz/go-logutil v0.0.0-20170814044541-9d21a9e4757d
-	github.com/boz/kail v0.6.0
-	github.com/boz/kcache v0.0.0-20171103002618-fb1338d32301
-	github.com/buildpack/lifecycle v0.0.0-20190327221653-eecd1c5c1b4c
-	github.com/buildpack/pack v0.1.0
-	github.com/frioux/shellquote v0.0.1
-	github.com/ghodss/yaml v1.0.0
-	github.com/knative/build v0.5.0
-	github.com/knative/pkg v0.0.0-20190330034653-916205998db9
-	github.com/knative/serving v0.5.1
-	github.com/onsi/ginkgo v1.8.0
-	github.com/onsi/gomega v1.5.0
-	github.com/pivotal/go-ape v0.0.0-20190405150324-756013ecae13
-	github.com/pkg/errors v0.8.1
+	github.com/google/go-cmp v0.3.0
+	github.com/knative/pkg v0.0.0-20190417151928-418e675f88c2
+	github.com/mitchellh/go-homedir v1.1.0
+	github.com/projectriff/system v0.0.0-20190507151708-5b67cb48c8ea
 	github.com/spf13/cobra v0.0.3
-	github.com/stretchr/testify v1.3.0
-	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
-	k8s.io/api v0.0.0-20180904230853-4e7be11eab3f
-	k8s.io/apimachinery v0.0.0-20180904193909-def12e63c512
-	k8s.io/client-go v0.0.0-20180910083459-2cefa64ff137
-	sigs.k8s.io/kustomize v2.0.3+incompatible
+	github.com/spf13/viper v1.3.2
+	k8s.io/api v0.0.0-20190226173710-145d52631d00
+	k8s.io/apimachinery v0.0.0-20190221084156-01f179d85dbc
+	k8s.io/client-go v0.0.0-20190226174127-78295b709ec6
 )
 
 require (
-	contrib.go.opencensus.io/exporter/stackdriver v0.10.1 // indirect
-	github.com/boz/go-lifecycle v0.0.0-20170921044039-c39961a5a0ce // indirect
-	github.com/cpuguy83/go-md2man v1.0.8 // indirect
-	github.com/emicklei/go-restful v2.8.1+incompatible // indirect
-	github.com/evanphx/json-patch v4.1.0+incompatible // indirect
-	github.com/go-openapi/spec v0.18.0 // indirect
-	github.com/golang/groupcache v0.0.0-20181024230925-c65c006176ff // indirect
-	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf // indirect
+	contrib.go.opencensus.io/exporter/stackdriver v0.10.2 // indirect
+	github.com/cpuguy83/go-md2man v1.0.10 // indirect
+	github.com/evanphx/json-patch v4.2.0+incompatible // indirect
+	github.com/gogo/protobuf v1.2.1 // indirect
+	github.com/golang/groupcache v0.0.0-20190129154638-5b532d6fd5ef // indirect
+	github.com/google/btree v1.0.0 // indirect
+	github.com/google/go-containerregistry v0.0.0-20190503220729-1c6c7f61e8a5 // indirect
+	github.com/google/gofuzz v1.0.0 // indirect
 	github.com/googleapis/gnostic v0.2.0 // indirect
-	github.com/imdario/mergo v0.3.5 // indirect
-	github.com/json-iterator/go v0.0.0-20180701071628-ab8a2e0c74be // indirect
+	github.com/gregjones/httpcache v0.0.0-20190212212710-3befbb6ad0cc // indirect
+	github.com/imdario/mergo v0.3.7 // indirect
+	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/json-iterator/go v1.1.6 // indirect
+	github.com/knative/build v0.5.0 // indirect
+	github.com/knative/serving v0.5.2 // indirect
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742 // indirect
+	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
-	github.com/russross/blackfriday v1.5.1 // indirect
-	go.uber.org/atomic v1.3.2 // indirect
+	github.com/pkg/errors v0.8.1 // indirect
+	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
-	go.uber.org/zap v1.9.1 // indirect
-	k8s.io/kube-openapi v0.0.0-20181114233023-0317810137be // indirect
+	go.uber.org/zap v1.10.0 // indirect
+	golang.org/x/net v0.0.0-20190503192946-f4e77d36d62c // indirect
+	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a // indirect
+	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
+	gopkg.in/inf.v0 v0.9.1 // indirect
+	k8s.io/kube-openapi v0.0.0-20190502190224-411b2483e503 // indirect
 )
-
-replace github.com/Nvveen/Gotty => github.com/ijc/Gotty v0.0.0-20170406111628-a8b993ba6abd
-
-replace google.golang.org/api => google.golang.org/api v0.3.1
