@@ -19,7 +19,6 @@ package commands
 import (
 	"context"
 
-	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/validation"
 	"github.com/spf13/cobra"
@@ -32,18 +31,18 @@ type CredentialDeleteOptions struct {
 	All       bool
 }
 
-func (opts *CredentialDeleteOptions) Validate(ctx context.Context) *apis.FieldError {
-	errs := &apis.FieldError{}
+func (opts *CredentialDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
+	errs := &cli.FieldError{}
 
 	if opts.Namespace == "" {
-		errs = errs.Also(apis.ErrMissingField("namespace"))
+		errs = errs.Also(cli.ErrMissingField("namespace"))
 	}
 
 	if opts.All && len(opts.Names) != 0 {
-		errs = errs.Also(apis.ErrMultipleOneOf("all", "names"))
+		errs = errs.Also(cli.ErrMultipleOneOf("all", "names"))
 	}
 	if !opts.All && len(opts.Names) == 0 {
-		errs = errs.Also(apis.ErrMissingOneOf("all", "names"))
+		errs = errs.Also(cli.ErrMissingOneOf("all", "names"))
 	}
 
 	errs = errs.Also(validation.K8sNames(opts.Names, "names"))

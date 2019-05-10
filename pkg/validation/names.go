@@ -17,29 +17,29 @@
 package validation
 
 import (
-	"github.com/knative/pkg/apis"
+	"github.com/projectriff/riff/pkg/cli"
 	"k8s.io/apimachinery/pkg/api/validation"
 )
 
-func K8sName(name, field string) *apis.FieldError {
-	errs := &apis.FieldError{}
+func K8sName(name, field string) *cli.FieldError {
+	errs := &cli.FieldError{}
 
 	if out := validation.NameIsDNSLabel(name, false); len(out) != 0 {
 		// TODO capture info about why the name is invalid
-		errs = errs.Also(apis.ErrInvalidValue(name, field))
+		errs = errs.Also(cli.ErrInvalidValue(name, field))
 	}
 
 	return errs
 }
 
-func K8sNames(names []string, field string) *apis.FieldError {
-	errs := &apis.FieldError{}
+func K8sNames(names []string, field string) *cli.FieldError {
+	errs := &cli.FieldError{}
 
 	for i, name := range names {
 		if name == "" {
-			errs = errs.Also(apis.ErrInvalidValue(name, field))
+			errs = errs.Also(cli.ErrInvalidValue(name, field))
 		} else {
-			errs = errs.Also(K8sName(name, apis.CurrentField).ViaFieldIndex(field, i))
+			errs = errs.Also(K8sName(name, cli.CurrentField).ViaFieldIndex(field, i))
 		}
 	}
 

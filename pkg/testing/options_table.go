@@ -23,7 +23,7 @@ import (
 	"unsafe"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/knative/pkg/apis"
+	"github.com/projectriff/riff/pkg/cli"
 )
 
 type OptionsTable []OptionsTableRecord
@@ -39,12 +39,12 @@ type OptionsTableRecord struct {
 
 	// outputs
 	ExpectErrorPaths []string
-	ExpectErrors     []apis.FieldError
+	ExpectErrors     []cli.FieldError
 	ShouldValidate   bool
-	Verify           func(t *T, err *apis.FieldError)
+	Verify           func(t *T, err *cli.FieldError)
 }
 
-func (ot OptionsTable) Run(t *T, defaultOptionsFactory func() apis.Validatable) {
+func (ot OptionsTable) Run(t *T, defaultOptionsFactory func() cli.Validatable) {
 	focusedTable := OptionsTable{}
 	for _, otr := range ot {
 		if otr.Focus == true && otr.Skip != true {
@@ -64,7 +64,7 @@ func (ot OptionsTable) Run(t *T, defaultOptionsFactory func() apis.Validatable) 
 	}
 }
 
-func (otr OptionsTableRecord) Run(t *T, defaultOptionsFactory func() apis.Validatable) {
+func (otr OptionsTableRecord) Run(t *T, defaultOptionsFactory func() cli.Validatable) {
 	t.Run(otr.Name, func(t *T) {
 		if otr.Skip {
 			t.SkipNow()
@@ -84,7 +84,7 @@ func (otr OptionsTableRecord) Run(t *T, defaultOptionsFactory func() apis.Valida
 
 		errs := opts.Validate(context.TODO())
 		if errs == nil {
-			errs = &apis.FieldError{}
+			errs = &cli.FieldError{}
 		}
 
 		if otr.ExpectErrorPaths != nil {
@@ -121,7 +121,7 @@ func (otr OptionsTableRecord) Run(t *T, defaultOptionsFactory func() apis.Valida
 	})
 }
 
-var compareFieldError = cmp.Comparer(func(a, b apis.FieldError) bool {
+var compareFieldError = cmp.Comparer(func(a, b cli.FieldError) bool {
 	if a.Message != b.Message {
 		return false
 	}
@@ -141,19 +141,19 @@ func filterEmpty(s []string) []string {
 	return r
 }
 
-type OverrideOptionsFunc func(apis.Validatable)
+type OverrideOptionsFunc func(cli.Validatable)
 
 func isOverideOptionsFunc(t reflect.Type) bool {
 	if t == nil || t.Kind() != reflect.Func || t.IsVariadic() {
 		return false
 	}
-	if t.NumIn() == 1 && t.NumOut() == 0 && t.In(0).ConvertibleTo(reflect.TypeOf((*apis.Validatable)(nil)).Elem()) {
+	if t.NumIn() == 1 && t.NumOut() == 0 && t.In(0).ConvertibleTo(reflect.TypeOf((*cli.Validatable)(nil)).Elem()) {
 		return true
 	}
 	return false
 }
 
-func flattenFieldPaths(err *apis.FieldError) []string {
+func flattenFieldPaths(err *cli.FieldError) []string {
 	paths := err.Paths
 	if paths == nil {
 		paths = []string{}
@@ -166,8 +166,8 @@ func flattenFieldPaths(err *apis.FieldError) []string {
 	return paths
 }
 
-func flattenFieldErrors(err *apis.FieldError) []apis.FieldError {
-	errs := []apis.FieldError{}
+func flattenFieldErrors(err *cli.FieldError) []cli.FieldError {
+	errs := []cli.FieldError{}
 
 	if err.Message != "" {
 		errs = append(errs, *err)
@@ -179,8 +179,8 @@ func flattenFieldErrors(err *apis.FieldError) []apis.FieldError {
 	return errs
 }
 
-func extractNestedErrors(err *apis.FieldError) []apis.FieldError {
-	var nestedErrors []apis.FieldError
+func extractNestedErrors(err *cli.FieldError) []cli.FieldError {
+	var nestedErrors []cli.FieldError
 
 	// `nestedErrors = err.errors`
 	// TODO let's get this exposed on the type so we don't need to do unsafe reflection

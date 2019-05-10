@@ -23,6 +23,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type Validatable = apis.Validatable
+type FieldError = apis.FieldError
+
+var (
+	CurrentField         = apis.CurrentField
+	ErrDisallowedFields  = apis.ErrDisallowedFields
+	ErrInvalidArrayValue = apis.ErrInvalidArrayValue
+	ErrInvalidKeyName    = apis.ErrInvalidKeyName
+	ErrInvalidValue      = apis.ErrInvalidValue
+	ErrMissingField      = apis.ErrMissingField
+	ErrMissingOneOf      = apis.ErrMissingOneOf
+	ErrMultipleOneOf     = apis.ErrMultipleOneOf
+	ErrOutOfBoundsValue  = apis.ErrOutOfBoundsValue
+)
+
 func ValidateOptions(opts apis.Validatable) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()

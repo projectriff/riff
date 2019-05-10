@@ -17,7 +17,7 @@
 package commands_test
 
 import (
-	"github.com/knative/pkg/apis"
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
@@ -26,7 +26,7 @@ import (
 )
 
 func TestFunctionDeleteOptions(t *testing.T) {
-	defaultOptions := func() testing.Validatable {
+	defaultOptions := func() cli.Validatable {
 		return &commands.FunctionDeleteOptions{
 			Namespace: "default",
 		}
@@ -35,8 +35,8 @@ func TestFunctionDeleteOptions(t *testing.T) {
 	table := testing.OptionsTable{
 		{
 			Name: "default",
-			ExpectErrors: []apis.FieldError{
-				*apis.ErrMissingOneOf("all", "names"),
+			ExpectErrors: []cli.FieldError{
+				*cli.ErrMissingOneOf("all", "names"),
 			},
 		},
 		{
@@ -58,8 +58,8 @@ func TestFunctionDeleteOptions(t *testing.T) {
 			OverrideOptions: func(opts *commands.FunctionDeleteOptions) {
 				opts.Names = []string{"my.function"}
 			},
-			ExpectErrors: []apis.FieldError{
-				*apis.ErrInvalidValue("my.function", apis.CurrentField).ViaFieldIndex("names", 0),
+			ExpectErrors: []cli.FieldError{
+				*cli.ErrInvalidValue("my.function", cli.CurrentField).ViaFieldIndex("names", 0),
 			},
 		},
 		{
@@ -75,8 +75,8 @@ func TestFunctionDeleteOptions(t *testing.T) {
 				opts.Names = []string{"my-function"}
 				opts.All = true
 			},
-			ExpectErrors: []apis.FieldError{
-				*apis.ErrMultipleOneOf("all", "names"),
+			ExpectErrors: []cli.FieldError{
+				*cli.ErrMultipleOneOf("all", "names"),
 			},
 		},
 	}

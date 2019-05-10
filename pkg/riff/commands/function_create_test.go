@@ -17,7 +17,7 @@
 package commands_test
 
 import (
-	"github.com/knative/pkg/apis"
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
@@ -27,7 +27,7 @@ import (
 )
 
 func TestFunctionCreateOptions(t *testing.T) {
-	defaultOptions := func() testing.Validatable {
+	defaultOptions := func() cli.Validatable {
 		return &commands.FunctionCreateOptions{
 			Namespace:   "default",
 			GitRevision: "master",
@@ -37,10 +37,10 @@ func TestFunctionCreateOptions(t *testing.T) {
 	table := testing.OptionsTable{
 		{
 			Name: "default",
-			ExpectErrors: []apis.FieldError{
-				*apis.ErrMissingField("name"),
-				*apis.ErrMissingField("image"),
-				*apis.ErrMissingOneOf("git-repo", "local-path"),
+			ExpectErrors: []cli.FieldError{
+				*cli.ErrMissingField("name"),
+				*cli.ErrMissingField("image"),
+				*cli.ErrMissingOneOf("git-repo", "local-path"),
 			},
 		},
 		{
@@ -67,8 +67,8 @@ func TestFunctionCreateOptions(t *testing.T) {
 				opts.Name = "my-function"
 				opts.Image = "example.com/repo:tag"
 			},
-			ExpectErrors: []apis.FieldError{
-				*apis.ErrMissingOneOf("git-repo", "local-path"),
+			ExpectErrors: []cli.FieldError{
+				*cli.ErrMissingOneOf("git-repo", "local-path"),
 			},
 		},
 		{
@@ -79,8 +79,8 @@ func TestFunctionCreateOptions(t *testing.T) {
 				opts.GitRepo = "https://example.com/repo.git"
 				opts.LocalPath = "."
 			},
-			ExpectErrors: []apis.FieldError{
-				*apis.ErrMultipleOneOf("git-repo", "local-path"),
+			ExpectErrors: []cli.FieldError{
+				*cli.ErrMultipleOneOf("git-repo", "local-path"),
 			},
 		},
 		{
@@ -101,8 +101,8 @@ func TestFunctionCreateOptions(t *testing.T) {
 				opts.LocalPath = "."
 				opts.CacheSize = "8Gi"
 			},
-			ExpectErrors: []apis.FieldError{
-				*apis.ErrDisallowedFields("cache-size"),
+			ExpectErrors: []cli.FieldError{
+				*cli.ErrDisallowedFields("cache-size"),
 			},
 		},
 		{
@@ -113,8 +113,8 @@ func TestFunctionCreateOptions(t *testing.T) {
 				opts.GitRepo = "https://example.com/repo.git"
 				opts.CacheSize = "X"
 			},
-			ExpectErrors: []apis.FieldError{
-				*apis.ErrInvalidValue("X", "cache-size"),
+			ExpectErrors: []cli.FieldError{
+				*cli.ErrInvalidValue("X", "cache-size"),
 			},
 		},
 		{
@@ -135,8 +135,8 @@ func TestFunctionCreateOptions(t *testing.T) {
 				opts.LocalPath = "."
 				opts.SubPath = "some/directory"
 			},
-			ExpectErrors: []apis.FieldError{
-				*apis.ErrDisallowedFields("sub-path"),
+			ExpectErrors: []cli.FieldError{
+				*cli.ErrDisallowedFields("sub-path"),
 			},
 		},
 		{
@@ -147,8 +147,8 @@ func TestFunctionCreateOptions(t *testing.T) {
 				opts.Image = "example.com/repo:tag"
 				opts.GitRepo = "https://example.com/repo.git"
 			},
-			ExpectErrors: []apis.FieldError{
-				*apis.ErrMissingField("namespace"),
+			ExpectErrors: []cli.FieldError{
+				*cli.ErrMissingField("namespace"),
 			},
 		},
 		{
@@ -159,8 +159,8 @@ func TestFunctionCreateOptions(t *testing.T) {
 				opts.GitRepo = "https://example.com/repo.git"
 				opts.GitRevision = ""
 			},
-			ExpectErrors: []apis.FieldError{
-				*apis.ErrMissingField("git-revision"),
+			ExpectErrors: []cli.FieldError{
+				*cli.ErrMissingField("git-revision"),
 			},
 		},
 	}

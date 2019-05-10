@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/parsers"
 	"github.com/projectriff/riff/pkg/validation"
@@ -43,21 +42,21 @@ type RequestProcessorCreateOptions struct {
 	EnvFrom []string
 }
 
-func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *apis.FieldError {
-	errs := &apis.FieldError{}
+func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *cli.FieldError {
+	errs := &cli.FieldError{}
 
 	if opts.Namespace == "" {
-		errs = errs.Also(apis.ErrMissingField("namespace"))
+		errs = errs.Also(cli.ErrMissingField("namespace"))
 	}
 
 	if opts.Name == "" {
-		errs = errs.Also(apis.ErrInvalidValue(opts.Name, "name"))
+		errs = errs.Also(cli.ErrInvalidValue(opts.Name, "name"))
 	} else {
 		errs = errs.Also(validation.K8sName(opts.Name, "name"))
 	}
 
 	if opts.ItemName == "" {
-		errs = errs.Also(apis.ErrMissingField("item"))
+		errs = errs.Also(cli.ErrMissingField("item"))
 	} else {
 		errs = errs.Also(validation.K8sName(opts.ItemName, "item"))
 	}
@@ -85,9 +84,9 @@ func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *apis.F
 	}
 
 	if len(used) == 0 {
-		errs = errs.Also(apis.ErrMissingOneOf(unused...))
+		errs = errs.Also(cli.ErrMissingOneOf(unused...))
 	} else if len(used) > 1 {
-		errs = errs.Also(apis.ErrMultipleOneOf(used...))
+		errs = errs.Also(cli.ErrMultipleOneOf(used...))
 	}
 
 	errs = errs.Also(validation.EnvVars(opts.Env, "env"))

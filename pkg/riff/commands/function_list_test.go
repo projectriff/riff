@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/knative/pkg/apis"
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
@@ -29,7 +29,7 @@ import (
 )
 
 func TestFunctionListOptions(t *testing.T) {
-	defaultOptions := func() testing.Validatable {
+	defaultOptions := func() cli.Validatable {
 		return &commands.FunctionListOptions{
 			Namespace: "default",
 		}
@@ -60,8 +60,8 @@ func TestFunctionListOptions(t *testing.T) {
 			OverrideOptions: func(opts *commands.FunctionListOptions) {
 				opts.Namespace = ""
 			},
-			ExpectErrors: []apis.FieldError{
-				*apis.ErrMissingOneOf("namespace", "all-namespaces"),
+			ExpectErrors: []cli.FieldError{
+				*cli.ErrMissingOneOf("namespace", "all-namespaces"),
 			},
 		},
 		{
@@ -69,8 +69,8 @@ func TestFunctionListOptions(t *testing.T) {
 			OverrideOptions: func(opts *commands.FunctionListOptions) {
 				opts.AllNamespaces = true
 			},
-			ExpectErrors: []apis.FieldError{
-				*apis.ErrMultipleOneOf("namespace", "all-namespaces"),
+			ExpectErrors: []cli.FieldError{
+				*cli.ErrMultipleOneOf("namespace", "all-namespaces"),
 			},
 		},
 	}

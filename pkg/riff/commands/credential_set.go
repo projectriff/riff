@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/validation"
 	"github.com/spf13/cobra"
@@ -34,15 +33,15 @@ type CredentialSetOptions struct {
 	Name      string
 }
 
-func (opts *CredentialSetOptions) Validate(ctx context.Context) *apis.FieldError {
-	errs := &apis.FieldError{}
+func (opts *CredentialSetOptions) Validate(ctx context.Context) *cli.FieldError {
+	errs := &cli.FieldError{}
 
 	if opts.Namespace == "" {
-		errs = errs.Also(apis.ErrMissingField("namespace"))
+		errs = errs.Also(cli.ErrMissingField("namespace"))
 	}
 
 	if opts.Name == "" {
-		errs = errs.Also(apis.ErrInvalidValue(opts.Name, "name"))
+		errs = errs.Also(cli.ErrInvalidValue(opts.Name, "name"))
 	} else {
 		errs = errs.Also(validation.K8sName(opts.Name, "name"))
 	}

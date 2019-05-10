@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,14 +30,14 @@ type CredentialListOptions struct {
 	AllNamespaces bool
 }
 
-func (opts *CredentialListOptions) Validate(ctx context.Context) *apis.FieldError {
-	errs := &apis.FieldError{}
+func (opts *CredentialListOptions) Validate(ctx context.Context) *cli.FieldError {
+	errs := &cli.FieldError{}
 
 	if opts.Namespace == "" && !opts.AllNamespaces {
-		errs = errs.Also(apis.ErrMissingOneOf("namespace", "all-namespaces"))
+		errs = errs.Also(cli.ErrMissingOneOf("namespace", "all-namespaces"))
 	}
 	if opts.Namespace != "" && opts.AllNamespaces {
-		errs = errs.Also(apis.ErrMultipleOneOf("namespace", "all-namespaces"))
+		errs = errs.Also(cli.ErrMultipleOneOf("namespace", "all-namespaces"))
 	}
 
 	return errs

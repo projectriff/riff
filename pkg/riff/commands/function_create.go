@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/validation"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
@@ -46,21 +45,21 @@ type FunctionCreateOptions struct {
 	SubPath     string
 }
 
-func (opts *FunctionCreateOptions) Validate(ctx context.Context) *apis.FieldError {
-	errs := &apis.FieldError{}
+func (opts *FunctionCreateOptions) Validate(ctx context.Context) *cli.FieldError {
+	errs := &cli.FieldError{}
 
 	if opts.Namespace == "" {
-		errs = errs.Also(apis.ErrMissingField("namespace"))
+		errs = errs.Also(cli.ErrMissingField("namespace"))
 	}
 
 	if opts.Name == "" {
-		errs = errs.Also(apis.ErrMissingField(opts.Name, "name"))
+		errs = errs.Also(cli.ErrMissingField(opts.Name, "name"))
 	} else {
 		errs = errs.Also(validation.K8sName(opts.Name, "name"))
 	}
 
 	if opts.Image == "" {
-		errs = errs.Also(apis.ErrMissingField("image"))
+		errs = errs.Also(cli.ErrMissingField("image"))
 	} else if false {
 		// TODO validate image
 	}
@@ -68,30 +67,30 @@ func (opts *FunctionCreateOptions) Validate(ctx context.Context) *apis.FieldErro
 	if opts.CacheSize != "" {
 		// must parse as a resource quantity
 		if _, err := resource.ParseQuantity(opts.CacheSize); err != nil {
-			errs = errs.Also(apis.ErrInvalidValue(opts.CacheSize, "cache-size"))
+			errs = errs.Also(cli.ErrInvalidValue(opts.CacheSize, "cache-size"))
 		}
 	}
 
 	// git-repo and local-path are mutually exclusive
 	if opts.GitRepo == "" && opts.LocalPath == "" {
-		errs = errs.Also(apis.ErrMissingOneOf("git-repo", "local-path"))
+		errs = errs.Also(cli.ErrMissingOneOf("git-repo", "local-path"))
 	} else if opts.GitRepo != "" && opts.LocalPath != "" {
-		errs = errs.Also(apis.ErrMultipleOneOf("git-repo", "local-path"))
+		errs = errs.Also(cli.ErrMultipleOneOf("git-repo", "local-path"))
 	}
 
 	// git-revision is required for git-repo
 	if opts.GitRepo != "" && opts.GitRevision == "" {
-		errs = errs.Also(apis.ErrMissingField("git-revision"))
+		errs = errs.Also(cli.ErrMissingField("git-revision"))
 	}
 
 	if opts.LocalPath != "" {
 		if opts.SubPath != "" {
 			// sub-path cannot be used with local-path
-			errs = errs.Also(apis.ErrDisallowedFields("sub-path"))
+			errs = errs.Also(cli.ErrDisallowedFields("sub-path"))
 		}
 		if opts.CacheSize != "" {
 			// cache-size cannot be used with local-path
-			errs = errs.Also(apis.ErrDisallowedFields("cache-size"))
+			errs = errs.Also(cli.ErrDisallowedFields("cache-size"))
 		}
 	}
 
