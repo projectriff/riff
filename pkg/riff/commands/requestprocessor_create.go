@@ -19,15 +19,14 @@ package commands
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/parsers"
+	"github.com/projectriff/riff/pkg/validation"
 	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -52,21 +51,15 @@ func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *apis.F
 	}
 
 	if opts.Name == "" {
-		errs = errs.Also(apis.ErrMissingField("name"))
+		errs = errs.Also(apis.ErrInvalidValue(opts.Name, "name"))
 	} else {
-		if out := validation.NameIsDNSSubdomain(opts.Name, false); len(out) != 0 {
-			// TODO capture info about why the name is invalid
-			errs = errs.Also(apis.ErrInvalidValue(opts.Name, "name"))
-		}
+		errs = errs.Also(validation.K8sName(opts.Name, "name"))
 	}
 
 	if opts.ItemName == "" {
 		errs = errs.Also(apis.ErrMissingField("item"))
 	} else {
-		if out := validation.NameIsDNSLabel(opts.ItemName, false); len(out) != 0 {
-			// TODO capture info about why the name is invalid
-			errs = errs.Also(apis.ErrInvalidValue(opts.ItemName, "item"))
-		}
+		errs = errs.Also(validation.K8sName(opts.ItemName, "item"))
 	}
 
 	// application-ref, build-ref and image are mutually exclusive
@@ -97,11 +90,7 @@ func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *apis.F
 		errs = errs.Also(apis.ErrMultipleOneOf(used...))
 	}
 
-	for i, env := range opts.Env {
-		if strings.HasPrefix(env, "=") || !strings.Contains(env, "=") {
-			errs = errs.Also(apis.ErrInvalidArrayValue(env, apis.CurrentField, i))
-		}
-	}
+	errs = errs.Also(validation.EnvVars(opts.Env, "env"))
 
 	// TODO validate EnvFrom
 

@@ -21,8 +21,8 @@ import (
 
 	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/riff/pkg/validation"
 	"github.com/spf13/cobra"
-	"k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -46,12 +46,7 @@ func (opts *FunctionDeleteOptions) Validate(ctx context.Context) *apis.FieldErro
 		errs = errs.Also(apis.ErrMissingOneOf("all", "names"))
 	}
 
-	for i, name := range opts.Names {
-		if out := validation.NameIsDNSSubdomain(name, false); len(out) != 0 || name == "" {
-			// TODO capture info about why the name is invalid
-			errs = errs.Also(apis.ErrInvalidArrayValue(name, "names", i))
-		}
-	}
+	errs = errs.Also(validation.K8sNames(opts.Names, "names"))
 
 	return errs
 }

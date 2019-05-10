@@ -22,10 +22,10 @@ import (
 
 	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/riff/pkg/validation"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/resource"
-	"k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -54,12 +54,9 @@ func (opts *FunctionCreateOptions) Validate(ctx context.Context) *apis.FieldErro
 	}
 
 	if opts.Name == "" {
-		errs = errs.Also(apis.ErrMissingField("name"))
+		errs = errs.Also(apis.ErrInvalidValue(opts.Name, "name"))
 	} else {
-		if out := validation.NameIsDNSSubdomain(opts.Name, false); len(out) != 0 {
-			// TODO capture info about why the name is invalid
-			errs = errs.Also(apis.ErrInvalidValue(opts.Name, "name"))
-		}
+		errs = errs.Also(validation.K8sName(opts.Name, "name"))
 	}
 
 	if opts.Image == "" {

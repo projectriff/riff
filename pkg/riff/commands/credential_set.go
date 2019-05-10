@@ -22,10 +22,10 @@ import (
 
 	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/riff/pkg/validation"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -42,12 +42,9 @@ func (opts *CredentialSetOptions) Validate(ctx context.Context) *apis.FieldError
 	}
 
 	if opts.Name == "" {
-		errs = errs.Also(apis.ErrMissingField("name"))
+		errs = errs.Also(apis.ErrInvalidValue(opts.Name, "name"))
 	} else {
-		if out := validation.NameIsDNSSubdomain(opts.Name, false); len(out) != 0 {
-			// TODO capture info about why the name is invalid
-			errs = errs.Also(apis.ErrInvalidValue(opts.Name, "name"))
-		}
+		errs = errs.Also(validation.K8sName(opts.Name, "name"))
 	}
 
 	return errs
