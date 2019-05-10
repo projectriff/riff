@@ -19,6 +19,7 @@ package testing
 import (
 	"testing"
 
+	"github.com/knative/pkg/apis"
 	kntesting "github.com/knative/pkg/reconciler/testing"
 	clientgotesting "k8s.io/client-go/testing"
 )
@@ -30,3 +31,5 @@ var (
 )
 
 type ReactionFunc = clientgotesting.ReactionFunc
+
+type Validatable = apis.Validatable

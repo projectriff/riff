@@ -17,12 +17,72 @@
 package commands_test
 
 import (
+	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
+
+func TestFunctionDeleteOptions(t *testing.T) {
+	defaultOptions := func() testing.Validatable {
+		return &commands.FunctionDeleteOptions{
+			Namespace: "default",
+		}
+	}
+
+	table := testing.OptionsTable{
+		{
+			Name: "default",
+			ExpectErrors: []apis.FieldError{
+				*apis.ErrMissingOneOf("all", "names"),
+			},
+		},
+		{
+			Name: "single name",
+			OverrideOptions: func(opts *commands.FunctionDeleteOptions) {
+				opts.Names = []string{"my-function"}
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "multiple names",
+			OverrideOptions: func(opts *commands.FunctionDeleteOptions) {
+				opts.Names = []string{"my-function", "my-other-function"}
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "invalid name",
+			OverrideOptions: func(opts *commands.FunctionDeleteOptions) {
+				opts.Names = []string{"my.function"}
+			},
+			ExpectErrors: []apis.FieldError{
+				*apis.ErrInvalidValue("my.function", apis.CurrentField).ViaFieldIndex("names", 0),
+			},
+		},
+		{
+			Name: "all",
+			OverrideOptions: func(opts *commands.FunctionDeleteOptions) {
+				opts.All = true
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "all with name",
+			OverrideOptions: func(opts *commands.FunctionDeleteOptions) {
+				opts.Names = []string{"my-function"}
+				opts.All = true
+			},
+			ExpectErrors: []apis.FieldError{
+				*apis.ErrMultipleOneOf("all", "names"),
+			},
+		},
+	}
+
+	table.Run(t, defaultOptions)
+}
 
 func TestFunctionDeleteCommand(t *testing.T) {
 	t.Parallel()

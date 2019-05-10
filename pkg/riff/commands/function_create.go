@@ -54,7 +54,7 @@ func (opts *FunctionCreateOptions) Validate(ctx context.Context) *apis.FieldErro
 	}
 
 	if opts.Name == "" {
-		errs = errs.Also(apis.ErrInvalidValue(opts.Name, "name"))
+		errs = errs.Also(apis.ErrMissingField(opts.Name, "name"))
 	} else {
 		errs = errs.Also(validation.K8sName(opts.Name, "name"))
 	}
@@ -84,9 +84,15 @@ func (opts *FunctionCreateOptions) Validate(ctx context.Context) *apis.FieldErro
 		errs = errs.Also(apis.ErrMissingField("git-revision"))
 	}
 
-	// sub-path cannot be used with local-path
-	if opts.SubPath != "" && opts.LocalPath != "" {
-		errs = errs.Also(apis.ErrDisallowedFields("sub-path"))
+	if opts.LocalPath != "" {
+		if opts.SubPath != "" {
+			// sub-path cannot be used with local-path
+			errs = errs.Also(apis.ErrDisallowedFields("sub-path"))
+		}
+		if opts.CacheSize != "" {
+			// cache-size cannot be used with local-path
+			errs = errs.Also(apis.ErrDisallowedFields("cache-size"))
+		}
 	}
 
 	// nothing to do for artifact, handler, and invoker

@@ -20,12 +20,63 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
+
+func TestFunctionListOptions(t *testing.T) {
+	defaultOptions := func() testing.Validatable {
+		return &commands.FunctionListOptions{
+			Namespace: "default",
+		}
+	}
+
+	table := testing.OptionsTable{
+		{
+			Name:           "default",
+			ShouldValidate: true,
+		},
+		{
+			Name: "custom namespace",
+			OverrideOptions: func(opts *commands.FunctionListOptions) {
+				opts.Namespace = "my-namespace"
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "all namespaces",
+			OverrideOptions: func(opts *commands.FunctionListOptions) {
+				opts.Namespace = ""
+				opts.AllNamespaces = true
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "neither",
+			OverrideOptions: func(opts *commands.FunctionListOptions) {
+				opts.Namespace = ""
+			},
+			ExpectErrors: []apis.FieldError{
+				*apis.ErrMissingOneOf("namespace", "all-namespaces"),
+			},
+		},
+		{
+			Name: "both",
+			OverrideOptions: func(opts *commands.FunctionListOptions) {
+				opts.AllNamespaces = true
+			},
+			ExpectErrors: []apis.FieldError{
+				*apis.ErrMultipleOneOf("namespace", "all-namespaces"),
+			},
+		},
+	}
+
+	table.Run(t, defaultOptions)
+}
 
 func TestFunctionListCommand(t *testing.T) {
 	t.Parallel()

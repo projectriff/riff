@@ -145,7 +145,7 @@ func (ct CommandTable) Run(t *T, cmdFactory func(*cli.Config) *cobra.Command) {
 		for _, ctr := range focusedTable {
 			ctr.Run(t, cmdFactory)
 		}
-		t.Errorf("test passed focusing on %d record, skipped %d records", len(focusedTable), len(ct)-len(focusedTable))
+		t.Errorf("test run focused on %d record(s), skipped %d record(s)", len(focusedTable), len(ct)-len(focusedTable))
 		return
 	}
 

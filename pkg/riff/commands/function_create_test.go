@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
@@ -24,6 +25,148 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
+
+func TestFunctionCreateOptions(t *testing.T) {
+	defaultOptions := func() testing.Validatable {
+		return &commands.FunctionCreateOptions{
+			Namespace:   "default",
+			GitRevision: "master",
+		}
+	}
+
+	table := testing.OptionsTable{
+		{
+			Name: "default",
+			ExpectErrors: []apis.FieldError{
+				*apis.ErrMissingField("name"),
+				*apis.ErrMissingField("image"),
+				*apis.ErrMissingOneOf("git-repo", "local-path"),
+			},
+		},
+		{
+			Name: "git source",
+			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
+				opts.Name = "my-function"
+				opts.Image = "example.com/repo:tag"
+				opts.GitRepo = "https://example.com/repo.git"
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "local source",
+			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
+				opts.Name = "my-function"
+				opts.Image = "example.com/repo:tag"
+				opts.LocalPath = "."
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "no source",
+			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
+				opts.Name = "my-function"
+				opts.Image = "example.com/repo:tag"
+			},
+			ExpectErrors: []apis.FieldError{
+				*apis.ErrMissingOneOf("git-repo", "local-path"),
+			},
+		},
+		{
+			Name: "multiple sources",
+			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
+				opts.Name = "my-function"
+				opts.Image = "example.com/repo:tag"
+				opts.GitRepo = "https://example.com/repo.git"
+				opts.LocalPath = "."
+			},
+			ExpectErrors: []apis.FieldError{
+				*apis.ErrMultipleOneOf("git-repo", "local-path"),
+			},
+		},
+		{
+			Name: "git source with cache",
+			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
+				opts.Name = "my-function"
+				opts.Image = "example.com/repo:tag"
+				opts.GitRepo = "https://example.com/repo.git"
+				opts.CacheSize = "8Gi"
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "local source with cache",
+			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
+				opts.Name = "my-function"
+				opts.Image = "example.com/repo:tag"
+				opts.LocalPath = "."
+				opts.CacheSize = "8Gi"
+			},
+			ExpectErrors: []apis.FieldError{
+				*apis.ErrDisallowedFields("cache-size"),
+			},
+		},
+		{
+			Name: "invalid cache",
+			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
+				opts.Name = "my-function"
+				opts.Image = "example.com/repo:tag"
+				opts.GitRepo = "https://example.com/repo.git"
+				opts.CacheSize = "X"
+			},
+			ExpectErrors: []apis.FieldError{
+				*apis.ErrInvalidValue("X", "cache-size"),
+			},
+		},
+		{
+			Name: "with git subpath",
+			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
+				opts.Name = "my-function"
+				opts.Image = "example.com/repo:tag"
+				opts.GitRepo = "https://example.com/repo.git"
+				opts.SubPath = "some/directory"
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "with local subpath",
+			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
+				opts.Name = "my-function"
+				opts.Image = "example.com/repo:tag"
+				opts.LocalPath = "."
+				opts.SubPath = "some/directory"
+			},
+			ExpectErrors: []apis.FieldError{
+				*apis.ErrDisallowedFields("sub-path"),
+			},
+		},
+		{
+			Name: "missing namespace",
+			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
+				opts.Namespace = ""
+				opts.Name = "my-function"
+				opts.Image = "example.com/repo:tag"
+				opts.GitRepo = "https://example.com/repo.git"
+			},
+			ExpectErrors: []apis.FieldError{
+				*apis.ErrMissingField("namespace"),
+			},
+		},
+		{
+			Name: "missing git revision",
+			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
+				opts.Name = "my-function"
+				opts.Image = "example.com/repo:tag"
+				opts.GitRepo = "https://example.com/repo.git"
+				opts.GitRevision = ""
+			},
+			ExpectErrors: []apis.FieldError{
+				*apis.ErrMissingField("git-revision"),
+			},
+		},
+	}
+
+	table.Run(t, defaultOptions)
+}
 
 func TestFunctionCreateCommand(t *testing.T) {
 	t.Parallel()
