@@ -23,6 +23,7 @@ import (
 	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
+	"k8s.io/apimachinery/pkg/api/validation"
 )
 
 type FunctionUpdateOptions struct {
@@ -34,15 +35,30 @@ type FunctionUpdateOptions struct {
 	Handler  string
 	Invoker  string
 
-	LocalPath   string
 	GitRepo     string
 	GitRevision string
 	SubPath     string
 }
 
 func (opts *FunctionUpdateOptions) Validate(ctx context.Context) *apis.FieldError {
-	// TODO implement
-	return nil
+	errs := &apis.FieldError{}
+
+	if opts.Namespace == "" {
+		errs = errs.Also(apis.ErrMissingField("namespace"))
+	}
+
+	if opts.Name == "" {
+		errs = errs.Also(apis.ErrMissingField("name"))
+	} else {
+		if out := validation.NameIsDNSSubdomain(opts.Name, false); len(out) != 0 {
+			// TODO capture info about why the name is invalid
+			errs = errs.Also(apis.ErrInvalidValue(opts.Name, "name"))
+		}
+	}
+
+	// TODO validate other fields
+
+	return errs
 }
 
 func NewFunctionUpdateCommand(c *cli.Config) *cobra.Command {
@@ -64,10 +80,9 @@ func NewFunctionUpdateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.Artifact, "artifact", "", "<todo>")
 	cmd.Flags().StringVar(&opts.Handler, "handler", "", "<todo>")
 	cmd.Flags().StringVar(&opts.Invoker, "invoker", "", "<todo>")
-	cmd.Flags().StringVar(&opts.LocalPath, "local-path", "", "<todo>")
-	cmd.Flags().StringVar(&opts.LocalPath, "git-repo", "", "<todo>")
-	cmd.Flags().StringVar(&opts.LocalPath, "git-revision", "", "<todo>")
-	cmd.Flags().StringVar(&opts.LocalPath, "sub-path", "", "<todo>")
+	cmd.Flags().StringVar(&opts.GitRepo, "git-repo", "", "<todo>")
+	cmd.Flags().StringVar(&opts.GitRevision, "git-revision", "", "<todo>")
+	cmd.Flags().StringVar(&opts.SubPath, "sub-path", "", "<todo>")
 
 	return cmd
 }

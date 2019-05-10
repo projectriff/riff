@@ -19,6 +19,7 @@ riff function delete [flags]
 ### Options
 
 ```
+      --all                <todo>
   -h, --help               help for delete
   -n, --namespace string   <todo>
 ```

@@ -23,6 +23,7 @@ import (
 	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type FunctionListOptions struct {
@@ -31,8 +32,16 @@ type FunctionListOptions struct {
 }
 
 func (opts *FunctionListOptions) Validate(ctx context.Context) *apis.FieldError {
-	// TODO implement
-	return nil
+	errs := &apis.FieldError{}
+
+	if opts.Namespace == "" && !opts.AllNamespaces {
+		errs = errs.Also(apis.ErrMissingOneOf("namespace", "all-namespaces"))
+	}
+	if opts.Namespace != "" && opts.AllNamespaces {
+		errs = errs.Also(apis.ErrMultipleOneOf("namespace", "all-namespaces"))
+	}
+
+	return errs
 }
 
 func NewFunctionListCommand(c *cli.Config) *cobra.Command {
@@ -45,7 +54,20 @@ func NewFunctionListCommand(c *cli.Config) *cobra.Command {
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return fmt.Errorf("not implemented")
+			functions, err := c.Build().Functions(opts.Namespace).List(metav1.ListOptions{})
+			if err != nil {
+				return err
+			}
+
+			if len(functions.Items) == 0 {
+				fmt.Fprintln(cmd.OutOrStdout(), "No functions found.")
+			}
+			for _, function := range functions.Items {
+				// TODO pick a generic table formatter
+				fmt.Fprintln(cmd.OutOrStdout(), function.Name)
+			}
+
+			return nil
 		},
 	}
 

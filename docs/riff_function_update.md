@@ -19,8 +19,15 @@ riff function update [flags]
 ### Options
 
 ```
-  -h, --help               help for update
-  -n, --namespace string   <todo>
+      --artifact string       <todo>
+      --git-repo string       <todo>
+      --git-revision string   <todo>
+      --handler string        <todo>
+  -h, --help                  help for update
+      --image string          <todo>
+      --invoker string        <todo>
+  -n, --namespace string      <todo>
+      --sub-path string       <todo>
 ```
 
 ### Options inherited from parent commands

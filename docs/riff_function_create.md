@@ -19,8 +19,17 @@ riff function create [flags]
 ### Options
 
 ```
-  -h, --help               help for create
-  -n, --namespace string   <todo>
+      --artifact string       <todo>
+      --cache-size string     <todo>
+      --git-repo string       <todo>
+      --git-revision string   <todo> (default "master")
+      --handler string        <todo>
+  -h, --help                  help for create
+      --image string          <todo>
+      --invoker string        <todo>
+      --local-path string     <todo>
+  -n, --namespace string      <todo>
+      --sub-path string       <todo>
 ```
 
 ### Options inherited from parent commands
