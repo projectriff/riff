@@ -19,8 +19,14 @@ riff requestprocessor create [flags]
 ### Options
 
 ```
-  -h, --help               help for create
-  -n, --namespace string   <todo>
+      --application-ref string   <todo>
+      --env stringArray          <todo>
+      --env-from stringArray     <todo>
+      --function-ref string      <todo>
+  -h, --help                     help for create
+      --image string             <todo>
+      --item string              <todo>
+  -n, --namespace string         <todo>
 ```
 
 ### Options inherited from parent commands

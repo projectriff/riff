@@ -25,6 +25,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/knative/pkg/apis"
 	"github.com/knative/pkg/kmeta"
 	kntesting "github.com/knative/pkg/reconciler/testing"
 	"github.com/projectriff/riff/pkg/cli"
@@ -157,6 +158,9 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Comm
 			obj := actual.GetObject()
 			objPrevState[objKey(obj)] = obj
 
+			applyDefaults(expected)
+			applyDefaults(obj)
+
 			if at, et := reflect.TypeOf(obj).String(), reflect.TypeOf(expected).String(); at != et {
 				t.Errorf("Unexpected create expected type %q, actually %q", et, at)
 			} else if diff := cmp.Diff(expected, obj, ignoreLastTransitionTime, safeDeployDiff, cmpopts.EquateEmpty()); diff != "" {
@@ -192,18 +196,21 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Comm
 			// Update the object state.
 			objPrevState[objKey(obj)] = obj
 
+			applyDefaults(expected)
+			applyDefaults(obj)
+
 			if at, et := reflect.TypeOf(obj).String(), reflect.TypeOf(expected).String(); at != et {
 				t.Errorf("Unexpected update expected type %q, actually %q", et, at)
 			} else if diff := cmp.Diff(expected, obj, ignoreLastTransitionTime, safeDeployDiff, cmpopts.EquateEmpty()); diff != "" {
 				t.Errorf("Unexpected update (-expected, +actual): %s", diff)
 			}
 		}
-
 		if actual, expected := len(actions.Updates), len(ctr.ExpectUpdates); actual > expected {
 			for _, extra := range actions.Updates[expected:] {
 				t.Errorf("Extra update: %#v", extra)
 			}
 		}
+
 		for i, expected := range ctr.ExpectDeletes {
 			if i >= len(actions.Deletes) {
 				t.Errorf("Missing delete: %#v", expected)
@@ -262,6 +269,12 @@ var (
 
 	safeDeployDiff = cmpopts.IgnoreUnexported(resource.Quantity{})
 )
+
+func applyDefaults(o runtime.Object) {
+	if d, ok := o.(apis.Defaultable); ok {
+		d.SetDefaults(context.Background())
+	}
+}
 
 type DeleteRef struct {
 	Group     string
