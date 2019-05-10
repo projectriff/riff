@@ -1,5 +1,0 @@
-manifestVersion: 0.1
-knative:
-  - serving-release
-namespace:
-  - buildtemplate-release

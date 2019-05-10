@@ -1,32 +1,18 @@
-debug
+# built artifacts
+/riff
+/riff.zip
+/riff-*.tgz
+/riff-*.zip
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
+# Eclipe artifacts
 .project
 .settings
-.springBeans
 
-### IntelliJ IDEA ###
+# IntelliJ artifacts
 .idea
-*.iws
-*.iml
-*.ipr
 
-### Visual Studio Code
+# Visual Studio Code artifacts
 .vscode
 
-### Coverage artefacts ###
-*.coverprofile
-
-### Credentials
-gcr-storage-admin.json
-
+# OS turds
 .DS_Store
-
-/riff
-/riff.exe
-/riff-darwin-amd64.tgz
-/riff-linux-amd64.tgz
-/riff-windows-amd64.zip

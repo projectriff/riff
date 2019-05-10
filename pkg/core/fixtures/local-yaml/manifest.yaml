@@ -1,7 +1,0 @@
-manifestVersion: 0.1
-istio:
-  - dummy
-knative:
-  - dummy
-namespace:
-  - buildtemplate.yaml

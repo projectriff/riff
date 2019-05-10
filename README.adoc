@@ -1,17 +1,15 @@
-= riff is for functions image:https://travis-ci.com/projectriff/riff.svg?branch=master["Build Status", link="https://travis-ci.com/projectriff/riff"]
+= riff is for functions
 
 image::logo.png[riff logo, link=https://projectriff.io/]
 = A FaaS for Kubernetes
 
-The riff CLI helps developers build and run functions using link:https://github.com/knative/docs[Knative].
-It includes commands to install Knative in a Kubernetes cluster, and for managing functions, services, channels, and subscriptions.
+The riff CLI helps developers build and run functions in a Kubernetes cluster.
 
 == Installation of the latest release
 
 === Binaries
 
-Official binary releases are available from the link:https://github.com/projectriff/riff/releases[Releases] page. See link:https://projectriff.io/docs/getting-started-with-knative-riff-on-minikube/[Getting started on Minikube] or
-link:https://projectriff.io/docs/getting-started-with-knative-riff-on-gke/[Getting started on GKE] for how to install the riff CLI and the riff system.
+Official binary releases are available from the link:https://github.com/projectriff/riff/releases[Releases] page. See link:https://projectriff.io/docs/getting-started/[Getting started] for how to install the riff CLI and the riff system.
 
 === Homebrew
 
@@ -31,48 +29,10 @@ To install the CLI for Windows with link:https://chocolatey.org/[Chocolatey]:
 choco install riff
 ----
 
-== Developer installation of Knative
-
-The code for Knative serving and build lives in repos under the link:https://github.com/knative[knative] GitHub organization. Developers can use the riff CLI against their own Knative builds, by installing a link:https://www.knative.dev/docs/install/[Knative development environment].
-
-== [[manual]] Manual build of the riff CLI
-
-This is the best option if you want to modify the riff CLI.
-
-=== Prerequisites
-
-You need:
-
-* A working Go 1.11.4 (or later) environment
-
-=== Get the main riff repo
-
-[source, bash]
-----
-go get -d github.com/projectriff/riff/...
-----
-
-=== Build the riff CLI
-
-[source, bash]
-----
-cd $(go env GOPATH)/src/github.com/projectriff/riff
-make build
-----
-
-=== Build and install the riff CLI
-
-[source, bash]
-----
-cd $(go env GOPATH)/src/github.com/projectriff/riff
-make build install
-----
-NOTE: This installs the CLI in `$GOBIN`, or if that is not set, in the `bin` subdirectory of the directory specified in `$GOPATH`.
-
 == Contributing to riff
 
 Please refer to the link:CONTRIBUTING.adoc[Contributors' Guide].
 
-== Maintaining riff
+== Code of Conduct
 
-Please refer to the link:MAINTAINING.adoc[Maintainers' Guide].
+Please refer to the link:CODE_OF_CONDUCT.adoc[Contributor Code of Conduct].

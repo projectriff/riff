@@ -1,26 +1,26 @@
 ## riff
 
-Commands for creating and managing function resources
+<todo>
 
 ### Synopsis
 
-riff is for functions.
-
-riff is a CLI for functions on Knative.
-See https://projectriff.io and https://github.com/knative/docs
+<todo>
 
 ### Options
 
 ```
-  -h, --help   help for riff
+      --config string       config file (default is $HOME/.riff.yaml)
+  -h, --help                help for riff
+      --kubeconfig string   kubectl config file (default is $HOME/.kube/config)
 ```
 
 ### SEE ALSO
 
-* [riff completion](riff_completion.md)	 - Generate shell completion scripts
-* [riff function](riff_function.md)	 - Interact with function related resources
-* [riff namespace](riff_namespace.md)	 - Manage namespaces used for riff resources
-* [riff service](riff_service.md)	 - Interact with service related resources
-* [riff system](riff_system.md)	 - Manage system related resources
-* [riff version](riff_version.md)	 - Print version information about riff
+* [riff application](riff_application.md)	 - <todo>
+* [riff completion](riff_completion.md)	 - <todo>
+* [riff credential](riff_credential.md)	 - <todo>
+* [riff function](riff_function.md)	 - <todo>
+* [riff requestprocessor](riff_requestprocessor.md)	 - <todo>
+* [riff stream](riff_stream.md)	 - <todo>
+* [riff streamprocessor](riff_streamprocessor.md)	 - <todo>
 
