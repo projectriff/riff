@@ -137,7 +137,7 @@ type CommandTableRecord struct {
 func (ct CommandTable) Run(t *T, cmdFactory func(*cli.Config) *cobra.Command) {
 	focusedTable := CommandTable{}
 	for _, ctr := range ct {
-		if ctr.Focus == true {
+		if ctr.Focus == true && ctr.Skip != true {
 			focusedTable = append(focusedTable, ctr)
 		}
 	}
