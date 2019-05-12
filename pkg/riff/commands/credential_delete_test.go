@@ -17,12 +17,68 @@
 package commands_test
 
 import (
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
+
+func TestCredentialDeleteOptions(t *testing.T) {
+	table := testing.OptionsTable{
+		{
+			Name: "default",
+			Options: &commands.CredentialDeleteOptions{
+				Namespace: "default",
+			},
+			ExpectFieldError: cli.ErrMissingOneOf("all", "names"),
+		},
+		{
+			Name: "single name",
+			Options: &commands.CredentialDeleteOptions{
+				Namespace: "default",
+				Names:     []string{"my-function"},
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "multiple names",
+			Options: &commands.CredentialDeleteOptions{
+				Namespace: "default",
+				Names:     []string{"my-function", "my-other-function"},
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "invalid name",
+			Options: &commands.CredentialDeleteOptions{
+				Namespace: "default",
+				Names:     []string{"my.function"},
+			},
+			ExpectFieldError: cli.ErrInvalidValue("my.function", cli.CurrentField).ViaFieldIndex("names", 0),
+		},
+		{
+			Name: "all",
+			Options: &commands.CredentialDeleteOptions{
+				Namespace: "default",
+				All:       true,
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "all with name",
+			Options: &commands.CredentialDeleteOptions{
+				Namespace: "default",
+				Names:     []string{"my-function"},
+				All:       true,
+			},
+			ExpectFieldError: cli.ErrMultipleOneOf("all", "names"),
+		},
+	}
+
+	table.Run(t)
+}
 
 func TestCredentialDeleteCommand(t *testing.T) {
 	t.Parallel()

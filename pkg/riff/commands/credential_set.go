@@ -41,7 +41,7 @@ func (opts *CredentialSetOptions) Validate(ctx context.Context) *cli.FieldError 
 	}
 
 	if opts.Name == "" {
-		errs = errs.Also(cli.ErrInvalidValue(opts.Name, "name"))
+		errs = errs.Also(cli.ErrMissingField(opts.Name, "name"))
 	} else {
 		errs = errs.Also(validation.K8sName(opts.Name, "name"))
 	}

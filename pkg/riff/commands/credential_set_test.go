@@ -17,12 +17,49 @@
 package commands_test
 
 import (
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
+
+func TestCredentialSetOptions(t *testing.T) {
+	table := testing.OptionsTable{
+		{
+			Name:    "default",
+			Options: &commands.CredentialSetOptions{},
+			ExpectFieldError: (&cli.FieldError{}).
+				Also(cli.ErrMissingField("namespace")).
+				Also(cli.ErrMissingField("name")),
+		},
+		{
+			Name: "success",
+			Options: &commands.CredentialSetOptions{
+				Namespace: "default",
+				Name:      "push-credentials",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "missing namespace",
+			Options: &commands.CredentialSetOptions{
+				Name: "push-credentials",
+			},
+			ExpectFieldError: cli.ErrMissingField("namespace"),
+		},
+		{
+			Name: "missing name",
+			Options: &commands.CredentialSetOptions{
+				Namespace: "default",
+			},
+			ExpectFieldError: cli.ErrMissingField("name"),
+		},
+	}
+
+	table.Run(t)
+}
 
 func TestCredentialSetCommand(t *testing.T) {
 	t.Parallel()

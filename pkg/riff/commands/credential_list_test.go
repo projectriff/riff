@@ -20,12 +20,47 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
+
+func TestCredentialListOptions(t *testing.T) {
+	table := testing.OptionsTable{
+		{
+			Name: "default",
+			Options: &commands.CredentialListOptions{
+				Namespace: "default",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "all namespaces",
+			Options: &commands.CredentialListOptions{
+				AllNamespaces: true,
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name:             "neither",
+			Options:          &commands.CredentialListOptions{},
+			ExpectFieldError: cli.ErrMissingOneOf("namespace", "all-namespaces"),
+		},
+		{
+			Name: "both",
+			Options: &commands.CredentialListOptions{
+				Namespace:     "default",
+				AllNamespaces: true,
+			},
+			ExpectFieldError: cli.ErrMultipleOneOf("namespace", "all-namespaces"),
+		},
+	}
+
+	table.Run(t)
+}
 
 func TestCredentialListCommand(t *testing.T) {
 	t.Parallel()
