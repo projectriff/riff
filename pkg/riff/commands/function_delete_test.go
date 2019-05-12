@@ -17,7 +17,6 @@
 package commands_test
 
 import (
-	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
@@ -28,52 +27,18 @@ import (
 func TestFunctionDeleteOptions(t *testing.T) {
 	table := testing.OptionsTable{
 		{
-			Name: "default",
+			Name: "invalid delete",
 			Options: &commands.FunctionDeleteOptions{
-				Namespace: "default",
+				DeleteOptions: testing.InvalidDeleteOptions,
 			},
-			ExpectFieldError: cli.ErrMissingOneOf("all", "names"),
+			ExpectFieldError: testing.InvalidDeleteOptionsFieldError,
 		},
 		{
-			Name: "single name",
+			Name: "valid delete",
 			Options: &commands.FunctionDeleteOptions{
-				Namespace: "default",
-				Names:     []string{"my-function"},
+				DeleteOptions: testing.ValidDeleteOptions,
 			},
 			ShouldValidate: true,
-		},
-		{
-			Name: "multiple names",
-			Options: &commands.FunctionDeleteOptions{
-				Namespace: "default",
-				Names:     []string{"my-function", "my-other-function"},
-			},
-			ShouldValidate: true,
-		},
-		{
-			Name: "invalid name",
-			Options: &commands.FunctionDeleteOptions{
-				Namespace: "default",
-				Names:     []string{"my.function"},
-			},
-			ExpectFieldError: cli.ErrInvalidValue("my.function", cli.CurrentField).ViaFieldIndex("names", 0),
-		},
-		{
-			Name: "all",
-			Options: &commands.FunctionDeleteOptions{
-				Namespace: "default",
-				All:       true,
-			},
-			ShouldValidate: true,
-		},
-		{
-			Name: "all with name",
-			Options: &commands.FunctionDeleteOptions{
-				Namespace: "default",
-				Names:     []string{"my-function"},
-				All:       true,
-			},
-			ExpectFieldError: cli.ErrMultipleOneOf("all", "names"),
 		},
 	}
 

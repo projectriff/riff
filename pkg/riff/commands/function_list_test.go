@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
@@ -31,31 +30,18 @@ import (
 func TestFunctionListOptions(t *testing.T) {
 	table := testing.OptionsTable{
 		{
-			Name: "default",
+			Name: "invalid list",
 			Options: &commands.FunctionListOptions{
-				Namespace: "default",
+				ListOptions: testing.InvalidListOptions,
+			},
+			ExpectFieldError: testing.InvalidListOptionsFieldError,
+		},
+		{
+			Name: "valid list",
+			Options: &commands.FunctionListOptions{
+				ListOptions: testing.ValidListOptions,
 			},
 			ShouldValidate: true,
-		},
-		{
-			Name: "all namespaces",
-			Options: &commands.FunctionListOptions{
-				AllNamespaces: true,
-			},
-			ShouldValidate: true,
-		},
-		{
-			Name:             "neither",
-			Options:          &commands.FunctionListOptions{},
-			ExpectFieldError: cli.ErrMissingOneOf("namespace", "all-namespaces"),
-		},
-		{
-			Name: "both",
-			Options: &commands.FunctionListOptions{
-				Namespace:     "default",
-				AllNamespaces: true,
-			},
-			ExpectFieldError: cli.ErrMultipleOneOf("namespace", "all-namespaces"),
 		},
 	}
 

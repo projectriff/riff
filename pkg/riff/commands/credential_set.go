@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"github.com/projectriff/riff/pkg/cli"
-	"github.com/projectriff/riff/pkg/validation"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
@@ -29,22 +28,13 @@ import (
 )
 
 type CredentialSetOptions struct {
-	Namespace string
-	Name      string
+	cli.ResourceOptions
 }
 
 func (opts *CredentialSetOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
 
-	if opts.Namespace == "" {
-		errs = errs.Also(cli.ErrMissingField("namespace"))
-	}
-
-	if opts.Name == "" {
-		errs = errs.Also(cli.ErrMissingField(opts.Name, "name"))
-	} else {
-		errs = errs.Also(validation.K8sName(opts.Name, "name"))
-	}
+	errs = errs.Also(opts.ResourceOptions.Validate(ctx))
 
 	return errs
 }

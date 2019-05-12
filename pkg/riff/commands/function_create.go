@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"github.com/projectriff/riff/pkg/cli"
-	"github.com/projectriff/riff/pkg/validation"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -29,8 +28,7 @@ import (
 )
 
 type FunctionCreateOptions struct {
-	Namespace string
-	Name      string
+	cli.ResourceOptions
 
 	Image     string
 	CacheSize string
@@ -48,15 +46,7 @@ type FunctionCreateOptions struct {
 func (opts *FunctionCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
 
-	if opts.Namespace == "" {
-		errs = errs.Also(cli.ErrMissingField("namespace"))
-	}
-
-	if opts.Name == "" {
-		errs = errs.Also(cli.ErrMissingField(opts.Name, "name"))
-	} else {
-		errs = errs.Also(validation.K8sName(opts.Name, "name"))
-	}
+	errs = errs.Also(opts.ResourceOptions.Validate(ctx))
 
 	if opts.Image == "" {
 		errs = errs.Also(cli.ErrMissingField("image"))

@@ -14,34 +14,23 @@
  * limitations under the License.
  */
 
-package validation
+package cli
 
 import (
 	"github.com/knative/pkg/apis"
-	"k8s.io/apimachinery/pkg/api/validation"
 )
 
-func K8sName(name, field string) *apis.FieldError {
-	errs := &apis.FieldError{}
+type Validatable = apis.Validatable
+type FieldError = apis.FieldError
 
-	if out := validation.NameIsDNSLabel(name, false); len(out) != 0 {
-		// TODO capture info about why the name is invalid
-		errs = errs.Also(apis.ErrInvalidValue(name, field))
-	}
-
-	return errs
-}
-
-func K8sNames(names []string, field string) *apis.FieldError {
-	errs := &apis.FieldError{}
-
-	for i, name := range names {
-		if name == "" {
-			errs = errs.Also(apis.ErrInvalidValue(name, field))
-		} else {
-			errs = errs.Also(K8sName(name, apis.CurrentField).ViaFieldIndex(field, i))
-		}
-	}
-
-	return errs
-}
+var (
+	CurrentField         = apis.CurrentField
+	ErrDisallowedFields  = apis.ErrDisallowedFields
+	ErrInvalidArrayValue = apis.ErrInvalidArrayValue
+	ErrInvalidKeyName    = apis.ErrInvalidKeyName
+	ErrInvalidValue      = apis.ErrInvalidValue
+	ErrMissingField      = apis.ErrMissingField
+	ErrMissingOneOf      = apis.ErrMissingOneOf
+	ErrMultipleOneOf     = apis.ErrMultipleOneOf
+	ErrOutOfBoundsValue  = apis.ErrOutOfBoundsValue
+)

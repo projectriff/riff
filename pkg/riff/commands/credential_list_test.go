@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	corev1 "k8s.io/api/core/v1"
@@ -31,31 +30,18 @@ import (
 func TestCredentialListOptions(t *testing.T) {
 	table := testing.OptionsTable{
 		{
-			Name: "default",
+			Name: "valid list",
 			Options: &commands.CredentialListOptions{
-				Namespace: "default",
+				ListOptions: testing.ValidListOptions,
 			},
 			ShouldValidate: true,
 		},
 		{
-			Name: "all namespaces",
+			Name: "invalid list",
 			Options: &commands.CredentialListOptions{
-				AllNamespaces: true,
+				ListOptions: testing.InvalidListOptions,
 			},
-			ShouldValidate: true,
-		},
-		{
-			Name:             "neither",
-			Options:          &commands.CredentialListOptions{},
-			ExpectFieldError: cli.ErrMissingOneOf("namespace", "all-namespaces"),
-		},
-		{
-			Name: "both",
-			Options: &commands.CredentialListOptions{
-				Namespace:     "default",
-				AllNamespaces: true,
-			},
-			ExpectFieldError: cli.ErrMultipleOneOf("namespace", "all-namespaces"),
+			ExpectFieldError: testing.InvalidListOptionsFieldError,
 		},
 	}
 

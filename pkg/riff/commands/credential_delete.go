@@ -20,32 +20,18 @@ import (
 	"context"
 
 	"github.com/projectriff/riff/pkg/cli"
-	"github.com/projectriff/riff/pkg/validation"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type CredentialDeleteOptions struct {
-	Namespace string
-	Names     []string
-	All       bool
+	cli.DeleteOptions
 }
 
 func (opts *CredentialDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
 
-	if opts.Namespace == "" {
-		errs = errs.Also(cli.ErrMissingField("namespace"))
-	}
-
-	if opts.All && len(opts.Names) != 0 {
-		errs = errs.Also(cli.ErrMultipleOneOf("all", "names"))
-	}
-	if !opts.All && len(opts.Names) == 0 {
-		errs = errs.Also(cli.ErrMissingOneOf("all", "names"))
-	}
-
-	errs = errs.Also(validation.K8sNames(opts.Names, "names"))
+	errs = errs.Also(opts.DeleteOptions.Validate(ctx))
 
 	return errs
 }

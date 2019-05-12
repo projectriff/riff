@@ -19,24 +19,24 @@ package validation
 import (
 	"strings"
 
-	"github.com/projectriff/riff/pkg/cli"
+	"github.com/knative/pkg/apis"
 )
 
-func EnvVar(env, field string) *cli.FieldError {
-	errs := &cli.FieldError{}
+func EnvVar(env, field string) *apis.FieldError {
+	errs := &apis.FieldError{}
 
 	if strings.HasPrefix(env, "=") || !strings.Contains(env, "=") {
-		errs = errs.Also(cli.ErrInvalidValue(env, field))
+		errs = errs.Also(apis.ErrInvalidValue(env, field))
 	}
 
 	return errs
 }
 
-func EnvVars(envs []string, field string) *cli.FieldError {
-	errs := &cli.FieldError{}
+func EnvVars(envs []string, field string) *apis.FieldError {
+	errs := &apis.FieldError{}
 
 	for i, env := range envs {
-		errs = errs.Also(EnvVar(env, cli.CurrentField).ViaFieldIndex(field, i))
+		errs = errs.Also(EnvVar(env, apis.CurrentField).ViaFieldIndex(field, i))
 	}
 
 	return errs
