@@ -18,7 +18,6 @@ package testing
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 	"unsafe"
 
@@ -29,21 +28,33 @@ import (
 type OptionsTable []OptionsTableRecord
 
 type OptionsTableRecord struct {
-	Name       string
-	Skip       bool
-	Focus      bool
+	// Name is used to identify the record in the test results. A sub-test is created for each
+	// record with this name.
+	Name string
+	// Skip suppresses the execution of this test record.
+	Skip bool
+	// Focus executes this record skipping all unfocused records. The containing test will fail to
+	// prevent accidental check-in.
+	Focus bool
+	// Sequential disables parallel processing for this record. By default records in a table will
+	// execute in parallel.
 	Sequential bool
 
 	// inputs
-	OverrideOptions interface{}
+
+	// Options to validate
+	Options cli.Validatable
 
 	// outputs
-	ExpectError    *cli.FieldError
+
+	// ExpectFieldError is the error that should be returned from the validation.
+	ExpectFieldError *cli.FieldError
+
+	// ShouldValidate is true if the options are valid
 	ShouldValidate bool
-	Verify         func(t *T, err *cli.FieldError)
 }
 
-func (ot OptionsTable) Run(t *T, defaultOptionsFactory func() cli.Validatable) {
+func (ot OptionsTable) Run(t *T) {
 	focusedTable := OptionsTable{}
 	for _, otr := range ot {
 		if otr.Focus == true && otr.Skip != true {
@@ -52,18 +63,18 @@ func (ot OptionsTable) Run(t *T, defaultOptionsFactory func() cli.Validatable) {
 	}
 	if len(focusedTable) != 0 {
 		for _, otr := range focusedTable {
-			otr.Run(t, defaultOptionsFactory)
+			otr.Run(t)
 		}
 		t.Errorf("test run focused on %d record(s), skipped %d record(s)", len(focusedTable), len(ot)-len(focusedTable))
 		return
 	}
 
 	for _, otr := range ot {
-		otr.Run(t, defaultOptionsFactory)
+		otr.Run(t)
 	}
 }
 
-func (otr OptionsTableRecord) Run(t *T, defaultOptionsFactory func() cli.Validatable) {
+func (otr OptionsTableRecord) Run(t *T) {
 	t.Run(otr.Name, func(t *T) {
 		if otr.Skip {
 			t.SkipNow()
@@ -72,23 +83,14 @@ func (otr OptionsTableRecord) Run(t *T, defaultOptionsFactory func() cli.Validat
 			t.Parallel()
 		}
 
-		opts := defaultOptionsFactory()
-		if otr.OverrideOptions != nil {
-			oov := reflect.ValueOf(otr.OverrideOptions)
-			if !isOverideOptionsFunc(oov.Type()) {
-				panic(fmt.Sprintf("invalid override options function: %T", otr.OverrideOptions))
-			}
-			oov.Call([]reflect.Value{reflect.ValueOf(opts)})
-		}
-
-		errs := opts.Validate(context.TODO())
+		errs := otr.Options.Validate(context.TODO())
 		if errs == nil {
 			errs = &cli.FieldError{}
 		}
 
-		if otr.ExpectError != nil {
+		if otr.ExpectFieldError != nil {
 			actual := flattenFieldErrors(errs)
-			expected := flattenFieldErrors(otr.ExpectError)
+			expected := flattenFieldErrors(otr.ExpectFieldError)
 			if diff := cmp.Diff(expected, actual, compareFieldError); diff != "" {
 				t.Errorf("Unexpected errors (-expected, +actual): %s", diff)
 			}
@@ -102,12 +104,8 @@ func (otr OptionsTableRecord) Run(t *T, defaultOptionsFactory func() cli.Validat
 			}
 		}
 
-		if otr.ShouldValidate == false && otr.ExpectError == nil {
-			t.Error("one of ShouldValidate=true or ExpectError is required")
-		}
-
-		if otr.Verify != nil {
-			otr.Verify(t, errs)
+		if otr.ShouldValidate == false && otr.ExpectFieldError == nil {
+			t.Error("one of ShouldValidate=true or ExpectFieldError is required")
 		}
 	})
 }

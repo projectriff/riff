@@ -27,130 +27,143 @@ import (
 )
 
 func TestFunctionCreateOptions(t *testing.T) {
-	defaultOptions := func() cli.Validatable {
-		return &commands.FunctionCreateOptions{
-			Namespace:   "default",
-			GitRevision: "master",
-		}
-	}
-
 	table := testing.OptionsTable{
 		{
 			Name: "default",
-			ExpectError: (&cli.FieldError{}).
+			Options: &commands.FunctionCreateOptions{
+				Namespace:   "default",
+				GitRevision: "master",
+			},
+			ExpectFieldError: (&cli.FieldError{}).
 				Also(cli.ErrMissingField("name")).
 				Also(cli.ErrMissingField("image")).
 				Also(cli.ErrMissingOneOf("git-repo", "local-path")),
 		},
 		{
 			Name: "git source",
-			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
-				opts.Name = "my-function"
-				opts.Image = "example.com/repo:tag"
-				opts.GitRepo = "https://example.com/repo.git"
+			Options: &commands.FunctionCreateOptions{
+				Namespace:   "default",
+				Name:        "my-function",
+				Image:       "example.com/repo:tag",
+				GitRepo:     "https://example.com/repo.git",
+				GitRevision: "master",
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "local source",
-			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
-				opts.Name = "my-function"
-				opts.Image = "example.com/repo:tag"
-				opts.LocalPath = "."
+			Options: &commands.FunctionCreateOptions{
+				Namespace: "default",
+				Name:      "my-function",
+				Image:     "example.com/repo:tag",
+				LocalPath: ".",
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "no source",
-			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
-				opts.Name = "my-function"
-				opts.Image = "example.com/repo:tag"
+			Options: &commands.FunctionCreateOptions{
+				Namespace: "default",
+				Name:      "my-function",
+				Image:     "example.com/repo:tag",
 			},
-			ExpectError: cli.ErrMissingOneOf("git-repo", "local-path"),
+			ExpectFieldError: cli.ErrMissingOneOf("git-repo", "local-path"),
 		},
 		{
 			Name: "multiple sources",
-			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
-				opts.Name = "my-function"
-				opts.Image = "example.com/repo:tag"
-				opts.GitRepo = "https://example.com/repo.git"
-				opts.LocalPath = "."
+			Options: &commands.FunctionCreateOptions{
+				Namespace:   "default",
+				Name:        "my-function",
+				Image:       "example.com/repo:tag",
+				GitRepo:     "https://example.com/repo.git",
+				GitRevision: "master",
+				LocalPath:   ".",
 			},
-			ExpectError: cli.ErrMultipleOneOf("git-repo", "local-path"),
+			ExpectFieldError: cli.ErrMultipleOneOf("git-repo", "local-path"),
 		},
 		{
 			Name: "git source with cache",
-			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
-				opts.Name = "my-function"
-				opts.Image = "example.com/repo:tag"
-				opts.GitRepo = "https://example.com/repo.git"
-				opts.CacheSize = "8Gi"
+			Options: &commands.FunctionCreateOptions{
+				Namespace:   "default",
+				Name:        "my-function",
+				Image:       "example.com/repo:tag",
+				GitRepo:     "https://example.com/repo.git",
+				GitRevision: "master",
+				CacheSize:   "8Gi",
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "local source with cache",
-			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
-				opts.Name = "my-function"
-				opts.Image = "example.com/repo:tag"
-				opts.LocalPath = "."
-				opts.CacheSize = "8Gi"
+			Options: &commands.FunctionCreateOptions{
+				Namespace: "default",
+				Name:      "my-function",
+				Image:     "example.com/repo:tag",
+				LocalPath: ".",
+				CacheSize: "8Gi",
 			},
-			ExpectError: cli.ErrDisallowedFields("cache-size"),
+			ExpectFieldError: cli.ErrDisallowedFields("cache-size"),
 		},
 		{
 			Name: "invalid cache",
-			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
-				opts.Name = "my-function"
-				opts.Image = "example.com/repo:tag"
-				opts.GitRepo = "https://example.com/repo.git"
-				opts.CacheSize = "X"
+			Options: &commands.FunctionCreateOptions{
+				Namespace:   "default",
+				Name:        "my-function",
+				Image:       "example.com/repo:tag",
+				GitRepo:     "https://example.com/repo.git",
+				GitRevision: "master",
+				CacheSize:   "X",
 			},
-			ExpectError: cli.ErrInvalidValue("X", "cache-size"),
+			ExpectFieldError: cli.ErrInvalidValue("X", "cache-size"),
 		},
 		{
 			Name: "with git subpath",
-			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
-				opts.Name = "my-function"
-				opts.Image = "example.com/repo:tag"
-				opts.GitRepo = "https://example.com/repo.git"
-				opts.SubPath = "some/directory"
+			Options: &commands.FunctionCreateOptions{
+				Namespace:   "default",
+				Name:        "my-function",
+				Image:       "example.com/repo:tag",
+				GitRepo:     "https://example.com/repo.git",
+				GitRevision: "master",
+				SubPath:     "some/directory",
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "with local subpath",
-			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
-				opts.Name = "my-function"
-				opts.Image = "example.com/repo:tag"
-				opts.LocalPath = "."
-				opts.SubPath = "some/directory"
+			Options: &commands.FunctionCreateOptions{
+				Namespace: "default",
+				Name:      "my-function",
+				Image:     "example.com/repo:tag",
+				LocalPath: ".",
+				SubPath:   "some/directory",
 			},
-			ExpectError: cli.ErrDisallowedFields("sub-path"),
+			ExpectFieldError: cli.ErrDisallowedFields("sub-path"),
 		},
 		{
 			Name: "missing namespace",
-			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
-				opts.Namespace = ""
-				opts.Name = "my-function"
-				opts.Image = "example.com/repo:tag"
-				opts.GitRepo = "https://example.com/repo.git"
+			Options: &commands.FunctionCreateOptions{
+				Namespace:   "",
+				Name:        "my-function",
+				Image:       "example.com/repo:tag",
+				GitRepo:     "https://example.com/repo.git",
+				GitRevision: "master",
 			},
-			ExpectError: cli.ErrMissingField("namespace"),
+			ExpectFieldError: cli.ErrMissingField("namespace"),
 		},
 		{
 			Name: "missing git revision",
-			OverrideOptions: func(opts *commands.FunctionCreateOptions) {
-				opts.Name = "my-function"
-				opts.Image = "example.com/repo:tag"
-				opts.GitRepo = "https://example.com/repo.git"
-				opts.GitRevision = ""
+			Options: &commands.FunctionCreateOptions{
+				Namespace:   "default",
+				Name:        "my-function",
+				Image:       "example.com/repo:tag",
+				GitRepo:     "https://example.com/repo.git",
+				GitRevision: "",
 			},
-			ExpectError: cli.ErrMissingField("git-revision"),
+			ExpectFieldError: cli.ErrMissingField("git-revision"),
 		},
 	}
 
-	table.Run(t, defaultOptions)
+	table.Run(t)
 }
 
 func TestFunctionCreateCommand(t *testing.T) {

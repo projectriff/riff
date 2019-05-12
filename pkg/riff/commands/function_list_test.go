@@ -29,49 +29,37 @@ import (
 )
 
 func TestFunctionListOptions(t *testing.T) {
-	defaultOptions := func() cli.Validatable {
-		return &commands.FunctionListOptions{
-			Namespace: "default",
-		}
-	}
-
 	table := testing.OptionsTable{
 		{
-			Name:           "default",
-			ShouldValidate: true,
-		},
-		{
-			Name: "custom namespace",
-			OverrideOptions: func(opts *commands.FunctionListOptions) {
-				opts.Namespace = "my-namespace"
+			Name: "default",
+			Options: &commands.FunctionListOptions{
+				Namespace: "default",
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "all namespaces",
-			OverrideOptions: func(opts *commands.FunctionListOptions) {
-				opts.Namespace = ""
-				opts.AllNamespaces = true
+			Options: &commands.FunctionListOptions{
+				AllNamespaces: true,
 			},
 			ShouldValidate: true,
 		},
 		{
-			Name: "neither",
-			OverrideOptions: func(opts *commands.FunctionListOptions) {
-				opts.Namespace = ""
-			},
-			ExpectError: cli.ErrMissingOneOf("namespace", "all-namespaces"),
+			Name:             "neither",
+			Options:          &commands.FunctionListOptions{},
+			ExpectFieldError: cli.ErrMissingOneOf("namespace", "all-namespaces"),
 		},
 		{
 			Name: "both",
-			OverrideOptions: func(opts *commands.FunctionListOptions) {
-				opts.AllNamespaces = true
+			Options: &commands.FunctionListOptions{
+				Namespace:     "default",
+				AllNamespaces: true,
 			},
-			ExpectError: cli.ErrMultipleOneOf("namespace", "all-namespaces"),
+			ExpectFieldError: cli.ErrMultipleOneOf("namespace", "all-namespaces"),
 		},
 	}
 
-	table.Run(t, defaultOptions)
+	table.Run(t)
 }
 
 func TestFunctionListCommand(t *testing.T) {

@@ -26,56 +26,58 @@ import (
 )
 
 func TestFunctionDeleteOptions(t *testing.T) {
-	defaultOptions := func() cli.Validatable {
-		return &commands.FunctionDeleteOptions{
-			Namespace: "default",
-		}
-	}
-
 	table := testing.OptionsTable{
 		{
-			Name:        "default",
-			ExpectError: cli.ErrMissingOneOf("all", "names"),
+			Name: "default",
+			Options: &commands.FunctionDeleteOptions{
+				Namespace: "default",
+			},
+			ExpectFieldError: cli.ErrMissingOneOf("all", "names"),
 		},
 		{
 			Name: "single name",
-			OverrideOptions: func(opts *commands.FunctionDeleteOptions) {
-				opts.Names = []string{"my-function"}
+			Options: &commands.FunctionDeleteOptions{
+				Namespace: "default",
+				Names:     []string{"my-function"},
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "multiple names",
-			OverrideOptions: func(opts *commands.FunctionDeleteOptions) {
-				opts.Names = []string{"my-function", "my-other-function"}
+			Options: &commands.FunctionDeleteOptions{
+				Namespace: "default",
+				Names:     []string{"my-function", "my-other-function"},
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "invalid name",
-			OverrideOptions: func(opts *commands.FunctionDeleteOptions) {
-				opts.Names = []string{"my.function"}
+			Options: &commands.FunctionDeleteOptions{
+				Namespace: "default",
+				Names:     []string{"my.function"},
 			},
-			ExpectError: cli.ErrInvalidValue("my.function", cli.CurrentField).ViaFieldIndex("names", 0),
+			ExpectFieldError: cli.ErrInvalidValue("my.function", cli.CurrentField).ViaFieldIndex("names", 0),
 		},
 		{
 			Name: "all",
-			OverrideOptions: func(opts *commands.FunctionDeleteOptions) {
-				opts.All = true
+			Options: &commands.FunctionDeleteOptions{
+				Namespace: "default",
+				All:       true,
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "all with name",
-			OverrideOptions: func(opts *commands.FunctionDeleteOptions) {
-				opts.Names = []string{"my-function"}
-				opts.All = true
+			Options: &commands.FunctionDeleteOptions{
+				Namespace: "default",
+				Names:     []string{"my-function"},
+				All:       true,
 			},
-			ExpectError: cli.ErrMultipleOneOf("all", "names"),
+			ExpectFieldError: cli.ErrMultipleOneOf("all", "names"),
 		},
 	}
 
-	table.Run(t, defaultOptions)
+	table.Run(t)
 }
 
 func TestFunctionDeleteCommand(t *testing.T) {
