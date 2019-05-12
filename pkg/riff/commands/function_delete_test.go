@@ -34,10 +34,8 @@ func TestFunctionDeleteOptions(t *testing.T) {
 
 	table := testing.OptionsTable{
 		{
-			Name: "default",
-			ExpectErrors: []cli.FieldError{
-				*cli.ErrMissingOneOf("all", "names"),
-			},
+			Name:        "default",
+			ExpectError: cli.ErrMissingOneOf("all", "names"),
 		},
 		{
 			Name: "single name",
@@ -58,9 +56,7 @@ func TestFunctionDeleteOptions(t *testing.T) {
 			OverrideOptions: func(opts *commands.FunctionDeleteOptions) {
 				opts.Names = []string{"my.function"}
 			},
-			ExpectErrors: []cli.FieldError{
-				*cli.ErrInvalidValue("my.function", cli.CurrentField).ViaFieldIndex("names", 0),
-			},
+			ExpectError: cli.ErrInvalidValue("my.function", cli.CurrentField).ViaFieldIndex("names", 0),
 		},
 		{
 			Name: "all",
@@ -75,9 +71,7 @@ func TestFunctionDeleteOptions(t *testing.T) {
 				opts.Names = []string{"my-function"}
 				opts.All = true
 			},
-			ExpectErrors: []cli.FieldError{
-				*cli.ErrMultipleOneOf("all", "names"),
-			},
+			ExpectError: cli.ErrMultipleOneOf("all", "names"),
 		},
 	}
 

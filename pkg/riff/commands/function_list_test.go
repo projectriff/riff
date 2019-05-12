@@ -60,18 +60,14 @@ func TestFunctionListOptions(t *testing.T) {
 			OverrideOptions: func(opts *commands.FunctionListOptions) {
 				opts.Namespace = ""
 			},
-			ExpectErrors: []cli.FieldError{
-				*cli.ErrMissingOneOf("namespace", "all-namespaces"),
-			},
+			ExpectError: cli.ErrMissingOneOf("namespace", "all-namespaces"),
 		},
 		{
 			Name: "both",
 			OverrideOptions: func(opts *commands.FunctionListOptions) {
 				opts.AllNamespaces = true
 			},
-			ExpectErrors: []cli.FieldError{
-				*cli.ErrMultipleOneOf("namespace", "all-namespaces"),
-			},
+			ExpectError: cli.ErrMultipleOneOf("namespace", "all-namespaces"),
 		},
 	}
 

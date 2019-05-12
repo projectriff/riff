@@ -37,11 +37,10 @@ func TestFunctionCreateOptions(t *testing.T) {
 	table := testing.OptionsTable{
 		{
 			Name: "default",
-			ExpectErrors: []cli.FieldError{
-				*cli.ErrMissingField("name"),
-				*cli.ErrMissingField("image"),
-				*cli.ErrMissingOneOf("git-repo", "local-path"),
-			},
+			ExpectError: (&cli.FieldError{}).
+				Also(cli.ErrMissingField("name")).
+				Also(cli.ErrMissingField("image")).
+				Also(cli.ErrMissingOneOf("git-repo", "local-path")),
 		},
 		{
 			Name: "git source",
@@ -67,9 +66,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 				opts.Name = "my-function"
 				opts.Image = "example.com/repo:tag"
 			},
-			ExpectErrors: []cli.FieldError{
-				*cli.ErrMissingOneOf("git-repo", "local-path"),
-			},
+			ExpectError: cli.ErrMissingOneOf("git-repo", "local-path"),
 		},
 		{
 			Name: "multiple sources",
@@ -79,9 +76,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 				opts.GitRepo = "https://example.com/repo.git"
 				opts.LocalPath = "."
 			},
-			ExpectErrors: []cli.FieldError{
-				*cli.ErrMultipleOneOf("git-repo", "local-path"),
-			},
+			ExpectError: cli.ErrMultipleOneOf("git-repo", "local-path"),
 		},
 		{
 			Name: "git source with cache",
@@ -101,9 +96,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 				opts.LocalPath = "."
 				opts.CacheSize = "8Gi"
 			},
-			ExpectErrors: []cli.FieldError{
-				*cli.ErrDisallowedFields("cache-size"),
-			},
+			ExpectError: cli.ErrDisallowedFields("cache-size"),
 		},
 		{
 			Name: "invalid cache",
@@ -113,9 +106,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 				opts.GitRepo = "https://example.com/repo.git"
 				opts.CacheSize = "X"
 			},
-			ExpectErrors: []cli.FieldError{
-				*cli.ErrInvalidValue("X", "cache-size"),
-			},
+			ExpectError: cli.ErrInvalidValue("X", "cache-size"),
 		},
 		{
 			Name: "with git subpath",
@@ -135,9 +126,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 				opts.LocalPath = "."
 				opts.SubPath = "some/directory"
 			},
-			ExpectErrors: []cli.FieldError{
-				*cli.ErrDisallowedFields("sub-path"),
-			},
+			ExpectError: cli.ErrDisallowedFields("sub-path"),
 		},
 		{
 			Name: "missing namespace",
@@ -147,9 +136,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 				opts.Image = "example.com/repo:tag"
 				opts.GitRepo = "https://example.com/repo.git"
 			},
-			ExpectErrors: []cli.FieldError{
-				*cli.ErrMissingField("namespace"),
-			},
+			ExpectError: cli.ErrMissingField("namespace"),
 		},
 		{
 			Name: "missing git revision",
@@ -159,9 +146,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 				opts.GitRepo = "https://example.com/repo.git"
 				opts.GitRevision = ""
 			},
-			ExpectErrors: []cli.FieldError{
-				*cli.ErrMissingField("git-revision"),
-			},
+			ExpectError: cli.ErrMissingField("git-revision"),
 		},
 	}
 

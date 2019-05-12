@@ -38,10 +38,9 @@ type OptionsTableRecord struct {
 	OverrideOptions interface{}
 
 	// outputs
-	ExpectErrorPaths []string
-	ExpectErrors     []cli.FieldError
-	ShouldValidate   bool
-	Verify           func(t *T, err *cli.FieldError)
+	ExpectError    *cli.FieldError
+	ShouldValidate bool
+	Verify         func(t *T, err *cli.FieldError)
 }
 
 func (ot OptionsTable) Run(t *T, defaultOptionsFactory func() cli.Validatable) {
@@ -87,17 +86,9 @@ func (otr OptionsTableRecord) Run(t *T, defaultOptionsFactory func() cli.Validat
 			errs = &cli.FieldError{}
 		}
 
-		if otr.ExpectErrorPaths != nil {
-			actual := flattenFieldPaths(errs)
-			expected := otr.ExpectErrorPaths
-			if diff := cmp.Diff(expected, actual); diff != "" {
-				t.Errorf("Unexpected field paths (-expected, +actual): %s", diff)
-			}
-		}
-
-		if otr.ExpectErrors != nil {
+		if otr.ExpectError != nil {
 			actual := flattenFieldErrors(errs)
-			expected := otr.ExpectErrors
+			expected := flattenFieldErrors(otr.ExpectError)
 			if diff := cmp.Diff(expected, actual, compareFieldError); diff != "" {
 				t.Errorf("Unexpected errors (-expected, +actual): %s", diff)
 			}
@@ -111,8 +102,8 @@ func (otr OptionsTableRecord) Run(t *T, defaultOptionsFactory func() cli.Validat
 			}
 		}
 
-		if otr.ShouldValidate == false && otr.ExpectErrorPaths == nil && otr.ExpectErrors == nil {
-			t.Error("at least one of ShouldValidate=true, ExpectErrorPaths or ExpectErrors is required")
+		if otr.ShouldValidate == false && otr.ExpectError == nil {
+			t.Error("one of ShouldValidate=true or ExpectError is required")
 		}
 
 		if otr.Verify != nil {
