@@ -54,6 +54,11 @@ func TestFunctionDeleteCommand(t *testing.T) {
 
 	table := testing.CommandTable{
 		{
+			Name:        "invalid args",
+			Args:        []string{},
+			ShouldError: true,
+		},
+		{
 			Name: "delete all functions",
 			Args: []string{"--all"},
 			GivenObjects: []runtime.Object{

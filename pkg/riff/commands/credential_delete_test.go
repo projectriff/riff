@@ -55,6 +55,11 @@ func TestCredentialDeleteCommand(t *testing.T) {
 
 	table := testing.CommandTable{
 		{
+			Name:        "invalid args",
+			Args:        []string{},
+			ShouldError: true,
+		},
+		{
 			Name: "delete all secrets",
 			Args: []string{"--all"},
 			GivenObjects: []runtime.Object{

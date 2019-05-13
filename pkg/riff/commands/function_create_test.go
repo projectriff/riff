@@ -161,7 +161,7 @@ func TestFunctionCreateCommand(t *testing.T) {
 
 	table := testing.CommandTable{
 		{
-			Name:        "empty",
+			Name:        "invalid args",
 			Args:        []string{},
 			ShouldError: true,
 		},

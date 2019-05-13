@@ -54,6 +54,11 @@ func TestCredentialSetCommand(t *testing.T) {
 
 	table := testing.CommandTable{
 		{
+			Name:        "invalid args",
+			Args:        []string{},
+			ShouldError: true,
+		},
+		{
 			Name: "create secret",
 			Args: []string{credentialName},
 			ExpectCreates: []runtime.Object{

@@ -54,6 +54,11 @@ func TestRequestProcessorDeleteCommand(t *testing.T) {
 
 	table := testing.CommandTable{
 		{
+			Name:        "invalid args",
+			Args:        []string{},
+			ShouldError: true,
+		},
+		{
 			Name: "delete all requestprocessors",
 			Args: []string{"--all"},
 			GivenObjects: []runtime.Object{

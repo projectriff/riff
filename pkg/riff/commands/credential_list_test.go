@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	corev1 "k8s.io/api/core/v1"
@@ -58,6 +59,16 @@ func TestCredentialListCommand(t *testing.T) {
 	credentialLabel := "projectriff.io/credential"
 
 	table := testing.CommandTable{
+		{
+			Name: "invalid args",
+			Args: []string{},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				// disable default namespace
+				c.Client.(*testing.FakeClient).Namespace = ""
+				return nil
+			},
+			ShouldError: true,
+		},
 		{
 			Name: "empty",
 			Args: []string{},
