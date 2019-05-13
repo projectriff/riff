@@ -34,9 +34,10 @@ var (
 		Name:      "push-credentials",
 	}
 	InvalidResourceOptions           = cli.ResourceOptions{}
-	InvalidResourceOptionsFieldError = ((&cli.FieldError{}).
-						Also(cli.ErrMissingField("namespace")).
-						Also(cli.ErrMissingField("name")))
+	InvalidResourceOptionsFieldError = (&cli.FieldError{}).Also(
+		cli.ErrMissingField("namespace"),
+		cli.ErrMissingField("name"),
+	)
 )
 
 var (

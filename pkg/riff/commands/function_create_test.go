@@ -33,9 +33,10 @@ func TestFunctionCreateOptions(t *testing.T) {
 			Options: &commands.FunctionCreateOptions{
 				ResourceOptions: testing.InvalidResourceOptions,
 			},
-			ExpectFieldError: testing.InvalidResourceOptionsFieldError.
-				Also(cli.ErrMissingField("image")).
-				Also(cli.ErrMissingOneOf("git-repo", "local-path")),
+			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
+				cli.ErrMissingField("image"),
+				cli.ErrMissingOneOf("git-repo", "local-path"),
+			),
 		},
 		{
 			Name: "git source",

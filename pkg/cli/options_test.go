@@ -60,9 +60,10 @@ func TestResourceOptions(t *testing.T) {
 		{
 			Name:    "default",
 			Options: &cli.ResourceOptions{},
-			ExpectFieldError: (&cli.FieldError{}).
-				Also(cli.ErrMissingField("namespace")).
-				Also(cli.ErrMissingField("name")),
+			ExpectFieldError: (&cli.FieldError{}).Also(
+				cli.ErrMissingField("namespace"),
+				cli.ErrMissingField("name"),
+			),
 		},
 		{
 			Name: "has both",

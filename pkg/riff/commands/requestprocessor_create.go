@@ -30,30 +30,22 @@ import (
 )
 
 type RequestProcessorCreateOptions struct {
-	Namespace string
-	Name      string
+	cli.ResourceOptions
 
 	ItemName       string
 	Image          string
 	ApplicationRef string
 	FunctionRef    string
 
-	Env     []string
-	EnvFrom []string
+	Env []string
+	// TODO implement
+	// EnvFrom []string
 }
 
 func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
 
-	if opts.Namespace == "" {
-		errs = errs.Also(cli.ErrMissingField("namespace"))
-	}
-
-	if opts.Name == "" {
-		errs = errs.Also(cli.ErrInvalidValue(opts.Name, "name"))
-	} else {
-		errs = errs.Also(validation.K8sName(opts.Name, "name"))
-	}
+	errs = errs.Also(opts.ResourceOptions.Validate((ctx)))
 
 	if opts.ItemName == "" {
 		errs = errs.Also(cli.ErrMissingField("item"))
@@ -90,8 +82,6 @@ func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *cli.Fi
 	}
 
 	errs = errs.Also(validation.EnvVars(opts.Env, "env"))
-
-	// TODO validate EnvFrom
 
 	return errs
 }
@@ -143,9 +133,6 @@ func NewRequestProcessorCreateCommand(c *cli.Config) *cobra.Command {
 				}
 				processor.Spec[0].Template.Containers[0].Env = append(processor.Spec[0].Template.Containers[0].Env, parsers.EnvVar(env))
 			}
-			for range opts.EnvFrom {
-				return fmt.Errorf("not implemented")
-			}
 
 			processor, err := c.Request().RequestProcessors(opts.Namespace).Create(processor)
 			if err != nil {
@@ -162,7 +149,6 @@ func NewRequestProcessorCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.ApplicationRef, "application-ref", "", "<todo>")
 	cmd.Flags().StringVar(&opts.FunctionRef, "function-ref", "", "<todo>")
 	cmd.Flags().StringArrayVar(&opts.Env, "env", []string{}, "<todo>")
-	cmd.Flags().StringArrayVar(&opts.EnvFrom, "env-from", []string{}, "<todo>")
 
 	return cmd
 }
