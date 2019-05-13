@@ -130,31 +130,6 @@ func filterEmpty(s []string) []string {
 	return r
 }
 
-type OverrideOptionsFunc func(cli.Validatable)
-
-func isOverideOptionsFunc(t reflect.Type) bool {
-	if t == nil || t.Kind() != reflect.Func || t.IsVariadic() {
-		return false
-	}
-	if t.NumIn() == 1 && t.NumOut() == 0 && t.In(0).ConvertibleTo(reflect.TypeOf((*cli.Validatable)(nil)).Elem()) {
-		return true
-	}
-	return false
-}
-
-func flattenFieldPaths(err *cli.FieldError) []string {
-	paths := err.Paths
-	if paths == nil {
-		paths = []string{}
-	}
-
-	for _, nestedErr := range extractNestedErrors(err) {
-		paths = append(paths, flattenFieldPaths(&nestedErr)...)
-	}
-
-	return paths
-}
-
 func flattenFieldErrors(err *cli.FieldError) []cli.FieldError {
 	errs := []cli.FieldError{}
 
