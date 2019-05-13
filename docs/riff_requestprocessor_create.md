@@ -21,7 +21,6 @@ riff requestprocessor create [flags]
 ```
       --application-ref string   <todo>
       --env stringArray          <todo>
-      --env-from stringArray     <todo>
       --function-ref string      <todo>
   -h, --help                     help for create
       --image string             <todo>

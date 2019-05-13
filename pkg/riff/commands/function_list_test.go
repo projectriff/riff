@@ -20,12 +20,34 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
+
+func TestFunctionListOptions(t *testing.T) {
+	table := testing.OptionsTable{
+		{
+			Name: "invalid list",
+			Options: &commands.FunctionListOptions{
+				ListOptions: testing.InvalidListOptions,
+			},
+			ExpectFieldError: testing.InvalidListOptionsFieldError,
+		},
+		{
+			Name: "valid list",
+			Options: &commands.FunctionListOptions{
+				ListOptions: testing.ValidListOptions,
+			},
+			ShouldValidate: true,
+		},
+	}
+
+	table.Run(t)
+}
 
 func TestFunctionListCommand(t *testing.T) {
 	t.Parallel()
@@ -36,6 +58,16 @@ func TestFunctionListCommand(t *testing.T) {
 	altNamespace := "alt-namespace"
 
 	table := testing.CommandTable{
+		{
+			Name: "invalid args",
+			Args: []string{},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				// disable default namespace
+				c.Client.(*testing.FakeClient).Namespace = ""
+				return nil
+			},
+			ShouldError: true,
+		},
 		{
 			Name: "empty",
 			Args: []string{},

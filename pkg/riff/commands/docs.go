@@ -19,7 +19,6 @@ package commands
 import (
 	"context"
 
-	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
@@ -29,7 +28,7 @@ type DocsOptions struct {
 	Directory string
 }
 
-func (opts *DocsOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *DocsOptions) Validate(ctx context.Context) *cli.FieldError {
 	// TODO implement
 	return nil
 }

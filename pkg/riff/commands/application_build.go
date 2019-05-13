@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
@@ -29,7 +28,7 @@ type ApplicationBuildOptions struct {
 	Namespace string
 }
 
-func (opts *ApplicationBuildOptions) Validate(ctx context.Context) *apis.FieldError {
+func (opts *ApplicationBuildOptions) Validate(ctx context.Context) *cli.FieldError {
 	// TODO implement
 	return nil
 }

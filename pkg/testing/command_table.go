@@ -65,10 +65,10 @@ type CommandTableRecord struct {
 	// Name is used to identify the record in the test results. A sub-test is created for each
 	// record with this name.
 	Name string
-	// Skip supresses the execution of this test record.
+	// Skip suppresses the execution of this test record.
 	Skip bool
-	// Focus executes only this record. The containing test will fail to prevent accidental
-	// check-in.
+	// Focus executes this record skipping all unfocused records. The containing test will fail to
+	// prevent accidental check-in.
 	Focus bool
 	// Sequential disables parallel processing for this record. By default records in a table will
 	// execute in parallel.
@@ -145,7 +145,7 @@ func (ct CommandTable) Run(t *T, cmdFactory func(*cli.Config) *cobra.Command) {
 		for _, ctr := range focusedTable {
 			ctr.Run(t, cmdFactory)
 		}
-		t.Errorf("test passed focusing on %d record, skipped %d records", len(focusedTable), len(ct)-len(focusedTable))
+		t.Errorf("test run focused on %d record(s), skipped %d record(s)", len(focusedTable), len(ct)-len(focusedTable))
 		return
 	}
 

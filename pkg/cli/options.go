@@ -20,9 +20,20 @@ import (
 	"context"
 
 	"github.com/knative/pkg/apis"
+	"github.com/projectriff/riff/pkg/validation"
 	"github.com/spf13/cobra"
 )
 
+// ValidateOptions bridges a cobra RunE function to the Validatable interface.  All flags and
+// arguments must already be bound, with explicit or default values, to the options struct being
+// validated. This function is typically used to define the PreRunE phase of a command.
+//
+// ```
+// cmd := &cobra.Command{
+// 	   ...
+// 	   PreRunE: cli.ValidateOptions(opts),
+// }
+// ```
 func ValidateOptions(opts apis.Validatable) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
@@ -32,4 +43,68 @@ func ValidateOptions(opts apis.Validatable) func(cmd *cobra.Command, args []stri
 		cmd.SilenceUsage = true
 		return nil
 	}
+}
+
+type ListOptions struct {
+	Namespace     string
+	AllNamespaces bool
+}
+
+func (opts *ListOptions) Validate(ctx context.Context) *FieldError {
+	errs := &FieldError{}
+
+	if opts.Namespace == "" && !opts.AllNamespaces {
+		errs = errs.Also(ErrMissingOneOf("namespace", "all-namespaces"))
+	}
+	if opts.Namespace != "" && opts.AllNamespaces {
+		errs = errs.Also(ErrMultipleOneOf("namespace", "all-namespaces"))
+	}
+
+	return errs
+}
+
+type ResourceOptions struct {
+	Namespace string
+	Name      string
+}
+
+func (opts *ResourceOptions) Validate(ctx context.Context) *FieldError {
+	errs := &FieldError{}
+
+	if opts.Namespace == "" {
+		errs = errs.Also(ErrMissingField("namespace"))
+	}
+
+	if opts.Name == "" {
+		errs = errs.Also(ErrMissingField(opts.Name, "name"))
+	} else {
+		errs = errs.Also(validation.K8sName(opts.Name, "name"))
+	}
+
+	return errs
+}
+
+type DeleteOptions struct {
+	Namespace string
+	Names     []string
+	All       bool
+}
+
+func (opts *DeleteOptions) Validate(ctx context.Context) *FieldError {
+	errs := &FieldError{}
+
+	if opts.Namespace == "" {
+		errs = errs.Also(ErrMissingField("namespace"))
+	}
+
+	if opts.All && len(opts.Names) != 0 {
+		errs = errs.Also(ErrMultipleOneOf("all", "names"))
+	}
+	if !opts.All && len(opts.Names) == 0 {
+		errs = errs.Also(ErrMissingOneOf("all", "names"))
+	}
+
+	errs = errs.Also(validation.K8sNames(opts.Names, "names"))
+
+	return errs
 }

@@ -24,6 +24,27 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
+func TestCredentialSetOptions(t *testing.T) {
+	table := testing.OptionsTable{
+		{
+			Name: "valid namespaced resource",
+			Options: &commands.CredentialSetOptions{
+				ResourceOptions: testing.ValidResourceOptions,
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "invalid namespaced resource",
+			Options: &commands.CredentialSetOptions{
+				ResourceOptions: testing.InvalidResourceOptions,
+			},
+			ExpectFieldError: testing.InvalidResourceOptionsFieldError,
+		},
+	}
+
+	table.Run(t)
+}
+
 func TestCredentialSetCommand(t *testing.T) {
 	t.Parallel()
 
@@ -32,6 +53,11 @@ func TestCredentialSetCommand(t *testing.T) {
 	credentialLabel := "projectriff.io/credential"
 
 	table := testing.CommandTable{
+		{
+			Name:        "invalid args",
+			Args:        []string{},
+			ShouldError: true,
+		},
 		{
 			Name: "create secret",
 			Args: []string{credentialName},

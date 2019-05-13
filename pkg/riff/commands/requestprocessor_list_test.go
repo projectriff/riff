@@ -23,40 +23,39 @@ import (
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
-	corev1 "k8s.io/api/core/v1"
+	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestCredentialListOptions(t *testing.T) {
+func TestRequestProcessorListOptions(t *testing.T) {
 	table := testing.OptionsTable{
 		{
-			Name: "valid list",
-			Options: &commands.CredentialListOptions{
-				ListOptions: testing.ValidListOptions,
-			},
-			ShouldValidate: true,
-		},
-		{
 			Name: "invalid list",
-			Options: &commands.CredentialListOptions{
+			Options: &commands.RequestProcessorListOptions{
 				ListOptions: testing.InvalidListOptions,
 			},
 			ExpectFieldError: testing.InvalidListOptionsFieldError,
+		},
+		{
+			Name: "valid list",
+			Options: &commands.RequestProcessorListOptions{
+				ListOptions: testing.ValidListOptions,
+			},
+			ShouldValidate: true,
 		},
 	}
 
 	table.Run(t)
 }
 
-func TestCredentialListCommand(t *testing.T) {
+func TestRequestProcessorListCommand(t *testing.T) {
 	t.Parallel()
 
-	credentialName := "test-credential"
-	credentialAltName := "test-alt-credential"
+	requestprocessorsName := "test-requestprocessors"
+	requestprocessorsAltName := "test-alt-requestprocessors"
 	defaultNamespace := "default"
 	altNamespace := "alt-namespace"
-	credentialLabel := "projectriff.io/credential"
 
 	table := testing.CommandTable{
 		{
@@ -73,7 +72,7 @@ func TestCredentialListCommand(t *testing.T) {
 			Name: "empty",
 			Args: []string{},
 			Verify: func(t *testing.T, output string, err error) {
-				if expected, actual := output, "No credentials found.\n"; actual != expected {
+				if expected, actual := output, "No request processors found.\n"; actual != expected {
 					t.Errorf("expected output %q, actually %q", expected, actual)
 				}
 			},
@@ -82,16 +81,15 @@ func TestCredentialListCommand(t *testing.T) {
 			Name: "lists a secret",
 			Args: []string{},
 			GivenObjects: []runtime.Object{
-				&corev1.Secret{
+				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      credentialName,
+						Name:      requestprocessorsName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
 					},
 				},
 			},
 			Verify: func(t *testing.T, output string, err error) {
-				if actual, want := output, fmt.Sprintf("%s\n", credentialName); actual != want {
+				if actual, want := output, fmt.Sprintf("%s\n", requestprocessorsName); actual != want {
 					t.Errorf("expected output %q, actually %q", want, actual)
 				}
 			},
@@ -100,16 +98,15 @@ func TestCredentialListCommand(t *testing.T) {
 			Name: "filters by namespace",
 			Args: []string{"--namespace", altNamespace},
 			GivenObjects: []runtime.Object{
-				&corev1.Secret{
+				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      credentialName,
+						Name:      requestprocessorsName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
 					},
 				},
 			},
 			Verify: func(t *testing.T, output string, err error) {
-				if actual, want := output, "No credentials found.\n"; actual != want {
+				if actual, want := output, "No request processors found.\n"; actual != want {
 					t.Errorf("expected output %q, actually %q", want, actual)
 				}
 			},
@@ -118,25 +115,23 @@ func TestCredentialListCommand(t *testing.T) {
 			Name: "all namespace",
 			Args: []string{"--all-namespaces"},
 			GivenObjects: []runtime.Object{
-				&corev1.Secret{
+				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      credentialName,
+						Name:      requestprocessorsName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
 					},
 				},
-				&corev1.Secret{
+				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      credentialAltName,
+						Name:      requestprocessorsAltName,
 						Namespace: altNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
 					},
 				},
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					fmt.Sprintf("%s\n", credentialName),
-					fmt.Sprintf("%s\n", credentialAltName),
+					fmt.Sprintf("%s\n", requestprocessorsName),
+					fmt.Sprintf("%s\n", requestprocessorsAltName),
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -145,31 +140,14 @@ func TestCredentialListCommand(t *testing.T) {
 			},
 		},
 		{
-			Name: "ignore non-riff secrets",
-			Args: []string{},
-			GivenObjects: []runtime.Object{
-				&corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "not-a-credential",
-						Namespace: defaultNamespace,
-					},
-				},
-			},
-			Verify: func(t *testing.T, output string, err error) {
-				if expected, actual := output, "No credentials found.\n"; actual != expected {
-					t.Errorf("expected output %q, actually %q", expected, actual)
-				}
-			},
-		},
-		{
 			Name: "list error",
 			Args: []string{},
 			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("list", "secrets"),
+				testing.InduceFailure("list", "requestprocessors"),
 			},
 			ShouldError: true,
 		},
 	}
 
-	table.Run(t, commands.NewCredentialListCommand)
+	table.Run(t, commands.NewRequestProcessorListCommand)
 }

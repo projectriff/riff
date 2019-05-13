@@ -19,54 +19,38 @@ package commands
 import (
 	"context"
 	"fmt"
-	"strings"
 
-	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/parsers"
+	"github.com/projectriff/riff/pkg/validation"
 	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type RequestProcessorCreateOptions struct {
-	Namespace string
-	Name      string
+	cli.ResourceOptions
 
 	ItemName       string
 	Image          string
 	ApplicationRef string
 	FunctionRef    string
 
-	Env     []string
-	EnvFrom []string
+	Env []string
+	// TODO implement
+	// EnvFrom []string
 }
 
-func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *apis.FieldError {
-	errs := &apis.FieldError{}
+func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *cli.FieldError {
+	errs := &cli.FieldError{}
 
-	if opts.Namespace == "" {
-		errs = errs.Also(apis.ErrMissingField("namespace"))
-	}
-
-	if opts.Name == "" {
-		errs = errs.Also(apis.ErrMissingField("name"))
-	} else {
-		if out := validation.NameIsDNSSubdomain(opts.Name, false); len(out) != 0 {
-			// TODO capture info about why the name is invalid
-			errs = errs.Also(apis.ErrInvalidValue(opts.Name, "name"))
-		}
-	}
+	errs = errs.Also(opts.ResourceOptions.Validate((ctx)))
 
 	if opts.ItemName == "" {
-		errs = errs.Also(apis.ErrMissingField("item"))
+		errs = errs.Also(cli.ErrMissingField("item"))
 	} else {
-		if out := validation.NameIsDNSLabel(opts.ItemName, false); len(out) != 0 {
-			// TODO capture info about why the name is invalid
-			errs = errs.Also(apis.ErrInvalidValue(opts.ItemName, "item"))
-		}
+		errs = errs.Also(validation.K8sName(opts.ItemName, "item"))
 	}
 
 	// application-ref, build-ref and image are mutually exclusive
@@ -92,18 +76,12 @@ func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *apis.F
 	}
 
 	if len(used) == 0 {
-		errs = errs.Also(apis.ErrMissingOneOf(unused...))
+		errs = errs.Also(cli.ErrMissingOneOf(unused...))
 	} else if len(used) > 1 {
-		errs = errs.Also(apis.ErrMultipleOneOf(used...))
+		errs = errs.Also(cli.ErrMultipleOneOf(used...))
 	}
 
-	for i, env := range opts.Env {
-		if strings.HasPrefix(env, "=") || !strings.Contains(env, "=") {
-			errs = errs.Also(apis.ErrInvalidArrayValue(env, apis.CurrentField, i))
-		}
-	}
-
-	// TODO validate EnvFrom
+	errs = errs.Also(validation.EnvVars(opts.Env, "env"))
 
 	return errs
 }
@@ -155,9 +133,6 @@ func NewRequestProcessorCreateCommand(c *cli.Config) *cobra.Command {
 				}
 				processor.Spec[0].Template.Containers[0].Env = append(processor.Spec[0].Template.Containers[0].Env, parsers.EnvVar(env))
 			}
-			for range opts.EnvFrom {
-				return fmt.Errorf("not implemented")
-			}
 
 			processor, err := c.Request().RequestProcessors(opts.Namespace).Create(processor)
 			if err != nil {
@@ -174,7 +149,6 @@ func NewRequestProcessorCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.ApplicationRef, "application-ref", "", "<todo>")
 	cmd.Flags().StringVar(&opts.FunctionRef, "function-ref", "", "<todo>")
 	cmd.Flags().StringArrayVar(&opts.Env, "env", []string{}, "<todo>")
-	cmd.Flags().StringArrayVar(&opts.EnvFrom, "env-from", []string{}, "<todo>")
 
 	return cmd
 }

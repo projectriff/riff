@@ -20,19 +20,21 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type RequestProcessorListOptions struct {
-	Namespace     string
-	AllNamespaces bool
+	cli.ListOptions
 }
 
-func (opts *RequestProcessorListOptions) Validate(ctx context.Context) *apis.FieldError {
-	// TODO implement
-	return nil
+func (opts *RequestProcessorListOptions) Validate(ctx context.Context) *cli.FieldError {
+	errs := &cli.FieldError{}
+
+	errs = errs.Also(opts.ListOptions.Validate(ctx))
+
+	return errs
 }
 
 func NewRequestProcessorListCommand(c *cli.Config) *cobra.Command {
@@ -45,7 +47,20 @@ func NewRequestProcessorListCommand(c *cli.Config) *cobra.Command {
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return fmt.Errorf("not implemented")
+			requestprocessors, err := c.Request().RequestProcessors(opts.Namespace).List(metav1.ListOptions{})
+			if err != nil {
+				return err
+			}
+
+			if len(requestprocessors.Items) == 0 {
+				fmt.Fprintln(cmd.OutOrStdout(), "No request processors found.")
+			}
+			for _, requestprocessor := range requestprocessors.Items {
+				// TODO pick a generic table formatter
+				fmt.Fprintln(cmd.OutOrStdout(), requestprocessor.Name)
+			}
+
+			return nil
 		},
 	}
 
