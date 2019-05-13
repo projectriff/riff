@@ -25,10 +25,12 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	kubernetes "k8s.io/client-go/kubernetes/fake"
 	corev1clientset "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/rest"
 )
 
 type FakeClient struct {
 	Namespace          string
+	FakeKubeRestConfig *rest.Config
 	FakeKubeClient     *kubernetes.Clientset
 	FakeRiffClient     *projectriffclientset.Clientset
 	ActionRecorderList kntesting.ActionRecorderList
@@ -36,6 +38,10 @@ type FakeClient struct {
 
 func (c *FakeClient) DefaultNamespace() string {
 	return c.Namespace
+}
+
+func (c *FakeClient) KubeRestConfig() *rest.Config {
+	return c.FakeKubeRestConfig
 }
 
 func (c *FakeClient) Core() corev1clientset.CoreV1Interface {
@@ -62,6 +68,7 @@ func (c *FakeClient) PrependReactor(verb, resource string, reaction ReactionFunc
 func NewClient(objects ...runtime.Object) *FakeClient {
 	lister := NewListers(objects)
 
+	kubeRestConfig := &rest.Config{Host: "https://localhost:8443"}
 	kubeClient := kubernetes.NewSimpleClientset(lister.GetKubeObjects()...)
 	riffClient := projectriffclientset.NewSimpleClientset(lister.GetProjectriffObjects()...)
 
@@ -69,6 +76,7 @@ func NewClient(objects ...runtime.Object) *FakeClient {
 
 	return &FakeClient{
 		Namespace:          "default",
+		FakeKubeRestConfig: kubeRestConfig,
 		FakeKubeClient:     kubeClient,
 		FakeRiffClient:     riffClient,
 		ActionRecorderList: actionRecorderList,

@@ -20,7 +20,9 @@ riff requestprocessor invoke [flags]
 
 ```
   -h, --help               help for invoke
+      --json               <todo>
   -n, --namespace string   <todo>
+      --text               <todo>
 ```
 
 ### Options inherited from parent commands

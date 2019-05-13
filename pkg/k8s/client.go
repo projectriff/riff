@@ -30,6 +30,7 @@ import (
 
 type Client interface {
 	DefaultNamespace() string
+	KubeRestConfig() *rest.Config
 	Core() corev1.CoreV1Interface
 	Build() buildv1alpha1.BuildV1alpha1Interface
 	Request() requestv1alpha1.RequestV1alpha1Interface
@@ -38,6 +39,10 @@ type Client interface {
 
 func (c *client) DefaultNamespace() string {
 	return c.lazyLoadDefaultNamespaceOrDie()
+}
+
+func (c *client) KubeRestConfig() *rest.Config {
+	return c.lazyLoadRestConfigOrDie()
 }
 
 func (c *client) Core() corev1.CoreV1Interface {
