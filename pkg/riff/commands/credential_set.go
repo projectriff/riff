@@ -20,35 +20,21 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type CredentialSetOptions struct {
-	Namespace string
-	Name      string
+	cli.ResourceOptions
 }
 
-func (opts *CredentialSetOptions) Validate(ctx context.Context) *apis.FieldError {
-	errs := &apis.FieldError{}
+func (opts *CredentialSetOptions) Validate(ctx context.Context) *cli.FieldError {
+	errs := &cli.FieldError{}
 
-	if opts.Namespace == "" {
-		errs = errs.Also(apis.ErrMissingField("namespace"))
-	}
-
-	if opts.Name == "" {
-		errs = errs.Also(apis.ErrMissingField("name"))
-	} else {
-		if out := validation.NameIsDNSSubdomain(opts.Name, false); len(out) != 0 {
-			// TODO capture info about why the name is invalid
-			errs = errs.Also(apis.ErrInvalidValue(opts.Name, "name"))
-		}
-	}
+	errs = errs.Also(opts.ResourceOptions.Validate(ctx))
 
 	return errs
 }

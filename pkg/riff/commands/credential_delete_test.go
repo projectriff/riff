@@ -24,6 +24,27 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
+func TestCredentialDeleteOptions(t *testing.T) {
+	table := testing.OptionsTable{
+		{
+			Name: "valid multi-delete",
+			Options: &commands.CredentialDeleteOptions{
+				DeleteOptions: testing.ValidDeleteOptions,
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "invalid multi-delete",
+			Options: &commands.CredentialDeleteOptions{
+				DeleteOptions: testing.InvalidDeleteOptions,
+			},
+			ExpectFieldError: testing.InvalidDeleteOptionsFieldError,
+		},
+	}
+
+	table.Run(t)
+}
+
 func TestCredentialDeleteCommand(t *testing.T) {
 	t.Parallel()
 
@@ -33,6 +54,11 @@ func TestCredentialDeleteCommand(t *testing.T) {
 	credentialLabel := "projectriff.io/credential"
 
 	table := testing.CommandTable{
+		{
+			Name:        "invalid args",
+			Args:        []string{},
+			ShouldError: true,
+		},
 		{
 			Name: "delete all secrets",
 			Args: []string{"--all"},

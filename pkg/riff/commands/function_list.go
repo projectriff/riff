@@ -20,26 +20,19 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type FunctionListOptions struct {
-	Namespace     string
-	AllNamespaces bool
+	cli.ListOptions
 }
 
-func (opts *FunctionListOptions) Validate(ctx context.Context) *apis.FieldError {
-	errs := &apis.FieldError{}
+func (opts *FunctionListOptions) Validate(ctx context.Context) *cli.FieldError {
+	errs := &cli.FieldError{}
 
-	if opts.Namespace == "" && !opts.AllNamespaces {
-		errs = errs.Also(apis.ErrMissingOneOf("namespace", "all-namespaces"))
-	}
-	if opts.Namespace != "" && opts.AllNamespaces {
-		errs = errs.Also(apis.ErrMultipleOneOf("namespace", "all-namespaces"))
-	}
+	errs = errs.Also(opts.ListOptions.Validate(ctx))
 
 	return errs
 }

@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
@@ -24,6 +25,124 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
+
+func TestFunctionCreateOptions(t *testing.T) {
+	table := testing.OptionsTable{
+		{
+			Name: "invalid resource",
+			Options: &commands.FunctionCreateOptions{
+				ResourceOptions: testing.InvalidResourceOptions,
+			},
+			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
+				cli.ErrMissingField("image"),
+				cli.ErrMissingOneOf("git-repo", "local-path"),
+			),
+		},
+		{
+			Name: "git source",
+			Options: &commands.FunctionCreateOptions{
+				ResourceOptions: testing.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				GitRepo:         "https://example.com/repo.git",
+				GitRevision:     "master",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "local source",
+			Options: &commands.FunctionCreateOptions{
+				ResourceOptions: testing.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				LocalPath:       ".",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "no source",
+			Options: &commands.FunctionCreateOptions{
+				ResourceOptions: testing.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+			},
+			ExpectFieldError: cli.ErrMissingOneOf("git-repo", "local-path"),
+		},
+		{
+			Name: "multiple sources",
+			Options: &commands.FunctionCreateOptions{
+				ResourceOptions: testing.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				GitRepo:         "https://example.com/repo.git",
+				GitRevision:     "master",
+				LocalPath:       ".",
+			},
+			ExpectFieldError: cli.ErrMultipleOneOf("git-repo", "local-path"),
+		},
+		{
+			Name: "git source with cache",
+			Options: &commands.FunctionCreateOptions{
+				ResourceOptions: testing.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				GitRepo:         "https://example.com/repo.git",
+				GitRevision:     "master",
+				CacheSize:       "8Gi",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "local source with cache",
+			Options: &commands.FunctionCreateOptions{
+				ResourceOptions: testing.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				LocalPath:       ".",
+				CacheSize:       "8Gi",
+			},
+			ExpectFieldError: cli.ErrDisallowedFields("cache-size"),
+		},
+		{
+			Name: "invalid cache",
+			Options: &commands.FunctionCreateOptions{
+				ResourceOptions: testing.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				GitRepo:         "https://example.com/repo.git",
+				GitRevision:     "master",
+				CacheSize:       "X",
+			},
+			ExpectFieldError: cli.ErrInvalidValue("X", "cache-size"),
+		},
+		{
+			Name: "with git subpath",
+			Options: &commands.FunctionCreateOptions{
+				ResourceOptions: testing.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				GitRepo:         "https://example.com/repo.git",
+				GitRevision:     "master",
+				SubPath:         "some/directory",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "with local subpath",
+			Options: &commands.FunctionCreateOptions{
+				ResourceOptions: testing.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				LocalPath:       ".",
+				SubPath:         "some/directory",
+			},
+			ExpectFieldError: cli.ErrDisallowedFields("sub-path"),
+		},
+		{
+			Name: "missing git revision",
+			Options: &commands.FunctionCreateOptions{
+				ResourceOptions: testing.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				GitRepo:         "https://example.com/repo.git",
+				GitRevision:     "",
+			},
+			ExpectFieldError: cli.ErrMissingField("git-revision"),
+		},
+	}
+
+	table.Run(t)
+}
 
 func TestFunctionCreateCommand(t *testing.T) {
 	t.Parallel()
@@ -42,7 +161,7 @@ func TestFunctionCreateCommand(t *testing.T) {
 
 	table := testing.CommandTable{
 		{
-			Name:        "empty",
+			Name:        "invalid args",
 			Args:        []string{},
 			ShouldError: true,
 		},

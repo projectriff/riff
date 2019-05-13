@@ -19,39 +19,19 @@ package commands
 import (
 	"context"
 
-	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
-	"k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type CredentialDeleteOptions struct {
-	Namespace string
-	Names     []string
-	All       bool
+	cli.DeleteOptions
 }
 
-func (opts *CredentialDeleteOptions) Validate(ctx context.Context) *apis.FieldError {
-	errs := &apis.FieldError{}
+func (opts *CredentialDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
+	errs := &cli.FieldError{}
 
-	if opts.Namespace == "" {
-		errs = errs.Also(apis.ErrMissingField("namespace"))
-	}
-
-	if opts.All && len(opts.Names) != 0 {
-		errs = errs.Also(apis.ErrMultipleOneOf("all", "names"))
-	}
-	if !opts.All && len(opts.Names) == 0 {
-		errs = errs.Also(apis.ErrMissingOneOf("all", "names"))
-	}
-
-	for i, name := range opts.Names {
-		if out := validation.NameIsDNSSubdomain(name, false); len(out) != 0 || name == "" {
-			// TODO capture info about why the name is invalid
-			errs = errs.Also(apis.ErrInvalidArrayValue(name, "names", i))
-		}
-	}
+	errs = errs.Also(opts.DeleteOptions.Validate(ctx))
 
 	return errs
 }

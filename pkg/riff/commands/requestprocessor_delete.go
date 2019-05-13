@@ -18,20 +18,22 @@ package commands
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type RequestProcessorDeleteOptions struct {
-	Namespace string
+	cli.DeleteOptions
 }
 
-func (opts *RequestProcessorDeleteOptions) Validate(ctx context.Context) *apis.FieldError {
-	// TODO implement
-	return nil
+func (opts *RequestProcessorDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
+	errs := &cli.FieldError{}
+
+	errs = errs.Also(opts.DeleteOptions.Validate(ctx))
+
+	return errs
 }
 
 func NewRequestProcessorDeleteCommand(c *cli.Config) *cobra.Command {
@@ -41,14 +43,29 @@ func NewRequestProcessorDeleteCommand(c *cli.Config) *cobra.Command {
 		Use:     "delete",
 		Short:   "<todo>",
 		Example: "<todo>",
-		Args:    cli.Args(),
+		Args: cli.Args(
+			cli.NamesArg(&opts.Names),
+		),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return fmt.Errorf("not implemented")
+			client := c.Request().RequestProcessors(opts.Namespace)
+
+			if opts.All {
+				return client.DeleteCollection(nil, metav1.ListOptions{})
+			}
+
+			for _, name := range opts.Names {
+				if err := client.Delete(name, nil); err != nil {
+					return err
+				}
+			}
+
+			return nil
 		},
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
+	cmd.Flags().BoolVar(&opts.All, "all", false, "<todo>")
 
 	return cmd
 }
