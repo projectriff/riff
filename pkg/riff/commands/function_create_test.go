@@ -185,7 +185,7 @@ func TestFunctionCreateCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name: "error durring create",
+			Name: "error during create",
 			Args: []string{functionName, "--image", imageTag, "--git-repo", gitRepo},
 			WithReactors: []testing.ReactionFunc{
 				testing.InduceFailure("create", "functions"),

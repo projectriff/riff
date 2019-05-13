@@ -201,7 +201,7 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name: "error durring create",
+			Name: "error during create",
 			Args: []string{requestProcessorName, "--item", itemName, "--image", image},
 			WithReactors: []testing.ReactionFunc{
 				testing.InduceFailure("create", "requestprocessors"),
