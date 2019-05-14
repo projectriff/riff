@@ -25,6 +25,7 @@ import (
 	"syscall"
 
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/system/pkg/apis/build"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	corev1 "k8s.io/api/core/v1"
@@ -178,7 +179,7 @@ func makeCredential(opts *CredentialSetOptions) (*corev1.Secret, string, error) 
 			Namespace: opts.Namespace,
 			Name:      opts.Name,
 			Labels: map[string]string{
-				projectriffCredentialsLabel: "",
+				build.CredentialLabelKey: "",
 			},
 		},
 	}
@@ -278,7 +279,7 @@ func setCredential(c *cli.Config, opts *CredentialSetOptions, desiredSecret *cor
 	}
 
 	// ensure we are not mutating a non-riff secret
-	if _, ok := existing.Labels[projectriffCredentialsLabel]; !ok {
+	if _, ok := existing.Labels[build.CredentialLabelKey]; !ok {
 		return fmt.Errorf("credential %q exists, but is not owned by riff", opts.Name)
 	}
 

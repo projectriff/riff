@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/system/pkg/apis/build"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -48,7 +49,7 @@ func NewCredentialListCommand(c *cli.Config) *cobra.Command {
 		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			secrets, err := c.Core().Secrets(opts.Namespace).List(metav1.ListOptions{
-				LabelSelector: projectriffCredentialsLabel,
+				LabelSelector: build.CredentialLabelKey,
 			})
 			if err != nil {
 				return err
