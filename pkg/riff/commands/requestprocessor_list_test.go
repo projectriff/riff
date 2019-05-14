@@ -50,8 +50,6 @@ func TestRequestProcessorListOptions(t *testing.T) {
 }
 
 func TestRequestProcessorListCommand(t *testing.T) {
-	t.Parallel()
-
 	requestprocessorsName := "test-requestprocessors"
 	requestprocessorsAltName := "test-alt-requestprocessors"
 	defaultNamespace := "default"

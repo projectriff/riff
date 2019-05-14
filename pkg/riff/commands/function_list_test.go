@@ -50,8 +50,6 @@ func TestFunctionListOptions(t *testing.T) {
 }
 
 func TestFunctionListCommand(t *testing.T) {
-	t.Parallel()
-
 	functionName := "test-function"
 	functionAltName := "test-alt-function"
 	defaultNamespace := "default"

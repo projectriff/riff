@@ -46,8 +46,6 @@ func TestCredentialSetOptions(t *testing.T) {
 }
 
 func TestCredentialSetCommand(t *testing.T) {
-	t.Parallel()
-
 	credentialName := "test-credential"
 	defaultNamespace := "default"
 	credentialLabel := "projectriff.io/credential"

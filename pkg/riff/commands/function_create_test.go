@@ -145,8 +145,6 @@ func TestFunctionCreateOptions(t *testing.T) {
 }
 
 func TestFunctionCreateCommand(t *testing.T) {
-	t.Parallel()
-
 	defaultNamespace := "default"
 	functionName := "my-function"
 	imageTag := "registry.example.com/repo:tag"
