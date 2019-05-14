@@ -25,6 +25,7 @@ riff credential set [flags]
   -n, --namespace string       <todo>
       --registry string        <todo>
       --registry-user string   <todo>
+      --set-as-default         <todo>
 ```
 
 ### Options inherited from parent commands

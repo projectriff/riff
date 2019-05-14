@@ -362,6 +362,250 @@ func TestCredentialSetCommand(t *testing.T) {
 			},
 			ShouldError: true,
 		},
+		{
+			Name:  "default image prefix create docker hub",
+			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-as-default"},
+			Stdin: []byte(dockerHubPassword),
+			ExpectCreates: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": "https://index.docker.io/v1/",
+						},
+					},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": dockerHubId,
+						"password": dockerHubPassword,
+					},
+				},
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      "riff-build",
+					},
+					Data: map[string]string{
+						"default-image-prefix": "docker.io/projectriff",
+					},
+				},
+			},
+		},
+		{
+			Name: "default image prefix create gcr",
+			Args: []string{credentialName, "--gcr", "./testdata/gcr.json", "--set-as-default"},
+			ExpectCreates: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": "https://gcr.io",
+							"build.knative.dev/docker-1": "https://us.gcr.io",
+							"build.knative.dev/docker-2": "https://eu.gcr.io",
+							"build.knative.dev/docker-3": "https://asia.gcr.io",
+						},
+					},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": "_json_key",
+						"password": `{"project_id":"my-gcp-project"}`,
+					},
+				},
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      "riff-build",
+					},
+					Data: map[string]string{
+						"default-image-prefix": "gcr.io/my-gcp-project",
+					},
+				},
+			},
+		},
+		{
+			Name:  "default image prefix create registry",
+			Args:  []string{credentialName, "--registry", registryHost, "--registry-user", registryUser, "--set-as-default"},
+			Stdin: []byte(registryPassword),
+			ExpectCreates: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": registryHost,
+						},
+					},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": registryUser,
+						"password": registryPassword,
+					},
+				},
+				// doesn't create configmap because there is no derivable image prefix for the registry
+			},
+		},
+		{
+			Name:  "default image prefix update",
+			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-as-default"},
+			Stdin: []byte(dockerHubPassword),
+			GivenObjects: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      "riff-build",
+					},
+					Data: map[string]string{
+						"existing-data":        "should still be here",
+						"default-image-prefix": "gcr.io/my-gcp-project",
+					},
+				},
+			},
+			ExpectCreates: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": "https://index.docker.io/v1/",
+						},
+					},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": dockerHubId,
+						"password": dockerHubPassword,
+					},
+				},
+			},
+			ExpectUpdates: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      "riff-build",
+					},
+					Data: map[string]string{
+						"existing-data":        "should still be here",
+						"default-image-prefix": "docker.io/projectriff",
+					},
+				},
+			},
+		},
+		{
+			Name:  "default image prefix get error",
+			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-as-default"},
+			Stdin: []byte(dockerHubPassword),
+			WithReactors: []testing.ReactionFunc{
+				testing.InduceFailure("get", "configmaps"),
+			},
+			ExpectCreates: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": "https://index.docker.io/v1/",
+						},
+					},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": dockerHubId,
+						"password": dockerHubPassword,
+					},
+				},
+			},
+			ShouldError: true,
+		},
+		{
+			Name:  "default image prefix create error",
+			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-as-default"},
+			Stdin: []byte(dockerHubPassword),
+			WithReactors: []testing.ReactionFunc{
+				testing.InduceFailure("create", "configmaps"),
+			},
+			ExpectCreates: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": "https://index.docker.io/v1/",
+						},
+					},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": dockerHubId,
+						"password": dockerHubPassword,
+					},
+				},
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      "riff-build",
+					},
+					Data: map[string]string{
+						"default-image-prefix": "docker.io/projectriff",
+					},
+				},
+			},
+			ShouldError: true,
+		},
+		{
+			Name:  "default image prefix update",
+			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-as-default"},
+			Stdin: []byte(dockerHubPassword),
+			WithReactors: []testing.ReactionFunc{
+				testing.InduceFailure("update", "configmaps"),
+			},
+			GivenObjects: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      "riff-build",
+					},
+					Data: map[string]string{
+						"existing-data":        "should still be here",
+						"default-image-prefix": "gcr.io/my-gcp-project",
+					},
+				},
+			},
+			ExpectCreates: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": "https://index.docker.io/v1/",
+						},
+					},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": dockerHubId,
+						"password": dockerHubPassword,
+					},
+				},
+			},
+			ExpectUpdates: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      "riff-build",
+					},
+					Data: map[string]string{
+						"existing-data":        "should still be here",
+						"default-image-prefix": "docker.io/projectriff",
+					},
+				},
+			},
+			ShouldError: true,
+		},
 	}
 
 	table.Run(t, commands.NewCredentialSetCommand)

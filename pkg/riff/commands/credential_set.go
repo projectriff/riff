@@ -41,6 +41,7 @@ type CredentialSetOptions struct {
 	Registry          string
 	RegistryUser      string
 	RegistryPassword  string
+	SetAsDefault      bool
 }
 
 func (opts *CredentialSetOptions) Validate(ctx context.Context) *cli.FieldError {
@@ -139,38 +140,30 @@ func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 			return cli.ValidateOptions(opts)(cmd, args)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// get desired credential
-			secret, _, err := makeCredential(opts)
+			// get desired credential and image prefix
+			secret, defaultImagePrefix, err := makeCredential(opts)
 			if err != nil {
 				return err
 			}
 
-			// look for existing secret
-			existing, err := c.Core().Secrets(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
-			if err != nil {
-				if !apierrs.IsNotFound(err) {
-					return err
+			if err := setCredential(c, opts, secret); err != nil {
+				return err
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "Set credentials %q\n", opts.Name)
+
+			if opts.SetAsDefault {
+				if defaultImagePrefix == "" {
+					fmt.Fprintf(cmd.OutOrStdout(), "Unable to derive default image prefix\n")
+				} else {
+					err := setDefaultImagePrefix(c, opts, defaultImagePrefix)
+					if err != nil {
+						return err
+					}
+					fmt.Fprintf(cmd.OutOrStdout(), "Set default image prefix to %q\n", defaultImagePrefix)
 				}
-
-				// create secret
-				_, err = c.Core().Secrets(opts.Namespace).Create(secret)
-				return err
 			}
 
-			// ensure we are not mutating a non-riff secret
-			if _, ok := existing.Labels[projectriffCredentialsLabel]; !ok {
-				return fmt.Errorf("credential %q exists, but is not owned by riff", opts.Name)
-			}
-
-			// update existing secret
-			existing = existing.DeepCopy()
-			existing.Annotations = secret.Annotations
-			existing.Type = secret.Type
-			existing.StringData = secret.StringData
-			existing.Data = secret.Data
-			_, err = c.Core().Secrets(opts.Namespace).Update(existing)
-
-			return err
+			return nil
 		},
 	}
 
@@ -179,6 +172,7 @@ func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.GcrTokenPath, "gcr", "", "<todo>")
 	cmd.Flags().StringVar(&opts.Registry, "registry", "", "<todo>")
 	cmd.Flags().StringVar(&opts.RegistryUser, "registry-user", "", "<todo>")
+	cmd.Flags().BoolVar(&opts.SetAsDefault, "set-as-default", false, "<todo>")
 
 	return cmd
 }
@@ -243,4 +237,63 @@ func makeCredential(opts *CredentialSetOptions) (*corev1.Secret, string, error) 
 	}
 
 	return secret, defaultPrefix, nil
+}
+
+func setDefaultImagePrefix(c *cli.Config, opts *CredentialSetOptions, defaultImagePrefix string) error {
+	configMapName := "riff-build"
+	defaultImagePrefixKey := "default-image-prefix"
+
+	riffBuildConfig, err := c.Core().ConfigMaps(opts.Namespace).Get(configMapName, metav1.GetOptions{})
+	if err != nil {
+		if !apierrs.IsNotFound(err) {
+			return err
+		}
+
+		// create riff-build configmaps
+		_, err = c.Core().ConfigMaps(opts.Namespace).Create(&corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: opts.Namespace,
+				Name:      configMapName,
+			},
+			Data: map[string]string{
+				defaultImagePrefixKey: defaultImagePrefix,
+			},
+		})
+		return err
+	}
+
+	// update riff-build config
+	riffBuildConfig = riffBuildConfig.DeepCopy()
+	riffBuildConfig.Data[defaultImagePrefixKey] = defaultImagePrefix
+	_, err = c.Core().ConfigMaps(opts.Namespace).Update(riffBuildConfig)
+	return err
+}
+
+func setCredential(c *cli.Config, opts *CredentialSetOptions, desiredSecret *corev1.Secret) error {
+	// look for existing secret
+	existing, err := c.Core().Secrets(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
+	if err != nil {
+		if !apierrs.IsNotFound(err) {
+			return err
+		}
+
+		// create secret
+		_, err = c.Core().Secrets(opts.Namespace).Create(desiredSecret)
+		return err
+	}
+
+	// ensure we are not mutating a non-riff secret
+	if _, ok := existing.Labels[projectriffCredentialsLabel]; !ok {
+		return fmt.Errorf("credential %q exists, but is not owned by riff", opts.Name)
+	}
+
+	// update existing secret
+	existing = existing.DeepCopy()
+	existing.Annotations = desiredSecret.Annotations
+	existing.Type = desiredSecret.Type
+	existing.StringData = desiredSecret.StringData
+	existing.Data = desiredSecret.Data
+	_, err = c.Core().Secrets(opts.Namespace).Update(existing)
+
+	return err
 }
