@@ -52,8 +52,7 @@ func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 
 			if opts.All {
 				return client.DeleteCollection(nil, metav1.ListOptions{
-					// TODO get label from riff system
-					LabelSelector: "projectriff.io/credential",
+					LabelSelector: projectriffCredentialsLabel,
 				})
 			}
 

@@ -21,6 +21,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TODO get label from riff system
+const projectriffCredentialsLabel = "projectriff.io/credential"
+
 func NewCredentialCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "credential",

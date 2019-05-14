@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	corev1 "k8s.io/api/core/v1"
@@ -31,14 +32,85 @@ func TestCredentialSetOptions(t *testing.T) {
 			Options: &commands.CredentialSetOptions{
 				ResourceOptions: testing.ValidResourceOptions,
 			},
-			ShouldValidate: true,
+			ExpectFieldError: cli.ErrMissingOneOf("docker-hub", "gcr", "registry"),
 		},
 		{
 			Name: "invalid namespaced resource",
 			Options: &commands.CredentialSetOptions{
 				ResourceOptions: testing.InvalidResourceOptions,
 			},
-			ExpectFieldError: testing.InvalidResourceOptionsFieldError,
+			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
+				cli.ErrMissingOneOf("docker-hub", "gcr", "registry"),
+			),
+		},
+		{
+			Name: "docker hub",
+			Options: &commands.CredentialSetOptions{
+				ResourceOptions:   testing.ValidResourceOptions,
+				DockerHubId:       "projectriff",
+				DockerHubPassword: "1password",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "docker hub missing password",
+			Options: &commands.CredentialSetOptions{
+				ResourceOptions: testing.ValidResourceOptions,
+				DockerHubId:     "projectriff",
+			},
+			ExpectFieldError: cli.ErrMissingField("docker-hub-password"),
+		},
+		{
+			Name: "gcr",
+			Options: &commands.CredentialSetOptions{
+				ResourceOptions: testing.ValidResourceOptions,
+				GcrTokenPath:    "gcr-credentials.json",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "registry",
+			Options: &commands.CredentialSetOptions{
+				ResourceOptions:  testing.ValidResourceOptions,
+				Registry:         "example.com",
+				RegistryUser:     "projectriff",
+				RegistryPassword: "1password",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "registry missing user",
+			Options: &commands.CredentialSetOptions{
+				ResourceOptions:  testing.ValidResourceOptions,
+				Registry:         "example.com",
+				RegistryPassword: "1password",
+			},
+			ExpectFieldError: cli.ErrMissingField("registry-user"),
+		},
+		{
+			Name: "registry missing password",
+			Options: &commands.CredentialSetOptions{
+				ResourceOptions: testing.ValidResourceOptions,
+				Registry:        "example.com",
+				RegistryUser:    "projectriff",
+			},
+			// allow password to be blank
+			ShouldValidate: true,
+		},
+		{
+			Name: "multiple registries",
+			Options: &commands.CredentialSetOptions{
+				ResourceOptions:   testing.InvalidResourceOptions,
+				DockerHubId:       "projectriff",
+				DockerHubPassword: "1password",
+				GcrTokenPath:      "gcr-credentials.json",
+				Registry:          "example.com",
+				RegistryUser:      "projectriff",
+				RegistryPassword:  "1password",
+			},
+			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
+				cli.ErrMultipleOneOf("docker-hub", "gcr", "registry"),
+			),
 		},
 	}
 
@@ -51,6 +123,11 @@ func TestCredentialSetCommand(t *testing.T) {
 	credentialName := "test-credential"
 	defaultNamespace := "default"
 	credentialLabel := "projectriff.io/credential"
+	dockerHubId := "projectriff"
+	dockerHubPassword := "docker-password"
+	registryHost := "https://example.com"
+	registryUser := "projectriff"
+	registryPassword := "registry-password"
 
 	table := testing.CommandTable{
 		{
@@ -59,30 +136,102 @@ func TestCredentialSetCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name: "create secret",
-			Args: []string{credentialName},
+			Name:  "create secret docker hub",
+			Args:  []string{credentialName, "--docker-hub", dockerHubId},
+			Stdin: []byte(dockerHubPassword),
 			ExpectCreates: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
 						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": "https://index.docker.io/v1/",
+						},
 					},
-					StringData: map[string]string{},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": dockerHubId,
+						"password": dockerHubPassword,
+					},
 				},
 			},
 		},
 		{
-			Name: "update secret",
-			Args: []string{credentialName},
+			Name: "create secret gcr",
+			Args: []string{credentialName, "--gcr", "./testdata/gcr.json"},
+			ExpectCreates: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": "https://gcr.io",
+							"build.knative.dev/docker-1": "https://us.gcr.io",
+							"build.knative.dev/docker-2": "https://eu.gcr.io",
+							"build.knative.dev/docker-3": "https://asia.gcr.io",
+						},
+					},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": "_json_key",
+						"password": `{"project_id":"my-gcp-project"}`,
+					},
+				},
+			},
+		},
+		{
+			Name:        "create secret gcr, bad token path",
+			Args:        []string{credentialName, "--gcr", "./testdata/gcr-badpath.json"},
+			ShouldError: true,
+		},
+		{
+			Name:        "create secret gcr, invalid token",
+			Args:        []string{credentialName, "--gcr", "./testdata/gcr-invalid.json"},
+			ShouldError: true,
+		},
+		{
+			Name:  "create secret registry",
+			Args:  []string{credentialName, "--registry", registryHost, "--registry-user", registryUser},
+			Stdin: []byte(registryPassword),
+			ExpectCreates: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": registryHost,
+						},
+					},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": registryUser,
+						"password": registryPassword,
+					},
+				},
+			},
+		},
+		{
+			Name:  "update secret",
+			Args:  []string{credentialName, "--registry", registryHost, "--registry-user", registryUser},
+			Stdin: []byte(registryPassword),
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
 						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": "https://index.dockerhub.io/projectriff",
+						},
 					},
-					StringData: map[string]string{},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": dockerHubId,
+						"password": dockerHubPassword,
+					},
 				},
 			},
 			ExpectUpdates: []runtime.Object{
@@ -91,22 +240,37 @@ func TestCredentialSetCommand(t *testing.T) {
 						Name:      credentialName,
 						Namespace: defaultNamespace,
 						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": registryHost,
+						},
 					},
-					StringData: map[string]string{},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": registryUser,
+						"password": registryPassword,
+					},
 				},
 			},
 		},
 		{
-			Name: "get error",
-			Args: []string{credentialName},
+			Name:  "get error",
+			Args:  []string{credentialName, "--registry", registryHost, "--registry-user", registryUser},
+			Stdin: []byte(registryPassword),
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
 						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": "https://index.dockerhub.io/projectriff",
+						},
 					},
-					StringData: map[string]string{},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": dockerHubId,
+						"password": dockerHubPassword,
+					},
 				},
 			},
 			WithReactors: []testing.ReactionFunc{
@@ -115,8 +279,9 @@ func TestCredentialSetCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name: "create error",
-			Args: []string{credentialName},
+			Name:  "create error",
+			Args:  []string{credentialName, "--registry", registryHost, "--registry-user", registryUser},
+			Stdin: []byte(registryPassword),
 			WithReactors: []testing.ReactionFunc{
 				testing.InduceFailure("create", "secrets"),
 			},
@@ -126,23 +291,38 @@ func TestCredentialSetCommand(t *testing.T) {
 						Name:      credentialName,
 						Namespace: defaultNamespace,
 						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": registryHost,
+						},
 					},
-					StringData: map[string]string{},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": registryUser,
+						"password": registryPassword,
+					},
 				},
 			},
 			ShouldError: true,
 		},
 		{
-			Name: "update error",
-			Args: []string{credentialName},
+			Name:  "update error",
+			Args:  []string{credentialName, "--registry", registryHost, "--registry-user", registryUser},
+			Stdin: []byte(registryPassword),
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
 						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": "https://index.dockerhub.io/projectriff",
+						},
 					},
-					StringData: map[string]string{},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": dockerHubId,
+						"password": dockerHubPassword,
+					},
 				},
 			},
 			WithReactors: []testing.ReactionFunc{
@@ -154,15 +334,23 @@ func TestCredentialSetCommand(t *testing.T) {
 						Name:      credentialName,
 						Namespace: defaultNamespace,
 						Labels:    map[string]string{credentialLabel: ""},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": registryHost,
+						},
 					},
-					StringData: map[string]string{},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": registryUser,
+						"password": registryPassword,
+					},
 				},
 			},
 			ShouldError: true,
 		},
 		{
-			Name: "no clobber",
-			Args: []string{"not-a-credential"},
+			Name:  "no clobber",
+			Args:  []string{"not-a-credential", "--registry", registryHost, "--registry-user", registryUser},
+			Stdin: []byte(registryPassword),
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{

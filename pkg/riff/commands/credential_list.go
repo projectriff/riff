@@ -48,8 +48,7 @@ func NewCredentialListCommand(c *cli.Config) *cobra.Command {
 		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			secrets, err := c.Core().Secrets(opts.Namespace).List(metav1.ListOptions{
-				// TODO get label from riff system
-				LabelSelector: "projectriff.io/credential",
+				LabelSelector: projectriffCredentialsLabel,
 			})
 			if err != nil {
 				return err

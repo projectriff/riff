@@ -17,11 +17,17 @@
 package commands
 
 import (
+	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"syscall"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
 	corev1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,12 +35,54 @@ import (
 
 type CredentialSetOptions struct {
 	cli.ResourceOptions
+	DockerHubId       string
+	DockerHubPassword string
+	GcrTokenPath      string
+	Registry          string
+	RegistryUser      string
+	RegistryPassword  string
 }
 
 func (opts *CredentialSetOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
 
 	errs = errs.Also(opts.ResourceOptions.Validate(ctx))
+
+	// docker-hub, gcr and registry are mutually exclusive
+	used := []string{}
+	unused := []string{}
+
+	if opts.DockerHubId != "" {
+		used = append(used, "docker-hub")
+	} else {
+		unused = append(unused, "docker-hub")
+	}
+
+	if opts.GcrTokenPath != "" {
+		used = append(used, "gcr")
+	} else {
+		unused = append(unused, "gcr")
+	}
+
+	if opts.Registry != "" {
+		used = append(used, "registry")
+	} else {
+		unused = append(unused, "registry")
+	}
+
+	if len(used) == 0 {
+		errs = errs.Also(cli.ErrMissingOneOf(unused...))
+	} else if len(used) > 1 {
+		errs = errs.Also(cli.ErrMultipleOneOf(used...))
+	}
+
+	if opts.DockerHubId != "" && opts.DockerHubPassword == "" {
+		errs = errs.Also(cli.ErrMissingField("docker-hub-password"))
+	}
+
+	if opts.RegistryPassword != "" && opts.RegistryUser == "" {
+		errs = errs.Also(cli.ErrMissingField("registry-user"))
+	}
 
 	return errs
 }
@@ -49,42 +97,150 @@ func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
-		PreRunE: cli.ValidateOptions(opts),
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if opts.DockerHubId != "" || opts.RegistryUser != "" {
+				// capture option from stdin
+
+				var prompt string
+				var value *string
+
+				if opts.DockerHubId != "" {
+					prompt = "Docker Hub password"
+					value = &opts.DockerHubPassword
+				}
+				if opts.RegistryUser != "" {
+					prompt = "Registry password"
+					value = &opts.RegistryPassword
+				}
+
+				if terminal.IsTerminal(int(syscall.Stdin)) {
+					fmt.Printf("%s: ", prompt)
+					res, err := terminal.ReadPassword(int(syscall.Stdin))
+					fmt.Println("")
+					if err != nil {
+						return err
+					}
+					*value = string(res)
+				} else {
+					reader := bufio.NewReader(os.Stdin)
+					res, err := ioutil.ReadAll(reader)
+					if err != nil {
+						return err
+					}
+					fmt.Printf("Read password %q\n", res)
+					if string(res) == "" {
+						return fmt.Errorf("bad password")
+					}
+					*value = string(res)
+				}
+			}
+
+			// continue with option validation
+			return cli.ValidateOptions(opts)(cmd, args)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			secret, err := c.Core().Secrets(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
+			// get desired credential
+			secret, _, err := makeCredential(opts)
+			if err != nil {
+				return err
+			}
+
+			// look for existing secret
+			existing, err := c.Core().Secrets(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
 			if err != nil {
 				if !apierrs.IsNotFound(err) {
 					return err
 				}
 
-				_, err = c.Core().Secrets(opts.Namespace).Create(&corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      opts.Name,
-						Namespace: opts.Namespace,
-						Labels: map[string]string{
-							// TODO get label from riff system
-							"projectriff.io/credential": "",
-						},
-					},
-					// TODO define secret data
-					StringData: map[string]string{},
-				})
+				// create secret
+				_, err = c.Core().Secrets(opts.Namespace).Create(secret)
 				return err
 			}
 
 			// ensure we are not mutating a non-riff secret
-			if _, ok := secret.Labels["projectriff.io/credential"]; !ok {
+			if _, ok := existing.Labels[projectriffCredentialsLabel]; !ok {
 				return fmt.Errorf("credential %q exists, but is not owned by riff", opts.Name)
 			}
 
-			// TODO mutate secret
-			_, err = c.Core().Secrets(opts.Namespace).Update(secret)
+			// update existing secret
+			existing = existing.DeepCopy()
+			existing.Annotations = secret.Annotations
+			existing.Type = secret.Type
+			existing.StringData = secret.StringData
+			existing.Data = secret.Data
+			_, err = c.Core().Secrets(opts.Namespace).Update(existing)
 
 			return err
 		},
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
+	cmd.Flags().StringVar(&opts.DockerHubId, "docker-hub", "", "<todo>")
+	cmd.Flags().StringVar(&opts.GcrTokenPath, "gcr", "", "<todo>")
+	cmd.Flags().StringVar(&opts.Registry, "registry", "", "<todo>")
+	cmd.Flags().StringVar(&opts.RegistryUser, "registry-user", "", "<todo>")
 
 	return cmd
+}
+
+func makeCredential(opts *CredentialSetOptions) (*corev1.Secret, string, error) {
+	secret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: opts.Namespace,
+			Name:      opts.Name,
+			Labels: map[string]string{
+				projectriffCredentialsLabel: "",
+			},
+		},
+	}
+	defaultPrefix := ""
+
+	switch {
+	case opts.DockerHubId != "":
+		secret.Annotations = map[string]string{
+			"build.knative.dev/docker-0": "https://index.docker.io/v1/",
+		}
+		secret.Type = corev1.SecretTypeBasicAuth
+		secret.StringData = map[string]string{
+			"username": opts.DockerHubId,
+			"password": opts.DockerHubPassword,
+		}
+		defaultPrefix = fmt.Sprintf("docker.io/%s", opts.DockerHubId)
+
+	case opts.GcrTokenPath != "":
+		token, err := ioutil.ReadFile(opts.GcrTokenPath)
+		if err != nil {
+			return nil, "", err
+		}
+		secret.Annotations = map[string]string{
+			"build.knative.dev/docker-0": "https://gcr.io",
+			"build.knative.dev/docker-1": "https://us.gcr.io",
+			"build.knative.dev/docker-2": "https://eu.gcr.io",
+			"build.knative.dev/docker-3": "https://asia.gcr.io",
+		}
+		secret.Type = corev1.SecretTypeBasicAuth
+		secret.StringData = map[string]string{
+			"username": "_json_key",
+			"password": string(token),
+		}
+		tokenMap := map[string]string{}
+		err = json.Unmarshal(token, &tokenMap)
+		if err != nil {
+			return nil, "", err
+		}
+		defaultPrefix = fmt.Sprintf("gcr.io/%s", tokenMap["project_id"])
+
+	case opts.RegistryUser != "":
+		secret.Annotations = map[string]string{
+			"build.knative.dev/docker-0": opts.Registry,
+		}
+		secret.Type = corev1.SecretTypeBasicAuth
+		secret.StringData = map[string]string{
+			"username": opts.RegistryUser,
+			"password": opts.RegistryPassword,
+		}
+		// unable to determine default prefix for registry
+	}
+
+	return secret, defaultPrefix, nil
 }
