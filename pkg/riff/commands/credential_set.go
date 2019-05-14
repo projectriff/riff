@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"syscall"
 
 	"github.com/projectriff/riff/pkg/cli"
@@ -123,14 +122,10 @@ func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 					}
 					*value = string(res)
 				} else {
-					reader := bufio.NewReader(os.Stdin)
+					reader := bufio.NewReader(c.Stdin)
 					res, err := ioutil.ReadAll(reader)
 					if err != nil {
 						return err
-					}
-					fmt.Printf("Read password %q\n", res)
-					if string(res) == "" {
-						return fmt.Errorf("bad password")
 					}
 					*value = string(res)
 				}

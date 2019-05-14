@@ -19,8 +19,6 @@ package testing
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
-	"os"
 	"path"
 	"reflect"
 	"strings"
@@ -165,7 +163,7 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Comm
 		if ctr.Skip {
 			t.SkipNow()
 		}
-		if !ctr.Sequential && ctr.Stdin == nil {
+		if !ctr.Sequential {
 			t.Parallel()
 		}
 
@@ -210,24 +208,7 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Comm
 		cmd.SetOutput(output)
 
 		if ctr.Stdin != nil {
-			// stub os.Stdio
-			tmpfile, err := ioutil.TempFile("", "stdin")
-			if err != nil {
-				t.Fatal(err)
-			}
-			if _, err := tmpfile.Write(ctr.Stdin); err != nil {
-				t.Fatal(err)
-			}
-			if _, err := tmpfile.Seek(0, 0); err != nil {
-				t.Fatal(err)
-			}
-
-			stdin := os.Stdin
-			defer func() {
-				os.Stdin = stdin
-				os.Remove(tmpfile.Name())
-			}()
-			os.Stdin = tmpfile
+			c.Stdin = bytes.NewBuffer(ctr.Stdin)
 		}
 
 		err := cmd.Execute()
