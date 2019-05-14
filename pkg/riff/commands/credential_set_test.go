@@ -113,6 +113,37 @@ func TestCredentialSetOptions(t *testing.T) {
 				cli.ErrMultipleOneOf("docker-hub", "gcr", "registry"),
 			),
 		},
+
+		{
+			Name: "docker hub as default image prefix",
+			Options: &commands.CredentialSetOptions{
+				ResourceOptions:       testing.ValidResourceOptions,
+				DockerHubId:           "projectriff",
+				DockerHubPassword:     "1password",
+				SetDefaultImagePrefix: true,
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "gcr as default image prefix",
+			Options: &commands.CredentialSetOptions{
+				ResourceOptions:       testing.ValidResourceOptions,
+				GcrTokenPath:          "gcr-credentials.json",
+				SetDefaultImagePrefix: true,
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "registry as default image prefix",
+			Options: &commands.CredentialSetOptions{
+				ResourceOptions:       testing.ValidResourceOptions,
+				Registry:              "example.com",
+				RegistryUser:          "projectriff",
+				RegistryPassword:      "1password",
+				SetDefaultImagePrefix: true,
+			},
+			ExpectFieldError: cli.ErrInvalidValue("cannot be used with registry", "set-default-image-prefix"),
+		},
 	}
 
 	table.Run(t)
@@ -365,7 +396,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:  "default image prefix create docker hub",
-			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-as-default"},
+			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-default-image-prefix"},
 			Stdin: []byte(dockerHubPassword),
 			ExpectCreates: []runtime.Object{
 				&corev1.Secret{
@@ -396,7 +427,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name: "default image prefix create gcr",
-			Args: []string{credentialName, "--gcr", "./testdata/gcr.json", "--set-as-default"},
+			Args: []string{credentialName, "--gcr", "./testdata/gcr.json", "--set-default-image-prefix"},
 			ExpectCreates: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
@@ -428,31 +459,14 @@ func TestCredentialSetCommand(t *testing.T) {
 			},
 		},
 		{
-			Name:  "default image prefix create registry",
-			Args:  []string{credentialName, "--registry", registryHost, "--registry-user", registryUser, "--set-as-default"},
-			Stdin: []byte(registryPassword),
-			ExpectCreates: []runtime.Object{
-				&corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      credentialName,
-						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
-						Annotations: map[string]string{
-							"build.knative.dev/docker-0": registryHost,
-						},
-					},
-					Type: corev1.SecretTypeBasicAuth,
-					StringData: map[string]string{
-						"username": registryUser,
-						"password": registryPassword,
-					},
-				},
-				// doesn't create configmap because there is no derivable image prefix for the registry
-			},
+			Name:        "default image prefix create registry",
+			Args:        []string{credentialName, "--registry", registryHost, "--registry-user", registryUser, "--set-default-image-prefix"},
+			Stdin:       []byte(registryPassword),
+			ShouldError: true,
 		},
 		{
 			Name:  "default image prefix update",
-			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-as-default"},
+			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-default-image-prefix"},
 			Stdin: []byte(dockerHubPassword),
 			GivenObjects: []runtime.Object{
 				&corev1.ConfigMap{
@@ -498,7 +512,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:  "default image prefix get error",
-			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-as-default"},
+			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-default-image-prefix"},
 			Stdin: []byte(dockerHubPassword),
 			WithReactors: []testing.ReactionFunc{
 				testing.InduceFailure("get", "configmaps"),
@@ -524,7 +538,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:  "default image prefix create error",
-			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-as-default"},
+			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-default-image-prefix"},
 			Stdin: []byte(dockerHubPassword),
 			WithReactors: []testing.ReactionFunc{
 				testing.InduceFailure("create", "configmaps"),
@@ -559,7 +573,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:  "default image prefix update",
-			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-as-default"},
+			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-default-image-prefix"},
 			Stdin: []byte(dockerHubPassword),
 			WithReactors: []testing.ReactionFunc{
 				testing.InduceFailure("update", "configmaps"),

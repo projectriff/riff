@@ -35,13 +35,13 @@ import (
 
 type CredentialSetOptions struct {
 	cli.ResourceOptions
-	DockerHubId       string
-	DockerHubPassword string
-	GcrTokenPath      string
-	Registry          string
-	RegistryUser      string
-	RegistryPassword  string
-	SetAsDefault      bool
+	DockerHubId           string
+	DockerHubPassword     string
+	GcrTokenPath          string
+	Registry              string
+	RegistryUser          string
+	RegistryPassword      string
+	SetDefaultImagePrefix bool
 }
 
 func (opts *CredentialSetOptions) Validate(ctx context.Context) *cli.FieldError {
@@ -83,6 +83,10 @@ func (opts *CredentialSetOptions) Validate(ctx context.Context) *cli.FieldError 
 
 	if opts.RegistryPassword != "" && opts.RegistryUser == "" {
 		errs = errs.Also(cli.ErrMissingField("registry-user"))
+	}
+
+	if opts.SetDefaultImagePrefix && opts.Registry != "" {
+		errs = errs.Also(cli.ErrInvalidValue("cannot be used with registry", "set-default-image-prefix"))
 	}
 
 	return errs
@@ -147,7 +151,7 @@ func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 			}
 			fmt.Fprintf(cmd.OutOrStdout(), "Set credentials %q\n", opts.Name)
 
-			if opts.SetAsDefault {
+			if opts.SetDefaultImagePrefix {
 				if defaultImagePrefix == "" {
 					fmt.Fprintf(cmd.OutOrStdout(), "Unable to derive default image prefix\n")
 				} else {
@@ -168,7 +172,7 @@ func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.GcrTokenPath, "gcr", "", "<todo>")
 	cmd.Flags().StringVar(&opts.Registry, "registry", "", "<todo>")
 	cmd.Flags().StringVar(&opts.RegistryUser, "registry-user", "", "<todo>")
-	cmd.Flags().BoolVar(&opts.SetAsDefault, "set-as-default", false, "<todo>")
+	cmd.Flags().BoolVar(&opts.SetDefaultImagePrefix, "set-default-image-prefix", false, "<todo>")
 
 	return cmd
 }
