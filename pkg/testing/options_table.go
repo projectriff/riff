@@ -36,9 +36,6 @@ type OptionsTableRecord struct {
 	// Focus executes this record skipping all unfocused records. The containing test will fail to
 	// prevent accidental check-in.
 	Focus bool
-	// Sequential disables parallel processing for this record. By default records in a table will
-	// execute in parallel.
-	Sequential bool
 
 	// inputs
 
@@ -78,9 +75,6 @@ func (otr OptionsTableRecord) Run(t *T) {
 	t.Run(otr.Name, func(t *T) {
 		if otr.Skip {
 			t.SkipNow()
-		}
-		if !otr.Sequential {
-			t.Parallel()
 		}
 
 		errs := otr.Options.Validate(context.TODO())
