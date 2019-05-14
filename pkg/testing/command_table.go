@@ -70,9 +70,6 @@ type CommandTableRecord struct {
 	// Focus executes this record skipping all unfocused records. The containing test will fail to
 	// prevent accidental check-in.
 	Focus bool
-	// Sequential disables parallel processing for this record. By default records in a table will
-	// execute in parallel.
-	Sequential bool
 
 	// environment
 
@@ -162,9 +159,6 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Comm
 	t.Run(ctr.Name, func(t *T) {
 		if ctr.Skip {
 			t.SkipNow()
-		}
-		if !ctr.Sequential {
-			t.Parallel()
 		}
 
 		c := ctr.Config

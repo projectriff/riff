@@ -104,8 +104,6 @@ func TestRequestProcessorCreateOptions(t *testing.T) {
 }
 
 func TestRequestProcessorCreateCommand(t *testing.T) {
-	t.Parallel()
-
 	defaultNamespace := "default"
 	requestProcessorName := "my-function"
 	itemName := "blue"

@@ -22,8 +22,6 @@ import (
 )
 
 func TestFunctionCommand(t *testing.T) {
-	t.Parallel()
-
 	table := testing.CommandTable{
 		{
 			Name: "empty",
