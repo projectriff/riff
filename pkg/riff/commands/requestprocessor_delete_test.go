@@ -46,8 +46,6 @@ func TestRequestProcessorDeleteOptions(t *testing.T) {
 }
 
 func TestRequestProcessorDeleteCommand(t *testing.T) {
-	t.Parallel()
-
 	requestprocessorName := "test-function"
 	requestprocessorAltName := "test-alt-function"
 	defaultNamespace := "default"
