@@ -18,6 +18,7 @@ package cli
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -34,11 +35,13 @@ type Config struct {
 	KubeConfigFile  string
 	k8s.Client
 	FileSystem fs.FileSystem
+	Stdin      io.Reader
 }
 
 func NewDefaultConfig() *Config {
 	return &Config{
 		CompiledEnv: env,
+		Stdin:       os.Stdin,
 	}
 }
 
