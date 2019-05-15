@@ -17,9 +17,11 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/mitchellh/go-homedir"
@@ -35,12 +37,14 @@ type Config struct {
 	KubeConfigFile  string
 	k8s.Client
 	FileSystem fs.FileSystem
+	Exec       func(ctx context.Context, command string, args ...string) *exec.Cmd
 	Stdin      io.Reader
 }
 
 func NewDefaultConfig() *Config {
 	return &Config{
 		CompiledEnv: env,
+		Exec:        exec.CommandContext,
 		Stdin:       os.Stdin,
 	}
 }

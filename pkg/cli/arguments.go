@@ -22,10 +22,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var ErrIgnoreArg = fmt.Errorf("ignore argument")
+
 type Arg struct {
-	Name  string
-	Arity int
-	Set   func(args []string) error
+	Name     string
+	Arity    int
+	Optional bool
+	Set      func(cmd *cobra.Command, args []string, offset int) error
 }
 
 func Args(argDefs ...Arg) cobra.PositionalArgs {
@@ -38,12 +41,18 @@ func Args(argDefs ...Arg) cobra.PositionalArgs {
 				// consume all remaining args
 				arity = len(args) - offset
 			}
-			if len(args) < arity {
+			if len(args)-offset < arity {
+				if argDef.Optional {
+					continue
+				}
 				// TODO create a better message saying what is missing
 				return fmt.Errorf("missing required argument(s)")
 			}
 
-			if err := argDef.Set(args[offset : offset+arity]); err != nil {
+			if err := argDef.Set(cmd, args, offset); err != nil {
+				if err == ErrIgnoreArg {
+					continue
+				}
 				return err
 			}
 
@@ -59,8 +68,8 @@ func NameArg(name *string) Arg {
 	return Arg{
 		Name:  "name",
 		Arity: 1,
-		Set: func(args []string) error {
-			*name = args[0]
+		Set: func(cmd *cobra.Command, args []string, offset int) error {
+			*name = args[offset]
 			return nil
 		},
 	}
@@ -70,8 +79,22 @@ func NamesArg(names *[]string) Arg {
 	return Arg{
 		Name:  "name(s)",
 		Arity: -1,
-		Set: func(args []string) error {
-			*names = args
+		Set: func(cmd *cobra.Command, args []string, offset int) error {
+			*names = args[offset:]
+			return nil
+		},
+	}
+}
+
+func BareDoubleDashArgs(values *[]string) Arg {
+	return Arg{
+		Name:  "dashdash",
+		Arity: -1,
+		Set: func(cmd *cobra.Command, args []string, offset int) error {
+			if cmd.ArgsLenAtDash() == -1 {
+				return nil
+			}
+			*values = args[cmd.ArgsLenAtDash():]
 			return nil
 		},
 	}
