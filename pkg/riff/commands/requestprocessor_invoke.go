@@ -52,6 +52,7 @@ func NewRequestProcessorInvokeCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "invoke",
+		Hidden:  true,
 		Short:   "<todo>",
 		Example: "<todo>",
 		Args: cli.Args(
