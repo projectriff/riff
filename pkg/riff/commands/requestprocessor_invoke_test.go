@@ -367,7 +367,7 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
 					"curl localhost -H 'Host: test-requestprocessor.example.com'\n",
-					"exit status 255\n",
+					"exit status 1\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -393,7 +393,7 @@ func TestHelperProcess_RequestProcessorInvokeError(t *testing.T) {
 		return
 	}
 	fmt.Fprintf(os.Stderr, "Command executed: %s\n", shellquote.Join(argsAfterBareDoubleDash(os.Args)...))
-	os.Exit(-1)
+	os.Exit(1)
 }
 
 func argsAfterBareDoubleDash(args []string) []string {
