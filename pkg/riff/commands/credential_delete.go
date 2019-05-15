@@ -52,9 +52,14 @@ func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 			client := c.Core().Secrets(opts.Namespace)
 
 			if opts.All {
-				return client.DeleteCollection(nil, metav1.ListOptions{
+				err := client.DeleteCollection(nil, metav1.ListOptions{
 					LabelSelector: build.CredentialLabelKey,
 				})
+				if err != nil {
+					return err
+				}
+				c.Successf("Deleted credentials in namespace %q\n", opts.Namespace)
+				return nil
 			}
 
 			for _, name := range opts.Names {
@@ -62,6 +67,7 @@ func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 				if err := client.Delete(name, nil); err != nil {
 					return err
 				}
+				c.Successf("Deleted credential %q\n", name)
 			}
 
 			return nil

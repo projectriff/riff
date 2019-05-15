@@ -18,7 +18,6 @@ package commands
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
@@ -53,11 +52,11 @@ func NewFunctionListCommand(c *cli.Config) *cobra.Command {
 			}
 
 			if len(functions.Items) == 0 {
-				fmt.Fprintln(cmd.OutOrStdout(), "No functions found.")
+				c.Infof("No functions found.\n")
 			}
 			for _, function := range functions.Items {
 				// TODO pick a generic table formatter
-				fmt.Fprintln(cmd.OutOrStdout(), function.Name)
+				c.Printf("%s\n", function.Name)
 			}
 
 			return nil

@@ -18,7 +18,6 @@ package cli
 
 import (
 	"bufio"
-	"fmt"
 	"io/ioutil"
 	"syscall"
 
@@ -40,9 +39,9 @@ func Sequence(items ...func(cmd *cobra.Command, args []string) error) func(*cobr
 func ReadStdin(c *Config, value *[]byte, prompt string) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		if terminal.IsTerminal(int(syscall.Stdin)) {
-			fmt.Printf("%s: ", prompt)
+			c.Printf("%s: ", prompt)
 			res, err := terminal.ReadPassword(int(syscall.Stdin))
-			fmt.Println("")
+			c.Printf("\n")
 			if err != nil {
 				return err
 			}

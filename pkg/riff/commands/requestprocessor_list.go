@@ -18,7 +18,6 @@ package commands
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
@@ -53,11 +52,11 @@ func NewRequestProcessorListCommand(c *cli.Config) *cobra.Command {
 			}
 
 			if len(requestprocessors.Items) == 0 {
-				fmt.Fprintln(cmd.OutOrStdout(), "No request processors found.")
+				c.Infof("No request processors found.\n")
 			}
 			for _, requestprocessor := range requestprocessors.Items {
 				// TODO pick a generic table formatter
-				fmt.Fprintln(cmd.OutOrStdout(), requestprocessor.Name)
+				c.Printf("%s\n", requestprocessor.Name)
 			}
 
 			return nil
