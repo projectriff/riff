@@ -17,9 +17,7 @@
 package commands_test
 
 import (
-	"fmt"
-	"strings"
-
+	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
@@ -67,16 +65,12 @@ func TestFunctionListCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name: "empty",
-			Args: []string{},
-			Verify: func(t *testing.T, output string, err error) {
-				if expected, actual := "No functions found.\n", output; actual != expected {
-					t.Errorf("expected output %q, actually %q", expected, actual)
-				}
-			},
+			Name:         "empty",
+			Args:         []string{},
+			ExpectOutput: "No functions found.\n",
 		},
 		{
-			Name: "lists a secret",
+			Name: "lists an item",
 			Args: []string{},
 			GivenObjects: []runtime.Object{
 				&buildv1alpha1.Function{
@@ -86,11 +80,10 @@ func TestFunctionListCommand(t *testing.T) {
 					},
 				},
 			},
-			Verify: func(t *testing.T, output string, err error) {
-				if actual, want := output, fmt.Sprintf("%s\n", functionName); actual != want {
-					t.Errorf("expected output %q, actually %q", want, actual)
-				}
-			},
+			ExpectOutput: `
+NAME            LATEST IMAGE   ARTIFACT   HANDLER   INVOKER   SUCCEEDED   AGE
+test-function   <empty>        <empty>    <empty>   <empty>   <unknown>   <unknown>
+`,
 		},
 		{
 			Name: "filters by namespace",
@@ -103,11 +96,7 @@ func TestFunctionListCommand(t *testing.T) {
 					},
 				},
 			},
-			Verify: func(t *testing.T, output string, err error) {
-				if actual, want := output, "No functions found.\n"; actual != want {
-					t.Errorf("expected output %q, actually %q", want, actual)
-				}
-			},
+			ExpectOutput: "No functions found.\n",
 		},
 		{
 			Name: "all namespace",
@@ -126,16 +115,42 @@ func TestFunctionListCommand(t *testing.T) {
 					},
 				},
 			},
-			Verify: func(t *testing.T, output string, err error) {
-				for _, expected := range []string{
-					fmt.Sprintf("%s\n", functionName),
-					fmt.Sprintf("%s\n", functionOtherName),
-				} {
-					if !strings.Contains(output, expected) {
-						t.Errorf("expected command output to contain %q, actually %q", expected, output)
-					}
-				}
+			ExpectOutput: `
+NAMESPACE         NAME                  LATEST IMAGE   ARTIFACT   HANDLER   INVOKER   SUCCEEDED   AGE
+default           test-function         <empty>        <empty>    <empty>   <empty>   <unknown>   <unknown>
+other-namespace   test-other-function   <empty>        <empty>    <empty>   <empty>   <unknown>   <unknown>
+`,
+		},
+		{
+			Name: "table populates all columns",
+			Args: []string{},
+			GivenObjects: []runtime.Object{
+				&buildv1alpha1.Function{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "upper",
+						Namespace: defaultNamespace,
+					},
+					Spec: buildv1alpha1.FunctionSpec{
+						Image:    "projectriff/upper",
+						Artifact: "uppercase.js",
+						Handler:  "functions.Uppercase",
+					},
+					Status: buildv1alpha1.FunctionStatus{
+						Status: duckv1alpha1.Status{
+							Conditions: []duckv1alpha1.Condition{
+								{Type: buildv1alpha1.FunctionConditionSucceeded, Status: "True"},
+							},
+						},
+						BuildStatus: buildv1alpha1.BuildStatus{
+							LatestImage: "projectriff/upper@sah256:abcdef1234",
+						},
+					},
+				},
 			},
+			ExpectOutput: `
+NAME    LATEST IMAGE                          ARTIFACT       HANDLER               INVOKER   SUCCEEDED   AGE
+upper   projectriff/upper@sah256:abcdef1234   uppercase.js   functions.Uppercase   <empty>   True        <unknown>
+`,
 		},
 		{
 			Name: "list error",

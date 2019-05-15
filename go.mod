@@ -5,7 +5,9 @@ go 1.12
 require (
 	github.com/fatih/color v1.7.0
 	github.com/google/go-cmp v0.3.0
+	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/knative/pkg v0.0.0-20190417151928-418e675f88c2
+	github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/projectriff/system v0.0.0-20190514230324-6e07cd39cb97
 	github.com/spf13/cobra v0.0.3
@@ -30,7 +32,6 @@ require (
 	github.com/imdario/mergo v0.3.7 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.6 // indirect
-	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/knative/build v0.5.0 // indirect
 	github.com/knative/serving v0.5.2 // indirect
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
