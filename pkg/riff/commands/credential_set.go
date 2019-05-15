@@ -125,17 +125,17 @@ func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 			if err := setCredential(c, opts, secret); err != nil {
 				return err
 			}
-			fmt.Fprintf(cmd.OutOrStdout(), "Set credentials %q\n", opts.Name)
+			c.Successf("Set credentials %q\n", opts.Name)
 
 			if opts.SetDefaultImagePrefix {
 				if defaultImagePrefix == "" {
-					fmt.Fprintf(cmd.OutOrStdout(), "Unable to derive default image prefix\n")
+					c.Infof("Unable to derive default image prefix\n")
 				} else {
 					err := setDefaultImagePrefix(c, opts, defaultImagePrefix)
 					if err != nil {
 						return err
 					}
-					fmt.Fprintf(cmd.OutOrStdout(), "Set default image prefix to %q\n", defaultImagePrefix)
+					c.Successf("Set default image prefix to %q\n", defaultImagePrefix)
 				}
 			}
 

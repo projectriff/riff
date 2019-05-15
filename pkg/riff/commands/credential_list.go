@@ -18,7 +18,6 @@ package commands
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/system/pkg/apis/build"
@@ -56,11 +55,11 @@ func NewCredentialListCommand(c *cli.Config) *cobra.Command {
 			}
 
 			if len(secrets.Items) == 0 {
-				fmt.Fprintln(cmd.OutOrStdout(), "No credentials found.")
+				c.Infof("No credentials found.\n")
 			}
 			for _, secret := range secrets.Items {
 				// TODO pick a generic table formatter
-				fmt.Fprintln(cmd.OutOrStdout(), secret.Name)
+				c.Printf("%s\n", secret.Name)
 			}
 
 			return nil

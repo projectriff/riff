@@ -19,6 +19,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/fatih/color"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
@@ -34,8 +35,9 @@ func NewRootCommand(c *cli.Config) *cobra.Command {
 	}
 	cmd.DisableAutoGenTag = true
 
-	cmd.PersistentFlags().StringVar(&c.ViperConfigFile, "config", "", fmt.Sprintf("config file (default is $HOME/.%s.yaml)", c.Name))
-	cmd.PersistentFlags().StringVar(&c.KubeConfigFile, "kubeconfig", "", "kubectl config file (default is $HOME/.kube/config)")
+	cmd.PersistentFlags().StringVar(&c.ViperConfigFile, cli.StripDash(cli.ConfigFlagName), "", fmt.Sprintf("config file (default is $HOME/.%s.yaml)", c.Name))
+	cmd.PersistentFlags().StringVar(&c.KubeConfigFile, cli.StripDash(cli.KubeConfigFlagName), "", "kubectl config file (default is $HOME/.kube/config)")
+	cmd.PersistentFlags().BoolVar(&color.NoColor, cli.StripDash(cli.NoColorFlagName), color.NoColor, "<todo>")
 
 	cmd.AddCommand(NewCompletionCommand(c))
 	cmd.AddCommand(NewDocsCommand(c))

@@ -9,9 +9,10 @@
 ### Options
 
 ```
-      --config string       config file (default is $HOME/.riff.yaml)
-  -h, --help                help for riff
-      --kubeconfig string   kubectl config file (default is $HOME/.kube/config)
+      --config string        config file (default is $HOME/.riff.yaml)
+  -h, --help                 help for riff
+      --kube-config string   kubectl config file (default is $HOME/.kube/config)
+      --no-color             <todo>
 ```
 
 ### SEE ALSO

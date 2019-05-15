@@ -135,7 +135,7 @@ func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(cmd.OutOrStdout(), "Created function %q\n", function.Name)
+			c.Successf("Created function %q\n", function.Name)
 			return nil
 		},
 	}

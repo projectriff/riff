@@ -17,7 +17,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -30,14 +29,15 @@ import (
 )
 
 func main() {
-	cmd := commands.NewRootCommand(cli.Initialize())
+	c := cli.Initialize()
+	cmd := commands.NewRootCommand(c)
 
 	cmd.SilenceErrors = true
 	if err := cmd.Execute(); err != nil {
-		fmt.Fprintln(cmd.OutOrStderr(), "Error executing command:")
+		c.Errorf("Error executing command:\n")
 		// errors can be multiple lines, indent each line
 		for _, line := range strings.Split(err.Error(), "\n") {
-			fmt.Fprintf(cmd.OutOrStderr(), "  %s\n", line)
+			c.Errorf("  %s\n", line)
 		}
 		os.Exit(1)
 	}

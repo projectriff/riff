@@ -220,14 +220,13 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Comm
 		}
 
 		cmd := cmdFactory(c)
-		output := &bytes.Buffer{}
-
 		cmd.SetArgs(ctr.Args)
-		cmd.SetOutput(output)
 
-		if ctr.Stdin != nil {
-			c.Stdin = bytes.NewBuffer(ctr.Stdin)
-		}
+		c.Stdin = bytes.NewBuffer(ctr.Stdin)
+		output := &bytes.Buffer{}
+		cmd.SetOutput(output)
+		c.Stdout = output
+		c.Stderr = output
 
 		err := cmd.Execute()
 

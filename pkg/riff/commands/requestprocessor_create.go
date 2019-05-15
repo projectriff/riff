@@ -18,7 +18,6 @@ package commands
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/parsers"
@@ -138,7 +137,7 @@ func NewRequestProcessorCreateCommand(c *cli.Config) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Fprintf(cmd.OutOrStdout(), "Created request processor %q\n", processor.Name)
+			c.Successf("Created request processor %q\n", processor.Name)
 			return nil
 		},
 	}

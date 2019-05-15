@@ -70,7 +70,7 @@ func TestFunctionListCommand(t *testing.T) {
 			Name: "empty",
 			Args: []string{},
 			Verify: func(t *testing.T, output string, err error) {
-				if expected, actual := output, "No functions found.\n"; actual != expected {
+				if expected, actual := "No functions found.\n", output; actual != expected {
 					t.Errorf("expected output %q, actually %q", expected, actual)
 				}
 			},

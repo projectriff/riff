@@ -47,7 +47,13 @@ func NewDocsCommand(c *cli.Config) *cobra.Command {
 			if err := c.FileSystem.MkdirAll(opts.Directory, 0744); err != nil {
 				return err
 			}
-			return doc.GenMarkdownTree(cmd.Root(), opts.Directory)
+			root := cmd.Root()
+			if noColorFlag := root.Flag(cli.StripDash(cli.NoColorFlagName)); noColorFlag != nil {
+				// force default to false for doc generation no matter the environment
+				noColorFlag.DefValue = "false"
+			}
+
+			return doc.GenMarkdownTree(root, opts.Directory)
 		},
 	}
 

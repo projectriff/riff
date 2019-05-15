@@ -23,7 +23,7 @@ build: $(OUTPUT)
 
 .PHONY: test
 test:
-	go test -v ./...
+	go test ./...
 
 $(OUTPUT): $(GO_SOURCES) VERSION
 	go build -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)" ./cmd/riff

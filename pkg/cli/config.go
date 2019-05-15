@@ -23,7 +23,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
+	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
 	"github.com/projectriff/riff/pkg/fs"
 	"github.com/projectriff/riff/pkg/k8s"
@@ -39,6 +41,8 @@ type Config struct {
 	FileSystem fs.FileSystem
 	Exec       func(ctx context.Context, command string, args ...string) *exec.Cmd
 	Stdin      io.Reader
+	Stdout     io.Writer
+	Stderr     io.Writer
 }
 
 func NewDefaultConfig() *Config {
@@ -46,7 +50,41 @@ func NewDefaultConfig() *Config {
 		CompiledEnv: env,
 		Exec:        exec.CommandContext,
 		Stdin:       os.Stdin,
+		Stdout:      os.Stdout,
+		Stderr:      os.Stderr,
 	}
+}
+
+func (c *Config) Printf(format string, a ...interface{}) (n int, err error) {
+	return fmt.Fprintf(c.Stdout, format, a...)
+}
+
+func (c *Config) Eprintf(format string, a ...interface{}) (n int, err error) {
+	return fmt.Fprintf(c.Stderr, format, a...)
+}
+
+func (c *Config) Successf(format string, a ...interface{}) (n int, err error) {
+	return fmt.Fprintf(c.Stdout, color.GreenString(format), a...)
+}
+
+func (c *Config) Esuccessf(format string, a ...interface{}) (n int, err error) {
+	return fmt.Fprintf(c.Stderr, color.GreenString(format), a...)
+}
+
+func (c *Config) Infof(format string, a ...interface{}) (n int, err error) {
+	return fmt.Fprintf(c.Stdout, color.CyanString(format), a...)
+}
+
+func (c *Config) Einfof(format string, a ...interface{}) (n int, err error) {
+	return fmt.Fprintf(c.Stderr, color.CyanString(format), a...)
+}
+
+func (c *Config) Errorf(format string, a ...interface{}) (n int, err error) {
+	return fmt.Fprintf(c.Stdout, color.RedString(format), a...)
+}
+
+func (c *Config) Eerrorf(format string, a ...interface{}) (n int, err error) {
+	return fmt.Fprintf(c.Stderr, color.RedString(format), a...)
 }
 
 func Initialize() *Config {
@@ -68,6 +106,7 @@ func (c *Config) initViperConfig() {
 		// Find home directory.
 		home, err := homedir.Dir()
 		if err != nil {
+			// avoid color since we don't know if it should be enabled yet
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
@@ -77,11 +116,18 @@ func (c *Config) initViperConfig() {
 		viper.SetConfigName("." + c.Name)
 	}
 
+	viper.SetEnvPrefix(c.Name)
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	err := viper.ReadInConfig()
+	// hack for no-color since we urgently need to know if color should be disabled
+	if viper.GetBool(StripDash(NoColorFlagName)) {
+		color.NoColor = true
+	}
+	if err == nil {
+		c.Einfof("Using config file: %s\n", viper.ConfigFileUsed())
 	}
 }
 
@@ -95,7 +141,7 @@ func (c *Config) initKubeConfig() {
 	} else {
 		home, err := homedir.Dir()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			c.Errorf("%s\n", err)
 			os.Exit(1)
 		}
 		c.KubeConfigFile = filepath.Join(home, ".kube", "config")

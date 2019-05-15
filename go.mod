@@ -3,6 +3,7 @@ module github.com/projectriff/riff
 go 1.12
 
 require (
+	github.com/fatih/color v1.7.0
 	github.com/google/go-cmp v0.3.0
 	github.com/knative/pkg v0.0.0-20190417151928-418e675f88c2
 	github.com/mitchellh/go-homedir v1.1.0
@@ -33,6 +34,8 @@ require (
 	github.com/knative/build v0.5.0 // indirect
 	github.com/knative/serving v0.5.2 // indirect
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
+	github.com/mattn/go-colorable v0.1.1 // indirect
+	github.com/mattn/go-isatty v0.0.7 // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.8.1 // indirect

@@ -72,7 +72,7 @@ func TestCredentialListCommand(t *testing.T) {
 			Name: "empty",
 			Args: []string{},
 			Verify: func(t *testing.T, output string, err error) {
-				if expected, actual := output, "No credentials found.\n"; actual != expected {
+				if expected, actual := "No credentials found.\n", output; actual != expected {
 					t.Errorf("expected output %q, actually %q", expected, actual)
 				}
 			},
@@ -155,7 +155,7 @@ func TestCredentialListCommand(t *testing.T) {
 				},
 			},
 			Verify: func(t *testing.T, output string, err error) {
-				if expected, actual := output, "No credentials found.\n"; actual != expected {
+				if expected, actual := "No credentials found.\n", output; actual != expected {
 					t.Errorf("expected output %q, actually %q", expected, actual)
 				}
 			},
