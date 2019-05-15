@@ -27,7 +27,7 @@ type CompiledEnv struct {
 	Name     string
 	Version  string
 	GitSha   string
-	GitDirty string
+	GitDirty bool
 }
 
 var env CompiledEnv
@@ -38,6 +38,6 @@ func init() {
 		Name:     cli_name,
 		Version:  cli_version,
 		GitSha:   cli_gitsha,
-		GitDirty: cli_gitdirty,
+		GitDirty: cli_gitdirty == "",
 	}
 }

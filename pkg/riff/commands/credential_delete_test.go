@@ -71,14 +71,34 @@ func TestCredentialDeleteCommand(t *testing.T) {
 					StringData: map[string]string{},
 				},
 			},
+			ExpectDeleteCollections: []testing.DeleteCollectionRef{{
+				Resource:      "secrets",
+				Namespace:     defaultNamespace,
+				LabelSelector: credentialLabel,
+			}},
+		},
+		{
+			Name: "delete all secrets error",
+			Args: []string{"--all"},
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+					StringData: map[string]string{},
+				},
+			},
 			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("delete", "secrets"),
+				testing.InduceFailure("delete-collection", "secrets"),
 			},
 			ExpectDeleteCollections: []testing.DeleteCollectionRef{{
 				Resource:      "secrets",
 				Namespace:     defaultNamespace,
 				LabelSelector: credentialLabel,
 			}},
+			ShouldError: true,
 		},
 		{
 			Name: "delete secret",

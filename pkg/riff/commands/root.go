@@ -27,14 +27,14 @@ func NewRootCommand(c *cli.Config) *cobra.Command {
 	cmd := NewRiffCommand(c)
 
 	cmd.Use = c.Name
-	if c.GitDirty == "" {
+	if c.GitDirty {
 		cmd.Version = fmt.Sprintf("%s (%s)", c.Version, c.GitSha)
 	} else {
 		cmd.Version = fmt.Sprintf("%s (%s, with local modifications)", c.Version, c.GitSha)
 	}
 	cmd.DisableAutoGenTag = true
 
-	cmd.PersistentFlags().StringVar(&c.ViperConfigFile, "config", "", "config file (default is $HOME/.riff.yaml)")
+	cmd.PersistentFlags().StringVar(&c.ViperConfigFile, "config", "", fmt.Sprintf("config file (default is $HOME/.%s.yaml)", c.Name))
 	cmd.PersistentFlags().StringVar(&c.KubeConfigFile, "kubeconfig", "", "kubectl config file (default is $HOME/.kube/config)")
 
 	cmd.AddCommand(NewCompletionCommand(c))
