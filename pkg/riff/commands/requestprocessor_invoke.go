@@ -77,7 +77,7 @@ func NewRequestProcessorInvokeCommand(c *cli.Config) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if !requestprocessor.Status.IsReady() {
+			if !requestprocessor.Status.IsReady() || requestprocessor.Status.Domain == "" {
 				return fmt.Errorf("request processor %q is not ready", opts.Name)
 			}
 
