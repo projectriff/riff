@@ -36,6 +36,22 @@ func (opts *FunctionDeleteOptions) Validate(ctx context.Context) *cli.FieldError
 	return errs
 }
 
+func (opts *FunctionDeleteOptions) Exec(ctx context.Context, c *cli.Config) error {
+	client := c.Build().Functions(opts.Namespace)
+
+	if opts.All {
+		return client.DeleteCollection(nil, metav1.ListOptions{})
+	}
+
+	for _, name := range opts.Names {
+		if err := client.Delete(name, nil); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func NewFunctionDeleteCommand(c *cli.Config) *cobra.Command {
 	opts := &FunctionDeleteOptions{}
 
@@ -47,21 +63,7 @@ func NewFunctionDeleteCommand(c *cli.Config) *cobra.Command {
 			cli.NamesArg(&opts.Names),
 		),
 		PreRunE: cli.ValidateOptions(opts),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			client := c.Build().Functions(opts.Namespace)
-
-			if opts.All {
-				return client.DeleteCollection(nil, metav1.ListOptions{})
-			}
-
-			for _, name := range opts.Names {
-				if err := client.Delete(name, nil); err != nil {
-					return err
-				}
-			}
-
-			return nil
-		},
+		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

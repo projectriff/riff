@@ -19,7 +19,6 @@ package commands
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
@@ -47,6 +46,38 @@ func (opts *RequestProcessorInvokeOptions) Validate(ctx context.Context) *cli.Fi
 	return errs
 }
 
+func (opts *RequestProcessorInvokeOptions) Exec(ctx context.Context, c *cli.Config) error {
+	requestprocessor, err := c.Request().RequestProcessors(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	if !requestprocessor.Status.IsReady() || requestprocessor.Status.Domain == "" {
+		return fmt.Errorf("request processor %q is not ready", opts.Name)
+	}
+
+	ingress, err := ingressServiceHost(c)
+	if err != nil {
+		return err
+	}
+
+	curlArgs := []string{ingress + opts.Path, "-H", fmt.Sprintf("Host: %s", requestprocessor.Status.Domain)}
+	if opts.ContentTypeJSON {
+		curlArgs = append(curlArgs, "-H", "Content-Type: application/json")
+	}
+	if opts.ContentTypeText {
+		curlArgs = append(curlArgs, "-H", "Content-Type: text/plain")
+	}
+	curlArgs = append(curlArgs, opts.BareArgs...)
+
+	curl := c.Exec(context.Background(), "curl", curlArgs...)
+
+	curl.Stdin = c.Stdin
+	curl.Stdout = c.Stdout
+	curl.Stderr = c.Stderr
+
+	return curl.Run()
+}
+
 func NewRequestProcessorInvokeCommand(c *cli.Config) *cobra.Command {
 	opts := &RequestProcessorInvokeOptions{}
 
@@ -72,37 +103,7 @@ func NewRequestProcessorInvokeCommand(c *cli.Config) *cobra.Command {
 			cli.BareDoubleDashArgs(&opts.BareArgs),
 		),
 		PreRunE: cli.ValidateOptions(opts),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			requestprocessor, err := c.Request().RequestProcessors(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
-			if err != nil {
-				return err
-			}
-			if !requestprocessor.Status.IsReady() || requestprocessor.Status.Domain == "" {
-				return fmt.Errorf("request processor %q is not ready", opts.Name)
-			}
-
-			ingress, err := ingressServiceHost(c)
-			if err != nil {
-				return err
-			}
-
-			curlArgs := []string{ingress + opts.Path, "-H", fmt.Sprintf("Host: %s", requestprocessor.Status.Domain)}
-			if opts.ContentTypeJSON {
-				curlArgs = append(curlArgs, "-H", "Content-Type: application/json")
-			}
-			if opts.ContentTypeText {
-				curlArgs = append(curlArgs, "-H", "Content-Type: text/plain")
-			}
-			curlArgs = append(curlArgs, opts.BareArgs...)
-
-			curl := c.Exec(context.Background(), "curl", curlArgs...)
-
-			curl.Stdin = os.Stdin
-			curl.Stdout = cmd.OutOrStdout()
-			curl.Stderr = cmd.OutOrStderr()
-
-			return curl.Run()
-		},
+		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

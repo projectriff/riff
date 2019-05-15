@@ -89,6 +89,45 @@ func (opts *FunctionCreateOptions) Validate(ctx context.Context) *cli.FieldError
 	return errs
 }
 
+func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) error {
+	function := &buildv1alpha1.Function{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: opts.Namespace,
+			Name:      opts.Name,
+		},
+		Spec: buildv1alpha1.FunctionSpec{
+			Image:    opts.Image,
+			Artifact: opts.Artifact,
+			Handler:  opts.Handler,
+			Invoker:  opts.Invoker,
+		},
+	}
+	if opts.CacheSize != "" {
+		quantity := resource.MustParse(opts.CacheSize)
+		function.Spec.CacheSize = &quantity
+	}
+	if opts.GitRepo != "" {
+		function.Spec.Source = buildv1alpha1.Source{
+			Git: &buildv1alpha1.GitSource{
+				URL:      opts.GitRepo,
+				Revision: opts.GitRevision,
+			},
+			SubPath: opts.SubPath,
+		}
+	}
+	if opts.LocalPath != "" {
+		// TODO implement
+		return fmt.Errorf("not implemented")
+	}
+
+	function, err := c.Build().Functions(opts.Namespace).Create(function)
+	if err != nil {
+		return err
+	}
+	c.Successf("Created function %q\n", function.Name)
+	return nil
+}
+
 func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
 	opts := &FunctionCreateOptions{}
 
@@ -100,44 +139,7 @@ func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
 			cli.NameArg(&opts.Name),
 		),
 		PreRunE: cli.ValidateOptions(opts),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			function := &buildv1alpha1.Function{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: opts.Namespace,
-					Name:      opts.Name,
-				},
-				Spec: buildv1alpha1.FunctionSpec{
-					Image:    opts.Image,
-					Artifact: opts.Artifact,
-					Handler:  opts.Handler,
-					Invoker:  opts.Invoker,
-				},
-			}
-			if opts.CacheSize != "" {
-				quantity := resource.MustParse(opts.CacheSize)
-				function.Spec.CacheSize = &quantity
-			}
-			if opts.GitRepo != "" {
-				function.Spec.Source = buildv1alpha1.Source{
-					Git: &buildv1alpha1.GitSource{
-						URL:      opts.GitRepo,
-						Revision: opts.GitRevision,
-					},
-					SubPath: opts.SubPath,
-				}
-			}
-			if opts.LocalPath != "" {
-				// TODO implement
-				return fmt.Errorf("not implemented")
-			}
-
-			function, err := c.Build().Functions(opts.Namespace).Create(function)
-			if err != nil {
-				return err
-			}
-			c.Successf("Created function %q\n", function.Name)
-			return nil
-		},
+		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
