@@ -384,7 +384,6 @@ func TestHelperProcess_RequestProcessorInvoke(t *testing.T) {
 	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
 		return
 	}
-	// TODO assert arguments
 	fmt.Fprintf(os.Stderr, "Command executed: %s\n", shellquote.Join(argsAfterBareDoubleDash(os.Args)...))
 	os.Exit(0)
 }
@@ -393,7 +392,6 @@ func TestHelperProcess_RequestProcessorInvokeError(t *testing.T) {
 	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
 		return
 	}
-	// TODO assert arguments
 	fmt.Fprintf(os.Stderr, "Command executed: %s\n", shellquote.Join(argsAfterBareDoubleDash(os.Args)...))
 	os.Exit(-1)
 }
