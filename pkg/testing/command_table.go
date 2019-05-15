@@ -19,6 +19,8 @@ package testing
 import (
 	"bytes"
 	"context"
+	"os"
+	"os/exec"
 	"path"
 	"reflect"
 	"strings"
@@ -84,6 +86,25 @@ type CommandTableRecord struct {
 	// WithReactors installs each ReactionFunc into each fake clientset. ReactionFuncs intercept
 	// each call to the clientset providing the ability to mutate the resource or inject an error.
 	WithReactors []ReactionFunc
+	// ExecHelper is a test case that will intercept exec calls receiving their arguments and
+	// environment. The helper is able to control stdio and the exit code of the process. Test
+	// cases that need to orchestrate multiple exec calls within a single test should instead use
+	// a mock.
+	//
+	// The value of ExecHelper must map to a test function in the same package taking the form
+	// `fmt.Sprintf("TestHelperProcess_%s", ExecHelper)``. The test function should distinguish
+	// between test exec invocations and vanilla test calls by the `GO_WANT_HELPER_PROCESS` env.
+	//
+	// ```
+	// func TestHelperProcess_Example(t *testing.T) {
+	//     if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
+	//         return
+	//     }
+	//     // insert custom behavior
+	//     os.Exit(0)
+	// }
+	// ```
+	ExecHelper string
 
 	// inputs
 
@@ -167,6 +188,9 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Comm
 		}
 		client := NewClient(ctr.GivenObjects...)
 		c.Client = client
+		if ctr.ExecHelper != "" {
+			c.Exec = fakeExecCommand(ctr.ExecHelper)
+		}
 
 		if ctr.CleanUp != nil {
 			defer func() {
@@ -376,5 +400,16 @@ func NewDeleteCollectionRef(action clientgotesting.DeleteCollectionAction) Delet
 		Resource:      action.GetResource().Resource,
 		Namespace:     action.GetNamespace(),
 		LabelSelector: action.GetListRestrictions().Labels.String(),
+	}
+}
+
+func fakeExecCommand(helper string) func(context.Context, string, ...string) *exec.Cmd {
+	// pattern derived from https://npf.io/2015/06/testing-exec-command/
+	return func(ctx context.Context, command string, args ...string) *exec.Cmd {
+		cs := []string{"-test.run=TestHelperProcess_" + helper, "--", command}
+		cs = append(cs, args...)
+		cmd := exec.CommandContext(ctx, os.Args[0], cs...)
+		cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
+		return cmd
 	}
 }
