@@ -6,9 +6,10 @@ require (
 	github.com/google/go-cmp v0.3.0
 	github.com/knative/pkg v0.0.0-20190417151928-418e675f88c2
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/projectriff/system v0.0.0-20190507151708-5b67cb48c8ea
+	github.com/projectriff/system v0.0.0-20190514230324-6e07cd39cb97
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.2
+	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	k8s.io/api v0.0.0-20190226173710-145d52631d00
 	k8s.io/apimachinery v0.0.0-20190221084156-01f179d85dbc
 	k8s.io/client-go v0.0.0-20190226174127-78295b709ec6

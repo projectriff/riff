@@ -46,8 +46,6 @@ func TestFunctionDeleteOptions(t *testing.T) {
 }
 
 func TestFunctionDeleteCommand(t *testing.T) {
-	t.Parallel()
-
 	functionName := "test-function"
 	functionAltName := "test-alt-function"
 	defaultNamespace := "default"

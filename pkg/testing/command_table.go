@@ -72,9 +72,6 @@ type CommandTableRecord struct {
 	// Focus executes this record skipping all unfocused records. The containing test will fail to
 	// prevent accidental check-in.
 	Focus bool
-	// Sequential disables parallel processing for this record. By default records in a table will
-	// execute in parallel.
-	Sequential bool
 
 	// environment
 
@@ -114,6 +111,9 @@ type CommandTableRecord struct {
 	// Args are passed directly to cobra before executing the command. This is the primary
 	// interface to control the behavior of the cli.
 	Args []string
+	// Stdin injects stub data to be read via os.Stdin for the command. Tests using stdin are
+	// forced to be sequential.
+	Stdin []byte
 
 	// side effects
 
@@ -181,9 +181,6 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Comm
 		if ctr.Skip {
 			t.SkipNow()
 		}
-		if !ctr.Sequential {
-			t.Parallel()
-		}
 
 		c := ctr.Config
 		if c == nil {
@@ -195,6 +192,13 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Comm
 			c.Exec = fakeExecCommand(ctr.ExecHelper)
 		}
 
+		if ctr.CleanUp != nil {
+			defer func() {
+				if err := ctr.CleanUp(t, c); err != nil {
+					t.Errorf("error during clean up: %s", err)
+				}
+			}()
+		}
 		if ctr.Prepare != nil {
 			if err := ctr.Prepare(t, c); err != nil {
 				t.Errorf("error during prepare: %s", err)
@@ -220,6 +224,10 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Comm
 
 		cmd.SetArgs(ctr.Args)
 		cmd.SetOutput(output)
+
+		if ctr.Stdin != nil {
+			c.Stdin = bytes.NewBuffer(ctr.Stdin)
+		}
 
 		err := cmd.Execute()
 
@@ -338,12 +346,6 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Comm
 
 		if ctr.Verify != nil {
 			ctr.Verify(t, output.String(), err)
-		}
-
-		if ctr.CleanUp != nil {
-			if err := ctr.CleanUp(t, c); err != nil {
-				t.Errorf("error during clean up: %s", err)
-			}
 		}
 	})
 }
