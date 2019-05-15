@@ -138,6 +138,10 @@ type CommandTableRecord struct {
 	// ShouldError indicates if the table record command execution should return an error. The
 	// test will fail if this value does not reflect the returned error.
 	ShouldError bool
+	// ExpectOutput performs a direct comparison of this content with the command's output showing
+	// a diff of any changes. The comparison is ignored for empty strings and ignores a leading
+	// new line.
+	ExpectOutput string
 	// Verify provides the command output and error for custom assertions.
 	Verify func(t *T, output string, err error)
 
@@ -340,6 +344,12 @@ func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Comm
 		if actual, expected := len(actions.DeleteCollections), len(ctr.ExpectDeleteCollections); actual > expected {
 			for _, extra := range actions.DeleteCollections[expected:] {
 				t.Errorf("Extra delete-collection: %#v", extra)
+			}
+		}
+
+		if ctr.ExpectOutput != "" {
+			if diff := cmp.Diff(strings.TrimPrefix(ctr.ExpectOutput, "\n"), output.String()); diff != "" {
+				t.Errorf("Unexpected output (-expected, +actual): %s", diff)
 			}
 		}
 

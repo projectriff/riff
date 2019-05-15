@@ -174,7 +174,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "docker-hub"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": "https://index.docker.io/v1/",
 						},
@@ -195,7 +195,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "gcr"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": "https://gcr.io",
 							"build.knative.dev/docker-1": "https://us.gcr.io",
@@ -230,7 +230,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "basic-auth"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": registryHost,
 						},
@@ -252,7 +252,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "docker-hub"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": "https://index.dockerhub.io/projectriff",
 						},
@@ -269,7 +269,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "basic-auth"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": registryHost,
 						},
@@ -291,7 +291,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "docker-hub"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": "https://index.dockerhub.io/projectriff",
 						},
@@ -320,7 +320,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "basic-auth"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": registryHost,
 						},
@@ -343,7 +343,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "docker-hub"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": "https://index.dockerhub.io/projectriff",
 						},
@@ -363,7 +363,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "basic-auth"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": registryHost,
 						},
@@ -401,7 +401,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "docker-hub"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": "https://index.docker.io/v1/",
 						},
@@ -431,7 +431,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "gcr"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": "https://gcr.io",
 							"build.knative.dev/docker-1": "https://us.gcr.io",
@@ -483,7 +483,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "docker-hub"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": "https://index.docker.io/v1/",
 						},
@@ -520,7 +520,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "docker-hub"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": "https://index.docker.io/v1/",
 						},
@@ -546,7 +546,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "docker-hub"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": "https://index.docker.io/v1/",
 						},
@@ -593,7 +593,7 @@ func TestCredentialSetCommand(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      credentialName,
 						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Labels:    map[string]string{credentialLabel: "docker-hub"},
 						Annotations: map[string]string{
 							"build.knative.dev/docker-0": "https://index.docker.io/v1/",
 						},
