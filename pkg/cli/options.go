@@ -45,6 +45,27 @@ func ValidateOptions(opts apis.Validatable) func(cmd *cobra.Command, args []stri
 	}
 }
 
+type Executable interface {
+	Exec(ctx context.Context, c *Config) error
+}
+
+// ExecOptions bridges a cobra RunE function to the Executable interface.  All flags and
+// arguments must already be bound, with explicit or default values, to the options struct being
+// validated. This function is typically used to define the RunE phase of a command.
+//
+// ```
+// cmd := &cobra.Command{
+// 	   ...
+// 	   RunE: cli.ExecOptions(c, opts),
+// }
+// ```
+func ExecOptions(c *Config, opts Executable) func(cmd *cobra.Command, args []string) error {
+	return func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+		return opts.Exec(ctx, c)
+	}
+}
+
 type ListOptions struct {
 	Namespace     string
 	AllNamespaces bool

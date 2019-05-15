@@ -34,6 +34,10 @@ func (opts *StreamListOptions) Validate(ctx context.Context) *cli.FieldError {
 	return nil
 }
 
+func (opts *StreamListOptions) Exec(ctx context.Context, c *cli.Config) error {
+	return fmt.Errorf("not implemented")
+}
+
 func NewStreamListCommand(c *cli.Config) *cobra.Command {
 	opts := &StreamListOptions{}
 
@@ -43,9 +47,7 @@ func NewStreamListCommand(c *cli.Config) *cobra.Command {
 		Example: "<todo>",
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return fmt.Errorf("not implemented")
-		},
+		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.AllNamespacesFlag(cmd, c, &opts.Namespace, &opts.AllNamespaces)

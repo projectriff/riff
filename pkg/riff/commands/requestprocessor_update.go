@@ -33,6 +33,10 @@ func (opts *RequestProcessorUpdateOptions) Validate(ctx context.Context) *cli.Fi
 	return nil
 }
 
+func (opts *RequestProcessorUpdateOptions) Exec(ctx context.Context, c *cli.Config) error {
+	return fmt.Errorf("not implemented")
+}
+
 func NewRequestProcessorUpdateCommand(c *cli.Config) *cobra.Command {
 	opts := &RequestProcessorUpdateOptions{}
 
@@ -42,9 +46,7 @@ func NewRequestProcessorUpdateCommand(c *cli.Config) *cobra.Command {
 		Example: "<todo>",
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return fmt.Errorf("not implemented")
-		},
+		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

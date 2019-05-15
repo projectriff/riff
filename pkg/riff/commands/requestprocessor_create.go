@@ -85,6 +85,51 @@ func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *cli.Fi
 	return errs
 }
 
+func (opts *RequestProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) error {
+	processor := &requestv1alpha1.RequestProcessor{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: opts.Namespace,
+			Name:      opts.Name,
+		},
+		Spec: requestv1alpha1.RequestProcessorSpec{
+			{
+				Name: opts.ItemName,
+				Template: &corev1.PodSpec{
+					Containers: []corev1.Container{{}},
+				},
+			},
+		},
+	}
+
+	if opts.ApplicationRef != "" {
+		processor.Spec[0].Build = &requestv1alpha1.Build{
+			ApplicationRef: opts.ApplicationRef,
+		}
+	}
+	if opts.FunctionRef != "" {
+		processor.Spec[0].Build = &requestv1alpha1.Build{
+			FunctionRef: opts.FunctionRef,
+		}
+	}
+	if opts.Image != "" {
+		processor.Spec[0].Template.Containers[0].Image = opts.Image
+	}
+
+	for _, env := range opts.Env {
+		if processor.Spec[0].Template.Containers[0].Env == nil {
+			processor.Spec[0].Template.Containers[0].Env = []corev1.EnvVar{}
+		}
+		processor.Spec[0].Template.Containers[0].Env = append(processor.Spec[0].Template.Containers[0].Env, parsers.EnvVar(env))
+	}
+
+	processor, err := c.Request().RequestProcessors(opts.Namespace).Create(processor)
+	if err != nil {
+		return err
+	}
+	c.Successf("Created request processor %q\n", processor.Name)
+	return nil
+}
+
 func NewRequestProcessorCreateCommand(c *cli.Config) *cobra.Command {
 	opts := &RequestProcessorCreateOptions{}
 
@@ -96,50 +141,7 @@ func NewRequestProcessorCreateCommand(c *cli.Config) *cobra.Command {
 			cli.NameArg(&opts.Name),
 		),
 		PreRunE: cli.ValidateOptions(opts),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			processor := &requestv1alpha1.RequestProcessor{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: opts.Namespace,
-					Name:      opts.Name,
-				},
-				Spec: requestv1alpha1.RequestProcessorSpec{
-					{
-						Name: opts.ItemName,
-						Template: &corev1.PodSpec{
-							Containers: []corev1.Container{{}},
-						},
-					},
-				},
-			}
-
-			if opts.ApplicationRef != "" {
-				processor.Spec[0].Build = &requestv1alpha1.Build{
-					ApplicationRef: opts.ApplicationRef,
-				}
-			}
-			if opts.FunctionRef != "" {
-				processor.Spec[0].Build = &requestv1alpha1.Build{
-					FunctionRef: opts.FunctionRef,
-				}
-			}
-			if opts.Image != "" {
-				processor.Spec[0].Template.Containers[0].Image = opts.Image
-			}
-
-			for _, env := range opts.Env {
-				if processor.Spec[0].Template.Containers[0].Env == nil {
-					processor.Spec[0].Template.Containers[0].Env = []corev1.EnvVar{}
-				}
-				processor.Spec[0].Template.Containers[0].Env = append(processor.Spec[0].Template.Containers[0].Env, parsers.EnvVar(env))
-			}
-
-			processor, err := c.Request().RequestProcessors(opts.Namespace).Create(processor)
-			if err != nil {
-				return err
-			}
-			c.Successf("Created request processor %q\n", processor.Name)
-			return nil
-		},
+		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

@@ -36,6 +36,22 @@ func (opts *RequestProcessorDeleteOptions) Validate(ctx context.Context) *cli.Fi
 	return errs
 }
 
+func (opts *RequestProcessorDeleteOptions) Exec(ctx context.Context, c *cli.Config) error {
+	client := c.Request().RequestProcessors(opts.Namespace)
+
+	if opts.All {
+		return client.DeleteCollection(nil, metav1.ListOptions{})
+	}
+
+	for _, name := range opts.Names {
+		if err := client.Delete(name, nil); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func NewRequestProcessorDeleteCommand(c *cli.Config) *cobra.Command {
 	opts := &RequestProcessorDeleteOptions{}
 
@@ -47,21 +63,7 @@ func NewRequestProcessorDeleteCommand(c *cli.Config) *cobra.Command {
 			cli.NamesArg(&opts.Names),
 		),
 		PreRunE: cli.ValidateOptions(opts),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			client := c.Request().RequestProcessors(opts.Namespace)
-
-			if opts.All {
-				return client.DeleteCollection(nil, metav1.ListOptions{})
-			}
-
-			for _, name := range opts.Names {
-				if err := client.Delete(name, nil); err != nil {
-					return err
-				}
-			}
-
-			return nil
-		},
+		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

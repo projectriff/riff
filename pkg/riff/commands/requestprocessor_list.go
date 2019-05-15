@@ -36,6 +36,23 @@ func (opts *RequestProcessorListOptions) Validate(ctx context.Context) *cli.Fiel
 	return errs
 }
 
+func (opts *RequestProcessorListOptions) Exec(ctx context.Context, c *cli.Config) error {
+	requestprocessors, err := c.Request().RequestProcessors(opts.Namespace).List(metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	if len(requestprocessors.Items) == 0 {
+		c.Infof("No request processors found.\n")
+	}
+	for _, requestprocessor := range requestprocessors.Items {
+		// TODO pick a generic table formatter
+		c.Printf("%s\n", requestprocessor.Name)
+	}
+
+	return nil
+}
+
 func NewRequestProcessorListCommand(c *cli.Config) *cobra.Command {
 	opts := &RequestProcessorListOptions{}
 
@@ -45,22 +62,7 @@ func NewRequestProcessorListCommand(c *cli.Config) *cobra.Command {
 		Example: "<todo>",
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			requestprocessors, err := c.Request().RequestProcessors(opts.Namespace).List(metav1.ListOptions{})
-			if err != nil {
-				return err
-			}
-
-			if len(requestprocessors.Items) == 0 {
-				c.Infof("No request processors found.\n")
-			}
-			for _, requestprocessor := range requestprocessors.Items {
-				// TODO pick a generic table formatter
-				c.Printf("%s\n", requestprocessor.Name)
-			}
-
-			return nil
-		},
+		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.AllNamespacesFlag(cmd, c, &opts.Namespace, &opts.AllNamespaces)

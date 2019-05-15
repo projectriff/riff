@@ -33,6 +33,10 @@ func (opts *ApplicationUpdateOptions) Validate(ctx context.Context) *cli.FieldEr
 	return nil
 }
 
+func (opts *ApplicationUpdateOptions) Exec(ctx context.Context, c *cli.Config) error {
+	return fmt.Errorf("not implemented")
+}
+
 func NewApplicationUpdateCommand(c *cli.Config) *cobra.Command {
 	opts := &ApplicationUpdateOptions{}
 
@@ -42,9 +46,7 @@ func NewApplicationUpdateCommand(c *cli.Config) *cobra.Command {
 		Example: "<todo>",
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return fmt.Errorf("not implemented")
-		},
+		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

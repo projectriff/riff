@@ -37,6 +37,31 @@ func (opts *CredentialDeleteOptions) Validate(ctx context.Context) *cli.FieldErr
 	return errs
 }
 
+func (opts *CredentialDeleteOptions) Exec(ctx context.Context, c *cli.Config) error {
+	client := c.Core().Secrets(opts.Namespace)
+
+	if opts.All {
+		err := client.DeleteCollection(nil, metav1.ListOptions{
+			LabelSelector: build.CredentialLabelKey,
+		})
+		if err != nil {
+			return err
+		}
+		c.Successf("Deleted credentials in namespace %q\n", opts.Namespace)
+		return nil
+	}
+
+	for _, name := range opts.Names {
+		// TODO check for the matching label before deleting
+		if err := client.Delete(name, nil); err != nil {
+			return err
+		}
+		c.Successf("Deleted credential %q\n", name)
+	}
+
+	return nil
+}
+
 func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 	opts := &CredentialDeleteOptions{}
 
@@ -48,30 +73,7 @@ func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 			cli.NamesArg(&opts.Names),
 		),
 		PreRunE: cli.ValidateOptions(opts),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			client := c.Core().Secrets(opts.Namespace)
-
-			if opts.All {
-				err := client.DeleteCollection(nil, metav1.ListOptions{
-					LabelSelector: build.CredentialLabelKey,
-				})
-				if err != nil {
-					return err
-				}
-				c.Successf("Deleted credentials in namespace %q\n", opts.Namespace)
-				return nil
-			}
-
-			for _, name := range opts.Names {
-				// TODO check for the matching label before deleting
-				if err := client.Delete(name, nil); err != nil {
-					return err
-				}
-				c.Successf("Deleted credential %q\n", name)
-			}
-
-			return nil
-		},
+		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

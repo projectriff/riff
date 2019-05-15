@@ -33,6 +33,10 @@ func (opts *ApplicationDeleteOptions) Validate(ctx context.Context) *cli.FieldEr
 	return nil
 }
 
+func (opts *ApplicationDeleteOptions) Exec(ctx context.Context, c *cli.Config) error {
+	return fmt.Errorf("not implemented")
+}
+
 func NewApplicationDeleteCommand(c *cli.Config) *cobra.Command {
 	opts := &ApplicationDeleteOptions{}
 
@@ -42,9 +46,7 @@ func NewApplicationDeleteCommand(c *cli.Config) *cobra.Command {
 		Example: "<todo>",
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return fmt.Errorf("not implemented")
-		},
+		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

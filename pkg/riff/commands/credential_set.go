@@ -89,6 +89,33 @@ func (opts *CredentialSetOptions) Validate(ctx context.Context) *cli.FieldError 
 	return errs
 }
 
+func (opts *CredentialSetOptions) Exec(ctx context.Context, c *cli.Config) error {
+	// get desired credential and image prefix
+	secret, defaultImagePrefix, err := makeCredential(opts)
+	if err != nil {
+		return err
+	}
+
+	if err := setCredential(c, opts, secret); err != nil {
+		return err
+	}
+	c.Successf("Set credentials %q\n", opts.Name)
+
+	if opts.SetDefaultImagePrefix {
+		if defaultImagePrefix == "" {
+			c.Infof("Unable to derive default image prefix\n")
+		} else {
+			err := setDefaultImagePrefix(c, opts, defaultImagePrefix)
+			if err != nil {
+				return err
+			}
+			c.Successf("Set default image prefix to %q\n", defaultImagePrefix)
+		}
+	}
+
+	return nil
+}
+
 func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 	opts := &CredentialSetOptions{}
 
@@ -115,32 +142,7 @@ func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 			},
 			cli.ValidateOptions(opts),
 		),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			// get desired credential and image prefix
-			secret, defaultImagePrefix, err := makeCredential(opts)
-			if err != nil {
-				return err
-			}
-
-			if err := setCredential(c, opts, secret); err != nil {
-				return err
-			}
-			c.Successf("Set credentials %q\n", opts.Name)
-
-			if opts.SetDefaultImagePrefix {
-				if defaultImagePrefix == "" {
-					c.Infof("Unable to derive default image prefix\n")
-				} else {
-					err := setDefaultImagePrefix(c, opts, defaultImagePrefix)
-					if err != nil {
-						return err
-					}
-					c.Successf("Set default image prefix to %q\n", defaultImagePrefix)
-				}
-			}
-
-			return nil
-		},
+		RunE: cli.ExecOptions(c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

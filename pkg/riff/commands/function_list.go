@@ -36,6 +36,23 @@ func (opts *FunctionListOptions) Validate(ctx context.Context) *cli.FieldError {
 	return errs
 }
 
+func (opts *FunctionListOptions) Exec(ctx context.Context, c *cli.Config) error {
+	functions, err := c.Build().Functions(opts.Namespace).List(metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	if len(functions.Items) == 0 {
+		c.Infof("No functions found.\n")
+	}
+	for _, function := range functions.Items {
+		// TODO pick a generic table formatter
+		c.Printf("%s\n", function.Name)
+	}
+
+	return nil
+}
+
 func NewFunctionListCommand(c *cli.Config) *cobra.Command {
 	opts := &FunctionListOptions{}
 
@@ -45,22 +62,7 @@ func NewFunctionListCommand(c *cli.Config) *cobra.Command {
 		Example: "<todo>",
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			functions, err := c.Build().Functions(opts.Namespace).List(metav1.ListOptions{})
-			if err != nil {
-				return err
-			}
-
-			if len(functions.Items) == 0 {
-				c.Infof("No functions found.\n")
-			}
-			for _, function := range functions.Items {
-				// TODO pick a generic table formatter
-				c.Printf("%s\n", function.Name)
-			}
-
-			return nil
-		},
+		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.AllNamespacesFlag(cmd, c, &opts.Namespace, &opts.AllNamespaces)
