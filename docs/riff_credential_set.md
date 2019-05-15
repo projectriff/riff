@@ -19,8 +19,13 @@ riff credential set [flags]
 ### Options
 
 ```
-  -h, --help               help for set
-  -n, --namespace string   <todo>
+      --docker-hub string          <todo>
+      --gcr string                 <todo>
+  -h, --help                       help for set
+  -n, --namespace string           <todo>
+      --registry string            <todo>
+      --registry-user string       <todo>
+      --set-default-image-prefix   <todo>
 ```
 
 ### Options inherited from parent commands

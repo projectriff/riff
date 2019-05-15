@@ -20,6 +20,7 @@ import (
 	"context"
 
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/system/pkg/apis/build"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -52,8 +53,7 @@ func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 
 			if opts.All {
 				return client.DeleteCollection(nil, metav1.ListOptions{
-					// TODO get label from riff system
-					LabelSelector: "projectriff.io/credential",
+					LabelSelector: build.CredentialLabelKey,
 				})
 			}
 
