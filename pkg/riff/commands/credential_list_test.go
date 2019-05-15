@@ -17,9 +17,6 @@
 package commands_test
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
@@ -69,31 +66,27 @@ func TestCredentialListCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name: "empty",
-			Args: []string{},
-			Verify: func(t *testing.T, output string, err error) {
-				if expected, actual := output, "No credentials found.\n"; actual != expected {
-					t.Errorf("expected output %q, actually %q", expected, actual)
-				}
-			},
+			Name:         "empty",
+			Args:         []string{},
+			ExpectOutput: "No credentials found.\n",
 		},
 		{
-			Name: "lists a secret",
+			Name: "lists an item",
 			Args: []string{},
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      credentialName,
-						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Name:        credentialName,
+						Namespace:   defaultNamespace,
+						Labels:      map[string]string{credentialLabel: "docker-hub"},
+						Annotations: map[string]string{"build.knative.dev/docker-0": "https://index.docker.io/v1/"},
 					},
 				},
 			},
-			Verify: func(t *testing.T, output string, err error) {
-				if actual, want := output, fmt.Sprintf("%s\n", credentialName); actual != want {
-					t.Errorf("expected output %q, actually %q", want, actual)
-				}
-			},
+			ExpectOutput: `
+NAME              TYPE         REGISTRY                      AGE
+test-credential   docker-hub   https://index.docker.io/v1/   <unknown>
+`,
 		},
 		{
 			Name: "filters by namespace",
@@ -101,17 +94,50 @@ func TestCredentialListCommand(t *testing.T) {
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      credentialName,
-						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Name:        credentialName,
+						Namespace:   defaultNamespace,
+						Labels:      map[string]string{credentialLabel: "docker-hub"},
+						Annotations: map[string]string{"build.knative.dev/docker-0": "https://index.docker.io/v1/"},
 					},
 				},
 			},
-			Verify: func(t *testing.T, output string, err error) {
-				if actual, want := output, "No credentials found.\n"; actual != want {
-					t.Errorf("expected output %q, actually %q", want, actual)
-				}
+			ExpectOutput: "No credentials found.\n",
+		},
+		{
+			Name: "table populates all columns",
+			Args: []string{},
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:        "registry",
+						Namespace:   defaultNamespace,
+						Labels:      map[string]string{credentialLabel: "basic-auth"},
+						Annotations: map[string]string{"build.knative.dev/docker-0": "https://registry.example.com/"},
+					},
+				},
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:        "docker-hub",
+						Namespace:   defaultNamespace,
+						Labels:      map[string]string{credentialLabel: "docker-hub"},
+						Annotations: map[string]string{"build.knative.dev/docker-0": "https://index.docker.io/v1/"},
+					},
+				},
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:        "gcr",
+						Namespace:   defaultNamespace,
+						Labels:      map[string]string{credentialLabel: "gcr"},
+						Annotations: map[string]string{"build.knative.dev/docker-0": "https://gcr.io"},
+					},
+				},
 			},
+			ExpectOutput: `
+NAME         TYPE         REGISTRY                        AGE
+docker-hub   docker-hub   https://index.docker.io/v1/     <unknown>
+gcr          gcr          https://gcr.io                  <unknown>
+registry     basic-auth   https://registry.example.com/   <unknown>
+`,
 		},
 		{
 			Name: "all namespace",
@@ -119,29 +145,26 @@ func TestCredentialListCommand(t *testing.T) {
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      credentialName,
-						Namespace: defaultNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Name:        credentialName,
+						Namespace:   defaultNamespace,
+						Labels:      map[string]string{credentialLabel: "docker-hub"},
+						Annotations: map[string]string{"build.knative.dev/docker-0": "https://index.docker.io/v1/"},
 					},
 				},
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      credentialOtherName,
-						Namespace: otherNamespace,
-						Labels:    map[string]string{credentialLabel: ""},
+						Name:        credentialOtherName,
+						Namespace:   otherNamespace,
+						Labels:      map[string]string{credentialLabel: "docker-hub"},
+						Annotations: map[string]string{"build.knative.dev/docker-0": "https://index.docker.io/v1/"},
 					},
 				},
 			},
-			Verify: func(t *testing.T, output string, err error) {
-				for _, expected := range []string{
-					fmt.Sprintf("%s\n", credentialName),
-					fmt.Sprintf("%s\n", credentialOtherName),
-				} {
-					if !strings.Contains(output, expected) {
-						t.Errorf("expected command output to contain %q, actually %q", expected, output)
-					}
-				}
-			},
+			ExpectOutput: `
+NAMESPACE         NAME                    TYPE         REGISTRY                      AGE
+default           test-credential         docker-hub   https://index.docker.io/v1/   <unknown>
+other-namespace   test-other-credential   docker-hub   https://index.docker.io/v1/   <unknown>
+`,
 		},
 		{
 			Name: "ignore non-riff secrets",
@@ -154,11 +177,7 @@ func TestCredentialListCommand(t *testing.T) {
 					},
 				},
 			},
-			Verify: func(t *testing.T, output string, err error) {
-				if expected, actual := output, "No credentials found.\n"; actual != expected {
-					t.Errorf("expected output %q, actually %q", expected, actual)
-				}
-			},
+			ExpectOutput: "No credentials found.\n",
 		},
 		{
 			Name: "list error",

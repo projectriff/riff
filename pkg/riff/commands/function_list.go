@@ -21,8 +21,12 @@ import (
 	"fmt"
 
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/riff/pkg/cli/printers"
+	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1beta1 "k8s.io/apimachinery/pkg/apis/meta/v1beta1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type FunctionListOptions struct {
@@ -54,17 +58,65 @@ func NewFunctionListCommand(c *cli.Config) *cobra.Command {
 
 			if len(functions.Items) == 0 {
 				fmt.Fprintln(cmd.OutOrStdout(), "No functions found.")
-			}
-			for _, function := range functions.Items {
-				// TODO pick a generic table formatter
-				fmt.Fprintln(cmd.OutOrStdout(), function.Name)
+				return nil
 			}
 
-			return nil
+			tablePrinter := printers.NewTablePrinter(printers.PrintOptions{
+				WithNamespace: opts.AllNamespaces,
+			}).With(func(h printers.PrintHandler) {
+				columns := printFunctionColumns()
+				h.TableHandler(columns, printFunctionList)
+				h.TableHandler(columns, printFunction)
+			})
+
+			functions = functions.DeepCopy()
+			cli.SortByNamespaceAndName(functions.Items)
+
+			return tablePrinter.PrintObj(functions, cmd.OutOrStdout())
 		},
 	}
 
 	cli.AllNamespacesFlag(cmd, c, &opts.Namespace, &opts.AllNamespaces)
 
 	return cmd
+}
+
+func printFunctionList(functions *buildv1alpha1.FunctionList, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
+	rows := make([]metav1beta1.TableRow, 0, len(functions.Items))
+	for i := range functions.Items {
+		r, err := printFunction(&functions.Items[i], opts)
+		if err != nil {
+			return nil, err
+		}
+		rows = append(rows, r...)
+	}
+	return rows, nil
+}
+
+func printFunction(function *buildv1alpha1.Function, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
+	row := metav1beta1.TableRow{
+		Object: runtime.RawExtension{Object: function},
+	}
+	row.Cells = append(row.Cells,
+		function.Name,
+		cli.FormatEmptyString(function.Status.LatestImage),
+		cli.FormatEmptyString(function.Spec.Artifact),
+		cli.FormatEmptyString(function.Spec.Handler),
+		cli.FormatEmptyString(function.Spec.Invoker),
+		cli.FormatConditionStatus(function.Status.GetCondition(buildv1alpha1.FunctionConditionSucceeded)),
+		cli.FormatTimestampSince(function.CreationTimestamp),
+	)
+	return []metav1beta1.TableRow{row}, nil
+}
+
+func printFunctionColumns() []metav1beta1.TableColumnDefinition {
+	return []metav1beta1.TableColumnDefinition{
+		{Name: "Name", Type: "string"},
+		{Name: "Latest Image", Type: "string"},
+		{Name: "Artifact", Type: "string"},
+		{Name: "Handler", Type: "string"},
+		{Name: "Invoker", Type: "string"},
+		{Name: "Succeeded", Type: "string"},
+		{Name: "Age", Type: "string"},
+	}
 }

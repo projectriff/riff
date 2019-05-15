@@ -158,15 +158,15 @@ func makeCredential(opts *CredentialSetOptions) (*corev1.Secret, string, error) 
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: opts.Namespace,
 			Name:      opts.Name,
-			Labels: map[string]string{
-				build.CredentialLabelKey: "",
-			},
 		},
 	}
 	defaultPrefix := ""
 
 	switch {
 	case opts.DockerHubId != "":
+		secret.Labels = map[string]string{
+			build.CredentialLabelKey: "docker-hub",
+		}
 		secret.Annotations = map[string]string{
 			"build.knative.dev/docker-0": "https://index.docker.io/v1/",
 		}
@@ -181,6 +181,9 @@ func makeCredential(opts *CredentialSetOptions) (*corev1.Secret, string, error) 
 		token, err := ioutil.ReadFile(opts.GcrTokenPath)
 		if err != nil {
 			return nil, "", err
+		}
+		secret.Labels = map[string]string{
+			build.CredentialLabelKey: "gcr",
 		}
 		secret.Annotations = map[string]string{
 			"build.knative.dev/docker-0": "https://gcr.io",
@@ -201,6 +204,9 @@ func makeCredential(opts *CredentialSetOptions) (*corev1.Secret, string, error) 
 		defaultPrefix = fmt.Sprintf("gcr.io/%s", tokenMap["project_id"])
 
 	case opts.RegistryUser != "":
+		secret.Labels = map[string]string{
+			build.CredentialLabelKey: "basic-auth",
+		}
 		secret.Annotations = map[string]string{
 			"build.knative.dev/docker-0": opts.Registry,
 		}
@@ -265,6 +271,7 @@ func setCredential(c *cli.Config, opts *CredentialSetOptions, desiredSecret *cor
 
 	// update existing secret
 	existing = existing.DeepCopy()
+	existing.Labels[build.CredentialLabelKey] = desiredSecret.Labels[build.CredentialLabelKey]
 	existing.Annotations = desiredSecret.Annotations
 	existing.Type = desiredSecret.Type
 	existing.StringData = desiredSecret.StringData

@@ -17,13 +17,12 @@
 package commands_test
 
 import (
-	"fmt"
-	"strings"
-
+	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -67,16 +66,12 @@ func TestRequestProcessorListCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name: "empty",
-			Args: []string{},
-			Verify: func(t *testing.T, output string, err error) {
-				if expected, actual := output, "No request processors found.\n"; actual != expected {
-					t.Errorf("expected output %q, actually %q", expected, actual)
-				}
-			},
+			Name:         "empty",
+			Args:         []string{},
+			ExpectOutput: "No request processors found.\n",
 		},
 		{
-			Name: "lists a secret",
+			Name: "lists an item",
 			Args: []string{},
 			GivenObjects: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
@@ -86,11 +81,10 @@ func TestRequestProcessorListCommand(t *testing.T) {
 					},
 				},
 			},
-			Verify: func(t *testing.T, output string, err error) {
-				if actual, want := output, fmt.Sprintf("%s\n", requestprocessorsName); actual != want {
-					t.Errorf("expected output %q, actually %q", want, actual)
-				}
-			},
+			ExpectOutput: `
+NAME                     TYPE        REF         DOMAIN    READY       AGE
+test-requestprocessors   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
+`,
 		},
 		{
 			Name: "filters by namespace",
@@ -103,11 +97,7 @@ func TestRequestProcessorListCommand(t *testing.T) {
 					},
 				},
 			},
-			Verify: func(t *testing.T, output string, err error) {
-				if actual, want := output, "No request processors found.\n"; actual != want {
-					t.Errorf("expected output %q, actually %q", want, actual)
-				}
-			},
+			ExpectOutput: "No request processors found.\n",
 		},
 		{
 			Name: "all namespace",
@@ -126,16 +116,84 @@ func TestRequestProcessorListCommand(t *testing.T) {
 					},
 				},
 			},
-			Verify: func(t *testing.T, output string, err error) {
-				for _, expected := range []string{
-					fmt.Sprintf("%s\n", requestprocessorsName),
-					fmt.Sprintf("%s\n", requestprocessorOtherName),
-				} {
-					if !strings.Contains(output, expected) {
-						t.Errorf("expected command output to contain %q, actually %q", expected, output)
-					}
-				}
+			ExpectOutput: `
+NAMESPACE         NAME                           TYPE        REF         DOMAIN    READY       AGE
+default           test-requestprocessors         <unknown>   <unknown>   <empty>   <unknown>   <unknown>
+other-namespace   test-other-requestprocessors   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
+`,
+		},
+		{
+			Name: "table populates all columns",
+			Args: []string{},
+			GivenObjects: []runtime.Object{
+				&requestv1alpha1.RequestProcessor{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "img",
+						Namespace: defaultNamespace,
+					},
+					Spec: requestv1alpha1.RequestProcessorSpec{
+						{
+							Template: &corev1.PodSpec{
+								Containers: []corev1.Container{
+									{Image: "projectriff/upper"},
+								},
+							},
+						},
+					},
+					Status: requestv1alpha1.RequestProcessorStatus{
+						Status: duckv1alpha1.Status{
+							Conditions: []duckv1alpha1.Condition{
+								{Type: requestv1alpha1.RequestProcessorConditionReady, Status: "True"},
+							},
+						},
+						Domain: "image.default.example.com",
+					},
+				},
+				&requestv1alpha1.RequestProcessor{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "app",
+						Namespace: defaultNamespace,
+					},
+					Spec: requestv1alpha1.RequestProcessorSpec{
+						{
+							Build: &requestv1alpha1.Build{ApplicationRef: "petclinic"},
+						},
+					},
+					Status: requestv1alpha1.RequestProcessorStatus{
+						Status: duckv1alpha1.Status{
+							Conditions: []duckv1alpha1.Condition{
+								{Type: requestv1alpha1.RequestProcessorConditionReady, Status: "True"},
+							},
+						},
+						Domain: "app.default.example.com",
+					},
+				},
+				&requestv1alpha1.RequestProcessor{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "func",
+						Namespace: defaultNamespace,
+					},
+					Spec: requestv1alpha1.RequestProcessorSpec{
+						{
+							Build: &requestv1alpha1.Build{FunctionRef: "square"},
+						},
+					},
+					Status: requestv1alpha1.RequestProcessorStatus{
+						Status: duckv1alpha1.Status{
+							Conditions: []duckv1alpha1.Condition{
+								{Type: requestv1alpha1.RequestProcessorConditionReady, Status: "True"},
+							},
+						},
+						Domain: "func.default.example.com",
+					},
+				},
 			},
+			ExpectOutput: `
+NAME   TYPE          REF                 DOMAIN                      READY   AGE
+app    application   petclinic           app.default.example.com     True    <unknown>
+func   function      square              func.default.example.com    True    <unknown>
+img    image         projectriff/upper   image.default.example.com   True    <unknown>
+`,
 		},
 		{
 			Name: "list error",
