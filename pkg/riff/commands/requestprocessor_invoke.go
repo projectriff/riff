@@ -29,7 +29,7 @@ import (
 
 type RequestProcessorInvokeOptions struct {
 	cli.ResourceOptions
-	ContentTypeJson bool
+	ContentTypeJSON bool
 	ContentTypeText bool
 	Path            string
 	BareArgs        []string
@@ -40,8 +40,8 @@ func (opts *RequestProcessorInvokeOptions) Validate(ctx context.Context) *cli.Fi
 
 	errs = errs.Also(opts.ResourceOptions.Validate(ctx))
 
-	if opts.ContentTypeJson && opts.ContentTypeText {
-		errs = errs.Also(cli.ErrMultipleOneOf("json", "text"))
+	if opts.ContentTypeJSON && opts.ContentTypeText {
+		errs = errs.Also(cli.ErrMultipleOneOf(cli.JSONFlagName, cli.TextFlagName))
 	}
 
 	return errs
@@ -87,7 +87,7 @@ func NewRequestProcessorInvokeCommand(c *cli.Config) *cobra.Command {
 			}
 
 			curlArgs := []string{ingress + opts.Path, "-H", fmt.Sprintf("Host: %s", requestprocessor.Status.Domain)}
-			if opts.ContentTypeJson {
+			if opts.ContentTypeJSON {
 				curlArgs = append(curlArgs, "-H", "Content-Type: application/json")
 			}
 			if opts.ContentTypeText {
@@ -106,8 +106,8 @@ func NewRequestProcessorInvokeCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().BoolVar(&opts.ContentTypeJson, "json", false, "<todo>")
-	cmd.Flags().BoolVar(&opts.ContentTypeText, "text", false, "<todo>")
+	cmd.Flags().BoolVar(&opts.ContentTypeJSON, cli.StripDash(cli.JSONFlagName), false, "<todo>")
+	cmd.Flags().BoolVar(&opts.ContentTypeText, cli.StripDash(cli.TextFlagName), false, "<todo>")
 
 	return cmd
 }

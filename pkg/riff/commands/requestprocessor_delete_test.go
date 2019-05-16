@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
@@ -47,7 +48,7 @@ func TestRequestProcessorDeleteOptions(t *testing.T) {
 
 func TestRequestProcessorDeleteCommand(t *testing.T) {
 	requestprocessorName := "test-function"
-	requestprocessorAltName := "test-alt-function"
+	requestprocessorOtherName := "test-other-function"
 	defaultNamespace := "default"
 
 	table := testing.CommandTable{
@@ -58,7 +59,7 @@ func TestRequestProcessorDeleteCommand(t *testing.T) {
 		},
 		{
 			Name: "delete all requestprocessors",
-			Args: []string{"--all"},
+			Args: []string{cli.AllFlagName},
 			GivenObjects: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
@@ -93,7 +94,7 @@ func TestRequestProcessorDeleteCommand(t *testing.T) {
 		},
 		{
 			Name: "delete request processors",
-			Args: []string{requestprocessorName, requestprocessorAltName},
+			Args: []string{requestprocessorName, requestprocessorOtherName},
 			GivenObjects: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
@@ -103,7 +104,7 @@ func TestRequestProcessorDeleteCommand(t *testing.T) {
 				},
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      requestprocessorAltName,
+						Name:      requestprocessorOtherName,
 						Namespace: defaultNamespace,
 					},
 				},
@@ -117,7 +118,7 @@ func TestRequestProcessorDeleteCommand(t *testing.T) {
 				Group:     "request.projectriff.io",
 				Resource:  "requestprocessors",
 				Namespace: defaultNamespace,
-				Name:      requestprocessorAltName,
+				Name:      requestprocessorOtherName,
 			}},
 		},
 		{

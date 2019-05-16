@@ -40,7 +40,7 @@ func TestListOptions(t *testing.T) {
 		{
 			Name:             "neither",
 			Options:          &cli.ListOptions{},
-			ExpectFieldError: cli.ErrMissingOneOf("namespace", "all-namespaces"),
+			ExpectFieldError: cli.ErrMissingOneOf(cli.NamespaceFlagName, cli.AllNamespacesFlagName),
 		},
 		{
 			Name: "both",
@@ -48,7 +48,7 @@ func TestListOptions(t *testing.T) {
 				Namespace:     "default",
 				AllNamespaces: true,
 			},
-			ExpectFieldError: cli.ErrMultipleOneOf("namespace", "all-namespaces"),
+			ExpectFieldError: cli.ErrMultipleOneOf(cli.NamespaceFlagName, cli.AllNamespacesFlagName),
 		},
 	}
 
@@ -61,8 +61,8 @@ func TestResourceOptions(t *testing.T) {
 			Name:    "default",
 			Options: &cli.ResourceOptions{},
 			ExpectFieldError: (&cli.FieldError{}).Also(
-				cli.ErrMissingField("namespace"),
-				cli.ErrMissingField("name"),
+				cli.ErrMissingField(cli.NamespaceFlagName),
+				cli.ErrMissingField(cli.NameArgumentName),
 			),
 		},
 		{
@@ -78,14 +78,14 @@ func TestResourceOptions(t *testing.T) {
 			Options: &cli.ResourceOptions{
 				Name: "push-credentials",
 			},
-			ExpectFieldError: cli.ErrMissingField("namespace"),
+			ExpectFieldError: cli.ErrMissingField(cli.NamespaceFlagName),
 		},
 		{
 			Name: "missing name",
 			Options: &cli.ResourceOptions{
 				Namespace: "default",
 			},
-			ExpectFieldError: cli.ErrMissingField("name"),
+			ExpectFieldError: cli.ErrMissingField(cli.NameArgumentName),
 		},
 	}
 
@@ -99,7 +99,7 @@ func TestDeleteOptions(t *testing.T) {
 			Options: &cli.DeleteOptions{
 				Namespace: "default",
 			},
-			ExpectFieldError: cli.ErrMissingOneOf("all", "names"),
+			ExpectFieldError: cli.ErrMissingOneOf(cli.AllFlagName, cli.NamesArgumentName),
 		},
 		{
 			Name: "single name",
@@ -123,7 +123,7 @@ func TestDeleteOptions(t *testing.T) {
 				Namespace: "default",
 				Names:     []string{"my.function"},
 			},
-			ExpectFieldError: cli.ErrInvalidValue("my.function", cli.CurrentField).ViaFieldIndex("names", 0),
+			ExpectFieldError: cli.ErrInvalidValue("my.function", cli.CurrentField).ViaFieldIndex(cli.NamesArgumentName, 0),
 		},
 		{
 			Name: "all",
@@ -140,7 +140,7 @@ func TestDeleteOptions(t *testing.T) {
 				Names:     []string{"my-function"},
 				All:       true,
 			},
-			ExpectFieldError: cli.ErrMultipleOneOf("all", "names"),
+			ExpectFieldError: cli.ErrMultipleOneOf(cli.AllFlagName, cli.NamesArgumentName),
 		},
 	}
 

@@ -51,9 +51,9 @@ func TestRequestProcessorListOptions(t *testing.T) {
 
 func TestRequestProcessorListCommand(t *testing.T) {
 	requestprocessorsName := "test-requestprocessors"
-	requestprocessorsAltName := "test-alt-requestprocessors"
+	requestprocessorOtherName := "test-other-requestprocessors"
 	defaultNamespace := "default"
-	altNamespace := "alt-namespace"
+	otherNamespace := "other-namespace"
 
 	table := testing.CommandTable{
 		{
@@ -94,7 +94,7 @@ func TestRequestProcessorListCommand(t *testing.T) {
 		},
 		{
 			Name: "filters by namespace",
-			Args: []string{"--namespace", altNamespace},
+			Args: []string{cli.NamespaceFlagName, otherNamespace},
 			GivenObjects: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
@@ -111,7 +111,7 @@ func TestRequestProcessorListCommand(t *testing.T) {
 		},
 		{
 			Name: "all namespace",
-			Args: []string{"--all-namespaces"},
+			Args: []string{cli.AllNamespacesFlagName},
 			GivenObjects: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
@@ -121,15 +121,15 @@ func TestRequestProcessorListCommand(t *testing.T) {
 				},
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      requestprocessorsAltName,
-						Namespace: altNamespace,
+						Name:      requestprocessorOtherName,
+						Namespace: otherNamespace,
 					},
 				},
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
 					fmt.Sprintf("%s\n", requestprocessorsName),
-					fmt.Sprintf("%s\n", requestprocessorsAltName),
+					fmt.Sprintf("%s\n", requestprocessorOtherName),
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)

@@ -17,17 +17,14 @@
 package commands
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"syscall"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/system/pkg/apis/build"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
 	corev1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,11 +33,11 @@ import (
 type CredentialSetOptions struct {
 	cli.ResourceOptions
 	DockerHubId           string
-	DockerHubPassword     string
+	DockerHubPassword     []byte
 	GcrTokenPath          string
 	Registry              string
 	RegistryUser          string
-	RegistryPassword      string
+	RegistryPassword      []byte
 	SetDefaultImagePrefix bool
 }
 
@@ -54,21 +51,21 @@ func (opts *CredentialSetOptions) Validate(ctx context.Context) *cli.FieldError 
 	unused := []string{}
 
 	if opts.DockerHubId != "" {
-		used = append(used, "docker-hub")
+		used = append(used, cli.DockerHubFlagName)
 	} else {
-		unused = append(unused, "docker-hub")
+		unused = append(unused, cli.DockerHubFlagName)
 	}
 
 	if opts.GcrTokenPath != "" {
-		used = append(used, "gcr")
+		used = append(used, cli.GcrFlagName)
 	} else {
-		unused = append(unused, "gcr")
+		unused = append(unused, cli.GcrFlagName)
 	}
 
 	if opts.Registry != "" {
-		used = append(used, "registry")
+		used = append(used, cli.RegistryFlagName)
 	} else {
-		unused = append(unused, "registry")
+		unused = append(unused, cli.RegistryFlagName)
 	}
 
 	if len(used) == 0 {
@@ -77,16 +74,16 @@ func (opts *CredentialSetOptions) Validate(ctx context.Context) *cli.FieldError 
 		errs = errs.Also(cli.ErrMultipleOneOf(used...))
 	}
 
-	if opts.DockerHubId != "" && opts.DockerHubPassword == "" {
-		errs = errs.Also(cli.ErrMissingField("docker-hub-password"))
+	if opts.DockerHubId != "" && len(opts.DockerHubPassword) == 0 {
+		errs = errs.Also(cli.ErrMissingField("<docker-hub-password>"))
 	}
 
-	if opts.RegistryPassword != "" && opts.RegistryUser == "" {
-		errs = errs.Also(cli.ErrMissingField("registry-user"))
+	if len(opts.RegistryPassword) != 0 && opts.RegistryUser == "" {
+		errs = errs.Also(cli.ErrMissingField(cli.RegistryUserFlagName))
 	}
 
 	if opts.SetDefaultImagePrefix && opts.Registry != "" {
-		errs = errs.Also(cli.ErrInvalidValue("cannot be used with registry", "set-default-image-prefix"))
+		errs = errs.Also(cli.ErrInvalidValue("cannot be used with registry", cli.SetDefaultImagePrefixFlagName))
 	}
 
 	return errs
@@ -102,43 +99,22 @@ func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
-		PreRunE: func(cmd *cobra.Command, args []string) error {
-			if opts.DockerHubId != "" || opts.RegistryUser != "" {
-				// capture option from stdin
-
-				var prompt string
-				var value *string
-
+		PreRunE: cli.Sequence(
+			func(cmd *cobra.Command, args []string) error {
 				if opts.DockerHubId != "" {
-					prompt = "Docker Hub password"
-					value = &opts.DockerHubPassword
+					if err := cli.ReadStdin(c, &opts.DockerHubPassword, "Docker Hub password")(cmd, args); err != nil {
+						return err
+					}
 				}
 				if opts.RegistryUser != "" {
-					prompt = "Registry password"
-					value = &opts.RegistryPassword
-				}
-
-				if terminal.IsTerminal(int(syscall.Stdin)) {
-					fmt.Printf("%s: ", prompt)
-					res, err := terminal.ReadPassword(int(syscall.Stdin))
-					fmt.Println("")
-					if err != nil {
+					if err := cli.ReadStdin(c, &opts.RegistryPassword, "Registry password")(cmd, args); err != nil {
 						return err
 					}
-					*value = string(res)
-				} else {
-					reader := bufio.NewReader(c.Stdin)
-					res, err := ioutil.ReadAll(reader)
-					if err != nil {
-						return err
-					}
-					*value = string(res)
 				}
-			}
-
-			// continue with option validation
-			return cli.ValidateOptions(opts)(cmd, args)
-		},
+				return nil
+			},
+			cli.ValidateOptions(opts),
+		),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// get desired credential and image prefix
 			secret, defaultImagePrefix, err := makeCredential(opts)
@@ -168,11 +144,11 @@ func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().StringVar(&opts.DockerHubId, "docker-hub", "", "<todo>")
-	cmd.Flags().StringVar(&opts.GcrTokenPath, "gcr", "", "<todo>")
-	cmd.Flags().StringVar(&opts.Registry, "registry", "", "<todo>")
-	cmd.Flags().StringVar(&opts.RegistryUser, "registry-user", "", "<todo>")
-	cmd.Flags().BoolVar(&opts.SetDefaultImagePrefix, "set-default-image-prefix", false, "<todo>")
+	cmd.Flags().StringVar(&opts.DockerHubId, cli.StripDash(cli.DockerHubFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.GcrTokenPath, cli.StripDash(cli.GcrFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.Registry, cli.StripDash(cli.RegistryFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.RegistryUser, cli.StripDash(cli.RegistryUserFlagName), "", "<todo>")
+	cmd.Flags().BoolVar(&opts.SetDefaultImagePrefix, cli.StripDash(cli.SetDefaultImagePrefixFlagName), false, "<todo>")
 
 	return cmd
 }
@@ -197,7 +173,7 @@ func makeCredential(opts *CredentialSetOptions) (*corev1.Secret, string, error) 
 		secret.Type = corev1.SecretTypeBasicAuth
 		secret.StringData = map[string]string{
 			"username": opts.DockerHubId,
-			"password": opts.DockerHubPassword,
+			"password": string(opts.DockerHubPassword),
 		}
 		defaultPrefix = fmt.Sprintf("docker.io/%s", opts.DockerHubId)
 
@@ -231,7 +207,7 @@ func makeCredential(opts *CredentialSetOptions) (*corev1.Secret, string, error) 
 		secret.Type = corev1.SecretTypeBasicAuth
 		secret.StringData = map[string]string{
 			"username": opts.RegistryUser,
-			"password": opts.RegistryPassword,
+			"password": string(opts.RegistryPassword),
 		}
 		// unable to determine default prefix for registry
 	}
