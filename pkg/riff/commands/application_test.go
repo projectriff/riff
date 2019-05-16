@@ -14,25 +14,20 @@
  * limitations under the License.
  */
 
-package commands
+package commands_test
 
 import (
-	"github.com/projectriff/riff/pkg/cli"
-	"github.com/spf13/cobra"
+	"github.com/projectriff/riff/pkg/riff/commands"
+	"github.com/projectriff/riff/pkg/testing"
 )
 
-func NewApplicationCommand(c *cli.Config) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:     "application",
-		Short:   "<todo>",
-		Args:    cli.Args(),
-		Aliases: []string{"applications", "app", "apps"},
+func TestApplicationCommand(t *testing.T) {
+	table := testing.CommandTable{
+		{
+			Name: "empty",
+			Args: []string{},
+		},
 	}
 
-	cmd.AddCommand(NewApplicationListCommand(c))
-	cmd.AddCommand(NewApplicationCreateCommand(c))
-	cmd.AddCommand(NewApplicationUpdateCommand(c))
-	cmd.AddCommand(NewApplicationDeleteCommand(c))
-
-	return cmd
+	table.Run(t, commands.NewApplicationCommand)
 }
