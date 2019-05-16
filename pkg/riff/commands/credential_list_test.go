@@ -52,9 +52,9 @@ func TestCredentialListOptions(t *testing.T) {
 
 func TestCredentialListCommand(t *testing.T) {
 	credentialName := "test-credential"
-	credentialAltName := "test-alt-credential"
+	credentialOtherName := "test-other-credential"
 	defaultNamespace := "default"
-	altNamespace := "alt-namespace"
+	otherNamespace := "other-namespace"
 	credentialLabel := build.CredentialLabelKey
 
 	table := testing.CommandTable{
@@ -97,7 +97,7 @@ func TestCredentialListCommand(t *testing.T) {
 		},
 		{
 			Name: "filters by namespace",
-			Args: []string{"--namespace", altNamespace},
+			Args: []string{cli.NamespaceFlagName, otherNamespace},
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
@@ -115,7 +115,7 @@ func TestCredentialListCommand(t *testing.T) {
 		},
 		{
 			Name: "all namespace",
-			Args: []string{"--all-namespaces"},
+			Args: []string{cli.AllNamespacesFlagName},
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
@@ -126,8 +126,8 @@ func TestCredentialListCommand(t *testing.T) {
 				},
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      credentialAltName,
-						Namespace: altNamespace,
+						Name:      credentialOtherName,
+						Namespace: otherNamespace,
 						Labels:    map[string]string{credentialLabel: ""},
 					},
 				},
@@ -135,7 +135,7 @@ func TestCredentialListCommand(t *testing.T) {
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
 					fmt.Sprintf("%s\n", credentialName),
-					fmt.Sprintf("%s\n", credentialAltName),
+					fmt.Sprintf("%s\n", credentialOtherName),
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)

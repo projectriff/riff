@@ -63,13 +63,13 @@ func NewFunctionUpdateCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().StringVar(&opts.Image, "image", "", "<todo>")
-	cmd.Flags().StringVar(&opts.Artifact, "artifact", "", "<todo>")
-	cmd.Flags().StringVar(&opts.Handler, "handler", "", "<todo>")
-	cmd.Flags().StringVar(&opts.Invoker, "invoker", "", "<todo>")
-	cmd.Flags().StringVar(&opts.GitRepo, "git-repo", "", "<todo>")
-	cmd.Flags().StringVar(&opts.GitRevision, "git-revision", "", "<todo>")
-	cmd.Flags().StringVar(&opts.SubPath, "sub-path", "", "<todo>")
+	cmd.Flags().StringVar(&opts.Image, cli.StripDash(cli.ImageFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.Artifact, cli.StripDash(cli.ArtifactFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.Handler, cli.StripDash(cli.HandlerFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.Invoker, cli.StripDash(cli.InvokerFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.GitRepo, cli.StripDash(cli.GitRepoFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.GitRevision, cli.StripDash(cli.GitRevisionFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.SubPath, cli.StripDash(cli.SubPathFlagName), "", "<todo>")
 
 	return cmd
 }

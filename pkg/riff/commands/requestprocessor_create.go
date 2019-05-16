@@ -48,9 +48,9 @@ func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *cli.Fi
 	errs = errs.Also(opts.ResourceOptions.Validate((ctx)))
 
 	if opts.ItemName == "" {
-		errs = errs.Also(cli.ErrMissingField("item"))
+		errs = errs.Also(cli.ErrMissingField(cli.ItemFlagName))
 	} else {
-		errs = errs.Also(validation.K8sName(opts.ItemName, "item"))
+		errs = errs.Also(validation.K8sName(opts.ItemName, cli.ItemFlagName))
 	}
 
 	// application-ref, build-ref and image are mutually exclusive
@@ -58,21 +58,21 @@ func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *cli.Fi
 	unused := []string{}
 
 	if opts.ApplicationRef != "" {
-		used = append(used, "application-ref")
+		used = append(used, cli.ApplicationRefFlagName)
 	} else {
-		unused = append(unused, "application-ref")
+		unused = append(unused, cli.ApplicationRefFlagName)
 	}
 
 	if opts.FunctionRef != "" {
-		used = append(used, "function-ref")
+		used = append(used, cli.FunctionRefFlagName)
 	} else {
-		unused = append(unused, "function-ref")
+		unused = append(unused, cli.FunctionRefFlagName)
 	}
 
 	if opts.Image != "" {
-		used = append(used, "image")
+		used = append(used, cli.ImageFlagName)
 	} else {
-		unused = append(unused, "image")
+		unused = append(unused, cli.ImageFlagName)
 	}
 
 	if len(used) == 0 {
@@ -81,7 +81,7 @@ func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *cli.Fi
 		errs = errs.Also(cli.ErrMultipleOneOf(used...))
 	}
 
-	errs = errs.Also(validation.EnvVars(opts.Env, "env"))
+	errs = errs.Also(validation.EnvVars(opts.Env, cli.EnvFlagName))
 
 	return errs
 }
@@ -144,11 +144,11 @@ func NewRequestProcessorCreateCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().StringVar(&opts.ItemName, "item", "", "<todo>")
-	cmd.Flags().StringVar(&opts.Image, "image", "", "<todo>")
-	cmd.Flags().StringVar(&opts.ApplicationRef, "application-ref", "", "<todo>")
-	cmd.Flags().StringVar(&opts.FunctionRef, "function-ref", "", "<todo>")
-	cmd.Flags().StringArrayVar(&opts.Env, "env", []string{}, "<todo>")
+	cmd.Flags().StringVar(&opts.ItemName, cli.StripDash(cli.ItemFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.Image, cli.StripDash(cli.ImageFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.ApplicationRef, cli.StripDash(cli.ApplicationRefFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.FunctionRef, cli.StripDash(cli.FunctionRefFlagName), "", "<todo>")
+	cmd.Flags().StringArrayVar(&opts.Env, cli.StripDash(cli.EnvFlagName), []string{}, "<todo>")
 
 	return cmd
 }

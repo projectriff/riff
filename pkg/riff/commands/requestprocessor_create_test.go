@@ -36,8 +36,8 @@ func TestRequestProcessorCreateOptions(t *testing.T) {
 				ResourceOptions: testing.InvalidResourceOptions,
 			},
 			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
-				cli.ErrMissingField("item"),
-				cli.ErrMissingOneOf("application-ref", "function-ref", "image"),
+				cli.ErrMissingField(cli.ItemFlagName),
+				cli.ErrMissingOneOf(cli.ApplicationRefFlagName, cli.FunctionRefFlagName, cli.ImageFlagName),
 			),
 		},
 		{
@@ -76,7 +76,7 @@ func TestRequestProcessorCreateOptions(t *testing.T) {
 				FunctionRef:     "my-function",
 				Image:           "example.com/repo:tag",
 			},
-			ExpectFieldError: cli.ErrMultipleOneOf("application-ref", "function-ref", "image"),
+			ExpectFieldError: cli.ErrMultipleOneOf(cli.ApplicationRefFlagName, cli.FunctionRefFlagName, cli.ImageFlagName),
 		},
 		{
 			Name: "with env",
@@ -96,7 +96,7 @@ func TestRequestProcessorCreateOptions(t *testing.T) {
 				Image:           "example.com/repo:tag",
 				Env:             []string{"=foo"},
 			},
-			ExpectFieldError: cli.ErrInvalidArrayValue("=foo", "env", 0),
+			ExpectFieldError: cli.ErrInvalidArrayValue("=foo", cli.EnvFlagName, 0),
 		},
 	}
 
@@ -113,9 +113,9 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 	envName := "MY_VAR"
 	envValue := "my-value"
 	envVar := fmt.Sprintf("%s=%s", envName, envValue)
-	envNameAlt := "MY_VAR_ALT"
-	envValueAlt := "my-value-alt"
-	envVarAlt := fmt.Sprintf("%s=%s", envNameAlt, envValueAlt)
+	envNameOther := "MY_VAR_OTHER"
+	envValueOther := "my-value-other"
+	envVarOther := fmt.Sprintf("%s=%s", envNameOther, envValueOther)
 
 	table := testing.CommandTable{
 		{
@@ -125,7 +125,7 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "create from image",
-			Args: []string{requestProcessorName, "--item", itemName, "--image", image},
+			Args: []string{requestProcessorName, cli.ItemFlagName, itemName, cli.ImageFlagName, image},
 			ExpectCreates: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
@@ -147,7 +147,7 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "create from application ref",
-			Args: []string{requestProcessorName, "--item", itemName, "--application-ref", applicationRef},
+			Args: []string{requestProcessorName, cli.ItemFlagName, itemName, cli.ApplicationRefFlagName, applicationRef},
 			ExpectCreates: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
@@ -167,7 +167,7 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "create from function ref",
-			Args: []string{requestProcessorName, "--item", itemName, "--function-ref", functionRef},
+			Args: []string{requestProcessorName, cli.ItemFlagName, itemName, cli.FunctionRefFlagName, functionRef},
 			ExpectCreates: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
@@ -187,7 +187,7 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "create from image with env",
-			Args: []string{requestProcessorName, "--item", itemName, "--image", image, "--env", envVar, "--env", envVarAlt},
+			Args: []string{requestProcessorName, cli.ItemFlagName, itemName, cli.ImageFlagName, image, cli.EnvFlagName, envVar, cli.EnvFlagName, envVarOther},
 			ExpectCreates: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
@@ -203,7 +203,7 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 										Image: image,
 										Env: []corev1.EnvVar{
 											{Name: envName, Value: envValue},
-											{Name: envNameAlt, Value: envValueAlt},
+											{Name: envNameOther, Value: envValueOther},
 										},
 									},
 								},
@@ -215,7 +215,7 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "error existing request processor",
-			Args: []string{requestProcessorName, "--item", itemName, "--image", image},
+			Args: []string{requestProcessorName, cli.ItemFlagName, itemName, cli.ImageFlagName, image},
 			GivenObjects: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
@@ -246,7 +246,7 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "error during create",
-			Args: []string{requestProcessorName, "--item", itemName, "--image", image},
+			Args: []string{requestProcessorName, cli.ItemFlagName, itemName, cli.ImageFlagName, image},
 			WithReactors: []testing.ReactionFunc{
 				testing.InduceFailure("create", "requestprocessors"),
 			},

@@ -49,7 +49,7 @@ func (opts *FunctionCreateOptions) Validate(ctx context.Context) *cli.FieldError
 	errs = errs.Also(opts.ResourceOptions.Validate(ctx))
 
 	if opts.Image == "" {
-		errs = errs.Also(cli.ErrMissingField("image"))
+		errs = errs.Also(cli.ErrMissingField(cli.ImageFlagName))
 	} else if false {
 		// TODO validate image
 	}
@@ -57,30 +57,30 @@ func (opts *FunctionCreateOptions) Validate(ctx context.Context) *cli.FieldError
 	if opts.CacheSize != "" {
 		// must parse as a resource quantity
 		if _, err := resource.ParseQuantity(opts.CacheSize); err != nil {
-			errs = errs.Also(cli.ErrInvalidValue(opts.CacheSize, "cache-size"))
+			errs = errs.Also(cli.ErrInvalidValue(opts.CacheSize, cli.CacheSizeFlagName))
 		}
 	}
 
 	// git-repo and local-path are mutually exclusive
 	if opts.GitRepo == "" && opts.LocalPath == "" {
-		errs = errs.Also(cli.ErrMissingOneOf("git-repo", "local-path"))
+		errs = errs.Also(cli.ErrMissingOneOf(cli.GitRepoFlagName, cli.LocalPathFlagName))
 	} else if opts.GitRepo != "" && opts.LocalPath != "" {
-		errs = errs.Also(cli.ErrMultipleOneOf("git-repo", "local-path"))
+		errs = errs.Also(cli.ErrMultipleOneOf(cli.GitRepoFlagName, cli.LocalPathFlagName))
 	}
 
 	// git-revision is required for git-repo
 	if opts.GitRepo != "" && opts.GitRevision == "" {
-		errs = errs.Also(cli.ErrMissingField("git-revision"))
+		errs = errs.Also(cli.ErrMissingField(cli.GitRevisionFlagName))
 	}
 
 	if opts.LocalPath != "" {
 		if opts.SubPath != "" {
 			// sub-path cannot be used with local-path
-			errs = errs.Also(cli.ErrDisallowedFields("sub-path"))
+			errs = errs.Also(cli.ErrDisallowedFields(cli.SubPathFlagName))
 		}
 		if opts.CacheSize != "" {
 			// cache-size cannot be used with local-path
-			errs = errs.Also(cli.ErrDisallowedFields("cache-size"))
+			errs = errs.Also(cli.ErrDisallowedFields(cli.CacheSizeFlagName))
 		}
 	}
 
@@ -141,15 +141,15 @@ func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().StringVar(&opts.Image, "image", "", "<todo>")
-	cmd.Flags().StringVar(&opts.CacheSize, "cache-size", "", "<todo>")
-	cmd.Flags().StringVar(&opts.Artifact, "artifact", "", "<todo>")
-	cmd.Flags().StringVar(&opts.Handler, "handler", "", "<todo>")
-	cmd.Flags().StringVar(&opts.Invoker, "invoker", "", "<todo>")
-	cmd.Flags().StringVar(&opts.LocalPath, "local-path", "", "<todo>")
-	cmd.Flags().StringVar(&opts.GitRepo, "git-repo", "", "<todo>")
-	cmd.Flags().StringVar(&opts.GitRevision, "git-revision", "master", "<todo>")
-	cmd.Flags().StringVar(&opts.SubPath, "sub-path", "", "<todo>")
+	cmd.Flags().StringVar(&opts.Image, cli.StripDash(cli.ImageFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.CacheSize, cli.StripDash(cli.CacheSizeFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.Artifact, cli.StripDash(cli.ArtifactFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.Handler, cli.StripDash(cli.HandlerFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.Invoker, cli.StripDash(cli.InvokerFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.LocalPath, cli.StripDash(cli.LocalPathFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.GitRepo, cli.StripDash(cli.GitRepoFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.GitRevision, cli.StripDash(cli.GitRevisionFlagName), "master", "<todo>")
+	cmd.Flags().StringVar(&opts.SubPath, cli.StripDash(cli.SubPathFlagName), "", "<todo>")
 
 	return cmd
 }

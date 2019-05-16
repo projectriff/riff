@@ -25,7 +25,7 @@ var (
 		Namespace: "default",
 	}
 	InvalidListOptions           = cli.ListOptions{}
-	InvalidListOptionsFieldError = cli.ErrMissingOneOf("namespace", "all-namespaces")
+	InvalidListOptionsFieldError = cli.ErrMissingOneOf(cli.NamespaceFlagName, cli.AllNamespacesFlagName)
 )
 
 var (
@@ -35,8 +35,8 @@ var (
 	}
 	InvalidResourceOptions           = cli.ResourceOptions{}
 	InvalidResourceOptionsFieldError = (&cli.FieldError{}).Also(
-		cli.ErrMissingField("namespace"),
-		cli.ErrMissingField("name"),
+		cli.ErrMissingField(cli.NamespaceFlagName),
+		cli.ErrMissingField(cli.NameArgumentName),
 	)
 )
 
@@ -48,5 +48,5 @@ var (
 	InvalidDeleteOptions = cli.DeleteOptions{
 		Namespace: "default",
 	}
-	InvalidDeleteOptionsFieldError = cli.ErrMissingOneOf("all", "names")
+	InvalidDeleteOptionsFieldError = cli.ErrMissingOneOf(cli.AllFlagName, cli.NamesArgumentName)
 )

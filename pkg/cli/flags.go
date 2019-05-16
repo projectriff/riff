@@ -17,7 +17,35 @@
 package cli
 
 import (
+	"strings"
+
 	"github.com/spf13/cobra"
+)
+
+const (
+	AllFlagName                   = "--all"
+	AllNamespacesFlagName         = "--all-namespaces"
+	ApplicationRefFlagName        = "--application-ref"
+	ArtifactFlagName              = "--artifact"
+	CacheSizeFlagName             = "--cache-size"
+	DockerHubFlagName             = "--docker-hub"
+	EnvFlagName                   = "--env"
+	FunctionRefFlagName           = "--function-ref"
+	GcrFlagName                   = "--gcr"
+	GitRepoFlagName               = "--git-repo"
+	GitRevisionFlagName           = "--git-revision"
+	HandlerFlagName               = "--handler"
+	ImageFlagName                 = "--image"
+	InvokerFlagName               = "--invoker"
+	ItemFlagName                  = "--item"
+	JSONFlagName                  = "--json"
+	LocalPathFlagName             = "--local-path"
+	NamespaceFlagName             = "--namespace"
+	RegistryFlagName              = "--registry"
+	RegistryUserFlagName          = "--registry-user"
+	SetDefaultImagePrefixFlagName = "--set-default-image-prefix"
+	SubPathFlagName               = "--sub-path"
+	TextFlagName                  = "--text"
 )
 
 func AllNamespacesFlag(cmd *cobra.Command, c *Config, namespace *string, allNamespaces *bool) {
@@ -35,7 +63,7 @@ func AllNamespacesFlag(cmd *cobra.Command, c *Config, namespace *string, allName
 	}
 
 	NamespaceFlag(cmd, c, namespace)
-	cmd.Flags().BoolVar(allNamespaces, "all-namespaces", false, "<todo>")
+	cmd.Flags().BoolVar(allNamespaces, StripDash(AllNamespacesFlagName), false, "<todo>")
 }
 
 func NamespaceFlag(cmd *cobra.Command, c *Config, namespace *string) {
@@ -52,5 +80,9 @@ func NamespaceFlag(cmd *cobra.Command, c *Config, namespace *string) {
 		return nil
 	}
 
-	cmd.Flags().StringVarP(namespace, "namespace", "n", "", "<todo>")
+	cmd.Flags().StringVarP(namespace, StripDash(NamespaceFlagName), "n", "", "<todo>")
+}
+
+func StripDash(flagName string) string {
+	return strings.Replace(flagName, "--", "", 1)
 }

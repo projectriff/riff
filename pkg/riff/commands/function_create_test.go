@@ -34,8 +34,8 @@ func TestFunctionCreateOptions(t *testing.T) {
 				ResourceOptions: testing.InvalidResourceOptions,
 			},
 			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
-				cli.ErrMissingField("image"),
-				cli.ErrMissingOneOf("git-repo", "local-path"),
+				cli.ErrMissingField(cli.ImageFlagName),
+				cli.ErrMissingOneOf(cli.GitRepoFlagName, cli.LocalPathFlagName),
 			),
 		},
 		{
@@ -63,7 +63,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 				ResourceOptions: testing.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 			},
-			ExpectFieldError: cli.ErrMissingOneOf("git-repo", "local-path"),
+			ExpectFieldError: cli.ErrMissingOneOf(cli.GitRepoFlagName, cli.LocalPathFlagName),
 		},
 		{
 			Name: "multiple sources",
@@ -74,7 +74,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 				GitRevision:     "master",
 				LocalPath:       ".",
 			},
-			ExpectFieldError: cli.ErrMultipleOneOf("git-repo", "local-path"),
+			ExpectFieldError: cli.ErrMultipleOneOf(cli.GitRepoFlagName, cli.LocalPathFlagName),
 		},
 		{
 			Name: "git source with cache",
@@ -95,7 +95,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 				LocalPath:       ".",
 				CacheSize:       "8Gi",
 			},
-			ExpectFieldError: cli.ErrDisallowedFields("cache-size"),
+			ExpectFieldError: cli.ErrDisallowedFields(cli.CacheSizeFlagName),
 		},
 		{
 			Name: "invalid cache",
@@ -106,7 +106,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 				GitRevision:     "master",
 				CacheSize:       "X",
 			},
-			ExpectFieldError: cli.ErrInvalidValue("X", "cache-size"),
+			ExpectFieldError: cli.ErrInvalidValue("X", cli.CacheSizeFlagName),
 		},
 		{
 			Name: "with git subpath",
@@ -127,7 +127,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 				LocalPath:       ".",
 				SubPath:         "some/directory",
 			},
-			ExpectFieldError: cli.ErrDisallowedFields("sub-path"),
+			ExpectFieldError: cli.ErrDisallowedFields(cli.SubPathFlagName),
 		},
 		{
 			Name: "missing git revision",
@@ -137,7 +137,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 				GitRepo:         "https://example.com/repo.git",
 				GitRevision:     "",
 			},
-			ExpectFieldError: cli.ErrMissingField("git-revision"),
+			ExpectFieldError: cli.ErrMissingField(cli.GitRevisionFlagName),
 		},
 	}
 
@@ -165,7 +165,7 @@ func TestFunctionCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "git repo",
-			Args: []string{functionName, "--image", imageTag, "--git-repo", gitRepo},
+			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo},
 			ExpectCreates: []runtime.Object{
 				&buildv1alpha1.Function{
 					ObjectMeta: metav1.ObjectMeta{
@@ -186,7 +186,7 @@ func TestFunctionCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "git repo with revision",
-			Args: []string{functionName, "--image", imageTag, "--git-repo", gitRepo, "--git-revision", gitSha},
+			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.GitRevisionFlagName, gitSha},
 			ExpectCreates: []runtime.Object{
 				&buildv1alpha1.Function{
 					ObjectMeta: metav1.ObjectMeta{
@@ -207,7 +207,7 @@ func TestFunctionCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "git repo with subpath",
-			Args: []string{functionName, "--image", imageTag, "--git-repo", gitRepo, "--sub-path", subPath},
+			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.SubPathFlagName, subPath},
 			ExpectCreates: []runtime.Object{
 				&buildv1alpha1.Function{
 					ObjectMeta: metav1.ObjectMeta{
@@ -229,7 +229,7 @@ func TestFunctionCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "git repo with cache",
-			Args: []string{functionName, "--image", imageTag, "--git-repo", gitRepo, "--cache-size", cacheSize},
+			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.CacheSizeFlagName, cacheSize},
 			ExpectCreates: []runtime.Object{
 				&buildv1alpha1.Function{
 					ObjectMeta: metav1.ObjectMeta{
@@ -253,7 +253,7 @@ func TestFunctionCreateCommand(t *testing.T) {
 			// TODO impelement
 			Skip: true,
 			Name: "local path",
-			Args: []string{functionName, "--image", imageTag, "--local-path", localPath},
+			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath},
 			ExpectCreates: []runtime.Object{
 				&buildv1alpha1.Function{
 					ObjectMeta: metav1.ObjectMeta{
@@ -273,7 +273,7 @@ func TestFunctionCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "error existing function",
-			Args: []string{functionName, "--image", imageTag, "--git-repo", gitRepo},
+			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo},
 			GivenObjects: []runtime.Object{
 				&buildv1alpha1.Function{
 					ObjectMeta: metav1.ObjectMeta{
@@ -303,7 +303,7 @@ func TestFunctionCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "error during create",
-			Args: []string{functionName, "--image", imageTag, "--git-repo", gitRepo},
+			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo},
 			WithReactors: []testing.ReactionFunc{
 				testing.InduceFailure("create", "functions"),
 			},

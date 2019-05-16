@@ -54,10 +54,10 @@ func (opts *ListOptions) Validate(ctx context.Context) *FieldError {
 	errs := &FieldError{}
 
 	if opts.Namespace == "" && !opts.AllNamespaces {
-		errs = errs.Also(ErrMissingOneOf("namespace", "all-namespaces"))
+		errs = errs.Also(ErrMissingOneOf(NamespaceFlagName, AllNamespacesFlagName))
 	}
 	if opts.Namespace != "" && opts.AllNamespaces {
-		errs = errs.Also(ErrMultipleOneOf("namespace", "all-namespaces"))
+		errs = errs.Also(ErrMultipleOneOf(NamespaceFlagName, AllNamespacesFlagName))
 	}
 
 	return errs
@@ -72,13 +72,13 @@ func (opts *ResourceOptions) Validate(ctx context.Context) *FieldError {
 	errs := &FieldError{}
 
 	if opts.Namespace == "" {
-		errs = errs.Also(ErrMissingField("namespace"))
+		errs = errs.Also(ErrMissingField(NamespaceFlagName))
 	}
 
 	if opts.Name == "" {
-		errs = errs.Also(ErrMissingField(opts.Name, "name"))
+		errs = errs.Also(ErrMissingField(opts.Name, NameArgumentName))
 	} else {
-		errs = errs.Also(validation.K8sName(opts.Name, "name"))
+		errs = errs.Also(validation.K8sName(opts.Name, NameArgumentName))
 	}
 
 	return errs
@@ -94,17 +94,17 @@ func (opts *DeleteOptions) Validate(ctx context.Context) *FieldError {
 	errs := &FieldError{}
 
 	if opts.Namespace == "" {
-		errs = errs.Also(ErrMissingField("namespace"))
+		errs = errs.Also(ErrMissingField(NamespaceFlagName))
 	}
 
 	if opts.All && len(opts.Names) != 0 {
-		errs = errs.Also(ErrMultipleOneOf("all", "names"))
+		errs = errs.Also(ErrMultipleOneOf(AllFlagName, NamesArgumentName))
 	}
 	if !opts.All && len(opts.Names) == 0 {
-		errs = errs.Also(ErrMissingOneOf("all", "names"))
+		errs = errs.Also(ErrMissingOneOf(AllFlagName, NamesArgumentName))
 	}
 
-	errs = errs.Also(validation.K8sNames(opts.Names, "names"))
+	errs = errs.Also(validation.K8sNames(opts.Names, NamesArgumentName))
 
 	return errs
 }

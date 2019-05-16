@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
@@ -47,7 +48,7 @@ func TestFunctionDeleteOptions(t *testing.T) {
 
 func TestFunctionDeleteCommand(t *testing.T) {
 	functionName := "test-function"
-	functionAltName := "test-alt-function"
+	functionOtherName := "test-other-function"
 	defaultNamespace := "default"
 
 	table := testing.CommandTable{
@@ -58,7 +59,7 @@ func TestFunctionDeleteCommand(t *testing.T) {
 		},
 		{
 			Name: "delete all functions",
-			Args: []string{"--all"},
+			Args: []string{cli.AllFlagName},
 			GivenObjects: []runtime.Object{
 				&buildv1alpha1.Function{
 					ObjectMeta: metav1.ObjectMeta{
@@ -93,7 +94,7 @@ func TestFunctionDeleteCommand(t *testing.T) {
 		},
 		{
 			Name: "delete functions",
-			Args: []string{functionName, functionAltName},
+			Args: []string{functionName, functionOtherName},
 			GivenObjects: []runtime.Object{
 				&buildv1alpha1.Function{
 					ObjectMeta: metav1.ObjectMeta{
@@ -103,7 +104,7 @@ func TestFunctionDeleteCommand(t *testing.T) {
 				},
 				&buildv1alpha1.Function{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      functionAltName,
+						Name:      functionOtherName,
 						Namespace: defaultNamespace,
 					},
 				},
@@ -117,7 +118,7 @@ func TestFunctionDeleteCommand(t *testing.T) {
 				Group:     "build.projectriff.io",
 				Resource:  "functions",
 				Namespace: defaultNamespace,
-				Name:      functionAltName,
+				Name:      functionOtherName,
 			}},
 		},
 		{

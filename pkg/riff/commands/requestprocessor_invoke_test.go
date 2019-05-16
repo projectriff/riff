@@ -52,7 +52,7 @@ func TestRequestProcessorInvokeOptions(t *testing.T) {
 			Name: "json content type",
 			Options: &commands.RequestProcessorInvokeOptions{
 				ResourceOptions: testing.ValidResourceOptions,
-				ContentTypeJson: true,
+				ContentTypeJSON: true,
 			},
 			ShouldValidate: true,
 		},
@@ -68,10 +68,10 @@ func TestRequestProcessorInvokeOptions(t *testing.T) {
 			Name: "multiple content types",
 			Options: &commands.RequestProcessorInvokeOptions{
 				ResourceOptions: testing.ValidResourceOptions,
-				ContentTypeJson: true,
+				ContentTypeJSON: true,
 				ContentTypeText: true,
 			},
-			ExpectFieldError: cli.ErrMultipleOneOf("json", "text"),
+			ExpectFieldError: cli.ErrMultipleOneOf(cli.JSONFlagName, cli.TextFlagName),
 		},
 	}
 
@@ -231,7 +231,7 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "content type json",
-			Args:       []string{requestprocessorName, "--json"},
+			Args:       []string{requestprocessorName, cli.JSONFlagName},
 			ExecHelper: "RequestProcessorInvoke",
 			GivenObjects: []runtime.Object{
 				requestProcessor,
@@ -249,7 +249,7 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "content type text",
-			Args:       []string{requestprocessorName, "--text"},
+			Args:       []string{requestprocessorName, cli.TextFlagName},
 			ExecHelper: "RequestProcessorInvoke",
 			GivenObjects: []runtime.Object{
 				requestProcessor,

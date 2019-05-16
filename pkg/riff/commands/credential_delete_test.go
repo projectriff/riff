@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	"github.com/projectriff/riff/pkg/testing"
 	"github.com/projectriff/system/pkg/apis/build"
@@ -48,7 +49,7 @@ func TestCredentialDeleteOptions(t *testing.T) {
 
 func TestCredentialDeleteCommand(t *testing.T) {
 	credentialName := "test-credential"
-	credentialAltName := "test-alt-credential"
+	credentialOtherName := "test-other-credential"
 	defaultNamespace := "default"
 	credentialLabel := build.CredentialLabelKey
 
@@ -60,7 +61,7 @@ func TestCredentialDeleteCommand(t *testing.T) {
 		},
 		{
 			Name: "delete all secrets",
-			Args: []string{"--all"},
+			Args: []string{cli.AllFlagName},
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
@@ -79,7 +80,7 @@ func TestCredentialDeleteCommand(t *testing.T) {
 		},
 		{
 			Name: "delete all secrets error",
-			Args: []string{"--all"},
+			Args: []string{cli.AllFlagName},
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
@@ -121,7 +122,7 @@ func TestCredentialDeleteCommand(t *testing.T) {
 		},
 		{
 			Name: "delete secrets",
-			Args: []string{credentialName, credentialAltName},
+			Args: []string{credentialName, credentialOtherName},
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
@@ -133,7 +134,7 @@ func TestCredentialDeleteCommand(t *testing.T) {
 				},
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      credentialAltName,
+						Name:      credentialOtherName,
 						Namespace: defaultNamespace,
 						Labels:    map[string]string{credentialLabel: ""},
 					},
@@ -147,7 +148,7 @@ func TestCredentialDeleteCommand(t *testing.T) {
 			}, {
 				Resource:  "secrets",
 				Namespace: defaultNamespace,
-				Name:      credentialAltName,
+				Name:      credentialOtherName,
 			}},
 		},
 		{

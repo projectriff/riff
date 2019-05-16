@@ -51,9 +51,9 @@ func TestFunctionListOptions(t *testing.T) {
 
 func TestFunctionListCommand(t *testing.T) {
 	functionName := "test-function"
-	functionAltName := "test-alt-function"
+	functionOtherName := "test-other-function"
 	defaultNamespace := "default"
-	altNamespace := "alt-namespace"
+	otherNamespace := "other-namespace"
 
 	table := testing.CommandTable{
 		{
@@ -94,7 +94,7 @@ func TestFunctionListCommand(t *testing.T) {
 		},
 		{
 			Name: "filters by namespace",
-			Args: []string{"--namespace", altNamespace},
+			Args: []string{cli.NamespaceFlagName, otherNamespace},
 			GivenObjects: []runtime.Object{
 				&buildv1alpha1.Function{
 					ObjectMeta: metav1.ObjectMeta{
@@ -111,7 +111,7 @@ func TestFunctionListCommand(t *testing.T) {
 		},
 		{
 			Name: "all namespace",
-			Args: []string{"--all-namespaces"},
+			Args: []string{cli.AllNamespacesFlagName},
 			GivenObjects: []runtime.Object{
 				&buildv1alpha1.Function{
 					ObjectMeta: metav1.ObjectMeta{
@@ -121,15 +121,15 @@ func TestFunctionListCommand(t *testing.T) {
 				},
 				&buildv1alpha1.Function{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      functionAltName,
-						Namespace: altNamespace,
+						Name:      functionOtherName,
+						Namespace: otherNamespace,
 					},
 				},
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
 					fmt.Sprintf("%s\n", functionName),
-					fmt.Sprintf("%s\n", functionAltName),
+					fmt.Sprintf("%s\n", functionOtherName),
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)

@@ -33,7 +33,7 @@ func TestCredentialSetOptions(t *testing.T) {
 			Options: &commands.CredentialSetOptions{
 				ResourceOptions: testing.ValidResourceOptions,
 			},
-			ExpectFieldError: cli.ErrMissingOneOf("docker-hub", "gcr", "registry"),
+			ExpectFieldError: cli.ErrMissingOneOf(cli.DockerHubFlagName, cli.GcrFlagName, cli.RegistryFlagName),
 		},
 		{
 			Name: "invalid namespaced resource",
@@ -41,7 +41,7 @@ func TestCredentialSetOptions(t *testing.T) {
 				ResourceOptions: testing.InvalidResourceOptions,
 			},
 			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
-				cli.ErrMissingOneOf("docker-hub", "gcr", "registry"),
+				cli.ErrMissingOneOf(cli.DockerHubFlagName, cli.GcrFlagName, cli.RegistryFlagName),
 			),
 		},
 		{
@@ -49,7 +49,7 @@ func TestCredentialSetOptions(t *testing.T) {
 			Options: &commands.CredentialSetOptions{
 				ResourceOptions:   testing.ValidResourceOptions,
 				DockerHubId:       "projectriff",
-				DockerHubPassword: "1password",
+				DockerHubPassword: []byte("1password"),
 			},
 			ShouldValidate: true,
 		},
@@ -59,7 +59,7 @@ func TestCredentialSetOptions(t *testing.T) {
 				ResourceOptions: testing.ValidResourceOptions,
 				DockerHubId:     "projectriff",
 			},
-			ExpectFieldError: cli.ErrMissingField("docker-hub-password"),
+			ExpectFieldError: cli.ErrMissingField("<docker-hub-password>"),
 		},
 		{
 			Name: "gcr",
@@ -75,7 +75,7 @@ func TestCredentialSetOptions(t *testing.T) {
 				ResourceOptions:  testing.ValidResourceOptions,
 				Registry:         "example.com",
 				RegistryUser:     "projectriff",
-				RegistryPassword: "1password",
+				RegistryPassword: []byte("1password"),
 			},
 			ShouldValidate: true,
 		},
@@ -84,9 +84,9 @@ func TestCredentialSetOptions(t *testing.T) {
 			Options: &commands.CredentialSetOptions{
 				ResourceOptions:  testing.ValidResourceOptions,
 				Registry:         "example.com",
-				RegistryPassword: "1password",
+				RegistryPassword: []byte("1password"),
 			},
-			ExpectFieldError: cli.ErrMissingField("registry-user"),
+			ExpectFieldError: cli.ErrMissingField(cli.RegistryUserFlagName),
 		},
 		{
 			Name: "registry missing password",
@@ -103,14 +103,14 @@ func TestCredentialSetOptions(t *testing.T) {
 			Options: &commands.CredentialSetOptions{
 				ResourceOptions:   testing.InvalidResourceOptions,
 				DockerHubId:       "projectriff",
-				DockerHubPassword: "1password",
+				DockerHubPassword: []byte("1password"),
 				GcrTokenPath:      "gcr-credentials.json",
 				Registry:          "example.com",
 				RegistryUser:      "projectriff",
-				RegistryPassword:  "1password",
+				RegistryPassword:  []byte("1password"),
 			},
 			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
-				cli.ErrMultipleOneOf("docker-hub", "gcr", "registry"),
+				cli.ErrMultipleOneOf(cli.DockerHubFlagName, cli.GcrFlagName, cli.RegistryFlagName),
 			),
 		},
 
@@ -119,7 +119,7 @@ func TestCredentialSetOptions(t *testing.T) {
 			Options: &commands.CredentialSetOptions{
 				ResourceOptions:       testing.ValidResourceOptions,
 				DockerHubId:           "projectriff",
-				DockerHubPassword:     "1password",
+				DockerHubPassword:     []byte("1password"),
 				SetDefaultImagePrefix: true,
 			},
 			ShouldValidate: true,
@@ -139,10 +139,10 @@ func TestCredentialSetOptions(t *testing.T) {
 				ResourceOptions:       testing.ValidResourceOptions,
 				Registry:              "example.com",
 				RegistryUser:          "projectriff",
-				RegistryPassword:      "1password",
+				RegistryPassword:      []byte("1password"),
 				SetDefaultImagePrefix: true,
 			},
-			ExpectFieldError: cli.ErrInvalidValue("cannot be used with registry", "set-default-image-prefix"),
+			ExpectFieldError: cli.ErrInvalidValue("cannot be used with registry", cli.SetDefaultImagePrefixFlagName),
 		},
 	}
 
@@ -167,7 +167,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:  "create secret docker hub",
-			Args:  []string{credentialName, "--docker-hub", dockerHubId},
+			Args:  []string{credentialName, cli.DockerHubFlagName, dockerHubId},
 			Stdin: []byte(dockerHubPassword),
 			ExpectCreates: []runtime.Object{
 				&corev1.Secret{
@@ -189,7 +189,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name: "create secret gcr",
-			Args: []string{credentialName, "--gcr", "./testdata/gcr.json"},
+			Args: []string{credentialName, cli.GcrFlagName, "./testdata/gcr.json"},
 			ExpectCreates: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
@@ -213,17 +213,17 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:        "create secret gcr, bad token path",
-			Args:        []string{credentialName, "--gcr", "./testdata/gcr-badpath.json"},
+			Args:        []string{credentialName, cli.GcrFlagName, "./testdata/gcr-badpath.json"},
 			ShouldError: true,
 		},
 		{
 			Name:        "create secret gcr, invalid token",
-			Args:        []string{credentialName, "--gcr", "./testdata/gcr-invalid.json"},
+			Args:        []string{credentialName, cli.GcrFlagName, "./testdata/gcr-invalid.json"},
 			ShouldError: true,
 		},
 		{
 			Name:  "create secret registry",
-			Args:  []string{credentialName, "--registry", registryHost, "--registry-user", registryUser},
+			Args:  []string{credentialName, cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser},
 			Stdin: []byte(registryPassword),
 			ExpectCreates: []runtime.Object{
 				&corev1.Secret{
@@ -245,7 +245,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:  "update secret",
-			Args:  []string{credentialName, "--registry", registryHost, "--registry-user", registryUser},
+			Args:  []string{credentialName, cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser},
 			Stdin: []byte(registryPassword),
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
@@ -284,7 +284,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:  "get error",
-			Args:  []string{credentialName, "--registry", registryHost, "--registry-user", registryUser},
+			Args:  []string{credentialName, cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser},
 			Stdin: []byte(registryPassword),
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
@@ -310,7 +310,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:  "create error",
-			Args:  []string{credentialName, "--registry", registryHost, "--registry-user", registryUser},
+			Args:  []string{credentialName, cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser},
 			Stdin: []byte(registryPassword),
 			WithReactors: []testing.ReactionFunc{
 				testing.InduceFailure("create", "secrets"),
@@ -336,7 +336,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:  "update error",
-			Args:  []string{credentialName, "--registry", registryHost, "--registry-user", registryUser},
+			Args:  []string{credentialName, cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser},
 			Stdin: []byte(registryPassword),
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
@@ -379,7 +379,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:  "no clobber",
-			Args:  []string{"not-a-credential", "--registry", registryHost, "--registry-user", registryUser},
+			Args:  []string{"not-a-credential", cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser},
 			Stdin: []byte(registryPassword),
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
@@ -394,7 +394,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:  "default image prefix create docker hub",
-			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-default-image-prefix"},
+			Args:  []string{credentialName, cli.DockerHubFlagName, dockerHubId, cli.SetDefaultImagePrefixFlagName},
 			Stdin: []byte(dockerHubPassword),
 			ExpectCreates: []runtime.Object{
 				&corev1.Secret{
@@ -425,7 +425,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name: "default image prefix create gcr",
-			Args: []string{credentialName, "--gcr", "./testdata/gcr.json", "--set-default-image-prefix"},
+			Args: []string{credentialName, cli.GcrFlagName, "./testdata/gcr.json", cli.SetDefaultImagePrefixFlagName},
 			ExpectCreates: []runtime.Object{
 				&corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
@@ -458,13 +458,13 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:        "default image prefix create registry",
-			Args:        []string{credentialName, "--registry", registryHost, "--registry-user", registryUser, "--set-default-image-prefix"},
+			Args:        []string{credentialName, cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser, cli.SetDefaultImagePrefixFlagName},
 			Stdin:       []byte(registryPassword),
 			ShouldError: true,
 		},
 		{
 			Name:  "default image prefix update",
-			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-default-image-prefix"},
+			Args:  []string{credentialName, cli.DockerHubFlagName, dockerHubId, cli.SetDefaultImagePrefixFlagName},
 			Stdin: []byte(dockerHubPassword),
 			GivenObjects: []runtime.Object{
 				&corev1.ConfigMap{
@@ -510,7 +510,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:  "default image prefix get error",
-			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-default-image-prefix"},
+			Args:  []string{credentialName, cli.DockerHubFlagName, dockerHubId, cli.SetDefaultImagePrefixFlagName},
 			Stdin: []byte(dockerHubPassword),
 			WithReactors: []testing.ReactionFunc{
 				testing.InduceFailure("get", "configmaps"),
@@ -536,7 +536,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:  "default image prefix create error",
-			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-default-image-prefix"},
+			Args:  []string{credentialName, cli.DockerHubFlagName, dockerHubId, cli.SetDefaultImagePrefixFlagName},
 			Stdin: []byte(dockerHubPassword),
 			WithReactors: []testing.ReactionFunc{
 				testing.InduceFailure("create", "configmaps"),
@@ -571,7 +571,7 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 		{
 			Name:  "default image prefix update",
-			Args:  []string{credentialName, "--docker-hub", dockerHubId, "--set-default-image-prefix"},
+			Args:  []string{credentialName, cli.DockerHubFlagName, dockerHubId, cli.SetDefaultImagePrefixFlagName},
 			Stdin: []byte(dockerHubPassword),
 			WithReactors: []testing.ReactionFunc{
 				testing.InduceFailure("update", "configmaps"),

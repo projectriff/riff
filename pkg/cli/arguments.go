@@ -22,6 +22,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	NameArgumentName  = "name"
+	NamesArgumentName = "name(s)"
+)
+
 var ErrIgnoreArg = fmt.Errorf("ignore argument")
 
 type Arg struct {
@@ -66,7 +71,7 @@ func Args(argDefs ...Arg) cobra.PositionalArgs {
 
 func NameArg(name *string) Arg {
 	return Arg{
-		Name:  "name",
+		Name:  NameArgumentName,
 		Arity: 1,
 		Set: func(cmd *cobra.Command, args []string, offset int) error {
 			*name = args[offset]
@@ -77,7 +82,7 @@ func NameArg(name *string) Arg {
 
 func NamesArg(names *[]string) Arg {
 	return Arg{
-		Name:  "name(s)",
+		Name:  NamesArgumentName,
 		Arity: -1,
 		Set: func(cmd *cobra.Command, args []string, offset int) error {
 			*names = args[offset:]
