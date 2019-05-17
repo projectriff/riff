@@ -18,24 +18,51 @@ package commands
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/riff/pkg/cli/printers"
+	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1beta1 "k8s.io/apimachinery/pkg/apis/meta/v1beta1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type ApplicationListOptions struct {
-	Namespace     string
-	AllNamespaces bool
+	cli.ListOptions
 }
 
 func (opts *ApplicationListOptions) Validate(ctx context.Context) *cli.FieldError {
-	// TODO implement
-	return nil
+	errs := &cli.FieldError{}
+
+	errs = errs.Also(opts.ListOptions.Validate(ctx))
+
+	return errs
 }
 
 func (opts *ApplicationListOptions) Exec(ctx context.Context, c *cli.Config) error {
-	return fmt.Errorf("not implemented")
+	applications, err := c.Build().Applications(opts.Namespace).List(metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	if len(applications.Items) == 0 {
+		c.Infof("No applications found.\n")
+		return nil
+	}
+
+	tablePrinter := printers.NewTablePrinter(printers.PrintOptions{
+		WithNamespace: opts.AllNamespaces,
+	}).With(func(h printers.PrintHandler) {
+		columns := printApplicationColumns()
+		h.TableHandler(columns, printApplicationList)
+		h.TableHandler(columns, printApplication)
+	})
+
+	applications = applications.DeepCopy()
+	cli.SortByNamespaceAndName(applications.Items)
+
+	return tablePrinter.PrintObj(applications, c.Stdout)
 }
 
 func NewApplicationListCommand(c *cli.Config) *cobra.Command {
@@ -53,4 +80,38 @@ func NewApplicationListCommand(c *cli.Config) *cobra.Command {
 	cli.AllNamespacesFlag(cmd, c, &opts.Namespace, &opts.AllNamespaces)
 
 	return cmd
+}
+
+func printApplicationList(applications *buildv1alpha1.ApplicationList, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
+	rows := make([]metav1beta1.TableRow, 0, len(applications.Items))
+	for i := range applications.Items {
+		r, err := printApplication(&applications.Items[i], opts)
+		if err != nil {
+			return nil, err
+		}
+		rows = append(rows, r...)
+	}
+	return rows, nil
+}
+
+func printApplication(application *buildv1alpha1.Application, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
+	row := metav1beta1.TableRow{
+		Object: runtime.RawExtension{Object: application},
+	}
+	row.Cells = append(row.Cells,
+		application.Name,
+		cli.FormatEmptyString(application.Status.LatestImage),
+		cli.FormatConditionStatus(application.Status.GetCondition(buildv1alpha1.ApplicationConditionSucceeded)),
+		cli.FormatTimestampSince(application.CreationTimestamp),
+	)
+	return []metav1beta1.TableRow{row}, nil
+}
+
+func printApplicationColumns() []metav1beta1.TableColumnDefinition {
+	return []metav1beta1.TableColumnDefinition{
+		{Name: "Name", Type: "string"},
+		{Name: "Latest Image", Type: "string"},
+		{Name: "Succeeded", Type: "string"},
+		{Name: "Age", Type: "string"},
+	}
 }

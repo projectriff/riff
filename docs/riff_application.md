@@ -23,7 +23,6 @@
 ### SEE ALSO
 
 * [riff](riff.md)	 - <todo>
-* [riff application build](riff_application_build.md)	 - <todo>
 * [riff application create](riff_application_create.md)	 - <todo>
 * [riff application delete](riff_application_delete.md)	 - <todo>
 * [riff application list](riff_application_list.md)	 - <todo>
