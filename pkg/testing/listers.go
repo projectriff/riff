@@ -77,8 +77,8 @@ func (l *Listers) GetFunctionLister() buildlisters.FunctionLister {
 	return buildlisters.NewFunctionLister(l.indexerFor(&buildv1alpha1.Function{}))
 }
 
-func (l *Listers) GetRequestProcessorLister() requestlisters.RequestProcessorLister {
-	return requestlisters.NewRequestProcessorLister(l.indexerFor(&requestv1alpha1.RequestProcessor{}))
+func (l *Listers) GetHandlerLister() requestlisters.HandlerLister {
+	return requestlisters.NewHandlerLister(l.indexerFor(&requestv1alpha1.Handler{}))
 }
 
 func (l *Listers) GetDeploymentLister() appsv1listers.DeploymentLister {

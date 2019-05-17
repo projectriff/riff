@@ -21,20 +21,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewRequestProcessorCommand(c *cli.Config) *cobra.Command {
+func NewHandlerCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "requestprocessor",
+		Use:     "handler",
 		Short:   "<todo>",
 		Example: "<todo>",
 		Args:    cli.Args(),
-		Aliases: []string{"requestprocessors", "rp"},
+		Aliases: []string{"handlers"},
 	}
 
-	cmd.AddCommand(NewRequestProcessorListCommand(c))
-	cmd.AddCommand(NewRequestProcessorCreateCommand(c))
-	cmd.AddCommand(NewRequestProcessorUpdateCommand(c))
-	cmd.AddCommand(NewRequestProcessorInvokeCommand(c))
-	cmd.AddCommand(NewRequestProcessorDeleteCommand(c))
+	cmd.AddCommand(NewHandlerListCommand(c))
+	cmd.AddCommand(NewHandlerCreateCommand(c))
+	cmd.AddCommand(NewHandlerUpdateCommand(c))
+	cmd.AddCommand(NewHandlerInvokeCommand(c))
+	cmd.AddCommand(NewHandlerDeleteCommand(c))
 
 	return cmd
 }

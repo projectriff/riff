@@ -50,4 +50,4 @@ require (
 	k8s.io/kube-openapi v0.0.0-20190502190224-411b2483e503 // indirect
 )
 
-replace github.com/projectriff/system => github.com/scothis/system v0.0.0-20190517200536-6d458e051552
+replace github.com/projectriff/system => github.com/scothis/system v0.0.0-20190517224229-28d4243d7ff0

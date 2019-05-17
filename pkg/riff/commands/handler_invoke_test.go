@@ -32,25 +32,25 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestRequestProcessorInvokeOptions(t *testing.T) {
+func TestHandlerInvokeOptions(t *testing.T) {
 	table := testing.OptionsTable{
 		{
 			Name: "invalid resource",
-			Options: &commands.RequestProcessorInvokeOptions{
+			Options: &commands.HandlerInvokeOptions{
 				ResourceOptions: testing.InvalidResourceOptions,
 			},
 			ExpectFieldError: testing.InvalidResourceOptionsFieldError,
 		},
 		{
 			Name: "valid resource",
-			Options: &commands.RequestProcessorInvokeOptions{
+			Options: &commands.HandlerInvokeOptions{
 				ResourceOptions: testing.ValidResourceOptions,
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "json content type",
-			Options: &commands.RequestProcessorInvokeOptions{
+			Options: &commands.HandlerInvokeOptions{
 				ResourceOptions: testing.ValidResourceOptions,
 				ContentTypeJSON: true,
 			},
@@ -58,7 +58,7 @@ func TestRequestProcessorInvokeOptions(t *testing.T) {
 		},
 		{
 			Name: "text content type",
-			Options: &commands.RequestProcessorInvokeOptions{
+			Options: &commands.HandlerInvokeOptions{
 				ResourceOptions: testing.ValidResourceOptions,
 				ContentTypeText: true,
 			},
@@ -66,7 +66,7 @@ func TestRequestProcessorInvokeOptions(t *testing.T) {
 		},
 		{
 			Name: "multiple content types",
-			Options: &commands.RequestProcessorInvokeOptions{
+			Options: &commands.HandlerInvokeOptions{
 				ResourceOptions: testing.ValidResourceOptions,
 				ContentTypeJSON: true,
 				ContentTypeText: true,
@@ -78,24 +78,24 @@ func TestRequestProcessorInvokeOptions(t *testing.T) {
 	table.Run(t)
 }
 
-func TestRequestProcessorInvokeCommand(t *testing.T) {
+func TestHandlerInvokeCommand(t *testing.T) {
 	t.Parallel()
 
-	requestprocessorName := "test-requestprocessor"
+	handlerName := "test-handler"
 	defaultNamespace := "default"
 
-	requestProcessor := &requestv1alpha1.RequestProcessor{
+	handler := &requestv1alpha1.Handler{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: defaultNamespace,
-			Name:      requestprocessorName,
+			Name:      handlerName,
 		},
-		Status: requestv1alpha1.RequestProcessorStatus{
+		Status: requestv1alpha1.HandlerStatus{
 			Status: duckv1alpha1.Status{
 				Conditions: []duckv1alpha1.Condition{
-					{Type: requestv1alpha1.RequestProcessorConditionReady, Status: "True"},
+					{Type: requestv1alpha1.HandlerConditionReady, Status: "True"},
 				},
 			},
-			Domain: fmt.Sprintf("%s.example.com", requestprocessorName),
+			Domain: fmt.Sprintf("%s.example.com", handlerName),
 		},
 	}
 
@@ -119,10 +119,10 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 	table := testing.CommandTable{
 		{
 			Name:       "ingress loadbalancer hostname",
-			Args:       []string{requestprocessorName},
-			ExecHelper: "RequestProcessorInvoke",
+			Args:       []string{handlerName},
+			ExecHelper: "HandlerInvoke",
 			GivenObjects: []runtime.Object{
-				requestProcessor,
+				handler,
 				&corev1.Service{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "istio-system",
@@ -142,7 +142,7 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl localhost -H 'Host: test-requestprocessor.example.com'\n",
+					"curl localhost -H 'Host: test-handler.example.com'\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -152,10 +152,10 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "ingress loadbalancer ip",
-			Args:       []string{requestprocessorName},
-			ExecHelper: "RequestProcessorInvoke",
+			Args:       []string{handlerName},
+			ExecHelper: "HandlerInvoke",
 			GivenObjects: []runtime.Object{
-				requestProcessor,
+				handler,
 				&corev1.Service{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "istio-system",
@@ -175,7 +175,7 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl 127.0.0.1 -H 'Host: test-requestprocessor.example.com'\n",
+					"curl 127.0.0.1 -H 'Host: test-handler.example.com'\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -185,10 +185,10 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "ingress nodeport",
-			Args:       []string{requestprocessorName},
-			ExecHelper: "RequestProcessorInvoke",
+			Args:       []string{handlerName},
+			ExecHelper: "HandlerInvoke",
 			GivenObjects: []runtime.Object{
-				requestProcessor,
+				handler,
 				&corev1.Service{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "istio-system",
@@ -203,7 +203,7 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl http://localhost:54321 -H 'Host: test-requestprocessor.example.com'\n",
+					"curl http://localhost:54321 -H 'Host: test-handler.example.com'\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -213,15 +213,15 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "request path",
-			Args:       []string{requestprocessorName, "/path"},
-			ExecHelper: "RequestProcessorInvoke",
+			Args:       []string{handlerName, "/path"},
+			ExecHelper: "HandlerInvoke",
 			GivenObjects: []runtime.Object{
-				requestProcessor,
+				handler,
 				ingressService,
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl localhost/path -H 'Host: test-requestprocessor.example.com'\n",
+					"curl localhost/path -H 'Host: test-handler.example.com'\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -231,15 +231,15 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "content type json",
-			Args:       []string{requestprocessorName, cli.JSONFlagName},
-			ExecHelper: "RequestProcessorInvoke",
+			Args:       []string{handlerName, cli.JSONFlagName},
+			ExecHelper: "HandlerInvoke",
 			GivenObjects: []runtime.Object{
-				requestProcessor,
+				handler,
 				ingressService,
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl localhost -H 'Host: test-requestprocessor.example.com' -H 'Content-Type: application/json'\n",
+					"curl localhost -H 'Host: test-handler.example.com' -H 'Content-Type: application/json'\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -249,15 +249,15 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "content type text",
-			Args:       []string{requestprocessorName, cli.TextFlagName},
-			ExecHelper: "RequestProcessorInvoke",
+			Args:       []string{handlerName, cli.TextFlagName},
+			ExecHelper: "HandlerInvoke",
 			GivenObjects: []runtime.Object{
-				requestProcessor,
+				handler,
 				ingressService,
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl localhost -H 'Host: test-requestprocessor.example.com' -H 'Content-Type: text/plain'\n",
+					"curl localhost -H 'Host: test-handler.example.com' -H 'Content-Type: text/plain'\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -267,15 +267,15 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "pass extra args to curl",
-			Args:       []string{requestprocessorName, "--", "-w", "\n"},
-			ExecHelper: "RequestProcessorInvoke",
+			Args:       []string{handlerName, "--", "-w", "\n"},
+			ExecHelper: "HandlerInvoke",
 			GivenObjects: []runtime.Object{
-				requestProcessor,
+				handler,
 				ingressService,
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl localhost -H 'Host: test-requestprocessor.example.com' -w '\n'\n",
+					"curl localhost -H 'Host: test-handler.example.com' -w '\n'\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -285,9 +285,9 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 		},
 		{
 			Name: "unknown ingress",
-			Args: []string{requestprocessorName},
+			Args: []string{handlerName},
 			GivenObjects: []runtime.Object{
-				requestProcessor,
+				handler,
 				&corev1.Service{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "istio-system",
@@ -302,24 +302,24 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "missing ingress",
-			Args:       []string{requestprocessorName},
-			ExecHelper: "RequestProcessorInvoke",
+			Args:       []string{handlerName},
+			ExecHelper: "HandlerInvoke",
 			GivenObjects: []runtime.Object{
-				requestProcessor,
+				handler,
 			},
 			ShouldError: true,
 		},
 		{
-			Name: "request processor not ready",
-			Args: []string{requestprocessorName},
+			Name: "handler not ready",
+			Args: []string{handlerName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.RequestProcessor{
+				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: defaultNamespace,
-						Name:      requestprocessorName,
+						Name:      handlerName,
 					},
-					Status: requestv1alpha1.RequestProcessorStatus{
-						Domain: fmt.Sprintf("%s.example.com", requestprocessorName),
+					Status: requestv1alpha1.HandlerStatus{
+						Domain: fmt.Sprintf("%s.example.com", handlerName),
 					},
 				},
 				ingressService,
@@ -327,18 +327,18 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name: "request processor missing domain",
-			Args: []string{requestprocessorName},
+			Name: "handler missing domain",
+			Args: []string{handlerName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.RequestProcessor{
+				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: defaultNamespace,
-						Name:      requestprocessorName,
+						Name:      handlerName,
 					},
-					Status: requestv1alpha1.RequestProcessorStatus{
+					Status: requestv1alpha1.HandlerStatus{
 						Status: duckv1alpha1.Status{
 							Conditions: []duckv1alpha1.Condition{
-								{Type: requestv1alpha1.RequestProcessorConditionReady, Status: "True"},
+								{Type: requestv1alpha1.HandlerConditionReady, Status: "True"},
 							},
 						},
 					},
@@ -348,8 +348,8 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name: "missing request processor",
-			Args: []string{requestprocessorName},
+			Name: "missing handler",
+			Args: []string{handlerName},
 			GivenObjects: []runtime.Object{
 				ingressService,
 			},
@@ -357,16 +357,16 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "curl error",
-			Args:       []string{requestprocessorName},
-			ExecHelper: "RequestProcessorInvokeError",
+			Args:       []string{handlerName},
+			ExecHelper: "HandlerInvokeError",
 			GivenObjects: []runtime.Object{
-				requestProcessor,
+				handler,
 				ingressService,
 			},
 			ShouldError: true,
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl localhost -H 'Host: test-requestprocessor.example.com'\n",
+					"curl localhost -H 'Host: test-handler.example.com'\n",
 					"exit status 1\n",
 				} {
 					if !strings.Contains(output, expected) {
@@ -377,10 +377,10 @@ func TestRequestProcessorInvokeCommand(t *testing.T) {
 		},
 	}
 
-	table.Run(t, commands.NewRequestProcessorInvokeCommand)
+	table.Run(t, commands.NewHandlerInvokeCommand)
 }
 
-func TestHelperProcess_RequestProcessorInvoke(t *testing.T) {
+func TestHelperProcess_HandlerInvoke(t *testing.T) {
 	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
 		return
 	}
@@ -388,7 +388,7 @@ func TestHelperProcess_RequestProcessorInvoke(t *testing.T) {
 	os.Exit(0)
 }
 
-func TestHelperProcess_RequestProcessorInvokeError(t *testing.T) {
+func TestHelperProcess_HandlerInvokeError(t *testing.T) {
 	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
 		return
 	}

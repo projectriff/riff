@@ -26,7 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type RequestProcessorInvokeOptions struct {
+type HandlerInvokeOptions struct {
 	cli.ResourceOptions
 	ContentTypeJSON bool
 	ContentTypeText bool
@@ -34,7 +34,7 @@ type RequestProcessorInvokeOptions struct {
 	BareArgs        []string
 }
 
-func (opts *RequestProcessorInvokeOptions) Validate(ctx context.Context) *cli.FieldError {
+func (opts *HandlerInvokeOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
 
 	errs = errs.Also(opts.ResourceOptions.Validate(ctx))
@@ -46,13 +46,13 @@ func (opts *RequestProcessorInvokeOptions) Validate(ctx context.Context) *cli.Fi
 	return errs
 }
 
-func (opts *RequestProcessorInvokeOptions) Exec(ctx context.Context, c *cli.Config) error {
-	requestprocessor, err := c.Request().RequestProcessors(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
+func (opts *HandlerInvokeOptions) Exec(ctx context.Context, c *cli.Config) error {
+	handler, err := c.Request().Handlers(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
-	if !requestprocessor.Status.IsReady() || requestprocessor.Status.Domain == "" {
-		return fmt.Errorf("request processor %q is not ready", opts.Name)
+	if !handler.Status.IsReady() || handler.Status.Domain == "" {
+		return fmt.Errorf("handler %q is not ready", opts.Name)
 	}
 
 	ingress, err := ingressServiceHost(c)
@@ -60,7 +60,7 @@ func (opts *RequestProcessorInvokeOptions) Exec(ctx context.Context, c *cli.Conf
 		return err
 	}
 
-	curlArgs := []string{ingress + opts.Path, "-H", fmt.Sprintf("Host: %s", requestprocessor.Status.Domain)}
+	curlArgs := []string{ingress + opts.Path, "-H", fmt.Sprintf("Host: %s", handler.Status.Domain)}
 	if opts.ContentTypeJSON {
 		curlArgs = append(curlArgs, "-H", "Content-Type: application/json")
 	}
@@ -78,8 +78,8 @@ func (opts *RequestProcessorInvokeOptions) Exec(ctx context.Context, c *cli.Conf
 	return curl.Run()
 }
 
-func NewRequestProcessorInvokeCommand(c *cli.Config) *cobra.Command {
-	opts := &RequestProcessorInvokeOptions{}
+func NewHandlerInvokeCommand(c *cli.Config) *cobra.Command {
+	opts := &HandlerInvokeOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "invoke",

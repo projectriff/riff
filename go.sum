@@ -187,8 +187,8 @@ github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqn
 github.com/rogpeppe/fastuuid v0.0.0-20150106093220-6724a57986af/go.mod h1:XWv6SoW27p1b0cqNHllgS5HIMJraePCO15w5zCzIWYg=
 github.com/russross/blackfriday v1.5.2 h1:HyvC0ARfnZBqnXwABFeSZHpKvJHJJfPz81GNueLj0oo=
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
-github.com/scothis/system v0.0.0-20190517200536-6d458e051552 h1:yQIX+c+kWksTPHJZt5n9N2a3RxwWYXJgaStwzz9HKk0=
-github.com/scothis/system v0.0.0-20190517200536-6d458e051552/go.mod h1:rpYGchushJTA5WGX2kh92XyDNVcGSkfcZcNoVGnWXao=
+github.com/scothis/system v0.0.0-20190517224229-28d4243d7ff0 h1:M2S+3RtjDm7UfXQ10gKMaxcFKZtL6oj6u1+nrc31L2c=
+github.com/scothis/system v0.0.0-20190517224229-28d4243d7ff0/go.mod h1:rpYGchushJTA5WGX2kh92XyDNVcGSkfcZcNoVGnWXao=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/spf13/afero v1.1.2 h1:m8/z1t7/fwjysjQRYbP0RD+bUIF/8tJwPdEZsI83ACI=
 github.com/spf13/afero v1.1.2/go.mod h1:j4pytiNVoe2o6bmDsKpLACNPDBIoEAkihy7loJ1B0CQ=

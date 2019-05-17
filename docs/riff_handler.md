@@ -1,4 +1,4 @@
-## riff requestprocessor
+## riff handler
 
 <todo>
 
@@ -15,7 +15,7 @@
 ### Options
 
 ```
-  -h, --help   help for requestprocessor
+  -h, --help   help for handler
 ```
 
 ### Options inherited from parent commands
@@ -29,8 +29,8 @@
 ### SEE ALSO
 
 * [riff](riff.md)	 - <todo>
-* [riff requestprocessor create](riff_requestprocessor_create.md)	 - <todo>
-* [riff requestprocessor delete](riff_requestprocessor_delete.md)	 - <todo>
-* [riff requestprocessor list](riff_requestprocessor_list.md)	 - <todo>
-* [riff requestprocessor update](riff_requestprocessor_update.md)	 - <todo>
+* [riff handler create](riff_handler_create.md)	 - <todo>
+* [riff handler delete](riff_handler_delete.md)	 - <todo>
+* [riff handler list](riff_handler_list.md)	 - <todo>
+* [riff handler update](riff_handler_update.md)	 - <todo>
 
