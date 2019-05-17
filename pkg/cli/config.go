@@ -63,28 +63,28 @@ func (c *Config) Eprintf(format string, a ...interface{}) (n int, err error) {
 	return fmt.Fprintf(c.Stderr, format, a...)
 }
 
-func (c *Config) Successf(format string, a ...interface{}) (n int, err error) {
-	return fmt.Fprintf(c.Stdout, color.GreenString(format), a...)
-}
-
-func (c *Config) Esuccessf(format string, a ...interface{}) (n int, err error) {
-	return fmt.Fprintf(c.Stderr, color.GreenString(format), a...)
-}
-
 func (c *Config) Infof(format string, a ...interface{}) (n int, err error) {
-	return fmt.Fprintf(c.Stdout, color.CyanString(format), a...)
+	return InfoColor.Fprintf(c.Stdout, format, a...)
 }
 
 func (c *Config) Einfof(format string, a ...interface{}) (n int, err error) {
-	return fmt.Fprintf(c.Stderr, color.CyanString(format), a...)
+	return InfoColor.Fprintf(c.Stderr, format, a...)
+}
+
+func (c *Config) Successf(format string, a ...interface{}) (n int, err error) {
+	return SuccessColor.Fprintf(c.Stdout, format, a...)
+}
+
+func (c *Config) Esuccessf(format string, a ...interface{}) (n int, err error) {
+	return SuccessColor.Fprintf(c.Stderr, format, a...)
 }
 
 func (c *Config) Errorf(format string, a ...interface{}) (n int, err error) {
-	return fmt.Fprintf(c.Stdout, color.RedString(format), a...)
+	return ErrorColor.Fprintf(c.Stdout, format, a...)
 }
 
 func (c *Config) Eerrorf(format string, a ...interface{}) (n int, err error) {
-	return fmt.Fprintf(c.Stderr, color.RedString(format), a...)
+	return ErrorColor.Fprintf(c.Stderr, format, a...)
 }
 
 func Initialize() *Config {

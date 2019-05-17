@@ -132,5 +132,5 @@ func handlerRef(handler *requestv1alpha1.Handler) (string, string) {
 	} else if handler.Spec.Template != nil && handler.Spec.Template.Containers[0].Image != "" {
 		return "image", handler.Spec.Template.Containers[0].Image
 	}
-	return "<unknown>", "<unknown>"
+	return cli.Swarnf("<unknown>"), cli.Swarnf("<unknown>")
 }
