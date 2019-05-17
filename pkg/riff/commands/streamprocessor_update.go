@@ -24,21 +24,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type StreamProcessorUpdateOptions struct {
+type ProcessorUpdateOptions struct {
 	Namespace string
 }
 
-func (opts *StreamProcessorUpdateOptions) Validate(ctx context.Context) *cli.FieldError {
+func (opts *ProcessorUpdateOptions) Validate(ctx context.Context) *cli.FieldError {
 	// TODO implement
 	return nil
 }
 
-func (opts *StreamProcessorUpdateOptions) Exec(ctx context.Context, c *cli.Config) error {
+func (opts *ProcessorUpdateOptions) Exec(ctx context.Context, c *cli.Config) error {
 	return fmt.Errorf("not implemented")
 }
 
-func NewStreamProcessorUpdateCommand(c *cli.Config) *cobra.Command {
-	opts := &StreamProcessorUpdateOptions{}
+func NewProcessorUpdateCommand(c *cli.Config) *cobra.Command {
+	opts := &ProcessorUpdateOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "update",

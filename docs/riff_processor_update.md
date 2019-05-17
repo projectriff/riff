@@ -1,4 +1,4 @@
-## riff streamprocessor update
+## riff processor update
 
 <todo>
 
@@ -7,7 +7,7 @@
 <todo>
 
 ```
-riff streamprocessor update [flags]
+riff processor update [flags]
 ```
 
 ### Examples
@@ -33,5 +33,5 @@ riff streamprocessor update [flags]
 
 ### SEE ALSO
 
-* [riff streamprocessor](riff_streamprocessor.md)	 - <todo>
+* [riff processor](riff_processor.md)	 - <todo>
 

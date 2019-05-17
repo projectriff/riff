@@ -24,21 +24,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type StreamProcessorCreateOptions struct {
+type ProcessorCreateOptions struct {
 	Namespace string
 }
 
-func (opts *StreamProcessorCreateOptions) Validate(ctx context.Context) *cli.FieldError {
+func (opts *ProcessorCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 	// TODO implement
 	return nil
 }
 
-func (opts *StreamProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) error {
+func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) error {
 	return fmt.Errorf("not implemented")
 }
 
-func NewStreamProcessorCreateCommand(c *cli.Config) *cobra.Command {
-	opts := &StreamProcessorCreateOptions{}
+func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {
+	opts := &ProcessorCreateOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "create",
