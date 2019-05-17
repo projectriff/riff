@@ -1,4 +1,4 @@
-## riff credential set
+## riff credential apply
 
 <todo>
 
@@ -7,7 +7,7 @@
 <todo>
 
 ```
-riff credential set [flags]
+riff credential apply [flags]
 ```
 
 ### Examples
@@ -21,7 +21,7 @@ riff credential set [flags]
 ```
       --docker-hub string          <todo>
       --gcr string                 <todo>
-  -h, --help                       help for set
+  -h, --help                       help for apply
   -n, --namespace string           <todo>
       --registry string            <todo>
       --registry-user string       <todo>
