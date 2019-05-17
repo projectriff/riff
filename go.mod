@@ -9,7 +9,7 @@ require (
 	github.com/knative/pkg v0.0.0-20190417151928-418e675f88c2
 	github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/projectriff/system v0.0.0-20190514230324-6e07cd39cb97
+	github.com/projectriff/system v0.0.0-20190517234833-edb02f2a0eaa
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.2
 	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
@@ -49,5 +49,3 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20190502190224-411b2483e503 // indirect
 )
-
-replace github.com/projectriff/system => github.com/scothis/system v0.0.0-20190517224229-28d4243d7ff0
