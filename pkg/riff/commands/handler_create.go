@@ -28,7 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type RequestProcessorCreateOptions struct {
+type HandlerCreateOptions struct {
 	cli.ResourceOptions
 
 	Image          string
@@ -40,7 +40,7 @@ type RequestProcessorCreateOptions struct {
 	// EnvFrom []string
 }
 
-func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *cli.FieldError {
+func (opts *HandlerCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
 
 	errs = errs.Also(opts.ResourceOptions.Validate((ctx)))
@@ -78,13 +78,13 @@ func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *cli.Fi
 	return errs
 }
 
-func (opts *RequestProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) error {
-	processor := &requestv1alpha1.RequestProcessor{
+func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error {
+	processor := &requestv1alpha1.Handler{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: opts.Namespace,
 			Name:      opts.Name,
 		},
-		Spec: requestv1alpha1.RequestProcessorSpec{
+		Spec: requestv1alpha1.HandlerSpec{
 			Template: &corev1.PodSpec{
 				Containers: []corev1.Container{{}},
 			},
@@ -112,16 +112,16 @@ func (opts *RequestProcessorCreateOptions) Exec(ctx context.Context, c *cli.Conf
 		processor.Spec.Template.Containers[0].Env = append(processor.Spec.Template.Containers[0].Env, parsers.EnvVar(env))
 	}
 
-	processor, err := c.Request().RequestProcessors(opts.Namespace).Create(processor)
+	processor, err := c.Request().Handlers(opts.Namespace).Create(processor)
 	if err != nil {
 		return err
 	}
-	c.Successf("Created request processor %q\n", processor.Name)
+	c.Successf("Created handler %q\n", processor.Name)
 	return nil
 }
 
-func NewRequestProcessorCreateCommand(c *cli.Config) *cobra.Command {
-	opts := &RequestProcessorCreateOptions{}
+func NewHandlerCreateCommand(c *cli.Config) *cobra.Command {
+	opts := &HandlerCreateOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "create",

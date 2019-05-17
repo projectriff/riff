@@ -1,4 +1,4 @@
-## riff requestprocessor delete
+## riff handler list
 
 <todo>
 
@@ -7,7 +7,7 @@
 <todo>
 
 ```
-riff requestprocessor delete [flags]
+riff handler list [flags]
 ```
 
 ### Examples
@@ -19,8 +19,8 @@ riff requestprocessor delete [flags]
 ### Options
 
 ```
-      --all                <todo>
-  -h, --help               help for delete
+      --all-namespaces     <todo>
+  -h, --help               help for list
   -n, --namespace string   <todo>
 ```
 
@@ -34,5 +34,5 @@ riff requestprocessor delete [flags]
 
 ### SEE ALSO
 
-* [riff requestprocessor](riff_requestprocessor.md)	 - <todo>
+* [riff handler](riff_handler.md)	 - <todo>
 

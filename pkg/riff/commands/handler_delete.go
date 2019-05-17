@@ -18,38 +18,56 @@ package commands
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type RequestProcessorUpdateOptions struct {
-	Namespace string
+type HandlerDeleteOptions struct {
+	cli.DeleteOptions
 }
 
-func (opts *RequestProcessorUpdateOptions) Validate(ctx context.Context) *cli.FieldError {
-	// TODO implement
+func (opts *HandlerDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
+	errs := &cli.FieldError{}
+
+	errs = errs.Also(opts.DeleteOptions.Validate(ctx))
+
+	return errs
+}
+
+func (opts *HandlerDeleteOptions) Exec(ctx context.Context, c *cli.Config) error {
+	client := c.Request().Handlers(opts.Namespace)
+
+	if opts.All {
+		return client.DeleteCollection(nil, metav1.ListOptions{})
+	}
+
+	for _, name := range opts.Names {
+		if err := client.Delete(name, nil); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
-func (opts *RequestProcessorUpdateOptions) Exec(ctx context.Context, c *cli.Config) error {
-	return fmt.Errorf("not implemented")
-}
-
-func NewRequestProcessorUpdateCommand(c *cli.Config) *cobra.Command {
-	opts := &RequestProcessorUpdateOptions{}
+func NewHandlerDeleteCommand(c *cli.Config) *cobra.Command {
+	opts := &HandlerDeleteOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "update",
+		Use:     "delete",
 		Short:   "<todo>",
 		Example: "<todo>",
-		Args:    cli.Args(),
+		Args: cli.Args(
+			cli.NamesArg(&opts.Names),
+		),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
+	cmd.Flags().BoolVar(&opts.All, cli.StripDash(cli.AllFlagName), false, "<todo>")
 
 	return cmd
 }

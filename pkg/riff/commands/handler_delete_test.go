@@ -25,18 +25,18 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestRequestProcessorDeleteOptions(t *testing.T) {
+func TestHandlerDeleteOptions(t *testing.T) {
 	table := testing.OptionsTable{
 		{
 			Name: "invalid delete",
-			Options: &commands.RequestProcessorDeleteOptions{
+			Options: &commands.HandlerDeleteOptions{
 				DeleteOptions: testing.InvalidDeleteOptions,
 			},
 			ExpectFieldError: testing.InvalidDeleteOptionsFieldError,
 		},
 		{
 			Name: "valid delete",
-			Options: &commands.RequestProcessorDeleteOptions{
+			Options: &commands.HandlerDeleteOptions{
 				DeleteOptions: testing.ValidDeleteOptions,
 			},
 			ShouldValidate: true,
@@ -46,9 +46,9 @@ func TestRequestProcessorDeleteOptions(t *testing.T) {
 	table.Run(t)
 }
 
-func TestRequestProcessorDeleteCommand(t *testing.T) {
-	requestprocessorName := "test-function"
-	requestprocessorOtherName := "test-other-function"
+func TestHandlerDeleteCommand(t *testing.T) {
+	handlerName := "test-handler"
+	handlerOtherName := "test-other-handler"
 	defaultNamespace := "default"
 
 	table := testing.CommandTable{
@@ -58,103 +58,103 @@ func TestRequestProcessorDeleteCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name: "delete all requestprocessors",
+			Name: "delete all handlers",
 			Args: []string{cli.AllFlagName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.RequestProcessor{
+				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      requestprocessorName,
+						Name:      handlerName,
 						Namespace: defaultNamespace,
 					},
 				},
 			},
 			ExpectDeleteCollections: []testing.DeleteCollectionRef{{
 				Group:     "request.projectriff.io",
-				Resource:  "requestprocessors",
+				Resource:  "handlers",
 				Namespace: defaultNamespace,
 			}},
 		},
 		{
-			Name: "delete request processor",
-			Args: []string{requestprocessorName},
+			Name: "delete handler",
+			Args: []string{handlerName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.RequestProcessor{
+				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      requestprocessorName,
+						Name:      handlerName,
 						Namespace: defaultNamespace,
 					},
 				},
 			},
 			ExpectDeletes: []testing.DeleteRef{{
 				Group:     "request.projectriff.io",
-				Resource:  "requestprocessors",
+				Resource:  "handlers",
 				Namespace: defaultNamespace,
-				Name:      requestprocessorName,
+				Name:      handlerName,
 			}},
 		},
 		{
-			Name: "delete request processors",
-			Args: []string{requestprocessorName, requestprocessorOtherName},
+			Name: "delete handlers",
+			Args: []string{handlerName, handlerOtherName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.RequestProcessor{
+				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      requestprocessorName,
+						Name:      handlerName,
 						Namespace: defaultNamespace,
 					},
 				},
-				&requestv1alpha1.RequestProcessor{
+				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      requestprocessorOtherName,
+						Name:      handlerOtherName,
 						Namespace: defaultNamespace,
 					},
 				},
 			},
 			ExpectDeletes: []testing.DeleteRef{{
 				Group:     "request.projectriff.io",
-				Resource:  "requestprocessors",
+				Resource:  "handlers",
 				Namespace: defaultNamespace,
-				Name:      requestprocessorName,
+				Name:      handlerName,
 			}, {
 				Group:     "request.projectriff.io",
-				Resource:  "requestprocessors",
+				Resource:  "handlers",
 				Namespace: defaultNamespace,
-				Name:      requestprocessorOtherName,
+				Name:      handlerOtherName,
 			}},
 		},
 		{
-			Name: "request processor does not exist",
-			Args: []string{requestprocessorName},
+			Name: "handler does not exist",
+			Args: []string{handlerName},
 			ExpectDeletes: []testing.DeleteRef{{
 				Group:     "request.projectriff.io",
-				Resource:  "requestprocessors",
+				Resource:  "handlers",
 				Namespace: defaultNamespace,
-				Name:      requestprocessorName,
+				Name:      handlerName,
 			}},
 			ShouldError: true,
 		},
 		{
 			Name: "delete error",
-			Args: []string{requestprocessorName},
+			Args: []string{handlerName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.RequestProcessor{
+				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      requestprocessorName,
+						Name:      handlerName,
 						Namespace: defaultNamespace,
 					},
 				},
 			},
 			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("delete", "requestprocessors"),
+				testing.InduceFailure("delete", "handlers"),
 			},
 			ExpectDeletes: []testing.DeleteRef{{
 				Group:     "request.projectriff.io",
-				Resource:  "requestprocessors",
+				Resource:  "handlers",
 				Namespace: defaultNamespace,
-				Name:      requestprocessorName,
+				Name:      handlerName,
 			}},
 			ShouldError: true,
 		},
 	}
 
-	table.Run(t, commands.NewRequestProcessorDeleteCommand)
+	table.Run(t, commands.NewHandlerDeleteCommand)
 }
