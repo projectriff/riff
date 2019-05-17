@@ -36,7 +36,6 @@ func TestRequestProcessorCreateOptions(t *testing.T) {
 				ResourceOptions: testing.InvalidResourceOptions,
 			},
 			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
-				cli.ErrMissingField(cli.ItemFlagName),
 				cli.ErrMissingOneOf(cli.ApplicationRefFlagName, cli.FunctionRefFlagName, cli.ImageFlagName),
 			),
 		},
@@ -44,7 +43,6 @@ func TestRequestProcessorCreateOptions(t *testing.T) {
 			Name: "from application",
 			Options: &commands.RequestProcessorCreateOptions{
 				ResourceOptions: testing.ValidResourceOptions,
-				ItemName:        "blue",
 				ApplicationRef:  "my-application",
 			},
 			ShouldValidate: true,
@@ -53,7 +51,6 @@ func TestRequestProcessorCreateOptions(t *testing.T) {
 			Name: "from function",
 			Options: &commands.RequestProcessorCreateOptions{
 				ResourceOptions: testing.ValidResourceOptions,
-				ItemName:        "blue",
 				FunctionRef:     "my-function",
 			},
 			ShouldValidate: true,
@@ -62,7 +59,6 @@ func TestRequestProcessorCreateOptions(t *testing.T) {
 			Name: "from image",
 			Options: &commands.RequestProcessorCreateOptions{
 				ResourceOptions: testing.ValidResourceOptions,
-				ItemName:        "blue",
 				Image:           "example.com/repo:tag",
 			},
 			ShouldValidate: true,
@@ -71,7 +67,6 @@ func TestRequestProcessorCreateOptions(t *testing.T) {
 			Name: "from application, funcation and image",
 			Options: &commands.RequestProcessorCreateOptions{
 				ResourceOptions: testing.ValidResourceOptions,
-				ItemName:        "blue",
 				ApplicationRef:  "my-application",
 				FunctionRef:     "my-function",
 				Image:           "example.com/repo:tag",
@@ -82,7 +77,6 @@ func TestRequestProcessorCreateOptions(t *testing.T) {
 			Name: "with env",
 			Options: &commands.RequestProcessorCreateOptions{
 				ResourceOptions: testing.ValidResourceOptions,
-				ItemName:        "blue",
 				Image:           "example.com/repo:tag",
 				Env:             []string{"VAR1=foo", "VAR2=bar"},
 			},
@@ -92,7 +86,6 @@ func TestRequestProcessorCreateOptions(t *testing.T) {
 			Name: "with invalid env",
 			Options: &commands.RequestProcessorCreateOptions{
 				ResourceOptions: testing.ValidResourceOptions,
-				ItemName:        "blue",
 				Image:           "example.com/repo:tag",
 				Env:             []string{"=foo"},
 			},
@@ -106,7 +99,6 @@ func TestRequestProcessorCreateOptions(t *testing.T) {
 func TestRequestProcessorCreateCommand(t *testing.T) {
 	defaultNamespace := "default"
 	requestProcessorName := "my-function"
-	itemName := "blue"
 	image := "registry.example.com/repo@sha256:deadbeefdeadbeefdeadbeefdeadbeef"
 	applicationRef := "my-app"
 	functionRef := "my-func"
@@ -125,7 +117,7 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "create from image",
-			Args: []string{requestProcessorName, cli.ItemFlagName, itemName, cli.ImageFlagName, image},
+			Args: []string{requestProcessorName, cli.ImageFlagName, image},
 			ExpectCreates: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
@@ -133,12 +125,9 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 						Name:      requestProcessorName,
 					},
 					Spec: requestv1alpha1.RequestProcessorSpec{
-						{
-							Name: itemName,
-							Template: &corev1.PodSpec{
-								Containers: []corev1.Container{
-									{Image: image},
-								},
+						Template: &corev1.PodSpec{
+							Containers: []corev1.Container{
+								{Image: image},
 							},
 						},
 					},
@@ -147,7 +136,7 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "create from application ref",
-			Args: []string{requestProcessorName, cli.ItemFlagName, itemName, cli.ApplicationRefFlagName, applicationRef},
+			Args: []string{requestProcessorName, cli.ApplicationRefFlagName, applicationRef},
 			ExpectCreates: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
@@ -155,11 +144,8 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 						Name:      requestProcessorName,
 					},
 					Spec: requestv1alpha1.RequestProcessorSpec{
-						{
-							Name: itemName,
-							Build: &requestv1alpha1.Build{
-								ApplicationRef: applicationRef,
-							},
+						Build: &requestv1alpha1.Build{
+							ApplicationRef: applicationRef,
 						},
 					},
 				},
@@ -167,7 +153,7 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "create from function ref",
-			Args: []string{requestProcessorName, cli.ItemFlagName, itemName, cli.FunctionRefFlagName, functionRef},
+			Args: []string{requestProcessorName, cli.FunctionRefFlagName, functionRef},
 			ExpectCreates: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
@@ -175,11 +161,8 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 						Name:      requestProcessorName,
 					},
 					Spec: requestv1alpha1.RequestProcessorSpec{
-						{
-							Name: itemName,
-							Build: &requestv1alpha1.Build{
-								FunctionRef: functionRef,
-							},
+						Build: &requestv1alpha1.Build{
+							FunctionRef: functionRef,
 						},
 					},
 				},
@@ -187,7 +170,7 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "create from image with env",
-			Args: []string{requestProcessorName, cli.ItemFlagName, itemName, cli.ImageFlagName, image, cli.EnvFlagName, envVar, cli.EnvFlagName, envVarOther},
+			Args: []string{requestProcessorName, cli.ImageFlagName, image, cli.EnvFlagName, envVar, cli.EnvFlagName, envVarOther},
 			ExpectCreates: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
@@ -195,16 +178,13 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 						Name:      requestProcessorName,
 					},
 					Spec: requestv1alpha1.RequestProcessorSpec{
-						{
-							Name: itemName,
-							Template: &corev1.PodSpec{
-								Containers: []corev1.Container{
-									{
-										Image: image,
-										Env: []corev1.EnvVar{
-											{Name: envName, Value: envValue},
-											{Name: envNameOther, Value: envValueOther},
-										},
+						Template: &corev1.PodSpec{
+							Containers: []corev1.Container{
+								{
+									Image: image,
+									Env: []corev1.EnvVar{
+										{Name: envName, Value: envValue},
+										{Name: envNameOther, Value: envValueOther},
 									},
 								},
 							},
@@ -215,7 +195,7 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "error existing request processor",
-			Args: []string{requestProcessorName, cli.ItemFlagName, itemName, cli.ImageFlagName, image},
+			Args: []string{requestProcessorName, cli.ImageFlagName, image},
 			GivenObjects: []runtime.Object{
 				&requestv1alpha1.RequestProcessor{
 					ObjectMeta: metav1.ObjectMeta{
@@ -231,12 +211,9 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 						Name:      requestProcessorName,
 					},
 					Spec: requestv1alpha1.RequestProcessorSpec{
-						{
-							Name: itemName,
-							Template: &corev1.PodSpec{
-								Containers: []corev1.Container{
-									{Image: image},
-								},
+						Template: &corev1.PodSpec{
+							Containers: []corev1.Container{
+								{Image: image},
 							},
 						},
 					},
@@ -246,7 +223,7 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "error during create",
-			Args: []string{requestProcessorName, cli.ItemFlagName, itemName, cli.ImageFlagName, image},
+			Args: []string{requestProcessorName, cli.ImageFlagName, image},
 			WithReactors: []testing.ReactionFunc{
 				testing.InduceFailure("create", "requestprocessors"),
 			},
@@ -257,12 +234,9 @@ func TestRequestProcessorCreateCommand(t *testing.T) {
 						Name:      requestProcessorName,
 					},
 					Spec: requestv1alpha1.RequestProcessorSpec{
-						{
-							Name: itemName,
-							Template: &corev1.PodSpec{
-								Containers: []corev1.Container{
-									{Image: image},
-								},
+						Template: &corev1.PodSpec{
+							Containers: []corev1.Container{
+								{Image: image},
 							},
 						},
 					},
