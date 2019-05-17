@@ -32,7 +32,6 @@ func NewStreamProcessorCommand(c *cli.Config) *cobra.Command {
 	cmd.AddCommand(NewStreamProcessorListCommand(c))
 	cmd.AddCommand(NewStreamProcessorCreateCommand(c))
 	cmd.AddCommand(NewStreamProcessorUpdateCommand(c))
-	cmd.AddCommand(NewStreamProcessorInvokeCommand(c))
 	cmd.AddCommand(NewStreamProcessorDeleteCommand(c))
 
 	return cmd
