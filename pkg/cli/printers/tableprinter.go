@@ -26,7 +26,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/liggitt/tabwriter"
+	"github.com/projectriff/riff/pkg/cli/printers/tabwriter"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metav1beta1 "k8s.io/apimachinery/pkg/apis/meta/v1beta1"

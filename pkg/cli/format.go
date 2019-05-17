@@ -26,28 +26,36 @@ import (
 
 func FormatTimestampSince(timestamp metav1.Time) string {
 	if timestamp.IsZero() {
-		return "<unknown>"
+		return Swarnf("<unknown>")
 	}
 	return duration.HumanDuration(time.Since(timestamp.Time))
 }
 
 func FormatEmptyString(str string) string {
 	if str == "" {
-		return "<empty>"
+		return Sfaintf("<empty>")
 	}
 	return str
 }
 
 func FormatConditionStatus(cond *duckv1alpha1.Condition) string {
-	if cond == nil {
-		return "<unknown>"
+	if cond == nil || cond.Status == "" {
+		return Swarnf("<unknown>")
 	}
-	return FormatEmptyString(string(cond.Status))
+	status := string(cond.Status)
+	switch status {
+	case "True":
+		return Ssuccessf(status)
+	case "False":
+		return Serrorf(status)
+	default:
+		return Sinfof(status)
+	}
 }
 
 func FormatConditionMessage(cond *duckv1alpha1.Condition) string {
 	if cond == nil {
-		return "<unknown>"
+		return Swarnf("<unknown>")
 	}
-	return cond.Message
+	return FormatEmptyString(cond.Message)
 }

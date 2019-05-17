@@ -3,11 +3,11 @@ module github.com/projectriff/riff
 go 1.12
 
 require (
+	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/fatih/color v1.7.0
 	github.com/google/go-cmp v0.3.0
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/knative/pkg v0.0.0-20190417151928-418e675f88c2
-	github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/projectriff/system v0.0.0-20190517234833-edb02f2a0eaa
 	github.com/spf13/cobra v0.0.3
@@ -34,6 +34,7 @@ require (
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/knative/build v0.5.0 // indirect
 	github.com/knative/serving v0.5.2 // indirect
+	github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de // indirect
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.7 // indirect
