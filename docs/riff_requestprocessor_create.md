@@ -24,7 +24,6 @@ riff requestprocessor create [flags]
       --function-ref string      <todo>
   -h, --help                     help for create
       --image string             <todo>
-      --item string              <todo>
   -n, --namespace string         <todo>
 ```
 

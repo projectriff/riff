@@ -98,10 +98,11 @@ func printRequestProcessor(requestprocessor *requestv1alpha1.RequestProcessor, o
 	row := metav1beta1.TableRow{
 		Object: runtime.RawExtension{Object: requestprocessor},
 	}
+	refType, refValue := requestProcessorRef(requestprocessor)
 	row.Cells = append(row.Cells,
 		requestprocessor.Name,
-		requestProcessorRefType(requestprocessor),
-		requestProcessorRef(requestprocessor),
+		refType,
+		refValue,
 		cli.FormatEmptyString(requestprocessor.Status.Domain),
 		cli.FormatConditionStatus(requestprocessor.Status.GetCondition(requestv1alpha1.RequestProcessorConditionReady)),
 		cli.FormatTimestampSince(requestprocessor.CreationTimestamp),
@@ -120,34 +121,16 @@ func printRequestProcessorColumns() []metav1beta1.TableColumnDefinition {
 	}
 }
 
-func requestProcessorRefType(requestprocessor *requestv1alpha1.RequestProcessor) string {
-	if len(requestprocessor.Spec) == 0 {
-		return "<unknown>"
+func requestProcessorRef(requestprocessor *requestv1alpha1.RequestProcessor) (string, string) {
+	if requestprocessor.Spec.Build != nil {
+		if requestprocessor.Spec.Build.ApplicationRef != "" {
+			return "application", requestprocessor.Spec.Build.ApplicationRef
+		}
+		if requestprocessor.Spec.Build.FunctionRef != "" {
+			return "function", requestprocessor.Spec.Build.FunctionRef
+		}
+	} else if requestprocessor.Spec.Template != nil && requestprocessor.Spec.Template.Containers[0].Image != "" {
+		return "image", requestprocessor.Spec.Template.Containers[0].Image
 	}
-	if requestprocessor.Spec[0].Build == nil {
-		return "image"
-	}
-	if requestprocessor.Spec[0].Build.ApplicationRef != "" {
-		return "application"
-	}
-	if requestprocessor.Spec[0].Build.FunctionRef != "" {
-		return "function"
-	}
-	return "<unknown>"
-}
-
-func requestProcessorRef(requestprocessor *requestv1alpha1.RequestProcessor) string {
-	if len(requestprocessor.Spec) == 0 {
-		return "<unknown>"
-	}
-	if requestprocessor.Spec[0].Build == nil {
-		return requestprocessor.Spec[0].Template.Containers[0].Image
-	}
-	if requestprocessor.Spec[0].Build.ApplicationRef != "" {
-		return requestprocessor.Spec[0].Build.ApplicationRef
-	}
-	if requestprocessor.Spec[0].Build.FunctionRef != "" {
-		return requestprocessor.Spec[0].Build.FunctionRef
-	}
-	return requestprocessor.Spec[0].Template.Containers[0].Image
+	return "<unknown>", "<unknown>"
 }

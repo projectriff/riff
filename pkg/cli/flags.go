@@ -38,7 +38,6 @@ const (
 	HandlerFlagName               = "--handler"
 	ImageFlagName                 = "--image"
 	InvokerFlagName               = "--invoker"
-	ItemFlagName                  = "--item"
 	JSONFlagName                  = "--json"
 	KubeConfigFlagName            = "--kube-config"
 	LocalPathFlagName             = "--local-path"

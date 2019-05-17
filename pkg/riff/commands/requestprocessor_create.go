@@ -31,7 +31,6 @@ import (
 type RequestProcessorCreateOptions struct {
 	cli.ResourceOptions
 
-	ItemName       string
 	Image          string
 	ApplicationRef string
 	FunctionRef    string
@@ -45,12 +44,6 @@ func (opts *RequestProcessorCreateOptions) Validate(ctx context.Context) *cli.Fi
 	errs := &cli.FieldError{}
 
 	errs = errs.Also(opts.ResourceOptions.Validate((ctx)))
-
-	if opts.ItemName == "" {
-		errs = errs.Also(cli.ErrMissingField(cli.ItemFlagName))
-	} else {
-		errs = errs.Also(validation.K8sName(opts.ItemName, cli.ItemFlagName))
-	}
 
 	// application-ref, build-ref and image are mutually exclusive
 	used := []string{}
@@ -92,34 +85,31 @@ func (opts *RequestProcessorCreateOptions) Exec(ctx context.Context, c *cli.Conf
 			Name:      opts.Name,
 		},
 		Spec: requestv1alpha1.RequestProcessorSpec{
-			{
-				Name: opts.ItemName,
-				Template: &corev1.PodSpec{
-					Containers: []corev1.Container{{}},
-				},
+			Template: &corev1.PodSpec{
+				Containers: []corev1.Container{{}},
 			},
 		},
 	}
 
 	if opts.ApplicationRef != "" {
-		processor.Spec[0].Build = &requestv1alpha1.Build{
+		processor.Spec.Build = &requestv1alpha1.Build{
 			ApplicationRef: opts.ApplicationRef,
 		}
 	}
 	if opts.FunctionRef != "" {
-		processor.Spec[0].Build = &requestv1alpha1.Build{
+		processor.Spec.Build = &requestv1alpha1.Build{
 			FunctionRef: opts.FunctionRef,
 		}
 	}
 	if opts.Image != "" {
-		processor.Spec[0].Template.Containers[0].Image = opts.Image
+		processor.Spec.Template.Containers[0].Image = opts.Image
 	}
 
 	for _, env := range opts.Env {
-		if processor.Spec[0].Template.Containers[0].Env == nil {
-			processor.Spec[0].Template.Containers[0].Env = []corev1.EnvVar{}
+		if processor.Spec.Template.Containers[0].Env == nil {
+			processor.Spec.Template.Containers[0].Env = []corev1.EnvVar{}
 		}
-		processor.Spec[0].Template.Containers[0].Env = append(processor.Spec[0].Template.Containers[0].Env, parsers.EnvVar(env))
+		processor.Spec.Template.Containers[0].Env = append(processor.Spec.Template.Containers[0].Env, parsers.EnvVar(env))
 	}
 
 	processor, err := c.Request().RequestProcessors(opts.Namespace).Create(processor)
@@ -145,7 +135,6 @@ func NewRequestProcessorCreateCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().StringVar(&opts.ItemName, cli.StripDash(cli.ItemFlagName), "", "<todo>")
 	cmd.Flags().StringVar(&opts.Image, cli.StripDash(cli.ImageFlagName), "", "<todo>")
 	cmd.Flags().StringVar(&opts.ApplicationRef, cli.StripDash(cli.ApplicationRefFlagName), "", "<todo>")
 	cmd.Flags().StringVar(&opts.FunctionRef, cli.StripDash(cli.FunctionRefFlagName), "", "<todo>")
