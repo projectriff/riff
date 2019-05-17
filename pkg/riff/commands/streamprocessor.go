@@ -21,18 +21,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewStreamProcessorCommand(c *cli.Config) *cobra.Command {
+func NewProcessorCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "streamprocessor",
+		Use:     "processor",
 		Short:   "<todo>",
 		Args:    cli.Args(),
-		Aliases: []string{"streamprocessors", "sp"},
+		Aliases: []string{"processors"},
 	}
 
-	cmd.AddCommand(NewStreamProcessorListCommand(c))
-	cmd.AddCommand(NewStreamProcessorCreateCommand(c))
-	cmd.AddCommand(NewStreamProcessorUpdateCommand(c))
-	cmd.AddCommand(NewStreamProcessorDeleteCommand(c))
+	cmd.AddCommand(NewProcessorListCommand(c))
+	cmd.AddCommand(NewProcessorCreateCommand(c))
+	cmd.AddCommand(NewProcessorUpdateCommand(c))
+	cmd.AddCommand(NewProcessorDeleteCommand(c))
 
 	return cmd
 }

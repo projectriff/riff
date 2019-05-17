@@ -1,4 +1,4 @@
-## riff streamprocessor delete
+## riff processor delete
 
 <todo>
 
@@ -7,7 +7,7 @@
 <todo>
 
 ```
-riff streamprocessor delete [flags]
+riff processor delete [flags]
 ```
 
 ### Examples
@@ -33,5 +33,5 @@ riff streamprocessor delete [flags]
 
 ### SEE ALSO
 
-* [riff streamprocessor](riff_streamprocessor.md)	 - <todo>
+* [riff processor](riff_processor.md)	 - <todo>
 

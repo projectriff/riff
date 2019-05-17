@@ -24,21 +24,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type StreamProcessorDeleteOptions struct {
+type ProcessorDeleteOptions struct {
 	Namespace string
 }
 
-func (opts *StreamProcessorDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
+func (opts *ProcessorDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
 	// TODO implement
 	return nil
 }
 
-func (opts *StreamProcessorDeleteOptions) Exec(ctx context.Context, c *cli.Config) error {
+func (opts *ProcessorDeleteOptions) Exec(ctx context.Context, c *cli.Config) error {
 	return fmt.Errorf("not implemented")
 }
 
-func NewStreamProcessorDeleteCommand(c *cli.Config) *cobra.Command {
-	opts := &StreamProcessorDeleteOptions{}
+func NewProcessorDeleteCommand(c *cli.Config) *cobra.Command {
+	opts := &ProcessorDeleteOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "delete",
