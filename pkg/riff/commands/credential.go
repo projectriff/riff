@@ -30,7 +30,7 @@ func NewCredentialCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cmd.AddCommand(NewCredentialListCommand(c))
-	cmd.AddCommand(NewCredentialSetCommand(c))
+	cmd.AddCommand(NewCredentialApplyCommand(c))
 	cmd.AddCommand(NewCredentialDeleteCommand(c))
 
 	return cmd

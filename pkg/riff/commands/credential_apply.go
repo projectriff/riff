@@ -30,7 +30,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type CredentialSetOptions struct {
+type CredentialApplyOptions struct {
 	cli.ResourceOptions
 	DockerHubId           string
 	DockerHubPassword     []byte
@@ -41,7 +41,7 @@ type CredentialSetOptions struct {
 	SetDefaultImagePrefix bool
 }
 
-func (opts *CredentialSetOptions) Validate(ctx context.Context) *cli.FieldError {
+func (opts *CredentialApplyOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
 
 	errs = errs.Also(opts.ResourceOptions.Validate(ctx))
@@ -89,17 +89,17 @@ func (opts *CredentialSetOptions) Validate(ctx context.Context) *cli.FieldError 
 	return errs
 }
 
-func (opts *CredentialSetOptions) Exec(ctx context.Context, c *cli.Config) error {
+func (opts *CredentialApplyOptions) Exec(ctx context.Context, c *cli.Config) error {
 	// get desired credential and image prefix
 	secret, defaultImagePrefix, err := makeCredential(opts)
 	if err != nil {
 		return err
 	}
 
-	if err := setCredential(c, opts, secret); err != nil {
+	if err := applyCredential(c, opts, secret); err != nil {
 		return err
 	}
-	c.Successf("Set credentials %q\n", opts.Name)
+	c.Successf("Apply credentials %q\n", opts.Name)
 
 	if opts.SetDefaultImagePrefix {
 		if defaultImagePrefix == "" {
@@ -116,11 +116,11 @@ func (opts *CredentialSetOptions) Exec(ctx context.Context, c *cli.Config) error
 	return nil
 }
 
-func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
-	opts := &CredentialSetOptions{}
+func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {
+	opts := &CredentialApplyOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "set",
+		Use:     "apply",
 		Short:   "<todo>",
 		Example: "<todo>",
 		Args: cli.Args(
@@ -155,7 +155,7 @@ func NewCredentialSetCommand(c *cli.Config) *cobra.Command {
 	return cmd
 }
 
-func makeCredential(opts *CredentialSetOptions) (*corev1.Secret, string, error) {
+func makeCredential(opts *CredentialApplyOptions) (*corev1.Secret, string, error) {
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: opts.Namespace,
@@ -223,7 +223,7 @@ func makeCredential(opts *CredentialSetOptions) (*corev1.Secret, string, error) 
 	return secret, defaultPrefix, nil
 }
 
-func setDefaultImagePrefix(c *cli.Config, opts *CredentialSetOptions, defaultImagePrefix string) error {
+func setDefaultImagePrefix(c *cli.Config, opts *CredentialApplyOptions, defaultImagePrefix string) error {
 	configMapName := "riff-build"
 	defaultImagePrefixKey := "default-image-prefix"
 
@@ -253,7 +253,7 @@ func setDefaultImagePrefix(c *cli.Config, opts *CredentialSetOptions, defaultIma
 	return err
 }
 
-func setCredential(c *cli.Config, opts *CredentialSetOptions, desiredSecret *corev1.Secret) error {
+func applyCredential(c *cli.Config, opts *CredentialApplyOptions, desiredSecret *corev1.Secret) error {
 	// look for existing secret
 	existing, err := c.Core().Secrets(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
 	if err != nil {

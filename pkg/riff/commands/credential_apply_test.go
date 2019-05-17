@@ -26,18 +26,18 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestCredentialSetOptions(t *testing.T) {
+func TestCredentialApplyOptions(t *testing.T) {
 	table := testing.OptionsTable{
 		{
 			Name: "valid namespaced resource",
-			Options: &commands.CredentialSetOptions{
+			Options: &commands.CredentialApplyOptions{
 				ResourceOptions: testing.ValidResourceOptions,
 			},
 			ExpectFieldError: cli.ErrMissingOneOf(cli.DockerHubFlagName, cli.GcrFlagName, cli.RegistryFlagName),
 		},
 		{
 			Name: "invalid namespaced resource",
-			Options: &commands.CredentialSetOptions{
+			Options: &commands.CredentialApplyOptions{
 				ResourceOptions: testing.InvalidResourceOptions,
 			},
 			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
@@ -46,7 +46,7 @@ func TestCredentialSetOptions(t *testing.T) {
 		},
 		{
 			Name: "docker hub",
-			Options: &commands.CredentialSetOptions{
+			Options: &commands.CredentialApplyOptions{
 				ResourceOptions:   testing.ValidResourceOptions,
 				DockerHubId:       "projectriff",
 				DockerHubPassword: []byte("1password"),
@@ -55,7 +55,7 @@ func TestCredentialSetOptions(t *testing.T) {
 		},
 		{
 			Name: "docker hub missing password",
-			Options: &commands.CredentialSetOptions{
+			Options: &commands.CredentialApplyOptions{
 				ResourceOptions: testing.ValidResourceOptions,
 				DockerHubId:     "projectriff",
 			},
@@ -63,7 +63,7 @@ func TestCredentialSetOptions(t *testing.T) {
 		},
 		{
 			Name: "gcr",
-			Options: &commands.CredentialSetOptions{
+			Options: &commands.CredentialApplyOptions{
 				ResourceOptions: testing.ValidResourceOptions,
 				GcrTokenPath:    "gcr-credentials.json",
 			},
@@ -71,7 +71,7 @@ func TestCredentialSetOptions(t *testing.T) {
 		},
 		{
 			Name: "registry",
-			Options: &commands.CredentialSetOptions{
+			Options: &commands.CredentialApplyOptions{
 				ResourceOptions:  testing.ValidResourceOptions,
 				Registry:         "example.com",
 				RegistryUser:     "projectriff",
@@ -81,7 +81,7 @@ func TestCredentialSetOptions(t *testing.T) {
 		},
 		{
 			Name: "registry missing user",
-			Options: &commands.CredentialSetOptions{
+			Options: &commands.CredentialApplyOptions{
 				ResourceOptions:  testing.ValidResourceOptions,
 				Registry:         "example.com",
 				RegistryPassword: []byte("1password"),
@@ -90,7 +90,7 @@ func TestCredentialSetOptions(t *testing.T) {
 		},
 		{
 			Name: "registry missing password",
-			Options: &commands.CredentialSetOptions{
+			Options: &commands.CredentialApplyOptions{
 				ResourceOptions: testing.ValidResourceOptions,
 				Registry:        "example.com",
 				RegistryUser:    "projectriff",
@@ -100,7 +100,7 @@ func TestCredentialSetOptions(t *testing.T) {
 		},
 		{
 			Name: "multiple registries",
-			Options: &commands.CredentialSetOptions{
+			Options: &commands.CredentialApplyOptions{
 				ResourceOptions:   testing.InvalidResourceOptions,
 				DockerHubId:       "projectriff",
 				DockerHubPassword: []byte("1password"),
@@ -116,7 +116,7 @@ func TestCredentialSetOptions(t *testing.T) {
 
 		{
 			Name: "docker hub as default image prefix",
-			Options: &commands.CredentialSetOptions{
+			Options: &commands.CredentialApplyOptions{
 				ResourceOptions:       testing.ValidResourceOptions,
 				DockerHubId:           "projectriff",
 				DockerHubPassword:     []byte("1password"),
@@ -126,7 +126,7 @@ func TestCredentialSetOptions(t *testing.T) {
 		},
 		{
 			Name: "gcr as default image prefix",
-			Options: &commands.CredentialSetOptions{
+			Options: &commands.CredentialApplyOptions{
 				ResourceOptions:       testing.ValidResourceOptions,
 				GcrTokenPath:          "gcr-credentials.json",
 				SetDefaultImagePrefix: true,
@@ -135,7 +135,7 @@ func TestCredentialSetOptions(t *testing.T) {
 		},
 		{
 			Name: "registry as default image prefix",
-			Options: &commands.CredentialSetOptions{
+			Options: &commands.CredentialApplyOptions{
 				ResourceOptions:       testing.ValidResourceOptions,
 				Registry:              "example.com",
 				RegistryUser:          "projectriff",
@@ -149,7 +149,7 @@ func TestCredentialSetOptions(t *testing.T) {
 	table.Run(t)
 }
 
-func TestCredentialSetCommand(t *testing.T) {
+func TestCredentialApplyCommand(t *testing.T) {
 	credentialName := "test-credential"
 	defaultNamespace := "default"
 	credentialLabel := build.CredentialLabelKey
@@ -621,5 +621,5 @@ func TestCredentialSetCommand(t *testing.T) {
 		},
 	}
 
-	table.Run(t, commands.NewCredentialSetCommand)
+	table.Run(t, commands.NewCredentialApplyCommand)
 }

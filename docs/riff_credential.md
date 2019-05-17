@@ -23,7 +23,7 @@
 ### SEE ALSO
 
 * [riff](riff.md)	 - <todo>
+* [riff credential apply](riff_credential_apply.md)	 - <todo>
 * [riff credential delete](riff_credential_delete.md)	 - <todo>
 * [riff credential list](riff_credential_list.md)	 - <todo>
-* [riff credential set](riff_credential_set.md)	 - <todo>
 
