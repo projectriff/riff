@@ -18,23 +18,38 @@ package commands
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type StreamDeleteOptions struct {
-	Namespace string
+	cli.DeleteOptions
 }
 
 func (opts *StreamDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
-	// TODO implement
-	return nil
+	errs := &cli.FieldError{}
+
+	errs = errs.Also(opts.DeleteOptions.Validate(ctx))
+
+	return errs
 }
 
 func (opts *StreamDeleteOptions) Exec(ctx context.Context, c *cli.Config) error {
-	return fmt.Errorf("not implemented")
+	client := c.Stream().Streams(opts.Namespace)
+
+	if opts.All {
+		return client.DeleteCollection(nil, metav1.ListOptions{})
+	}
+
+	for _, name := range opts.Names {
+		if err := client.Delete(name, nil); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func NewStreamDeleteCommand(c *cli.Config) *cobra.Command {
@@ -44,12 +59,15 @@ func NewStreamDeleteCommand(c *cli.Config) *cobra.Command {
 		Use:     "delete",
 		Short:   "<todo>",
 		Example: "<todo>",
-		Args:    cli.Args(),
+		Args: cli.Args(
+			cli.NamesArg(&opts.Names),
+		),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
+	cmd.Flags().BoolVar(&opts.All, cli.StripDash(cli.AllFlagName), false, "<todo>")
 
 	return cmd
 }
