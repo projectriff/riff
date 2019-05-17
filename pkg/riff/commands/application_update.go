@@ -20,17 +20,28 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
 type ApplicationUpdateOptions struct {
-	Namespace string
+	cli.ResourceOptions
+
+	Image    string
+	GitRepo     string
+	GitRevision string
+	SubPath     string
 }
 
-func (opts *ApplicationUpdateOptions) Validate(ctx context.Context) *cli.FieldError {
-	// TODO implement
-	return nil
+func (opts *ApplicationUpdateOptions) Validate(ctx context.Context) *apis.FieldError {
+	errs := &apis.FieldError{}
+
+	errs = errs.Also(opts.ResourceOptions.Validate((ctx)))
+
+	// TODO validate other fields
+
+	return errs
 }
 
 func (opts *ApplicationUpdateOptions) Exec(ctx context.Context, c *cli.Config) error {
@@ -50,6 +61,10 @@ func NewApplicationUpdateCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
+	cmd.Flags().StringVar(&opts.Image, cli.StripDash(cli.ImageFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.GitRepo, cli.StripDash(cli.GitRepoFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.GitRevision, cli.StripDash(cli.GitRevisionFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.SubPath, cli.StripDash(cli.SubPathFlagName), "", "<todo>")
 
 	return cmd
 }
