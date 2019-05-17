@@ -132,11 +132,9 @@ other-namespace   test-other-requestprocessors   <unknown>   <unknown>   <empty>
 						Namespace: defaultNamespace,
 					},
 					Spec: requestv1alpha1.RequestProcessorSpec{
-						{
-							Template: &corev1.PodSpec{
-								Containers: []corev1.Container{
-									{Image: "projectriff/upper"},
-								},
+						Template: &corev1.PodSpec{
+							Containers: []corev1.Container{
+								{Image: "projectriff/upper"},
 							},
 						},
 					},
@@ -155,9 +153,7 @@ other-namespace   test-other-requestprocessors   <unknown>   <unknown>   <empty>
 						Namespace: defaultNamespace,
 					},
 					Spec: requestv1alpha1.RequestProcessorSpec{
-						{
-							Build: &requestv1alpha1.Build{ApplicationRef: "petclinic"},
-						},
+						Build: &requestv1alpha1.Build{ApplicationRef: "petclinic"},
 					},
 					Status: requestv1alpha1.RequestProcessorStatus{
 						Status: duckv1alpha1.Status{
@@ -174,9 +170,7 @@ other-namespace   test-other-requestprocessors   <unknown>   <unknown>   <empty>
 						Namespace: defaultNamespace,
 					},
 					Spec: requestv1alpha1.RequestProcessorSpec{
-						{
-							Build: &requestv1alpha1.Build{FunctionRef: "square"},
-						},
+						Build: &requestv1alpha1.Build{FunctionRef: "square"},
 					},
 					Status: requestv1alpha1.RequestProcessorStatus{
 						Status: duckv1alpha1.Status{
