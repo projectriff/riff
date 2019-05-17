@@ -27,18 +27,18 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestRequestProcessorListOptions(t *testing.T) {
+func TestHandlerListOptions(t *testing.T) {
 	table := testing.OptionsTable{
 		{
 			Name: "invalid list",
-			Options: &commands.RequestProcessorListOptions{
+			Options: &commands.HandlerListOptions{
 				ListOptions: testing.InvalidListOptions,
 			},
 			ExpectFieldError: testing.InvalidListOptionsFieldError,
 		},
 		{
 			Name: "valid list",
-			Options: &commands.RequestProcessorListOptions{
+			Options: &commands.HandlerListOptions{
 				ListOptions: testing.ValidListOptions,
 			},
 			ShouldValidate: true,
@@ -48,9 +48,9 @@ func TestRequestProcessorListOptions(t *testing.T) {
 	table.Run(t)
 }
 
-func TestRequestProcessorListCommand(t *testing.T) {
-	requestprocessorsName := "test-requestprocessors"
-	requestprocessorOtherName := "test-other-requestprocessors"
+func TestHandlerListCommand(t *testing.T) {
+	handlerName := "test-handler"
+	handlerOtherName := "test-other-handler"
 	defaultNamespace := "default"
 	otherNamespace := "other-namespace"
 
@@ -68,114 +68,114 @@ func TestRequestProcessorListCommand(t *testing.T) {
 		{
 			Name:         "empty",
 			Args:         []string{},
-			ExpectOutput: "No request processors found.\n",
+			ExpectOutput: "No handlers found.\n",
 		},
 		{
 			Name: "lists an item",
 			Args: []string{},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.RequestProcessor{
+				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      requestprocessorsName,
+						Name:      handlerName,
 						Namespace: defaultNamespace,
 					},
 				},
 			},
 			ExpectOutput: `
-NAME                     TYPE        REF         DOMAIN    READY       AGE
-test-requestprocessors   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
+NAME           TYPE        REF         DOMAIN    READY       AGE
+test-handler   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
 `,
 		},
 		{
 			Name: "filters by namespace",
 			Args: []string{cli.NamespaceFlagName, otherNamespace},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.RequestProcessor{
+				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      requestprocessorsName,
+						Name:      handlerName,
 						Namespace: defaultNamespace,
 					},
 				},
 			},
-			ExpectOutput: "No request processors found.\n",
+			ExpectOutput: "No handlers found.\n",
 		},
 		{
 			Name: "all namespace",
 			Args: []string{cli.AllNamespacesFlagName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.RequestProcessor{
+				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      requestprocessorsName,
+						Name:      handlerName,
 						Namespace: defaultNamespace,
 					},
 				},
-				&requestv1alpha1.RequestProcessor{
+				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      requestprocessorOtherName,
+						Name:      handlerOtherName,
 						Namespace: otherNamespace,
 					},
 				},
 			},
 			ExpectOutput: `
-NAMESPACE         NAME                           TYPE        REF         DOMAIN    READY       AGE
-default           test-requestprocessors         <unknown>   <unknown>   <empty>   <unknown>   <unknown>
-other-namespace   test-other-requestprocessors   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
+NAMESPACE         NAME                 TYPE        REF         DOMAIN    READY       AGE
+default           test-handler         <unknown>   <unknown>   <empty>   <unknown>   <unknown>
+other-namespace   test-other-handler   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
 `,
 		},
 		{
 			Name: "table populates all columns",
 			Args: []string{},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.RequestProcessor{
+				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "img",
 						Namespace: defaultNamespace,
 					},
-					Spec: requestv1alpha1.RequestProcessorSpec{
+					Spec: requestv1alpha1.HandlerSpec{
 						Template: &corev1.PodSpec{
 							Containers: []corev1.Container{
 								{Image: "projectriff/upper"},
 							},
 						},
 					},
-					Status: requestv1alpha1.RequestProcessorStatus{
+					Status: requestv1alpha1.HandlerStatus{
 						Status: duckv1alpha1.Status{
 							Conditions: []duckv1alpha1.Condition{
-								{Type: requestv1alpha1.RequestProcessorConditionReady, Status: "True"},
+								{Type: requestv1alpha1.HandlerConditionReady, Status: "True"},
 							},
 						},
 						Domain: "image.default.example.com",
 					},
 				},
-				&requestv1alpha1.RequestProcessor{
+				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "app",
 						Namespace: defaultNamespace,
 					},
-					Spec: requestv1alpha1.RequestProcessorSpec{
+					Spec: requestv1alpha1.HandlerSpec{
 						Build: &requestv1alpha1.Build{ApplicationRef: "petclinic"},
 					},
-					Status: requestv1alpha1.RequestProcessorStatus{
+					Status: requestv1alpha1.HandlerStatus{
 						Status: duckv1alpha1.Status{
 							Conditions: []duckv1alpha1.Condition{
-								{Type: requestv1alpha1.RequestProcessorConditionReady, Status: "True"},
+								{Type: requestv1alpha1.HandlerConditionReady, Status: "True"},
 							},
 						},
 						Domain: "app.default.example.com",
 					},
 				},
-				&requestv1alpha1.RequestProcessor{
+				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "func",
 						Namespace: defaultNamespace,
 					},
-					Spec: requestv1alpha1.RequestProcessorSpec{
+					Spec: requestv1alpha1.HandlerSpec{
 						Build: &requestv1alpha1.Build{FunctionRef: "square"},
 					},
-					Status: requestv1alpha1.RequestProcessorStatus{
+					Status: requestv1alpha1.HandlerStatus{
 						Status: duckv1alpha1.Status{
 							Conditions: []duckv1alpha1.Condition{
-								{Type: requestv1alpha1.RequestProcessorConditionReady, Status: "True"},
+								{Type: requestv1alpha1.HandlerConditionReady, Status: "True"},
 							},
 						},
 						Domain: "func.default.example.com",
@@ -193,11 +193,11 @@ img    image         projectriff/upper   image.default.example.com   True    <un
 			Name: "list error",
 			Args: []string{},
 			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("list", "requestprocessors"),
+				testing.InduceFailure("list", "handlers"),
 			},
 			ShouldError: true,
 		},
 	}
 
-	table.Run(t, commands.NewRequestProcessorListCommand)
+	table.Run(t, commands.NewHandlerListCommand)
 }

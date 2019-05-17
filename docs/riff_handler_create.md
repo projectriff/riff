@@ -1,4 +1,4 @@
-## riff requestprocessor list
+## riff handler create
 
 <todo>
 
@@ -7,7 +7,7 @@
 <todo>
 
 ```
-riff requestprocessor list [flags]
+riff handler create [flags]
 ```
 
 ### Examples
@@ -19,9 +19,12 @@ riff requestprocessor list [flags]
 ### Options
 
 ```
-      --all-namespaces     <todo>
-  -h, --help               help for list
-  -n, --namespace string   <todo>
+      --application-ref string   <todo>
+      --env stringArray          <todo>
+      --function-ref string      <todo>
+  -h, --help                     help for create
+      --image string             <todo>
+  -n, --namespace string         <todo>
 ```
 
 ### Options inherited from parent commands
@@ -34,5 +37,5 @@ riff requestprocessor list [flags]
 
 ### SEE ALSO
 
-* [riff requestprocessor](riff_requestprocessor.md)	 - <todo>
+* [riff handler](riff_handler.md)	 - <todo>
 
