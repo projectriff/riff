@@ -73,6 +73,9 @@ func TestStreamDeleteCommand(t *testing.T) {
 				Resource:  "streams",
 				Namespace: defaultNamespace,
 			}},
+			ExpectOutput: `
+Deleted streams in namespace "default"
+`,
 		},
 		{
 			Name: "delete stream",
@@ -91,6 +94,9 @@ func TestStreamDeleteCommand(t *testing.T) {
 				Namespace: defaultNamespace,
 				Name:      streamName,
 			}},
+			ExpectOutput: `
+Deleted stream "test-stream"
+`,
 		},
 		{
 			Name: "delete streams",
@@ -120,6 +126,10 @@ func TestStreamDeleteCommand(t *testing.T) {
 				Namespace: defaultNamespace,
 				Name:      streamOtherName,
 			}},
+			ExpectOutput: `
+Deleted stream "test-stream"
+Deleted stream "test-other-stream"
+`,
 		},
 		{
 			Name: "stream does not exist",

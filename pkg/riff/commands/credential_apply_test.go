@@ -186,6 +186,9 @@ func TestCredentialApplyCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Apply credentials "test-credential"
+`,
 		},
 		{
 			Name: "create secret gcr",
@@ -210,6 +213,9 @@ func TestCredentialApplyCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Apply credentials "test-credential"
+`,
 		},
 		{
 			Name:        "create secret gcr, bad token path",
@@ -242,6 +248,9 @@ func TestCredentialApplyCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Apply credentials "test-credential"
+`,
 		},
 		{
 			Name:  "update secret",
@@ -281,6 +290,9 @@ func TestCredentialApplyCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Apply credentials "test-credential"
+`,
 		},
 		{
 			Name:  "get error",
@@ -422,6 +434,10 @@ func TestCredentialApplyCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Apply credentials "test-credential"
+Set default image prefix to "docker.io/projectriff"
+`,
 		},
 		{
 			Name: "default image prefix create gcr",
@@ -455,6 +471,10 @@ func TestCredentialApplyCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Apply credentials "test-credential"
+Set default image prefix to "gcr.io/my-gcp-project"
+`,
 		},
 		{
 			Name:        "default image prefix create registry",
@@ -507,6 +527,10 @@ func TestCredentialApplyCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Apply credentials "test-credential"
+Set default image prefix to "docker.io/projectriff"
+`,
 		},
 		{
 			Name:  "default image prefix get error",

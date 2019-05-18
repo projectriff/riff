@@ -77,6 +77,9 @@ func TestCredentialDeleteCommand(t *testing.T) {
 				Namespace:     defaultNamespace,
 				LabelSelector: credentialLabel,
 			}},
+			ExpectOutput: `
+Deleted credentials in namespace "default"
+`,
 		},
 		{
 			Name: "delete all secrets error",
@@ -119,6 +122,9 @@ func TestCredentialDeleteCommand(t *testing.T) {
 				Namespace: defaultNamespace,
 				Name:      credentialName,
 			}},
+			ExpectOutput: `
+Deleted credential "test-credential"
+`,
 		},
 		{
 			Name: "delete secrets",
@@ -150,6 +156,10 @@ func TestCredentialDeleteCommand(t *testing.T) {
 				Namespace: defaultNamespace,
 				Name:      credentialOtherName,
 			}},
+			ExpectOutput: `
+Deleted credential "test-credential"
+Deleted credential "test-other-credential"
+`,
 		},
 		{
 			Name: "secret does not exist",

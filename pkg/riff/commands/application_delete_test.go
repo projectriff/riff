@@ -73,6 +73,9 @@ func TestApplicationDeleteCommand(t *testing.T) {
 				Resource:  "applications",
 				Namespace: defaultNamespace,
 			}},
+			ExpectOutput: `
+Deleted applications in namespace "default"
+`,
 		},
 		{
 			Name: "delete application",
@@ -91,6 +94,9 @@ func TestApplicationDeleteCommand(t *testing.T) {
 				Namespace: defaultNamespace,
 				Name:      applicationName,
 			}},
+			ExpectOutput: `
+Deleted application "test-application"
+`,
 		},
 		{
 			Name: "delete applications",
@@ -120,6 +126,10 @@ func TestApplicationDeleteCommand(t *testing.T) {
 				Namespace: defaultNamespace,
 				Name:      applicationOtherName,
 			}},
+			ExpectOutput: `
+Deleted application "test-application"
+Deleted application "test-other-application"
+`,
 		},
 		{
 			Name: "application does not exist",

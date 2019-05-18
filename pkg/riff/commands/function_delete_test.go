@@ -73,6 +73,9 @@ func TestFunctionDeleteCommand(t *testing.T) {
 				Resource:  "functions",
 				Namespace: defaultNamespace,
 			}},
+			ExpectOutput: `
+Deleted functions in namespace "default"
+`,
 		},
 		{
 			Name: "delete function",
@@ -91,6 +94,9 @@ func TestFunctionDeleteCommand(t *testing.T) {
 				Namespace: defaultNamespace,
 				Name:      functionName,
 			}},
+			ExpectOutput: `
+Deleted function "test-function"
+`,
 		},
 		{
 			Name: "delete functions",
@@ -120,6 +126,10 @@ func TestFunctionDeleteCommand(t *testing.T) {
 				Namespace: defaultNamespace,
 				Name:      functionOtherName,
 			}},
+			ExpectOutput: `
+Deleted function "test-function"
+Deleted function "test-other-function"
+`,
 		},
 		{
 			Name: "function does not exist",

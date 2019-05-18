@@ -183,6 +183,9 @@ func TestApplicationCreateCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Created application "my-application"
+`,
 		},
 		{
 			Name: "git repo with revision",
@@ -204,6 +207,9 @@ func TestApplicationCreateCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Created application "my-application"
+`,
 		},
 		{
 			Name: "git repo with subpath",
@@ -226,6 +232,9 @@ func TestApplicationCreateCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Created application "my-application"
+`,
 		},
 		{
 			Name: "git repo with cache",
@@ -248,6 +257,9 @@ func TestApplicationCreateCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Created application "my-application"
+`,
 		},
 		{
 			// TODO impelement

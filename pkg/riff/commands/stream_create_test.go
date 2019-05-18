@@ -81,6 +81,9 @@ func TestStreamCreateCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Created stream "my-stream"
+`,
 		},
 		{
 			Name: "error existing stream",

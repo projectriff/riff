@@ -65,9 +65,11 @@ func TestStreamListCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name:         "empty",
-			Args:         []string{},
-			ExpectOutput: "No streams found.\n",
+			Name: "empty",
+			Args: []string{},
+			ExpectOutput: `
+No streams found.
+`,
 		},
 		{
 			Name: "lists an item",
@@ -96,7 +98,9 @@ test-stream   <empty>   <empty>   <empty>    <unknown>   <unknown>
 					},
 				},
 			},
-			ExpectOutput: "No streams found.\n",
+			ExpectOutput: `
+No streams found.
+`,
 		},
 		{
 			Name: "all namespace",

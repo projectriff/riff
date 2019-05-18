@@ -73,6 +73,9 @@ func TestHandlerDeleteCommand(t *testing.T) {
 				Resource:  "handlers",
 				Namespace: defaultNamespace,
 			}},
+			ExpectOutput: `
+Deleted handlers in namespace "default"
+`,
 		},
 		{
 			Name: "delete handler",
@@ -91,6 +94,9 @@ func TestHandlerDeleteCommand(t *testing.T) {
 				Namespace: defaultNamespace,
 				Name:      handlerName,
 			}},
+			ExpectOutput: `
+Deleted handler "test-handler"
+`,
 		},
 		{
 			Name: "delete handlers",
@@ -120,6 +126,10 @@ func TestHandlerDeleteCommand(t *testing.T) {
 				Namespace: defaultNamespace,
 				Name:      handlerOtherName,
 			}},
+			ExpectOutput: `
+Deleted handler "test-handler"
+Deleted handler "test-other-handler"
+`,
 		},
 		{
 			Name: "handler does not exist",

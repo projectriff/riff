@@ -65,9 +65,11 @@ func TestFunctionListCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name:         "empty",
-			Args:         []string{},
-			ExpectOutput: "No functions found.\n",
+			Name: "empty",
+			Args: []string{},
+			ExpectOutput: `
+No functions found.
+`,
 		},
 		{
 			Name: "lists an item",
@@ -96,7 +98,9 @@ test-function   <empty>        <empty>    <empty>   <empty>   <unknown>   <unkno
 					},
 				},
 			},
-			ExpectOutput: "No functions found.\n",
+			ExpectOutput: `
+No functions found.
+`,
 		},
 		{
 			Name: "all namespace",

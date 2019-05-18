@@ -40,13 +40,18 @@ func (opts *FunctionDeleteOptions) Exec(ctx context.Context, c *cli.Config) erro
 	client := c.Build().Functions(opts.Namespace)
 
 	if opts.All {
-		return client.DeleteCollection(nil, metav1.ListOptions{})
+		if err := client.DeleteCollection(nil, metav1.ListOptions{}); err != nil {
+			return err
+		}
+		c.Successf("Deleted functions in namespace %q\n", opts.Namespace)
+		return nil
 	}
 
 	for _, name := range opts.Names {
 		if err := client.Delete(name, nil); err != nil {
 			return err
 		}
+		c.Successf("Deleted function %q\n", name)
 	}
 
 	return nil
