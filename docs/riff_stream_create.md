@@ -21,6 +21,7 @@ riff stream create [flags]
 ```
   -h, --help               help for create
   -n, --namespace string   <todo>
+      --provider string    <todo>
 ```
 
 ### Options inherited from parent commands

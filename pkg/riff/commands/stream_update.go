@@ -20,17 +20,25 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/knative/pkg/apis"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
 type StreamUpdateOptions struct {
-	Namespace string
+	cli.ResourceOptions
+
+	Provider string
 }
 
 func (opts *StreamUpdateOptions) Validate(ctx context.Context) *cli.FieldError {
-	// TODO implement
-	return nil
+	errs := &apis.FieldError{}
+
+	errs = errs.Also(opts.ResourceOptions.Validate(ctx))
+
+	// TODO validate other fields
+
+	return errs
 }
 
 func (opts *StreamUpdateOptions) Exec(ctx context.Context, c *cli.Config) error {
@@ -50,6 +58,7 @@ func NewStreamUpdateCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
+	cmd.Flags().StringVar(&opts.Provider, cli.StripDash(cli.ProviderFlagName), "", "<todo>")
 
 	return cmd
 }
