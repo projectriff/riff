@@ -65,9 +65,11 @@ func TestApplicationListCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name:         "empty",
-			Args:         []string{},
-			ExpectOutput: "No applications found.\n",
+			Name: "empty",
+			Args: []string{},
+			ExpectOutput: `
+No applications found.
+`,
 		},
 		{
 			Name: "lists an item",
@@ -96,7 +98,9 @@ test-application   <empty>        <unknown>   <unknown>
 					},
 				},
 			},
-			ExpectOutput: "No applications found.\n",
+			ExpectOutput: `
+No applications found.
+`,
 		},
 		{
 			Name: "all namespace",
@@ -131,7 +135,7 @@ other-namespace   test-other-application   <empty>        <unknown>   <unknown>
 						Namespace: defaultNamespace,
 					},
 					Spec: buildv1alpha1.ApplicationSpec{
-						Image:    "projectriff/petclinic",
+						Image: "projectriff/petclinic",
 					},
 					Status: buildv1alpha1.ApplicationStatus{
 						Status: duckv1alpha1.Status{

@@ -40,13 +40,18 @@ func (opts *ApplicationDeleteOptions) Exec(ctx context.Context, c *cli.Config) e
 	client := c.Build().Applications(opts.Namespace)
 
 	if opts.All {
-		return client.DeleteCollection(nil, metav1.ListOptions{})
+		if err := client.DeleteCollection(nil, metav1.ListOptions{}); err != nil {
+			return err
+		}
+		c.Successf("Deleted applications in namespace %q\n", opts.Namespace)
+		return nil
 	}
 
 	for _, name := range opts.Names {
 		if err := client.Delete(name, nil); err != nil {
 			return err
 		}
+		c.Successf("Deleted application %q\n", name)
 	}
 
 	return nil
@@ -68,6 +73,6 @@ func NewApplicationDeleteCommand(c *cli.Config) *cobra.Command {
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
 	cmd.Flags().BoolVar(&opts.All, cli.StripDash(cli.AllFlagName), false, "<todo>")
-	
+
 	return cmd
 }

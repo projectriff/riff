@@ -133,6 +133,9 @@ func TestHandlerCreateCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Created handler "my-handler"
+`,
 		},
 		{
 			Name: "create from application ref",
@@ -150,6 +153,9 @@ func TestHandlerCreateCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Created handler "my-handler"
+`,
 		},
 		{
 			Name: "create from function ref",
@@ -167,6 +173,9 @@ func TestHandlerCreateCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Created handler "my-handler"
+`,
 		},
 		{
 			Name: "create from image with env",
@@ -192,6 +201,9 @@ func TestHandlerCreateCommand(t *testing.T) {
 					},
 				},
 			},
+			ExpectOutput: `
+Created handler "my-handler"
+`,
 		},
 		{
 			Name: "error existing handler",

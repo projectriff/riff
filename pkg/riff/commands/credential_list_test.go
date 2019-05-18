@@ -66,9 +66,11 @@ func TestCredentialListCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name:         "empty",
-			Args:         []string{},
-			ExpectOutput: "No credentials found.\n",
+			Name: "empty",
+			Args: []string{},
+			ExpectOutput: `
+No credentials found.
+`,
 		},
 		{
 			Name: "lists an item",
@@ -101,7 +103,9 @@ test-credential   docker-hub   https://index.docker.io/v1/   <unknown>
 					},
 				},
 			},
-			ExpectOutput: "No credentials found.\n",
+			ExpectOutput: `
+No credentials found.
+`,
 		},
 		{
 			Name: "table populates all columns",
@@ -177,7 +181,9 @@ other-namespace   test-other-credential   docker-hub   https://index.docker.io/v
 					},
 				},
 			},
-			ExpectOutput: "No credentials found.\n",
+			ExpectOutput: `
+No credentials found.
+`,
 		},
 		{
 			Name: "list error",

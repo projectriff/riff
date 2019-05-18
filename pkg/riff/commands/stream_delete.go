@@ -40,13 +40,18 @@ func (opts *StreamDeleteOptions) Exec(ctx context.Context, c *cli.Config) error 
 	client := c.Stream().Streams(opts.Namespace)
 
 	if opts.All {
-		return client.DeleteCollection(nil, metav1.ListOptions{})
+		if err := client.DeleteCollection(nil, metav1.ListOptions{}); err != nil {
+			return err
+		}
+		c.Successf("Deleted streams in namespace %q\n", opts.Namespace)
+		return nil
 	}
 
 	for _, name := range opts.Names {
 		if err := client.Delete(name, nil); err != nil {
 			return err
 		}
+		c.Successf("Deleted stream %q\n", name)
 	}
 
 	return nil

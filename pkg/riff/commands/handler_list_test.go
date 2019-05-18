@@ -66,9 +66,11 @@ func TestHandlerListCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name:         "empty",
-			Args:         []string{},
-			ExpectOutput: "No handlers found.\n",
+			Name: "empty",
+			Args: []string{},
+			ExpectOutput: `
+No handlers found.
+`,
 		},
 		{
 			Name: "lists an item",
@@ -97,7 +99,9 @@ test-handler   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
 					},
 				},
 			},
-			ExpectOutput: "No handlers found.\n",
+			ExpectOutput: `
+No handlers found.
+`,
 		},
 		{
 			Name: "all namespace",
