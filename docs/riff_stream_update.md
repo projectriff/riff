@@ -21,6 +21,7 @@ riff stream update [flags]
 ```
   -h, --help               help for update
   -n, --namespace string   <todo>
+      --provider string    <todo>
 ```
 
 ### Options inherited from parent commands

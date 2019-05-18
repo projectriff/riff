@@ -43,6 +43,7 @@ const (
 	LocalPathFlagName             = "--local-path"
 	NamespaceFlagName             = "--namespace"
 	NoColorFlagName               = "--no-color"
+	ProviderFlagName              = "--provider"
 	RegistryFlagName              = "--registry"
 	RegistryUserFlagName          = "--registry-user"
 	SetDefaultImagePrefixFlagName = "--set-default-image-prefix"
