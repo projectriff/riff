@@ -17,9 +17,11 @@
 package commands_test
 
 import (
+	"testing"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
-	"github.com/projectriff/riff/pkg/testing"
+	rifftesting "github.com/projectriff/riff/pkg/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,13 +29,13 @@ import (
 )
 
 func TestFunctionCreateOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name: "invalid resource",
 			Options: &commands.FunctionCreateOptions{
-				ResourceOptions: testing.InvalidResourceOptions,
+				ResourceOptions: rifftesting.InvalidResourceOptions,
 			},
-			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
+			ExpectFieldError: rifftesting.InvalidResourceOptionsFieldError.Also(
 				cli.ErrMissingField(cli.ImageFlagName),
 				cli.ErrMissingOneOf(cli.GitRepoFlagName, cli.LocalPathFlagName),
 			),
@@ -41,7 +43,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 		{
 			Name: "git source",
 			Options: &commands.FunctionCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 				GitRepo:         "https://example.com/repo.git",
 				GitRevision:     "master",
@@ -51,7 +53,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 		{
 			Name: "local source",
 			Options: &commands.FunctionCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 				LocalPath:       ".",
 			},
@@ -60,7 +62,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 		{
 			Name: "no source",
 			Options: &commands.FunctionCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 			},
 			ExpectFieldError: cli.ErrMissingOneOf(cli.GitRepoFlagName, cli.LocalPathFlagName),
@@ -68,7 +70,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 		{
 			Name: "multiple sources",
 			Options: &commands.FunctionCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 				GitRepo:         "https://example.com/repo.git",
 				GitRevision:     "master",
@@ -79,7 +81,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 		{
 			Name: "git source with cache",
 			Options: &commands.FunctionCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 				GitRepo:         "https://example.com/repo.git",
 				GitRevision:     "master",
@@ -90,7 +92,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 		{
 			Name: "local source with cache",
 			Options: &commands.FunctionCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 				LocalPath:       ".",
 				CacheSize:       "8Gi",
@@ -100,7 +102,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 		{
 			Name: "invalid cache",
 			Options: &commands.FunctionCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 				GitRepo:         "https://example.com/repo.git",
 				GitRevision:     "master",
@@ -111,7 +113,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 		{
 			Name: "with git subpath",
 			Options: &commands.FunctionCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 				GitRepo:         "https://example.com/repo.git",
 				GitRevision:     "master",
@@ -122,7 +124,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 		{
 			Name: "with local subpath",
 			Options: &commands.FunctionCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 				LocalPath:       ".",
 				SubPath:         "some/directory",
@@ -132,7 +134,7 @@ func TestFunctionCreateOptions(t *testing.T) {
 		{
 			Name: "missing git revision",
 			Options: &commands.FunctionCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 				GitRepo:         "https://example.com/repo.git",
 				GitRevision:     "",
@@ -157,7 +159,7 @@ func TestFunctionCreateCommand(t *testing.T) {
 	cacheSizeQuantity := resource.MustParse(cacheSize)
 	localPath := "."
 
-	table := testing.CommandTable{
+	table := rifftesting.CommandTable{
 		{
 			Name:        "invalid args",
 			Args:        []string{},
@@ -316,8 +318,8 @@ Created function "my-function"
 		{
 			Name: "error during create",
 			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo},
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("create", "functions"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("create", "functions"),
 			},
 			ExpectCreates: []runtime.Object{
 				&buildv1alpha1.Function{

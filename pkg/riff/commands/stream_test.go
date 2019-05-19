@@ -17,12 +17,14 @@
 package commands_test
 
 import (
+	"testing"
+
 	"github.com/projectriff/riff/pkg/riff/commands"
-	"github.com/projectriff/riff/pkg/testing"
+	rifftesting "github.com/projectriff/riff/pkg/testing"
 )
 
 func TestStreamCommand(t *testing.T) {
-	table := testing.CommandTable{
+	table := rifftesting.CommandTable{
 		{
 			Name: "empty",
 			Args: []string{},

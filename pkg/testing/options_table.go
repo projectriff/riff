@@ -19,6 +19,7 @@ package testing
 import (
 	"context"
 	"reflect"
+	"testing"
 	"unsafe"
 
 	"github.com/google/go-cmp/cmp"
@@ -51,7 +52,7 @@ type OptionsTableRecord struct {
 	ShouldValidate bool
 }
 
-func (ot OptionsTable) Run(t *T) {
+func (ot OptionsTable) Run(t *testing.T) {
 	focusedTable := OptionsTable{}
 	for _, otr := range ot {
 		if otr.Focus == true && otr.Skip != true {
@@ -71,8 +72,8 @@ func (ot OptionsTable) Run(t *T) {
 	}
 }
 
-func (otr OptionsTableRecord) Run(t *T) {
-	t.Run(otr.Name, func(t *T) {
+func (otr OptionsTableRecord) Run(t *testing.T) {
+	t.Run(otr.Name, func(t *testing.T) {
 		if otr.Skip {
 			t.SkipNow()
 		}

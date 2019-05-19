@@ -17,27 +17,29 @@
 package commands_test
 
 import (
+	"testing"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
-	"github.com/projectriff/riff/pkg/testing"
+	rifftesting "github.com/projectriff/riff/pkg/testing"
 	streamv1alpha1 "github.com/projectriff/system/pkg/apis/stream/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func TestStreamDeleteOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name: "invalid delete",
 			Options: &commands.StreamDeleteOptions{
-				DeleteOptions: testing.InvalidDeleteOptions,
+				DeleteOptions: rifftesting.InvalidDeleteOptions,
 			},
-			ExpectFieldError: testing.InvalidDeleteOptionsFieldError,
+			ExpectFieldError: rifftesting.InvalidDeleteOptionsFieldError,
 		},
 		{
 			Name: "valid delete",
 			Options: &commands.StreamDeleteOptions{
-				DeleteOptions: testing.ValidDeleteOptions,
+				DeleteOptions: rifftesting.ValidDeleteOptions,
 			},
 			ShouldValidate: true,
 		},
@@ -51,7 +53,7 @@ func TestStreamDeleteCommand(t *testing.T) {
 	streamOtherName := "test-other-stream"
 	defaultNamespace := "default"
 
-	table := testing.CommandTable{
+	table := rifftesting.CommandTable{
 		{
 			Name:        "invalid args",
 			Args:        []string{},
@@ -68,7 +70,7 @@ func TestStreamDeleteCommand(t *testing.T) {
 					},
 				},
 			},
-			ExpectDeleteCollections: []testing.DeleteCollectionRef{{
+			ExpectDeleteCollections: []rifftesting.DeleteCollectionRef{{
 				Group:     "stream.projectriff.io",
 				Resource:  "streams",
 				Namespace: defaultNamespace,
@@ -88,7 +90,7 @@ Deleted streams in namespace "default"
 					},
 				},
 			},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "stream.projectriff.io",
 				Resource:  "streams",
 				Namespace: defaultNamespace,
@@ -115,7 +117,7 @@ Deleted stream "test-stream"
 					},
 				},
 			},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "stream.projectriff.io",
 				Resource:  "streams",
 				Namespace: defaultNamespace,
@@ -134,7 +136,7 @@ Deleted stream "test-other-stream"
 		{
 			Name: "stream does not exist",
 			Args: []string{streamName},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "stream.projectriff.io",
 				Resource:  "streams",
 				Namespace: defaultNamespace,
@@ -153,10 +155,10 @@ Deleted stream "test-other-stream"
 					},
 				},
 			},
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("delete", "streams"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("delete", "streams"),
 			},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "stream.projectriff.io",
 				Resource:  "streams",
 				Namespace: defaultNamespace,

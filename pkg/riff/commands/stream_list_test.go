@@ -17,28 +17,30 @@
 package commands_test
 
 import (
+	"testing"
+
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
-	"github.com/projectriff/riff/pkg/testing"
+	rifftesting "github.com/projectriff/riff/pkg/testing"
 	streamv1alpha1 "github.com/projectriff/system/pkg/apis/stream/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func TestStreamListOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name: "invalid list",
 			Options: &commands.StreamListOptions{
-				ListOptions: testing.InvalidListOptions,
+				ListOptions: rifftesting.InvalidListOptions,
 			},
-			ExpectFieldError: testing.InvalidListOptionsFieldError,
+			ExpectFieldError: rifftesting.InvalidListOptionsFieldError,
 		},
 		{
 			Name: "valid list",
 			Options: &commands.StreamListOptions{
-				ListOptions: testing.ValidListOptions,
+				ListOptions: rifftesting.ValidListOptions,
 			},
 			ShouldValidate: true,
 		},
@@ -53,13 +55,13 @@ func TestStreamListCommand(t *testing.T) {
 	defaultNamespace := "default"
 	otherNamespace := "other-namespace"
 
-	table := testing.CommandTable{
+	table := rifftesting.CommandTable{
 		{
 			Name: "invalid args",
 			Args: []string{},
 			Prepare: func(t *testing.T, c *cli.Config) error {
 				// disable default namespace
-				c.Client.(*testing.FakeClient).Namespace = ""
+				c.Client.(*rifftesting.FakeClient).Namespace = ""
 				return nil
 			},
 			ShouldError: true,
@@ -158,8 +160,8 @@ words   words   test-gateway:1234   kafka      True    <unknown>
 		{
 			Name: "list error",
 			Args: []string{},
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("list", "streams"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("list", "streams"),
 			},
 			ShouldError: true,
 		},

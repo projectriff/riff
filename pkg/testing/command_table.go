@@ -24,6 +24,7 @@ import (
 	"path"
 	"reflect"
 	"strings"
+	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -143,23 +144,23 @@ type CommandTableRecord struct {
 	// new line.
 	ExpectOutput string
 	// Verify provides the command output and error for custom assertions.
-	Verify func(t *T, output string, err error)
+	Verify func(t *testing.T, output string, err error)
 
 	// lifecycle
 
 	// Prepare is called before the command is executed. It is intended to prepare that broader
 	// environment before the specific table record is executed. For example, chaning the working
 	// directory or setting mock expectations.
-	Prepare func(t *T, config *cli.Config) error
+	Prepare func(t *testing.T, config *cli.Config) error
 	// CleanUp is called after the table record is finished and all defined assertions complete.
 	// It is indended to clean up any state created in the Prepare step or during the test
 	// execution, or to make assertions for mocks.
-	CleanUp func(t *T, config *cli.Config) error
+	CleanUp func(t *testing.T, config *cli.Config) error
 }
 
 // Run each record for the table. Tables with a focused record will run only the focused records
 // and then fail, to prevent accidental check-in.
-func (ct CommandTable) Run(t *T, cmdFactory func(*cli.Config) *cobra.Command) {
+func (ct CommandTable) Run(t *testing.T, cmdFactory func(*cli.Config) *cobra.Command) {
 	focusedTable := CommandTable{}
 	for _, ctr := range ct {
 		if ctr.Focus == true && ctr.Skip != true {
@@ -180,8 +181,8 @@ func (ct CommandTable) Run(t *T, cmdFactory func(*cli.Config) *cobra.Command) {
 }
 
 // Run a single table record for the command. It is not common to run a record outside of a table.
-func (ctr CommandTableRecord) Run(t *T, cmdFactory func(*cli.Config) *cobra.Command) {
-	t.Run(ctr.Name, func(t *T) {
+func (ctr CommandTableRecord) Run(t *testing.T, cmdFactory func(*cli.Config) *cobra.Command) {
+	t.Run(ctr.Name, func(t *testing.T) {
 		if ctr.Skip {
 			t.SkipNow()
 		}

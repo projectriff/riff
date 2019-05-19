@@ -18,10 +18,11 @@ package commands_test
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
-	"github.com/projectriff/riff/pkg/testing"
+	rifftesting "github.com/projectriff/riff/pkg/testing"
 	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,20 +30,20 @@ import (
 )
 
 func TestHandlerCreateOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name: "invalid resource",
 			Options: &commands.HandlerCreateOptions{
-				ResourceOptions: testing.InvalidResourceOptions,
+				ResourceOptions: rifftesting.InvalidResourceOptions,
 			},
-			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
+			ExpectFieldError: rifftesting.InvalidResourceOptionsFieldError.Also(
 				cli.ErrMissingOneOf(cli.ApplicationRefFlagName, cli.FunctionRefFlagName, cli.ImageFlagName),
 			),
 		},
 		{
 			Name: "from application",
 			Options: &commands.HandlerCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				ApplicationRef:  "my-application",
 			},
 			ShouldValidate: true,
@@ -50,7 +51,7 @@ func TestHandlerCreateOptions(t *testing.T) {
 		{
 			Name: "from function",
 			Options: &commands.HandlerCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				FunctionRef:     "my-function",
 			},
 			ShouldValidate: true,
@@ -58,7 +59,7 @@ func TestHandlerCreateOptions(t *testing.T) {
 		{
 			Name: "from image",
 			Options: &commands.HandlerCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 			},
 			ShouldValidate: true,
@@ -66,7 +67,7 @@ func TestHandlerCreateOptions(t *testing.T) {
 		{
 			Name: "from application, funcation and image",
 			Options: &commands.HandlerCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				ApplicationRef:  "my-application",
 				FunctionRef:     "my-function",
 				Image:           "example.com/repo:tag",
@@ -76,7 +77,7 @@ func TestHandlerCreateOptions(t *testing.T) {
 		{
 			Name: "with env",
 			Options: &commands.HandlerCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 				Env:             []string{"VAR1=foo", "VAR2=bar"},
 			},
@@ -85,7 +86,7 @@ func TestHandlerCreateOptions(t *testing.T) {
 		{
 			Name: "with invalid env",
 			Options: &commands.HandlerCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 				Env:             []string{"=foo"},
 			},
@@ -109,7 +110,7 @@ func TestHandlerCreateCommand(t *testing.T) {
 	envValueOther := "my-value-other"
 	envVarOther := fmt.Sprintf("%s=%s", envNameOther, envValueOther)
 
-	table := testing.CommandTable{
+	table := rifftesting.CommandTable{
 		{
 			Name:        "invalid args",
 			Args:        []string{},
@@ -236,8 +237,8 @@ Created handler "my-handler"
 		{
 			Name: "error during create",
 			Args: []string{handlerName, cli.ImageFlagName, image},
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("create", "handlers"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("create", "handlers"),
 			},
 			ExpectCreates: []runtime.Object{
 				&requestv1alpha1.Handler{
