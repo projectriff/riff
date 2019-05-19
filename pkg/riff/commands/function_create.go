@@ -18,8 +18,8 @@ package commands
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/buildpack/pack"
 	"github.com/projectriff/riff/pkg/cli"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/spf13/cobra"
@@ -107,7 +107,7 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 		function.Spec.CacheSize = &quantity
 	}
 	if opts.GitRepo != "" {
-		function.Spec.Source = buildv1alpha1.Source{
+		function.Spec.Source = &buildv1alpha1.Source{
 			Git: &buildv1alpha1.GitSource{
 				URL:      opts.GitRepo,
 				Revision: opts.GitRevision,
@@ -116,8 +116,22 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 		}
 	}
 	if opts.LocalPath != "" {
-		// TODO implement
-		return fmt.Errorf("not implemented")
+		err := c.Pack.Build(ctx, pack.BuildOptions{
+			Image:  opts.Image,
+			AppDir: opts.LocalPath,
+			// TODO lookup builder from ClusterBuildTemplate/riff-cnb
+			Builder: "projectriff/builder:0.2.0",
+			Env: map[string]string{
+				"RIFF":          "true",
+				"RIFF_ARTIFACT": opts.Artifact,
+				"RIFF_HANDLER":  opts.Handler,
+				"RIFF_OVERRIDE": opts.Invoker,
+			},
+			Publish: true,
+		})
+		if err != nil {
+			return err
+		}
 	}
 
 	function, err := c.Build().Functions(opts.Namespace).Create(function)

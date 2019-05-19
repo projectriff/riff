@@ -18,12 +18,12 @@ package commands
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/buildpack/pack"
 	"github.com/projectriff/riff/pkg/cli"
+	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/resource"
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -98,7 +98,7 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 		application.Spec.CacheSize = &quantity
 	}
 	if opts.GitRepo != "" {
-		application.Spec.Source = buildv1alpha1.Source{
+		application.Spec.Source = &buildv1alpha1.Source{
 			Git: &buildv1alpha1.GitSource{
 				URL:      opts.GitRepo,
 				Revision: opts.GitRevision,
@@ -107,8 +107,16 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 		}
 	}
 	if opts.LocalPath != "" {
-		// TODO implement
-		return fmt.Errorf("not implemented")
+		err := c.Pack.Build(ctx, pack.BuildOptions{
+			Image:  opts.Image,
+			AppDir: opts.LocalPath,
+			// TODO lookup builder from ClusterBuildTemplate/cf-cnb
+			Builder: "cloudfoundry/cnb:bionic",
+			Publish: true,
+		})
+		if err != nil {
+			return err
+		}
 	}
 
 	application, err := c.Build().Applications(opts.Namespace).Create(application)

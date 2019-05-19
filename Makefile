@@ -44,3 +44,12 @@ verify-docs: docs
 .PHONY: clean-docs
 clean-docs:
 	rm -fR docs
+
+.PHONY: check-mockery
+check-mockery:
+    # Use go get in GOPATH mode to install/update counterfeiter. This avoids polluting go.mod/go.sum.
+	@which mockery > /dev/null || (echo mockery not found: issue \"GO111MODULE=off go get -u  github.com/vektra/mockery/.../\" && false)
+
+.PHONY: gen-mocks
+gen-mocks: check-mockery
+	mockery -output ./pkg/testing/pack -outpkg pack -dir ./pkg/pack -name Client
