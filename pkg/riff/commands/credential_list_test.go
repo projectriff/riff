@@ -17,9 +17,11 @@
 package commands_test
 
 import (
+	"testing"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
-	"github.com/projectriff/riff/pkg/testing"
+	rifftesting "github.com/projectriff/riff/pkg/testing"
 	"github.com/projectriff/system/pkg/apis/build"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,20 +29,20 @@ import (
 )
 
 func TestCredentialListOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name: "valid list",
 			Options: &commands.CredentialListOptions{
-				ListOptions: testing.ValidListOptions,
+				ListOptions: rifftesting.ValidListOptions,
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "invalid list",
 			Options: &commands.CredentialListOptions{
-				ListOptions: testing.InvalidListOptions,
+				ListOptions: rifftesting.InvalidListOptions,
 			},
-			ExpectFieldError: testing.InvalidListOptionsFieldError,
+			ExpectFieldError: rifftesting.InvalidListOptionsFieldError,
 		},
 	}
 
@@ -54,13 +56,13 @@ func TestCredentialListCommand(t *testing.T) {
 	otherNamespace := "other-namespace"
 	credentialLabel := build.CredentialLabelKey
 
-	table := testing.CommandTable{
+	table := rifftesting.CommandTable{
 		{
 			Name: "invalid args",
 			Args: []string{},
 			Prepare: func(t *testing.T, c *cli.Config) error {
 				// disable default namespace
-				c.Client.(*testing.FakeClient).Namespace = ""
+				c.Client.(*rifftesting.FakeClient).Namespace = ""
 				return nil
 			},
 			ShouldError: true,
@@ -188,8 +190,8 @@ No credentials found.
 		{
 			Name: "list error",
 			Args: []string{},
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("list", "secrets"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("list", "secrets"),
 			},
 			ShouldError: true,
 		},

@@ -20,12 +20,13 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"testing"
 
 	"github.com/kballard/go-shellquote"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
-	"github.com/projectriff/riff/pkg/testing"
+	rifftesting "github.com/projectriff/riff/pkg/testing"
 	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,25 +34,25 @@ import (
 )
 
 func TestHandlerInvokeOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name: "invalid resource",
 			Options: &commands.HandlerInvokeOptions{
-				ResourceOptions: testing.InvalidResourceOptions,
+				ResourceOptions: rifftesting.InvalidResourceOptions,
 			},
-			ExpectFieldError: testing.InvalidResourceOptionsFieldError,
+			ExpectFieldError: rifftesting.InvalidResourceOptionsFieldError,
 		},
 		{
 			Name: "valid resource",
 			Options: &commands.HandlerInvokeOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "json content type",
 			Options: &commands.HandlerInvokeOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				ContentTypeJSON: true,
 			},
 			ShouldValidate: true,
@@ -59,7 +60,7 @@ func TestHandlerInvokeOptions(t *testing.T) {
 		{
 			Name: "text content type",
 			Options: &commands.HandlerInvokeOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				ContentTypeText: true,
 			},
 			ShouldValidate: true,
@@ -67,7 +68,7 @@ func TestHandlerInvokeOptions(t *testing.T) {
 		{
 			Name: "multiple content types",
 			Options: &commands.HandlerInvokeOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				ContentTypeJSON: true,
 				ContentTypeText: true,
 			},
@@ -116,7 +117,7 @@ func TestHandlerInvokeCommand(t *testing.T) {
 		},
 	}
 
-	table := testing.CommandTable{
+	table := rifftesting.CommandTable{
 		{
 			Name:       "ingress loadbalancer hostname",
 			Args:       []string{handlerName},

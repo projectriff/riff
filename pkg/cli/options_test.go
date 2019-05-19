@@ -17,12 +17,14 @@
 package cli_test
 
 import (
+	"testing"
+
 	"github.com/projectriff/riff/pkg/cli"
-	"github.com/projectriff/riff/pkg/testing"
+	rifftesting "github.com/projectriff/riff/pkg/testing"
 )
 
 func TestListOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name: "default",
 			Options: &cli.ListOptions{
@@ -56,7 +58,7 @@ func TestListOptions(t *testing.T) {
 }
 
 func TestResourceOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name:    "default",
 			Options: &cli.ResourceOptions{},
@@ -93,7 +95,7 @@ func TestResourceOptions(t *testing.T) {
 }
 
 func TestDeleteOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name: "default",
 			Options: &cli.DeleteOptions{

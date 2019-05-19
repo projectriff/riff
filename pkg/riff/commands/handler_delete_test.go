@@ -17,27 +17,29 @@
 package commands_test
 
 import (
+	"testing"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
-	"github.com/projectriff/riff/pkg/testing"
+	rifftesting "github.com/projectriff/riff/pkg/testing"
 	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func TestHandlerDeleteOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name: "invalid delete",
 			Options: &commands.HandlerDeleteOptions{
-				DeleteOptions: testing.InvalidDeleteOptions,
+				DeleteOptions: rifftesting.InvalidDeleteOptions,
 			},
-			ExpectFieldError: testing.InvalidDeleteOptionsFieldError,
+			ExpectFieldError: rifftesting.InvalidDeleteOptionsFieldError,
 		},
 		{
 			Name: "valid delete",
 			Options: &commands.HandlerDeleteOptions{
-				DeleteOptions: testing.ValidDeleteOptions,
+				DeleteOptions: rifftesting.ValidDeleteOptions,
 			},
 			ShouldValidate: true,
 		},
@@ -51,7 +53,7 @@ func TestHandlerDeleteCommand(t *testing.T) {
 	handlerOtherName := "test-other-handler"
 	defaultNamespace := "default"
 
-	table := testing.CommandTable{
+	table := rifftesting.CommandTable{
 		{
 			Name:        "invalid args",
 			Args:        []string{},
@@ -68,7 +70,7 @@ func TestHandlerDeleteCommand(t *testing.T) {
 					},
 				},
 			},
-			ExpectDeleteCollections: []testing.DeleteCollectionRef{{
+			ExpectDeleteCollections: []rifftesting.DeleteCollectionRef{{
 				Group:     "request.projectriff.io",
 				Resource:  "handlers",
 				Namespace: defaultNamespace,
@@ -88,7 +90,7 @@ Deleted handlers in namespace "default"
 					},
 				},
 			},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "request.projectriff.io",
 				Resource:  "handlers",
 				Namespace: defaultNamespace,
@@ -115,7 +117,7 @@ Deleted handler "test-handler"
 					},
 				},
 			},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "request.projectriff.io",
 				Resource:  "handlers",
 				Namespace: defaultNamespace,
@@ -134,7 +136,7 @@ Deleted handler "test-other-handler"
 		{
 			Name: "handler does not exist",
 			Args: []string{handlerName},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "request.projectriff.io",
 				Resource:  "handlers",
 				Namespace: defaultNamespace,
@@ -153,10 +155,10 @@ Deleted handler "test-other-handler"
 					},
 				},
 			},
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("delete", "handlers"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("delete", "handlers"),
 			},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "request.projectriff.io",
 				Resource:  "handlers",
 				Namespace: defaultNamespace,

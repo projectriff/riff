@@ -17,9 +17,11 @@
 package commands_test
 
 import (
+	"testing"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
-	"github.com/projectriff/riff/pkg/testing"
+	rifftesting "github.com/projectriff/riff/pkg/testing"
 	"github.com/projectriff/system/pkg/apis/build"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,20 +29,20 @@ import (
 )
 
 func TestCredentialDeleteOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name: "valid multi-delete",
 			Options: &commands.CredentialDeleteOptions{
-				DeleteOptions: testing.ValidDeleteOptions,
+				DeleteOptions: rifftesting.ValidDeleteOptions,
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "invalid multi-delete",
 			Options: &commands.CredentialDeleteOptions{
-				DeleteOptions: testing.InvalidDeleteOptions,
+				DeleteOptions: rifftesting.InvalidDeleteOptions,
 			},
-			ExpectFieldError: testing.InvalidDeleteOptionsFieldError,
+			ExpectFieldError: rifftesting.InvalidDeleteOptionsFieldError,
 		},
 	}
 
@@ -53,7 +55,7 @@ func TestCredentialDeleteCommand(t *testing.T) {
 	defaultNamespace := "default"
 	credentialLabel := build.CredentialLabelKey
 
-	table := testing.CommandTable{
+	table := rifftesting.CommandTable{
 		{
 			Name:        "invalid args",
 			Args:        []string{},
@@ -72,7 +74,7 @@ func TestCredentialDeleteCommand(t *testing.T) {
 					StringData: map[string]string{},
 				},
 			},
-			ExpectDeleteCollections: []testing.DeleteCollectionRef{{
+			ExpectDeleteCollections: []rifftesting.DeleteCollectionRef{{
 				Resource:      "secrets",
 				Namespace:     defaultNamespace,
 				LabelSelector: credentialLabel,
@@ -94,10 +96,10 @@ Deleted credentials in namespace "default"
 					StringData: map[string]string{},
 				},
 			},
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("delete-collection", "secrets"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("delete-collection", "secrets"),
 			},
-			ExpectDeleteCollections: []testing.DeleteCollectionRef{{
+			ExpectDeleteCollections: []rifftesting.DeleteCollectionRef{{
 				Resource:      "secrets",
 				Namespace:     defaultNamespace,
 				LabelSelector: credentialLabel,
@@ -117,7 +119,7 @@ Deleted credentials in namespace "default"
 					StringData: map[string]string{},
 				},
 			},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Resource:  "secrets",
 				Namespace: defaultNamespace,
 				Name:      credentialName,
@@ -147,7 +149,7 @@ Deleted credential "test-credential"
 					StringData: map[string]string{},
 				},
 			},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Resource:  "secrets",
 				Namespace: defaultNamespace,
 				Name:      credentialName,
@@ -164,7 +166,7 @@ Deleted credential "test-other-credential"
 		{
 			Name: "secret does not exist",
 			Args: []string{credentialName},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Resource:  "secrets",
 				Namespace: defaultNamespace,
 				Name:      credentialName,
@@ -184,10 +186,10 @@ Deleted credential "test-other-credential"
 					StringData: map[string]string{},
 				},
 			},
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("delete", "secrets"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("delete", "secrets"),
 			},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Resource:  "secrets",
 				Namespace: defaultNamespace,
 				Name:      credentialName,

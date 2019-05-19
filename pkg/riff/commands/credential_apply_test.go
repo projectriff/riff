@@ -17,9 +17,11 @@
 package commands_test
 
 import (
+	"testing"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
-	"github.com/projectriff/riff/pkg/testing"
+	rifftesting "github.com/projectriff/riff/pkg/testing"
 	"github.com/projectriff/system/pkg/apis/build"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,27 +29,27 @@ import (
 )
 
 func TestCredentialApplyOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name: "valid namespaced resource",
 			Options: &commands.CredentialApplyOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 			},
 			ExpectFieldError: cli.ErrMissingOneOf(cli.DockerHubFlagName, cli.GcrFlagName, cli.RegistryFlagName),
 		},
 		{
 			Name: "invalid namespaced resource",
 			Options: &commands.CredentialApplyOptions{
-				ResourceOptions: testing.InvalidResourceOptions,
+				ResourceOptions: rifftesting.InvalidResourceOptions,
 			},
-			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
+			ExpectFieldError: rifftesting.InvalidResourceOptionsFieldError.Also(
 				cli.ErrMissingOneOf(cli.DockerHubFlagName, cli.GcrFlagName, cli.RegistryFlagName),
 			),
 		},
 		{
 			Name: "docker hub",
 			Options: &commands.CredentialApplyOptions{
-				ResourceOptions:   testing.ValidResourceOptions,
+				ResourceOptions:   rifftesting.ValidResourceOptions,
 				DockerHubId:       "projectriff",
 				DockerHubPassword: []byte("1password"),
 			},
@@ -56,7 +58,7 @@ func TestCredentialApplyOptions(t *testing.T) {
 		{
 			Name: "docker hub missing password",
 			Options: &commands.CredentialApplyOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				DockerHubId:     "projectriff",
 			},
 			ExpectFieldError: cli.ErrMissingField("<docker-hub-password>"),
@@ -64,7 +66,7 @@ func TestCredentialApplyOptions(t *testing.T) {
 		{
 			Name: "gcr",
 			Options: &commands.CredentialApplyOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				GcrTokenPath:    "gcr-credentials.json",
 			},
 			ShouldValidate: true,
@@ -72,7 +74,7 @@ func TestCredentialApplyOptions(t *testing.T) {
 		{
 			Name: "registry",
 			Options: &commands.CredentialApplyOptions{
-				ResourceOptions:  testing.ValidResourceOptions,
+				ResourceOptions:  rifftesting.ValidResourceOptions,
 				Registry:         "example.com",
 				RegistryUser:     "projectriff",
 				RegistryPassword: []byte("1password"),
@@ -82,7 +84,7 @@ func TestCredentialApplyOptions(t *testing.T) {
 		{
 			Name: "registry missing user",
 			Options: &commands.CredentialApplyOptions{
-				ResourceOptions:  testing.ValidResourceOptions,
+				ResourceOptions:  rifftesting.ValidResourceOptions,
 				Registry:         "example.com",
 				RegistryPassword: []byte("1password"),
 			},
@@ -91,7 +93,7 @@ func TestCredentialApplyOptions(t *testing.T) {
 		{
 			Name: "registry missing password",
 			Options: &commands.CredentialApplyOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Registry:        "example.com",
 				RegistryUser:    "projectriff",
 			},
@@ -101,7 +103,7 @@ func TestCredentialApplyOptions(t *testing.T) {
 		{
 			Name: "multiple registries",
 			Options: &commands.CredentialApplyOptions{
-				ResourceOptions:   testing.InvalidResourceOptions,
+				ResourceOptions:   rifftesting.InvalidResourceOptions,
 				DockerHubId:       "projectriff",
 				DockerHubPassword: []byte("1password"),
 				GcrTokenPath:      "gcr-credentials.json",
@@ -109,7 +111,7 @@ func TestCredentialApplyOptions(t *testing.T) {
 				RegistryUser:      "projectriff",
 				RegistryPassword:  []byte("1password"),
 			},
-			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
+			ExpectFieldError: rifftesting.InvalidResourceOptionsFieldError.Also(
 				cli.ErrMultipleOneOf(cli.DockerHubFlagName, cli.GcrFlagName, cli.RegistryFlagName),
 			),
 		},
@@ -117,7 +119,7 @@ func TestCredentialApplyOptions(t *testing.T) {
 		{
 			Name: "docker hub as default image prefix",
 			Options: &commands.CredentialApplyOptions{
-				ResourceOptions:       testing.ValidResourceOptions,
+				ResourceOptions:       rifftesting.ValidResourceOptions,
 				DockerHubId:           "projectriff",
 				DockerHubPassword:     []byte("1password"),
 				SetDefaultImagePrefix: true,
@@ -127,7 +129,7 @@ func TestCredentialApplyOptions(t *testing.T) {
 		{
 			Name: "gcr as default image prefix",
 			Options: &commands.CredentialApplyOptions{
-				ResourceOptions:       testing.ValidResourceOptions,
+				ResourceOptions:       rifftesting.ValidResourceOptions,
 				GcrTokenPath:          "gcr-credentials.json",
 				SetDefaultImagePrefix: true,
 			},
@@ -136,7 +138,7 @@ func TestCredentialApplyOptions(t *testing.T) {
 		{
 			Name: "registry as default image prefix",
 			Options: &commands.CredentialApplyOptions{
-				ResourceOptions:       testing.ValidResourceOptions,
+				ResourceOptions:       rifftesting.ValidResourceOptions,
 				Registry:              "example.com",
 				RegistryUser:          "projectriff",
 				RegistryPassword:      []byte("1password"),
@@ -159,7 +161,7 @@ func TestCredentialApplyCommand(t *testing.T) {
 	registryUser := "projectriff"
 	registryPassword := "registry-password"
 
-	table := testing.CommandTable{
+	table := rifftesting.CommandTable{
 		{
 			Name:        "invalid args",
 			Args:        []string{},
@@ -315,8 +317,8 @@ Apply credentials "test-credential"
 					},
 				},
 			},
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("get", "secrets"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("get", "secrets"),
 			},
 			ShouldError: true,
 		},
@@ -324,8 +326,8 @@ Apply credentials "test-credential"
 			Name:  "create error",
 			Args:  []string{credentialName, cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser},
 			Stdin: []byte(registryPassword),
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("create", "secrets"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("create", "secrets"),
 			},
 			ExpectCreates: []runtime.Object{
 				&corev1.Secret{
@@ -367,8 +369,8 @@ Apply credentials "test-credential"
 					},
 				},
 			},
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("update", "secrets"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("update", "secrets"),
 			},
 			ExpectUpdates: []runtime.Object{
 				&corev1.Secret{
@@ -536,8 +538,8 @@ Set default image prefix to "docker.io/projectriff"
 			Name:  "default image prefix get error",
 			Args:  []string{credentialName, cli.DockerHubFlagName, dockerHubId, cli.SetDefaultImagePrefixFlagName},
 			Stdin: []byte(dockerHubPassword),
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("get", "configmaps"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("get", "configmaps"),
 			},
 			ExpectCreates: []runtime.Object{
 				&corev1.Secret{
@@ -562,8 +564,8 @@ Set default image prefix to "docker.io/projectriff"
 			Name:  "default image prefix create error",
 			Args:  []string{credentialName, cli.DockerHubFlagName, dockerHubId, cli.SetDefaultImagePrefixFlagName},
 			Stdin: []byte(dockerHubPassword),
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("create", "configmaps"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("create", "configmaps"),
 			},
 			ExpectCreates: []runtime.Object{
 				&corev1.Secret{
@@ -597,8 +599,8 @@ Set default image prefix to "docker.io/projectriff"
 			Name:  "default image prefix update",
 			Args:  []string{credentialName, cli.DockerHubFlagName, dockerHubId, cli.SetDefaultImagePrefixFlagName},
 			Stdin: []byte(dockerHubPassword),
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("update", "configmaps"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("update", "configmaps"),
 			},
 			GivenObjects: []runtime.Object{
 				&corev1.ConfigMap{

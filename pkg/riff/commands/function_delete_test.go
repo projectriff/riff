@@ -17,27 +17,29 @@
 package commands_test
 
 import (
+	"testing"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
-	"github.com/projectriff/riff/pkg/testing"
+	rifftesting "github.com/projectriff/riff/pkg/testing"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func TestFunctionDeleteOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name: "invalid delete",
 			Options: &commands.FunctionDeleteOptions{
-				DeleteOptions: testing.InvalidDeleteOptions,
+				DeleteOptions: rifftesting.InvalidDeleteOptions,
 			},
-			ExpectFieldError: testing.InvalidDeleteOptionsFieldError,
+			ExpectFieldError: rifftesting.InvalidDeleteOptionsFieldError,
 		},
 		{
 			Name: "valid delete",
 			Options: &commands.FunctionDeleteOptions{
-				DeleteOptions: testing.ValidDeleteOptions,
+				DeleteOptions: rifftesting.ValidDeleteOptions,
 			},
 			ShouldValidate: true,
 		},
@@ -51,7 +53,7 @@ func TestFunctionDeleteCommand(t *testing.T) {
 	functionOtherName := "test-other-function"
 	defaultNamespace := "default"
 
-	table := testing.CommandTable{
+	table := rifftesting.CommandTable{
 		{
 			Name:        "invalid args",
 			Args:        []string{},
@@ -68,7 +70,7 @@ func TestFunctionDeleteCommand(t *testing.T) {
 					},
 				},
 			},
-			ExpectDeleteCollections: []testing.DeleteCollectionRef{{
+			ExpectDeleteCollections: []rifftesting.DeleteCollectionRef{{
 				Group:     "build.projectriff.io",
 				Resource:  "functions",
 				Namespace: defaultNamespace,
@@ -88,7 +90,7 @@ Deleted functions in namespace "default"
 					},
 				},
 			},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "build.projectriff.io",
 				Resource:  "functions",
 				Namespace: defaultNamespace,
@@ -115,7 +117,7 @@ Deleted function "test-function"
 					},
 				},
 			},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "build.projectriff.io",
 				Resource:  "functions",
 				Namespace: defaultNamespace,
@@ -134,7 +136,7 @@ Deleted function "test-other-function"
 		{
 			Name: "function does not exist",
 			Args: []string{functionName},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "build.projectriff.io",
 				Resource:  "functions",
 				Namespace: defaultNamespace,
@@ -153,10 +155,10 @@ Deleted function "test-other-function"
 					},
 				},
 			},
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("delete", "functions"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("delete", "functions"),
 			},
-			ExpectDeletes: []testing.DeleteRef{{
+			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "build.projectriff.io",
 				Resource:  "functions",
 				Namespace: defaultNamespace,

@@ -17,13 +17,9 @@
 package testing
 
 import (
-	"testing"
-
 	kntesting "github.com/knative/pkg/reconciler/testing"
 	clientgotesting "k8s.io/client-go/testing"
 )
-
-type T = testing.T
 
 var (
 	InduceFailure = kntesting.InduceFailure

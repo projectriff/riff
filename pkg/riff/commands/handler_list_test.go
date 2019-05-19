@@ -17,10 +17,12 @@
 package commands_test
 
 import (
+	"testing"
+
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
-	"github.com/projectriff/riff/pkg/testing"
+	rifftesting "github.com/projectriff/riff/pkg/testing"
 	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,18 +30,18 @@ import (
 )
 
 func TestHandlerListOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name: "invalid list",
 			Options: &commands.HandlerListOptions{
-				ListOptions: testing.InvalidListOptions,
+				ListOptions: rifftesting.InvalidListOptions,
 			},
-			ExpectFieldError: testing.InvalidListOptionsFieldError,
+			ExpectFieldError: rifftesting.InvalidListOptionsFieldError,
 		},
 		{
 			Name: "valid list",
 			Options: &commands.HandlerListOptions{
-				ListOptions: testing.ValidListOptions,
+				ListOptions: rifftesting.ValidListOptions,
 			},
 			ShouldValidate: true,
 		},
@@ -54,13 +56,13 @@ func TestHandlerListCommand(t *testing.T) {
 	defaultNamespace := "default"
 	otherNamespace := "other-namespace"
 
-	table := testing.CommandTable{
+	table := rifftesting.CommandTable{
 		{
 			Name: "invalid args",
 			Args: []string{},
 			Prepare: func(t *testing.T, c *cli.Config) error {
 				// disable default namespace
-				c.Client.(*testing.FakeClient).Namespace = ""
+				c.Client.(*rifftesting.FakeClient).Namespace = ""
 				return nil
 			},
 			ShouldError: true,
@@ -196,8 +198,8 @@ img    image         projectriff/upper   image.default.example.com   True    <un
 		{
 			Name: "list error",
 			Args: []string{},
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("list", "handlers"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("list", "handlers"),
 			},
 			ShouldError: true,
 		},

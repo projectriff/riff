@@ -17,29 +17,31 @@
 package commands_test
 
 import (
+	"testing"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
-	"github.com/projectriff/riff/pkg/testing"
+	rifftesting "github.com/projectriff/riff/pkg/testing"
 	streamv1alpha1 "github.com/projectriff/system/pkg/apis/stream/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func TestStreamCreateOptions(t *testing.T) {
-	table := testing.OptionsTable{
+	table := rifftesting.OptionsTable{
 		{
 			Name: "invalid resource",
 			Options: &commands.StreamCreateOptions{
-				ResourceOptions: testing.InvalidResourceOptions,
+				ResourceOptions: rifftesting.InvalidResourceOptions,
 			},
-			ExpectFieldError: testing.InvalidResourceOptionsFieldError.Also(
+			ExpectFieldError: rifftesting.InvalidResourceOptionsFieldError.Also(
 				cli.ErrMissingField(cli.ProviderFlagName),
 			),
 		},
 		{
 			Name: "valid provider",
 			Options: &commands.StreamCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 				Provider:        "test-provider",
 			},
 			ShouldValidate: true,
@@ -47,7 +49,7 @@ func TestStreamCreateOptions(t *testing.T) {
 		{
 			Name: "no provider",
 			Options: &commands.StreamCreateOptions{
-				ResourceOptions: testing.ValidResourceOptions,
+				ResourceOptions: rifftesting.ValidResourceOptions,
 			},
 			ExpectFieldError: cli.ErrMissingField(cli.ProviderFlagName),
 		},
@@ -61,7 +63,7 @@ func TestStreamCreateCommand(t *testing.T) {
 	streamName := "my-stream"
 	provider := "test-provider"
 
-	table := testing.CommandTable{
+	table := rifftesting.CommandTable{
 		{
 			Name:        "invalid args",
 			Args:        []string{},
@@ -112,8 +114,8 @@ Created stream "my-stream"
 		{
 			Name: "error during create",
 			Args: []string{streamName, cli.ProviderFlagName, provider},
-			WithReactors: []testing.ReactionFunc{
-				testing.InduceFailure("create", "streams"),
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("create", "streams"),
 			},
 			ExpectCreates: []runtime.Object{
 				&streamv1alpha1.Stream{
