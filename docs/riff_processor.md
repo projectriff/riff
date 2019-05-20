@@ -26,5 +26,4 @@
 * [riff processor create](riff_processor_create.md)	 - <todo>
 * [riff processor delete](riff_processor_delete.md)	 - <todo>
 * [riff processor list](riff_processor_list.md)	 - <todo>
-* [riff processor update](riff_processor_update.md)	 - <todo>
 

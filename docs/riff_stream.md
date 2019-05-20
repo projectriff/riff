@@ -26,5 +26,4 @@
 * [riff stream create](riff_stream_create.md)	 - <todo>
 * [riff stream delete](riff_stream_delete.md)	 - <todo>
 * [riff stream list](riff_stream_list.md)	 - <todo>
-* [riff stream update](riff_stream_update.md)	 - <todo>
 
