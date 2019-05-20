@@ -18,6 +18,7 @@ package cli
 
 import (
 	"bufio"
+	"context"
 	"io/ioutil"
 	"syscall"
 
@@ -57,4 +58,17 @@ func ReadStdin(c *Config, value *[]byte, prompt string) func(*cobra.Command, []s
 
 		return nil
 	}
+}
+
+type commandKey struct{}
+
+func WithCommand(ctx context.Context, cmd *cobra.Command) context.Context {
+	return context.WithValue(ctx, commandKey{}, cmd)
+}
+
+func CommandFromContext(ctx context.Context) *cobra.Command {
+	if cmd, ok := ctx.Value(commandKey{}).(*cobra.Command); ok {
+		return cmd
+	}
+	return nil
 }

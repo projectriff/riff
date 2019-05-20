@@ -27,21 +27,28 @@ import (
 func TestCompletionOptions(t *testing.T) {
 	table := rifftesting.OptionsTable{
 		{
-			Name:             "missing shell name",
+			Name:             "missing shell",
 			Options:          &commands.CompletionOptions{},
-			ExpectFieldError: cli.ErrMissingField("shell"),
+			ExpectFieldError: cli.ErrMissingField(cli.ShellFlagname),
 		},
 		{
-			Name: "invalid shell name",
+			Name: "invalid shell",
 			Options: &commands.CompletionOptions{
 				Shell: "zorglub",
 			},
-			ExpectFieldError: cli.ErrInvalidValue("zorglub", "shell"),
+			ExpectFieldError: cli.ErrInvalidValue("zorglub", cli.ShellFlagname),
 		},
 		{
-			Name: "valid shell name",
+			Name: "valid shell bash",
 			Options: &commands.CompletionOptions{
 				Shell: "bash",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "valid shell zsh",
+			Options: &commands.CompletionOptions{
+				Shell: "zsh",
 			},
 			ShouldValidate: true,
 		},
