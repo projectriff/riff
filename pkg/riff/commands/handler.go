@@ -32,7 +32,6 @@ func NewHandlerCommand(c *cli.Config) *cobra.Command {
 
 	cmd.AddCommand(NewHandlerListCommand(c))
 	cmd.AddCommand(NewHandlerCreateCommand(c))
-	cmd.AddCommand(NewHandlerUpdateCommand(c))
 	cmd.AddCommand(NewHandlerInvokeCommand(c))
 	cmd.AddCommand(NewHandlerDeleteCommand(c))
 

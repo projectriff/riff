@@ -31,7 +31,6 @@ func NewProcessorCommand(c *cli.Config) *cobra.Command {
 
 	cmd.AddCommand(NewProcessorListCommand(c))
 	cmd.AddCommand(NewProcessorCreateCommand(c))
-	cmd.AddCommand(NewProcessorUpdateCommand(c))
 	cmd.AddCommand(NewProcessorDeleteCommand(c))
 
 	return cmd

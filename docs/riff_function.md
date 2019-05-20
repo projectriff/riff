@@ -26,5 +26,4 @@
 * [riff function create](riff_function_create.md)	 - <todo>
 * [riff function delete](riff_function_delete.md)	 - <todo>
 * [riff function list](riff_function_list.md)	 - <todo>
-* [riff function update](riff_function_update.md)	 - <todo>
 

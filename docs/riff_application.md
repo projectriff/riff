@@ -26,5 +26,4 @@
 * [riff application create](riff_application_create.md)	 - <todo>
 * [riff application delete](riff_application_delete.md)	 - <todo>
 * [riff application list](riff_application_list.md)	 - <todo>
-* [riff application update](riff_application_update.md)	 - <todo>
 
