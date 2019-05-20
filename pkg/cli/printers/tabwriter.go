@@ -22,7 +22,7 @@ package printers
 import (
 	"io"
 
-	"github.com/liggitt/tabwriter"
+	"github.com/projectriff/riff/pkg/cli/printers/tabwriter"
 )
 
 const (
@@ -30,7 +30,7 @@ const (
 	tabwriterWidth    = 4
 	tabwriterPadding  = 3
 	tabwriterPadChar  = ' '
-	tabwriterFlags    = tabwriter.RememberWidths
+	tabwriterFlags    = tabwriter.RememberWidths | tabwriter.IgnoreAnsiCodes
 )
 
 // GetNewTabWriter returns a tabwriter that translates tabbed columns in input into properly aligned text.

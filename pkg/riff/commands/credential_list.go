@@ -66,7 +66,6 @@ func (opts *CredentialListOptions) Exec(ctx context.Context, c *cli.Config) erro
 	cli.SortByNamespaceAndName(secrets.Items)
 
 	return tablePrinter.PrintObj(secrets, c.Stdout)
-
 }
 
 func NewCredentialListCommand(c *cli.Config) *cobra.Command {
