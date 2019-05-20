@@ -55,6 +55,11 @@ func AllNamespacesFlag(cmd *cobra.Command, c *Config, namespace *string, allName
 	prior := cmd.PreRunE
 	cmd.PreRunE = func(cmd *cobra.Command, args []string) error {
 		if *allNamespaces == true {
+			if cmd.Flag(StripDash(NamespaceFlagName)).Changed {
+				// forbid --namespace alongside --all-namespaces
+				// Check here since we need the Flag to know if the namespace came from a flag
+				return ErrMultipleOneOf(NamespaceFlagName, AllNamespacesFlagName)
+			}
 			*namespace = ""
 		}
 		if prior != nil {
