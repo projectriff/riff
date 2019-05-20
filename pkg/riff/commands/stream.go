@@ -31,7 +31,6 @@ func NewStreamCommand(c *cli.Config) *cobra.Command {
 
 	cmd.AddCommand(NewStreamListCommand(c))
 	cmd.AddCommand(NewStreamCreateCommand(c))
-	cmd.AddCommand(NewStreamUpdateCommand(c))
 	cmd.AddCommand(NewStreamDeleteCommand(c))
 
 	return cmd

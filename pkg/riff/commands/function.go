@@ -31,7 +31,6 @@ func NewFunctionCommand(c *cli.Config) *cobra.Command {
 
 	cmd.AddCommand(NewFunctionListCommand(c))
 	cmd.AddCommand(NewFunctionCreateCommand(c))
-	cmd.AddCommand(NewFunctionUpdateCommand(c))
 	cmd.AddCommand(NewFunctionDeleteCommand(c))
 
 	return cmd

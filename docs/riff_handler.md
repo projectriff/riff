@@ -32,5 +32,4 @@
 * [riff handler create](riff_handler_create.md)	 - <todo>
 * [riff handler delete](riff_handler_delete.md)	 - <todo>
 * [riff handler list](riff_handler_list.md)	 - <todo>
-* [riff handler update](riff_handler_update.md)	 - <todo>
 
