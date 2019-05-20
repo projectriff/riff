@@ -17,20 +17,52 @@
 package commands
 
 import (
+	"context"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
+type CompletionOptions struct {
+	Shell string
+	cmd   *cobra.Command
+}
+
+func (o *CompletionOptions) Validate(ctx context.Context) *cli.FieldError {
+	errs := &cli.FieldError{}
+	if o.Shell == "" {
+		errs = errs.Also(cli.ErrMissingField("shell"))
+	} else if o.Shell != "bash" && o.Shell != "zsh" {
+		errs = errs.Also(cli.ErrInvalidValue(o.Shell, "shell"))
+	}
+	return errs
+}
+
+func (o *CompletionOptions) Exec(ctx context.Context, c *cli.Config) error {
+	switch o.Shell {
+	case "bash":
+		return o.cmd.Root().GenBashCompletion(o.cmd.OutOrStdout())
+	case "zsh":
+		return o.cmd.Root().GenZshCompletion(o.cmd.OutOrStdout())
+	default:
+		panic("invalid shell: " + o.Shell) // protected by o.Validate()
+	}
+	return nil
+}
+
 func NewCompletionCommand(c *cli.Config) *cobra.Command {
+
+	opts := &CompletionOptions{}
+
 	cmd := &cobra.Command{
 		Use:     "completion",
 		Short:   "<todo>",
 		Example: "<todo>",
-		Args:    cli.Args(),
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Root().GenBashCompletion(cmd.OutOrStdout())
-		},
+		Args:    cli.Args(cli.NameArg(&opts.Shell)),
+		PreRunE: cli.ValidateOptions(opts),
+		RunE:    cli.ExecOptions(c, opts),
 	}
+	opts.cmd = cmd
 
 	return cmd
 }
