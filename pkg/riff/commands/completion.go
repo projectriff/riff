@@ -25,44 +25,46 @@ import (
 
 type CompletionOptions struct {
 	Shell string
-	cmd   *cobra.Command
 }
 
-func (o *CompletionOptions) Validate(ctx context.Context) *cli.FieldError {
+func (opts *CompletionOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
-	if o.Shell == "" {
-		errs = errs.Also(cli.ErrMissingField("shell"))
-	} else if o.Shell != "bash" && o.Shell != "zsh" {
-		errs = errs.Also(cli.ErrInvalidValue(o.Shell, "shell"))
+
+	if opts.Shell == "" {
+		errs = errs.Also(cli.ErrMissingField(cli.ShellFlagname))
+	} else if opts.Shell != "bash" && opts.Shell != "zsh" {
+		errs = errs.Also(cli.ErrInvalidValue(opts.Shell, cli.ShellFlagname))
 	}
+
 	return errs
 }
 
-func (o *CompletionOptions) Exec(ctx context.Context, c *cli.Config) error {
-	switch o.Shell {
+func (opts *CompletionOptions) Exec(ctx context.Context, c *cli.Config) error {
+	cmd := cli.CommandFromContext(ctx)
+	switch opts.Shell {
 	case "bash":
-		return o.cmd.Root().GenBashCompletion(o.cmd.OutOrStdout())
+		return cmd.Root().GenBashCompletion(c.Stdout)
 	case "zsh":
-		return o.cmd.Root().GenZshCompletion(o.cmd.OutOrStdout())
+		return cmd.Root().GenZshCompletion(c.Stdout)
 	default:
-		panic("invalid shell: " + o.Shell) // protected by o.Validate()
+		panic("invalid shell: " + opts.Shell) // protected by opts.Validate()
 	}
 	return nil
 }
 
 func NewCompletionCommand(c *cli.Config) *cobra.Command {
-
 	opts := &CompletionOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "completion",
 		Short:   "<todo>",
 		Example: "<todo>",
-		Args:    cli.Args(cli.NameArg(&opts.Shell)),
+		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE:    cli.ExecOptions(c, opts),
 	}
-	opts.cmd = cmd
+
+	cmd.Flags().StringVar(&opts.Shell, cli.StripDash(cli.ShellFlagname), "bash", "shell to generate completion for: bash or zsh")
 
 	return cmd
 }

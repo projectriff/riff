@@ -61,7 +61,7 @@ type Executable interface {
 // ```
 func ExecOptions(c *Config, opts Executable) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
+		ctx := WithCommand(context.Background(), cmd)
 		return opts.Exec(ctx, c)
 	}
 }

@@ -19,7 +19,8 @@ riff completion [flags]
 ### Options
 
 ```
-  -h, --help   help for completion
+  -h, --help           help for completion
+      --shell string   shell to generate completion for: bash or zsh (default "bash")
 ```
 
 ### Options inherited from parent commands
