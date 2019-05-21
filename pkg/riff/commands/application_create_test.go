@@ -17,12 +17,16 @@
 package commands_test
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/buildpack/pack"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	rifftesting "github.com/projectriff/riff/pkg/testing"
+	packtesting "github.com/projectriff/riff/pkg/testing/pack"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
+	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -150,7 +154,6 @@ func TestApplicationCreateCommand(t *testing.T) {
 	defaultNamespace := "default"
 	applicationName := "my-application"
 	imageTag := "registry.example.com/repo:tag"
-	imageDigest := "registry.example.com/repo@sha256:deadbeefdeadbeefdeadbeefdeadbeef"
 	gitRepo := "https://example.com/repo.git"
 	gitMaster := "master"
 	gitSha := "deadbeefdeadbeefdeadbeefdeadbeef"
@@ -176,7 +179,7 @@ func TestApplicationCreateCommand(t *testing.T) {
 					},
 					Spec: buildv1alpha1.ApplicationSpec{
 						Image: imageTag,
-						Source: buildv1alpha1.Source{
+						Source: &buildv1alpha1.Source{
 							Git: &buildv1alpha1.GitSource{
 								URL:      gitRepo,
 								Revision: gitMaster,
@@ -200,7 +203,7 @@ Created application "my-application"
 					},
 					Spec: buildv1alpha1.ApplicationSpec{
 						Image: imageTag,
-						Source: buildv1alpha1.Source{
+						Source: &buildv1alpha1.Source{
 							Git: &buildv1alpha1.GitSource{
 								URL:      gitRepo,
 								Revision: gitSha,
@@ -224,7 +227,7 @@ Created application "my-application"
 					},
 					Spec: buildv1alpha1.ApplicationSpec{
 						Image: imageTag,
-						Source: buildv1alpha1.Source{
+						Source: &buildv1alpha1.Source{
 							Git: &buildv1alpha1.GitSource{
 								URL:      gitRepo,
 								Revision: gitMaster,
@@ -250,7 +253,7 @@ Created application "my-application"
 					Spec: buildv1alpha1.ApplicationSpec{
 						Image:     imageTag,
 						CacheSize: &cacheSizeQuantity,
-						Source: buildv1alpha1.Source{
+						Source: &buildv1alpha1.Source{
 							Git: &buildv1alpha1.GitSource{
 								URL:      gitRepo,
 								Revision: gitMaster,
@@ -264,10 +267,26 @@ Created application "my-application"
 `,
 		},
 		{
-			// TODO impelement
-			Skip: true,
 			Name: "local path",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				packClient := &packtesting.Client{}
+				c.Pack = packClient
+				packClient.On("Build", mock.Anything, pack.BuildOptions{
+					Image:   imageTag,
+					AppDir:  localPath,
+					Builder: "cloudfoundry/cnb:bionic",
+					Publish: true,
+				}).Return(nil).Run(func(args mock.Arguments) {
+					fmt.Fprintf(c.Stdout, "...build output...\n")
+				})
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				packClient := c.Pack.(*packtesting.Client)
+				packClient.AssertExpectations(t)
+				return nil
+			},
 			ExpectCreates: []runtime.Object{
 				&buildv1alpha1.Application{
 					ObjectMeta: metav1.ObjectMeta{
@@ -277,13 +296,39 @@ Created application "my-application"
 					Spec: buildv1alpha1.ApplicationSpec{
 						Image: imageTag,
 					},
-					Status: buildv1alpha1.ApplicationStatus{
-						BuildStatus: buildv1alpha1.BuildStatus{
-							LatestImage: imageDigest,
-						},
-					},
 				},
 			},
+			ExpectOutput: `
+...build output...
+Created application "my-application"
+`,
+		},
+		{
+			Name: "local path, pack error",
+			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				packClient := &packtesting.Client{}
+				c.Pack = packClient
+				packClient.On("Build", mock.Anything, pack.BuildOptions{
+					Image:   imageTag,
+					AppDir:  localPath,
+					Builder: "cloudfoundry/cnb:bionic",
+					Publish: true,
+				}).Return(fmt.Errorf("pack error")).Run(func(args mock.Arguments) {
+					fmt.Fprintf(c.Stdout, "...build output...\n")
+				})
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				packClient := c.Pack.(*packtesting.Client)
+				packClient.AssertExpectations(t)
+				return nil
+			},
+			ExpectOutput: `
+...build output...
+Error: pack error
+`,
+			ShouldError: true,
 		},
 		{
 			Name: "error existing application",
@@ -304,7 +349,7 @@ Created application "my-application"
 					},
 					Spec: buildv1alpha1.ApplicationSpec{
 						Image: imageTag,
-						Source: buildv1alpha1.Source{
+						Source: &buildv1alpha1.Source{
 							Git: &buildv1alpha1.GitSource{
 								URL:      gitRepo,
 								Revision: gitMaster,
@@ -329,7 +374,7 @@ Created application "my-application"
 					},
 					Spec: buildv1alpha1.ApplicationSpec{
 						Image: imageTag,
-						Source: buildv1alpha1.Source{
+						Source: &buildv1alpha1.Source{
 							Git: &buildv1alpha1.GitSource{
 								URL:      gitRepo,
 								Revision: gitMaster,

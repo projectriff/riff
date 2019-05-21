@@ -29,6 +29,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/projectriff/riff/pkg/fs"
 	"github.com/projectriff/riff/pkg/k8s"
+	"github.com/projectriff/riff/pkg/pack"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -40,6 +41,7 @@ type Config struct {
 	k8s.Client
 	FileSystem fs.FileSystem
 	Exec       func(ctx context.Context, command string, args ...string) *exec.Cmd
+	Pack       pack.Client
 	Stdin      io.Reader
 	Stdout     io.Writer
 	Stderr     io.Writer
@@ -154,5 +156,13 @@ func (c *Config) init() {
 	}
 	if c.Client == nil {
 		c.Client = k8s.NewClient(c.KubeConfigFile)
+	}
+	if c.Pack == nil {
+		packClient, err := pack.NewClient(c.Stdout, c.Stderr)
+		if err != nil {
+			c.Eerrorf("%s\n", err)
+			os.Exit(1)
+		}
+		c.Pack = packClient
 	}
 }
