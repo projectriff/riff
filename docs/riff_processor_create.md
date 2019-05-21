@@ -19,8 +19,11 @@ riff processor create [flags]
 ### Options
 
 ```
-  -h, --help               help for create
-  -n, --namespace string   <todo>
+      --function-ref string   <todo>
+  -h, --help                  help for create
+      --input stringArray     <todo>
+  -n, --namespace string      <todo>
+      --output stringArray    <todo>
 ```
 
 ### Options inherited from parent commands

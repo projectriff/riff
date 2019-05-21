@@ -18,23 +18,58 @@ package commands
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/projectriff/riff/pkg/cli"
+	streamv1alpha1 "github.com/projectriff/system/pkg/apis/stream/v1alpha1"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type ProcessorCreateOptions struct {
-	Namespace string
+	cli.ResourceOptions
+
+	FunctionRef string
+	Inputs      []string
+	Outputs     []string
 }
 
 func (opts *ProcessorCreateOptions) Validate(ctx context.Context) *cli.FieldError {
-	// TODO implement
-	return nil
+	errs := &cli.FieldError{}
+
+	errs = errs.Also(opts.ResourceOptions.Validate((ctx)))
+
+	if opts.FunctionRef == "" {
+		errs = errs.Also(cli.ErrMissingField(cli.FunctionRefFlagName))
+	} else if false {
+		// TODO validate function ref
+	}
+
+	if len(opts.Inputs) == 0 {
+		errs = errs.Also(cli.ErrMissingField(cli.InputFlagName))
+	}
+
+	return errs
 }
 
 func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) error {
-	return fmt.Errorf("not implemented")
+	processor := &streamv1alpha1.Processor{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: opts.Namespace,
+			Name:      opts.Name,
+		},
+		Spec: streamv1alpha1.ProcessorSpec{
+			FunctionRef: opts.FunctionRef,
+			Inputs:      opts.Inputs,
+			Outputs:     opts.Outputs,
+		},
+	}
+
+	processor, err := c.Stream().Processors(opts.Namespace).Create(processor)
+	if err != nil {
+		return err
+	}
+	c.Successf("Created processor %q\n", processor.Name)
+	return nil
 }
 
 func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {
@@ -44,12 +79,17 @@ func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {
 		Use:     "create",
 		Short:   "<todo>",
 		Example: "<todo>",
-		Args:    cli.Args(),
+		Args: cli.Args(
+			cli.NameArg(&opts.Name),
+		),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE:    cli.ExecOptions(c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
+	cmd.Flags().StringVar(&opts.FunctionRef, cli.StripDash(cli.FunctionRefFlagName), "", "<todo>")
+	cmd.Flags().StringArrayVar(&opts.Inputs, cli.StripDash(cli.InputFlagName), []string{}, "<todo>")
+	cmd.Flags().StringArrayVar(&opts.Outputs, cli.StripDash(cli.OutputFlagName), []string{}, "<todo>")
 
 	return cmd
 }
