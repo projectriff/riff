@@ -31,6 +31,7 @@ const (
 	ConfigFlagName                = "--config"
 	DockerHubFlagName             = "--docker-hub"
 	EnvFlagName                   = "--env"
+	EnvFromFlagName               = "--env-from"
 	FunctionRefFlagName           = "--function-ref"
 	GcrFlagName                   = "--gcr"
 	GitRepoFlagName               = "--git-repo"
