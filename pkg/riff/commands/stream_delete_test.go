@@ -80,6 +80,27 @@ Deleted streams in namespace "default"
 `,
 		},
 		{
+			Name: "delete all streams error",
+			Args: []string{cli.AllFlagName},
+			GivenObjects: []runtime.Object{
+				&streamv1alpha1.Stream{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      streamName,
+						Namespace: defaultNamespace,
+					},
+				},
+			},
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("delete-collection", "streams"),
+			},
+			ExpectDeleteCollections: []rifftesting.DeleteCollectionRef{{
+				Group:     "stream.projectriff.io",
+				Resource:  "streams",
+				Namespace: defaultNamespace,
+			}},
+			ShouldError: true,
+		},
+		{
 			Name: "delete stream",
 			Args: []string{streamName},
 			GivenObjects: []runtime.Object{

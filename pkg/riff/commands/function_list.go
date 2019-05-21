@@ -85,16 +85,12 @@ func NewFunctionListCommand(c *cli.Config) *cobra.Command {
 func printFunctionList(functions *buildv1alpha1.FunctionList, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
 	rows := make([]metav1beta1.TableRow, 0, len(functions.Items))
 	for i := range functions.Items {
-		r, err := printFunction(&functions.Items[i], opts)
-		if err != nil {
-			return nil, err
-		}
-		rows = append(rows, r...)
+		rows = append(rows, printFunction(&functions.Items[i], opts)...)
 	}
 	return rows, nil
 }
 
-func printFunction(function *buildv1alpha1.Function, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
+func printFunction(function *buildv1alpha1.Function, opts printers.PrintOptions) []metav1beta1.TableRow {
 	row := metav1beta1.TableRow{
 		Object: runtime.RawExtension{Object: function},
 	}
@@ -107,7 +103,7 @@ func printFunction(function *buildv1alpha1.Function, opts printers.PrintOptions)
 		cli.FormatConditionStatus(function.Status.GetCondition(buildv1alpha1.FunctionConditionSucceeded)),
 		cli.FormatTimestampSince(function.CreationTimestamp),
 	)
-	return []metav1beta1.TableRow{row}, nil
+	return []metav1beta1.TableRow{row}
 }
 
 func printFunctionColumns() []metav1beta1.TableColumnDefinition {

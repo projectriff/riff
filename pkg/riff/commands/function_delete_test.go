@@ -80,6 +80,27 @@ Deleted functions in namespace "default"
 `,
 		},
 		{
+			Name: "delete all functions error",
+			Args: []string{cli.AllFlagName},
+			GivenObjects: []runtime.Object{
+				&buildv1alpha1.Function{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      functionName,
+						Namespace: defaultNamespace,
+					},
+				},
+			},
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("delete-collection", "functions"),
+			},
+			ExpectDeleteCollections: []rifftesting.DeleteCollectionRef{{
+				Group:     "build.projectriff.io",
+				Resource:  "functions",
+				Namespace: defaultNamespace,
+			}},
+			ShouldError: true,
+		},
+		{
 			Name: "delete function",
 			Args: []string{functionName},
 			GivenObjects: []runtime.Object{

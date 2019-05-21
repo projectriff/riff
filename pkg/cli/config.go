@@ -27,7 +27,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
-	"github.com/projectriff/riff/pkg/fs"
 	"github.com/projectriff/riff/pkg/k8s"
 	"github.com/projectriff/riff/pkg/pack"
 	"github.com/spf13/cobra"
@@ -39,12 +38,11 @@ type Config struct {
 	ViperConfigFile string
 	KubeConfigFile  string
 	k8s.Client
-	FileSystem fs.FileSystem
-	Exec       func(ctx context.Context, command string, args ...string) *exec.Cmd
-	Pack       pack.Client
-	Stdin      io.Reader
-	Stdout     io.Writer
-	Stderr     io.Writer
+	Exec   func(ctx context.Context, command string, args ...string) *exec.Cmd
+	Pack   pack.Client
+	Stdin  io.Reader
+	Stdout io.Writer
+	Stderr io.Writer
 }
 
 func NewDefaultConfig() *Config {
@@ -151,9 +149,6 @@ func (c *Config) initKubeConfig() {
 }
 
 func (c *Config) init() {
-	if c.FileSystem == nil {
-		c.FileSystem = &fs.Local{}
-	}
 	if c.Client == nil {
 		c.Client = k8s.NewClient(c.KubeConfigFile)
 	}
