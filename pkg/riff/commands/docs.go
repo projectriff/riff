@@ -18,6 +18,7 @@ package commands
 
 import (
 	"context"
+	"os"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
@@ -29,8 +30,13 @@ type DocsOptions struct {
 }
 
 func (opts *DocsOptions) Validate(ctx context.Context) *cli.FieldError {
-	// TODO implement
-	return nil
+	errs := &cli.FieldError{}
+
+	if opts.Directory == "" {
+		errs = errs.Also(cli.ErrMissingField(cli.DirectoryFlagName))
+	}
+
+	return errs
 }
 
 func NewDocsCommand(c *cli.Config) *cobra.Command {
@@ -44,7 +50,7 @@ func NewDocsCommand(c *cli.Config) *cobra.Command {
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := c.FileSystem.MkdirAll(opts.Directory, 0744); err != nil {
+			if err := os.MkdirAll(opts.Directory, 0744); err != nil {
 				return err
 			}
 			root := cmd.Root()
@@ -57,7 +63,7 @@ func NewDocsCommand(c *cli.Config) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.Directory, "dir", "d", "docs", "the output directory for the docs.")
+	cmd.Flags().StringVarP(&opts.Directory, cli.StripDash(cli.DirectoryFlagName), "d", "docs", "the output directory for the docs")
 
 	return cmd
 }

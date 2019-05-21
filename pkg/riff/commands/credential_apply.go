@@ -129,14 +129,10 @@ func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {
 		PreRunE: cli.Sequence(
 			func(cmd *cobra.Command, args []string) error {
 				if opts.DockerHubId != "" {
-					if err := cli.ReadStdin(c, &opts.DockerHubPassword, "Docker Hub password")(cmd, args); err != nil {
-						return err
-					}
+					return cli.ReadStdin(c, &opts.DockerHubPassword, "Docker Hub password")(cmd, args)
 				}
 				if opts.RegistryUser != "" {
-					if err := cli.ReadStdin(c, &opts.RegistryPassword, "Registry password")(cmd, args); err != nil {
-						return err
-					}
+					return cli.ReadStdin(c, &opts.RegistryPassword, "Registry password")(cmd, args)
 				}
 				return nil
 			},

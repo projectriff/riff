@@ -88,16 +88,12 @@ func NewCredentialListCommand(c *cli.Config) *cobra.Command {
 func printCredentialList(credentials *corev1.SecretList, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
 	rows := make([]metav1beta1.TableRow, 0, len(credentials.Items))
 	for i := range credentials.Items {
-		r, err := printCredential(&credentials.Items[i], opts)
-		if err != nil {
-			return nil, err
-		}
-		rows = append(rows, r...)
+		rows = append(rows, printCredential(&credentials.Items[i], opts)...)
 	}
 	return rows, nil
 }
 
-func printCredential(credential *corev1.Secret, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
+func printCredential(credential *corev1.Secret, opts printers.PrintOptions) []metav1beta1.TableRow {
 	row := metav1beta1.TableRow{
 		Object: runtime.RawExtension{Object: credential.DeepCopy()},
 	}
@@ -107,7 +103,7 @@ func printCredential(credential *corev1.Secret, opts printers.PrintOptions) ([]m
 		credential.Annotations["build.knative.dev/docker-0"],
 		cli.FormatTimestampSince(credential.CreationTimestamp),
 	)
-	return []metav1beta1.TableRow{row}, nil
+	return []metav1beta1.TableRow{row}
 }
 
 func printCredentialColumns() []metav1beta1.TableColumnDefinition {

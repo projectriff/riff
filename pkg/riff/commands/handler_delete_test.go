@@ -80,6 +80,27 @@ Deleted handlers in namespace "default"
 `,
 		},
 		{
+			Name: "delete all handlers error",
+			Args: []string{cli.AllFlagName},
+			GivenObjects: []runtime.Object{
+				&requestv1alpha1.Handler{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      handlerName,
+						Namespace: defaultNamespace,
+					},
+				},
+			},
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("delete-collection", "handlers"),
+			},
+			ExpectDeleteCollections: []rifftesting.DeleteCollectionRef{{
+				Group:     "request.projectriff.io",
+				Resource:  "handlers",
+				Namespace: defaultNamespace,
+			}},
+			ShouldError: true,
+		},
+		{
 			Name: "delete handler",
 			Args: []string{handlerName},
 			GivenObjects: []runtime.Object{

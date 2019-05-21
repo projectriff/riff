@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/projectriff/riff/pkg/cli"
@@ -55,4 +56,50 @@ func TestCompletionOptions(t *testing.T) {
 	}
 
 	table.Run(t)
+}
+
+func TestCompletionCommand(t *testing.T) {
+	table := rifftesting.CommandTable{
+		{
+			Name: "default",
+			Args: []string{},
+			Verify: func(t *testing.T, output string, err error) {
+				for _, str := range []string{
+					"# bash completion",
+				} {
+					if !strings.Contains(output, str) {
+						t.Errorf("expected completion output to contain %q\n", str)
+					}
+				}
+			},
+		},
+		{
+			Name: "bash",
+			Args: []string{cli.ShellFlagname, "bash"},
+			Verify: func(t *testing.T, output string, err error) {
+				for _, str := range []string{
+					"# bash completion",
+				} {
+					if !strings.Contains(output, str) {
+						t.Errorf("expected completion output to contain %q\n", str)
+					}
+				}
+			},
+		},
+		{
+			Name: "zsh",
+			Args: []string{cli.ShellFlagname, "zsh"},
+			Verify: func(t *testing.T, output string, err error) {
+				for _, str := range []string{
+					"#compdef completion",
+				} {
+					if !strings.Contains(output, str) {
+						t.Errorf("expected completion output to contain %q\n", str)
+					}
+				}
+			},
+		},
+	}
+
+	table.Run(t, commands.NewCompletionCommand)
 }

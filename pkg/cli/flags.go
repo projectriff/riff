@@ -29,6 +29,7 @@ const (
 	ArtifactFlagName              = "--artifact"
 	CacheSizeFlagName             = "--cache-size"
 	ConfigFlagName                = "--config"
+	DirectoryFlagName             = "--directory"
 	DockerHubFlagName             = "--docker-hub"
 	EnvFlagName                   = "--env"
 	FunctionRefFlagName           = "--function-ref"

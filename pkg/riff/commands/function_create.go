@@ -50,8 +50,6 @@ func (opts *FunctionCreateOptions) Validate(ctx context.Context) *cli.FieldError
 
 	if opts.Image == "" {
 		errs = errs.Also(cli.ErrMissingField(cli.ImageFlagName))
-	} else if false {
-		// TODO validate image
 	}
 
 	if opts.CacheSize != "" {

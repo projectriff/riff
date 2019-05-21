@@ -38,8 +38,6 @@ func (opts *StreamCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 
 	if opts.Provider == "" {
 		errs = errs.Also(cli.ErrMissingField(cli.ProviderFlagName))
-	} else if false {
-		// TODO validate provider
 	}
 
 	return errs

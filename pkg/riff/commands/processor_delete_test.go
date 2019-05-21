@@ -80,6 +80,27 @@ Deleted processors in namespace "default"
 `,
 		},
 		{
+			Name: "delete all processors error",
+			Args: []string{cli.AllFlagName},
+			GivenObjects: []runtime.Object{
+				&streamv1alpha1.Processor{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      processorName,
+						Namespace: defaultNamespace,
+					},
+				},
+			},
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("delete-collection", "processors"),
+			},
+			ExpectDeleteCollections: []rifftesting.DeleteCollectionRef{{
+				Group:     "stream.projectriff.io",
+				Resource:  "processors",
+				Namespace: defaultNamespace,
+			}},
+			ShouldError: true,
+		},
+		{
 			Name: "delete processor",
 			Args: []string{processorName},
 			GivenObjects: []runtime.Object{

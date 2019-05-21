@@ -46,10 +46,9 @@ func (opts *CompletionOptions) Exec(ctx context.Context, c *cli.Config) error {
 		return cmd.Root().GenBashCompletion(c.Stdout)
 	case "zsh":
 		return cmd.Root().GenZshCompletion(c.Stdout)
-	default:
-		panic("invalid shell: " + opts.Shell) // protected by opts.Validate()
 	}
-	return nil
+	// protected by opts.Validate()
+	panic("invalid shell: " + opts.Shell)
 }
 
 func NewCompletionCommand(c *cli.Config) *cobra.Command {

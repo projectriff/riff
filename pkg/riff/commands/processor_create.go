@@ -40,8 +40,6 @@ func (opts *ProcessorCreateOptions) Validate(ctx context.Context) *cli.FieldErro
 
 	if opts.FunctionRef == "" {
 		errs = errs.Also(cli.ErrMissingField(cli.FunctionRefFlagName))
-	} else if false {
-		// TODO validate function ref
 	}
 
 	if len(opts.Inputs) == 0 {

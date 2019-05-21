@@ -80,6 +80,27 @@ Deleted applications in namespace "default"
 `,
 		},
 		{
+			Name: "delete all applications error",
+			Args: []string{cli.AllFlagName},
+			GivenObjects: []runtime.Object{
+				&buildv1alpha1.Application{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      applicationName,
+						Namespace: defaultNamespace,
+					},
+				},
+			},
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("delete-collection", "applications"),
+			},
+			ExpectDeleteCollections: []rifftesting.DeleteCollectionRef{{
+				Group:     "build.projectriff.io",
+				Resource:  "applications",
+				Namespace: defaultNamespace,
+			}},
+			ShouldError: true,
+		},
+		{
 			Name: "delete application",
 			Args: []string{applicationName},
 			GivenObjects: []runtime.Object{

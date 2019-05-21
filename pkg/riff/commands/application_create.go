@@ -46,8 +46,6 @@ func (opts *ApplicationCreateOptions) Validate(ctx context.Context) *cli.FieldEr
 
 	if opts.Image == "" {
 		errs = errs.Also(cli.ErrMissingField(cli.ImageFlagName))
-	} else if false {
-		// TODO validate image
 	}
 
 	if opts.CacheSize != "" {

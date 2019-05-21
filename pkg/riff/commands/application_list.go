@@ -85,16 +85,12 @@ func NewApplicationListCommand(c *cli.Config) *cobra.Command {
 func printApplicationList(applications *buildv1alpha1.ApplicationList, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
 	rows := make([]metav1beta1.TableRow, 0, len(applications.Items))
 	for i := range applications.Items {
-		r, err := printApplication(&applications.Items[i], opts)
-		if err != nil {
-			return nil, err
-		}
-		rows = append(rows, r...)
+		rows = append(rows, printApplication(&applications.Items[i], opts)...)
 	}
 	return rows, nil
 }
 
-func printApplication(application *buildv1alpha1.Application, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
+func printApplication(application *buildv1alpha1.Application, opts printers.PrintOptions) []metav1beta1.TableRow {
 	row := metav1beta1.TableRow{
 		Object: runtime.RawExtension{Object: application},
 	}
@@ -104,7 +100,7 @@ func printApplication(application *buildv1alpha1.Application, opts printers.Prin
 		cli.FormatConditionStatus(application.Status.GetCondition(buildv1alpha1.ApplicationConditionSucceeded)),
 		cli.FormatTimestampSince(application.CreationTimestamp),
 	)
-	return []metav1beta1.TableRow{row}, nil
+	return []metav1beta1.TableRow{row}
 }
 
 func printApplicationColumns() []metav1beta1.TableColumnDefinition {
