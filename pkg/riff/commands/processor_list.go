@@ -86,12 +86,16 @@ func NewProcessorListCommand(c *cli.Config) *cobra.Command {
 func printProcessorList(processors *streamv1alpha1.ProcessorList, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
 	rows := make([]metav1beta1.TableRow, 0, len(processors.Items))
 	for i := range processors.Items {
-		rows = append(rows, printProcessor(&processors.Items[i], opts)...)
+		r, err := printProcessor(&processors.Items[i], opts)
+		if err != nil {
+			return nil, err
+		}
+		rows = append(rows, r...)
 	}
 	return rows, nil
 }
 
-func printProcessor(processor *streamv1alpha1.Processor, opts printers.PrintOptions) []metav1beta1.TableRow {
+func printProcessor(processor *streamv1alpha1.Processor, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
 	row := metav1beta1.TableRow{
 		Object: runtime.RawExtension{Object: processor},
 	}
@@ -103,7 +107,7 @@ func printProcessor(processor *streamv1alpha1.Processor, opts printers.PrintOpti
 		cli.FormatConditionStatus(processor.Status.GetCondition(streamv1alpha1.ProcessorConditionReady)),
 		cli.FormatTimestampSince(processor.CreationTimestamp),
 	)
-	return []metav1beta1.TableRow{row}
+	return []metav1beta1.TableRow{row}, nil
 }
 
 func printProcessorColumns() []metav1beta1.TableColumnDefinition {
