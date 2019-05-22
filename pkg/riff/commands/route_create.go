@@ -28,7 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type HandlerCreateOptions struct {
+type RouteCreateOptions struct {
 	cli.ResourceOptions
 
 	Image          string
@@ -40,7 +40,7 @@ type HandlerCreateOptions struct {
 	// EnvFrom []string
 }
 
-func (opts *HandlerCreateOptions) Validate(ctx context.Context) *cli.FieldError {
+func (opts *RouteCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
 
 	errs = errs.Also(opts.ResourceOptions.Validate((ctx)))
@@ -78,13 +78,13 @@ func (opts *HandlerCreateOptions) Validate(ctx context.Context) *cli.FieldError 
 	return errs
 }
 
-func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error {
-	processor := &requestv1alpha1.Handler{
+func (opts *RouteCreateOptions) Exec(ctx context.Context, c *cli.Config) error {
+	route := &requestv1alpha1.Route{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: opts.Namespace,
 			Name:      opts.Name,
 		},
-		Spec: requestv1alpha1.HandlerSpec{
+		Spec: requestv1alpha1.RouteSpec{
 			Template: &corev1.PodSpec{
 				Containers: []corev1.Container{{}},
 			},
@@ -92,36 +92,36 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 	}
 
 	if opts.ApplicationRef != "" {
-		processor.Spec.Build = &requestv1alpha1.Build{
+		route.Spec.Build = &requestv1alpha1.Build{
 			ApplicationRef: opts.ApplicationRef,
 		}
 	}
 	if opts.FunctionRef != "" {
-		processor.Spec.Build = &requestv1alpha1.Build{
+		route.Spec.Build = &requestv1alpha1.Build{
 			FunctionRef: opts.FunctionRef,
 		}
 	}
 	if opts.Image != "" {
-		processor.Spec.Template.Containers[0].Image = opts.Image
+		route.Spec.Template.Containers[0].Image = opts.Image
 	}
 
 	for _, env := range opts.Env {
-		if processor.Spec.Template.Containers[0].Env == nil {
-			processor.Spec.Template.Containers[0].Env = []corev1.EnvVar{}
+		if route.Spec.Template.Containers[0].Env == nil {
+			route.Spec.Template.Containers[0].Env = []corev1.EnvVar{}
 		}
-		processor.Spec.Template.Containers[0].Env = append(processor.Spec.Template.Containers[0].Env, parsers.EnvVar(env))
+		route.Spec.Template.Containers[0].Env = append(route.Spec.Template.Containers[0].Env, parsers.EnvVar(env))
 	}
 
-	processor, err := c.Request().Handlers(opts.Namespace).Create(processor)
+	route, err := c.Request().Routes(opts.Namespace).Create(route)
 	if err != nil {
 		return err
 	}
-	c.Successf("Created handler %q\n", processor.Name)
+	c.Successf("Created route %q\n", route.Name)
 	return nil
 }
 
-func NewHandlerCreateCommand(c *cli.Config) *cobra.Command {
-	opts := &HandlerCreateOptions{}
+func NewRouteCreateCommand(c *cli.Config) *cobra.Command {
+	opts := &RouteCreateOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "create",

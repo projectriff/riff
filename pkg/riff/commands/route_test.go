@@ -23,7 +23,7 @@ import (
 	rifftesting "github.com/projectriff/riff/pkg/testing"
 )
 
-func TestHandlerCommand(t *testing.T) {
+func TestRouteCommand(t *testing.T) {
 	table := rifftesting.CommandTable{
 		{
 			Name: "empty",
@@ -31,5 +31,5 @@ func TestHandlerCommand(t *testing.T) {
 		},
 	}
 
-	table.Run(t, commands.NewHandlerCommand)
+	table.Run(t, commands.NewRouteCommand)
 }

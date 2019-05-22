@@ -1,4 +1,4 @@
-## riff handler list
+## riff route list
 
 <todo>
 
@@ -7,7 +7,7 @@
 <todo>
 
 ```
-riff handler list [flags]
+riff route list [flags]
 ```
 
 ### Examples
@@ -34,5 +34,5 @@ riff handler list [flags]
 
 ### SEE ALSO
 
-* [riff handler](riff_handler.md)	 - <todo>
+* [riff route](riff_route.md)	 - <todo>
 

@@ -28,11 +28,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-type HandlerListOptions struct {
+type RouteListOptions struct {
 	cli.ListOptions
 }
 
-func (opts *HandlerListOptions) Validate(ctx context.Context) *cli.FieldError {
+func (opts *RouteListOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
 
 	errs = errs.Also(opts.ListOptions.Validate(ctx))
@@ -40,33 +40,33 @@ func (opts *HandlerListOptions) Validate(ctx context.Context) *cli.FieldError {
 	return errs
 }
 
-func (opts *HandlerListOptions) Exec(ctx context.Context, c *cli.Config) error {
-	handlers, err := c.Request().Handlers(opts.Namespace).List(metav1.ListOptions{})
+func (opts *RouteListOptions) Exec(ctx context.Context, c *cli.Config) error {
+	routes, err := c.Request().Routes(opts.Namespace).List(metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
 
-	if len(handlers.Items) == 0 {
-		c.Infof("No handlers found.\n")
+	if len(routes.Items) == 0 {
+		c.Infof("No routes found.\n")
 		return nil
 	}
 
 	tablePrinter := printers.NewTablePrinter(printers.PrintOptions{
 		WithNamespace: opts.AllNamespaces,
 	}).With(func(h printers.PrintHandler) {
-		columns := printHandlerColumns()
-		h.TableHandler(columns, printHandlerList)
-		h.TableHandler(columns, printHandler)
+		columns := printRouteColumns()
+		h.TableHandler(columns, printRouteList)
+		h.TableHandler(columns, printRoute)
 	})
 
-	handlers = handlers.DeepCopy()
-	cli.SortByNamespaceAndName(handlers.Items)
+	routes = routes.DeepCopy()
+	cli.SortByNamespaceAndName(routes.Items)
 
-	return tablePrinter.PrintObj(handlers, c.Stdout)
+	return tablePrinter.PrintObj(routes, c.Stdout)
 }
 
-func NewHandlerListCommand(c *cli.Config) *cobra.Command {
-	opts := &HandlerListOptions{}
+func NewRouteListCommand(c *cli.Config) *cobra.Command {
+	opts := &RouteListOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "list",
@@ -82,31 +82,31 @@ func NewHandlerListCommand(c *cli.Config) *cobra.Command {
 	return cmd
 }
 
-func printHandlerList(handlers *requestv1alpha1.HandlerList, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
-	rows := make([]metav1beta1.TableRow, 0, len(handlers.Items))
-	for i := range handlers.Items {
-		rows = append(rows, printHandler(&handlers.Items[i], opts)...)
+func printRouteList(routes *requestv1alpha1.RouteList, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
+	rows := make([]metav1beta1.TableRow, 0, len(routes.Items))
+	for i := range routes.Items {
+		rows = append(rows, printRoute(&routes.Items[i], opts)...)
 	}
 	return rows, nil
 }
 
-func printHandler(handler *requestv1alpha1.Handler, opts printers.PrintOptions) []metav1beta1.TableRow {
+func printRoute(route *requestv1alpha1.Route, opts printers.PrintOptions) []metav1beta1.TableRow {
 	row := metav1beta1.TableRow{
-		Object: runtime.RawExtension{Object: handler},
+		Object: runtime.RawExtension{Object: route},
 	}
-	refType, refValue := handlerRef(handler)
+	refType, refValue := routeRef(route)
 	row.Cells = append(row.Cells,
-		handler.Name,
+		route.Name,
 		refType,
 		refValue,
-		cli.FormatEmptyString(handler.Status.Domain),
-		cli.FormatConditionStatus(handler.Status.GetCondition(requestv1alpha1.HandlerConditionReady)),
-		cli.FormatTimestampSince(handler.CreationTimestamp),
+		cli.FormatEmptyString(route.Status.Domain),
+		cli.FormatConditionStatus(route.Status.GetCondition(requestv1alpha1.RouteConditionReady)),
+		cli.FormatTimestampSince(route.CreationTimestamp),
 	)
 	return []metav1beta1.TableRow{row}
 }
 
-func printHandlerColumns() []metav1beta1.TableColumnDefinition {
+func printRouteColumns() []metav1beta1.TableColumnDefinition {
 	return []metav1beta1.TableColumnDefinition{
 		{Name: "Name", Type: "string"},
 		{Name: "Type", Type: "string"},
@@ -117,16 +117,16 @@ func printHandlerColumns() []metav1beta1.TableColumnDefinition {
 	}
 }
 
-func handlerRef(handler *requestv1alpha1.Handler) (string, string) {
-	if handler.Spec.Build != nil {
-		if handler.Spec.Build.ApplicationRef != "" {
-			return "application", handler.Spec.Build.ApplicationRef
+func routeRef(route *requestv1alpha1.Route) (string, string) {
+	if route.Spec.Build != nil {
+		if route.Spec.Build.ApplicationRef != "" {
+			return "application", route.Spec.Build.ApplicationRef
 		}
-		if handler.Spec.Build.FunctionRef != "" {
-			return "function", handler.Spec.Build.FunctionRef
+		if route.Spec.Build.FunctionRef != "" {
+			return "function", route.Spec.Build.FunctionRef
 		}
-	} else if handler.Spec.Template != nil && handler.Spec.Template.Containers[0].Image != "" {
-		return "image", handler.Spec.Template.Containers[0].Image
+	} else if route.Spec.Template != nil && route.Spec.Template.Containers[0].Image != "" {
+		return "image", route.Spec.Template.Containers[0].Image
 	}
 	return cli.Swarnf("<unknown>"), cli.Swarnf("<unknown>")
 }

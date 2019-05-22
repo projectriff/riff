@@ -26,7 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type HandlerInvokeOptions struct {
+type RouteInvokeOptions struct {
 	cli.ResourceOptions
 	ContentTypeJSON bool
 	ContentTypeText bool
@@ -34,7 +34,7 @@ type HandlerInvokeOptions struct {
 	BareArgs        []string
 }
 
-func (opts *HandlerInvokeOptions) Validate(ctx context.Context) *cli.FieldError {
+func (opts *RouteInvokeOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
 
 	errs = errs.Also(opts.ResourceOptions.Validate(ctx))
@@ -46,13 +46,13 @@ func (opts *HandlerInvokeOptions) Validate(ctx context.Context) *cli.FieldError 
 	return errs
 }
 
-func (opts *HandlerInvokeOptions) Exec(ctx context.Context, c *cli.Config) error {
-	handler, err := c.Request().Handlers(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
+func (opts *RouteInvokeOptions) Exec(ctx context.Context, c *cli.Config) error {
+	route, err := c.Request().Routes(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
-	if !handler.Status.IsReady() || handler.Status.Domain == "" {
-		return fmt.Errorf("handler %q is not ready", opts.Name)
+	if !route.Status.IsReady() || route.Status.Domain == "" {
+		return fmt.Errorf("route %q is not ready", opts.Name)
 	}
 
 	ingress, err := ingressServiceHost(c)
@@ -60,7 +60,7 @@ func (opts *HandlerInvokeOptions) Exec(ctx context.Context, c *cli.Config) error
 		return err
 	}
 
-	curlArgs := []string{ingress + opts.Path, "-H", fmt.Sprintf("Host: %s", handler.Status.Domain)}
+	curlArgs := []string{ingress + opts.Path, "-H", fmt.Sprintf("Host: %s", route.Status.Domain)}
 	if opts.ContentTypeJSON {
 		curlArgs = append(curlArgs, "-H", "Content-Type: application/json")
 	}
@@ -78,8 +78,8 @@ func (opts *HandlerInvokeOptions) Exec(ctx context.Context, c *cli.Config) error
 	return curl.Run()
 }
 
-func NewHandlerInvokeCommand(c *cli.Config) *cobra.Command {
-	opts := &HandlerInvokeOptions{}
+func NewRouteInvokeCommand(c *cli.Config) *cobra.Command {
+	opts := &RouteInvokeOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "invoke",

@@ -21,7 +21,7 @@
 * [riff completion](riff_completion.md)	 - <todo>
 * [riff credential](riff_credential.md)	 - <todo>
 * [riff function](riff_function.md)	 - <todo>
-* [riff handler](riff_handler.md)	 - <todo>
 * [riff processor](riff_processor.md)	 - <todo>
+* [riff route](riff_route.md)	 - <todo>
 * [riff stream](riff_stream.md)	 - <todo>
 

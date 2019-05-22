@@ -1,4 +1,4 @@
-## riff handler create
+## riff route delete
 
 <todo>
 
@@ -7,7 +7,7 @@
 <todo>
 
 ```
-riff handler create [flags]
+riff route delete [flags]
 ```
 
 ### Examples
@@ -19,12 +19,9 @@ riff handler create [flags]
 ### Options
 
 ```
-      --application-ref string   <todo>
-      --env stringArray          <todo>
-      --function-ref string      <todo>
-  -h, --help                     help for create
-      --image string             <todo>
-  -n, --namespace string         <todo>
+      --all                <todo>
+  -h, --help               help for delete
+  -n, --namespace string   <todo>
 ```
 
 ### Options inherited from parent commands
@@ -37,5 +34,5 @@ riff handler create [flags]
 
 ### SEE ALSO
 
-* [riff handler](riff_handler.md)	 - <todo>
+* [riff route](riff_route.md)	 - <todo>
 

@@ -33,25 +33,25 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestHandlerInvokeOptions(t *testing.T) {
+func TestRouteInvokeOptions(t *testing.T) {
 	table := rifftesting.OptionsTable{
 		{
 			Name: "invalid resource",
-			Options: &commands.HandlerInvokeOptions{
+			Options: &commands.RouteInvokeOptions{
 				ResourceOptions: rifftesting.InvalidResourceOptions,
 			},
 			ExpectFieldError: rifftesting.InvalidResourceOptionsFieldError,
 		},
 		{
 			Name: "valid resource",
-			Options: &commands.HandlerInvokeOptions{
+			Options: &commands.RouteInvokeOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "json content type",
-			Options: &commands.HandlerInvokeOptions{
+			Options: &commands.RouteInvokeOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
 				ContentTypeJSON: true,
 			},
@@ -59,7 +59,7 @@ func TestHandlerInvokeOptions(t *testing.T) {
 		},
 		{
 			Name: "text content type",
-			Options: &commands.HandlerInvokeOptions{
+			Options: &commands.RouteInvokeOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
 				ContentTypeText: true,
 			},
@@ -67,7 +67,7 @@ func TestHandlerInvokeOptions(t *testing.T) {
 		},
 		{
 			Name: "multiple content types",
-			Options: &commands.HandlerInvokeOptions{
+			Options: &commands.RouteInvokeOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
 				ContentTypeJSON: true,
 				ContentTypeText: true,
@@ -79,24 +79,24 @@ func TestHandlerInvokeOptions(t *testing.T) {
 	table.Run(t)
 }
 
-func TestHandlerInvokeCommand(t *testing.T) {
+func TestRouteInvokeCommand(t *testing.T) {
 	t.Parallel()
 
-	handlerName := "test-handler"
+	routeName := "test-route"
 	defaultNamespace := "default"
 
-	handler := &requestv1alpha1.Handler{
+	route := &requestv1alpha1.Route{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: defaultNamespace,
-			Name:      handlerName,
+			Name:      routeName,
 		},
-		Status: requestv1alpha1.HandlerStatus{
+		Status: requestv1alpha1.RouteStatus{
 			Status: duckv1alpha1.Status{
 				Conditions: []duckv1alpha1.Condition{
-					{Type: requestv1alpha1.HandlerConditionReady, Status: "True"},
+					{Type: requestv1alpha1.RouteConditionReady, Status: "True"},
 				},
 			},
-			Domain: fmt.Sprintf("%s.example.com", handlerName),
+			Domain: fmt.Sprintf("%s.example.com", routeName),
 		},
 	}
 
@@ -120,10 +120,10 @@ func TestHandlerInvokeCommand(t *testing.T) {
 	table := rifftesting.CommandTable{
 		{
 			Name:       "ingress loadbalancer hostname",
-			Args:       []string{handlerName},
-			ExecHelper: "HandlerInvoke",
+			Args:       []string{routeName},
+			ExecHelper: "RouteInvoke",
 			GivenObjects: []runtime.Object{
-				handler,
+				route,
 				&corev1.Service{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "istio-system",
@@ -143,7 +143,7 @@ func TestHandlerInvokeCommand(t *testing.T) {
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl localhost -H 'Host: test-handler.example.com'\n",
+					"curl localhost -H 'Host: test-route.example.com'\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -153,10 +153,10 @@ func TestHandlerInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "ingress loadbalancer ip",
-			Args:       []string{handlerName},
-			ExecHelper: "HandlerInvoke",
+			Args:       []string{routeName},
+			ExecHelper: "RouteInvoke",
 			GivenObjects: []runtime.Object{
-				handler,
+				route,
 				&corev1.Service{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "istio-system",
@@ -176,7 +176,7 @@ func TestHandlerInvokeCommand(t *testing.T) {
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl 127.0.0.1 -H 'Host: test-handler.example.com'\n",
+					"curl 127.0.0.1 -H 'Host: test-route.example.com'\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -186,10 +186,10 @@ func TestHandlerInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "ingress nodeport",
-			Args:       []string{handlerName},
-			ExecHelper: "HandlerInvoke",
+			Args:       []string{routeName},
+			ExecHelper: "RouteInvoke",
 			GivenObjects: []runtime.Object{
-				handler,
+				route,
 				&corev1.Service{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "istio-system",
@@ -204,7 +204,7 @@ func TestHandlerInvokeCommand(t *testing.T) {
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl http://localhost:54321 -H 'Host: test-handler.example.com'\n",
+					"curl http://localhost:54321 -H 'Host: test-route.example.com'\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -214,15 +214,15 @@ func TestHandlerInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "request path",
-			Args:       []string{handlerName, "/path"},
-			ExecHelper: "HandlerInvoke",
+			Args:       []string{routeName, "/path"},
+			ExecHelper: "RouteInvoke",
 			GivenObjects: []runtime.Object{
-				handler,
+				route,
 				ingressService,
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl localhost/path -H 'Host: test-handler.example.com'\n",
+					"curl localhost/path -H 'Host: test-route.example.com'\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -232,15 +232,15 @@ func TestHandlerInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "content type json",
-			Args:       []string{handlerName, cli.JSONFlagName},
-			ExecHelper: "HandlerInvoke",
+			Args:       []string{routeName, cli.JSONFlagName},
+			ExecHelper: "RouteInvoke",
 			GivenObjects: []runtime.Object{
-				handler,
+				route,
 				ingressService,
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl localhost -H 'Host: test-handler.example.com' -H 'Content-Type: application/json'\n",
+					"curl localhost -H 'Host: test-route.example.com' -H 'Content-Type: application/json'\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -250,15 +250,15 @@ func TestHandlerInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "content type text",
-			Args:       []string{handlerName, cli.TextFlagName},
-			ExecHelper: "HandlerInvoke",
+			Args:       []string{routeName, cli.TextFlagName},
+			ExecHelper: "RouteInvoke",
 			GivenObjects: []runtime.Object{
-				handler,
+				route,
 				ingressService,
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl localhost -H 'Host: test-handler.example.com' -H 'Content-Type: text/plain'\n",
+					"curl localhost -H 'Host: test-route.example.com' -H 'Content-Type: text/plain'\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -268,15 +268,15 @@ func TestHandlerInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "pass extra args to curl",
-			Args:       []string{handlerName, "--", "-w", "\n"},
-			ExecHelper: "HandlerInvoke",
+			Args:       []string{routeName, "--", "-w", "\n"},
+			ExecHelper: "RouteInvoke",
 			GivenObjects: []runtime.Object{
-				handler,
+				route,
 				ingressService,
 			},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl localhost -H 'Host: test-handler.example.com' -w '\n'\n",
+					"curl localhost -H 'Host: test-route.example.com' -w '\n'\n",
 				} {
 					if !strings.Contains(output, expected) {
 						t.Errorf("expected command output to contain %q, actually %q", expected, output)
@@ -286,9 +286,9 @@ func TestHandlerInvokeCommand(t *testing.T) {
 		},
 		{
 			Name: "unknown ingress",
-			Args: []string{handlerName},
+			Args: []string{routeName},
 			GivenObjects: []runtime.Object{
-				handler,
+				route,
 				&corev1.Service{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "istio-system",
@@ -303,24 +303,24 @@ func TestHandlerInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "missing ingress",
-			Args:       []string{handlerName},
-			ExecHelper: "HandlerInvoke",
+			Args:       []string{routeName},
+			ExecHelper: "RouteInvoke",
 			GivenObjects: []runtime.Object{
-				handler,
+				route,
 			},
 			ShouldError: true,
 		},
 		{
-			Name: "handler not ready",
-			Args: []string{handlerName},
+			Name: "route not ready",
+			Args: []string{routeName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: defaultNamespace,
-						Name:      handlerName,
+						Name:      routeName,
 					},
-					Status: requestv1alpha1.HandlerStatus{
-						Domain: fmt.Sprintf("%s.example.com", handlerName),
+					Status: requestv1alpha1.RouteStatus{
+						Domain: fmt.Sprintf("%s.example.com", routeName),
 					},
 				},
 				ingressService,
@@ -328,18 +328,18 @@ func TestHandlerInvokeCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name: "handler missing domain",
-			Args: []string{handlerName},
+			Name: "route missing domain",
+			Args: []string{routeName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: defaultNamespace,
-						Name:      handlerName,
+						Name:      routeName,
 					},
-					Status: requestv1alpha1.HandlerStatus{
+					Status: requestv1alpha1.RouteStatus{
 						Status: duckv1alpha1.Status{
 							Conditions: []duckv1alpha1.Condition{
-								{Type: requestv1alpha1.HandlerConditionReady, Status: "True"},
+								{Type: requestv1alpha1.RouteConditionReady, Status: "True"},
 							},
 						},
 					},
@@ -349,8 +349,8 @@ func TestHandlerInvokeCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name: "missing handler",
-			Args: []string{handlerName},
+			Name: "missing route",
+			Args: []string{routeName},
 			GivenObjects: []runtime.Object{
 				ingressService,
 			},
@@ -358,16 +358,16 @@ func TestHandlerInvokeCommand(t *testing.T) {
 		},
 		{
 			Name:       "curl error",
-			Args:       []string{handlerName},
-			ExecHelper: "HandlerInvokeError",
+			Args:       []string{routeName},
+			ExecHelper: "RouteInvokeError",
 			GivenObjects: []runtime.Object{
-				handler,
+				route,
 				ingressService,
 			},
 			ShouldError: true,
 			Verify: func(t *testing.T, output string, err error) {
 				for _, expected := range []string{
-					"curl localhost -H 'Host: test-handler.example.com'\n",
+					"curl localhost -H 'Host: test-route.example.com'\n",
 					"exit status 1\n",
 				} {
 					if !strings.Contains(output, expected) {
@@ -378,10 +378,10 @@ func TestHandlerInvokeCommand(t *testing.T) {
 		},
 	}
 
-	table.Run(t, commands.NewHandlerInvokeCommand)
+	table.Run(t, commands.NewRouteInvokeCommand)
 }
 
-func TestHelperProcess_HandlerInvoke(t *testing.T) {
+func TestHelperProcess_RouteInvoke(t *testing.T) {
 	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
 		return
 	}
@@ -389,7 +389,7 @@ func TestHelperProcess_HandlerInvoke(t *testing.T) {
 	os.Exit(0)
 }
 
-func TestHelperProcess_HandlerInvokeError(t *testing.T) {
+func TestHelperProcess_RouteInvokeError(t *testing.T) {
 	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
 		return
 	}

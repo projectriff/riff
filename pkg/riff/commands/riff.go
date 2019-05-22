@@ -31,7 +31,7 @@ func NewRiffCommand(c *cli.Config) *cobra.Command {
 	cmd.AddCommand(NewCredentialCommand(c))
 	cmd.AddCommand(NewApplicationCommand(c))
 	cmd.AddCommand(NewFunctionCommand(c))
-	cmd.AddCommand(NewHandlerCommand(c))
+	cmd.AddCommand(NewRouteCommand(c))
 	cmd.AddCommand(NewStreamCommand(c))
 	cmd.AddCommand(NewProcessorCommand(c))
 

@@ -29,11 +29,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestHandlerCreateOptions(t *testing.T) {
+func TestRouteCreateOptions(t *testing.T) {
 	table := rifftesting.OptionsTable{
 		{
 			Name: "invalid resource",
-			Options: &commands.HandlerCreateOptions{
+			Options: &commands.RouteCreateOptions{
 				ResourceOptions: rifftesting.InvalidResourceOptions,
 			},
 			ExpectFieldError: rifftesting.InvalidResourceOptionsFieldError.Also(
@@ -42,7 +42,7 @@ func TestHandlerCreateOptions(t *testing.T) {
 		},
 		{
 			Name: "from application",
-			Options: &commands.HandlerCreateOptions{
+			Options: &commands.RouteCreateOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
 				ApplicationRef:  "my-application",
 			},
@@ -50,7 +50,7 @@ func TestHandlerCreateOptions(t *testing.T) {
 		},
 		{
 			Name: "from function",
-			Options: &commands.HandlerCreateOptions{
+			Options: &commands.RouteCreateOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
 				FunctionRef:     "my-function",
 			},
@@ -58,7 +58,7 @@ func TestHandlerCreateOptions(t *testing.T) {
 		},
 		{
 			Name: "from image",
-			Options: &commands.HandlerCreateOptions{
+			Options: &commands.RouteCreateOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 			},
@@ -66,7 +66,7 @@ func TestHandlerCreateOptions(t *testing.T) {
 		},
 		{
 			Name: "from application, funcation and image",
-			Options: &commands.HandlerCreateOptions{
+			Options: &commands.RouteCreateOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
 				ApplicationRef:  "my-application",
 				FunctionRef:     "my-function",
@@ -76,7 +76,7 @@ func TestHandlerCreateOptions(t *testing.T) {
 		},
 		{
 			Name: "with env",
-			Options: &commands.HandlerCreateOptions{
+			Options: &commands.RouteCreateOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 				Env:             []string{"VAR1=foo", "VAR2=bar"},
@@ -85,7 +85,7 @@ func TestHandlerCreateOptions(t *testing.T) {
 		},
 		{
 			Name: "with invalid env",
-			Options: &commands.HandlerCreateOptions{
+			Options: &commands.RouteCreateOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
 				Image:           "example.com/repo:tag",
 				Env:             []string{"=foo"},
@@ -97,9 +97,9 @@ func TestHandlerCreateOptions(t *testing.T) {
 	table.Run(t)
 }
 
-func TestHandlerCreateCommand(t *testing.T) {
+func TestRouteCreateCommand(t *testing.T) {
 	defaultNamespace := "default"
-	handlerName := "my-handler"
+	routeName := "my-route"
 	image := "registry.example.com/repo@sha256:deadbeefdeadbeefdeadbeefdeadbeef"
 	applicationRef := "my-app"
 	functionRef := "my-func"
@@ -118,14 +118,14 @@ func TestHandlerCreateCommand(t *testing.T) {
 		},
 		{
 			Name: "create from image",
-			Args: []string{handlerName, cli.ImageFlagName, image},
+			Args: []string{routeName, cli.ImageFlagName, image},
 			ExpectCreates: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: defaultNamespace,
-						Name:      handlerName,
+						Name:      routeName,
 					},
-					Spec: requestv1alpha1.HandlerSpec{
+					Spec: requestv1alpha1.RouteSpec{
 						Template: &corev1.PodSpec{
 							Containers: []corev1.Container{
 								{Image: image},
@@ -135,19 +135,19 @@ func TestHandlerCreateCommand(t *testing.T) {
 				},
 			},
 			ExpectOutput: `
-Created handler "my-handler"
+Created route "my-route"
 `,
 		},
 		{
 			Name: "create from application ref",
-			Args: []string{handlerName, cli.ApplicationRefFlagName, applicationRef},
+			Args: []string{routeName, cli.ApplicationRefFlagName, applicationRef},
 			ExpectCreates: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: defaultNamespace,
-						Name:      handlerName,
+						Name:      routeName,
 					},
-					Spec: requestv1alpha1.HandlerSpec{
+					Spec: requestv1alpha1.RouteSpec{
 						Build: &requestv1alpha1.Build{
 							ApplicationRef: applicationRef,
 						},
@@ -155,19 +155,19 @@ Created handler "my-handler"
 				},
 			},
 			ExpectOutput: `
-Created handler "my-handler"
+Created route "my-route"
 `,
 		},
 		{
 			Name: "create from function ref",
-			Args: []string{handlerName, cli.FunctionRefFlagName, functionRef},
+			Args: []string{routeName, cli.FunctionRefFlagName, functionRef},
 			ExpectCreates: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: defaultNamespace,
-						Name:      handlerName,
+						Name:      routeName,
 					},
-					Spec: requestv1alpha1.HandlerSpec{
+					Spec: requestv1alpha1.RouteSpec{
 						Build: &requestv1alpha1.Build{
 							FunctionRef: functionRef,
 						},
@@ -175,19 +175,19 @@ Created handler "my-handler"
 				},
 			},
 			ExpectOutput: `
-Created handler "my-handler"
+Created route "my-route"
 `,
 		},
 		{
 			Name: "create from image with env",
-			Args: []string{handlerName, cli.ImageFlagName, image, cli.EnvFlagName, envVar, cli.EnvFlagName, envVarOther},
+			Args: []string{routeName, cli.ImageFlagName, image, cli.EnvFlagName, envVar, cli.EnvFlagName, envVarOther},
 			ExpectCreates: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: defaultNamespace,
-						Name:      handlerName,
+						Name:      routeName,
 					},
-					Spec: requestv1alpha1.HandlerSpec{
+					Spec: requestv1alpha1.RouteSpec{
 						Template: &corev1.PodSpec{
 							Containers: []corev1.Container{
 								{
@@ -203,27 +203,27 @@ Created handler "my-handler"
 				},
 			},
 			ExpectOutput: `
-Created handler "my-handler"
+Created route "my-route"
 `,
 		},
 		{
-			Name: "error existing handler",
-			Args: []string{handlerName, cli.ImageFlagName, image},
+			Name: "error existing route",
+			Args: []string{routeName, cli.ImageFlagName, image},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: defaultNamespace,
-						Name:      handlerName,
+						Name:      routeName,
 					},
 				},
 			},
 			ExpectCreates: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: defaultNamespace,
-						Name:      handlerName,
+						Name:      routeName,
 					},
-					Spec: requestv1alpha1.HandlerSpec{
+					Spec: requestv1alpha1.RouteSpec{
 						Template: &corev1.PodSpec{
 							Containers: []corev1.Container{
 								{Image: image},
@@ -236,17 +236,17 @@ Created handler "my-handler"
 		},
 		{
 			Name: "error during create",
-			Args: []string{handlerName, cli.ImageFlagName, image},
+			Args: []string{routeName, cli.ImageFlagName, image},
 			WithReactors: []rifftesting.ReactionFunc{
-				rifftesting.InduceFailure("create", "handlers"),
+				rifftesting.InduceFailure("create", "routes"),
 			},
 			ExpectCreates: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: defaultNamespace,
-						Name:      handlerName,
+						Name:      routeName,
 					},
-					Spec: requestv1alpha1.HandlerSpec{
+					Spec: requestv1alpha1.RouteSpec{
 						Template: &corev1.PodSpec{
 							Containers: []corev1.Container{
 								{Image: image},
@@ -259,5 +259,5 @@ Created handler "my-handler"
 		},
 	}
 
-	table.Run(t, commands.NewHandlerCreateCommand)
+	table.Run(t, commands.NewRouteCreateCommand)
 }

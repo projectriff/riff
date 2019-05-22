@@ -1,14 +1,10 @@
-## riff handler delete
+## riff route
 
 <todo>
 
 ### Synopsis
 
 <todo>
-
-```
-riff handler delete [flags]
-```
 
 ### Examples
 
@@ -19,9 +15,7 @@ riff handler delete [flags]
 ### Options
 
 ```
-      --all                <todo>
-  -h, --help               help for delete
-  -n, --namespace string   <todo>
+  -h, --help   help for route
 ```
 
 ### Options inherited from parent commands
@@ -34,5 +28,8 @@ riff handler delete [flags]
 
 ### SEE ALSO
 
-* [riff handler](riff_handler.md)	 - <todo>
+* [riff](riff.md)	 - <todo>
+* [riff route create](riff_route_create.md)	 - <todo>
+* [riff route delete](riff_route_delete.md)	 - <todo>
+* [riff route list](riff_route_list.md)	 - <todo>
 

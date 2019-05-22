@@ -24,11 +24,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type HandlerDeleteOptions struct {
+type RouteDeleteOptions struct {
 	cli.DeleteOptions
 }
 
-func (opts *HandlerDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
+func (opts *RouteDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
 
 	errs = errs.Also(opts.DeleteOptions.Validate(ctx))
@@ -36,14 +36,14 @@ func (opts *HandlerDeleteOptions) Validate(ctx context.Context) *cli.FieldError 
 	return errs
 }
 
-func (opts *HandlerDeleteOptions) Exec(ctx context.Context, c *cli.Config) error {
-	client := c.Request().Handlers(opts.Namespace)
+func (opts *RouteDeleteOptions) Exec(ctx context.Context, c *cli.Config) error {
+	client := c.Request().Routes(opts.Namespace)
 
 	if opts.All {
 		if err := client.DeleteCollection(nil, metav1.ListOptions{}); err != nil {
 			return err
 		}
-		c.Successf("Deleted handlers in namespace %q\n", opts.Namespace)
+		c.Successf("Deleted routes in namespace %q\n", opts.Namespace)
 		return nil
 	}
 
@@ -51,14 +51,14 @@ func (opts *HandlerDeleteOptions) Exec(ctx context.Context, c *cli.Config) error
 		if err := client.Delete(name, nil); err != nil {
 			return err
 		}
-		c.Successf("Deleted handler %q\n", name)
+		c.Successf("Deleted route %q\n", name)
 	}
 
 	return nil
 }
 
-func NewHandlerDeleteCommand(c *cli.Config) *cobra.Command {
-	opts := &HandlerDeleteOptions{}
+func NewRouteDeleteCommand(c *cli.Config) *cobra.Command {
+	opts := &RouteDeleteOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "delete",

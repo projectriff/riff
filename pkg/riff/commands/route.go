@@ -21,19 +21,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewHandlerCommand(c *cli.Config) *cobra.Command {
+func NewRouteCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "handler",
+		Use:     "route",
 		Short:   "<todo>",
 		Example: "<todo>",
 		Args:    cli.Args(),
-		Aliases: []string{"handlers"},
+		Aliases: []string{"routes"},
 	}
 
-	cmd.AddCommand(NewHandlerListCommand(c))
-	cmd.AddCommand(NewHandlerCreateCommand(c))
-	cmd.AddCommand(NewHandlerInvokeCommand(c))
-	cmd.AddCommand(NewHandlerDeleteCommand(c))
+	cmd.AddCommand(NewRouteListCommand(c))
+	cmd.AddCommand(NewRouteCreateCommand(c))
+	cmd.AddCommand(NewRouteInvokeCommand(c))
+	cmd.AddCommand(NewRouteDeleteCommand(c))
 
 	return cmd
 }

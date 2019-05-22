@@ -27,18 +27,18 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestHandlerDeleteOptions(t *testing.T) {
+func TestRouteDeleteOptions(t *testing.T) {
 	table := rifftesting.OptionsTable{
 		{
 			Name: "invalid delete",
-			Options: &commands.HandlerDeleteOptions{
+			Options: &commands.RouteDeleteOptions{
 				DeleteOptions: rifftesting.InvalidDeleteOptions,
 			},
 			ExpectFieldError: rifftesting.InvalidDeleteOptionsFieldError,
 		},
 		{
 			Name: "valid delete",
-			Options: &commands.HandlerDeleteOptions{
+			Options: &commands.RouteDeleteOptions{
 				DeleteOptions: rifftesting.ValidDeleteOptions,
 			},
 			ShouldValidate: true,
@@ -48,9 +48,9 @@ func TestHandlerDeleteOptions(t *testing.T) {
 	table.Run(t)
 }
 
-func TestHandlerDeleteCommand(t *testing.T) {
-	handlerName := "test-handler"
-	handlerOtherName := "test-other-handler"
+func TestRouteDeleteCommand(t *testing.T) {
+	routeName := "test-route"
+	routeOtherName := "test-other-route"
 	defaultNamespace := "default"
 
 	table := rifftesting.CommandTable{
@@ -60,134 +60,134 @@ func TestHandlerDeleteCommand(t *testing.T) {
 			ShouldError: true,
 		},
 		{
-			Name: "delete all handlers",
+			Name: "delete all routes",
 			Args: []string{cli.AllFlagName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      handlerName,
+						Name:      routeName,
 						Namespace: defaultNamespace,
 					},
 				},
 			},
 			ExpectDeleteCollections: []rifftesting.DeleteCollectionRef{{
 				Group:     "request.projectriff.io",
-				Resource:  "handlers",
+				Resource:  "routes",
 				Namespace: defaultNamespace,
 			}},
 			ExpectOutput: `
-Deleted handlers in namespace "default"
+Deleted routes in namespace "default"
 `,
 		},
 		{
-			Name: "delete all handlers error",
+			Name: "delete all routes error",
 			Args: []string{cli.AllFlagName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      handlerName,
+						Name:      routeName,
 						Namespace: defaultNamespace,
 					},
 				},
 			},
 			WithReactors: []rifftesting.ReactionFunc{
-				rifftesting.InduceFailure("delete-collection", "handlers"),
+				rifftesting.InduceFailure("delete-collection", "routes"),
 			},
 			ExpectDeleteCollections: []rifftesting.DeleteCollectionRef{{
 				Group:     "request.projectriff.io",
-				Resource:  "handlers",
+				Resource:  "routes",
 				Namespace: defaultNamespace,
 			}},
 			ShouldError: true,
 		},
 		{
-			Name: "delete handler",
-			Args: []string{handlerName},
+			Name: "delete route",
+			Args: []string{routeName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      handlerName,
+						Name:      routeName,
 						Namespace: defaultNamespace,
 					},
 				},
 			},
 			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "request.projectriff.io",
-				Resource:  "handlers",
+				Resource:  "routes",
 				Namespace: defaultNamespace,
-				Name:      handlerName,
+				Name:      routeName,
 			}},
 			ExpectOutput: `
-Deleted handler "test-handler"
+Deleted route "test-route"
 `,
 		},
 		{
-			Name: "delete handlers",
-			Args: []string{handlerName, handlerOtherName},
+			Name: "delete routes",
+			Args: []string{routeName, routeOtherName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      handlerName,
+						Name:      routeName,
 						Namespace: defaultNamespace,
 					},
 				},
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      handlerOtherName,
+						Name:      routeOtherName,
 						Namespace: defaultNamespace,
 					},
 				},
 			},
 			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "request.projectriff.io",
-				Resource:  "handlers",
+				Resource:  "routes",
 				Namespace: defaultNamespace,
-				Name:      handlerName,
+				Name:      routeName,
 			}, {
 				Group:     "request.projectriff.io",
-				Resource:  "handlers",
+				Resource:  "routes",
 				Namespace: defaultNamespace,
-				Name:      handlerOtherName,
+				Name:      routeOtherName,
 			}},
 			ExpectOutput: `
-Deleted handler "test-handler"
-Deleted handler "test-other-handler"
+Deleted route "test-route"
+Deleted route "test-other-route"
 `,
 		},
 		{
-			Name: "handler does not exist",
-			Args: []string{handlerName},
+			Name: "route does not exist",
+			Args: []string{routeName},
 			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "request.projectriff.io",
-				Resource:  "handlers",
+				Resource:  "routes",
 				Namespace: defaultNamespace,
-				Name:      handlerName,
+				Name:      routeName,
 			}},
 			ShouldError: true,
 		},
 		{
 			Name: "delete error",
-			Args: []string{handlerName},
+			Args: []string{routeName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      handlerName,
+						Name:      routeName,
 						Namespace: defaultNamespace,
 					},
 				},
 			},
 			WithReactors: []rifftesting.ReactionFunc{
-				rifftesting.InduceFailure("delete", "handlers"),
+				rifftesting.InduceFailure("delete", "routes"),
 			},
 			ExpectDeletes: []rifftesting.DeleteRef{{
 				Group:     "request.projectriff.io",
-				Resource:  "handlers",
+				Resource:  "routes",
 				Namespace: defaultNamespace,
-				Name:      handlerName,
+				Name:      routeName,
 			}},
 			ShouldError: true,
 		},
 	}
 
-	table.Run(t, commands.NewHandlerDeleteCommand)
+	table.Run(t, commands.NewRouteDeleteCommand)
 }

@@ -29,18 +29,18 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestHandlerListOptions(t *testing.T) {
+func TestRouteListOptions(t *testing.T) {
 	table := rifftesting.OptionsTable{
 		{
 			Name: "invalid list",
-			Options: &commands.HandlerListOptions{
+			Options: &commands.RouteListOptions{
 				ListOptions: rifftesting.InvalidListOptions,
 			},
 			ExpectFieldError: rifftesting.InvalidListOptionsFieldError,
 		},
 		{
 			Name: "valid list",
-			Options: &commands.HandlerListOptions{
+			Options: &commands.RouteListOptions{
 				ListOptions: rifftesting.ValidListOptions,
 			},
 			ShouldValidate: true,
@@ -50,9 +50,9 @@ func TestHandlerListOptions(t *testing.T) {
 	table.Run(t)
 }
 
-func TestHandlerListCommand(t *testing.T) {
-	handlerName := "test-handler"
-	handlerOtherName := "test-other-handler"
+func TestRouteListCommand(t *testing.T) {
+	routeName := "test-route"
+	routeOtherName := "test-other-route"
 	defaultNamespace := "default"
 	otherNamespace := "other-namespace"
 
@@ -71,117 +71,117 @@ func TestHandlerListCommand(t *testing.T) {
 			Name: "empty",
 			Args: []string{},
 			ExpectOutput: `
-No handlers found.
+No routes found.
 `,
 		},
 		{
 			Name: "lists an item",
 			Args: []string{},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      handlerName,
+						Name:      routeName,
 						Namespace: defaultNamespace,
 					},
 				},
 			},
 			ExpectOutput: `
-NAME           TYPE        REF         DOMAIN    READY       AGE
-test-handler   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
+NAME         TYPE        REF         DOMAIN    READY       AGE
+test-route   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
 `,
 		},
 		{
 			Name: "filters by namespace",
 			Args: []string{cli.NamespaceFlagName, otherNamespace},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      handlerName,
+						Name:      routeName,
 						Namespace: defaultNamespace,
 					},
 				},
 			},
 			ExpectOutput: `
-No handlers found.
+No routes found.
 `,
 		},
 		{
 			Name: "all namespace",
 			Args: []string{cli.AllNamespacesFlagName},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      handlerName,
+						Name:      routeName,
 						Namespace: defaultNamespace,
 					},
 				},
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      handlerOtherName,
+						Name:      routeOtherName,
 						Namespace: otherNamespace,
 					},
 				},
 			},
 			ExpectOutput: `
-NAMESPACE         NAME                 TYPE        REF         DOMAIN    READY       AGE
-default           test-handler         <unknown>   <unknown>   <empty>   <unknown>   <unknown>
-other-namespace   test-other-handler   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
+NAMESPACE         NAME               TYPE        REF         DOMAIN    READY       AGE
+default           test-route         <unknown>   <unknown>   <empty>   <unknown>   <unknown>
+other-namespace   test-other-route   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
 `,
 		},
 		{
 			Name: "table populates all columns",
 			Args: []string{},
 			GivenObjects: []runtime.Object{
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "img",
 						Namespace: defaultNamespace,
 					},
-					Spec: requestv1alpha1.HandlerSpec{
+					Spec: requestv1alpha1.RouteSpec{
 						Template: &corev1.PodSpec{
 							Containers: []corev1.Container{
 								{Image: "projectriff/upper"},
 							},
 						},
 					},
-					Status: requestv1alpha1.HandlerStatus{
+					Status: requestv1alpha1.RouteStatus{
 						Status: duckv1alpha1.Status{
 							Conditions: []duckv1alpha1.Condition{
-								{Type: requestv1alpha1.HandlerConditionReady, Status: "True"},
+								{Type: requestv1alpha1.RouteConditionReady, Status: "True"},
 							},
 						},
 						Domain: "image.default.example.com",
 					},
 				},
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "app",
 						Namespace: defaultNamespace,
 					},
-					Spec: requestv1alpha1.HandlerSpec{
+					Spec: requestv1alpha1.RouteSpec{
 						Build: &requestv1alpha1.Build{ApplicationRef: "petclinic"},
 					},
-					Status: requestv1alpha1.HandlerStatus{
+					Status: requestv1alpha1.RouteStatus{
 						Status: duckv1alpha1.Status{
 							Conditions: []duckv1alpha1.Condition{
-								{Type: requestv1alpha1.HandlerConditionReady, Status: "True"},
+								{Type: requestv1alpha1.RouteConditionReady, Status: "True"},
 							},
 						},
 						Domain: "app.default.example.com",
 					},
 				},
-				&requestv1alpha1.Handler{
+				&requestv1alpha1.Route{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "func",
 						Namespace: defaultNamespace,
 					},
-					Spec: requestv1alpha1.HandlerSpec{
+					Spec: requestv1alpha1.RouteSpec{
 						Build: &requestv1alpha1.Build{FunctionRef: "square"},
 					},
-					Status: requestv1alpha1.HandlerStatus{
+					Status: requestv1alpha1.RouteStatus{
 						Status: duckv1alpha1.Status{
 							Conditions: []duckv1alpha1.Condition{
-								{Type: requestv1alpha1.HandlerConditionReady, Status: "True"},
+								{Type: requestv1alpha1.RouteConditionReady, Status: "True"},
 							},
 						},
 						Domain: "func.default.example.com",
@@ -199,11 +199,11 @@ img    image         projectriff/upper   image.default.example.com   True    <un
 			Name: "list error",
 			Args: []string{},
 			WithReactors: []rifftesting.ReactionFunc{
-				rifftesting.InduceFailure("list", "handlers"),
+				rifftesting.InduceFailure("list", "routes"),
 			},
 			ShouldError: true,
 		},
 	}
 
-	table.Run(t, commands.NewHandlerListCommand)
+	table.Run(t, commands.NewRouteListCommand)
 }
