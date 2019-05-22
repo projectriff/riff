@@ -85,12 +85,16 @@ func NewHandlerListCommand(c *cli.Config) *cobra.Command {
 func printHandlerList(handlers *requestv1alpha1.HandlerList, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
 	rows := make([]metav1beta1.TableRow, 0, len(handlers.Items))
 	for i := range handlers.Items {
-		rows = append(rows, printHandler(&handlers.Items[i], opts)...)
+		r, err := printHandler(&handlers.Items[i], opts)
+		if err != nil {
+			return nil, err
+		}
+		rows = append(rows, r...)
 	}
 	return rows, nil
 }
 
-func printHandler(handler *requestv1alpha1.Handler, opts printers.PrintOptions) []metav1beta1.TableRow {
+func printHandler(handler *requestv1alpha1.Handler, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
 	row := metav1beta1.TableRow{
 		Object: runtime.RawExtension{Object: handler},
 	}
@@ -103,7 +107,7 @@ func printHandler(handler *requestv1alpha1.Handler, opts printers.PrintOptions) 
 		cli.FormatConditionStatus(handler.Status.GetCondition(requestv1alpha1.HandlerConditionReady)),
 		cli.FormatTimestampSince(handler.CreationTimestamp),
 	)
-	return []metav1beta1.TableRow{row}
+	return []metav1beta1.TableRow{row}, nil
 }
 
 func printHandlerColumns() []metav1beta1.TableColumnDefinition {

@@ -85,12 +85,16 @@ func NewStreamListCommand(c *cli.Config) *cobra.Command {
 func printStreamList(streams *streamv1alpha1.StreamList, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
 	rows := make([]metav1beta1.TableRow, 0, len(streams.Items))
 	for i := range streams.Items {
-		rows = append(rows, printStream(&streams.Items[i], opts)...)
+		r, err := printStream(&streams.Items[i], opts)
+		if err != nil {
+			return nil, err
+		}
+		rows = append(rows, r...)
 	}
 	return rows, nil
 }
 
-func printStream(stream *streamv1alpha1.Stream, opts printers.PrintOptions) []metav1beta1.TableRow {
+func printStream(stream *streamv1alpha1.Stream, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
 	row := metav1beta1.TableRow{
 		Object: runtime.RawExtension{Object: stream},
 	}
@@ -102,7 +106,7 @@ func printStream(stream *streamv1alpha1.Stream, opts printers.PrintOptions) []me
 		cli.FormatConditionStatus(stream.Status.GetCondition(streamv1alpha1.StreamConditionReady)),
 		cli.FormatTimestampSince(stream.CreationTimestamp),
 	)
-	return []metav1beta1.TableRow{row}
+	return []metav1beta1.TableRow{row}, nil
 }
 
 func printStreamColumns() []metav1beta1.TableColumnDefinition {
