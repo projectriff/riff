@@ -27,6 +27,7 @@ import (
 	packtesting "github.com/projectriff/riff/pkg/testing/pack"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -287,6 +288,17 @@ Created application "my-application"
 				packClient.AssertExpectations(t)
 				return nil
 			},
+			GivenObjects: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "riff-system",
+						Name:      "builders",
+					},
+					Data: map[string]string{
+						"riff-application": "cloudfoundry/cnb:bionic",
+					},
+				},
+			},
 			ExpectCreates: []runtime.Object{
 				&buildv1alpha1.Application{
 					ObjectMeta: metav1.ObjectMeta{
@@ -302,6 +314,31 @@ Created application "my-application"
 ...build output...
 Created application "my-application"
 `,
+		},
+		{
+			Name: "local path, no builders",
+			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath},
+			ExpectOutput: `
+Error: configmaps "builders" not found
+`,
+			ShouldError: true,
+		},
+		{
+			Name: "local path, no application builder",
+			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath},
+			GivenObjects: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "riff-system",
+						Name:      "builders",
+					},
+					Data: map[string]string{},
+				},
+			},
+			ExpectOutput: `
+Error: unknown builder for "riff-application"
+`,
+			ShouldError: true,
 		},
 		{
 			Name: "local path, pack error",
@@ -323,6 +360,17 @@ Created application "my-application"
 				packClient := c.Pack.(*packtesting.Client)
 				packClient.AssertExpectations(t)
 				return nil
+			},
+			GivenObjects: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "riff-system",
+						Name:      "builders",
+					},
+					Data: map[string]string{
+						"riff-application": "cloudfoundry/cnb:bionic",
+					},
+				},
 			},
 			ExpectOutput: `
 ...build output...
