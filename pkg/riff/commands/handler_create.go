@@ -35,9 +35,8 @@ type HandlerCreateOptions struct {
 	ApplicationRef string
 	FunctionRef    string
 
-	Env []string
-	// TODO implement
-	// EnvFrom []string
+	Env     []string
+	EnvFrom []string
 }
 
 func (opts *HandlerCreateOptions) Validate(ctx context.Context) *cli.FieldError {
@@ -74,6 +73,7 @@ func (opts *HandlerCreateOptions) Validate(ctx context.Context) *cli.FieldError 
 	}
 
 	errs = errs.Also(validation.EnvVars(opts.Env, cli.EnvFlagName))
+	errs = errs.Also(validation.EnvVarFroms(opts.EnvFrom, cli.EnvFromFlagName))
 
 	return errs
 }
@@ -111,6 +111,12 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 		}
 		processor.Spec.Template.Containers[0].Env = append(processor.Spec.Template.Containers[0].Env, parsers.EnvVar(env))
 	}
+	for _, env := range opts.EnvFrom {
+		if processor.Spec.Template.Containers[0].Env == nil {
+			processor.Spec.Template.Containers[0].Env = []corev1.EnvVar{}
+		}
+		processor.Spec.Template.Containers[0].Env = append(processor.Spec.Template.Containers[0].Env, parsers.EnvVarFrom(env))
+	}
 
 	processor, err := c.Request().Handlers(opts.Namespace).Create(processor)
 	if err != nil {
@@ -139,6 +145,7 @@ func NewHandlerCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.ApplicationRef, cli.StripDash(cli.ApplicationRefFlagName), "", "<todo>")
 	cmd.Flags().StringVar(&opts.FunctionRef, cli.StripDash(cli.FunctionRefFlagName), "", "<todo>")
 	cmd.Flags().StringArrayVar(&opts.Env, cli.StripDash(cli.EnvFlagName), []string{}, "<todo>")
+	cmd.Flags().StringArrayVar(&opts.EnvFrom, cli.StripDash(cli.EnvFromFlagName), []string{}, "<todo>")
 
 	return cmd
 }

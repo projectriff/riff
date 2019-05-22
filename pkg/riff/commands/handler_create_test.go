@@ -92,6 +92,33 @@ func TestHandlerCreateOptions(t *testing.T) {
 			},
 			ExpectFieldError: cli.ErrInvalidArrayValue("=foo", cli.EnvFlagName, 0),
 		},
+		{
+			Name: "with envfrom secret",
+			Options: &commands.HandlerCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				EnvFrom:         []string{"VAR1=secretKeyRef:name:key"},
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "with envfrom configmap",
+			Options: &commands.HandlerCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				EnvFrom:         []string{"VAR1=configMapKeyRef:name:key"},
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "with invalid envfrom",
+			Options: &commands.HandlerCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				EnvFrom:         []string{"VAR1=someOtherKeyRef:name:key"},
+			},
+			ExpectFieldError: cli.ErrInvalidArrayValue("VAR1=someOtherKeyRef:name:key", cli.EnvFromFlagName, 0),
+		},
 	}
 
 	table.Run(t)
@@ -109,6 +136,8 @@ func TestHandlerCreateCommand(t *testing.T) {
 	envNameOther := "MY_VAR_OTHER"
 	envValueOther := "my-value-other"
 	envVarOther := fmt.Sprintf("%s=%s", envNameOther, envValueOther)
+	envVarFromConfigMap := "MY_VAR_FROM_CONFIGMAP=configMapKeyRef:my-configmap:my-key"
+	envVarFromSecret := "MY_VAR_FROM_SECRET=secretKeyRef:my-secret:my-key"
 
 	table := rifftesting.CommandTable{
 		{
@@ -179,8 +208,8 @@ Created handler "my-handler"
 `,
 		},
 		{
-			Name: "create from image with env",
-			Args: []string{handlerName, cli.ImageFlagName, image, cli.EnvFlagName, envVar, cli.EnvFlagName, envVarOther},
+			Name: "create from image with env and env-from",
+			Args: []string{handlerName, cli.ImageFlagName, image, cli.EnvFlagName, envVar, cli.EnvFlagName, envVarOther, cli.EnvFromFlagName, envVarFromConfigMap, cli.EnvFromFlagName, envVarFromSecret},
 			ExpectCreates: []runtime.Object{
 				&requestv1alpha1.Handler{
 					ObjectMeta: metav1.ObjectMeta{
@@ -195,6 +224,28 @@ Created handler "my-handler"
 									Env: []corev1.EnvVar{
 										{Name: envName, Value: envValue},
 										{Name: envNameOther, Value: envValueOther},
+										{
+											Name: "MY_VAR_FROM_CONFIGMAP",
+											ValueFrom: &corev1.EnvVarSource{
+												ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+													LocalObjectReference: corev1.LocalObjectReference{
+														Name: "my-configmap",
+													},
+													Key: "my-key",
+												},
+											},
+										},
+										{
+											Name: "MY_VAR_FROM_SECRET",
+											ValueFrom: &corev1.EnvVarSource{
+												SecretKeyRef: &corev1.SecretKeySelector{
+													LocalObjectReference: corev1.LocalObjectReference{
+														Name: "my-secret",
+													},
+													Key: "my-key",
+												},
+											},
+										},
 									},
 								},
 							},
