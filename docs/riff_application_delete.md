@@ -1,10 +1,10 @@
 ## riff application delete
 
-<todo>
+delete an application, handlers that reference this app will stop updating
 
 ### Synopsis
 
-<todo>
+delete an application, handlers that reference this app will stop updating
 
 ```
 riff application delete [flags]
@@ -13,15 +13,16 @@ riff application delete [flags]
 ### Examples
 
 ```
-<todo>
+riff application delete my-application
+riff application delete --all
 ```
 
 ### Options
 
 ```
-      --all                <todo>
+      --all                delete all applications within the namespace
   -h, --help               help for delete
-  -n, --namespace string   <todo>
+  -n, --namespace string   kubernetes namespace (defaulted from kube config)
 ```
 
 ### Options inherited from parent commands
@@ -29,10 +30,10 @@ riff application delete [flags]
 ```
       --config string        config file (default is $HOME/.riff.yaml)
       --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --no-color             disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff application](riff_application.md)	 - <todo>
+* [riff application](riff_application.md)	 - build applications from source using Cloud Foundry buildpacks
 

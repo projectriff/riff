@@ -1,10 +1,10 @@
 ## riff processor create
 
-<todo>
+process messages with a function
 
 ### Synopsis
 
-<todo>
+process messages with a function
 
 ```
 riff processor create [flags]
@@ -13,17 +13,18 @@ riff processor create [flags]
 ### Examples
 
 ```
-<todo>
+riff processor create my-processor --function-ref my-func --input my-input-stream
+riff processor create my-processor --function-ref my-func --input my-input-stream --input my-join-stream --output my-output-stream
 ```
 
 ### Options
 
 ```
-      --function-ref string   <todo>
+      --function-ref string   function build to deploy
   -h, --help                  help for create
-      --input stringArray     <todo>
-  -n, --namespace string      <todo>
-      --output stringArray    <todo>
+      --input stringArray     stream to read messages from
+  -n, --namespace string      kubernetes namespace (defaulted from kube config)
+      --output stringArray    stream to write messages to
 ```
 
 ### Options inherited from parent commands
@@ -31,10 +32,10 @@ riff processor create [flags]
 ```
       --config string        config file (default is $HOME/.riff.yaml)
       --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --no-color             disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff processor](riff_processor.md)	 - <todo>
+* [riff processor](riff_processor.md)	 - process messages with a function
 

@@ -1,10 +1,10 @@
 ## riff credential
 
-<todo>
+image registry credentails
 
 ### Synopsis
 
-<todo>
+image registry credentails
 
 ### Options
 
@@ -17,13 +17,13 @@
 ```
       --config string        config file (default is $HOME/.riff.yaml)
       --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --no-color             disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff](riff.md)	 - <todo>
-* [riff credential apply](riff_credential_apply.md)	 - <todo>
-* [riff credential delete](riff_credential_delete.md)	 - <todo>
-* [riff credential list](riff_credential_list.md)	 - <todo>
+* [riff](riff.md)	 - riff is for functions
+* [riff credential apply](riff_credential_apply.md)	 - create or update credentials
+* [riff credential delete](riff_credential_delete.md)	 - delete credential, image builds that depend on this credential may fail
+* [riff credential list](riff_credential_list.md)	 - list credentials in a namespace
 

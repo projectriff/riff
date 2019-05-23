@@ -18,6 +18,8 @@ package commands
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/buildpack/pack"
 	"github.com/projectriff/riff/pkg/cli"
@@ -129,9 +131,12 @@ func NewApplicationCreateCommand(c *cli.Config) *cobra.Command {
 	opts := &ApplicationCreateOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "create",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "create",
+		Short: "build an application from source",
+		Example: strings.Join([]string{
+			fmt.Sprintf("%s application create my-app %s registry.example.com/image %s https://example.com/my-app.git", c.Name, cli.ImageFlagName, cli.GitRepoFlagName),
+			fmt.Sprintf("%s application create my-app %s registry.example.com/image %s ./my-app", c.Name, cli.ImageFlagName, cli.LocalPathFlagName),
+		}, "\n"),
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
@@ -140,12 +145,12 @@ func NewApplicationCreateCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().StringVar(&opts.Image, cli.StripDash(cli.ImageFlagName), "", "<todo>")
-	cmd.Flags().StringVar(&opts.CacheSize, cli.StripDash(cli.CacheSizeFlagName), "", "<todo>")
-	cmd.Flags().StringVar(&opts.LocalPath, cli.StripDash(cli.LocalPathFlagName), "", "<todo>")
-	cmd.Flags().StringVar(&opts.GitRepo, cli.StripDash(cli.GitRepoFlagName), "", "<todo>")
-	cmd.Flags().StringVar(&opts.GitRevision, cli.StripDash(cli.GitRevisionFlagName), "master", "<todo>")
-	cmd.Flags().StringVar(&opts.SubPath, cli.StripDash(cli.SubPathFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.Image, cli.StripDash(cli.ImageFlagName), "", "repository where the built images are pushed")
+	cmd.Flags().StringVar(&opts.CacheSize, cli.StripDash(cli.CacheSizeFlagName), "", "size of persistent volume to cache resources between builds")
+	cmd.Flags().StringVar(&opts.LocalPath, cli.StripDash(cli.LocalPathFlagName), "", "path to source code on the local machine")
+	cmd.Flags().StringVar(&opts.GitRepo, cli.StripDash(cli.GitRepoFlagName), "", "git url to remote source code")
+	cmd.Flags().StringVar(&opts.GitRevision, cli.StripDash(cli.GitRevisionFlagName), "master", "refspec within the git repo to checkout")
+	cmd.Flags().StringVar(&opts.SubPath, cli.StripDash(cli.SubPathFlagName), "", "path within the git repo to checkout")
 
 	return cmd
 }

@@ -18,6 +18,8 @@ package commands
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/cli/printers"
@@ -69,9 +71,12 @@ func NewFunctionListCommand(c *cli.Config) *cobra.Command {
 	opts := &FunctionListOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "list",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "list",
+		Short: "list functions in a namespace",
+		Example: strings.Join([]string{
+			fmt.Sprintf("%s function list", c.Name),
+			fmt.Sprintf("%s function list %s", c.Name, cli.AllNamespacesFlagName),
+		}, "\n"),
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE:    cli.ExecOptions(c, opts),

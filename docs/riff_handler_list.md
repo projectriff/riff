@@ -1,10 +1,10 @@
 ## riff handler list
 
-<todo>
+list http request handlers in a namespace
 
 ### Synopsis
 
-<todo>
+list http request handlers in a namespace
 
 ```
 riff handler list [flags]
@@ -13,15 +13,16 @@ riff handler list [flags]
 ### Examples
 
 ```
-<todo>
+riff handler list
+riff handler list --all-namespaces
 ```
 
 ### Options
 
 ```
-      --all-namespaces     <todo>
+      --all-namespaces     use all kubernetes namespaces
   -h, --help               help for list
-  -n, --namespace string   <todo>
+  -n, --namespace string   kubernetes namespace (defaulted from kube config)
 ```
 
 ### Options inherited from parent commands
@@ -29,10 +30,10 @@ riff handler list [flags]
 ```
       --config string        config file (default is $HOME/.riff.yaml)
       --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --no-color             disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff handler](riff_handler.md)	 - <todo>
+* [riff handler](riff_handler.md)	 - handle http requests with an application, function or image
 

@@ -24,7 +24,7 @@ import (
 func NewApplicationCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "application",
-		Short:   "<todo>",
+		Short:   "build applications from source using Cloud Foundry buildpacks",
 		Args:    cli.Args(),
 		Aliases: []string{"applications", "app", "apps"},
 	}

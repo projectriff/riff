@@ -1,10 +1,10 @@
 ## riff function create
 
-<todo>
+build a function from source
 
 ### Synopsis
 
-<todo>
+build a function from source
 
 ```
 riff function create [flags]
@@ -13,23 +13,24 @@ riff function create [flags]
 ### Examples
 
 ```
-<todo>
+riff function create my-func --image registry.example.com/image --git-repo https://example.com/my-func.git
+riff function create my-func --image registry.example.com/image --local-path ./my-func
 ```
 
 ### Options
 
 ```
-      --artifact string       <todo>
-      --cache-size string     <todo>
-      --git-repo string       <todo>
-      --git-revision string   <todo> (default "master")
-      --handler string        <todo>
+      --artifact string       file containing the function within the build workspace (detected by default)
+      --cache-size string     size of persistent volume to cache resources between builds
+      --git-repo string       git url to remote source code
+      --git-revision string   refspec within the git repo to checkout (default "master")
+      --handler string        name of the method or class to invoke, depends on the invoker (detected by default)
   -h, --help                  help for create
-      --image string          <todo>
-      --invoker string        <todo>
-      --local-path string     <todo>
-  -n, --namespace string      <todo>
-      --sub-path string       <todo>
+      --image string          repository where the built images are pushed
+      --invoker string        language runtime invoker (detected by default)
+      --local-path string     path to source code on the local machine
+  -n, --namespace string      kubernetes namespace (defaulted from kube config)
+      --sub-path string       path within the git repo to checkout
 ```
 
 ### Options inherited from parent commands
@@ -37,10 +38,10 @@ riff function create [flags]
 ```
       --config string        config file (default is $HOME/.riff.yaml)
       --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --no-color             disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - <todo>
+* [riff function](riff_function.md)	 - build functions from source using riff function buildpacks
 

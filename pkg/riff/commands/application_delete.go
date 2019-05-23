@@ -18,6 +18,8 @@ package commands
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
@@ -61,9 +63,12 @@ func NewApplicationDeleteCommand(c *cli.Config) *cobra.Command {
 	opts := &ApplicationDeleteOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "delete",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "delete",
+		Short: "delete an application, handlers that reference this app will stop updating",
+		Example: strings.Join([]string{
+			fmt.Sprintf("%s application delete my-application", c.Name),
+			fmt.Sprintf("%s application delete %s", c.Name, cli.AllFlagName),
+		}, "\n"),
 		Args: cli.Args(
 			cli.NamesArg(&opts.Names),
 		),
@@ -72,7 +77,7 @@ func NewApplicationDeleteCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().BoolVar(&opts.All, cli.StripDash(cli.AllFlagName), false, "<todo>")
+	cmd.Flags().BoolVar(&opts.All, cli.StripDash(cli.AllFlagName), false, "delete all applications within the namespace")
 
 	return cmd
 }

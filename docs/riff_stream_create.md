@@ -1,10 +1,10 @@
 ## riff stream create
 
-<todo>
+create a stream of messages
 
 ### Synopsis
 
-<todo>
+create a stream of messages
 
 ```
 riff stream create [flags]
@@ -13,15 +13,15 @@ riff stream create [flags]
 ### Examples
 
 ```
-<todo>
+riff stream create --provider my-provider
 ```
 
 ### Options
 
 ```
   -h, --help               help for create
-  -n, --namespace string   <todo>
-      --provider string    <todo>
+  -n, --namespace string   kubernetes namespace (defaulted from kube config)
+      --provider string    stream provider
 ```
 
 ### Options inherited from parent commands
@@ -29,10 +29,10 @@ riff stream create [flags]
 ```
       --config string        config file (default is $HOME/.riff.yaml)
       --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --no-color             disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff stream](riff_stream.md)	 - <todo>
+* [riff stream](riff_stream.md)	 - stream of messages
 

@@ -18,6 +18,7 @@ package commands
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/projectriff/riff/pkg/cli"
@@ -44,8 +45,8 @@ func NewDocsCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "docs",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Short:   "generate docs in Markdown for this CLI",
+		Example: fmt.Sprintf("%s docs", c.Name),
 		Hidden:  true,
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),

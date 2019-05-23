@@ -18,6 +18,8 @@ package commands
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/parsers"
@@ -130,9 +132,13 @@ func NewHandlerCreateCommand(c *cli.Config) *cobra.Command {
 	opts := &HandlerCreateOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "create",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "create",
+		Short: "deploy an application, function or image to handle http requests",
+		Example: strings.Join([]string{
+			fmt.Sprintf("%s handler create my-app-handler %s my-app", c.Name, cli.ApplicationRefFlagName),
+			fmt.Sprintf("%s handler create my-func-handler %s my-func", c.Name, cli.FunctionRefFlagName),
+			fmt.Sprintf("%s handler create my-image-handler %s registry.example.com/my-image:latest", c.Name, cli.ImageFlagName),
+		}, "\n"),
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
@@ -141,11 +147,11 @@ func NewHandlerCreateCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().StringVar(&opts.Image, cli.StripDash(cli.ImageFlagName), "", "<todo>")
-	cmd.Flags().StringVar(&opts.ApplicationRef, cli.StripDash(cli.ApplicationRefFlagName), "", "<todo>")
-	cmd.Flags().StringVar(&opts.FunctionRef, cli.StripDash(cli.FunctionRefFlagName), "", "<todo>")
-	cmd.Flags().StringArrayVar(&opts.Env, cli.StripDash(cli.EnvFlagName), []string{}, "<todo>")
-	cmd.Flags().StringArrayVar(&opts.EnvFrom, cli.StripDash(cli.EnvFromFlagName), []string{}, "<todo>")
+	cmd.Flags().StringVar(&opts.Image, cli.StripDash(cli.ImageFlagName), "", "container image to deploy")
+	cmd.Flags().StringVar(&opts.ApplicationRef, cli.StripDash(cli.ApplicationRefFlagName), "", "application build to deploy")
+	cmd.Flags().StringVar(&opts.FunctionRef, cli.StripDash(cli.FunctionRefFlagName), "", "function build to deploy")
+	cmd.Flags().StringArrayVar(&opts.Env, cli.StripDash(cli.EnvFlagName), []string{}, fmt.Sprintf("environment variable defined as a key value pair separated by an equals sign, example %q", fmt.Sprintf("%s MY_VAR=my-value", cli.EnvFlagName)))
+	cmd.Flags().StringArrayVar(&opts.EnvFrom, cli.StripDash(cli.EnvFromFlagName), []string{}, fmt.Sprintf("environment variable from a config map or secret, example %q, %q", fmt.Sprintf("%s MY_SECRET_VALUE=secretKeyRef:my-secret-name:key-in-secret", cli.EnvFromFlagName), fmt.Sprintf("%s MY_CONFIG_MAP_VALUE=configMapKeyRef:my-config-map-name:key-in-config-map", cli.EnvFromFlagName)))
 
 	return cmd
 }

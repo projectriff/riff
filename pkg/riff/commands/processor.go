@@ -24,7 +24,7 @@ import (
 func NewProcessorCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "processor",
-		Short:   "<todo>",
+		Short:   "process messages with a function",
 		Args:    cli.Args(),
 		Aliases: []string{"processors"},
 	}

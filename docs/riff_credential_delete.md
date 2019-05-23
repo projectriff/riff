@@ -1,10 +1,10 @@
 ## riff credential delete
 
-<todo>
+delete credential, image builds that depend on this credential may fail
 
 ### Synopsis
 
-<todo>
+delete credential, image builds that depend on this credential may fail
 
 ```
 riff credential delete [flags]
@@ -13,15 +13,16 @@ riff credential delete [flags]
 ### Examples
 
 ```
-<todo>
+riff credential delete my-creds
+riff credential delete --all 
 ```
 
 ### Options
 
 ```
-      --all                <todo>
+      --all                delete all credentials within the namespace
   -h, --help               help for delete
-  -n, --namespace string   <todo>
+  -n, --namespace string   kubernetes namespace (defaulted from kube config)
 ```
 
 ### Options inherited from parent commands
@@ -29,10 +30,10 @@ riff credential delete [flags]
 ```
       --config string        config file (default is $HOME/.riff.yaml)
       --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --no-color             disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff credential](riff_credential.md)	 - <todo>
+* [riff credential](riff_credential.md)	 - image registry credentails
 

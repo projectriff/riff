@@ -1,10 +1,10 @@
 ## riff application list
 
-<todo>
+list applications in a namespace
 
 ### Synopsis
 
-<todo>
+list applications in a namespace
 
 ```
 riff application list [flags]
@@ -13,15 +13,16 @@ riff application list [flags]
 ### Examples
 
 ```
-<todo>
+riff application list
+riff application list --all-namespaces
 ```
 
 ### Options
 
 ```
-      --all-namespaces     <todo>
+      --all-namespaces     use all kubernetes namespaces
   -h, --help               help for list
-  -n, --namespace string   <todo>
+  -n, --namespace string   kubernetes namespace (defaulted from kube config)
 ```
 
 ### Options inherited from parent commands
@@ -29,10 +30,10 @@ riff application list [flags]
 ```
       --config string        config file (default is $HOME/.riff.yaml)
       --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --no-color             disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff application](riff_application.md)	 - <todo>
+* [riff application](riff_application.md)	 - build applications from source using Cloud Foundry buildpacks
 

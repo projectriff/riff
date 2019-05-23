@@ -24,8 +24,7 @@ import (
 func NewHandlerCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "handler",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Short:   "handle http requests with an application, function or image",
 		Args:    cli.Args(),
 		Aliases: []string{"handlers"},
 	}

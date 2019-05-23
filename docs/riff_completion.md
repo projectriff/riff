@@ -1,10 +1,10 @@
 ## riff completion
 
-<todo>
+generate shell completion script for bash or zsh
 
 ### Synopsis
 
-<todo>
+generate shell completion script for bash or zsh
 
 ```
 riff completion [flags]
@@ -13,7 +13,8 @@ riff completion [flags]
 ### Examples
 
 ```
-<todo>
+riff completion
+riff completion --shell zsh
 ```
 
 ### Options
@@ -28,10 +29,10 @@ riff completion [flags]
 ```
       --config string        config file (default is $HOME/.riff.yaml)
       --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --no-color             disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff](riff.md)	 - <todo>
+* [riff](riff.md)	 - riff is for functions
 

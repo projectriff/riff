@@ -1,10 +1,10 @@
 ## riff function
 
-<todo>
+build functions from source using riff function buildpacks
 
 ### Synopsis
 
-<todo>
+build functions from source using riff function buildpacks
 
 ### Options
 
@@ -17,13 +17,13 @@
 ```
       --config string        config file (default is $HOME/.riff.yaml)
       --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --no-color             disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff](riff.md)	 - <todo>
-* [riff function create](riff_function_create.md)	 - <todo>
-* [riff function delete](riff_function_delete.md)	 - <todo>
-* [riff function list](riff_function_list.md)	 - <todo>
+* [riff](riff.md)	 - riff is for functions
+* [riff function create](riff_function_create.md)	 - build a function from source
+* [riff function delete](riff_function_delete.md)	 - delete a function, handlers and processors that reference this function will stop updating
+* [riff function list](riff_function_list.md)	 - list functions in a namespace
 

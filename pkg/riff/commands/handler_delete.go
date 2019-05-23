@@ -18,6 +18,8 @@ package commands
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
@@ -61,9 +63,12 @@ func NewHandlerDeleteCommand(c *cli.Config) *cobra.Command {
 	opts := &HandlerDeleteOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "delete",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "delete",
+		Short: "delete an http request handler",
+		Example: strings.Join([]string{
+			fmt.Sprintf("%s handler delete my-handler", c.Name),
+			fmt.Sprintf("%s handler delete %s ", c.Name, cli.AllFlagName),
+		}, "\n"),
 		Args: cli.Args(
 			cli.NamesArg(&opts.Names),
 		),
@@ -72,7 +77,7 @@ func NewHandlerDeleteCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().BoolVar(&opts.All, cli.StripDash(cli.AllFlagName), false, "<todo>")
+	cmd.Flags().BoolVar(&opts.All, cli.StripDash(cli.AllFlagName), false, "delete all handlers within the namespace")
 
 	return cmd
 }

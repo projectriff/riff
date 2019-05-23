@@ -1,10 +1,10 @@
 ## riff processor delete
 
-<todo>
+stop processing messages
 
 ### Synopsis
 
-<todo>
+stop processing messages
 
 ```
 riff processor delete [flags]
@@ -13,15 +13,16 @@ riff processor delete [flags]
 ### Examples
 
 ```
-<todo>
+riff processor delete my-processor
+riff processor delete --all 
 ```
 
 ### Options
 
 ```
-      --all                <todo>
+      --all                delete all processors within the namespace
   -h, --help               help for delete
-  -n, --namespace string   <todo>
+  -n, --namespace string   kubernetes namespace (defaulted from kube config)
 ```
 
 ### Options inherited from parent commands
@@ -29,10 +30,10 @@ riff processor delete [flags]
 ```
       --config string        config file (default is $HOME/.riff.yaml)
       --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --no-color             disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff processor](riff_processor.md)	 - <todo>
+* [riff processor](riff_processor.md)	 - process messages with a function
 

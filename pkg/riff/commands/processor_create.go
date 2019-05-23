@@ -18,6 +18,8 @@ package commands
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	streamv1alpha1 "github.com/projectriff/system/pkg/apis/stream/v1alpha1"
@@ -74,9 +76,12 @@ func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {
 	opts := &ProcessorCreateOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "create",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "create",
+		Short: "process messages with a function",
+		Example: strings.Join([]string{
+			fmt.Sprintf("%s processor create my-processor %s my-func %s my-input-stream", c.Name, cli.FunctionRefFlagName, cli.InputFlagName),
+			fmt.Sprintf("%s processor create my-processor %s my-func %s my-input-stream %s my-join-stream %s my-output-stream", c.Name, cli.FunctionRefFlagName, cli.InputFlagName, cli.InputFlagName, cli.OutputFlagName),
+		}, "\n"),
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
@@ -85,9 +90,9 @@ func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().StringVar(&opts.FunctionRef, cli.StripDash(cli.FunctionRefFlagName), "", "<todo>")
-	cmd.Flags().StringArrayVar(&opts.Inputs, cli.StripDash(cli.InputFlagName), []string{}, "<todo>")
-	cmd.Flags().StringArrayVar(&opts.Outputs, cli.StripDash(cli.OutputFlagName), []string{}, "<todo>")
+	cmd.Flags().StringVar(&opts.FunctionRef, cli.StripDash(cli.FunctionRefFlagName), "", "function build to deploy")
+	cmd.Flags().StringArrayVar(&opts.Inputs, cli.StripDash(cli.InputFlagName), []string{}, "stream to read messages from")
+	cmd.Flags().StringArrayVar(&opts.Outputs, cli.StripDash(cli.OutputFlagName), []string{}, "stream to write messages to")
 
 	return cmd
 }

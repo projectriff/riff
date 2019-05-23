@@ -18,6 +18,8 @@ package commands
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/cli/printers"
@@ -69,9 +71,12 @@ func NewApplicationListCommand(c *cli.Config) *cobra.Command {
 	opts := &ApplicationListOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "list",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "list",
+		Short: "list applications in a namespace",
+		Example: strings.Join([]string{
+			fmt.Sprintf("%s application list", c.Name),
+			fmt.Sprintf("%s application list %s", c.Name, cli.AllNamespacesFlagName),
+		}, "\n"),
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE:    cli.ExecOptions(c, opts),

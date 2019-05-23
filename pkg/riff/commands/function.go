@@ -24,7 +24,7 @@ import (
 func NewFunctionCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "function",
-		Short:   "<todo>",
+		Short:   "build functions from source using riff function buildpacks",
 		Args:    cli.Args(),
 		Aliases: []string{"functions", "func", "fn"},
 	}
