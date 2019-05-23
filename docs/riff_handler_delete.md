@@ -4,9 +4,7 @@ delete handler(s)
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff handler delete [flags]

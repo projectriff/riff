@@ -4,9 +4,7 @@ delete credential(s)
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff credential delete [flags]

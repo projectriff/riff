@@ -65,9 +65,9 @@ func NewHandlerDeleteCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "delete handler(s)",
-		Long: `
+		Long: strings.TrimSpace(`
 <todo>
-`,
+`),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s handler delete my-handler", c.Name),
 			fmt.Sprintf("%s handler delete %s ", c.Name, cli.AllFlagName),

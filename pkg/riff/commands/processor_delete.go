@@ -65,9 +65,9 @@ func NewProcessorDeleteCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "delete processor(s)",
-		Long: `
+		Long: strings.TrimSpace(`
 <todo>
-`,
+`),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s processor delete my-processor", c.Name),
 			fmt.Sprintf("%s processor delete %s ", c.Name, cli.AllFlagName),

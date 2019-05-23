@@ -4,9 +4,7 @@ applications built from source using application buildpacks
 
 ### Synopsis
 
-
 <todo>
-
 
 ### Options
 

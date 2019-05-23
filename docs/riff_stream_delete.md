@@ -4,9 +4,7 @@ delete stream(s)
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff stream delete [flags]

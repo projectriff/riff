@@ -4,9 +4,7 @@ table listing of applications
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff application list [flags]

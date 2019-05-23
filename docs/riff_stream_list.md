@@ -4,9 +4,7 @@ table listing of streams
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff stream list [flags]

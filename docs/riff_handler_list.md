@@ -4,9 +4,7 @@ table listing of handlers
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff handler list [flags]

@@ -4,9 +4,7 @@ riff is for functions
 
 ### Synopsis
 
-
 <todo>
-
 
 ### Options
 

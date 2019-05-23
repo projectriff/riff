@@ -4,9 +4,7 @@ processors apply functions to messages on streams
 
 ### Synopsis
 
-
 <todo>
-
 
 ### Options
 

@@ -4,9 +4,7 @@ delete function(s)
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff function delete [flags]

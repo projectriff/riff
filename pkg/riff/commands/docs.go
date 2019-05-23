@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
@@ -46,9 +47,9 @@ func NewDocsCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "docs",
 		Short: "generate docs in Markdown for this CLI",
-		Long: `
+		Long: strings.TrimSpace(`
 <todo>
-`,
+`),
 		Example: fmt.Sprintf("%s docs", c.Name),
 		Hidden:  true,
 		Args:    cli.Args(),

@@ -4,9 +4,7 @@ table listing of processors
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff processor list [flags]

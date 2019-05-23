@@ -4,9 +4,7 @@ delete application(s)
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff application delete [flags]

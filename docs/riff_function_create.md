@@ -4,9 +4,7 @@ create a function from source
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff function create [flags]

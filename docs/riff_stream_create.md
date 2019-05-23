@@ -4,9 +4,7 @@ create a stream of messages
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff stream create [flags]

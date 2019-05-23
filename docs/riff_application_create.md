@@ -4,9 +4,7 @@ create an application from source
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff application create [flags]

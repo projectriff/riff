@@ -73,9 +73,9 @@ func NewHandlerListCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "table listing of handlers",
-		Long: `
+		Long: strings.TrimSpace(`
 <todo>
-`,
+`),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s handler list", c.Name),
 			fmt.Sprintf("%s handler list %s", c.Name, cli.AllNamespacesFlagName),

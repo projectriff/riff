@@ -4,9 +4,7 @@ delete processor(s)
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff processor delete [flags]

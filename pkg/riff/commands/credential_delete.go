@@ -70,9 +70,9 @@ func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "delete credential(s)",
-		Long: `
+		Long: strings.TrimSpace(`
 <todo>
-`,
+`),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s credential delete my-creds", c.Name),
 			fmt.Sprintf("%s credential delete %s ", c.Name, cli.AllFlagName),

@@ -4,9 +4,7 @@ streams of messages
 
 ### Synopsis
 
-
 <todo>
-
 
 ### Options
 

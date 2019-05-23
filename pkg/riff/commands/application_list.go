@@ -73,9 +73,9 @@ func NewApplicationListCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "table listing of applications",
-		Long: `
+		Long: strings.TrimSpace(`
 <todo>
-`,
+`),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s application list", c.Name),
 			fmt.Sprintf("%s application list %s", c.Name, cli.AllNamespacesFlagName),

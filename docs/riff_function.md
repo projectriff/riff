@@ -4,9 +4,7 @@ functions built from source using function buildpacks
 
 ### Synopsis
 
-
 <todo>
-
 
 ### Options
 

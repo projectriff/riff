@@ -4,9 +4,7 @@ handlers map HTTP requests to applications, functions or images
 
 ### Synopsis
 
-
 <todo>
-
 
 ### Options
 

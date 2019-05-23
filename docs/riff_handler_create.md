@@ -4,9 +4,7 @@ create a handler to map HTTP requests to an application, function or image
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff handler create [flags]

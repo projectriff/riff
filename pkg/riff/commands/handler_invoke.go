@@ -85,9 +85,9 @@ func NewHandlerInvokeCommand(c *cli.Config) *cobra.Command {
 		Use:    "invoke",
 		Hidden: true,
 		Short:  "invoke an http request handler using curl",
-		Long: `
+		Long: strings.TrimSpace(`
 <todo>
-`,
+`),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s handler invoke my-handler", c.Name),
 			fmt.Sprintf("%s handler invoke my-handler --text -- -d 'hello' -w '\n'", c.Name),

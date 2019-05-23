@@ -4,9 +4,7 @@ create a processor to apply a function to messages on streams
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff processor create [flags]

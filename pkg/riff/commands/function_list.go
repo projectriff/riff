@@ -73,9 +73,9 @@ func NewFunctionListCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "table listing of functions",
-		Long: `
+		Long: strings.TrimSpace(`
 <todo>
-`,
+`),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s function list", c.Name),
 			fmt.Sprintf("%s function list %s", c.Name, cli.AllNamespacesFlagName),

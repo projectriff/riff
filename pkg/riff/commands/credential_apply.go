@@ -123,9 +123,9 @@ func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "apply",
 		Short: "create or update credentials for a container registry",
-		Long: `
+		Long: strings.TrimSpace(`
 <todo>
-`,
+`),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s credential apply my-docker-hub-creds %s my-docker-id", c.Name, cli.DockerHubFlagName),
 			fmt.Sprintf("%s credential apply my-gcr-creds %s path/to/token.json", c.Name, cli.GcrFlagName),

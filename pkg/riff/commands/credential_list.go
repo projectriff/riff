@@ -76,9 +76,9 @@ func NewCredentialListCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "table listing of credentials",
-		Long: `
+		Long: strings.TrimSpace(`
 <todo>
-`,
+`),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s credential list", c.Name),
 			fmt.Sprintf("%s credential list %s", c.Name, cli.AllNamespacesFlagName),

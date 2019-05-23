@@ -4,9 +4,7 @@ table listing of functions
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff function list [flags]

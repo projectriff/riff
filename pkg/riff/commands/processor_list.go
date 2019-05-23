@@ -73,9 +73,9 @@ func NewProcessorListCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "table listing of processors",
-		Long: `
+		Long: strings.TrimSpace(`
 <todo>
-`,
+`),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s processor list", c.Name),
 			fmt.Sprintf("%s processor list %s", c.Name, cli.AllNamespacesFlagName),

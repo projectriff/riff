@@ -73,9 +73,9 @@ func NewStreamListCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "table listing of streams",
-		Long: `
+		Long: strings.TrimSpace(`
 <todo>
-`,
+`),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s stream list", c.Name),
 			fmt.Sprintf("%s stream list %s", c.Name, cli.AllNamespacesFlagName),

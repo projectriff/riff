@@ -65,9 +65,9 @@ func NewFunctionDeleteCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "delete function(s)",
-		Long: `
+		Long: strings.TrimSpace(`
 <todo>
-`,
+`),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s function delete my-function", c.Name),
 			fmt.Sprintf("%s function delete %s ", c.Name, cli.AllFlagName),

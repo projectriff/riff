@@ -4,9 +4,7 @@ create or update credentials for a container registry
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff credential apply [flags]

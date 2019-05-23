@@ -4,9 +4,7 @@ credentials for container registries
 
 ### Synopsis
 
-
 <todo>
-
 
 ### Options
 

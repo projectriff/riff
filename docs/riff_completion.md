@@ -4,9 +4,7 @@ generate shell completion script
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff completion [flags]

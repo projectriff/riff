@@ -4,9 +4,7 @@ table listing of credentials
 
 ### Synopsis
 
-
 <todo>
-
 
 ```
 riff credential list [flags]
