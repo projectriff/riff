@@ -1,6 +1,6 @@
 ## riff processor
 
-message processors for functions
+processors apply functions to messages on streams
 
 ### Synopsis
 

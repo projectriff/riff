@@ -41,5 +41,5 @@ riff credential apply my-registry-creds --registry http://registry.example.com -
 
 ### SEE ALSO
 
-* [riff credential](riff_credential.md)	 - image registry credentials
+* [riff credential](riff_credential.md)	 - credentials for image registries
 

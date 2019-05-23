@@ -1,6 +1,6 @@
 ## riff credential
 
-image registry credentials
+credentials for image registries
 
 ### Synopsis
 

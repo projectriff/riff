@@ -1,6 +1,6 @@
 ## riff handler
 
-HTTP handlers for applications, functions or images
+handlers map HTTP requests to applications, functions or images
 
 ### Synopsis
 

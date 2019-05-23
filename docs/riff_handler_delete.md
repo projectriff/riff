@@ -37,5 +37,5 @@ riff handler delete --all
 
 ### SEE ALSO
 
-* [riff handler](riff_handler.md)	 - HTTP handlers for applications, functions or images
+* [riff handler](riff_handler.md)	 - handlers map HTTP requests to applications, functions or images
 

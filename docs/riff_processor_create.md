@@ -39,5 +39,5 @@ riff processor create my-processor --function-ref my-func --input my-input-strea
 
 ### SEE ALSO
 
-* [riff processor](riff_processor.md)	 - message processors for functions
+* [riff processor](riff_processor.md)	 - processors apply functions to messages on streams
 

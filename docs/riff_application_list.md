@@ -37,5 +37,5 @@ riff application list --all-namespaces
 
 ### SEE ALSO
 
-* [riff application](riff_application.md)	 - applications built from source using Cloud Foundry buildpacks
+* [riff application](riff_application.md)	 - applications are built from source using Cloud Foundry buildpacks
 

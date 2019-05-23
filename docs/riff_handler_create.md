@@ -42,5 +42,5 @@ riff handler create my-image-handler --image registry.example.com/my-image:lates
 
 ### SEE ALSO
 
-* [riff handler](riff_handler.md)	 - HTTP handlers for applications, functions or images
+* [riff handler](riff_handler.md)	 - handlers map HTTP requests to applications, functions or images
 

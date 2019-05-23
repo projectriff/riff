@@ -37,5 +37,5 @@ riff credential delete --all
 
 ### SEE ALSO
 
-* [riff credential](riff_credential.md)	 - image registry credentials
+* [riff credential](riff_credential.md)	 - credentials for image registries
 

@@ -1,6 +1,6 @@
 ## riff application
 
-applications built from source using Cloud Foundry buildpacks
+applications are built from source using Cloud Foundry buildpacks
 
 ### Synopsis
 

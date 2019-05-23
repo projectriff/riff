@@ -24,7 +24,7 @@ import (
 func NewCredentialCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "credential",
-		Short: "image registry credentials",
+		Short: "credentials for image registries",
 		Long: `
 <todo>
 `,

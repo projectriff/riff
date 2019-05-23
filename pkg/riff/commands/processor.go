@@ -24,7 +24,7 @@ import (
 func NewProcessorCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "processor",
-		Short: "message processors for functions",
+		Short: "processors apply functions to messages on streams",
 		Long: `
 <todo>
 `,

@@ -1,6 +1,6 @@
 ## riff function
 
-functions built from source using riff function buildpacks
+functions are built from source using riff function buildpacks
 
 ### Synopsis
 
