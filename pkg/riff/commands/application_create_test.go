@@ -27,6 +27,7 @@ import (
 	packtesting "github.com/projectriff/riff/pkg/testing/pack"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -153,7 +154,9 @@ func TestApplicationCreateOptions(t *testing.T) {
 func TestApplicationCreateCommand(t *testing.T) {
 	defaultNamespace := "default"
 	applicationName := "my-application"
+	imageDefault := "_"
 	imageTag := "registry.example.com/repo:tag"
+	registryHost := "registry.example.com"
 	gitRepo := "https://example.com/repo.git"
 	gitMaster := "master"
 	gitSha := "deadbeefdeadbeefdeadbeefdeadbeef"
@@ -328,6 +331,75 @@ Created application "my-application"
 ...build output...
 Error: pack error
 `,
+			ShouldError: true,
+		},
+		{
+			Name: "local path, default image",
+			Args: []string{applicationName, cli.LocalPathFlagName, localPath},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				packClient := &packtesting.Client{}
+				c.Pack = packClient
+				packClient.On("Build", mock.Anything, pack.BuildOptions{
+					Image:   fmt.Sprintf("%s/%s", registryHost, applicationName),
+					AppDir:  localPath,
+					Builder: "cloudfoundry/cnb:bionic",
+					Publish: true,
+				}).Return(nil).Run(func(args mock.Arguments) {
+					fmt.Fprintf(c.Stdout, "...build output...\n")
+				})
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				packClient := c.Pack.(*packtesting.Client)
+				packClient.AssertExpectations(t)
+				return nil
+			},
+			GivenObjects: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      "riff-build",
+					},
+					Data: map[string]string{
+						"default-image-prefix": registryHost,
+					},
+				},
+			},
+			ExpectCreates: []runtime.Object{
+				&buildv1alpha1.Application{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      applicationName,
+					},
+					Spec: buildv1alpha1.ApplicationSpec{
+						Image: imageDefault,
+					},
+				},
+			},
+			ExpectOutput: `
+...build output...
+Created application "my-application"
+`,
+		},
+		{
+			Name:        "local path, default image, bad default",
+			Args:        []string{applicationName, cli.LocalPathFlagName, localPath},
+			ShouldError: true,
+		},
+		{
+			Name: "local path, default image",
+			Args: []string{applicationName, cli.LocalPathFlagName, localPath},
+			GivenObjects: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      "riff-build",
+					},
+					Data: map[string]string{
+						"default-image-prefix": "",
+					},
+				},
+			},
 			ShouldError: true,
 		},
 		{

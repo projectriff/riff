@@ -24,7 +24,7 @@ riff application create my-app --image registry.example.com/image --local-path .
       --git-repo url           git url to remote source code
       --git-revision refspec   refspec within the git repo to checkout (default "master")
   -h, --help                   help for create
-      --image repository       repository where the built images are pushed
+      --image repository       repository where the built images are pushed (default "_")
       --local-path directory   path to directory containing source code on the local machine
   -n, --namespace name         kubernetes namespace (defaulted from kube config)
       --sub-path directory     path to directory within the git repo to checkout

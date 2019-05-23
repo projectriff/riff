@@ -116,8 +116,19 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 		}
 	}
 	if opts.LocalPath != "" {
+		targetImage := opts.Image
+		if strings.HasPrefix(opts.Image, "_") {
+			riffBuildConfig, err := c.Core().ConfigMaps(function.Namespace).Get("riff-build", metav1.GetOptions{})
+			if err != nil {
+				return err
+			}
+			targetImage, err = buildv1alpha1.ResolveDefaultImage(function, riffBuildConfig.Data["default-image-prefix"])
+			if err != nil {
+				return err
+			}
+		}
 		err := c.Pack.Build(ctx, pack.BuildOptions{
-			Image:  opts.Image,
+			Image:  targetImage,
 			AppDir: opts.LocalPath,
 			// TODO lookup builder from ClusterBuildTemplate/riff-cnb
 			Builder: "projectriff/builder:0.2.0",
@@ -163,7 +174,7 @@ func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().StringVar(&opts.Image, cli.StripDash(cli.ImageFlagName), "", "`repository` where the built images are pushed")
+	cmd.Flags().StringVar(&opts.Image, cli.StripDash(cli.ImageFlagName), "_", "`repository` where the built images are pushed")
 	cmd.Flags().StringVar(&opts.CacheSize, cli.StripDash(cli.CacheSizeFlagName), "", "`size` of persistent volume to cache resources between builds")
 	cmd.Flags().StringVar(&opts.Artifact, cli.StripDash(cli.ArtifactFlagName), "", "`file` containing the function within the build workspace (detected by default)")
 	cmd.Flags().StringVar(&opts.Handler, cli.StripDash(cli.HandlerFlagName), "", "`name` of the method or class to invoke, depends on the invoker (detected by default)")

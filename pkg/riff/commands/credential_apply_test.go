@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/projectriff/riff/pkg/cli"
@@ -144,7 +145,7 @@ func TestCredentialApplyOptions(t *testing.T) {
 				RegistryPassword:      []byte("1password"),
 				SetDefaultImagePrefix: true,
 			},
-			ExpectFieldError: cli.ErrInvalidValue("cannot be used with registry", cli.SetDefaultImagePrefixFlagName),
+			ExpectFieldError: cli.ErrInvalidValue(fmt.Sprintf("cannot be used with %s, without %s", cli.RegistryFlagName, cli.DefaultImagePrefixFlagName), cli.SetDefaultImagePrefixFlagName),
 		},
 	}
 
@@ -157,7 +158,8 @@ func TestCredentialApplyCommand(t *testing.T) {
 	credentialLabel := build.CredentialLabelKey
 	dockerHubId := "projectriff"
 	dockerHubPassword := "docker-password"
-	registryHost := "https://example.com"
+	registryHost := "example.com"
+	registryURL := fmt.Sprintf("https://%s", registryHost)
 	registryUser := "projectriff"
 	registryPassword := "registry-password"
 
@@ -231,7 +233,7 @@ Apply credentials "test-credential"
 		},
 		{
 			Name:  "create secret registry",
-			Args:  []string{credentialName, cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser},
+			Args:  []string{credentialName, cli.RegistryFlagName, registryURL, cli.RegistryUserFlagName, registryUser},
 			Stdin: []byte(registryPassword),
 			ExpectCreates: []runtime.Object{
 				&corev1.Secret{
@@ -240,7 +242,7 @@ Apply credentials "test-credential"
 						Namespace: defaultNamespace,
 						Labels:    map[string]string{credentialLabel: "basic-auth"},
 						Annotations: map[string]string{
-							"build.knative.dev/docker-0": registryHost,
+							"build.knative.dev/docker-0": registryURL,
 						},
 					},
 					Type: corev1.SecretTypeBasicAuth,
@@ -256,7 +258,7 @@ Apply credentials "test-credential"
 		},
 		{
 			Name:  "update secret",
-			Args:  []string{credentialName, cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser},
+			Args:  []string{credentialName, cli.RegistryFlagName, registryURL, cli.RegistryUserFlagName, registryUser},
 			Stdin: []byte(registryPassword),
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
@@ -282,7 +284,7 @@ Apply credentials "test-credential"
 						Namespace: defaultNamespace,
 						Labels:    map[string]string{credentialLabel: "basic-auth"},
 						Annotations: map[string]string{
-							"build.knative.dev/docker-0": registryHost,
+							"build.knative.dev/docker-0": registryURL,
 						},
 					},
 					Type: corev1.SecretTypeBasicAuth,
@@ -298,7 +300,7 @@ Apply credentials "test-credential"
 		},
 		{
 			Name:  "get error",
-			Args:  []string{credentialName, cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser},
+			Args:  []string{credentialName, cli.RegistryFlagName, registryURL, cli.RegistryUserFlagName, registryUser},
 			Stdin: []byte(registryPassword),
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
@@ -324,7 +326,7 @@ Apply credentials "test-credential"
 		},
 		{
 			Name:  "create error",
-			Args:  []string{credentialName, cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser},
+			Args:  []string{credentialName, cli.RegistryFlagName, registryURL, cli.RegistryUserFlagName, registryUser},
 			Stdin: []byte(registryPassword),
 			WithReactors: []rifftesting.ReactionFunc{
 				rifftesting.InduceFailure("create", "secrets"),
@@ -336,7 +338,7 @@ Apply credentials "test-credential"
 						Namespace: defaultNamespace,
 						Labels:    map[string]string{credentialLabel: "basic-auth"},
 						Annotations: map[string]string{
-							"build.knative.dev/docker-0": registryHost,
+							"build.knative.dev/docker-0": registryURL,
 						},
 					},
 					Type: corev1.SecretTypeBasicAuth,
@@ -350,7 +352,7 @@ Apply credentials "test-credential"
 		},
 		{
 			Name:  "update error",
-			Args:  []string{credentialName, cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser},
+			Args:  []string{credentialName, cli.RegistryFlagName, registryURL, cli.RegistryUserFlagName, registryUser},
 			Stdin: []byte(registryPassword),
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
@@ -379,7 +381,7 @@ Apply credentials "test-credential"
 						Namespace: defaultNamespace,
 						Labels:    map[string]string{credentialLabel: "basic-auth"},
 						Annotations: map[string]string{
-							"build.knative.dev/docker-0": registryHost,
+							"build.knative.dev/docker-0": registryURL,
 						},
 					},
 					Type: corev1.SecretTypeBasicAuth,
@@ -393,7 +395,7 @@ Apply credentials "test-credential"
 		},
 		{
 			Name:  "no clobber",
-			Args:  []string{"not-a-credential", cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser},
+			Args:  []string{"not-a-credential", cli.RegistryFlagName, registryURL, cli.RegistryUserFlagName, registryUser},
 			Stdin: []byte(registryPassword),
 			GivenObjects: []runtime.Object{
 				&corev1.Secret{
@@ -479,8 +481,43 @@ Set default image prefix to "gcr.io/my-gcp-project"
 `,
 		},
 		{
-			Name:        "default image prefix create registry",
-			Args:        []string{credentialName, cli.RegistryFlagName, registryHost, cli.RegistryUserFlagName, registryUser, cli.SetDefaultImagePrefixFlagName},
+			Name:  "default image prefix create registry, explicit default",
+			Args:  []string{credentialName, cli.RegistryFlagName, registryURL, cli.RegistryUserFlagName, registryUser, cli.DefaultImagePrefixFlagName, registryHost},
+			Stdin: []byte(registryPassword),
+			ExpectCreates: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: "basic-auth"},
+						Annotations: map[string]string{
+							"build.knative.dev/docker-0": registryURL,
+						},
+					},
+					Type: corev1.SecretTypeBasicAuth,
+					StringData: map[string]string{
+						"username": registryUser,
+						"password": registryPassword,
+					},
+				},
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      "riff-build",
+					},
+					Data: map[string]string{
+						"default-image-prefix": registryHost,
+					},
+				},
+			},
+			ExpectOutput: `
+Apply credentials "test-credential"
+Set default image prefix to "example.com"
+`,
+		},
+		{
+			Name:        "default image prefix create registry, no implicit default",
+			Args:        []string{credentialName, cli.RegistryFlagName, registryURL, cli.RegistryUserFlagName, registryUser, cli.SetDefaultImagePrefixFlagName},
 			Stdin:       []byte(registryPassword),
 			ShouldError: true,
 		},

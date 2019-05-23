@@ -39,6 +39,7 @@ type CredentialApplyOptions struct {
 	Registry              string
 	RegistryUser          string
 	RegistryPassword      []byte
+	DefaultImagePrefix    string
 	SetDefaultImagePrefix bool
 }
 
@@ -83,8 +84,8 @@ func (opts *CredentialApplyOptions) Validate(ctx context.Context) *cli.FieldErro
 		errs = errs.Also(cli.ErrMissingField(cli.RegistryUserFlagName))
 	}
 
-	if opts.SetDefaultImagePrefix && opts.Registry != "" {
-		errs = errs.Also(cli.ErrInvalidValue("cannot be used with registry", cli.SetDefaultImagePrefixFlagName))
+	if opts.SetDefaultImagePrefix && opts.DefaultImagePrefix == "" && opts.Registry != "" {
+		errs = errs.Also(cli.ErrInvalidValue(fmt.Sprintf("cannot be used with %s, without %s", cli.RegistryFlagName, cli.DefaultImagePrefixFlagName), cli.SetDefaultImagePrefixFlagName))
 	}
 
 	return errs
@@ -92,7 +93,7 @@ func (opts *CredentialApplyOptions) Validate(ctx context.Context) *cli.FieldErro
 
 func (opts *CredentialApplyOptions) Exec(ctx context.Context, c *cli.Config) error {
 	// get desired credential and image prefix
-	secret, defaultImagePrefix, err := makeCredential(opts)
+	secret, imagePrefix, err := makeCredential(opts)
 	if err != nil {
 		return err
 	}
@@ -102,15 +103,19 @@ func (opts *CredentialApplyOptions) Exec(ctx context.Context, c *cli.Config) err
 	}
 	c.Successf("Apply credentials %q\n", opts.Name)
 
-	if opts.SetDefaultImagePrefix {
-		if defaultImagePrefix == "" {
+	if opts.DefaultImagePrefix != "" || opts.SetDefaultImagePrefix {
+		if opts.DefaultImagePrefix != "" {
+			imagePrefix = opts.DefaultImagePrefix
+		}
+		if imagePrefix == "" {
+			// guarded by opts.Validate()
 			c.Infof("Unable to derive default image prefix\n")
 		} else {
-			err := setDefaultImagePrefix(c, opts, defaultImagePrefix)
+			err := setDefaultImagePrefix(c, opts, imagePrefix)
 			if err != nil {
 				return err
 			}
-			c.Successf("Set default image prefix to %q\n", defaultImagePrefix)
+			c.Successf("Set default image prefix to %q\n", imagePrefix)
 		}
 	}
 
@@ -128,8 +133,11 @@ func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {
 `),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s credential apply my-docker-hub-creds %s my-docker-id", c.Name, cli.DockerHubFlagName),
+			fmt.Sprintf("%s credential apply my-docker-hub-creds %s my-docker-id %s", c.Name, cli.DockerHubFlagName, cli.SetDefaultImagePrefixFlagName),
 			fmt.Sprintf("%s credential apply my-gcr-creds %s path/to/token.json", c.Name, cli.GcrFlagName),
+			fmt.Sprintf("%s credential apply my-gcr-creds %s path/to/token.json %s", c.Name, cli.GcrFlagName, cli.SetDefaultImagePrefixFlagName),
 			fmt.Sprintf("%s credential apply my-registry-creds %s http://registry.example.com %s my-username", c.Name, cli.RegistryFlagName, cli.RegistryUserFlagName),
+			fmt.Sprintf("%s credential apply my-registry-creds %s http://registry.example.com %s my-username %s registry.example.com/my-username", c.Name, cli.RegistryFlagName, cli.RegistryUserFlagName, cli.DefaultImagePrefixFlagName),
 		}, "\n"),
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
@@ -154,9 +162,8 @@ func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.GcrTokenPath, cli.StripDash(cli.GcrFlagName), "", "path to Google Container Registry service account token `file`")
 	cmd.Flags().StringVar(&opts.Registry, cli.StripDash(cli.RegistryFlagName), "", "registry `url`")
 	cmd.Flags().StringVar(&opts.RegistryUser, cli.StripDash(cli.RegistryUserFlagName), "", "`username` for a registry, the password must be provided via stdin")
+	cmd.Flags().StringVar(&opts.DefaultImagePrefix, cli.StripDash(cli.DefaultImagePrefixFlagName), "", fmt.Sprintf("use this `registry` as the default for built images, implies %s", cli.SetDefaultImagePrefixFlagName))
 	cmd.Flags().BoolVar(&opts.SetDefaultImagePrefix, cli.StripDash(cli.SetDefaultImagePrefixFlagName), false, "use this registry as the default for built images")
-	// TODO restore visibility once fully implemented
-	cmd.Flag(cli.StripDash(cli.SetDefaultImagePrefixFlagName)).Hidden = true
 
 	return cmd
 }
