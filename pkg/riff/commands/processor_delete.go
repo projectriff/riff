@@ -64,7 +64,7 @@ func NewProcessorDeleteCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "stop processing messages",
+		Short: "delete processor(s)",
 		Long: `
 <todo>
 `,

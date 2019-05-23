@@ -1,6 +1,6 @@
 ## riff handler delete
 
-delete an http request handler
+delete handler(s)
 
 ### Synopsis
 

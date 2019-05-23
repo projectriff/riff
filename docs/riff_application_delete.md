@@ -1,6 +1,6 @@
 ## riff application delete
 
-delete an application, handlers that reference this app will stop updating
+delete application(s)
 
 ### Synopsis
 

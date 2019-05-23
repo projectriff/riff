@@ -26,6 +26,6 @@ processors apply functions to messages on streams
 
 * [riff](riff.md)	 - riff is for functions
 * [riff processor create](riff_processor_create.md)	 - process messages with a function
-* [riff processor delete](riff_processor_delete.md)	 - stop processing messages
+* [riff processor delete](riff_processor_delete.md)	 - delete processor(s)
 * [riff processor list](riff_processor_list.md)	 - table listing of processors
 

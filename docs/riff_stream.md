@@ -26,6 +26,6 @@ streams of messages
 
 * [riff](riff.md)	 - riff is for functions
 * [riff stream create](riff_stream_create.md)	 - create a stream of messages
-* [riff stream delete](riff_stream_delete.md)	 - delete a stream of messages
+* [riff stream delete](riff_stream_delete.md)	 - delete stream(s)
 * [riff stream list](riff_stream_list.md)	 - table listing of streams
 

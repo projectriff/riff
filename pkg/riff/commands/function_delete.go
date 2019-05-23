@@ -64,7 +64,7 @@ func NewFunctionDeleteCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "delete a function, handlers and processors that reference this function will stop updating",
+		Short: "delete function(s)",
 		Long: `
 <todo>
 `,

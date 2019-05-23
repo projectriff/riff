@@ -64,7 +64,7 @@ func NewApplicationDeleteCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "delete an application, handlers that reference this app will stop updating",
+		Short: "delete application(s)",
 		Long: `
 <todo>
 `,

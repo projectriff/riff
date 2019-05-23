@@ -1,6 +1,6 @@
 ## riff function delete
 
-delete a function, handlers and processors that reference this function will stop updating
+delete function(s)
 
 ### Synopsis
 

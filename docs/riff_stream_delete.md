@@ -1,6 +1,6 @@
 ## riff stream delete
 
-delete a stream of messages
+delete stream(s)
 
 ### Synopsis
 

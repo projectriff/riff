@@ -1,6 +1,6 @@
 ## riff processor delete
 
-stop processing messages
+delete processor(s)
 
 ### Synopsis
 

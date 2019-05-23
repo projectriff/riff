@@ -64,7 +64,7 @@ func NewHandlerDeleteCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "delete an http request handler",
+		Short: "delete handler(s)",
 		Long: `
 <todo>
 `,

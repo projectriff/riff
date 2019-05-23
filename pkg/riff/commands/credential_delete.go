@@ -69,7 +69,7 @@ func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "delete",
-		Short: "delete credential, image builds that depend on this credential may fail",
+		Short: "delete credential(s)",
 		Long: `
 <todo>
 `,

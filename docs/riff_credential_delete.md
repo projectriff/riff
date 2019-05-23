@@ -1,6 +1,6 @@
 ## riff credential delete
 
-delete credential, image builds that depend on this credential may fail
+delete credential(s)
 
 ### Synopsis
 
