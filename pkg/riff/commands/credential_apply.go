@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/system/pkg/apis/build"
@@ -120,9 +121,16 @@ func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {
 	opts := &CredentialApplyOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "apply",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "apply",
+		Short: "create or update credentials for a container registry",
+		Long: strings.TrimSpace(`
+<todo>
+`),
+		Example: strings.Join([]string{
+			fmt.Sprintf("%s credential apply my-docker-hub-creds %s my-docker-id", c.Name, cli.DockerHubFlagName),
+			fmt.Sprintf("%s credential apply my-gcr-creds %s path/to/token.json", c.Name, cli.GcrFlagName),
+			fmt.Sprintf("%s credential apply my-registry-creds %s http://registry.example.com %s my-username", c.Name, cli.RegistryFlagName, cli.RegistryUserFlagName),
+		}, "\n"),
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
@@ -142,11 +150,13 @@ func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().StringVar(&opts.DockerHubId, cli.StripDash(cli.DockerHubFlagName), "", "<todo>")
-	cmd.Flags().StringVar(&opts.GcrTokenPath, cli.StripDash(cli.GcrFlagName), "", "<todo>")
-	cmd.Flags().StringVar(&opts.Registry, cli.StripDash(cli.RegistryFlagName), "", "<todo>")
-	cmd.Flags().StringVar(&opts.RegistryUser, cli.StripDash(cli.RegistryUserFlagName), "", "<todo>")
-	cmd.Flags().BoolVar(&opts.SetDefaultImagePrefix, cli.StripDash(cli.SetDefaultImagePrefixFlagName), false, "<todo>")
+	cmd.Flags().StringVar(&opts.DockerHubId, cli.StripDash(cli.DockerHubFlagName), "", "Docker Hub `username`, the password must be provided via stdin")
+	cmd.Flags().StringVar(&opts.GcrTokenPath, cli.StripDash(cli.GcrFlagName), "", "path to Google Container Registry service account token `file`")
+	cmd.Flags().StringVar(&opts.Registry, cli.StripDash(cli.RegistryFlagName), "", "registry `url`")
+	cmd.Flags().StringVar(&opts.RegistryUser, cli.StripDash(cli.RegistryUserFlagName), "", "`username` for a registry, the password must be provided via stdin")
+	cmd.Flags().BoolVar(&opts.SetDefaultImagePrefix, cli.StripDash(cli.SetDefaultImagePrefixFlagName), false, "use this registry as the default for built images")
+	// TODO restore visibility once fully implemented
+	cmd.Flag(cli.StripDash(cli.SetDefaultImagePrefixFlagName)).Hidden = true
 
 	return cmd
 }

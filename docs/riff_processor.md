@@ -1,6 +1,6 @@
 ## riff processor
 
-<todo>
+processors apply functions to messages on streams
 
 ### Synopsis
 
@@ -15,15 +15,15 @@
 ### Options inherited from parent commands
 
 ```
-      --config string        config file (default is $HOME/.riff.yaml)
-      --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --config file        config file (default is $HOME/.riff.yaml)
+      --kube-config file   kubectl config file (default is $HOME/.kube/config)
+      --no-color           disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff](riff.md)	 - <todo>
-* [riff processor create](riff_processor_create.md)	 - <todo>
-* [riff processor delete](riff_processor_delete.md)	 - <todo>
-* [riff processor list](riff_processor_list.md)	 - <todo>
+* [riff](riff.md)	 - riff is for functions
+* [riff processor create](riff_processor_create.md)	 - create a processor to apply a function to messages on streams
+* [riff processor delete](riff_processor_delete.md)	 - delete processor(s)
+* [riff processor list](riff_processor_list.md)	 - table listing of processors
 

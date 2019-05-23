@@ -17,14 +17,19 @@
 package commands
 
 import (
+	"strings"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
 func NewApplicationCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "application",
-		Short:   "<todo>",
+		Use:   "application",
+		Short: "applications built from source using application buildpacks",
+		Long: strings.TrimSpace(`
+<todo>
+`),
 		Args:    cli.Args(),
 		Aliases: []string{"applications", "app", "apps"},
 	}

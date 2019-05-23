@@ -18,6 +18,8 @@ package commands
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
@@ -61,9 +63,15 @@ func NewProcessorDeleteCommand(c *cli.Config) *cobra.Command {
 	opts := &ProcessorDeleteOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "delete",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "delete",
+		Short: "delete processor(s)",
+		Long: strings.TrimSpace(`
+<todo>
+`),
+		Example: strings.Join([]string{
+			fmt.Sprintf("%s processor delete my-processor", c.Name),
+			fmt.Sprintf("%s processor delete %s ", c.Name, cli.AllFlagName),
+		}, "\n"),
 		Args: cli.Args(
 			cli.NamesArg(&opts.Names),
 		),
@@ -72,7 +80,7 @@ func NewProcessorDeleteCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().BoolVar(&opts.All, cli.StripDash(cli.AllFlagName), false, "<todo>")
+	cmd.Flags().BoolVar(&opts.All, cli.StripDash(cli.AllFlagName), false, "delete all processors within the namespace")
 
 	return cmd
 }

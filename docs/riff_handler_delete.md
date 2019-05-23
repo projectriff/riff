@@ -1,6 +1,6 @@
 ## riff handler delete
 
-<todo>
+delete handler(s)
 
 ### Synopsis
 
@@ -13,26 +13,27 @@ riff handler delete [flags]
 ### Examples
 
 ```
-<todo>
+riff handler delete my-handler
+riff handler delete --all 
 ```
 
 ### Options
 
 ```
-      --all                <todo>
-  -h, --help               help for delete
-  -n, --namespace string   <todo>
+      --all              delete all handlers within the namespace
+  -h, --help             help for delete
+  -n, --namespace name   kubernetes namespace (defaulted from kube config)
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --config string        config file (default is $HOME/.riff.yaml)
-      --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --config file        config file (default is $HOME/.riff.yaml)
+      --kube-config file   kubectl config file (default is $HOME/.kube/config)
+      --no-color           disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff handler](riff_handler.md)	 - <todo>
+* [riff handler](riff_handler.md)	 - handlers map HTTP requests to applications, functions or images
 

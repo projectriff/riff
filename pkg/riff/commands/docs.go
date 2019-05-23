@@ -18,7 +18,9 @@ package commands
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
@@ -43,9 +45,12 @@ func NewDocsCommand(c *cli.Config) *cobra.Command {
 	opts := &DocsOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "docs",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "docs",
+		Short: "generate docs in Markdown for this CLI",
+		Long: strings.TrimSpace(`
+<todo>
+`),
+		Example: fmt.Sprintf("%s docs", c.Name),
 		Hidden:  true,
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
@@ -63,7 +68,7 @@ func NewDocsCommand(c *cli.Config) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.Directory, cli.StripDash(cli.DirectoryFlagName), "d", "docs", "the output directory for the docs")
+	cmd.Flags().StringVarP(&opts.Directory, cli.StripDash(cli.DirectoryFlagName), "d", "docs", "the output `directory` for the docs")
 
 	return cmd
 }

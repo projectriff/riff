@@ -76,7 +76,7 @@ func AllNamespacesFlag(cmd *cobra.Command, c *Config, namespace *string, allName
 	}
 
 	NamespaceFlag(cmd, c, namespace)
-	cmd.Flags().BoolVar(allNamespaces, StripDash(AllNamespacesFlagName), false, "<todo>")
+	cmd.Flags().BoolVar(allNamespaces, StripDash(AllNamespacesFlagName), false, "use all kubernetes namespaces")
 }
 
 func NamespaceFlag(cmd *cobra.Command, c *Config, namespace *string) {
@@ -93,7 +93,7 @@ func NamespaceFlag(cmd *cobra.Command, c *Config, namespace *string) {
 		return nil
 	}
 
-	cmd.Flags().StringVarP(namespace, StripDash(NamespaceFlagName), "n", "", "<todo>")
+	cmd.Flags().StringVarP(namespace, StripDash(NamespaceFlagName), "n", "", "kubernetes `name`space (defaulted from kube config)")
 }
 
 func StripDash(flagName string) string {

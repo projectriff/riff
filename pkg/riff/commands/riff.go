@@ -17,6 +17,8 @@
 package commands
 
 import (
+	"strings"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
@@ -24,8 +26,11 @@ import (
 func NewRiffCommand(c *cli.Config) *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "riff",
-		Short: "<todo>",
-		Args:  cli.Args(),
+		Short: "riff is for functions",
+		Long: strings.TrimSpace(`
+<todo>
+`),
+		Args: cli.Args(),
 	}
 
 	cmd.AddCommand(NewCredentialCommand(c))

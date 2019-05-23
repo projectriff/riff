@@ -82,10 +82,17 @@ func NewHandlerInvokeCommand(c *cli.Config) *cobra.Command {
 	opts := &HandlerInvokeOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "invoke",
-		Hidden:  true,
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:    "invoke",
+		Hidden: true,
+		Short:  "invoke an http request handler using curl",
+		Long: strings.TrimSpace(`
+<todo>
+`),
+		Example: strings.Join([]string{
+			fmt.Sprintf("%s handler invoke my-handler", c.Name),
+			fmt.Sprintf("%s handler invoke my-handler --text -- -d 'hello' -w '\n'", c.Name),
+			fmt.Sprintf("%s handler invoke my-handler /request/path", c.Name),
+		}, "\n"),
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 			cli.Arg{
@@ -107,8 +114,8 @@ func NewHandlerInvokeCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().BoolVar(&opts.ContentTypeJSON, cli.StripDash(cli.JSONFlagName), false, "<todo>")
-	cmd.Flags().BoolVar(&opts.ContentTypeText, cli.StripDash(cli.TextFlagName), false, "<todo>")
+	cmd.Flags().BoolVar(&opts.ContentTypeJSON, cli.StripDash(cli.JSONFlagName), false, "set the content type to application/json")
+	cmd.Flags().BoolVar(&opts.ContentTypeText, cli.StripDash(cli.TextFlagName), false, "set the content type to text/plain")
 
 	return cmd
 }

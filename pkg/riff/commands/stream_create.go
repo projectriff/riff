@@ -18,6 +18,8 @@ package commands
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	streamv1alpha1 "github.com/projectriff/system/pkg/apis/stream/v1alpha1"
@@ -66,9 +68,12 @@ func NewStreamCreateCommand(c *cli.Config) *cobra.Command {
 	opts := &StreamCreateOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "create",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "create",
+		Short: "create a stream of messages",
+		Long: strings.TrimSpace(`
+<todo>
+`),
+		Example: fmt.Sprintf("%s stream create %s my-provider", c.Name, cli.ProviderFlagName),
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
@@ -77,7 +82,7 @@ func NewStreamCreateCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().StringVar(&opts.Provider, cli.StripDash(cli.ProviderFlagName), "", "<todo>")
+	cmd.Flags().StringVar(&opts.Provider, cli.StripDash(cli.ProviderFlagName), "", "`name` of stream provider")
 
 	return cmd
 }

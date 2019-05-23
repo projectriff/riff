@@ -18,6 +18,8 @@ package commands
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/system/pkg/apis/build"
@@ -66,9 +68,15 @@ func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 	opts := &CredentialDeleteOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "delete",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "delete",
+		Short: "delete credential(s)",
+		Long: strings.TrimSpace(`
+<todo>
+`),
+		Example: strings.Join([]string{
+			fmt.Sprintf("%s credential delete my-creds", c.Name),
+			fmt.Sprintf("%s credential delete %s ", c.Name, cli.AllFlagName),
+		}, "\n"),
 		Args: cli.Args(
 			cli.NamesArg(&opts.Names),
 		),
@@ -77,7 +85,7 @@ func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().BoolVar(&opts.All, cli.StripDash(cli.AllFlagName), false, "<todo>")
+	cmd.Flags().BoolVar(&opts.All, cli.StripDash(cli.AllFlagName), false, "delete all credentials within the namespace")
 
 	return cmd
 }
