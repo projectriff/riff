@@ -133,7 +133,7 @@ func NewHandlerCreateCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "deploy an application, function or image to handle http requests",
+		Short: "create a handler to map HTTP requests to an application, function or image",
 		Long: `
 <todo>
 `,

@@ -1,6 +1,6 @@
 ## riff application create
 
-build an application from source
+create an application from source
 
 ### Synopsis
 

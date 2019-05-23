@@ -147,7 +147,7 @@ func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "build a function from source",
+		Short: "create a function from source",
 		Long: `
 <todo>
 `,

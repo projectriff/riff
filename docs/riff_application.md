@@ -25,7 +25,7 @@ applications are built from source using Cloud Foundry buildpacks
 ### SEE ALSO
 
 * [riff](riff.md)	 - riff is for functions
-* [riff application create](riff_application_create.md)	 - build an application from source
+* [riff application create](riff_application_create.md)	 - create an application from source
 * [riff application delete](riff_application_delete.md)	 - delete application(s)
 * [riff application list](riff_application_list.md)	 - table listing of applications
 

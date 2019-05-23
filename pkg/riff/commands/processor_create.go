@@ -77,7 +77,7 @@ func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "process messages with a function",
+		Short: "create a processor to apply a function to messages on streams",
 		Long: `
 <todo>
 `,

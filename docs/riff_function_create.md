@@ -1,6 +1,6 @@
 ## riff function create
 
-build a function from source
+create a function from source
 
 ### Synopsis
 

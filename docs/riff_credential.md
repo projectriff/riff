@@ -25,7 +25,7 @@ credentials for image registries
 ### SEE ALSO
 
 * [riff](riff.md)	 - riff is for functions
-* [riff credential apply](riff_credential_apply.md)	 - create or update credentials
+* [riff credential apply](riff_credential_apply.md)	 - create or update credentials for an image registry
 * [riff credential delete](riff_credential_delete.md)	 - delete credential(s)
 * [riff credential list](riff_credential_list.md)	 - table listing of credentials
 

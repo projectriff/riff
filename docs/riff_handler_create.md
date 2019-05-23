@@ -1,6 +1,6 @@
 ## riff handler create
 
-deploy an application, function or image to handle http requests
+create a handler to map HTTP requests to an application, function or image
 
 ### Synopsis
 

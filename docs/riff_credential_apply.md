@@ -1,6 +1,6 @@
 ## riff credential apply
 
-create or update credentials
+create or update credentials for an image registry
 
 ### Synopsis
 

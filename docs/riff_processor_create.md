@@ -1,6 +1,6 @@
 ## riff processor create
 
-process messages with a function
+create a processor to apply a function to messages on streams
 
 ### Synopsis
 

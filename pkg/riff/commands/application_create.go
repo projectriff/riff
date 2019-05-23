@@ -132,7 +132,7 @@ func NewApplicationCreateCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "create",
-		Short: "build an application from source",
+		Short: "create an application from source",
 		Long: `
 <todo>
 `,
