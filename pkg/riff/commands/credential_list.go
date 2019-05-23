@@ -76,6 +76,9 @@ func NewCredentialListCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "list credentials in a namespace",
+		Long: `
+<todo>
+`,
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s credential list", c.Name),
 			fmt.Sprintf("%s credential list %s", c.Name, cli.AllNamespacesFlagName),

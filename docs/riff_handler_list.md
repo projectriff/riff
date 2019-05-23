@@ -4,7 +4,9 @@ list http request handlers in a namespace
 
 ### Synopsis
 
-list http request handlers in a namespace
+
+<todo>
+
 
 ```
 riff handler list [flags]
@@ -35,5 +37,5 @@ riff handler list --all-namespaces
 
 ### SEE ALSO
 
-* [riff handler](riff_handler.md)	 - handle http requests with an application, function or image
+* [riff handler](riff_handler.md)	 - HTTP handlers for applications, functions or images
 

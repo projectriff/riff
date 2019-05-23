@@ -4,7 +4,9 @@ list credentials in a namespace
 
 ### Synopsis
 
-list credentials in a namespace
+
+<todo>
+
 
 ```
 riff credential list [flags]
@@ -35,5 +37,5 @@ riff credential list --all-namespaces
 
 ### SEE ALSO
 
-* [riff credential](riff_credential.md)	 - image registry credentails
+* [riff credential](riff_credential.md)	 - image registry credentials
 

@@ -73,6 +73,9 @@ func NewProcessorListCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "list processors in a namespace",
+		Long: `
+<todo>
+`,
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s processor list", c.Name),
 			fmt.Sprintf("%s processor list %s", c.Name, cli.AllNamespacesFlagName),

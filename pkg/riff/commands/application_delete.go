@@ -65,6 +65,9 @@ func NewApplicationDeleteCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "delete an application, handlers that reference this app will stop updating",
+		Long: `
+<todo>
+`,
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s application delete my-application", c.Name),
 			fmt.Sprintf("%s application delete %s", c.Name, cli.AllFlagName),

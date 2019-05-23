@@ -134,6 +134,9 @@ func NewHandlerCreateCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "deploy an application, function or image to handle http requests",
+		Long: `
+<todo>
+`,
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s handler create my-app-handler %s my-app", c.Name, cli.ApplicationRefFlagName),
 			fmt.Sprintf("%s handler create my-func-handler %s my-func", c.Name, cli.FunctionRefFlagName),

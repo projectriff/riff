@@ -4,7 +4,9 @@ stop processing messages
 
 ### Synopsis
 
-stop processing messages
+
+<todo>
+
 
 ```
 riff processor delete [flags]
@@ -35,5 +37,5 @@ riff processor delete --all
 
 ### SEE ALSO
 
-* [riff processor](riff_processor.md)	 - process messages with a function
+* [riff processor](riff_processor.md)	 - message processors for functions
 

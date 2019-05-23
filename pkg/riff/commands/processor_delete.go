@@ -65,6 +65,9 @@ func NewProcessorDeleteCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "stop processing messages",
+		Long: `
+<todo>
+`,
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s processor delete my-processor", c.Name),
 			fmt.Sprintf("%s processor delete %s ", c.Name, cli.AllFlagName),

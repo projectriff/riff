@@ -4,7 +4,9 @@ list streams in a namespace
 
 ### Synopsis
 
-list streams in a namespace
+
+<todo>
+
 
 ```
 riff stream list [flags]
@@ -35,5 +37,5 @@ riff stream list --all-namespaces
 
 ### SEE ALSO
 
-* [riff stream](riff_stream.md)	 - stream of messages
+* [riff stream](riff_stream.md)	 - streams of messages
 

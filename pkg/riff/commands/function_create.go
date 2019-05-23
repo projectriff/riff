@@ -148,6 +148,9 @@ func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "build a function from source",
+		Long: `
+<todo>
+`,
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s function create my-func %s registry.example.com/image %s https://example.com/my-func.git", c.Name, cli.ImageFlagName, cli.GitRepoFlagName),
 			fmt.Sprintf("%s function create my-func %s registry.example.com/image %s ./my-func", c.Name, cli.ImageFlagName, cli.LocalPathFlagName),

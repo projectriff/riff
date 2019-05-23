@@ -1,10 +1,12 @@
 ## riff function
 
-build functions from source using riff function buildpacks
+functions built from source using riff function buildpacks
 
 ### Synopsis
 
-build functions from source using riff function buildpacks
+
+<todo>
+
 
 ### Options
 

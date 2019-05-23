@@ -44,8 +44,11 @@ func NewDocsCommand(c *cli.Config) *cobra.Command {
 	opts := &DocsOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "docs",
-		Short:   "generate docs in Markdown for this CLI",
+		Use:   "docs",
+		Short: "generate docs in Markdown for this CLI",
+		Long: `
+<todo>
+`,
 		Example: fmt.Sprintf("%s docs", c.Name),
 		Hidden:  true,
 		Args:    cli.Args(),

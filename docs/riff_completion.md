@@ -4,7 +4,9 @@ generate shell completion script for bash or zsh
 
 ### Synopsis
 
-generate shell completion script for bash or zsh
+
+<todo>
+
 
 ```
 riff completion [flags]

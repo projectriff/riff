@@ -4,7 +4,9 @@ delete a stream of messages
 
 ### Synopsis
 
-delete a stream of messages
+
+<todo>
+
 
 ```
 riff stream delete [flags]
@@ -35,5 +37,5 @@ riff stream delete --all
 
 ### SEE ALSO
 
-* [riff stream](riff_stream.md)	 - stream of messages
+* [riff stream](riff_stream.md)	 - streams of messages
 

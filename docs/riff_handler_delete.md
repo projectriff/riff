@@ -4,7 +4,9 @@ delete an http request handler
 
 ### Synopsis
 
-delete an http request handler
+
+<todo>
+
 
 ```
 riff handler delete [flags]
@@ -35,5 +37,5 @@ riff handler delete --all
 
 ### SEE ALSO
 
-* [riff handler](riff_handler.md)	 - handle http requests with an application, function or image
+* [riff handler](riff_handler.md)	 - HTTP handlers for applications, functions or images
 

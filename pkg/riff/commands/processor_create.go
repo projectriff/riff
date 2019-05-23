@@ -78,6 +78,9 @@ func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "process messages with a function",
+		Long: `
+<todo>
+`,
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s processor create my-processor %s my-func %s my-input-stream", c.Name, cli.FunctionRefFlagName, cli.InputFlagName),
 			fmt.Sprintf("%s processor create my-processor %s my-func %s my-input-stream %s my-join-stream %s my-output-stream", c.Name, cli.FunctionRefFlagName, cli.InputFlagName, cli.InputFlagName, cli.OutputFlagName),

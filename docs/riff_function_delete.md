@@ -4,7 +4,9 @@ delete a function, handlers and processors that reference this function will sto
 
 ### Synopsis
 
-delete a function, handlers and processors that reference this function will stop updating
+
+<todo>
+
 
 ```
 riff function delete [flags]
@@ -35,5 +37,5 @@ riff function delete --all
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - build functions from source using riff function buildpacks
+* [riff function](riff_function.md)	 - functions built from source using riff function buildpacks
 

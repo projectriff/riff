@@ -133,6 +133,9 @@ func NewApplicationCreateCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "build an application from source",
+		Long: `
+<todo>
+`,
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s application create my-app %s registry.example.com/image %s https://example.com/my-app.git", c.Name, cli.ImageFlagName, cli.GitRepoFlagName),
 			fmt.Sprintf("%s application create my-app %s registry.example.com/image %s ./my-app", c.Name, cli.ImageFlagName, cli.LocalPathFlagName),

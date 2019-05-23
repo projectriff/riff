@@ -4,7 +4,9 @@ delete an application, handlers that reference this app will stop updating
 
 ### Synopsis
 
-delete an application, handlers that reference this app will stop updating
+
+<todo>
+
 
 ```
 riff application delete [flags]
@@ -35,5 +37,5 @@ riff application delete --all
 
 ### SEE ALSO
 
-* [riff application](riff_application.md)	 - build applications from source using Cloud Foundry buildpacks
+* [riff application](riff_application.md)	 - applications built from source using Cloud Foundry buildpacks
 

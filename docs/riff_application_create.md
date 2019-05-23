@@ -4,7 +4,9 @@ build an application from source
 
 ### Synopsis
 
-build an application from source
+
+<todo>
+
 
 ```
 riff application create [flags]
@@ -40,5 +42,5 @@ riff application create my-app --image registry.example.com/image --local-path .
 
 ### SEE ALSO
 
-* [riff application](riff_application.md)	 - build applications from source using Cloud Foundry buildpacks
+* [riff application](riff_application.md)	 - applications built from source using Cloud Foundry buildpacks
 

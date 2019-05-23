@@ -4,7 +4,9 @@ delete credential, image builds that depend on this credential may fail
 
 ### Synopsis
 
-delete credential, image builds that depend on this credential may fail
+
+<todo>
+
 
 ```
 riff credential delete [flags]
@@ -35,5 +37,5 @@ riff credential delete --all
 
 ### SEE ALSO
 
-* [riff credential](riff_credential.md)	 - image registry credentails
+* [riff credential](riff_credential.md)	 - image registry credentials
 

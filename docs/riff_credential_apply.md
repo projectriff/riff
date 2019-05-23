@@ -4,7 +4,9 @@ create or update credentials
 
 ### Synopsis
 
-create or update credentials
+
+<todo>
+
 
 ```
 riff credential apply [flags]
@@ -39,5 +41,5 @@ riff credential apply my-registry-creds --registry http://registry.example.com -
 
 ### SEE ALSO
 
-* [riff credential](riff_credential.md)	 - image registry credentails
+* [riff credential](riff_credential.md)	 - image registry credentials
 

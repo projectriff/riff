@@ -67,8 +67,11 @@ func NewStreamCreateCommand(c *cli.Config) *cobra.Command {
 	opts := &StreamCreateOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "create",
-		Short:   "create a stream of messages",
+		Use:   "create",
+		Short: "create a stream of messages",
+		Long: `
+<todo>
+`,
 		Example: fmt.Sprintf("%s stream create %s my-provider", c.Name, cli.ProviderFlagName),
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),

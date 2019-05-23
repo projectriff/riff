@@ -4,7 +4,9 @@ create a stream of messages
 
 ### Synopsis
 
-create a stream of messages
+
+<todo>
+
 
 ```
 riff stream create [flags]
@@ -34,5 +36,5 @@ riff stream create --provider my-provider
 
 ### SEE ALSO
 
-* [riff stream](riff_stream.md)	 - stream of messages
+* [riff stream](riff_stream.md)	 - streams of messages
 

@@ -1,10 +1,12 @@
 ## riff application
 
-build applications from source using Cloud Foundry buildpacks
+applications built from source using Cloud Foundry buildpacks
 
 ### Synopsis
 
-build applications from source using Cloud Foundry buildpacks
+
+<todo>
+
 
 ### Options
 

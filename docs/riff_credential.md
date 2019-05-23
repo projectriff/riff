@@ -1,10 +1,12 @@
 ## riff credential
 
-image registry credentails
+image registry credentials
 
 ### Synopsis
 
-image registry credentails
+
+<todo>
+
 
 ### Options
 

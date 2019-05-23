@@ -59,6 +59,9 @@ func NewCompletionCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "completion",
 		Short: "generate shell completion script for bash or zsh",
+		Long: `
+<todo>
+`,
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s completion", c.Name),
 			fmt.Sprintf("%s completion %s zsh", c.Name, cli.ShellFlagname),

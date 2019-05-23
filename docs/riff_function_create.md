@@ -4,7 +4,9 @@ build a function from source
 
 ### Synopsis
 
-build a function from source
+
+<todo>
+
 
 ```
 riff function create [flags]
@@ -43,5 +45,5 @@ riff function create my-func --image registry.example.com/image --local-path ./m
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - build functions from source using riff function buildpacks
+* [riff function](riff_function.md)	 - functions built from source using riff function buildpacks
 

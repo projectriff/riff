@@ -73,6 +73,9 @@ func NewHandlerListCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "list http request handlers in a namespace",
+		Long: `
+<todo>
+`,
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s handler list", c.Name),
 			fmt.Sprintf("%s handler list %s", c.Name, cli.AllNamespacesFlagName),

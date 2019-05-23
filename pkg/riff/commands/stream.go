@@ -23,8 +23,11 @@ import (
 
 func NewStreamCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "stream",
-		Short:   "streams of messages",
+		Use:   "stream",
+		Short: "streams of messages",
+		Long: `
+<todo>
+`,
 		Args:    cli.Args(),
 		Aliases: []string{"streams"},
 	}

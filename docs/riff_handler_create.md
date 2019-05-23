@@ -4,7 +4,9 @@ deploy an application, function or image to handle http requests
 
 ### Synopsis
 
-deploy an application, function or image to handle http requests
+
+<todo>
+
 
 ```
 riff handler create [flags]
@@ -40,5 +42,5 @@ riff handler create my-image-handler --image registry.example.com/my-image:lates
 
 ### SEE ALSO
 
-* [riff handler](riff_handler.md)	 - handle http requests with an application, function or image
+* [riff handler](riff_handler.md)	 - HTTP handlers for applications, functions or images
 

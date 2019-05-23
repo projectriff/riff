@@ -1,10 +1,12 @@
 ## riff handler
 
-handle http requests with an application, function or image
+HTTP handlers for applications, functions or images
 
 ### Synopsis
 
-handle http requests with an application, function or image
+
+<todo>
+
 
 ### Options
 

@@ -4,7 +4,9 @@ list functions in a namespace
 
 ### Synopsis
 
-list functions in a namespace
+
+<todo>
+
 
 ```
 riff function list [flags]
@@ -35,5 +37,5 @@ riff function list --all-namespaces
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - build functions from source using riff function buildpacks
+* [riff function](riff_function.md)	 - functions built from source using riff function buildpacks
 

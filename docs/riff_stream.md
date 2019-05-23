@@ -1,10 +1,12 @@
 ## riff stream
 
-stream of messages
+streams of messages
 
 ### Synopsis
 
-stream of messages
+
+<todo>
+
 
 ### Options
 

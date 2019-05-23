@@ -4,7 +4,9 @@ process messages with a function
 
 ### Synopsis
 
-process messages with a function
+
+<todo>
+
 
 ```
 riff processor create [flags]
@@ -37,5 +39,5 @@ riff processor create my-processor --function-ref my-func --input my-input-strea
 
 ### SEE ALSO
 
-* [riff processor](riff_processor.md)	 - process messages with a function
+* [riff processor](riff_processor.md)	 - message processors for functions
 

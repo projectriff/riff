@@ -4,7 +4,9 @@ list processors in a namespace
 
 ### Synopsis
 
-list processors in a namespace
+
+<todo>
+
 
 ```
 riff processor list [flags]
@@ -35,5 +37,5 @@ riff processor list --all-namespaces
 
 ### SEE ALSO
 
-* [riff processor](riff_processor.md)	 - process messages with a function
+* [riff processor](riff_processor.md)	 - message processors for functions
 

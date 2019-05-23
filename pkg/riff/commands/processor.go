@@ -23,8 +23,11 @@ import (
 
 func NewProcessorCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "processor",
-		Short:   "message processors for functions",
+		Use:   "processor",
+		Short: "message processors for functions",
+		Long: `
+<todo>
+`,
 		Args:    cli.Args(),
 		Aliases: []string{"processors"},
 	}

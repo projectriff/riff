@@ -65,6 +65,9 @@ func NewStreamDeleteCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "delete a stream of messages",
+		Long: `
+<todo>
+`,
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s stream delete my-stream", c.Name),
 			fmt.Sprintf("%s stream delete %s ", c.Name, cli.AllFlagName),

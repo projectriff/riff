@@ -1,10 +1,12 @@
 ## riff processor
 
-process messages with a function
+message processors for functions
 
 ### Synopsis
 
-process messages with a function
+
+<todo>
+
 
 ### Options
 

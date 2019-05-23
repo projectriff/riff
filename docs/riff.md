@@ -4,7 +4,9 @@ riff is for functions
 
 ### Synopsis
 
-riff is for functions
+
+<todo>
+
 
 ### Options
 
@@ -17,11 +19,11 @@ riff is for functions
 
 ### SEE ALSO
 
-* [riff application](riff_application.md)	 - build applications from source using Cloud Foundry buildpacks
+* [riff application](riff_application.md)	 - applications built from source using Cloud Foundry buildpacks
 * [riff completion](riff_completion.md)	 - generate shell completion script for bash or zsh
-* [riff credential](riff_credential.md)	 - image registry credentails
-* [riff function](riff_function.md)	 - build functions from source using riff function buildpacks
-* [riff handler](riff_handler.md)	 - handle http requests with an application, function or image
-* [riff processor](riff_processor.md)	 - process messages with a function
-* [riff stream](riff_stream.md)	 - stream of messages
+* [riff credential](riff_credential.md)	 - image registry credentials
+* [riff function](riff_function.md)	 - functions built from source using riff function buildpacks
+* [riff handler](riff_handler.md)	 - HTTP handlers for applications, functions or images
+* [riff processor](riff_processor.md)	 - message processors for functions
+* [riff stream](riff_stream.md)	 - streams of messages
 

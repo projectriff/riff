@@ -4,7 +4,9 @@ list applications in a namespace
 
 ### Synopsis
 
-list applications in a namespace
+
+<todo>
+
 
 ```
 riff application list [flags]
@@ -35,5 +37,5 @@ riff application list --all-namespaces
 
 ### SEE ALSO
 
-* [riff application](riff_application.md)	 - build applications from source using Cloud Foundry buildpacks
+* [riff application](riff_application.md)	 - applications built from source using Cloud Foundry buildpacks
 
