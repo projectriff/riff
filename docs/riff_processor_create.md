@@ -24,9 +24,9 @@ riff processor create my-processor --function-ref my-func --input my-input-strea
 ```
       --function-ref name   name of function build to deploy
   -h, --help                help for create
-      --input name          name of stream to read messages from
+      --input name          name of stream to read messages from (may be set multiple times)
   -n, --namespace name      kubernetes namespace (defaulted from kube config)
-      --output name         name of stream to write messages to
+      --output name         name of stream to write messages to (may be set multiple times)
 ```
 
 ### Options inherited from parent commands
