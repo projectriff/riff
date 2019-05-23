@@ -11,10 +11,10 @@ riff is for functions
 ### Options
 
 ```
-      --config string        config file (default is $HOME/.riff.yaml)
-  -h, --help                 help for riff
-      --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             disable color output in terminals
+      --config file        config file (default is $HOME/.riff.yaml)
+  -h, --help               help for riff
+      --kube-config file   kubectl config file (default is $HOME/.kube/config)
+      --no-color           disable color output in terminals
 ```
 
 ### SEE ALSO

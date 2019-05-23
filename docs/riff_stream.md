@@ -17,9 +17,9 @@ streams of messages
 ### Options inherited from parent commands
 
 ```
-      --config string        config file (default is $HOME/.riff.yaml)
-      --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             disable color output in terminals
+      --config file        config file (default is $HOME/.riff.yaml)
+      --kube-config file   kubectl config file (default is $HOME/.kube/config)
+      --no-color           disable color output in terminals
 ```
 
 ### SEE ALSO

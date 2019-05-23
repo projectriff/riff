@@ -23,21 +23,21 @@ riff handler create my-image-handler --image registry.example.com/my-image:lates
 ### Options
 
 ```
-      --application-ref string   application build to deploy
-      --env stringArray          environment variable defined as a key value pair separated by an equals sign, example "--env MY_VAR=my-value"
-      --env-from stringArray     environment variable from a config map or secret, example "--env-from MY_SECRET_VALUE=secretKeyRef:my-secret-name:key-in-secret", "--env-from MY_CONFIG_MAP_VALUE=configMapKeyRef:my-config-map-name:key-in-config-map"
-      --function-ref string      function build to deploy
-  -h, --help                     help for create
-      --image string             container image to deploy
-  -n, --namespace string         kubernetes namespace (defaulted from kube config)
+      --application-ref name   name of application to deploy
+      --env variable           environment variable(s) defined as a key value pair separated by an equals sign, example "--env MY_VAR=my-value"
+      --env-from variable      environment variable(s) from a config map or secret, example "--env-from MY_SECRET_VALUE=secretKeyRef:my-secret-name:key-in-secret", "--env-from MY_CONFIG_MAP_VALUE=configMapKeyRef:my-config-map-name:key-in-config-map"
+      --function-ref name      name of function to deploy
+  -h, --help                   help for create
+      --image image            container image to deploy
+  -n, --namespace name         kubernetes namespace (defaulted from kube config)
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --config string        config file (default is $HOME/.riff.yaml)
-      --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             disable color output in terminals
+      --config file        config file (default is $HOME/.riff.yaml)
+      --kube-config file   kubectl config file (default is $HOME/.kube/config)
+      --no-color           disable color output in terminals
 ```
 
 ### SEE ALSO

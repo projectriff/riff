@@ -93,7 +93,7 @@ func NamespaceFlag(cmd *cobra.Command, c *Config, namespace *string) {
 		return nil
 	}
 
-	cmd.Flags().StringVarP(namespace, StripDash(NamespaceFlagName), "n", "", "kubernetes namespace (defaulted from kube config)")
+	cmd.Flags().StringVarP(namespace, StripDash(NamespaceFlagName), "n", "", "kubernetes `name`space (defaulted from kube config)")
 }
 
 func StripDash(flagName string) string {

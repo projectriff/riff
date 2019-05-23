@@ -22,19 +22,19 @@ riff processor create my-processor --function-ref my-func --input my-input-strea
 ### Options
 
 ```
-      --function-ref string   function build to deploy
-  -h, --help                  help for create
-      --input stringArray     stream to read messages from
-  -n, --namespace string      kubernetes namespace (defaulted from kube config)
-      --output stringArray    stream to write messages to
+      --function-ref name   name of function build to deploy
+  -h, --help                help for create
+      --input name          name of stream to read messages from
+  -n, --namespace name      kubernetes namespace (defaulted from kube config)
+      --output name         name of stream to write messages to
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --config string        config file (default is $HOME/.riff.yaml)
-      --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             disable color output in terminals
+      --config file        config file (default is $HOME/.riff.yaml)
+      --kube-config file   kubectl config file (default is $HOME/.kube/config)
+      --no-color           disable color output in terminals
 ```
 
 ### SEE ALSO

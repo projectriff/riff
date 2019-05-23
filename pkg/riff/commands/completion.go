@@ -71,7 +71,7 @@ func NewCompletionCommand(c *cli.Config) *cobra.Command {
 		RunE:    cli.ExecOptions(c, opts),
 	}
 
-	cmd.Flags().StringVar(&opts.Shell, cli.StripDash(cli.ShellFlagname), "bash", "shell to generate completion for: bash or zsh")
+	cmd.Flags().StringVar(&opts.Shell, cli.StripDash(cli.ShellFlagname), "bash", "`shell` to generate completion for: bash or zsh")
 
 	return cmd
 }

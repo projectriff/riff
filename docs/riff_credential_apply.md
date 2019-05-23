@@ -23,20 +23,20 @@ riff credential apply my-registry-creds --registry http://registry.example.com -
 ### Options
 
 ```
-      --docker-hub string      Docker Hub username, the password must be provided via stdin
-      --gcr string             path to Google Container Registry service account token file
-  -h, --help                   help for apply
-  -n, --namespace string       kubernetes namespace (defaulted from kube config)
-      --registry string        registry url
-      --registry-user string   username for a registry, the password must be provided via stdin
+      --docker-hub username      Docker Hub username, the password must be provided via stdin
+      --gcr file                 path to Google Container Registry service account token file
+  -h, --help                     help for apply
+  -n, --namespace name           kubernetes namespace (defaulted from kube config)
+      --registry url             registry url
+      --registry-user username   username for a registry, the password must be provided via stdin
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --config string        config file (default is $HOME/.riff.yaml)
-      --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             disable color output in terminals
+      --config file        config file (default is $HOME/.riff.yaml)
+      --kube-config file   kubectl config file (default is $HOME/.kube/config)
+      --no-color           disable color output in terminals
 ```
 
 ### SEE ALSO

@@ -67,7 +67,7 @@ func NewDocsCommand(c *cli.Config) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.Directory, cli.StripDash(cli.DirectoryFlagName), "d", "docs", "the output directory for the docs")
+	cmd.Flags().StringVarP(&opts.Directory, cli.StripDash(cli.DirectoryFlagName), "d", "docs", "the output `directory` for the docs")
 
 	return cmd
 }
