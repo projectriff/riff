@@ -17,15 +17,19 @@
 package commands
 
 import (
+	"strings"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
 func NewHandlerCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "handler",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "handler",
+		Short: "handlers map HTTP requests to applications, functions or images",
+		Long: strings.TrimSpace(`
+<todo>
+`),
 		Args:    cli.Args(),
 		Aliases: []string{"handlers"},
 	}

@@ -17,14 +17,19 @@
 package commands
 
 import (
+	"strings"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
 func NewProcessorCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "processor",
-		Short:   "<todo>",
+		Use:   "processor",
+		Short: "processors apply functions to messages on streams",
+		Long: strings.TrimSpace(`
+<todo>
+`),
 		Args:    cli.Args(),
 		Aliases: []string{"processors"},
 	}

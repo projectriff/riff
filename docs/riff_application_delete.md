@@ -1,6 +1,6 @@
 ## riff application delete
 
-<todo>
+delete application(s)
 
 ### Synopsis
 
@@ -13,26 +13,27 @@ riff application delete [flags]
 ### Examples
 
 ```
-<todo>
+riff application delete my-application
+riff application delete --all
 ```
 
 ### Options
 
 ```
-      --all                <todo>
-  -h, --help               help for delete
-  -n, --namespace string   <todo>
+      --all              delete all applications within the namespace
+  -h, --help             help for delete
+  -n, --namespace name   kubernetes namespace (defaulted from kube config)
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --config string        config file (default is $HOME/.riff.yaml)
-      --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --config file        config file (default is $HOME/.riff.yaml)
+      --kube-config file   kubectl config file (default is $HOME/.kube/config)
+      --no-color           disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff application](riff_application.md)	 - <todo>
+* [riff application](riff_application.md)	 - applications built from source using application buildpacks
 

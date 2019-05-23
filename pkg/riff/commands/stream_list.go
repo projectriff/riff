@@ -18,6 +18,8 @@ package commands
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/cli/printers"
@@ -69,9 +71,15 @@ func NewStreamListCommand(c *cli.Config) *cobra.Command {
 	opts := &StreamListOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "list",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "list",
+		Short: "table listing of streams",
+		Long: strings.TrimSpace(`
+<todo>
+`),
+		Example: strings.Join([]string{
+			fmt.Sprintf("%s stream list", c.Name),
+			fmt.Sprintf("%s stream list %s", c.Name, cli.AllNamespacesFlagName),
+		}, "\n"),
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE:    cli.ExecOptions(c, opts),

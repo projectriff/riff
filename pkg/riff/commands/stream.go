@@ -17,14 +17,19 @@
 package commands
 
 import (
+	"strings"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
 func NewStreamCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "stream",
-		Short:   "<todo>",
+		Use:   "stream",
+		Short: "streams of messages",
+		Long: strings.TrimSpace(`
+<todo>
+`),
 		Args:    cli.Args(),
 		Aliases: []string{"streams"},
 	}

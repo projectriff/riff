@@ -1,6 +1,6 @@
 ## riff stream delete
 
-<todo>
+delete stream(s)
 
 ### Synopsis
 
@@ -13,26 +13,27 @@ riff stream delete [flags]
 ### Examples
 
 ```
-<todo>
+riff stream delete my-stream
+riff stream delete --all 
 ```
 
 ### Options
 
 ```
-      --all                <todo>
-  -h, --help               help for delete
-  -n, --namespace string   <todo>
+      --all              delete all streams within the namespace
+  -h, --help             help for delete
+  -n, --namespace name   kubernetes namespace (defaulted from kube config)
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --config string        config file (default is $HOME/.riff.yaml)
-      --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --config file        config file (default is $HOME/.riff.yaml)
+      --kube-config file   kubectl config file (default is $HOME/.kube/config)
+      --no-color           disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff stream](riff_stream.md)	 - <todo>
+* [riff stream](riff_stream.md)	 - streams of messages
 

@@ -17,14 +17,19 @@
 package commands
 
 import (
+	"strings"
+
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
 func NewCredentialCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "credential",
-		Short:   "<todo>",
+		Use:   "credential",
+		Short: "credentials for container registries",
+		Long: strings.TrimSpace(`
+<todo>
+`),
 		Args:    cli.Args(),
 		Aliases: []string{"credentials", "cred", "creds"},
 	}

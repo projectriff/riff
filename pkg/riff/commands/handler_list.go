@@ -18,6 +18,8 @@ package commands
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/cli/printers"
@@ -69,9 +71,15 @@ func NewHandlerListCommand(c *cli.Config) *cobra.Command {
 	opts := &HandlerListOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "list",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "list",
+		Short: "table listing of handlers",
+		Long: strings.TrimSpace(`
+<todo>
+`),
+		Example: strings.Join([]string{
+			fmt.Sprintf("%s handler list", c.Name),
+			fmt.Sprintf("%s handler list %s", c.Name, cli.AllNamespacesFlagName),
+		}, "\n"),
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE:    cli.ExecOptions(c, opts),

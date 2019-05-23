@@ -18,6 +18,8 @@ package commands
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
@@ -55,15 +57,21 @@ func NewCompletionCommand(c *cli.Config) *cobra.Command {
 	opts := &CompletionOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "completion",
-		Short:   "<todo>",
-		Example: "<todo>",
+		Use:   "completion",
+		Short: "generate shell completion script",
+		Long: strings.TrimSpace(`
+<todo>
+`),
+		Example: strings.Join([]string{
+			fmt.Sprintf("%s completion", c.Name),
+			fmt.Sprintf("%s completion %s zsh", c.Name, cli.ShellFlagname),
+		}, "\n"),
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE:    cli.ExecOptions(c, opts),
 	}
 
-	cmd.Flags().StringVar(&opts.Shell, cli.StripDash(cli.ShellFlagname), "bash", "shell to generate completion for: bash or zsh")
+	cmd.Flags().StringVar(&opts.Shell, cli.StripDash(cli.ShellFlagname), "bash", "`shell` to generate completion for: bash or zsh")
 
 	return cmd
 }

@@ -1,6 +1,6 @@
 ## riff credential apply
 
-<todo>
+create or update credentials for a container registry
 
 ### Synopsis
 
@@ -13,30 +13,31 @@ riff credential apply [flags]
 ### Examples
 
 ```
-<todo>
+riff credential apply my-docker-hub-creds --docker-hub my-docker-id
+riff credential apply my-gcr-creds --gcr path/to/token.json
+riff credential apply my-registry-creds --registry http://registry.example.com --registry-user my-username
 ```
 
 ### Options
 
 ```
-      --docker-hub string          <todo>
-      --gcr string                 <todo>
-  -h, --help                       help for apply
-  -n, --namespace string           <todo>
-      --registry string            <todo>
-      --registry-user string       <todo>
-      --set-default-image-prefix   <todo>
+      --docker-hub username      Docker Hub username, the password must be provided via stdin
+      --gcr file                 path to Google Container Registry service account token file
+  -h, --help                     help for apply
+  -n, --namespace name           kubernetes namespace (defaulted from kube config)
+      --registry url             registry url
+      --registry-user username   username for a registry, the password must be provided via stdin
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --config string        config file (default is $HOME/.riff.yaml)
-      --kube-config string   kubectl config file (default is $HOME/.kube/config)
-      --no-color             <todo>
+      --config file        config file (default is $HOME/.riff.yaml)
+      --kube-config file   kubectl config file (default is $HOME/.kube/config)
+      --no-color           disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff credential](riff_credential.md)	 - <todo>
+* [riff credential](riff_credential.md)	 - credentials for container registries
 
