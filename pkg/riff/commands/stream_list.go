@@ -72,7 +72,7 @@ func NewStreamListCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "list streams in a namespace",
+		Short: "table listing of streams",
 		Long: `
 <todo>
 `,

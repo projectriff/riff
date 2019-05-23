@@ -1,6 +1,6 @@
 ## riff application list
 
-list applications in a namespace
+table listing of applications
 
 ### Synopsis
 

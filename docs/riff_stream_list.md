@@ -1,6 +1,6 @@
 ## riff stream list
 
-list streams in a namespace
+table listing of streams
 
 ### Synopsis
 

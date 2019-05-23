@@ -1,6 +1,6 @@
 ## riff credential list
 
-list credentials in a namespace
+table listing of credentials
 
 ### Synopsis
 

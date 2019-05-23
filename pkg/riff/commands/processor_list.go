@@ -72,7 +72,7 @@ func NewProcessorListCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "list processors in a namespace",
+		Short: "table listing of processors",
 		Long: `
 <todo>
 `,

@@ -1,6 +1,6 @@
 ## riff function list
 
-list functions in a namespace
+table listing of functions
 
 ### Synopsis
 

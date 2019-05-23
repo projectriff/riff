@@ -27,5 +27,5 @@ image registry credentials
 * [riff](riff.md)	 - riff is for functions
 * [riff credential apply](riff_credential_apply.md)	 - create or update credentials
 * [riff credential delete](riff_credential_delete.md)	 - delete credential, image builds that depend on this credential may fail
-* [riff credential list](riff_credential_list.md)	 - list credentials in a namespace
+* [riff credential list](riff_credential_list.md)	 - table listing of credentials
 

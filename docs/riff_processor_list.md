@@ -1,6 +1,6 @@
 ## riff processor list
 
-list processors in a namespace
+table listing of processors
 
 ### Synopsis
 

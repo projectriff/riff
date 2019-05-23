@@ -72,7 +72,7 @@ func NewApplicationListCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "list applications in a namespace",
+		Short: "table listing of applications",
 		Long: `
 <todo>
 `,

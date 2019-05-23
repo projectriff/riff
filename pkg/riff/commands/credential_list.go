@@ -75,7 +75,7 @@ func NewCredentialListCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "list credentials in a namespace",
+		Short: "table listing of credentials",
 		Long: `
 <todo>
 `,

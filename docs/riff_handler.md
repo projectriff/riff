@@ -27,5 +27,5 @@ HTTP handlers for applications, functions or images
 * [riff](riff.md)	 - riff is for functions
 * [riff handler create](riff_handler_create.md)	 - deploy an application, function or image to handle http requests
 * [riff handler delete](riff_handler_delete.md)	 - delete an http request handler
-* [riff handler list](riff_handler_list.md)	 - list http request handlers in a namespace
+* [riff handler list](riff_handler_list.md)	 - table listing of handlers
 

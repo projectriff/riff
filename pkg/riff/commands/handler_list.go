@@ -72,7 +72,7 @@ func NewHandlerListCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "list http request handlers in a namespace",
+		Short: "table listing of handlers",
 		Long: `
 <todo>
 `,

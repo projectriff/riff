@@ -1,6 +1,6 @@
 ## riff handler list
 
-list http request handlers in a namespace
+table listing of handlers
 
 ### Synopsis
 

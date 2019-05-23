@@ -72,7 +72,7 @@ func NewFunctionListCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "list functions in a namespace",
+		Short: "table listing of functions",
 		Long: `
 <todo>
 `,
