@@ -1,6 +1,6 @@
 ## riff completion
 
-generate shell completion script for bash or zsh
+generate shell completion script
 
 ### Synopsis
 

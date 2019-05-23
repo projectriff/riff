@@ -37,5 +37,5 @@ riff credential list --all-namespaces
 
 ### SEE ALSO
 
-* [riff credential](riff_credential.md)	 - credentials for image registries
+* [riff credential](riff_credential.md)	 - credentials for container registries
 

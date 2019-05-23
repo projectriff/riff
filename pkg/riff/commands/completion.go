@@ -58,7 +58,7 @@ func NewCompletionCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "completion",
-		Short: "generate shell completion script for bash or zsh",
+		Short: "generate shell completion script",
 		Long: `
 <todo>
 `,

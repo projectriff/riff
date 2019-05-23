@@ -37,5 +37,5 @@ riff function list --all-namespaces
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - functions are built from source using riff function buildpacks
+* [riff function](riff_function.md)	 - functions built from source using function buildpacks
 

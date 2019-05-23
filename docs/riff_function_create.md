@@ -45,5 +45,5 @@ riff function create my-func --image registry.example.com/image --local-path ./m
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - functions are built from source using riff function buildpacks
+* [riff function](riff_function.md)	 - functions built from source using function buildpacks
 

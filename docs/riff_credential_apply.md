@@ -1,6 +1,6 @@
 ## riff credential apply
 
-create or update credentials for an image registry
+create or update credentials for a container registry
 
 ### Synopsis
 
@@ -41,5 +41,5 @@ riff credential apply my-registry-creds --registry http://registry.example.com -
 
 ### SEE ALSO
 
-* [riff credential](riff_credential.md)	 - credentials for image registries
+* [riff credential](riff_credential.md)	 - credentials for container registries
 

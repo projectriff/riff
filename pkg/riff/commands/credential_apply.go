@@ -122,7 +122,7 @@ func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "apply",
-		Short: "create or update credentials for an image registry",
+		Short: "create or update credentials for a container registry",
 		Long: `
 <todo>
 `,

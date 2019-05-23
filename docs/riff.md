@@ -19,10 +19,10 @@ riff is for functions
 
 ### SEE ALSO
 
-* [riff application](riff_application.md)	 - applications are built from source using Cloud Foundry buildpacks
-* [riff completion](riff_completion.md)	 - generate shell completion script for bash or zsh
-* [riff credential](riff_credential.md)	 - credentials for image registries
-* [riff function](riff_function.md)	 - functions are built from source using riff function buildpacks
+* [riff application](riff_application.md)	 - applications built from source using application buildpacks
+* [riff completion](riff_completion.md)	 - generate shell completion script
+* [riff credential](riff_credential.md)	 - credentials for container registries
+* [riff function](riff_function.md)	 - functions built from source using function buildpacks
 * [riff handler](riff_handler.md)	 - handlers map HTTP requests to applications, functions or images
 * [riff processor](riff_processor.md)	 - processors apply functions to messages on streams
 * [riff stream](riff_stream.md)	 - streams of messages
