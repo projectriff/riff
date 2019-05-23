@@ -24,7 +24,7 @@ import (
 func NewCredentialCommand(c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "credential",
-		Short:   "image registry credentails",
+		Short:   "image registry credentials",
 		Args:    cli.Args(),
 		Aliases: []string{"credentials", "cred", "creds"},
 	}
