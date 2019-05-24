@@ -299,6 +299,17 @@ Created function "my-function"
 				packClient.AssertExpectations(t)
 				return nil
 			},
+			GivenObjects: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "riff-system",
+						Name:      "builders",
+					},
+					Data: map[string]string{
+						"riff-function": "projectriff/builder:0.2.0",
+					},
+				},
+			},
 			ExpectCreates: []runtime.Object{
 				&buildv1alpha1.Function{
 					ObjectMeta: metav1.ObjectMeta{
@@ -317,6 +328,31 @@ Created function "my-function"
 ...build output...
 Created function "my-function"
 `,
+		},
+		{
+			Name: "local path, no builders",
+			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath},
+			ExpectOutput: `
+Error: configmaps "builders" not found
+`,
+			ShouldError: true,
+		},
+		{
+			Name: "local path, no function builder",
+			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath},
+			GivenObjects: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "riff-system",
+						Name:      "builders",
+					},
+					Data: map[string]string{},
+				},
+			},
+			ExpectOutput: `
+Error: unknown builder for "riff-function"
+`,
+			ShouldError: true,
 		},
 		{
 			Name: "local path, pack error",
@@ -344,6 +380,17 @@ Created function "my-function"
 				packClient := c.Pack.(*packtesting.Client)
 				packClient.AssertExpectations(t)
 				return nil
+			},
+			GivenObjects: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "riff-system",
+						Name:      "builders",
+					},
+					Data: map[string]string{
+						"riff-function": "projectriff/builder:0.2.0",
+					},
+				},
 			},
 			ExpectOutput: `
 ...build output...
@@ -386,6 +433,15 @@ Error: pack error
 					},
 					Data: map[string]string{
 						"default-image-prefix": registryHost,
+					},
+				},
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "riff-system",
+						Name:      "builders",
+					},
+					Data: map[string]string{
+						"riff-function": "projectriff/builder:0.2.0",
 					},
 				},
 			},

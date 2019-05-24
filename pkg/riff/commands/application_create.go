@@ -118,11 +118,18 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 				return err
 			}
 		}
-		err := c.Pack.Build(ctx, pack.BuildOptions{
-			Image:  targetImage,
-			AppDir: opts.LocalPath,
-			// TODO lookup builder from ClusterBuildTemplate/cf-cnb
-			Builder: "cloudfoundry/cnb:bionic",
+		builders, err := c.Core().ConfigMaps("riff-system").Get("builders", metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		builder := builders.Data["riff-application"]
+		if builder == "" {
+			return fmt.Errorf("unknown builder for %q", "riff-application")
+		}
+		err = c.Pack.Build(ctx, pack.BuildOptions{
+			Image:   targetImage,
+			AppDir:  opts.LocalPath,
+			Builder: builder,
 			Publish: true,
 		})
 		if err != nil {

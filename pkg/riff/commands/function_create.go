@@ -115,6 +115,7 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 			SubPath: opts.SubPath,
 		}
 	}
+
 	if opts.LocalPath != "" {
 		targetImage := opts.Image
 		if strings.HasPrefix(opts.Image, "_") {
@@ -127,11 +128,18 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 				return err
 			}
 		}
-		err := c.Pack.Build(ctx, pack.BuildOptions{
-			Image:  targetImage,
-			AppDir: opts.LocalPath,
-			// TODO lookup builder from ClusterBuildTemplate/riff-cnb
-			Builder: "projectriff/builder:0.2.0",
+		builders, err := c.Core().ConfigMaps("riff-system").Get("builders", metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		builder := builders.Data["riff-function"]
+		if builder == "" {
+			return fmt.Errorf("unknown builder for %q", "riff-function")
+		}
+		err = c.Pack.Build(ctx, pack.BuildOptions{
+			Image:   targetImage,
+			AppDir:  opts.LocalPath,
+			Builder: builder,
 			Env: map[string]string{
 				"RIFF":          "true",
 				"RIFF_ARTIFACT": opts.Artifact,
