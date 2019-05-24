@@ -85,7 +85,7 @@ No streams found.
 				},
 			},
 			ExpectOutput: `
-NAME          TOPIC     GATEWAY   PROVIDER   READY       AGE
+NAME          TOPIC     GATEWAY   PROVIDER   STATUS      AGE
 test-stream   <empty>   <empty>   <empty>    <unknown>   <unknown>
 `,
 		},
@@ -122,7 +122,7 @@ No streams found.
 				},
 			},
 			ExpectOutput: `
-NAMESPACE         NAME                TOPIC     GATEWAY   PROVIDER   READY       AGE
+NAMESPACE         NAME                TOPIC     GATEWAY   PROVIDER   STATUS      AGE
 default           test-stream         <empty>   <empty>   <empty>    <unknown>   <unknown>
 other-namespace   test-other-stream   <empty>   <empty>   <empty>    <unknown>   <unknown>
 `,
@@ -153,8 +153,8 @@ other-namespace   test-other-stream   <empty>   <empty>   <empty>    <unknown>  
 				},
 			},
 			ExpectOutput: `
-NAME    TOPIC   GATEWAY             PROVIDER   READY   AGE
-words   words   test-gateway:1234   kafka      True    <unknown>
+NAME    TOPIC   GATEWAY             PROVIDER   STATUS   AGE
+words   words   test-gateway:1234   kafka      Ready    <unknown>
 `,
 		},
 		{

@@ -86,7 +86,7 @@ No handlers found.
 				},
 			},
 			ExpectOutput: `
-NAME           TYPE        REF         DOMAIN    READY       AGE
+NAME           TYPE        REF         DOMAIN    STATUS      AGE
 test-handler   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
 `,
 		},
@@ -123,7 +123,7 @@ No handlers found.
 				},
 			},
 			ExpectOutput: `
-NAMESPACE         NAME                 TYPE        REF         DOMAIN    READY       AGE
+NAMESPACE         NAME                 TYPE        REF         DOMAIN    STATUS      AGE
 default           test-handler         <unknown>   <unknown>   <empty>   <unknown>   <unknown>
 other-namespace   test-other-handler   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
 `,
@@ -189,10 +189,10 @@ other-namespace   test-other-handler   <unknown>   <unknown>   <empty>   <unknow
 				},
 			},
 			ExpectOutput: `
-NAME   TYPE          REF                 DOMAIN                      READY   AGE
-app    application   petclinic           app.default.example.com     True    <unknown>
-func   function      square              func.default.example.com    True    <unknown>
-img    image         projectriff/upper   image.default.example.com   True    <unknown>
+NAME   TYPE          REF                 DOMAIN                      STATUS   AGE
+app    application   petclinic           app.default.example.com     Ready    <unknown>
+func   function      square              func.default.example.com    Ready    <unknown>
+img    image         projectriff/upper   image.default.example.com   Ready    <unknown>
 `,
 		},
 		{
