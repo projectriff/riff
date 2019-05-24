@@ -32,10 +32,7 @@ type Client interface {
 }
 
 func NewClient(stdout, stderr io.Writer) (Client, error) {
-	config, err := config.NewDefault()
-	if err != nil {
-		return nil, err
-	}
+	config := &config.Config{}
 	logger := logging.NewLogger(stdout, stderr, true, false)
 	return pack.DefaultClient(config, logger)
 }
