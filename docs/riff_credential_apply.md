@@ -24,14 +24,14 @@ riff credential apply my-registry-creds --registry http://registry.example.com -
 ### Options
 
 ```
-      --default-image-prefix registry   use this registry as the default for built images, implies --set-default-image-prefix
-      --docker-hub username             Docker Hub username, the password must be provided via stdin
-      --gcr file                        path to Google Container Registry service account token file
-  -h, --help                            help for apply
-  -n, --namespace name                  kubernetes namespace (defaulted from kube config)
-      --registry url                    registry url
-      --registry-user username          username for a registry, the password must be provided via stdin
-      --set-default-image-prefix        use this registry as the default for built images
+      --default-image-prefix repository   default repository prefix for built images, implies --set-default-image-prefix
+      --docker-hub username               Docker Hub username, the password must be provided via stdin
+      --gcr file                          path to Google Container Registry service account token file
+  -h, --help                              help for apply
+  -n, --namespace name                    kubernetes namespace (defaulted from kube config)
+      --registry url                      registry url
+      --registry-user username            username for a registry, the password must be provided via stdin
+      --set-default-image-prefix          use this registry as the default for built images
 ```
 
 ### Options inherited from parent commands
