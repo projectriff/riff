@@ -10,7 +10,7 @@ require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/knative/pkg v0.0.0-20190417151928-418e675f88c2
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/projectriff/system v0.0.0-20190520215811-c1726686672a
+	github.com/projectriff/system v0.0.0-20190528222540-7c6ea07de861
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
@@ -45,5 +45,3 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20190502190224-411b2483e503 // indirect
 )
-
-replace github.com/projectriff/system => github.com/scothis/system v0.0.0-20190524145535-d6ef5f49dc76
