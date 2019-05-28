@@ -26,7 +26,7 @@ riff function create my-func --image registry.example.com/image --local-path ./m
       --git-revision refspec   refspec within the git repo to checkout (default "master")
       --handler name           name of the method or class to invoke, depends on the invoker (detected by default)
   -h, --help                   help for create
-      --image repository       repository where the built images are pushed
+      --image repository       repository where the built images are pushed (default "_")
       --invoker name           language runtime invoker name (detected by default)
       --local-path directory   path to directory containing source code on the local machine
   -n, --namespace name         kubernetes namespace (defaulted from kube config)
