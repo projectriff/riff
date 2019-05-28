@@ -14,19 +14,24 @@ riff credential apply [flags]
 
 ```
 riff credential apply my-docker-hub-creds --docker-hub my-docker-id
+riff credential apply my-docker-hub-creds --docker-hub my-docker-id --set-default-image-prefix
 riff credential apply my-gcr-creds --gcr path/to/token.json
+riff credential apply my-gcr-creds --gcr path/to/token.json --set-default-image-prefix
 riff credential apply my-registry-creds --registry http://registry.example.com --registry-user my-username
+riff credential apply my-registry-creds --registry http://registry.example.com --registry-user my-username --default-image-prefix registry.example.com/my-username
 ```
 
 ### Options
 
 ```
-      --docker-hub username      Docker Hub username, the password must be provided via stdin
-      --gcr file                 path to Google Container Registry service account token file
-  -h, --help                     help for apply
-  -n, --namespace name           kubernetes namespace (defaulted from kube config)
-      --registry url             registry url
-      --registry-user username   username for a registry, the password must be provided via stdin
+      --default-image-prefix repository   default repository prefix for built images, implies --set-default-image-prefix
+      --docker-hub username               Docker Hub username, the password must be provided via stdin
+      --gcr file                          path to Google Container Registry service account token file
+  -h, --help                              help for apply
+  -n, --namespace name                    kubernetes namespace (defaulted from kube config)
+      --registry url                      registry url
+      --registry-user username            username for a registry, the password must be provided via stdin
+      --set-default-image-prefix          use this registry as the default for built images
 ```
 
 ### Options inherited from parent commands

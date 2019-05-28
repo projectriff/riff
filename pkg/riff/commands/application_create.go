@@ -107,6 +107,17 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 		}
 	}
 	if opts.LocalPath != "" {
+		targetImage := opts.Image
+		if strings.HasPrefix(targetImage, "_") {
+			riffBuildConfig, err := c.Core().ConfigMaps(application.Namespace).Get("riff-build", metav1.GetOptions{})
+			if err != nil {
+				return err
+			}
+			targetImage, err = buildv1alpha1.ResolveDefaultImage(application, riffBuildConfig.Data["default-image-prefix"])
+			if err != nil {
+				return err
+			}
+		}
 		builders, err := c.Core().ConfigMaps("riff-system").Get("builders", metav1.GetOptions{})
 		if err != nil {
 			return err
@@ -116,7 +127,7 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 			return fmt.Errorf("unknown builder for %q", "riff-application")
 		}
 		err = c.Pack.Build(ctx, pack.BuildOptions{
-			Image:   opts.Image,
+			Image:   targetImage,
 			AppDir:  opts.LocalPath,
 			Builder: builder,
 			Publish: true,
@@ -155,7 +166,7 @@ func NewApplicationCreateCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
-	cmd.Flags().StringVar(&opts.Image, cli.StripDash(cli.ImageFlagName), "", "`repository` where the built images are pushed")
+	cmd.Flags().StringVar(&opts.Image, cli.StripDash(cli.ImageFlagName), "_", "`repository` where the built images are pushed")
 	cmd.Flags().StringVar(&opts.CacheSize, cli.StripDash(cli.CacheSizeFlagName), "", "`size` of persistent volume to cache resources between builds")
 	cmd.Flags().StringVar(&opts.LocalPath, cli.StripDash(cli.LocalPathFlagName), "", "path to `directory` containing source code on the local machine")
 	cmd.Flags().StringVar(&opts.GitRepo, cli.StripDash(cli.GitRepoFlagName), "", "git `url` to remote source code")
