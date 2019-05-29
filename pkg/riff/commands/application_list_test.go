@@ -85,7 +85,7 @@ No applications found.
 				},
 			},
 			ExpectOutput: `
-NAME               LATEST IMAGE   SUCCEEDED   AGE
+NAME               LATEST IMAGE   STATUS      AGE
 test-application   <empty>        <unknown>   <unknown>
 `,
 		},
@@ -122,7 +122,7 @@ No applications found.
 				},
 			},
 			ExpectOutput: `
-NAMESPACE         NAME                     LATEST IMAGE   SUCCEEDED   AGE
+NAMESPACE         NAME                     LATEST IMAGE   STATUS      AGE
 default           test-application         <empty>        <unknown>   <unknown>
 other-namespace   test-other-application   <empty>        <unknown>   <unknown>
 `,
@@ -152,8 +152,8 @@ other-namespace   test-other-application   <empty>        <unknown>   <unknown>
 				},
 			},
 			ExpectOutput: `
-NAME        LATEST IMAGE                              SUCCEEDED   AGE
-petclinic   projectriff/petclinic@sah256:abcdef1234   True        <unknown>
+NAME        LATEST IMAGE                              STATUS      AGE
+petclinic   projectriff/petclinic@sah256:abcdef1234   Succeeded   <unknown>
 `,
 		},
 		{

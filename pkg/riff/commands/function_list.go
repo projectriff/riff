@@ -125,7 +125,7 @@ func printFunctionColumns() []metav1beta1.TableColumnDefinition {
 		{Name: "Artifact", Type: "string"},
 		{Name: "Handler", Type: "string"},
 		{Name: "Invoker", Type: "string"},
-		{Name: "Succeeded", Type: "string"},
+		{Name: "Status", Type: "string"},
 		{Name: "Age", Type: "string"},
 	}
 }

@@ -85,7 +85,7 @@ No processors found.
 				},
 			},
 			ExpectOutput: `
-NAME             FUNCTION   INPUTS    OUTPUTS   READY       AGE
+NAME             FUNCTION   INPUTS    OUTPUTS   STATUS      AGE
 test-processor   <empty>    <empty>   <empty>   <unknown>   <unknown>
 `,
 		},
@@ -122,7 +122,7 @@ No processors found.
 				},
 			},
 			ExpectOutput: `
-NAMESPACE         NAME                   FUNCTION   INPUTS    OUTPUTS   READY       AGE
+NAMESPACE         NAME                   FUNCTION   INPUTS    OUTPUTS   STATUS      AGE
 default           test-processor         <empty>    <empty>   <empty>   <unknown>   <unknown>
 other-namespace   test-other-processor   <empty>    <empty>   <empty>   <unknown>   <unknown>
 `,
@@ -151,8 +151,8 @@ other-namespace   test-other-processor   <empty>    <empty>   <empty>   <unknown
 				},
 			},
 			ExpectOutput: `
-NAME     FUNCTION   INPUTS                OUTPUTS   READY   AGE
-square   square     numbers,morenumbers   squares   True    <unknown>
+NAME     FUNCTION   INPUTS                OUTPUTS   STATUS   AGE
+square   square     numbers,morenumbers   squares   Ready    <unknown>
 `,
 		},
 		{

@@ -124,7 +124,7 @@ func printHandlerColumns() []metav1beta1.TableColumnDefinition {
 		{Name: "Type", Type: "string"},
 		{Name: "Ref", Type: "string"},
 		{Name: "Domain", Type: "string"},
-		{Name: "Ready", Type: "string"},
+		{Name: "Status", Type: "string"},
 		{Name: "Age", Type: "string"},
 	}
 }
