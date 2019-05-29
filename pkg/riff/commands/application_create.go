@@ -155,11 +155,12 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 				ResourceVersion: application.ResourceVersion,
 			})
 			if err != nil {
+				c.Errorf("Error: %s\n", err)
 				return
 			}
 			defer applicationWatch.Stop()
 			if err := k8s.WaitUntilReady(applicationWatch); err != nil {
-				c.Errorf("%s\n", err)
+				c.Errorf("Error: %s\n", err)
 				return
 			}
 		}()

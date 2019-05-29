@@ -171,11 +171,12 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 				ResourceVersion: function.ResourceVersion,
 			})
 			if err != nil {
+				c.Errorf("Error: %s\n", err)
 				return
 			}
 			defer functionWatch.Stop()
 			if err := k8s.WaitUntilReady(functionWatch); err != nil {
-				c.Errorf("%s\n", err)
+				c.Errorf("Error: %s\n", err)
 				return
 			}
 		}()

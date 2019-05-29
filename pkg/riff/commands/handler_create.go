@@ -138,11 +138,12 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 				ResourceVersion: handler.ResourceVersion,
 			})
 			if err != nil {
+				c.Errorf("Error: %s\n", err)
 				return
 			}
 			defer handlerWatch.Stop()
 			if err := k8s.WaitUntilReady(handlerWatch); err != nil {
-				c.Errorf("%s\n", err)
+				c.Errorf("Error: %s\n", err)
 				return
 			}
 		}()

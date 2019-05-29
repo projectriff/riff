@@ -82,11 +82,12 @@ func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) err
 				ResourceVersion: processor.ResourceVersion,
 			})
 			if err != nil {
+				c.Errorf("Error: %s\n", err)
 				return
 			}
 			defer processorWatch.Stop()
 			if err := k8s.WaitUntilReady(processorWatch); err != nil {
-				c.Errorf("%s\n", err)
+				c.Errorf("Error: %s\n", err)
 				return
 			}
 		}()
