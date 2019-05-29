@@ -19,6 +19,7 @@ package commands_test
 import (
 	"testing"
 
+	"github.com/knative/pkg/apis"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
@@ -86,7 +87,7 @@ No handlers found.
 				},
 			},
 			ExpectOutput: `
-NAME           TYPE        REF         DOMAIN    READY       AGE
+NAME           TYPE        REF         HOST      READY       AGE
 test-handler   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
 `,
 		},
@@ -123,7 +124,7 @@ No handlers found.
 				},
 			},
 			ExpectOutput: `
-NAMESPACE         NAME                 TYPE        REF         DOMAIN    READY       AGE
+NAMESPACE         NAME                 TYPE        REF         HOST      READY       AGE
 default           test-handler         <unknown>   <unknown>   <empty>   <unknown>   <unknown>
 other-namespace   test-other-handler   <unknown>   <unknown>   <empty>   <unknown>   <unknown>
 `,
@@ -150,7 +151,9 @@ other-namespace   test-other-handler   <unknown>   <unknown>   <empty>   <unknow
 								{Type: requestv1alpha1.HandlerConditionReady, Status: "True"},
 							},
 						},
-						Domain: "image.default.example.com",
+						URL: &apis.URL{
+							Host: "image.default.example.com",
+						},
 					},
 				},
 				&requestv1alpha1.Handler{
@@ -167,7 +170,9 @@ other-namespace   test-other-handler   <unknown>   <unknown>   <empty>   <unknow
 								{Type: requestv1alpha1.HandlerConditionReady, Status: "True"},
 							},
 						},
-						Domain: "app.default.example.com",
+						URL: &apis.URL{
+							Host: "app.default.example.com",
+						},
 					},
 				},
 				&requestv1alpha1.Handler{
@@ -184,12 +189,14 @@ other-namespace   test-other-handler   <unknown>   <unknown>   <empty>   <unknow
 								{Type: requestv1alpha1.HandlerConditionReady, Status: "True"},
 							},
 						},
-						Domain: "func.default.example.com",
+						URL: &apis.URL{
+							Host: "func.default.example.com",
+						},
 					},
 				},
 			},
 			ExpectOutput: `
-NAME   TYPE          REF                 DOMAIN                      READY   AGE
+NAME   TYPE          REF                 HOST                        READY   AGE
 app    application   petclinic           app.default.example.com     True    <unknown>
 func   function      square              func.default.example.com    True    <unknown>
 img    image         projectriff/upper   image.default.example.com   True    <unknown>

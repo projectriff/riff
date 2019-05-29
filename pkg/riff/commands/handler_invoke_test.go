@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/kballard/go-shellquote"
+	"github.com/knative/pkg/apis"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
@@ -96,7 +97,9 @@ func TestHandlerInvokeCommand(t *testing.T) {
 					{Type: requestv1alpha1.HandlerConditionReady, Status: "True"},
 				},
 			},
-			Domain: fmt.Sprintf("%s.example.com", handlerName),
+			URL: &apis.URL{
+				Host: fmt.Sprintf("%s.example.com", handlerName),
+			},
 		},
 	}
 
@@ -320,7 +323,9 @@ func TestHandlerInvokeCommand(t *testing.T) {
 						Name:      handlerName,
 					},
 					Status: requestv1alpha1.HandlerStatus{
-						Domain: fmt.Sprintf("%s.example.com", handlerName),
+						URL: &apis.URL{
+							Host: fmt.Sprintf("%s.example.com", handlerName),
+						},
 					},
 				},
 				ingressService,
