@@ -123,7 +123,7 @@ func printProcessorColumns() []metav1beta1.TableColumnDefinition {
 		{Name: "Function", Type: "string"},
 		{Name: "Inputs", Type: "string"},
 		{Name: "Outputs", Type: "string"},
-		{Name: "Ready", Type: "string"},
+		{Name: "Status", Type: "string"},
 		{Name: "Age", Type: "string"},
 	}
 }

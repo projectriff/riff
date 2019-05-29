@@ -45,17 +45,31 @@ func FormatConditionStatus(cond *duckv1alpha1.Condition) string {
 	status := string(cond.Status)
 	switch status {
 	case "True":
-		return Ssuccessf(status)
+		return Ssuccessf(string(cond.Type))
 	case "False":
-		return Serrorf(status)
+		if cond.Reason == "" {
+			// display something if there is no reason
+			return Serrorf("not-" + string(cond.Type))
+		}
+		return Serrorf(cond.Reason)
 	default:
 		return Sinfof(status)
 	}
 }
 
 func FormatConditionMessage(cond *duckv1alpha1.Condition) string {
-	if cond == nil {
+	switch {
+	case cond == nil:
 		return Swarnf("<unknown>")
+	case cond.Message == "":
+		return FormatEmptyString(cond.Message)
+	case cond.IsFalse():
+		return Serrorf(cond.Message)
+	case cond.IsTrue():
+		return Ssuccessf(cond.Message)
+	case cond.IsUnknown():
+		return Sinfof(cond.Message)
+	default:
+		return Swarnf(cond.Message)
 	}
-	return FormatEmptyString(cond.Message)
 }
