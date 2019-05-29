@@ -14,6 +14,7 @@ riff function tail [flags]
 
 ```
 riff function tail my-function
+riff function tail my-function --since 1h
 ```
 
 ### Options
@@ -21,6 +22,7 @@ riff function tail my-function
 ```
   -h, --help             help for tail
   -n, --namespace name   kubernetes namespace (defaulted from kube config)
+      --since duration   time duration to start reading logs from
 ```
 
 ### Options inherited from parent commands

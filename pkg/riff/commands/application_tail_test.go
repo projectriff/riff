@@ -47,6 +47,22 @@ func TestApplicationTailOptions(t *testing.T) {
 			},
 			ShouldValidate: true,
 		},
+		{
+			Name: "since duration",
+			Options: &commands.ApplicationTailOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Since:           "1m",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "invalid duration",
+			Options: &commands.ApplicationTailOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Since:           "1",
+			},
+			ExpectFieldError: cli.ErrInvalidValue("1", cli.SinceFlagName),
+		},
 	}
 
 	table.Run(t)
@@ -74,7 +90,30 @@ func TestApplicationTailCommand(t *testing.T) {
 			Prepare: func(t *testing.T, c *cli.Config) error {
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
-				kail.On("ApplicationLogs", mock.Anything, application, time.Minute, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+				kail.On("ApplicationLogs", mock.Anything, application, time.Second, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					fmt.Fprintf(c.Stdout, "...log output...\n")
+				})
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				kail := c.Kail.(*kailtesting.Logger)
+				kail.AssertExpectations(t)
+				return nil
+			},
+			GivenObjects: []runtime.Object{
+				application,
+			},
+			ExpectOutput: `
+...log output...
+`,
+		},
+		{
+			Name: "show logs since",
+			Args: []string{applicationName, cli.SinceFlagName, "1h"},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				kail := &kailtesting.Logger{}
+				c.Kail = kail
+				kail.On("ApplicationLogs", mock.Anything, application, time.Hour, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...log output...\n")
 				})
 				return nil
@@ -102,7 +141,7 @@ func TestApplicationTailCommand(t *testing.T) {
 			Prepare: func(t *testing.T, c *cli.Config) error {
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
-				kail.On("ApplicationLogs", mock.Anything, application, time.Minute, mock.Anything).Return(fmt.Errorf("kail error"))
+				kail.On("ApplicationLogs", mock.Anything, application, time.Second, mock.Anything).Return(fmt.Errorf("kail error"))
 				return nil
 			},
 			CleanUp: func(t *testing.T, c *cli.Config) error {

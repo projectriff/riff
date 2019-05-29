@@ -14,6 +14,7 @@ riff processor tail [flags]
 
 ```
 riff processor tail my-processor
+riff processor tail my-processor --since 1h
 ```
 
 ### Options

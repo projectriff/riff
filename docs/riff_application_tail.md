@@ -14,6 +14,7 @@ riff application tail [flags]
 
 ```
 riff application tail my-application
+riff application tail my-application --since 1h
 ```
 
 ### Options
@@ -21,6 +22,7 @@ riff application tail my-application
 ```
   -h, --help             help for tail
   -n, --namespace name   kubernetes namespace (defaulted from kube config)
+      --since duration   time duration to start reading logs from
 ```
 
 ### Options inherited from parent commands

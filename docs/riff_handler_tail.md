@@ -14,6 +14,7 @@ riff handler tail [flags]
 
 ```
 riff handler tail my-handler
+riff handler tail my-handler --since 1h
 ```
 
 ### Options
@@ -21,6 +22,7 @@ riff handler tail my-handler
 ```
   -h, --help             help for tail
   -n, --namespace name   kubernetes namespace (defaulted from kube config)
+      --since duration   time duration to start reading logs from
 ```
 
 ### Options inherited from parent commands

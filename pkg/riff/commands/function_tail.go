@@ -29,12 +29,19 @@ import (
 
 type FunctionTailOptions struct {
 	cli.ResourceOptions
+	Since string
 }
 
 func (opts *FunctionTailOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
 
 	errs = errs.Also(opts.ResourceOptions.Validate(ctx))
+
+	if opts.Since != "" {
+		if _, err := time.ParseDuration(opts.Since); err != nil {
+			errs = errs.Also(cli.ErrInvalidValue(opts.Since, cli.SinceFlagName))
+		}
+	}
 
 	return errs
 }
@@ -44,7 +51,12 @@ func (opts *FunctionTailOptions) Exec(ctx context.Context, c *cli.Config) error 
 	if err != nil {
 		return err
 	}
-	return c.Kail.FunctionLogs(ctx, function, time.Minute, c.Stdout)
+	since := time.Second
+	if opts.Since != "" {
+		// error is protected by Validate()
+		since, _ = time.ParseDuration(opts.Since)
+	}
+	return c.Kail.FunctionLogs(ctx, function, since, c.Stdout)
 }
 
 func NewFunctionTailCommand(c *cli.Config) *cobra.Command {
@@ -58,6 +70,7 @@ func NewFunctionTailCommand(c *cli.Config) *cobra.Command {
 `),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s function tail my-function", c.Name),
+			fmt.Sprintf("%s function tail my-function %s 1h", c.Name, cli.SinceFlagName),
 		}, "\n"),
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
@@ -67,6 +80,7 @@ func NewFunctionTailCommand(c *cli.Config) *cobra.Command {
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
+	cmd.Flags().StringVar(&opts.Since, cli.StripDash(cli.SinceFlagName), "", "time `duration` to start reading logs from")
 
 	return cmd
 }
