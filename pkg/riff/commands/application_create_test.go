@@ -19,11 +19,13 @@ package commands_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/buildpack/pack"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	rifftesting "github.com/projectriff/riff/pkg/testing"
+	kailtesting "github.com/projectriff/riff/pkg/testing/kail"
 	packtesting "github.com/projectriff/riff/pkg/testing/pack"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/stretchr/testify/mock"
@@ -493,6 +495,105 @@ Created application "my-application"
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo},
 			WithReactors: []rifftesting.ReactionFunc{
 				rifftesting.InduceFailure("create", "applications"),
+			},
+			ExpectCreates: []runtime.Object{
+				&buildv1alpha1.Application{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      applicationName,
+					},
+					Spec: buildv1alpha1.ApplicationSpec{
+						Image: imageTag,
+						Source: &buildv1alpha1.Source{
+							Git: &buildv1alpha1.GitSource{
+								URL:      gitRepo,
+								Revision: gitMaster,
+							},
+						},
+					},
+				},
+			},
+			ShouldError: true,
+		},
+		{
+			Name: "tail logs",
+			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				kail := &kailtesting.Logger{}
+				c.Kail = kail
+				kail.On("ApplicationLogs", mock.Anything, &buildv1alpha1.Application{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      applicationName,
+					},
+					Spec: buildv1alpha1.ApplicationSpec{
+						Image: imageTag,
+						Source: &buildv1alpha1.Source{
+							Git: &buildv1alpha1.GitSource{
+								URL:      gitRepo,
+								Revision: gitMaster,
+							},
+						},
+					},
+				}, time.Minute, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					fmt.Fprintf(c.Stdout, "...log output...\n")
+				})
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				kail := c.Kail.(*kailtesting.Logger)
+				kail.AssertExpectations(t)
+				return nil
+			},
+			ExpectCreates: []runtime.Object{
+				&buildv1alpha1.Application{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      applicationName,
+					},
+					Spec: buildv1alpha1.ApplicationSpec{
+						Image: imageTag,
+						Source: &buildv1alpha1.Source{
+							Git: &buildv1alpha1.GitSource{
+								URL:      gitRepo,
+								Revision: gitMaster,
+							},
+						},
+					},
+				},
+			},
+			ExpectOutput: `
+Created application "my-application"
+...log output...
+`,
+		},
+		{
+			Name: "tail error",
+			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				kail := &kailtesting.Logger{}
+				c.Kail = kail
+				kail.On("ApplicationLogs", mock.Anything, &buildv1alpha1.Application{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      applicationName,
+					},
+					Spec: buildv1alpha1.ApplicationSpec{
+						Image: imageTag,
+						Source: &buildv1alpha1.Source{
+							Git: &buildv1alpha1.GitSource{
+								URL:      gitRepo,
+								Revision: gitMaster,
+							},
+						},
+					},
+				}, time.Minute, mock.Anything).Return(fmt.Errorf("kail error"))
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				kail := c.Kail.(*kailtesting.Logger)
+				kail.AssertExpectations(t)
+				return nil
 			},
 			ExpectCreates: []runtime.Object{
 				&buildv1alpha1.Application{

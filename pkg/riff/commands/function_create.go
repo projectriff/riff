@@ -20,9 +20,11 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/buildpack/pack"
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/riff/pkg/k8s"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -43,6 +45,8 @@ type FunctionCreateOptions struct {
 	GitRepo     string
 	GitRevision string
 	SubPath     string
+
+	Tail bool
 }
 
 func (opts *FunctionCreateOptions) Validate(ctx context.Context) *cli.FieldError {
@@ -158,6 +162,22 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 		return err
 	}
 	c.Successf("Created function %q\n", function.Name)
+	if opts.Tail {
+		// cancel ctx when function becomes ready
+		ctx, cancel := context.WithCancel(ctx)
+		go func() {
+			defer cancel()
+			functionWatch, err := c.Build().Functions(opts.Namespace).Watch(metav1.ListOptions{
+				ResourceVersion: function.ResourceVersion,
+			})
+			if err != nil {
+				return
+			}
+			defer functionWatch.Stop()
+			k8s.WaitUntilReady(functionWatch)
+		}()
+		return c.Kail.FunctionLogs(ctx, function, time.Minute, c.Stdout)
+	}
 	return nil
 }
 
@@ -191,6 +211,7 @@ func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.GitRepo, cli.StripDash(cli.GitRepoFlagName), "", "git `url` to remote source code")
 	cmd.Flags().StringVar(&opts.GitRevision, cli.StripDash(cli.GitRevisionFlagName), "master", "`refspec` within the git repo to checkout")
 	cmd.Flags().StringVar(&opts.SubPath, cli.StripDash(cli.SubPathFlagName), "", "path to `directory` within the git repo to checkout")
+	cmd.Flags().BoolVar(&opts.Tail, cli.StripDash(cli.TailFlagName), false, "watch build logs")
 
 	return cmd
 }

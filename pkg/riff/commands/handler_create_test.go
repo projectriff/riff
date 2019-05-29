@@ -19,11 +19,14 @@ package commands_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	rifftesting "github.com/projectriff/riff/pkg/testing"
+	kailtesting "github.com/projectriff/riff/pkg/testing/kail"
 	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
+	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -302,6 +305,89 @@ Created handler "my-handler"
 							Containers: []corev1.Container{
 								{Image: image},
 							},
+						},
+					},
+				},
+			},
+			ShouldError: true,
+		},
+		{
+			Name: "tail logs",
+			Args: []string{handlerName, cli.ImageFlagName, image, cli.TailFlagName},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				kail := &kailtesting.Logger{}
+				c.Kail = kail
+				kail.On("HandlerLogs", mock.Anything, &requestv1alpha1.Handler{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      handlerName,
+					},
+					Spec: requestv1alpha1.HandlerSpec{
+						Template: &corev1.PodSpec{
+							Containers: []corev1.Container{{Image: image}},
+						},
+					},
+				}, time.Minute, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					fmt.Fprintf(c.Stdout, "...log output...\n")
+				})
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				kail := c.Kail.(*kailtesting.Logger)
+				kail.AssertExpectations(t)
+				return nil
+			},
+			ExpectCreates: []runtime.Object{
+				&requestv1alpha1.Handler{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      handlerName,
+					},
+					Spec: requestv1alpha1.HandlerSpec{
+						Template: &corev1.PodSpec{
+							Containers: []corev1.Container{{Image: image}},
+						},
+					},
+				},
+			},
+			ExpectOutput: `
+Created handler "my-handler"
+...log output...
+`,
+		},
+		{
+			Name: "tail error",
+			Args: []string{handlerName, cli.ImageFlagName, image, cli.TailFlagName},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				kail := &kailtesting.Logger{}
+				c.Kail = kail
+				kail.On("HandlerLogs", mock.Anything, &requestv1alpha1.Handler{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      handlerName,
+					},
+					Spec: requestv1alpha1.HandlerSpec{
+						Template: &corev1.PodSpec{
+							Containers: []corev1.Container{{Image: image}},
+						},
+					},
+				}, time.Minute, mock.Anything).Return(fmt.Errorf("kail error"))
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				kail := c.Kail.(*kailtesting.Logger)
+				kail.AssertExpectations(t)
+				return nil
+			},
+			ExpectCreates: []runtime.Object{
+				&requestv1alpha1.Handler{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      handlerName,
+					},
+					Spec: requestv1alpha1.HandlerSpec{
+						Template: &corev1.PodSpec{
+							Containers: []corev1.Container{{Image: image}},
 						},
 					},
 				},

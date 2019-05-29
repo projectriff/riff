@@ -54,6 +54,7 @@ const (
 	SetDefaultImagePrefixFlagName = "--set-default-image-prefix"
 	ShellFlagname                 = "--shell"
 	SubPathFlagName               = "--sub-path"
+	TailFlagName                  = "--tail"
 	TextFlagName                  = "--text"
 )
 

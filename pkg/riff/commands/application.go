@@ -37,6 +37,7 @@ func NewApplicationCommand(c *cli.Config) *cobra.Command {
 	cmd.AddCommand(NewApplicationListCommand(c))
 	cmd.AddCommand(NewApplicationCreateCommand(c))
 	cmd.AddCommand(NewApplicationDeleteCommand(c))
+	cmd.AddCommand(NewApplicationTailCommand(c))
 
 	return cmd
 }

@@ -20,8 +20,10 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/riff/pkg/k8s"
 	"github.com/projectriff/riff/pkg/parsers"
 	"github.com/projectriff/riff/pkg/validation"
 	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
@@ -39,6 +41,8 @@ type HandlerCreateOptions struct {
 
 	Env     []string
 	EnvFrom []string
+
+	Tail bool
 }
 
 func (opts *HandlerCreateOptions) Validate(ctx context.Context) *cli.FieldError {
@@ -81,7 +85,7 @@ func (opts *HandlerCreateOptions) Validate(ctx context.Context) *cli.FieldError 
 }
 
 func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error {
-	processor := &requestv1alpha1.Handler{
+	handler := &requestv1alpha1.Handler{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: opts.Namespace,
 			Name:      opts.Name,
@@ -94,37 +98,53 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 	}
 
 	if opts.ApplicationRef != "" {
-		processor.Spec.Build = &requestv1alpha1.Build{
+		handler.Spec.Build = &requestv1alpha1.Build{
 			ApplicationRef: opts.ApplicationRef,
 		}
 	}
 	if opts.FunctionRef != "" {
-		processor.Spec.Build = &requestv1alpha1.Build{
+		handler.Spec.Build = &requestv1alpha1.Build{
 			FunctionRef: opts.FunctionRef,
 		}
 	}
 	if opts.Image != "" {
-		processor.Spec.Template.Containers[0].Image = opts.Image
+		handler.Spec.Template.Containers[0].Image = opts.Image
 	}
 
 	for _, env := range opts.Env {
-		if processor.Spec.Template.Containers[0].Env == nil {
-			processor.Spec.Template.Containers[0].Env = []corev1.EnvVar{}
+		if handler.Spec.Template.Containers[0].Env == nil {
+			handler.Spec.Template.Containers[0].Env = []corev1.EnvVar{}
 		}
-		processor.Spec.Template.Containers[0].Env = append(processor.Spec.Template.Containers[0].Env, parsers.EnvVar(env))
+		handler.Spec.Template.Containers[0].Env = append(handler.Spec.Template.Containers[0].Env, parsers.EnvVar(env))
 	}
 	for _, env := range opts.EnvFrom {
-		if processor.Spec.Template.Containers[0].Env == nil {
-			processor.Spec.Template.Containers[0].Env = []corev1.EnvVar{}
+		if handler.Spec.Template.Containers[0].Env == nil {
+			handler.Spec.Template.Containers[0].Env = []corev1.EnvVar{}
 		}
-		processor.Spec.Template.Containers[0].Env = append(processor.Spec.Template.Containers[0].Env, parsers.EnvVarFrom(env))
+		handler.Spec.Template.Containers[0].Env = append(handler.Spec.Template.Containers[0].Env, parsers.EnvVarFrom(env))
 	}
 
-	processor, err := c.Request().Handlers(opts.Namespace).Create(processor)
+	handler, err := c.Request().Handlers(opts.Namespace).Create(handler)
 	if err != nil {
 		return err
 	}
-	c.Successf("Created handler %q\n", processor.Name)
+	c.Successf("Created handler %q\n", handler.Name)
+	if opts.Tail {
+		// cancel ctx when handler becomes ready
+		ctx, cancel := context.WithCancel(ctx)
+		go func() {
+			defer cancel()
+			handlerWatch, err := c.Request().Handlers(opts.Namespace).Watch(metav1.ListOptions{
+				ResourceVersion: handler.ResourceVersion,
+			})
+			if err != nil {
+				return
+			}
+			defer handlerWatch.Stop()
+			k8s.WaitUntilReady(handlerWatch)
+		}()
+		return c.Kail.HandlerLogs(ctx, handler, time.Minute, c.Stdout)
+	}
 	return nil
 }
 
@@ -155,6 +175,7 @@ func NewHandlerCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.FunctionRef, cli.StripDash(cli.FunctionRefFlagName), "", "`name` of function to deploy")
 	cmd.Flags().StringArrayVar(&opts.Env, cli.StripDash(cli.EnvFlagName), []string{}, fmt.Sprintf("environment `variable` defined as a key value pair separated by an equals sign, example %q (may be set multiple times)", fmt.Sprintf("%s MY_VAR=my-value", cli.EnvFlagName)))
 	cmd.Flags().StringArrayVar(&opts.EnvFrom, cli.StripDash(cli.EnvFromFlagName), []string{}, fmt.Sprintf("environment `variable` from a config map or secret, example %q, %q (may be set multiple times)", fmt.Sprintf("%s MY_SECRET_VALUE=secretKeyRef:my-secret-name:key-in-secret", cli.EnvFromFlagName), fmt.Sprintf("%s MY_CONFIG_MAP_VALUE=configMapKeyRef:my-config-map-name:key-in-config-map", cli.EnvFromFlagName)))
+	cmd.Flags().BoolVar(&opts.Tail, cli.StripDash(cli.TailFlagName), false, "watch handler logs")
 
 	return cmd
 }
