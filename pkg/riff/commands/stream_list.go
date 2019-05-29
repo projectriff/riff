@@ -123,7 +123,7 @@ func printStreamColumns() []metav1beta1.TableColumnDefinition {
 		{Name: "Topic", Type: "string"},
 		{Name: "Gateway", Type: "string"},
 		{Name: "Provider", Type: "string"},
-		{Name: "Ready", Type: "string"},
+		{Name: "Status", Type: "string"},
 		{Name: "Age", Type: "string"},
 	}
 }

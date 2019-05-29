@@ -85,7 +85,7 @@ No functions found.
 				},
 			},
 			ExpectOutput: `
-NAME            LATEST IMAGE   ARTIFACT   HANDLER   INVOKER   SUCCEEDED   AGE
+NAME            LATEST IMAGE   ARTIFACT   HANDLER   INVOKER   STATUS      AGE
 test-function   <empty>        <empty>    <empty>   <empty>   <unknown>   <unknown>
 `,
 		},
@@ -122,7 +122,7 @@ No functions found.
 				},
 			},
 			ExpectOutput: `
-NAMESPACE         NAME                  LATEST IMAGE   ARTIFACT   HANDLER   INVOKER   SUCCEEDED   AGE
+NAMESPACE         NAME                  LATEST IMAGE   ARTIFACT   HANDLER   INVOKER   STATUS      AGE
 default           test-function         <empty>        <empty>    <empty>   <empty>   <unknown>   <unknown>
 other-namespace   test-other-function   <empty>        <empty>    <empty>   <empty>   <unknown>   <unknown>
 `,
@@ -154,8 +154,8 @@ other-namespace   test-other-function   <empty>        <empty>    <empty>   <emp
 				},
 			},
 			ExpectOutput: `
-NAME    LATEST IMAGE                          ARTIFACT       HANDLER               INVOKER   SUCCEEDED   AGE
-upper   projectriff/upper@sah256:abcdef1234   uppercase.js   functions.Uppercase   <empty>   True        <unknown>
+NAME    LATEST IMAGE                          ARTIFACT       HANDLER               INVOKER   STATUS      AGE
+upper   projectriff/upper@sah256:abcdef1234   uppercase.js   functions.Uppercase   <empty>   Succeeded   <unknown>
 `,
 		},
 		{
