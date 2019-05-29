@@ -17,42 +17,29 @@
 package k8s
 
 import (
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
-	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
-	streamv1alpha1 "github.com/projectriff/system/pkg/apis/stream/v1alpha1"
+	"fmt"
+	"reflect"
+	"strings"
+
 	"k8s.io/apimachinery/pkg/watch"
 )
 
-func WaitUntilReady(watcher watch.Interface) {
+func WaitUntilReady(watcher watch.Interface) error {
 	for {
 		select {
 		case ev := <-watcher.ResultChan():
 			switch ev.Type {
 			case watch.Added, watch.Modified:
-				// TODO create an interface for this
-				if application, ok := ev.Object.(*buildv1alpha1.Application); ok {
-					if application.Status.IsReady() {
-						return
-					}
-				} else if function, ok := ev.Object.(*buildv1alpha1.Function); ok {
-					if function.Status.IsReady() {
-						return
-					}
-				} else if handler, ok := ev.Object.(*requestv1alpha1.Handler); ok {
-					if handler.Status.IsReady() {
-						return
-					}
-				} else if stream, ok := ev.Object.(*streamv1alpha1.Stream); ok {
-					if stream.Status.IsReady() {
-						return
-					}
-				} else if processor, ok := ev.Object.(*streamv1alpha1.Processor); ok {
-					if processor.Status.IsReady() {
-						return
+				// use reflection since there is no common interface
+				if readyFunc := reflect.ValueOf(ev.Object).Elem().FieldByName("Status").Addr().MethodByName("IsReady"); readyFunc.Kind() == reflect.Func {
+					if readyFunc.Call([]reflect.Value{})[0].Bool() {
+						return nil
 					}
 				}
-			case watch.Deleted, watch.Error:
-				return
+			case watch.Deleted:
+				return fmt.Errorf("%s deleted", strings.ToLower(ev.Object.GetObjectKind().GroupVersionKind().Kind))
+			case watch.Error:
+				return fmt.Errorf("error waiting for ready")
 			}
 		}
 	}

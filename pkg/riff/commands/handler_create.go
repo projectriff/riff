@@ -141,7 +141,10 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 				return
 			}
 			defer handlerWatch.Stop()
-			k8s.WaitUntilReady(handlerWatch)
+			if err := k8s.WaitUntilReady(handlerWatch); err != nil {
+				c.Errorf("%s\n", err)
+				return
+			}
 		}()
 		return c.Kail.HandlerLogs(ctx, handler, time.Minute, c.Stdout)
 	}

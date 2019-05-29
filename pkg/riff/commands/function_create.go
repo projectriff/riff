@@ -174,7 +174,10 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 				return
 			}
 			defer functionWatch.Stop()
-			k8s.WaitUntilReady(functionWatch)
+			if err := k8s.WaitUntilReady(functionWatch); err != nil {
+				c.Errorf("%s\n", err)
+				return
+			}
 		}()
 		return c.Kail.FunctionLogs(ctx, function, time.Minute, c.Stdout)
 	}

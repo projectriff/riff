@@ -158,7 +158,10 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 				return
 			}
 			defer applicationWatch.Stop()
-			k8s.WaitUntilReady(applicationWatch)
+			if err := k8s.WaitUntilReady(applicationWatch); err != nil {
+				c.Errorf("%s\n", err)
+				return
+			}
 		}()
 		return c.Kail.ApplicationLogs(ctx, application, time.Minute, c.Stdout)
 	}

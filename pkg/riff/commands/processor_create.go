@@ -85,7 +85,10 @@ func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) err
 				return
 			}
 			defer processorWatch.Stop()
-			k8s.WaitUntilReady(processorWatch)
+			if err := k8s.WaitUntilReady(processorWatch); err != nil {
+				c.Errorf("%s\n", err)
+				return
+			}
 		}()
 		return c.Kail.ProcessorLogs(ctx, processor, time.Minute, c.Stdout)
 	}
