@@ -86,7 +86,7 @@ func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) err
 				return
 			}
 			defer processorWatch.Stop()
-			if err := k8s.WaitUntilReady(processorWatch); err != nil {
+			if err := k8s.WaitUntilReady(processor, processorWatch); err != nil {
 				c.Errorf("Error: %s\n", err)
 				return
 			}

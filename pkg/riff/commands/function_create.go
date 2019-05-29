@@ -175,7 +175,7 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 				return
 			}
 			defer functionWatch.Stop()
-			if err := k8s.WaitUntilReady(functionWatch); err != nil {
+			if err := k8s.WaitUntilReady(function, functionWatch); err != nil {
 				c.Errorf("Error: %s\n", err)
 				return
 			}

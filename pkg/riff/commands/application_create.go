@@ -159,7 +159,7 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 				return
 			}
 			defer applicationWatch.Stop()
-			if err := k8s.WaitUntilReady(applicationWatch); err != nil {
+			if err := k8s.WaitUntilReady(application, applicationWatch); err != nil {
 				c.Errorf("Error: %s\n", err)
 				return
 			}

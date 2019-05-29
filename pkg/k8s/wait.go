@@ -21,13 +21,21 @@ import (
 	"reflect"
 	"strings"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 )
 
-func WaitUntilReady(watcher watch.Interface) error {
+func WaitUntilReady(target metav1.Object, watcher watch.Interface) error {
 	for {
 		select {
 		case ev := <-watcher.ResultChan():
+			if ev.Type == watch.Error {
+				return fmt.Errorf("error waiting for ready")
+			}
+			if obj, ok := ev.Object.(metav1.Object); !ok || obj.GetUID() != target.GetUID() {
+				// event is not for the target resource
+				continue
+			}
 			switch ev.Type {
 			case watch.Added, watch.Modified:
 				// use reflection since there is no common interface
@@ -38,8 +46,6 @@ func WaitUntilReady(watcher watch.Interface) error {
 				}
 			case watch.Deleted:
 				return fmt.Errorf("%s deleted", strings.ToLower(ev.Object.GetObjectKind().GroupVersionKind().Kind))
-			case watch.Error:
-				return fmt.Errorf("error waiting for ready")
 			}
 		}
 	}

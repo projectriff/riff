@@ -142,7 +142,7 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 				return
 			}
 			defer handlerWatch.Stop()
-			if err := k8s.WaitUntilReady(handlerWatch); err != nil {
+			if err := k8s.WaitUntilReady(handler, handlerWatch); err != nil {
 				c.Errorf("Error: %s\n", err)
 				return
 			}
