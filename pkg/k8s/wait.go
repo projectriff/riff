@@ -24,32 +24,36 @@ import (
 )
 
 func WaitUntilReady(watcher watch.Interface) {
-	func() {
-		for {
-			select {
-			case ev := <-watcher.ResultChan():
-				switch ev.Type {
-				case watch.Added, watch.Modified:
-					// TODO create an interface for this
-					if application, ok := ev.Object.(*buildv1alpha1.Application); ok && application.Status.IsReady() {
+	for {
+		select {
+		case ev := <-watcher.ResultChan():
+			switch ev.Type {
+			case watch.Added, watch.Modified:
+				// TODO create an interface for this
+				if application, ok := ev.Object.(*buildv1alpha1.Application); ok {
+					if application.Status.IsReady() {
 						return
 					}
-					if function, ok := ev.Object.(*buildv1alpha1.Function); ok && function.Status.IsReady() {
+				} else if function, ok := ev.Object.(*buildv1alpha1.Function); ok {
+					if function.Status.IsReady() {
 						return
 					}
-					if handler, ok := ev.Object.(*requestv1alpha1.Handler); ok && handler.Status.IsReady() {
+				} else if handler, ok := ev.Object.(*requestv1alpha1.Handler); ok {
+					if handler.Status.IsReady() {
 						return
 					}
-					if stream, ok := ev.Object.(*streamv1alpha1.Stream); ok && stream.Status.IsReady() {
+				} else if stream, ok := ev.Object.(*streamv1alpha1.Stream); ok {
+					if stream.Status.IsReady() {
 						return
 					}
-					if processor, ok := ev.Object.(*streamv1alpha1.Processor); ok && processor.Status.IsReady() {
+				} else if processor, ok := ev.Object.(*streamv1alpha1.Processor); ok {
+					if processor.Status.IsReady() {
 						return
 					}
-				case watch.Deleted, watch.Error:
-					return
 				}
+			case watch.Deleted, watch.Error:
+				return
 			}
 		}
-	}()
+	}
 }
