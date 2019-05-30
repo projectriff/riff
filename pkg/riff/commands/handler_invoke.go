@@ -51,7 +51,7 @@ func (opts *HandlerInvokeOptions) Exec(ctx context.Context, c *cli.Config) error
 	if err != nil {
 		return err
 	}
-	if !handler.Status.IsReady() || handler.Status.Domain == "" {
+	if !handler.Status.IsReady() || handler.Status.URL == nil || handler.Status.URL.Host == "" {
 		return fmt.Errorf("handler %q is not ready", opts.Name)
 	}
 
@@ -60,7 +60,7 @@ func (opts *HandlerInvokeOptions) Exec(ctx context.Context, c *cli.Config) error
 		return err
 	}
 
-	curlArgs := []string{ingress + opts.Path, "-H", fmt.Sprintf("Host: %s", handler.Status.Domain)}
+	curlArgs := []string{ingress + opts.Path, "-H", fmt.Sprintf("Host: %s", handler.Status.URL.Host)}
 	if opts.ContentTypeJSON {
 		curlArgs = append(curlArgs, "-H", "Content-Type: application/json")
 	}

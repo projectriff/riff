@@ -10,9 +10,9 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/google/go-cmp v0.3.0
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/knative/pkg v0.0.0-20190417151928-418e675f88c2
+	github.com/knative/pkg v0.0.0-20190510233738-9e0db8f0a7f4
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/projectriff/system v0.0.0-20190528222540-7c6ea07de861
+	github.com/projectriff/system v0.0.0-20190530163417-0810dd8d9795
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
@@ -33,8 +33,8 @@ require (
 	github.com/gregjones/httpcache v0.0.0-20190212212710-3befbb6ad0cc // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
 	github.com/json-iterator/go v1.1.6 // indirect
-	github.com/knative/build v0.5.0 // indirect
-	github.com/knative/serving v0.5.2 // indirect
+	github.com/knative/build v0.6.0 // indirect
+	github.com/knative/serving v0.6.0 // indirect
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.7 // indirect
