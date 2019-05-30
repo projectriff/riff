@@ -33,9 +33,9 @@ func (opts *CompletionOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := &cli.FieldError{}
 
 	if opts.Shell == "" {
-		errs = errs.Also(cli.ErrMissingField(cli.ShellFlagname))
+		errs = errs.Also(cli.ErrMissingField(cli.ShellFlagName))
 	} else if opts.Shell != "bash" && opts.Shell != "zsh" {
-		errs = errs.Also(cli.ErrInvalidValue(opts.Shell, cli.ShellFlagname))
+		errs = errs.Also(cli.ErrInvalidValue(opts.Shell, cli.ShellFlagName))
 	}
 
 	return errs
@@ -64,14 +64,14 @@ func NewCompletionCommand(c *cli.Config) *cobra.Command {
 `),
 		Example: strings.Join([]string{
 			fmt.Sprintf("%s completion", c.Name),
-			fmt.Sprintf("%s completion %s zsh", c.Name, cli.ShellFlagname),
+			fmt.Sprintf("%s completion %s zsh", c.Name, cli.ShellFlagName),
 		}, "\n"),
 		Args:    cli.Args(),
 		PreRunE: cli.ValidateOptions(opts),
 		RunE:    cli.ExecOptions(c, opts),
 	}
 
-	cmd.Flags().StringVar(&opts.Shell, cli.StripDash(cli.ShellFlagname), "bash", "`shell` to generate completion for: bash or zsh")
+	cmd.Flags().StringVar(&opts.Shell, cli.StripDash(cli.ShellFlagName), "bash", "`shell` to generate completion for: bash or zsh")
 
 	return cmd
 }

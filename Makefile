@@ -53,3 +53,4 @@ check-mockery:
 .PHONY: gen-mocks
 gen-mocks: check-mockery
 	mockery -output ./pkg/testing/pack -outpkg pack -dir ./pkg/pack -name Client
+	mockery -output ./pkg/testing/kail -outpkg kail -dir ./pkg/kail -name Logger
