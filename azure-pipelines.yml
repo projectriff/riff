@@ -26,7 +26,7 @@ jobs:
   displayName: 'Unit test'
 
 - job: fats_lite
-# TODO: restore  dependsOn: unit
+  dependsOn: unit
   strategy:
     matrix:
       minikube:
@@ -41,7 +41,7 @@ jobs:
     REGISTRY: '$(registry)'
     CLUSTER_NAME: 'riff-$(Build.BuildId)-$(qualifier)'
     NAMESPACE: '$(CLUSTER_NAME)'
-# TODO: restore  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
   steps:
     - template: ci/install-riff-system.yml
     - bash: ./ci/fats.sh lite
