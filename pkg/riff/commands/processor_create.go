@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/k8s"
@@ -91,7 +90,7 @@ func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) err
 				return
 			}
 		}()
-		return c.Kail.ProcessorLogs(ctx, processor, time.Minute, c.Stdout)
+		return c.Kail.ProcessorLogs(ctx, processor, cli.TailSinceCreateDefault, c.Stdout)
 	}
 	return nil
 }

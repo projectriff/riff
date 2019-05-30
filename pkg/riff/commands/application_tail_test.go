@@ -90,7 +90,7 @@ func TestApplicationTailCommand(t *testing.T) {
 			Prepare: func(t *testing.T, c *cli.Config) error {
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
-				kail.On("ApplicationLogs", mock.Anything, application, time.Second, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+				kail.On("ApplicationLogs", mock.Anything, application, cli.TailSinceDefault, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...log output...\n")
 				})
 				return nil
@@ -141,7 +141,7 @@ func TestApplicationTailCommand(t *testing.T) {
 			Prepare: func(t *testing.T, c *cli.Config) error {
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
-				kail.On("ApplicationLogs", mock.Anything, application, time.Second, mock.Anything).Return(fmt.Errorf("kail error"))
+				kail.On("ApplicationLogs", mock.Anything, application, cli.TailSinceDefault, mock.Anything).Return(fmt.Errorf("kail error"))
 				return nil
 			},
 			CleanUp: func(t *testing.T, c *cli.Config) error {

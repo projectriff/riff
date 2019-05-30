@@ -19,7 +19,6 @@ package commands_test
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/buildpack/pack"
 	"github.com/projectriff/riff/pkg/cli"
@@ -535,7 +534,7 @@ Created application "my-application"
 							},
 						},
 					},
-				}, time.Minute, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+				}, cli.TailSinceCreateDefault, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...log output...\n")
 				})
 				return nil
@@ -587,7 +586,7 @@ Created application "my-application"
 							},
 						},
 					},
-				}, time.Minute, mock.Anything).Return(fmt.Errorf("kail error"))
+				}, cli.TailSinceCreateDefault, mock.Anything).Return(fmt.Errorf("kail error"))
 				return nil
 			},
 			CleanUp: func(t *testing.T, c *cli.Config) error {

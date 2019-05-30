@@ -51,7 +51,7 @@ func (opts *FunctionTailOptions) Exec(ctx context.Context, c *cli.Config) error 
 	if err != nil {
 		return err
 	}
-	since := time.Second
+	since := cli.TailSinceDefault
 	if opts.Since != "" {
 		// error is protected by Validate()
 		since, _ = time.ParseDuration(opts.Since)

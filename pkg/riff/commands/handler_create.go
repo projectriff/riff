@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/k8s"
@@ -147,7 +146,7 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 				return
 			}
 		}()
-		return c.Kail.HandlerLogs(ctx, handler, time.Minute, c.Stdout)
+		return c.Kail.HandlerLogs(ctx, handler, cli.TailSinceCreateDefault, c.Stdout)
 	}
 	return nil
 }

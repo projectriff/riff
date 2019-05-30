@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/buildpack/pack"
 	"github.com/projectriff/riff/pkg/cli"
@@ -180,7 +179,7 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 				return
 			}
 		}()
-		return c.Kail.FunctionLogs(ctx, function, time.Minute, c.Stdout)
+		return c.Kail.FunctionLogs(ctx, function, cli.TailSinceCreateDefault, c.Stdout)
 	}
 	return nil
 }

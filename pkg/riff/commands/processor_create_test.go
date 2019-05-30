@@ -19,7 +19,6 @@ package commands_test
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
@@ -221,7 +220,7 @@ Created processor "my-processor"
 						Inputs:      []string{inputName},
 						Outputs:     []string{},
 					},
-				}, time.Minute, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+				}, cli.TailSinceCreateDefault, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...log output...\n")
 				})
 				return nil
@@ -265,7 +264,7 @@ Created processor "my-processor"
 						Inputs:      []string{inputName},
 						Outputs:     []string{},
 					},
-				}, time.Minute, mock.Anything).Return(fmt.Errorf("kail error"))
+				}, cli.TailSinceCreateDefault, mock.Anything).Return(fmt.Errorf("kail error"))
 				return nil
 			},
 			CleanUp: func(t *testing.T, c *cli.Config) error {
