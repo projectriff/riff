@@ -17,42 +17,61 @@
 package k8s
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/cache"
+	watchclient "k8s.io/client-go/tools/watch"
 )
+
+type object interface {
+	runtime.Object
+	metav1.Object
+}
 
 // WaitUntilReady watches for mutations of the target object until the target is ready.
 // Target objects must implement metav1.Object and have a Status field with an IsReady
 // method. Types that implement this contract include *.projectriff.io CRDs.
-func WaitUntilReady(target metav1.Object, watcher watch.Interface) error {
+func WaitUntilReady(ctx context.Context, client rest.Interface, resource string, target object) error {
 	if readyFunc := readyFunc(target); readyFunc.Kind() != reflect.Func {
 		return fmt.Errorf("unsupported target of type %t, must have .Status.IsReady() method", target)
 	}
-	for {
-		select {
-		case ev := <-watcher.ResultChan():
-			if ev.Type == watch.Error {
-				return fmt.Errorf("error waiting for ready")
-			}
-			if obj, ok := ev.Object.(metav1.Object); !ok || obj.GetUID() != target.GetUID() {
-				// event is not for the target resource
-				continue
-			}
-			switch ev.Type {
-			case watch.Added, watch.Modified:
-				if readyFunc := readyFunc(ev.Object); readyFunc.Kind() == reflect.Func {
-					if readyFunc.Call([]reflect.Value{})[0].Bool() {
-						return nil
-					}
-				}
-			case watch.Deleted:
-				return fmt.Errorf("%s deleted", strings.ToLower(ev.Object.GetObjectKind().GroupVersionKind().Kind))
-			}
+	if client == (*rest.RESTClient)(nil) {
+		return fmt.Errorf("WaitUntilReady not implemented for tests")
+	}
+	lw := cache.NewListWatchFromClient(client, resource, target.GetNamespace(), fields.Everything())
+	_, err := watchclient.UntilWithSync(ctx, lw, target, nil, readyCondition(target))
+	return err
+}
+
+func readyCondition(target object) watchclient.ConditionFunc {
+	return func(event watch.Event) (bool, error) {
+		if event.Type == watch.Error {
+			return false, fmt.Errorf("error waiting for ready")
 		}
+		if obj, ok := event.Object.(metav1.Object); !ok || obj.GetUID() != target.GetUID() {
+			// event is not for the target resource
+			return false, nil
+		}
+		switch event.Type {
+		case watch.Added, watch.Modified:
+			if readyFunc := readyFunc(event.Object); readyFunc.Kind() == reflect.Func {
+				ready := readyFunc.Call([]reflect.Value{})[0].Bool()
+				if ready {
+					return true, nil
+				}
+			}
+		case watch.Deleted:
+			return true, fmt.Errorf("%s %q deleted", strings.ToLower(target.GetObjectKind().GroupVersionKind().Kind), target.GetName())
+		}
+		return false, nil
 	}
 }
 

@@ -351,6 +351,7 @@ Created handler "my-handler"
 			},
 			ExpectOutput: `
 Created handler "my-handler"
+Error: WaitUntilReady not implemented for tests
 ...log output...
 `,
 		},

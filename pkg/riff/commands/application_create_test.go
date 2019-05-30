@@ -563,6 +563,7 @@ Created application "my-application"
 			},
 			ExpectOutput: `
 Created application "my-application"
+Error: WaitUntilReady not implemented for tests
 ...log output...
 `,
 		},
