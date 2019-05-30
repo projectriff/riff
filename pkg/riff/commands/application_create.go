@@ -150,17 +150,9 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 		ctx, cancel := context.WithCancel(ctx)
 		go func() {
 			defer cancel()
-			applicationWatch, err := c.Build().Applications(opts.Namespace).Watch(metav1.ListOptions{
-				ResourceVersion: application.ResourceVersion,
-			})
+			err := k8s.WaitUntilReady(ctx, c.Build().RESTClient(), "applications", application)
 			if err != nil {
 				c.Errorf("Error: %s\n", err)
-				return
-			}
-			defer applicationWatch.Stop()
-			if err := k8s.WaitUntilReady(application, applicationWatch); err != nil {
-				c.Errorf("Error: %s\n", err)
-				return
 			}
 		}()
 		return c.Kail.ApplicationLogs(ctx, application, cli.TailSinceCreateDefault, c.Stdout)

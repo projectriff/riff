@@ -166,17 +166,9 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 		ctx, cancel := context.WithCancel(ctx)
 		go func() {
 			defer cancel()
-			functionWatch, err := c.Build().Functions(opts.Namespace).Watch(metav1.ListOptions{
-				ResourceVersion: function.ResourceVersion,
-			})
+			err := k8s.WaitUntilReady(ctx, c.Build().RESTClient(), "functions", function)
 			if err != nil {
 				c.Errorf("Error: %s\n", err)
-				return
-			}
-			defer functionWatch.Stop()
-			if err := k8s.WaitUntilReady(function, functionWatch); err != nil {
-				c.Errorf("Error: %s\n", err)
-				return
 			}
 		}()
 		return c.Kail.FunctionLogs(ctx, function, cli.TailSinceCreateDefault, c.Stdout)
