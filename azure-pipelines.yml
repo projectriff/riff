@@ -41,7 +41,7 @@ jobs:
     REGISTRY: '$(registry)'
     CLUSTER_NAME: 'riff-$(Build.BuildId)-$(qualifier)'
     NAMESPACE: '$(CLUSTER_NAME)'
-  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+# TODO: restore  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
   steps:
     - template: ci/install-riff-system.yml
     - bash: ./ci/fats.sh lite
