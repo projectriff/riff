@@ -19,8 +19,9 @@ steps:
     displayName: 'setup cluster and registry'
 
   - bash: |
-      duffle credentials add myk8s.yaml
+      duffle credentials add ci/myk8s.yaml
       curl -O https://storage.googleapis.com/projectriff/riff-cnab/snapshots/riff-bundle-latest.json
       duffle install myriff riff-bundle-latest.json --bundle-is-file --credentials myk8s --insecure
     displayName: 'install riff system'
+    workingDirectory: '$(system.defaultWorkingDirectory)'
 
