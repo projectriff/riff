@@ -1,0 +1,26 @@
+steps:
+  - template: install-duffle-step.yml
+
+  - bash: ./git-repo-fetch.sh $(fatsDir) $(fatsRefspec) projectriff/fats
+    workingDirectory: '$(system.defaultWorkingDirectory)'
+    displayName: 'fetch fats'
+
+  - bash: |
+      $(fatsDir)/install.sh kubectl
+      $(fatsDir)/install.sh minikube
+      $(fatsDir)/install.sh gcloud
+    displayName: 'install tools'
+    env:
+      GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
+
+  - template: setup-minikube.yml
+
+  - bash: $(fatsDir)/start.sh
+    displayName: 'setup cluster and registry'
+
+  - bash: |
+      duffle credentials add myk8s.yaml
+      curl -O https://storage.googleapis.com/projectriff/riff-cnab/snapshots/riff-bundle-latest.json
+      duffle install myriff riff-bundle-latest.json --bundle-is-file --credentials myk8s --insecure
+    displayName: 'install riff system'
+

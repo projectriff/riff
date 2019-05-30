@@ -1,3 +1,8 @@
+variables:
+  duffleVersion: '0.1.0-ralpha.5%2Benglishrose'
+  fatsDir: '$(system.defaultWorkingDirectory)/../fats'
+  fatsRefspec: 9f83cecb60cdbdb4644cc7836d17df5205c44a88 # projectriff/fats with-reset as of 2019-05-30
+
 jobs:
 
 - job: unit
@@ -19,3 +24,31 @@ jobs:
   steps:
   - template: ci/unit-test-steps.yml
   displayName: 'Unit test'
+
+- job: fats_lite
+  dependsOn: unit
+  strategy:
+    matrix:
+      minikube:
+        imageName: ubuntu-16.04
+        qualifier: minikube
+        cluster: minikube
+        registry: minikube
+  pool:
+    vmImage: $(imageName)
+  variables:
+    CLUSTER:  '$(cluster)'
+    REGISTRY: '$(registry)'
+    CLUSTER_NAME: 'riff-$(Build.BuildId)-$(qualifier)'
+    NAMESPACE: '$(CLUSTER_NAME)'
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+  steps:
+    - template: ci/install-riff-system.yml
+    - bash: ./ci/fats.sh lite
+      displayName: 'Run FATS'
+    - bash: ./ci/fats-cleanup.sh
+      env:
+        TRAVIS_TEST_RESULT: '' # TODO remove this
+      condition: always()
+      displayName: 'Cleanup FATS'
+  displayName: 'FATS lite'

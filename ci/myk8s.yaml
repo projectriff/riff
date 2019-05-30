@@ -1,0 +1,5 @@
+name: myk8s
+credentials:
+  - name: kubeconfig
+    source:
+      path: $HOME/.kube/config
