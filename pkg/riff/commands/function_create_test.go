@@ -590,7 +590,6 @@ Created function "my-function"
 			},
 			ExpectOutput: `
 Created function "my-function"
-Error: WaitUntilReady not implemented for tests
 ...log output...
 `,
 		},

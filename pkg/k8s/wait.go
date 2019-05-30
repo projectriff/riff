@@ -44,7 +44,7 @@ func WaitUntilReady(ctx context.Context, client rest.Interface, resource string,
 		return fmt.Errorf("unsupported target of type %t, must have .Status.IsReady() method", target)
 	}
 	if client == (*rest.RESTClient)(nil) {
-		return fmt.Errorf("WaitUntilReady not implemented for tests")
+		return nil
 	}
 	lw := cache.NewListWatchFromClient(client, resource, target.GetNamespace(), fields.Everything())
 	_, err := watchclient.UntilWithSync(ctx, lw, target, nil, readyCondition(target))

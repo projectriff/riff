@@ -245,7 +245,6 @@ Created processor "my-processor"
 			},
 			ExpectOutput: `
 Created processor "my-processor"
-Error: WaitUntilReady not implemented for tests
 ...log output...
 `,
 		},
