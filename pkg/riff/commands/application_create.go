@@ -23,6 +23,7 @@ import (
 
 	"github.com/buildpack/pack"
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/riff/pkg/k8s"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -39,6 +40,8 @@ type ApplicationCreateOptions struct {
 	GitRepo     string
 	GitRevision string
 	SubPath     string
+
+	Tail bool
 }
 
 func (opts *ApplicationCreateOptions) Validate(ctx context.Context) *cli.FieldError {
@@ -142,6 +145,26 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 		return err
 	}
 	c.Successf("Created application %q\n", application.Name)
+	if opts.Tail {
+		// cancel ctx when application becomes ready
+		ctx, cancel := context.WithCancel(ctx)
+		go func() {
+			defer cancel()
+			applicationWatch, err := c.Build().Applications(opts.Namespace).Watch(metav1.ListOptions{
+				ResourceVersion: application.ResourceVersion,
+			})
+			if err != nil {
+				c.Errorf("Error: %s\n", err)
+				return
+			}
+			defer applicationWatch.Stop()
+			if err := k8s.WaitUntilReady(application, applicationWatch); err != nil {
+				c.Errorf("Error: %s\n", err)
+				return
+			}
+		}()
+		return c.Kail.ApplicationLogs(ctx, application, cli.TailSinceCreateDefault, c.Stdout)
+	}
 	return nil
 }
 
@@ -172,6 +195,7 @@ func NewApplicationCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.GitRepo, cli.StripDash(cli.GitRepoFlagName), "", "git `url` to remote source code")
 	cmd.Flags().StringVar(&opts.GitRevision, cli.StripDash(cli.GitRevisionFlagName), "master", "`refspec` within the git repo to checkout")
 	cmd.Flags().StringVar(&opts.SubPath, cli.StripDash(cli.SubPathFlagName), "", "path to `directory` within the git repo to checkout")
+	cmd.Flags().BoolVar(&opts.Tail, cli.StripDash(cli.TailFlagName), false, "watch build logs")
 
 	return cmd
 }

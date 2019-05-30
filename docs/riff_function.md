@@ -26,4 +26,5 @@ functions built from source using function buildpacks
 * [riff function create](riff_function_create.md)	 - create a function from source
 * [riff function delete](riff_function_delete.md)	 - delete function(s)
 * [riff function list](riff_function_list.md)	 - table listing of functions
+* [riff function tail](riff_function_tail.md)	 - watch build logs
 

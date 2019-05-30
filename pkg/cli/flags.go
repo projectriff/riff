@@ -52,8 +52,10 @@ const (
 	RegistryFlagName              = "--registry"
 	RegistryUserFlagName          = "--registry-user"
 	SetDefaultImagePrefixFlagName = "--set-default-image-prefix"
-	ShellFlagname                 = "--shell"
+	ShellFlagName                 = "--shell"
+	SinceFlagName                 = "--since"
 	SubPathFlagName               = "--sub-path"
+	TailFlagName                  = "--tail"
 	TextFlagName                  = "--text"
 )
 

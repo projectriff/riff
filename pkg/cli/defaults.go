@@ -14,30 +14,13 @@
  * limitations under the License.
  */
 
-package commands
+package cli
 
 import (
-	"strings"
-
-	"github.com/projectriff/riff/pkg/cli"
-	"github.com/spf13/cobra"
+	"time"
 )
 
-func NewApplicationCommand(c *cli.Config) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "application",
-		Short: "applications built from source using application buildpacks",
-		Long: strings.TrimSpace(`
-<todo>
-`),
-		Args:    cli.Args(),
-		Aliases: []string{"applications", "app", "apps"},
-	}
-
-	cmd.AddCommand(NewApplicationListCommand(c))
-	cmd.AddCommand(NewApplicationCreateCommand(c))
-	cmd.AddCommand(NewApplicationDeleteCommand(c))
-	cmd.AddCommand(NewApplicationTailCommand(c))
-
-	return cmd
-}
+const (
+	TailSinceCreateDefault = time.Minute
+	TailSinceDefault       = time.Second
+)
