@@ -25,7 +25,13 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 )
 
+// WaitUntilReady watches for mutations of the target object until the target is ready.
+// Target objects must implement metav1.Object and have a Status field with an IsReady
+// method. Types that implement this contract include *.projectriff.io CRDs.
 func WaitUntilReady(target metav1.Object, watcher watch.Interface) error {
+	if readyFunc := readyFunc(target); readyFunc.Kind() != reflect.Func {
+		return fmt.Errorf("unsupported target of type %t, must have .Status.IsReady() method", target)
+	}
 	for {
 		select {
 		case ev := <-watcher.ResultChan():
@@ -38,8 +44,7 @@ func WaitUntilReady(target metav1.Object, watcher watch.Interface) error {
 			}
 			switch ev.Type {
 			case watch.Added, watch.Modified:
-				// use reflection since there is no common interface
-				if readyFunc := reflect.ValueOf(ev.Object).Elem().FieldByName("Status").Addr().MethodByName("IsReady"); readyFunc.Kind() == reflect.Func {
+				if readyFunc := readyFunc(ev.Object); readyFunc.Kind() == reflect.Func {
 					if readyFunc.Call([]reflect.Value{})[0].Bool() {
 						return nil
 					}
@@ -49,4 +54,9 @@ func WaitUntilReady(target metav1.Object, watcher watch.Interface) error {
 			}
 		}
 	}
+}
+
+func readyFunc(obj interface{}) reflect.Value {
+	// use reflection since there is no common interface
+	return reflect.ValueOf(obj).Elem().FieldByName("Status").Addr().MethodByName("IsReady")
 }
