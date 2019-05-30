@@ -28,6 +28,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
 	"github.com/projectriff/riff/pkg/k8s"
+	"github.com/projectriff/riff/pkg/kail"
 	"github.com/projectriff/riff/pkg/pack"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -40,6 +41,7 @@ type Config struct {
 	k8s.Client
 	Exec   func(ctx context.Context, command string, args ...string) *exec.Cmd
 	Pack   pack.Client
+	Kail   kail.Logger
 	Stdin  io.Reader
 	Stdout io.Writer
 	Stderr io.Writer
@@ -159,5 +161,8 @@ func (c *Config) init() {
 			os.Exit(1)
 		}
 		c.Pack = packClient
+	}
+	if c.Kail == nil {
+		c.Kail = kail.NewDefault(c.Client)
 	}
 }

@@ -28,6 +28,7 @@ riff application create my-app --image registry.example.com/image --local-path .
       --local-path directory   path to directory containing source code on the local machine
   -n, --namespace name         kubernetes namespace (defaulted from kube config)
       --sub-path directory     path to directory within the git repo to checkout
+      --tail                   watch build logs
 ```
 
 ### Options inherited from parent commands

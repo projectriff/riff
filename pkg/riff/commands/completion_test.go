@@ -30,14 +30,14 @@ func TestCompletionOptions(t *testing.T) {
 		{
 			Name:             "missing shell",
 			Options:          &commands.CompletionOptions{},
-			ExpectFieldError: cli.ErrMissingField(cli.ShellFlagname),
+			ExpectFieldError: cli.ErrMissingField(cli.ShellFlagName),
 		},
 		{
 			Name: "invalid shell",
 			Options: &commands.CompletionOptions{
 				Shell: "zorglub",
 			},
-			ExpectFieldError: cli.ErrInvalidValue("zorglub", cli.ShellFlagname),
+			ExpectFieldError: cli.ErrInvalidValue("zorglub", cli.ShellFlagName),
 		},
 		{
 			Name: "valid shell bash",
@@ -75,7 +75,7 @@ func TestCompletionCommand(t *testing.T) {
 		},
 		{
 			Name: "bash",
-			Args: []string{cli.ShellFlagname, "bash"},
+			Args: []string{cli.ShellFlagName, "bash"},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, str := range []string{
 					"# bash completion",
@@ -88,7 +88,7 @@ func TestCompletionCommand(t *testing.T) {
 		},
 		{
 			Name: "zsh",
-			Args: []string{cli.ShellFlagname, "zsh"},
+			Args: []string{cli.ShellFlagName, "zsh"},
 			Verify: func(t *testing.T, output string, err error) {
 				for _, str := range []string{
 					"#compdef completion",

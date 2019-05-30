@@ -25,6 +25,7 @@ riff processor create my-processor --function-ref my-func --input my-input-strea
       --input name          name of stream to read messages from (may be set multiple times)
   -n, --namespace name      kubernetes namespace (defaulted from kube config)
       --output name         name of stream to write messages to (may be set multiple times)
+      --tail                watch processor logs
 ```
 
 ### Options inherited from parent commands

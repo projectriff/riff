@@ -28,6 +28,7 @@ riff handler create my-image-handler --image registry.example.com/my-image:lates
   -h, --help                   help for create
       --image image            container image to deploy
   -n, --namespace name         kubernetes namespace (defaulted from kube config)
+      --tail                   watch handler logs
 ```
 
 ### Options inherited from parent commands

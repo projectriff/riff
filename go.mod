@@ -4,6 +4,8 @@ go 1.12
 
 require (
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
+	github.com/boz/go-logutil v0.1.0
+	github.com/boz/kail v0.10.1
 	github.com/buildpack/pack v0.2.0
 	github.com/fatih/color v1.7.0
 	github.com/google/go-cmp v0.3.0
@@ -15,9 +17,9 @@ require (
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
 	golang.org/x/crypto v0.0.0-20190424203555-c05e17bb3b2d
-	k8s.io/api v0.0.0-20190226173710-145d52631d00
-	k8s.io/apimachinery v0.0.0-20190221084156-01f179d85dbc
-	k8s.io/client-go v0.0.0-20190226174127-78295b709ec6
+	k8s.io/api v0.0.0-20190515023547-db5a9d1c40eb
+	k8s.io/apimachinery v0.0.0-20190515023456-b74e4c97951f
+	k8s.io/client-go v0.0.0-20190514184034-dd7f3ad83f18
 )
 
 require (
@@ -36,12 +38,17 @@ require (
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a // indirect
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.7 // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
 	go.uber.org/zap v1.10.0 // indirect
-	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20190502190224-411b2483e503 // indirect
+)
+
+replace (
+	// kail wants to upgrade these deps, don't let it
+	k8s.io/api => k8s.io/api v0.0.0-20190226173710-145d52631d00
+	k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20190221084156-01f179d85dbc
+	k8s.io/client-go => k8s.io/client-go v0.0.0-20190226174127-78295b709ec6
 )

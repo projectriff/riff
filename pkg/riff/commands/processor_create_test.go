@@ -17,12 +17,15 @@
 package commands_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	rifftesting "github.com/projectriff/riff/pkg/testing"
+	kailtesting "github.com/projectriff/riff/pkg/testing/kail"
 	streamv1alpha1 "github.com/projectriff/system/pkg/apis/stream/v1alpha1"
+	"github.com/stretchr/testify/mock"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -196,6 +199,89 @@ Created processor "my-processor"
 					Spec: streamv1alpha1.ProcessorSpec{
 						FunctionRef: functionRef,
 						Inputs:      []string{inputName},
+					},
+				},
+			},
+			ShouldError: true,
+		},
+		{
+			Name: "tail logs",
+			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.TailFlagName},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				kail := &kailtesting.Logger{}
+				c.Kail = kail
+				kail.On("ProcessorLogs", mock.Anything, &streamv1alpha1.Processor{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      processorName,
+					},
+					Spec: streamv1alpha1.ProcessorSpec{
+						FunctionRef: functionRef,
+						Inputs:      []string{inputName},
+						Outputs:     []string{},
+					},
+				}, cli.TailSinceCreateDefault, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+					fmt.Fprintf(c.Stdout, "...log output...\n")
+				})
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				kail := c.Kail.(*kailtesting.Logger)
+				kail.AssertExpectations(t)
+				return nil
+			},
+			ExpectCreates: []runtime.Object{
+				&streamv1alpha1.Processor{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      processorName,
+					},
+					Spec: streamv1alpha1.ProcessorSpec{
+						FunctionRef: functionRef,
+						Inputs:      []string{inputName},
+						Outputs:     []string{},
+					},
+				},
+			},
+			ExpectOutput: `
+Created processor "my-processor"
+...log output...
+`,
+		},
+		{
+			Name: "tail error",
+			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.TailFlagName},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				kail := &kailtesting.Logger{}
+				c.Kail = kail
+				kail.On("ProcessorLogs", mock.Anything, &streamv1alpha1.Processor{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      processorName,
+					},
+					Spec: streamv1alpha1.ProcessorSpec{
+						FunctionRef: functionRef,
+						Inputs:      []string{inputName},
+						Outputs:     []string{},
+					},
+				}, cli.TailSinceCreateDefault, mock.Anything).Return(fmt.Errorf("kail error"))
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				kail := c.Kail.(*kailtesting.Logger)
+				kail.AssertExpectations(t)
+				return nil
+			},
+			ExpectCreates: []runtime.Object{
+				&streamv1alpha1.Processor{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      processorName,
+					},
+					Spec: streamv1alpha1.ProcessorSpec{
+						FunctionRef: functionRef,
+						Inputs:      []string{inputName},
+						Outputs:     []string{},
 					},
 				},
 			},

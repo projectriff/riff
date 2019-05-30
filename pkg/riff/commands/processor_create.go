@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/riff/pkg/k8s"
 	streamv1alpha1 "github.com/projectriff/system/pkg/apis/stream/v1alpha1"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,6 +34,8 @@ type ProcessorCreateOptions struct {
 	FunctionRef string
 	Inputs      []string
 	Outputs     []string
+
+	Tail bool
 }
 
 func (opts *ProcessorCreateOptions) Validate(ctx context.Context) *cli.FieldError {
@@ -69,6 +72,26 @@ func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) err
 		return err
 	}
 	c.Successf("Created processor %q\n", processor.Name)
+	if opts.Tail {
+		// cancel ctx when processor becomes ready
+		ctx, cancel := context.WithCancel(ctx)
+		go func() {
+			defer cancel()
+			processorWatch, err := c.Stream().Processors(opts.Namespace).Watch(metav1.ListOptions{
+				ResourceVersion: processor.ResourceVersion,
+			})
+			if err != nil {
+				c.Errorf("Error: %s\n", err)
+				return
+			}
+			defer processorWatch.Stop()
+			if err := k8s.WaitUntilReady(processor, processorWatch); err != nil {
+				c.Errorf("Error: %s\n", err)
+				return
+			}
+		}()
+		return c.Kail.ProcessorLogs(ctx, processor, cli.TailSinceCreateDefault, c.Stdout)
+	}
 	return nil
 }
 
@@ -96,6 +119,7 @@ func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.FunctionRef, cli.StripDash(cli.FunctionRefFlagName), "", "`name` of function build to deploy")
 	cmd.Flags().StringArrayVar(&opts.Inputs, cli.StripDash(cli.InputFlagName), []string{}, "`name` of stream to read messages from (may be set multiple times)")
 	cmd.Flags().StringArrayVar(&opts.Outputs, cli.StripDash(cli.OutputFlagName), []string{}, "`name` of stream to write messages to (may be set multiple times)")
+	cmd.Flags().BoolVar(&opts.Tail, cli.StripDash(cli.TailFlagName), false, "watch processor logs")
 
 	return cmd
 }
