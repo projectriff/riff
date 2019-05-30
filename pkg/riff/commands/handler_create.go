@@ -133,17 +133,9 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 		ctx, cancel := context.WithCancel(ctx)
 		go func() {
 			defer cancel()
-			handlerWatch, err := c.Request().Handlers(opts.Namespace).Watch(metav1.ListOptions{
-				ResourceVersion: handler.ResourceVersion,
-			})
+			err := k8s.WaitUntilReady(ctx, c.Request().RESTClient(), "handlers", handler)
 			if err != nil {
 				c.Errorf("Error: %s\n", err)
-				return
-			}
-			defer handlerWatch.Stop()
-			if err := k8s.WaitUntilReady(handler, handlerWatch); err != nil {
-				c.Errorf("Error: %s\n", err)
-				return
 			}
 		}()
 		return c.Kail.HandlerLogs(ctx, handler, cli.TailSinceCreateDefault, c.Stdout)

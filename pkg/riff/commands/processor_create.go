@@ -77,17 +77,9 @@ func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) err
 		ctx, cancel := context.WithCancel(ctx)
 		go func() {
 			defer cancel()
-			processorWatch, err := c.Stream().Processors(opts.Namespace).Watch(metav1.ListOptions{
-				ResourceVersion: processor.ResourceVersion,
-			})
+			err := k8s.WaitUntilReady(ctx, c.Stream().RESTClient(), "processors", processor)
 			if err != nil {
 				c.Errorf("Error: %s\n", err)
-				return
-			}
-			defer processorWatch.Stop()
-			if err := k8s.WaitUntilReady(processor, processorWatch); err != nil {
-				c.Errorf("Error: %s\n", err)
-				return
 			}
 		}()
 		return c.Kail.ProcessorLogs(ctx, processor, cli.TailSinceCreateDefault, c.Stdout)
