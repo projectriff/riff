@@ -79,7 +79,7 @@ type CommandTableRecord struct {
 	// Config is passed into the command factory. Mosts tests should not need to set this field.
 	// If not specified, a default Config is created with a FakeClient. The Config's client will
 	// always be replaced with a FakeClient configured with the given objects and reactors to
-	// intercept all calls to the fake clientsets for comparision with the expected operations.
+	// intercept all calls to the fake clientsets for comparison with the expected operations.
 	Config *cli.Config
 	// GivenObjects represents resources that would already exist within Kubernetes. These
 	// resources are passed directly to the fake clientsets.

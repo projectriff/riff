@@ -18,6 +18,7 @@ package commands_test
 
 import (
 	"testing"
+
 	"github.com/projectriff/riff/pkg/riff/commands"
 	rifftesting "github.com/projectriff/riff/pkg/testing"
 )
