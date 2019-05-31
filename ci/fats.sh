@@ -44,6 +44,9 @@ else
 fi
 travis_fold end install-riff
 
+# create namespace
+kubectl create namespace $NAMESPACE
+
 # health checks
 echo "Checking for ready ingress"
 wait_for_ingress_ready 'istio-ingressgateway' 'istio-system'
