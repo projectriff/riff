@@ -10,11 +10,11 @@ commit=$(git rev-parse HEAD)
 
 # fetch FATS scripts
 fats_repo="projectriff/fats"
-source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $fatsDir $fatsRefspec $fats_repo
-source $fats_dir/.util.sh
+source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $FATSDIR $FATSREFSPEC $fats_repo
+source $FATSDIR/.util.sh
 
-$fats_dir/install.sh kubectl
-$fats_dir/install.sh kail
+$FATSDIR/install.sh kubectl
+$FATSDIR/install.sh kail
 
 # install riff-cli
 travis_fold start install-riff
@@ -45,13 +45,13 @@ echo "Checking for ready ingress"
 wait_for_ingress_ready 'istio-ingressgateway' 'istio-system'
 
 # run test functions
-source $fats_dir/functions/helpers.sh
+source $FATSDIR/functions/helpers.sh
 
 for test in java java-boot node npm command; do
-  path=${fats_dir}/functions/uppercase/${test}
+  path=${FATSDIR}/functions/uppercase/${test}
   function_name=fats-cluster-uppercase-${test}
   image=$(fats_image_repo ${function_name})
-  create_args="--git-repo https://github.com/${fats_repo}.git --git-revision ${fats_refspec} --sub-path functions/uppercase/${test}"
+  create_args="--git-repo https://github.com/${FATSREPO}.git --git-revision ${FATSREFSPEC} --sub-path functions/uppercase/${test}"
   input_data=riff
   expected_data=RIFF
 
@@ -60,7 +60,7 @@ done
 
 if [ "$machine" != "MinGw" ]; then
   for test in node command; do
-    path=${fats_dir}/functions/uppercase/${test}
+    path=${FATSDIR}/functions/uppercase/${test}
     function_name=fats-local-uppercase-${test}
     image=$(fats_image_repo ${function_name})
     create_args="--local-path ."
