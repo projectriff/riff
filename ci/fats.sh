@@ -36,11 +36,6 @@ fi
 travis_fold end install-riff
 
 # health checks
-echo "Checking for ready pods"
-wait_pod_selector_ready 'app=controller' 'knative-serving'
-wait_pod_selector_ready 'app=webhook' 'knative-serving'
-wait_pod_selector_ready 'app=build-controller' 'knative-build'
-wait_pod_selector_ready 'app=build-webhook' 'knative-build'
 echo "Checking for ready ingress"
 wait_for_ingress_ready 'istio-ingressgateway' 'istio-system'
 
