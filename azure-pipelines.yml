@@ -33,7 +33,7 @@ jobs:
         imageName: ubuntu-16.04
         qualifier: minikube
         cluster: minikube
-        registry: minikube
+        registry: docker-daemon
   pool:
     vmImage: $(imageName)
   variables:
