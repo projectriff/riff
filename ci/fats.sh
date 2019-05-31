@@ -9,10 +9,8 @@ version=`cat VERSION`
 commit=$(git rev-parse HEAD)
 
 # fetch FATS scripts
-fats_dir=`dirname "${BASH_SOURCE[0]}"`/fats
 fats_repo="projectriff/fats"
-fats_refspec=2234005739491f39fabaa75098b19c6d521af324 # projectriff/fats master as of 2019-04-09
-source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $fats_dir $fats_refspec $fats_repo
+source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $fatsDir $fatsRefspec $fats_repo
 source $fats_dir/.util.sh
 
 $fats_dir/install.sh kubectl
