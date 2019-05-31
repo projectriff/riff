@@ -1,7 +1,7 @@
 variables:
   duffleVersion: '0.1.0-ralpha.5%2Benglishrose'
   fatsDir: '$(system.defaultWorkingDirectory)/../fats'
-  fatsRefspec: d5705cbb0d71ee444da638517079b6499593a1b3 # projectriff/fats new-cli as of 2019-05-31
+  fatsRefspec: b300bdbc302bbc1b5d34818928003ed47684200a # projectriff/fats new-cli as of 2019-05-31
 
 jobs:
 
