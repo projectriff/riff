@@ -43,7 +43,7 @@ jobs:
     NAMESPACE: '$(CLUSTER_NAME)'
 # TODO: restore  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
   steps:
-    - template: ci/install-riff-system.yml
+    - template: ci/downgrade-docker.yml
     - bash: ./ci/fats.sh lite
       displayName: 'Run FATS'
     - bash: ./ci/fats-cleanup.sh
