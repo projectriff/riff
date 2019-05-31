@@ -21,7 +21,7 @@ $FATSDIR/install.sh duffle
 $FATSDIR/start.sh
 
 duffle init
-duffle credentials add source ci/myk8s.yaml
+duffle credentials add ci/myk8s.yaml
 curl -O https://storage.googleapis.com/projectriff/riff-cnab/snapshots/riff-bundle-latest.json
 duffle install myriff riff-bundle-latest.json --bundle-is-file --credentials myk8s --insecure
 
