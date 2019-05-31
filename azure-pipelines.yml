@@ -20,8 +20,38 @@ jobs:
   - template: ci/unit-test-steps.yml
   displayName: 'Unit test'
 
-- job: publish
+- job: stage
   dependsOn: unit
+  pool:
+    vmImage: ubuntu-16.04
+  variables:
+    GOBIN:  '$(GOPATH)/bin' # Go binaries path
+    GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
+    GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
+    modulePath: '$(build.repository.name)' # Path to the module's code
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  steps:
+  - template: ci/install-go-steps.yml
+  - template: ci/install-gcloud.yml
+  - bash: ./ci/stage.sh
+    env:
+      GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
+    workingDirectory: '$(modulePath)'
+    displayName: 'Stage riff release artifacts'
+  displayName: 'Stage'
+
+# TODO restore FATS tests
+- job: fats
+  dependsOn: stage
+  pool:
+    vmImage: ubuntu-16.04
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  steps:
+  - bash: echo 'TODO implement me'
+  displayName: 'FATS'
+
+- job: publish
+  dependsOn: fats
   pool:
     vmImage: ubuntu-16.04
   condition: |
