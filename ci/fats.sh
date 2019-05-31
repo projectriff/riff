@@ -20,7 +20,8 @@ $FATSDIR/install.sh duffle
 # start the cluster and registry
 $FATSDIR/start.sh
 
-duffle credentials add source `dirname "${BASH_SOURCE[0]}"`/myk8s.yaml
+duffle init
+duffle credentials add source ci/myk8s.yaml
 curl -O https://storage.googleapis.com/projectriff/riff-cnab/snapshots/riff-bundle-latest.json
 duffle install myriff riff-bundle-latest.json --bundle-is-file --credentials myk8s --insecure
 
