@@ -19,3 +19,27 @@ jobs:
   steps:
   - template: ci/unit-test-steps.yml
   displayName: 'Unit test'
+
+- job: publish
+  dependsOn: unit
+  pool:
+    vmImage: ubuntu-16.04
+  condition: |
+    and(
+      succeeded(),
+      ne(variables['Build.Reason'], 'PullRequest'),
+      or(
+        eq(variables['Build.SourceBranch'], 'refs/heads/master'),
+        and(
+          startsWith(variables['Build.SourceBranch'], 'refs/heads/v'),
+          endsWith(variables['Build.SourceBranch'], 'x')
+        )
+      )
+    )
+  steps:
+  - template: ci/install-gcloud.yml
+  - bash: ./ci/publish.sh $(Build.SourceBranchName)
+    env:
+      GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
+    displayName: 'Publish riff release artifacts'
+  displayName: 'Publish'
