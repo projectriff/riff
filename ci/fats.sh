@@ -18,7 +18,7 @@ $FATSDIR/install.sh kail
 $FATSDIR/install.sh duffle
 
 # start the cluster and registry
-$FATSDIR/start.sh
+source $FATSDIR/start.sh
 
 duffle init
 duffle credentials add ci/myk8s.yaml
