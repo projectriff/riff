@@ -13,7 +13,7 @@ all: build test docs
 
 .PHONY: clean
 clean:
-	rm riff
+	rm -f $(OUTPUT)
 	rm -f riff-darwin-amd64.tgz
 	rm -f riff-linux-amd64.tgz
 	rm -f riff-windows-amd64.zip
