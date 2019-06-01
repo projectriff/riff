@@ -51,6 +51,8 @@ kubectl create namespace $NAMESPACE
 echo "Checking for ready ingress"
 wait_for_ingress_ready 'istio-ingressgateway' 'istio-system'
 
+fats_create_push_credentials $NAMESPACE
+
 # run test functions
 source $FATSDIR/functions/helpers.sh
 
