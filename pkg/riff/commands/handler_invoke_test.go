@@ -277,15 +277,9 @@ func TestHandlerInvokeCommand(t *testing.T) {
 				handler,
 				ingressService,
 			},
-			Verify: func(t *testing.T, output string, err error) {
-				for _, expected := range []string{
-					"curl localhost -H 'Host: test-handler.example.com' -w '\n'\n",
-				} {
-					if !strings.Contains(output, expected) {
-						t.Errorf("expected command output to contain %q, actually %q", expected, output)
-					}
-				}
-			},
+			ExpectOutput: `
+Command executed: curl localhost -H 'Host: test-handler.example.com' -w '` + "\n" + `'
+`,
 		},
 		{
 			Name: "unknown ingress",
@@ -369,17 +363,10 @@ func TestHandlerInvokeCommand(t *testing.T) {
 				handler,
 				ingressService,
 			},
+			ExpectOutput: `
+Command executed: curl localhost -H 'Host: test-handler.example.com'
+`,
 			ShouldError: true,
-			Verify: func(t *testing.T, output string, err error) {
-				for _, expected := range []string{
-					"curl localhost -H 'Host: test-handler.example.com'\n",
-					"exit status 1\n",
-				} {
-					if !strings.Contains(output, expected) {
-						t.Errorf("expected command output to contain %q, actually %q", expected, output)
-					}
-				}
-			},
 		},
 	}
 

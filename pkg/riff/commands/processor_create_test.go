@@ -304,7 +304,7 @@ Created processor "my-processor"
 					fmt.Fprintf(c.Stdout, "...log output...\n")
 					// wait for context to be cancelled, plus some fudge
 					<-ctx.Done()
-					time.Sleep(2 * time.Millisecond)
+					time.Sleep(time.Millisecond)
 				})
 				return nil
 			},
@@ -332,9 +332,13 @@ Created processor "my-processor"
 Timeout after "1ms" waiting for "my-processor" to become ready
 To view status run: riff processor list --namespace default
 To continue watching logs run: riff processor tail my-processor --namespace default
-Error: timed out waiting for the condition
 `,
 			ShouldError: true,
+			Verify: func(t *testing.T, output string, err error) {
+				if expected, actual := k8s.ErrWaitTimeout, err; expected != actual {
+					t.Errorf("expected error %q, actual %q", expected, actual)
+				}
+			},
 		},
 		{
 			Name: "tail error",
