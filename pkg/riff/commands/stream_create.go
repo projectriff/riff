@@ -30,7 +30,8 @@ import (
 type StreamCreateOptions struct {
 	cli.ResourceOptions
 
-	Provider string
+	Provider    string
+	ContentType string
 }
 
 func (opts *StreamCreateOptions) Validate(ctx context.Context) *cli.FieldError {
@@ -52,7 +53,8 @@ func (opts *StreamCreateOptions) Exec(ctx context.Context, c *cli.Config) error 
 			Name:      opts.Name,
 		},
 		Spec: streamv1alpha1.StreamSpec{
-			Provider: opts.Provider,
+			Provider:    opts.Provider,
+			ContentType: opts.ContentType,
 		},
 	}
 
@@ -60,7 +62,7 @@ func (opts *StreamCreateOptions) Exec(ctx context.Context, c *cli.Config) error 
 	if err != nil {
 		return err
 	}
-	c.Successf("Created stream %q\n", stream.Name)
+	_, _ = c.Successf("Created stream %q\n", stream.Name)
 	return nil
 }
 
@@ -83,6 +85,7 @@ func NewStreamCreateCommand(c *cli.Config) *cobra.Command {
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
 	cmd.Flags().StringVar(&opts.Provider, cli.StripDash(cli.ProviderFlagName), "", "`name` of stream provider")
+	cmd.Flags().StringVar(&opts.ContentType, cli.StripDash(cli.ContentTypeName), "", "`content-type` of stream")
 
 	return cmd
 }

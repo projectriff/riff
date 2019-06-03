@@ -47,6 +47,15 @@ func TestStreamCreateOptions(t *testing.T) {
 			ShouldValidate: true,
 		},
 		{
+			Name: "valid stream",
+			Options: &commands.StreamCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Provider:        "test-provider",
+				ContentType:     "application/x-doom",
+			},
+			ShouldValidate: true,
+		},
+		{
 			Name: "no provider",
 			Options: &commands.StreamCreateOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
@@ -61,6 +70,7 @@ func TestStreamCreateOptions(t *testing.T) {
 func TestStreamCreateCommand(t *testing.T) {
 	defaultNamespace := "default"
 	streamName := "my-stream"
+	contentType := "video/jpeg"
 	provider := "test-provider"
 
 	table := rifftesting.CommandTable{
@@ -80,6 +90,25 @@ func TestStreamCreateCommand(t *testing.T) {
 					},
 					Spec: streamv1alpha1.StreamSpec{
 						Provider: provider,
+					},
+				},
+			},
+			ExpectOutput: `
+Created stream "my-stream"
+`,
+		},
+		{
+			Name: "stream provider and content-type",
+			Args: []string{streamName, cli.ProviderFlagName, provider},
+			ExpectCreates: []runtime.Object{
+				&streamv1alpha1.Stream{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      streamName,
+					},
+					Spec: streamv1alpha1.StreamSpec{
+						Provider:    provider,
+						ContentType: contentType,
 					},
 				},
 			},

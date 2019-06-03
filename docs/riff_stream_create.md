@@ -19,9 +19,10 @@ riff stream create --provider my-provider
 ### Options
 
 ```
-  -h, --help             help for create
-  -n, --namespace name   kubernetes namespace (defaulted from kube config)
-      --provider name    name of stream provider
+      --content-type content-type   content-type of stream
+  -h, --help                        help for create
+  -n, --namespace name              kubernetes namespace (defaulted from kube config)
+      --provider name               name of stream provider
 ```
 
 ### Options inherited from parent commands
