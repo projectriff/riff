@@ -225,6 +225,8 @@ func (ctr CommandTableRecord) Run(t *testing.T, cmdFactory func(*cli.Config) *co
 		}
 
 		cmd := cmdFactory(c)
+		cmd.SilenceErrors = true
+		cmd.SilenceUsage = true
 		cmd.SetArgs(ctr.Args)
 
 		c.Stdin = bytes.NewBuffer(ctr.Stdin)
@@ -233,13 +235,13 @@ func (ctr CommandTableRecord) Run(t *testing.T, cmdFactory func(*cli.Config) *co
 		c.Stdout = output
 		c.Stderr = output
 
-		err := cmd.Execute()
+		cmdErr := cmd.Execute()
 
-		if expected, actual := ctr.ShouldError, err != nil; expected != actual {
+		if expected, actual := ctr.ShouldError, cmdErr != nil; expected != actual {
 			if expected {
-				t.Errorf("expected command to error, actual %v", err)
+				t.Errorf("expected command to error, actual %v", cmdErr)
 			} else {
-				t.Errorf("expected command not to error, actual %q", err)
+				t.Errorf("expected command not to error, actual %q", cmdErr)
 			}
 		}
 
@@ -355,7 +357,7 @@ func (ctr CommandTableRecord) Run(t *testing.T, cmdFactory func(*cli.Config) *co
 		}
 
 		if ctr.Verify != nil {
-			ctr.Verify(t, output.String(), err)
+			ctr.Verify(t, output.String(), cmdErr)
 		}
 	})
 }

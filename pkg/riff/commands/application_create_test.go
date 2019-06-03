@@ -360,9 +360,13 @@ Created application "my-application"
 			Name: "local path, no builders",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath},
 			ExpectOutput: `
-Error: configmaps "builders" not found
 `,
 			ShouldError: true,
+			Verify: func(t *testing.T, output string, err error) {
+				if expected, actual := `configmaps "builders" not found`, err.Error(); expected != actual {
+					t.Errorf("expected error %q, actual %q", expected, actual)
+				}
+			},
 		},
 		{
 			Name: "local path, no application builder",
@@ -377,9 +381,13 @@ Error: configmaps "builders" not found
 				},
 			},
 			ExpectOutput: `
-Error: unknown builder for "riff-application"
 `,
 			ShouldError: true,
+			Verify: func(t *testing.T, output string, err error) {
+				if expected, actual := `unknown builder for "riff-application"`, err.Error(); expected != actual {
+					t.Errorf("expected error %q, actual %q", expected, actual)
+				}
+			},
 		},
 		{
 			Name: "local path, pack error",
@@ -415,9 +423,13 @@ Error: unknown builder for "riff-application"
 			},
 			ExpectOutput: `
 ...build output...
-Error: pack error
 `,
 			ShouldError: true,
+			Verify: func(t *testing.T, output string, err error) {
+				if expected, actual := "pack error", err.Error(); expected != actual {
+					t.Errorf("expected error %q, actual %q", expected, actual)
+				}
+			},
 		},
 		{
 			Name: "local path, default image",
@@ -629,7 +641,7 @@ Created application "my-application"
 					fmt.Fprintf(c.Stdout, "...log output...\n")
 					// wait for context to be cancelled, plus some fudge
 					<-ctx.Done()
-					time.Sleep(2 * time.Millisecond)
+					time.Sleep(time.Millisecond)
 				})
 				return nil
 			},
@@ -661,9 +673,13 @@ Created application "my-application"
 Timeout after "1ms" waiting for "my-application" to become ready
 To view status run: riff application list --namespace default
 To continue watching logs run: riff application tail my-application --namespace default
-Error: timed out waiting for the condition
 `,
 			ShouldError: true,
+			Verify: func(t *testing.T, output string, err error) {
+				if expected, actual := k8s.ErrWaitTimeout, err; expected != actual {
+					t.Errorf("expected error %q, actual %q", expected, actual)
+				}
+			},
 		},
 		{
 			Name: "tail error",
