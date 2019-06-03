@@ -17,10 +17,13 @@
 package commands_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/riff/pkg/k8s"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	rifftesting "github.com/projectriff/riff/pkg/testing"
 	kailtesting "github.com/projectriff/riff/pkg/testing/kail"
@@ -120,6 +123,35 @@ func TestHandlerCreateOptions(t *testing.T) {
 				EnvFrom:         []string{"VAR1=someOtherKeyRef:name:key"},
 			},
 			ExpectFieldError: cli.ErrInvalidArrayValue("VAR1=someOtherKeyRef:name:key", cli.EnvFromFlagName, 0),
+		},
+		{
+			Name: "with tail",
+			Options: &commands.HandlerCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				Tail:            true,
+				WaitTimeout:     "10m",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "with tail, missing timeout",
+			Options: &commands.HandlerCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				Tail:            true,
+			},
+			ExpectFieldError: cli.ErrMissingField(cli.WaitTimeoutFlagName),
+		},
+		{
+			Name: "with tail, invalid timeout",
+			Options: &commands.HandlerCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				Tail:            true,
+				WaitTimeout:     "d",
+			},
+			ExpectFieldError: cli.ErrInvalidValue("d", cli.WaitTimeoutFlagName),
 		},
 	}
 
@@ -353,6 +385,59 @@ Created handler "my-handler"
 Created handler "my-handler"
 ...log output...
 `,
+		},
+		{
+			Name: "tail timeout",
+			Args: []string{handlerName, cli.ImageFlagName, image, cli.TailFlagName, cli.WaitTimeoutFlagName, "1ms"},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				kail := &kailtesting.Logger{}
+				c.Kail = kail
+				kail.On("HandlerLogs", mock.Anything, &requestv1alpha1.Handler{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      handlerName,
+					},
+					Spec: requestv1alpha1.HandlerSpec{
+						Template: &corev1.PodSpec{
+							Containers: []corev1.Container{{Image: image}},
+						},
+					},
+				}, cli.TailSinceCreateDefault, mock.Anything).Return(k8s.ErrWaitTimeout).Run(func(args mock.Arguments) {
+					ctx := args[0].(context.Context)
+					fmt.Fprintf(c.Stdout, "...log output...\n")
+					// wait for context to be cancelled, plus some fudge
+					<-ctx.Done()
+					time.Sleep(2 * time.Millisecond)
+				})
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				kail := c.Kail.(*kailtesting.Logger)
+				kail.AssertExpectations(t)
+				return nil
+			},
+			ExpectCreates: []runtime.Object{
+				&requestv1alpha1.Handler{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      handlerName,
+					},
+					Spec: requestv1alpha1.HandlerSpec{
+						Template: &corev1.PodSpec{
+							Containers: []corev1.Container{{Image: image}},
+						},
+					},
+				},
+			},
+			ExpectOutput: `
+Created handler "my-handler"
+...log output...
+Timeout after "1ms" waiting for "my-handler" to become ready
+To view status run: riff handler list --namespace default
+To continue watching logs run: riff handler tail my-handler --namespace default
+Error: timed out waiting for the condition
+`,
+			ShouldError: true,
 		},
 		{
 			Name: "tail error",

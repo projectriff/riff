@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/buildpack/pack"
 	"github.com/projectriff/riff/pkg/cli"
@@ -45,7 +46,8 @@ type FunctionCreateOptions struct {
 	GitRevision string
 	SubPath     string
 
-	Tail bool
+	Tail        bool
+	WaitTimeout string
 }
 
 func (opts *FunctionCreateOptions) Validate(ctx context.Context) *cli.FieldError {
@@ -88,6 +90,14 @@ func (opts *FunctionCreateOptions) Validate(ctx context.Context) *cli.FieldError
 	}
 
 	// nothing to do for artifact, handler, and invoker
+
+	if opts.Tail {
+		if opts.WaitTimeout == "" {
+			errs = errs.Also(cli.ErrMissingField(cli.WaitTimeoutFlagName))
+		} else if _, err := time.ParseDuration(opts.WaitTimeout); err != nil {
+			errs = errs.Also(cli.ErrInvalidValue(opts.WaitTimeout, cli.WaitTimeoutFlagName))
+		}
+	}
 
 	return errs
 }
@@ -164,6 +174,8 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 	if opts.Tail {
 		// cancel ctx when function becomes ready
 		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
 		go func() {
 			defer cancel()
 			err := k8s.WaitUntilReady(ctx, c.Build().RESTClient(), "functions", function)
@@ -171,6 +183,17 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 				c.Errorf("Error: %s\n", err)
 			}
 		}()
+
+		// err guarded by Validate()
+		timeout, _ := time.ParseDuration(opts.WaitTimeout)
+		timer := time.AfterFunc(timeout, func() {
+			c.Errorf("Timeout after %q waiting for %q to become ready\n", opts.WaitTimeout, opts.Name)
+			c.Infof("To view status run: %s function list %s %s\n", c.Name, cli.NamespaceFlagName, opts.Namespace)
+			c.Infof("To continue watching logs run: %s function tail %s %s %s\n", c.Name, opts.Name, cli.NamespaceFlagName, opts.Namespace)
+			cancel()
+		})
+		defer timer.Stop()
+
 		return c.Kail.FunctionLogs(ctx, function, cli.TailSinceCreateDefault, c.Stdout)
 	}
 	return nil
@@ -207,6 +230,7 @@ func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.GitRevision, cli.StripDash(cli.GitRevisionFlagName), "master", "`refspec` within the git repo to checkout")
 	cmd.Flags().StringVar(&opts.SubPath, cli.StripDash(cli.SubPathFlagName), "", "path to `directory` within the git repo to checkout")
 	cmd.Flags().BoolVar(&opts.Tail, cli.StripDash(cli.TailFlagName), false, "watch build logs")
+	cmd.Flags().StringVar(&opts.WaitTimeout, cli.StripDash(cli.WaitTimeoutFlagName), "10m", "`duration` to wait for the function to become ready when watching logs")
 
 	return cmd
 }

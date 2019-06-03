@@ -20,15 +20,16 @@ riff application create my-app --image registry.example.com/image --local-path .
 ### Options
 
 ```
-      --cache-size size        size of persistent volume to cache resources between builds
-      --git-repo url           git url to remote source code
-      --git-revision refspec   refspec within the git repo to checkout (default "master")
-  -h, --help                   help for create
-      --image repository       repository where the built images are pushed (default "_")
-      --local-path directory   path to directory containing source code on the local machine
-  -n, --namespace name         kubernetes namespace (defaulted from kube config)
-      --sub-path directory     path to directory within the git repo to checkout
-      --tail                   watch build logs
+      --cache-size size         size of persistent volume to cache resources between builds
+      --git-repo url            git url to remote source code
+      --git-revision refspec    refspec within the git repo to checkout (default "master")
+  -h, --help                    help for create
+      --image repository        repository where the built images are pushed (default "_")
+      --local-path directory    path to directory containing source code on the local machine
+  -n, --namespace name          kubernetes namespace (defaulted from kube config)
+      --sub-path directory      path to directory within the git repo to checkout
+      --tail                    watch build logs
+      --wait-timeout duration   duration to wait for the application to become ready when watching logs (default "10m")
 ```
 
 ### Options inherited from parent commands

@@ -17,11 +17,14 @@
 package commands_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/buildpack/pack"
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/riff/pkg/k8s"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	rifftesting "github.com/projectriff/riff/pkg/testing"
 	kailtesting "github.com/projectriff/riff/pkg/testing/kail"
@@ -146,6 +149,41 @@ func TestApplicationCreateOptions(t *testing.T) {
 				GitRevision:     "",
 			},
 			ExpectFieldError: cli.ErrMissingField(cli.GitRevisionFlagName),
+		},
+		{
+			Name: "git source, tail",
+			Options: &commands.ApplicationCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				GitRepo:         "https://example.com/repo.git",
+				GitRevision:     "master",
+				Tail:            true,
+				WaitTimeout:     "10m",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "git source, tail missing timeout",
+			Options: &commands.ApplicationCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				GitRepo:         "https://example.com/repo.git",
+				GitRevision:     "master",
+				Tail:            true,
+			},
+			ExpectFieldError: cli.ErrMissingField(cli.WaitTimeoutFlagName),
+		},
+		{
+			Name: "git source, tail invalid timeout",
+			Options: &commands.ApplicationCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				GitRepo:         "https://example.com/repo.git",
+				GitRevision:     "master",
+				Tail:            true,
+				WaitTimeout:     "d",
+			},
+			ExpectFieldError: cli.ErrInvalidValue("d", cli.WaitTimeoutFlagName),
 		},
 	}
 
@@ -565,6 +603,67 @@ Created application "my-application"
 Created application "my-application"
 ...log output...
 `,
+		},
+		{
+			Name: "tail timeout",
+			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName, cli.WaitTimeoutFlagName, "1ms"},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				kail := &kailtesting.Logger{}
+				c.Kail = kail
+				kail.On("ApplicationLogs", mock.Anything, &buildv1alpha1.Application{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      applicationName,
+					},
+					Spec: buildv1alpha1.ApplicationSpec{
+						Image: imageTag,
+						Source: &buildv1alpha1.Source{
+							Git: &buildv1alpha1.GitSource{
+								URL:      gitRepo,
+								Revision: gitMaster,
+							},
+						},
+					},
+				}, cli.TailSinceCreateDefault, mock.Anything).Return(k8s.ErrWaitTimeout).Run(func(args mock.Arguments) {
+					ctx := args[0].(context.Context)
+					fmt.Fprintf(c.Stdout, "...log output...\n")
+					// wait for context to be cancelled, plus some fudge
+					<-ctx.Done()
+					time.Sleep(2 * time.Millisecond)
+				})
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				kail := c.Kail.(*kailtesting.Logger)
+				kail.AssertExpectations(t)
+				return nil
+			},
+			ExpectCreates: []runtime.Object{
+				&buildv1alpha1.Application{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      applicationName,
+					},
+					Spec: buildv1alpha1.ApplicationSpec{
+						Image: imageTag,
+						Source: &buildv1alpha1.Source{
+							Git: &buildv1alpha1.GitSource{
+								URL:      gitRepo,
+								Revision: gitMaster,
+							},
+						},
+					},
+				},
+			},
+			ExpectOutput: `
+Created application "my-application"
+...log output...
+Timeout after "1ms" waiting for "my-application" to become ready
+To view status run: riff application list --namespace default
+To continue watching logs run: riff application tail my-application --namespace default
+Error: timed out waiting for the condition
+`,
+			ShouldError: true,
 		},
 		{
 			Name: "tail error",

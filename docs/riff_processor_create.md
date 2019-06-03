@@ -20,12 +20,13 @@ riff processor create my-processor --function-ref my-func --input my-input-strea
 ### Options
 
 ```
-      --function-ref name   name of function build to deploy
-  -h, --help                help for create
-      --input name          name of stream to read messages from (may be set multiple times)
-  -n, --namespace name      kubernetes namespace (defaulted from kube config)
-      --output name         name of stream to write messages to (may be set multiple times)
-      --tail                watch processor logs
+      --function-ref name       name of function build to deploy
+  -h, --help                    help for create
+      --input name              name of stream to read messages from (may be set multiple times)
+  -n, --namespace name          kubernetes namespace (defaulted from kube config)
+      --output name             name of stream to write messages to (may be set multiple times)
+      --tail                    watch processor logs
+      --wait-timeout duration   duration to wait for the processor to become ready when watching logs (default "10m")
 ```
 
 ### Options inherited from parent commands

@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/k8s"
@@ -41,7 +42,8 @@ type HandlerCreateOptions struct {
 	Env     []string
 	EnvFrom []string
 
-	Tail bool
+	Tail        bool
+	WaitTimeout string
 }
 
 func (opts *HandlerCreateOptions) Validate(ctx context.Context) *cli.FieldError {
@@ -79,6 +81,14 @@ func (opts *HandlerCreateOptions) Validate(ctx context.Context) *cli.FieldError 
 
 	errs = errs.Also(validation.EnvVars(opts.Env, cli.EnvFlagName))
 	errs = errs.Also(validation.EnvVarFroms(opts.EnvFrom, cli.EnvFromFlagName))
+
+	if opts.Tail {
+		if opts.WaitTimeout == "" {
+			errs = errs.Also(cli.ErrMissingField(cli.WaitTimeoutFlagName))
+		} else if _, err := time.ParseDuration(opts.WaitTimeout); err != nil {
+			errs = errs.Also(cli.ErrInvalidValue(opts.WaitTimeout, cli.WaitTimeoutFlagName))
+		}
+	}
 
 	return errs
 }
@@ -131,6 +141,8 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 	if opts.Tail {
 		// cancel ctx when handler becomes ready
 		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
 		go func() {
 			defer cancel()
 			err := k8s.WaitUntilReady(ctx, c.Request().RESTClient(), "handlers", handler)
@@ -138,6 +150,17 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 				c.Errorf("Error: %s\n", err)
 			}
 		}()
+
+		// err guarded by Validate()
+		timeout, _ := time.ParseDuration(opts.WaitTimeout)
+		timer := time.AfterFunc(timeout, func() {
+			c.Errorf("Timeout after %q waiting for %q to become ready\n", opts.WaitTimeout, opts.Name)
+			c.Infof("To view status run: %s handler list %s %s\n", c.Name, cli.NamespaceFlagName, opts.Namespace)
+			c.Infof("To continue watching logs run: %s handler tail %s %s %s\n", c.Name, opts.Name, cli.NamespaceFlagName, opts.Namespace)
+			cancel()
+		})
+		defer timer.Stop()
+
 		return c.Kail.HandlerLogs(ctx, handler, cli.TailSinceCreateDefault, c.Stdout)
 	}
 	return nil
@@ -171,6 +194,7 @@ func NewHandlerCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringArrayVar(&opts.Env, cli.StripDash(cli.EnvFlagName), []string{}, fmt.Sprintf("environment `variable` defined as a key value pair separated by an equals sign, example %q (may be set multiple times)", fmt.Sprintf("%s MY_VAR=my-value", cli.EnvFlagName)))
 	cmd.Flags().StringArrayVar(&opts.EnvFrom, cli.StripDash(cli.EnvFromFlagName), []string{}, fmt.Sprintf("environment `variable` from a config map or secret, example %q, %q (may be set multiple times)", fmt.Sprintf("%s MY_SECRET_VALUE=secretKeyRef:my-secret-name:key-in-secret", cli.EnvFromFlagName), fmt.Sprintf("%s MY_CONFIG_MAP_VALUE=configMapKeyRef:my-config-map-name:key-in-config-map", cli.EnvFromFlagName)))
 	cmd.Flags().BoolVar(&opts.Tail, cli.StripDash(cli.TailFlagName), false, "watch handler logs")
+	cmd.Flags().StringVar(&opts.WaitTimeout, cli.StripDash(cli.WaitTimeoutFlagName), "10m", "`duration` to wait for the handler to become ready when watching logs")
 
 	return cmd
 }

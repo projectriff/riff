@@ -57,6 +57,7 @@ const (
 	SubPathFlagName               = "--sub-path"
 	TailFlagName                  = "--tail"
 	TextFlagName                  = "--text"
+	WaitTimeoutFlagName           = "--wait-timeout"
 )
 
 func AllNamespacesFlag(cmd *cobra.Command, c *Config, namespace *string, allNamespaces *bool) {
