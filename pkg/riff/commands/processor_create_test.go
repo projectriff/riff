@@ -17,10 +17,13 @@
 package commands_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/riff/pkg/k8s"
 	"github.com/projectriff/riff/pkg/riff/commands"
 	rifftesting "github.com/projectriff/riff/pkg/testing"
 	kailtesting "github.com/projectriff/riff/pkg/testing/kail"
@@ -60,6 +63,38 @@ func TestProcessorCreateOptions(t *testing.T) {
 				Outputs:         []string{"output1", "output2"},
 			},
 			ShouldValidate: true,
+		},
+		{
+			Name: "with tail",
+			Options: &commands.ProcessorCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				FunctionRef:     "my-function",
+				Inputs:          []string{"input"},
+				Tail:            true,
+				WaitTimeout:     "10m",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "with tail, missing timeout",
+			Options: &commands.ProcessorCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				FunctionRef:     "my-function",
+				Inputs:          []string{"input"},
+				Tail:            true,
+			},
+			ExpectFieldError: cli.ErrMissingField(cli.WaitTimeoutFlagName),
+		},
+		{
+			Name: "with tail, invalid timeout",
+			Options: &commands.ProcessorCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				FunctionRef:     "my-function",
+				Inputs:          []string{"input"},
+				Tail:            true,
+				WaitTimeout:     "d",
+			},
+			ExpectFieldError: cli.ErrInvalidValue("d", cli.WaitTimeoutFlagName),
 		},
 	}
 
@@ -247,6 +282,59 @@ Created processor "my-processor"
 Created processor "my-processor"
 ...log output...
 `,
+		},
+		{
+			Name: "tail timeout",
+			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.TailFlagName, cli.WaitTimeoutFlagName, "1ms"},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				kail := &kailtesting.Logger{}
+				c.Kail = kail
+				kail.On("ProcessorLogs", mock.Anything, &streamv1alpha1.Processor{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      processorName,
+					},
+					Spec: streamv1alpha1.ProcessorSpec{
+						FunctionRef: functionRef,
+						Inputs:      []string{inputName},
+						Outputs:     []string{},
+					},
+				}, cli.TailSinceCreateDefault, mock.Anything).Return(k8s.ErrWaitTimeout).Run(func(args mock.Arguments) {
+					ctx := args[0].(context.Context)
+					fmt.Fprintf(c.Stdout, "...log output...\n")
+					// wait for context to be cancelled, plus some fudge
+					<-ctx.Done()
+					time.Sleep(2 * time.Millisecond)
+				})
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				kail := c.Kail.(*kailtesting.Logger)
+				kail.AssertExpectations(t)
+				return nil
+			},
+			ExpectCreates: []runtime.Object{
+				&streamv1alpha1.Processor{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      processorName,
+					},
+					Spec: streamv1alpha1.ProcessorSpec{
+						FunctionRef: functionRef,
+						Inputs:      []string{inputName},
+						Outputs:     []string{},
+					},
+				},
+			},
+			ExpectOutput: `
+Created processor "my-processor"
+...log output...
+Timeout after "1ms" waiting for "my-processor" to become ready
+To view status run: riff processor list --namespace default
+To continue watching logs run: riff processor tail my-processor --namespace default
+Error: timed out waiting for the condition
+`,
+			ShouldError: true,
 		},
 		{
 			Name: "tail error",

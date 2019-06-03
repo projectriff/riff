@@ -25,11 +25,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	watchclient "k8s.io/client-go/tools/watch"
 )
+
+var ErrWaitTimeout = wait.ErrWaitTimeout
 
 type object interface {
 	runtime.Object

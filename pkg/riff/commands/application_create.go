@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/buildpack/pack"
 	"github.com/projectriff/riff/pkg/cli"
@@ -41,7 +42,8 @@ type ApplicationCreateOptions struct {
 	GitRevision string
 	SubPath     string
 
-	Tail bool
+	Tail        bool
+	WaitTimeout string
 }
 
 func (opts *ApplicationCreateOptions) Validate(ctx context.Context) *cli.FieldError {
@@ -80,6 +82,14 @@ func (opts *ApplicationCreateOptions) Validate(ctx context.Context) *cli.FieldEr
 		if opts.CacheSize != "" {
 			// cache-size cannot be used with local-path
 			errs = errs.Also(cli.ErrDisallowedFields(cli.CacheSizeFlagName))
+		}
+	}
+
+	if opts.Tail {
+		if opts.WaitTimeout == "" {
+			errs = errs.Also(cli.ErrMissingField(cli.WaitTimeoutFlagName))
+		} else if _, err := time.ParseDuration(opts.WaitTimeout); err != nil {
+			errs = errs.Also(cli.ErrInvalidValue(opts.WaitTimeout, cli.WaitTimeoutFlagName))
 		}
 	}
 
@@ -148,6 +158,8 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 	if opts.Tail {
 		// cancel ctx when application becomes ready
 		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
 		go func() {
 			defer cancel()
 			err := k8s.WaitUntilReady(ctx, c.Build().RESTClient(), "applications", application)
@@ -155,6 +167,17 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 				c.Errorf("Error: %s\n", err)
 			}
 		}()
+
+		// err guarded by Validate()
+		timeout, _ := time.ParseDuration(opts.WaitTimeout)
+		timer := time.AfterFunc(timeout, func() {
+			c.Errorf("Timeout after %q waiting for %q to become ready\n", opts.WaitTimeout, opts.Name)
+			c.Infof("To view status run: %s application list %s %s\n", c.Name, cli.NamespaceFlagName, opts.Namespace)
+			c.Infof("To continue watching logs run: %s application tail %s %s %s\n", c.Name, opts.Name, cli.NamespaceFlagName, opts.Namespace)
+			cancel()
+		})
+		defer timer.Stop()
+
 		return c.Kail.ApplicationLogs(ctx, application, cli.TailSinceCreateDefault, c.Stdout)
 	}
 	return nil
@@ -188,6 +211,7 @@ func NewApplicationCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.GitRevision, cli.StripDash(cli.GitRevisionFlagName), "master", "`refspec` within the git repo to checkout")
 	cmd.Flags().StringVar(&opts.SubPath, cli.StripDash(cli.SubPathFlagName), "", "path to `directory` within the git repo to checkout")
 	cmd.Flags().BoolVar(&opts.Tail, cli.StripDash(cli.TailFlagName), false, "watch build logs")
+	cmd.Flags().StringVar(&opts.WaitTimeout, cli.StripDash(cli.WaitTimeoutFlagName), "10m", "`duration` to wait for the application to become ready when watching logs")
 
 	return cmd
 }

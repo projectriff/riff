@@ -21,14 +21,15 @@ riff handler create my-image-handler --image registry.example.com/my-image:lates
 ### Options
 
 ```
-      --application-ref name   name of application to deploy
-      --env variable           environment variable defined as a key value pair separated by an equals sign, example "--env MY_VAR=my-value" (may be set multiple times)
-      --env-from variable      environment variable from a config map or secret, example "--env-from MY_SECRET_VALUE=secretKeyRef:my-secret-name:key-in-secret", "--env-from MY_CONFIG_MAP_VALUE=configMapKeyRef:my-config-map-name:key-in-config-map" (may be set multiple times)
-      --function-ref name      name of function to deploy
-  -h, --help                   help for create
-      --image image            container image to deploy
-  -n, --namespace name         kubernetes namespace (defaulted from kube config)
-      --tail                   watch handler logs
+      --application-ref name    name of application to deploy
+      --env variable            environment variable defined as a key value pair separated by an equals sign, example "--env MY_VAR=my-value" (may be set multiple times)
+      --env-from variable       environment variable from a config map or secret, example "--env-from MY_SECRET_VALUE=secretKeyRef:my-secret-name:key-in-secret", "--env-from MY_CONFIG_MAP_VALUE=configMapKeyRef:my-config-map-name:key-in-config-map" (may be set multiple times)
+      --function-ref name       name of function to deploy
+  -h, --help                    help for create
+      --image image             container image to deploy
+  -n, --namespace name          kubernetes namespace (defaulted from kube config)
+      --tail                    watch handler logs
+      --wait-timeout duration   duration to wait for the handler to become ready when watching logs (default "10m")
 ```
 
 ### Options inherited from parent commands

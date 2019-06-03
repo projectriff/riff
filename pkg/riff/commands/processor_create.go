@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/k8s"
@@ -35,7 +36,8 @@ type ProcessorCreateOptions struct {
 	Inputs      []string
 	Outputs     []string
 
-	Tail bool
+	Tail        bool
+	WaitTimeout string
 }
 
 func (opts *ProcessorCreateOptions) Validate(ctx context.Context) *cli.FieldError {
@@ -49,6 +51,14 @@ func (opts *ProcessorCreateOptions) Validate(ctx context.Context) *cli.FieldErro
 
 	if len(opts.Inputs) == 0 {
 		errs = errs.Also(cli.ErrMissingField(cli.InputFlagName))
+	}
+
+	if opts.Tail {
+		if opts.WaitTimeout == "" {
+			errs = errs.Also(cli.ErrMissingField(cli.WaitTimeoutFlagName))
+		} else if _, err := time.ParseDuration(opts.WaitTimeout); err != nil {
+			errs = errs.Also(cli.ErrInvalidValue(opts.WaitTimeout, cli.WaitTimeoutFlagName))
+		}
 	}
 
 	return errs
@@ -75,6 +85,8 @@ func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) err
 	if opts.Tail {
 		// cancel ctx when processor becomes ready
 		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
 		go func() {
 			defer cancel()
 			err := k8s.WaitUntilReady(ctx, c.Stream().RESTClient(), "processors", processor)
@@ -82,6 +94,17 @@ func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) err
 				c.Errorf("Error: %s\n", err)
 			}
 		}()
+
+		// err guarded by Validate()
+		timeout, _ := time.ParseDuration(opts.WaitTimeout)
+		timer := time.AfterFunc(timeout, func() {
+			c.Errorf("Timeout after %q waiting for %q to become ready\n", opts.WaitTimeout, opts.Name)
+			c.Infof("To view status run: %s processor list %s %s\n", c.Name, cli.NamespaceFlagName, opts.Namespace)
+			c.Infof("To continue watching logs run: %s processor tail %s %s %s\n", c.Name, opts.Name, cli.NamespaceFlagName, opts.Namespace)
+			cancel()
+		})
+		defer timer.Stop()
+
 		return c.Kail.ProcessorLogs(ctx, processor, cli.TailSinceCreateDefault, c.Stdout)
 	}
 	return nil
@@ -112,6 +135,7 @@ func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringArrayVar(&opts.Inputs, cli.StripDash(cli.InputFlagName), []string{}, "`name` of stream to read messages from (may be set multiple times)")
 	cmd.Flags().StringArrayVar(&opts.Outputs, cli.StripDash(cli.OutputFlagName), []string{}, "`name` of stream to write messages to (may be set multiple times)")
 	cmd.Flags().BoolVar(&opts.Tail, cli.StripDash(cli.TailFlagName), false, "watch processor logs")
+	cmd.Flags().StringVar(&opts.WaitTimeout, cli.StripDash(cli.WaitTimeoutFlagName), "10m", "`duration` to wait for the processor to become ready when watching logs")
 
 	return cmd
 }
