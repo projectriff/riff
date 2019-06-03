@@ -28,7 +28,9 @@ jobs:
         imageName: ubuntu-16.04
         qualifier: minikube
         cluster: minikube
-        registry: minikube
+        # TODO restore registry
+        # registry: minikube
+        registry: docker-daemon
   pool:
     vmImage: $(imageName)
   variables:
@@ -76,7 +78,9 @@ jobs:
         imageName: ubuntu-16.04
         qualifier: minikube
         cluster: minikube
-        registry: dockerhub
+        # TODO restore registry
+        # registry: dockerhub
+        registry: docker-daemon
       gke:
         imageName: ubuntu-16.04
         qualifier: gke
