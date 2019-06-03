@@ -142,7 +142,7 @@ other-namespace   test-other-application   <empty>        <unknown>   <unknown>
 					Status: buildv1alpha1.ApplicationStatus{
 						Status: duckv1alpha1.Status{
 							Conditions: []duckv1alpha1.Condition{
-								{Type: buildv1alpha1.ApplicationConditionSucceeded, Status: "True"},
+								{Type: buildv1alpha1.ApplicationConditionReady, Status: "True"},
 							},
 						},
 						BuildStatus: buildv1alpha1.BuildStatus{
@@ -152,8 +152,8 @@ other-namespace   test-other-application   <empty>        <unknown>   <unknown>
 				},
 			},
 			ExpectOutput: `
-NAME        LATEST IMAGE                              STATUS      AGE
-petclinic   projectriff/petclinic@sah256:abcdef1234   Succeeded   <unknown>
+NAME        LATEST IMAGE                              STATUS   AGE
+petclinic   projectriff/petclinic@sah256:abcdef1234   Ready    <unknown>
 `,
 		},
 		{

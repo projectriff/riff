@@ -144,7 +144,7 @@ other-namespace   test-other-function   <empty>        <empty>    <empty>   <emp
 					Status: buildv1alpha1.FunctionStatus{
 						Status: duckv1alpha1.Status{
 							Conditions: []duckv1alpha1.Condition{
-								{Type: buildv1alpha1.FunctionConditionSucceeded, Status: "True"},
+								{Type: buildv1alpha1.FunctionConditionReady, Status: "True"},
 							},
 						},
 						BuildStatus: buildv1alpha1.BuildStatus{
@@ -154,8 +154,8 @@ other-namespace   test-other-function   <empty>        <empty>    <empty>   <emp
 				},
 			},
 			ExpectOutput: `
-NAME    LATEST IMAGE                          ARTIFACT       HANDLER               INVOKER   STATUS      AGE
-upper   projectriff/upper@sah256:abcdef1234   uppercase.js   functions.Uppercase   <empty>   Succeeded   <unknown>
+NAME    LATEST IMAGE                          ARTIFACT       HANDLER               INVOKER   STATUS   AGE
+upper   projectriff/upper@sah256:abcdef1234   uppercase.js   functions.Uppercase   <empty>   Ready    <unknown>
 `,
 		},
 		{

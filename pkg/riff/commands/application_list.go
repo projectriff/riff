@@ -109,7 +109,7 @@ func printApplication(application *buildv1alpha1.Application, opts printers.Prin
 	row.Cells = append(row.Cells,
 		application.Name,
 		cli.FormatEmptyString(application.Status.LatestImage),
-		cli.FormatConditionStatus(application.Status.GetCondition(buildv1alpha1.ApplicationConditionSucceeded)),
+		cli.FormatConditionStatus(application.Status.GetCondition(buildv1alpha1.ApplicationConditionReady)),
 		cli.FormatTimestampSince(application.CreationTimestamp),
 	)
 	return []metav1beta1.TableRow{row}, nil

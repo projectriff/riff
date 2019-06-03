@@ -112,7 +112,7 @@ func printFunction(function *buildv1alpha1.Function, opts printers.PrintOptions)
 		cli.FormatEmptyString(function.Spec.Artifact),
 		cli.FormatEmptyString(function.Spec.Handler),
 		cli.FormatEmptyString(function.Spec.Invoker),
-		cli.FormatConditionStatus(function.Status.GetCondition(buildv1alpha1.FunctionConditionSucceeded)),
+		cli.FormatConditionStatus(function.Status.GetCondition(buildv1alpha1.FunctionConditionReady)),
 		cli.FormatTimestampSince(function.CreationTimestamp),
 	)
 	return []metav1beta1.TableRow{row}, nil
