@@ -20,6 +20,34 @@ jobs:
   - template: ci/unit-test-steps.yml
   displayName: 'Unit test'
 
+- job: fats_lite
+  dependsOn: unit
+  strategy:
+    matrix:
+      minikube:
+        imageName: ubuntu-16.04
+        qualifier: minikube
+        cluster: minikube
+        registry: minikube
+  pool:
+    vmImage: $(imageName)
+  variables:
+    CLUSTER:  '$(cluster)'
+    REGISTRY: '$(registry)'
+    CLUSTER_NAME: 'riff-$(Build.BuildId)-$(qualifier)'
+    NAMESPACE: '$(CLUSTER_NAME)'
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+  steps:
+  - template: ci/downgrade-docker.yml
+  - bash: ./ci/fats.sh lite
+    displayName: 'Run FATS'
+  - bash: ./ci/fats-cleanup.sh
+    env:
+      TRAVIS_TEST_RESULT: '' # TODO remove this
+    condition: always()
+    displayName: 'Cleanup FATS'
+  displayName: 'FATS lite'
+
 - job: stage
   dependsOn: unit
   pool:
@@ -40,14 +68,50 @@ jobs:
     displayName: 'Stage riff release artifacts'
   displayName: 'Stage'
 
-# TODO restore FATS tests
 - job: fats
   dependsOn: stage
+  strategy:
+    matrix:
+      minikube:
+        imageName: ubuntu-16.04
+        qualifier: minikube
+        cluster: minikube
+        registry: dockerhub
+      gke:
+        imageName: ubuntu-16.04
+        qualifier: gke
+        cluster: gke
+        registry: gcr
+      # TODO restore windows tests
+      # windows:
+      #   imageName: windows-2019
+      #   qualifier: windows
+      #   cluster: gke
+      #   registry: gcr
   pool:
-    vmImage: ubuntu-16.04
+    vmImage: $(imageName)
+  variables:
+    CLUSTER:  '$(cluster)'
+    REGISTRY: '$(registry)'
+    CLUSTER_NAME: 'riff-$(Build.BuildId)-$(qualifier)'
+    NAMESPACE: '$(CLUSTER_NAME)'
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   steps:
-  - bash: echo 'TODO implement me'
+  - template: ci/downgrade-docker.yml
+  - bash: ./ci/fats.sh
+    env:
+      DOCKER_USERNAME: '$(DockerUsername)'
+      DOCKER_PASSWORD: '$(DockerPassword)'
+      GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
+    displayName: 'Run FATS'
+  - bash: ./ci/fats-cleanup.sh
+    env:
+      DOCKER_USERNAME: '$(DockerUsername)'
+      DOCKER_PASSWORD: '$(DockerPassword)'
+      GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
+      TRAVIS_TEST_RESULT: '' # TODO remove this
+    condition: always()
+    displayName: 'Cleanup FATS'
   displayName: 'FATS'
 
 - job: publish
