@@ -53,6 +53,24 @@ func TestStreamCreateOptions(t *testing.T) {
 			},
 			ExpectFieldError: cli.ErrMissingField(cli.ProviderFlagName),
 		},
+		{
+			Name: "with valid content type",
+			Options: &commands.StreamCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Provider:        "test-provider",
+				ContentType:     "application/x-doom",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "with invalid content-type",
+			Options: &commands.StreamCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Provider: "test-provider",
+				ContentType: "invalid-content-type",
+			},
+			ExpectFieldError: cli.ErrInvalidValue("invalid-content-type", cli.ContentTypeName),
+		},
 	}
 
 	table.Run(t)
@@ -61,6 +79,8 @@ func TestStreamCreateOptions(t *testing.T) {
 func TestStreamCreateCommand(t *testing.T) {
 	defaultNamespace := "default"
 	streamName := "my-stream"
+	defaultContentType := "application/octet-stream"
+	contentType := "video/jpeg"
 	provider := "test-provider"
 
 	table := rifftesting.CommandTable{
@@ -79,7 +99,27 @@ func TestStreamCreateCommand(t *testing.T) {
 						Name:      streamName,
 					},
 					Spec: streamv1alpha1.StreamSpec{
-						Provider: provider,
+						Provider:    provider,
+						ContentType: defaultContentType,
+					},
+				},
+			},
+			ExpectOutput: `
+Created stream "my-stream"
+`,
+		},
+		{
+			Name: "with optional content-type",
+			Args: []string{streamName, cli.ProviderFlagName, provider, cli.ContentTypeName, contentType},
+			ExpectCreates: []runtime.Object{
+				&streamv1alpha1.Stream{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      streamName,
+					},
+					Spec: streamv1alpha1.StreamSpec{
+						Provider:    provider,
+						ContentType: contentType,
 					},
 				},
 			},

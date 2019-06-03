@@ -19,6 +19,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"github.com/projectriff/riff/pkg/validation"
 	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
@@ -30,7 +31,8 @@ import (
 type StreamCreateOptions struct {
 	cli.ResourceOptions
 
-	Provider string
+	Provider    string
+	ContentType string
 }
 
 func (opts *StreamCreateOptions) Validate(ctx context.Context) *cli.FieldError {
@@ -40,6 +42,11 @@ func (opts *StreamCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 
 	if opts.Provider == "" {
 		errs = errs.Also(cli.ErrMissingField(cli.ProviderFlagName))
+	}
+
+	contentType := opts.ContentType
+	if contentType != "" {
+		errs = errs.Also(validation.MimeType(contentType, cli.ContentTypeName))
 	}
 
 	return errs
@@ -52,7 +59,8 @@ func (opts *StreamCreateOptions) Exec(ctx context.Context, c *cli.Config) error 
 			Name:      opts.Name,
 		},
 		Spec: streamv1alpha1.StreamSpec{
-			Provider: opts.Provider,
+			Provider:    opts.Provider,
+			ContentType: opts.ContentType,
 		},
 	}
 
@@ -83,6 +91,7 @@ func NewStreamCreateCommand(c *cli.Config) *cobra.Command {
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
 	cmd.Flags().StringVar(&opts.Provider, cli.StripDash(cli.ProviderFlagName), "", "`name` of stream provider")
+	cmd.Flags().StringVar(&opts.ContentType, cli.StripDash(cli.ContentTypeName), "", "`MIME type` for message payloads accepted by the stream")
 
 	return cmd
 }
