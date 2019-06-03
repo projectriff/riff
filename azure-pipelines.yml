@@ -20,6 +20,36 @@ jobs:
   - template: ci/unit-test-steps.yml
   displayName: 'Unit test'
 
+- job: fats_lite
+  dependsOn: unit
+  strategy:
+    matrix:
+      minikube:
+        imageName: ubuntu-16.04
+        qualifier: minikube
+        cluster: minikube
+        # TODO restore registry
+        # registry: minikube
+        registry: docker-daemon
+  pool:
+    vmImage: $(imageName)
+  variables:
+    CLUSTER:  '$(cluster)'
+    REGISTRY: '$(registry)'
+    CLUSTER_NAME: 'riff-$(Build.BuildId)-$(qualifier)'
+    NAMESPACE: '$(CLUSTER_NAME)'
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+  steps:
+  - template: ci/downgrade-docker.yml
+  - bash: ./ci/fats.sh lite
+    displayName: 'Run FATS'
+  - bash: ./ci/fats-cleanup.sh
+    env:
+      TRAVIS_TEST_RESULT: '' # TODO remove this
+    condition: always()
+    displayName: 'Cleanup FATS'
+  displayName: 'FATS lite'
+
 - job: stage
   dependsOn: unit
   pool:
@@ -48,6 +78,8 @@ jobs:
         imageName: ubuntu-16.04
         qualifier: minikube
         cluster: minikube
+        # TODO restore registry
+        # registry: dockerhub
         registry: docker-daemon
   pool:
     vmImage: $(imageName)
@@ -56,15 +88,12 @@ jobs:
     REGISTRY: '$(registry)'
     CLUSTER_NAME: 'riff-$(Build.BuildId)-$(qualifier)'
     NAMESPACE: '$(CLUSTER_NAME)'
-    BUILD_REASON: '$(Build.Reason)'
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   steps:
   - template: ci/downgrade-docker.yml
-  - bash: |
-      if [ "$BUILD_REASON" == "PullRequest" ]; then
-        source ./ci/fats.sh lite
-      else
-        source ./ci/fats.sh
-      fi
+  - bash: ./ci/fats.sh
+    env:
+      GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
     displayName: 'Run FATS'
   - bash: ./ci/fats-cleanup.sh
     env:
