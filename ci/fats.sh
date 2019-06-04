@@ -60,7 +60,7 @@ travis_fold end system-install
 # run test functions
 source $fats_dir/functions/helpers.sh
 
-for test in java java-boot node npm command; do
+for test in command; do
   path=${fats_dir}/functions/uppercase/${test}
   function_name=fats-cluster-uppercase-${test}
   image=$(fats_image_repo ${function_name})
@@ -72,7 +72,7 @@ for test in java java-boot node npm command; do
 done
 
 if [ "$machine" != "MinGw" ]; then
-  for test in node command; do
+  for test in command; do
     path=${fats_dir}/functions/uppercase/${test}
     function_name=fats-local-uppercase-${test}
     image=$(fats_image_repo ${function_name})
