@@ -19,6 +19,7 @@ package commands_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -440,6 +441,23 @@ To continue watching logs run: riff handler tail my-handler --namespace default
 			Verify: func(t *testing.T, output string, err error) {
 				if expected, actual := k8s.ErrWaitTimeout, err; expected != actual {
 					t.Errorf("expected error %q, actual %q", expected, actual)
+				}
+				for _, line := range []string{
+					`
+Created handler "my-handler"
+`,
+					`
+...log output...
+`,
+					`
+Timeout after "1ms" waiting for "my-handler" to become ready
+To view status run: riff handler list --namespace default
+To continue watching logs run: riff handler tail my-handler --namespace default
+`,
+				} {
+					if expected, actual := line[1:], output; !strings.Contains(actual, expected) {
+						t.Errorf("expected output to contain %q, actual %q", expected, actual)
+					}
 				}
 			},
 		},

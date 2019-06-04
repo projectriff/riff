@@ -19,6 +19,7 @@ package commands_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -667,17 +668,27 @@ Created application "my-application"
 					},
 				},
 			},
-			ExpectOutput: `
-Created application "my-application"
-...log output...
-Timeout after "1ms" waiting for "my-application" to become ready
-To view status run: riff application list --namespace default
-To continue watching logs run: riff application tail my-application --namespace default
-`,
 			ShouldError: true,
 			Verify: func(t *testing.T, output string, err error) {
 				if expected, actual := k8s.ErrWaitTimeout, err; expected != actual {
 					t.Errorf("expected error %q, actual %q", expected, actual)
+				}
+				for _, line := range []string{
+					`
+Created application "my-application"
+`,
+					`
+...log output...
+`,
+					`
+Timeout after "1ms" waiting for "my-application" to become ready
+To view status run: riff application list --namespace default
+To continue watching logs run: riff application tail my-application --namespace default
+`,
+				} {
+					if expected, actual := line[1:], output; !strings.Contains(actual, expected) {
+						t.Errorf("expected output to contain %q, actual %q", expected, actual)
+					}
 				}
 			},
 		},
