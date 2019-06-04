@@ -78,9 +78,7 @@ jobs:
         imageName: ubuntu-16.04
         qualifier: minikube
         cluster: minikube
-        # TODO restore registry
-        # registry: dockerhub
-        registry: docker-daemon
+        registry: dockerhub
   pool:
     vmImage: $(imageName)
   variables:
@@ -93,10 +91,14 @@ jobs:
   - template: ci/downgrade-docker.yml
   - bash: ./ci/fats.sh
     env:
+      DOCKER_USERNAME: '$(DockerUsername)'
+      DOCKER_PASSWORD: '$(DockerPassword)'
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
     displayName: 'Run FATS'
   - bash: ./ci/fats-cleanup.sh
     env:
+      DOCKER_USERNAME: '$(DockerUsername)'
+      DOCKER_PASSWORD: '$(DockerPassword)'
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
       TRAVIS_TEST_RESULT: '' # TODO remove this
     condition: always()
