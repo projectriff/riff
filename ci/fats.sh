@@ -11,7 +11,7 @@ commit=$(git rev-parse HEAD)
 # fetch FATS scripts
 fats_dir=`dirname "${BASH_SOURCE[0]}"`/fats
 fats_repo="projectriff/fats"
-fats_refspec=c7d87aedeac8772520459a527329976d6269fedd # projectriff/fats master as of 2019-05-31
+fats_refspec=0831f098d7663188adea906f602754916f4f7e4d # projectriff/fats master as of 2019-06-04
 source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $fats_dir $fats_refspec $fats_repo
 source $fats_dir/.util.sh
 
@@ -60,7 +60,13 @@ travis_fold end system-install
 # run test functions
 source $fats_dir/functions/helpers.sh
 
-for test in command; do
+if [ "$mode" = "full" ]; then
+  functions=(java java-boot node npm command)
+else
+  functions=(command)
+fi
+
+for test in "${functions[@]}"; do
   path=${fats_dir}/functions/uppercase/${test}
   function_name=fats-cluster-uppercase-${test}
   image=$(fats_image_repo ${function_name})
@@ -72,7 +78,7 @@ for test in command; do
 done
 
 if [ "$machine" != "MinGw" ]; then
-  for test in command; do
+  for test in "${functions[@]}"; do
     path=${fats_dir}/functions/uppercase/${test}
     function_name=fats-local-uppercase-${test}
     image=$(fats_image_repo ${function_name})
