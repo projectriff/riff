@@ -40,7 +40,6 @@ jobs:
     NAMESPACE: '$(CLUSTER_NAME)'
   condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
   steps:
-  - template: ci/downgrade-docker.yml
   - bash: ./ci/fats.sh lite
     displayName: 'Run FATS'
   - bash: ./ci/fats-cleanup.sh
@@ -78,9 +77,7 @@ jobs:
         imageName: ubuntu-16.04
         qualifier: minikube
         cluster: minikube
-        # TODO restore registry
-        # registry: dockerhub
-        registry: docker-daemon
+        registry: dockerhub
   pool:
     vmImage: $(imageName)
   variables:
@@ -90,13 +87,16 @@ jobs:
     NAMESPACE: '$(CLUSTER_NAME)'
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   steps:
-  - template: ci/downgrade-docker.yml
   - bash: ./ci/fats.sh
     env:
+      DOCKER_USERNAME: '$(DockerUsername)'
+      DOCKER_PASSWORD: '$(DockerPassword)'
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
     displayName: 'Run FATS'
   - bash: ./ci/fats-cleanup.sh
     env:
+      DOCKER_USERNAME: '$(DockerUsername)'
+      DOCKER_PASSWORD: '$(DockerPassword)'
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
       TRAVIS_TEST_RESULT: '' # TODO remove this
     condition: always()
