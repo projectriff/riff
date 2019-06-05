@@ -43,6 +43,8 @@ type object interface {
 // WaitUntilReady watches for mutations of the target object until the target is ready.
 func WaitUntilReady(ctx context.Context, client rest.Interface, resource string, target object) error {
 	if client == (*rest.RESTClient)(nil) {
+		// the client is nil for tests, simulate waiting by blocking
+		<-ctx.Done()
 		return nil
 	}
 	lw := cache.NewListWatchFromClient(client, resource, target.GetNamespace(), fields.Everything())

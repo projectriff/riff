@@ -83,29 +83,35 @@ func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) err
 	}
 	c.Successf("Created processor %q\n", processor.Name)
 	if opts.Tail {
-		// cancel ctx when processor becomes ready
-		ctx, cancel := context.WithCancel(ctx)
-		defer cancel()
+		// err guarded by Validate()
+		timeout, _ := time.ParseDuration(opts.WaitTimeout)
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		errChan := make(chan error, 1)
+		defer close(errChan)
 
 		go func() {
 			defer cancel()
 			err := k8s.WaitUntilReady(ctx, c.Stream().RESTClient(), "processors", processor)
-			if err != nil {
-				c.Errorf("Error: %s\n", err)
+			if ctx.Err() == nil {
+				errChan <- err
+			}
+		}()
+		go func() {
+			defer cancel()
+			err := c.Kail.ProcessorLogs(ctx, processor, cli.TailSinceCreateDefault, c.Stdout)
+			if ctx.Err() == nil {
+				errChan <- err
 			}
 		}()
 
-		// err guarded by Validate()
-		timeout, _ := time.ParseDuration(opts.WaitTimeout)
-		timer := time.AfterFunc(timeout, func() {
+		<-ctx.Done()
+		if ctx.Err() == context.DeadlineExceeded {
 			c.Errorf("Timeout after %q waiting for %q to become ready\n", opts.WaitTimeout, opts.Name)
 			c.Infof("To view status run: %s processor list %s %s\n", c.Name, cli.NamespaceFlagName, opts.Namespace)
 			c.Infof("To continue watching logs run: %s processor tail %s %s %s\n", c.Name, opts.Name, cli.NamespaceFlagName, opts.Namespace)
-			cancel()
-		})
-		defer timer.Stop()
-
-		return c.Kail.ProcessorLogs(ctx, processor, cli.TailSinceCreateDefault, c.Stdout)
+			errChan <- cli.ErrSilent
+		}
+		return <-errChan
 	}
 	return nil
 }
