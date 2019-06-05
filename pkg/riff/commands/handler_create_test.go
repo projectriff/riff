@@ -430,13 +430,6 @@ Created handler "my-handler"
 					},
 				},
 			},
-			ExpectOutput: `
-Created handler "my-handler"
-...log output...
-Timeout after "1ms" waiting for "my-handler" to become ready
-To view status run: riff handler list --namespace default
-To continue watching logs run: riff handler tail my-handler --namespace default
-`,
 			ShouldError: true,
 			Verify: func(t *testing.T, output string, err error) {
 				if expected, actual := k8s.ErrWaitTimeout, err; expected != actual {
