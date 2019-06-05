@@ -40,7 +40,6 @@ jobs:
     NAMESPACE: '$(CLUSTER_NAME)'
   condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
   steps:
-  - template: ci/downgrade-docker.yml
   - bash: ./ci/fats.sh lite
     displayName: 'Run FATS'
   - bash: ./ci/fats-cleanup.sh
@@ -88,7 +87,6 @@ jobs:
     NAMESPACE: '$(CLUSTER_NAME)'
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   steps:
-  - template: ci/downgrade-docker.yml
   - bash: ./ci/fats.sh
     env:
       DOCKER_USERNAME: '$(DockerUsername)'
