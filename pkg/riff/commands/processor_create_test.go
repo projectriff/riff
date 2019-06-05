@@ -284,7 +284,7 @@ Created processor "my-processor"
 		},
 		{
 			Name: "tail timeout",
-			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.TailFlagName, cli.WaitTimeoutFlagName, "1ms"},
+			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.TailFlagName, cli.WaitTimeoutFlagName, "5ms"},
 			Prepare: func(t *testing.T, c *cli.Config) error {
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
@@ -327,7 +327,7 @@ Created processor "my-processor"
 			ExpectOutput: `
 Created processor "my-processor"
 ...log output...
-Timeout after "1ms" waiting for "my-processor" to become ready
+Timeout after "5ms" waiting for "my-processor" to become ready
 To view status run: riff processor list --namespace default
 To continue watching logs run: riff processor tail my-processor --namespace default
 `,

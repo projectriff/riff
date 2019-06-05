@@ -644,7 +644,7 @@ Created function "my-function"
 		},
 		{
 			Name: "tail timeout",
-			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName, cli.WaitTimeoutFlagName, "1ms"},
+			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName, cli.WaitTimeoutFlagName, "5ms"},
 			Prepare: func(t *testing.T, c *cli.Config) error {
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
@@ -695,7 +695,7 @@ Created function "my-function"
 			ExpectOutput: `
 Created function "my-function"
 ...log output...
-Timeout after "1ms" waiting for "my-function" to become ready
+Timeout after "5ms" waiting for "my-function" to become ready
 To view status run: riff function list --namespace default
 To continue watching logs run: riff function tail my-function --namespace default
 `,

@@ -617,7 +617,7 @@ Created application "my-application"
 		},
 		{
 			Name: "tail timeout",
-			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName, cli.WaitTimeoutFlagName, "1ms"},
+			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName, cli.WaitTimeoutFlagName, "5ms"},
 			Prepare: func(t *testing.T, c *cli.Config) error {
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
@@ -668,7 +668,7 @@ Created application "my-application"
 			ExpectOutput: `
 Created application "my-application"
 ...log output...
-Timeout after "1ms" waiting for "my-application" to become ready
+Timeout after "5ms" waiting for "my-application" to become ready
 To view status run: riff application list --namespace default
 To continue watching logs run: riff application tail my-application --namespace default
 `,

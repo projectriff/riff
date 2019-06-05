@@ -387,7 +387,7 @@ Created handler "my-handler"
 		},
 		{
 			Name: "tail timeout",
-			Args: []string{handlerName, cli.ImageFlagName, image, cli.TailFlagName, cli.WaitTimeoutFlagName, "1ms"},
+			Args: []string{handlerName, cli.ImageFlagName, image, cli.TailFlagName, cli.WaitTimeoutFlagName, "5ms"},
 			Prepare: func(t *testing.T, c *cli.Config) error {
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
@@ -430,7 +430,7 @@ Created handler "my-handler"
 			ExpectOutput: `
 Created handler "my-handler"
 ...log output...
-Timeout after "1ms" waiting for "my-handler" to become ready
+Timeout after "5ms" waiting for "my-handler" to become ready
 To view status run: riff handler list --namespace default
 To continue watching logs run: riff handler tail my-handler --namespace default
 `,
