@@ -42,6 +42,9 @@ jobs:
   steps:
   - bash: ./ci/fats.sh lite
     displayName: 'Run FATS'
+  - bash: ./ci/diagnostics.sh
+    condition: failed()
+    displayName: 'Dump Diagnostics'
   - bash: ./ci/fats-cleanup.sh
     env:
       TRAVIS_TEST_RESULT: '' # TODO remove this
@@ -93,6 +96,9 @@ jobs:
       DOCKER_PASSWORD: '$(DockerPassword)'
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
     displayName: 'Run FATS'
+  - bash: ./ci/diagnostics.sh
+    condition: failed()
+    displayName: 'Dump Diagnostics'
   - bash: ./ci/fats-cleanup.sh
     env:
       DOCKER_USERNAME: '$(DockerUsername)'
