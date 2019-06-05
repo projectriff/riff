@@ -12,7 +12,7 @@ require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/knative/pkg v0.0.0-20190510233738-9e0db8f0a7f4
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/projectriff/system v0.0.0-20190603192429-ab7b6ac36700
+	github.com/projectriff/system v0.0.0-20190605132317-10ae5f6984a2
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0
@@ -47,7 +47,6 @@ require (
 )
 
 replace (
-	github.com/projectriff/system => github.com/scothis/system v0.0.0-20190604154613-47de6a9639aa
 	// kail wants to upgrade these deps, don't let it
 	k8s.io/api => k8s.io/api v0.0.0-20190226173710-145d52631d00
 	k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20190221084156-01f179d85dbc

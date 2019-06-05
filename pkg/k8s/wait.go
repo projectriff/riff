@@ -22,7 +22,9 @@ import (
 	"strings"
 
 	"github.com/projectriff/system/pkg/apis"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/rest"
@@ -32,8 +34,14 @@ import (
 
 var ErrWaitTimeout = wait.ErrWaitTimeout
 
+type object interface {
+	apis.Object
+	metav1.Object
+	runtime.Object
+}
+
 // WaitUntilReady watches for mutations of the target object until the target is ready.
-func WaitUntilReady(ctx context.Context, client rest.Interface, resource string, target apis.Object) error {
+func WaitUntilReady(ctx context.Context, client rest.Interface, resource string, target object) error {
 	if client == (*rest.RESTClient)(nil) {
 		return nil
 	}
@@ -42,12 +50,12 @@ func WaitUntilReady(ctx context.Context, client rest.Interface, resource string,
 	return err
 }
 
-func readyCondition(target apis.Object) watchclient.ConditionFunc {
+func readyCondition(target object) watchclient.ConditionFunc {
 	return func(event watch.Event) (bool, error) {
 		if event.Type == watch.Error {
 			return false, fmt.Errorf("error waiting for ready")
 		}
-		obj, ok := event.Object.(apis.Object)
+		obj, ok := event.Object.(object)
 		if !ok || obj.GetUID() != target.GetUID() {
 			// event is not for the target resource
 			return false, nil
