@@ -19,9 +19,9 @@ package k8s
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"strings"
 
+	"github.com/projectriff/system/pkg/apis"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -35,17 +35,13 @@ import (
 var ErrWaitTimeout = wait.ErrWaitTimeout
 
 type object interface {
-	runtime.Object
+	apis.Object
 	metav1.Object
+	runtime.Object
 }
 
 // WaitUntilReady watches for mutations of the target object until the target is ready.
-// Target objects must implement metav1.Object and have a Status field with an IsReady
-// method. Types that implement this contract include *.projectriff.io CRDs.
 func WaitUntilReady(ctx context.Context, client rest.Interface, resource string, target object) error {
-	if readyFunc := readyFunc(target); readyFunc.Kind() != reflect.Func {
-		return fmt.Errorf("unsupported target of type %t, must have .Status.IsReady() method", target)
-	}
 	if client == (*rest.RESTClient)(nil) {
 		return nil
 	}
@@ -59,26 +55,25 @@ func readyCondition(target object) watchclient.ConditionFunc {
 		if event.Type == watch.Error {
 			return false, fmt.Errorf("error waiting for ready")
 		}
-		if obj, ok := event.Object.(metav1.Object); !ok || obj.GetUID() != target.GetUID() {
+		obj, ok := event.Object.(object)
+		if !ok || obj.GetUID() != target.GetUID() {
 			// event is not for the target resource
 			return false, nil
 		}
 		switch event.Type {
 		case watch.Added, watch.Modified:
-			if readyFunc := readyFunc(event.Object); readyFunc.Kind() == reflect.Func {
-				ready := readyFunc.Call([]reflect.Value{})[0].Bool()
-				if ready {
-					return true, nil
-				}
+			status := obj.GetStatus()
+			if status.IsReady() {
+				return true, nil
 			}
+			readyCond := status.GetCondition(status.GetReadyConditionType())
+			if readyCond != nil && readyCond.IsFalse() {
+				return false, fmt.Errorf("failed to become ready: %s", readyCond.Message)
+			}
+			return false, nil
 		case watch.Deleted:
 			return true, fmt.Errorf("%s %q deleted", strings.ToLower(target.GetObjectKind().GroupVersionKind().Kind), target.GetName())
 		}
 		return false, nil
 	}
-}
-
-func readyFunc(obj interface{}) reflect.Value {
-	// use reflection since there is no common interface
-	return reflect.ValueOf(obj).Elem().FieldByName("Status").Addr().MethodByName("IsReady")
 }
