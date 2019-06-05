@@ -11,7 +11,7 @@ commit=$(git rev-parse HEAD)
 # fetch FATS scripts
 fats_dir=`dirname "${BASH_SOURCE[0]}"`/fats
 fats_repo="projectriff/fats"
-fats_refspec=68753ee64ac47c1c9c24b0c175e085438fba8682 # projectriff/fats master as of 2019-06-04
+fats_refspec=0831f098d7663188adea906f602754916f4f7e4d # projectriff/fats master as of 2019-06-04
 source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $fats_dir $fats_refspec $fats_repo
 source $fats_dir/.util.sh
 
@@ -61,9 +61,9 @@ travis_fold end system-install
 source $fats_dir/functions/helpers.sh
 
 if [ "$mode" = "full" ]; then
-  functions=(command)
-else
   functions=(java java-boot node npm command)
+else
+  functions=(command)
 fi
 
 for test in "${functions[@]}"; do
