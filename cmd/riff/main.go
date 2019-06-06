@@ -34,10 +34,14 @@ func main() {
 
 	cmd.SilenceErrors = true
 	if err := cmd.Execute(); err != nil {
-		c.Errorf("Error executing command:\n")
-		// errors can be multiple lines, indent each line
-		for _, line := range strings.Split(err.Error(), "\n") {
-			c.Errorf("  %s\n", line)
+		// silent errors should not log, but still exit with an error code
+		// typically the command has already been logged with more detail
+		if !cli.IsSilent(err) {
+			c.Errorf("Error executing command:\n")
+			// errors can be multiple lines, indent each line
+			for _, line := range strings.Split(err.Error(), "\n") {
+				c.Errorf("  %s\n", line)
+			}
 		}
 		os.Exit(1)
 	}

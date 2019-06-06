@@ -139,29 +139,35 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 	}
 	c.Successf("Created handler %q\n", handler.Name)
 	if opts.Tail {
-		// cancel ctx when handler becomes ready
-		ctx, cancel := context.WithCancel(ctx)
-		defer cancel()
+		// err guarded by Validate()
+		timeout, _ := time.ParseDuration(opts.WaitTimeout)
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		errChan := make(chan error, 1)
+		defer close(errChan)
 
 		go func() {
 			defer cancel()
 			err := k8s.WaitUntilReady(ctx, c.Request().RESTClient(), "handlers", handler)
-			if err != nil {
-				c.Errorf("Error: %s\n", err)
+			if ctx.Err() == nil {
+				errChan <- err
+			}
+		}()
+		go func() {
+			defer cancel()
+			err := c.Kail.HandlerLogs(ctx, handler, cli.TailSinceCreateDefault, c.Stdout)
+			if ctx.Err() == nil {
+				errChan <- err
 			}
 		}()
 
-		// err guarded by Validate()
-		timeout, _ := time.ParseDuration(opts.WaitTimeout)
-		timer := time.AfterFunc(timeout, func() {
+		<-ctx.Done()
+		if ctx.Err() == context.DeadlineExceeded {
 			c.Errorf("Timeout after %q waiting for %q to become ready\n", opts.WaitTimeout, opts.Name)
 			c.Infof("To view status run: %s handler list %s %s\n", c.Name, cli.NamespaceFlagName, opts.Namespace)
 			c.Infof("To continue watching logs run: %s handler tail %s %s %s\n", c.Name, opts.Name, cli.NamespaceFlagName, opts.Namespace)
-			cancel()
-		})
-		defer timer.Stop()
-
-		return c.Kail.HandlerLogs(ctx, handler, cli.TailSinceCreateDefault, c.Stdout)
+			errChan <- cli.SilenceError(ctx.Err())
+		}
+		return <-errChan
 	}
 	return nil
 }

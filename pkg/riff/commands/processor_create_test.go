@@ -19,9 +19,7 @@ package commands_test
 import (
 	"context"
 	"fmt"
-	"strings"
 	"testing"
-	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/k8s"
@@ -286,7 +284,7 @@ Created processor "my-processor"
 		},
 		{
 			Name: "tail timeout",
-			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.TailFlagName, cli.WaitTimeoutFlagName, "1ms"},
+			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.TailFlagName, cli.WaitTimeoutFlagName, "5ms"},
 			Prepare: func(t *testing.T, c *cli.Config) error {
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
@@ -303,9 +301,8 @@ Created processor "my-processor"
 				}, cli.TailSinceCreateDefault, mock.Anything).Return(k8s.ErrWaitTimeout).Run(func(args mock.Arguments) {
 					ctx := args[0].(context.Context)
 					fmt.Fprintf(c.Stdout, "...log output...\n")
-					// wait for context to be cancelled, plus some fudge
+					// wait for context to be cancelled
 					<-ctx.Done()
-					time.Sleep(time.Millisecond)
 				})
 				return nil
 			},
@@ -327,27 +324,17 @@ Created processor "my-processor"
 					},
 				},
 			},
-			ShouldError: true,
-			Verify: func(t *testing.T, output string, err error) {
-				if expected, actual := k8s.ErrWaitTimeout, err; expected != actual {
-					t.Errorf("expected error %q, actual %q", expected, actual)
-				}
-				for _, line := range []string{
-					`
+			ExpectOutput: `
 Created processor "my-processor"
-`,
-					`
 ...log output...
-`,
-					`
-Timeout after "1ms" waiting for "my-processor" to become ready
+Timeout after "5ms" waiting for "my-processor" to become ready
 To view status run: riff processor list --namespace default
 To continue watching logs run: riff processor tail my-processor --namespace default
 `,
-				} {
-					if expected, actual := line[1:], output; !strings.Contains(actual, expected) {
-						t.Errorf("expected output to contain %q, actual %q", expected, actual)
-					}
+			ShouldError: true,
+			Verify: func(t *testing.T, output string, err error) {
+				if actual := err; !cli.IsSilent(err) {
+					t.Errorf("expected error to be silent, actual %#v", actual)
 				}
 			},
 		},
