@@ -1,19 +1,10 @@
 steps:
 - template: install-go-steps.yml
 
-- template: install-coverage-steps.yml
-
-- bash: |
-    set -o errexit
-    set -o nounset
-    set -o pipefail
-
-    go version
-
-    make build
-    go test -v -coverprofile=coverage.txt -covermode count ./... 2>&1 | tee >(go-junit-report > report.xml)
-    make verify-docs
+- bash: make build coverage verify-docs
   workingDirectory: '$(modulePath)'
   displayName: 'Run unit test'
 
-- template: report-coverage-steps.yml
+- bash: bash <(curl -s https://codecov.io/bash)
+  workingDirectory: '$(modulePath)'
+  displayName: 'Report coverage'
