@@ -42,9 +42,7 @@ jobs:
   steps:
   - bash: ./ci/fats.sh lite
     displayName: 'Run FATS'
-  - bash: ./ci/diagnostics.sh
-    condition: failed()
-    displayName: 'Dump Diagnostics'
+  - template: ci/dump-diagnostics-steps.yml
   - bash: ./ci/fats-cleanup.sh
     env:
       TRAVIS_TEST_RESULT: '' # TODO remove this
