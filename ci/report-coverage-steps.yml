@@ -7,8 +7,6 @@ steps:
     if [ -f "coverage.txt" ]; then
       gocov convert coverage.txt > coverage.json
       gocov-xml < coverage.json > coverage.xml
-      mkdir coverage
-      gocov-html < coverage.json > coverage/index.html
     fi
   condition: succeededOrFailed()
   workingDirectory: '$(modulePath)'
@@ -25,4 +23,3 @@ steps:
   inputs:
     codeCoverageTool: Cobertura
     summaryFileLocation: $(System.DefaultWorkingDirectory)/**/coverage.xml
-    reportDirectory: $(System.DefaultWorkingDirectory)/**/coverage
