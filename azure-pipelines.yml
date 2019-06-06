@@ -17,7 +17,7 @@ jobs:
     GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
     modulePath: '$(build.repository.name)' # Path to the module's code
   steps:
-    - template: install-go-steps.yml
+    - template: ci/install-go-steps.yml
     - bash: make build coverage verify-docs
       workingDirectory: '$(modulePath)'
       displayName: 'Run unit test'
