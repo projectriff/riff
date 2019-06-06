@@ -436,8 +436,8 @@ To continue watching logs run: riff handler tail my-handler --namespace default
 `,
 			ShouldError: true,
 			Verify: func(t *testing.T, output string, err error) {
-				if expected, actual := cli.ErrSilent, err; expected != actual {
-					t.Errorf("expected error %q, actual %q", expected, actual)
+				if actual := err; !cli.IsSilent(err) {
+					t.Errorf("expected error to be silent, actual %#v", actual)
 				}
 			},
 		},

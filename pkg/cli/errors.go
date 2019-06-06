@@ -16,8 +16,21 @@
 
 package cli
 
-import (
-	"errors"
-)
+type SilentError struct {
+	Err error
+}
 
-var ErrSilent = errors.New("silent error")
+func (e *SilentError) Error() string {
+	return e.Err.Error()
+}
+
+func SilenceError(err error) error {
+	return &SilentError{
+		Err: err,
+	}
+}
+
+func IsSilent(err error) bool {
+	_, ok := err.(*SilentError)
+	return ok
+}
