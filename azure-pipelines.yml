@@ -101,9 +101,7 @@ jobs:
       DOCKER_PASSWORD: '$(DockerPassword)'
       GCLOUD_CLIENT_SECRET: '$(GcloudClientSecret)'
     displayName: 'Run FATS'
-  - bash: ./ci/diagnostics.sh
-    condition: failed()
-    displayName: 'Dump Diagnostics'
+  - template: ci/dump-diagnostics-steps.yml
   - bash: ./ci/fats-cleanup.sh
     env:
       DOCKER_USERNAME: '$(DockerUsername)'
