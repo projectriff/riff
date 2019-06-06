@@ -43,6 +43,14 @@ func (opts *StreamCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 		errs = errs.Also(cli.ErrMissingField(cli.ProviderFlagName))
 	}
 
+	contentType := opts.ContentType
+	if contentType != "" {
+		index := strings.Index(contentType, "/")
+		if index == -1 || index == len(contentType)-1 {
+			errs = errs.Also(cli.ErrInvalidValue(contentType, cli.ContentTypeName))
+		}
+	}
+
 	return errs
 }
 

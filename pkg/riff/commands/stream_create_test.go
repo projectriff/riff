@@ -47,7 +47,14 @@ func TestStreamCreateOptions(t *testing.T) {
 			ShouldValidate: true,
 		},
 		{
-			Name: "valid stream",
+			Name: "no provider",
+			Options: &commands.StreamCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+			},
+			ExpectFieldError: cli.ErrMissingField(cli.ProviderFlagName),
+		},
+		{
+			Name: "with content type",
 			Options: &commands.StreamCreateOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
 				Provider:        "test-provider",
@@ -56,11 +63,22 @@ func TestStreamCreateOptions(t *testing.T) {
 			ShouldValidate: true,
 		},
 		{
-			Name: "no provider",
+			Name: "invalid content-type (missing slash)",
 			Options: &commands.StreamCreateOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
+				Provider: "test-provider",
+				ContentType: "invalid-content-type",
 			},
-			ExpectFieldError: cli.ErrMissingField(cli.ProviderFlagName),
+			ExpectFieldError: cli.ErrInvalidValue("invalid-content-type", cli.ContentTypeName),
+		},
+		{
+			Name: "invalid content-type (single slash as suffix)",
+			Options: &commands.StreamCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Provider: "test-provider",
+				ContentType: "invalid-content-type/",
+			},
+			ExpectFieldError: cli.ErrInvalidValue("invalid-content-type/", cli.ContentTypeName),
 		},
 	}
 
@@ -70,6 +88,7 @@ func TestStreamCreateOptions(t *testing.T) {
 func TestStreamCreateCommand(t *testing.T) {
 	defaultNamespace := "default"
 	streamName := "my-stream"
+	defaultContentType := "application/octet-stream"
 	contentType := "video/jpeg"
 	provider := "test-provider"
 
@@ -89,7 +108,8 @@ func TestStreamCreateCommand(t *testing.T) {
 						Name:      streamName,
 					},
 					Spec: streamv1alpha1.StreamSpec{
-						Provider: provider,
+						Provider:    provider,
+						ContentType: defaultContentType,
 					},
 				},
 			},
@@ -99,7 +119,7 @@ Created stream "my-stream"
 		},
 		{
 			Name: "stream provider and content-type",
-			Args: []string{streamName, cli.ProviderFlagName, provider},
+			Args: []string{streamName, cli.ProviderFlagName, provider, cli.ContentTypeName, contentType},
 			ExpectCreates: []runtime.Object{
 				&streamv1alpha1.Stream{
 					ObjectMeta: metav1.ObjectMeta{

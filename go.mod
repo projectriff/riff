@@ -47,6 +47,7 @@ require (
 )
 
 replace (
+	github.com/projectriff/system => github.com/fbiville/system v0.0.0-20190530163417-d17f452cb28123f16189000099ddace2dd6b375f
 	// kail wants to upgrade these deps, don't let it
 	k8s.io/api => k8s.io/api v0.0.0-20190226173710-145d52631d00
 	k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20190221084156-01f179d85dbc
