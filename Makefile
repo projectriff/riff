@@ -25,6 +25,10 @@ build: $(OUTPUT)
 test:
 	go test -mod=vendor ./...
 
+.PHONY: coverage
+coverage:
+	go test -mod=vendor -v --race -coverprofile=coverage.txt -covermode=atomic ./...
+
 $(OUTPUT): $(GO_SOURCES) VERSION
 	go build -mod=vendor -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)" ./cmd/riff
 
