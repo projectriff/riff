@@ -17,7 +17,16 @@ jobs:
     GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
     modulePath: '$(build.repository.name)' # Path to the module's code
   steps:
-  - template: ci/unit-test-steps.yml
+    - template: ci/install-go-steps.yml
+    - bash: make build coverage verify-docs
+      workingDirectory: '$(modulePath)'
+      displayName: 'Run unit test'
+    - bash: bash <(curl -s https://codecov.io/bash)
+      env:
+        CODECOV_TOKEN: '$(CodecovToken)'
+      workingDirectory: '$(modulePath)'
+      displayName: 'Report coverage'
+
   displayName: 'Unit test'
 
 - job: fats_lite
