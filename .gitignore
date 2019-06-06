@@ -4,6 +4,9 @@
 /riff-*.tgz
 /riff-*.zip
 
+# coverage artifacts
+/coverage.txt
+
 # Eclipe artifacts
 .project
 .settings
