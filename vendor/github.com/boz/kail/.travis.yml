@@ -1,0 +1,16 @@
+language: go
+
+go:
+  - "1.12"
+  - tip
+
+sudo: required
+
+services:
+  - docker
+
+install:
+  - make install-deps
+
+script: |
+  make test-full && ./release.sh
