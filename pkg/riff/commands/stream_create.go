@@ -93,7 +93,7 @@ func NewStreamCreateCommand(c *cli.Config) *cobra.Command {
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
 	cmd.Flags().StringVar(&opts.Provider, cli.StripDash(cli.ProviderFlagName), "", "`name` of stream provider")
-	cmd.Flags().StringVar(&opts.ContentType, cli.StripDash(cli.ContentTypeName), "", "`content-type` of stream")
+	cmd.Flags().StringVar(&opts.ContentType, cli.StripDash(cli.ContentTypeName), "", "`MIME type` for message payloads accepted by the stream")
 
 	return cmd
 }
