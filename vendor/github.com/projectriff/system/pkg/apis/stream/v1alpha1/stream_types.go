@@ -47,6 +47,7 @@ var (
 
 type StreamSpec struct {
 	Provider string `json:"provider"`
+	ContentType string `json:"contentType"`
 }
 
 type StreamStatus struct {

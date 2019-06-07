@@ -52,10 +52,11 @@ type ProcessorSpec struct {
 type ProcessorStatus struct {
 	duckv1alpha1.Status `json:",inline"`
 
-	InputAddresses  []string `json:"inputAddresses,omitempty"`
-	OutputAddresses []string `json:"outputAddresses,omitempty"`
-	DeploymentName  string   `json:"deploymentName,omitempty"`
-	FunctionImage   string   `json:"functionImage,omitempty"`
+	InputAddresses     []string `json:"inputAddresses,omitempty"`
+	OutputAddresses    []string `json:"outputAddresses,omitempty"`
+	OutputContentTypes []string `json:"outputContentTypes,omitempty"`
+	DeploymentName     string   `json:"deploymentName,omitempty"`
+	FunctionImage      string   `json:"functionImage,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
