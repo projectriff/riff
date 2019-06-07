@@ -17,9 +17,21 @@
 package pack_test
 
 import (
+	"bytes"
 	"testing"
+
+	"github.com/buildpack/pack"
+	riffpack "github.com/projectriff/riff/pkg/pack"
 )
 
-func TestStub(t *testing.T) {
-	// TODO add tests for this package and remove this file
+func TestNewClient(t *testing.T) {
+	out := &bytes.Buffer{}
+	client, err := riffpack.NewClient(out, out)
+
+	if err != nil {
+		t.Errorf("Unexpected error from pack.NewClient(): %s", err)
+	}
+	if _, ok := client.(*pack.Client); !ok {
+		t.Errorf("Expected client from pack.NewClient(), actually %v", client)
+	}
 }
