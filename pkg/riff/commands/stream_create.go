@@ -68,7 +68,7 @@ func (opts *StreamCreateOptions) Exec(ctx context.Context, c *cli.Config) error 
 	if err != nil {
 		return err
 	}
-	_, _ = c.Successf("Created stream %q\n", stream.Name)
+	c.Successf("Created stream %q\n", stream.Name)
 	return nil
 }
 
