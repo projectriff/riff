@@ -32,7 +32,7 @@ type DocsOptions struct {
 }
 
 func (opts *DocsOptions) Validate(ctx context.Context) *cli.FieldError {
-	errs := &cli.FieldError{}
+	errs := cli.EmptyFieldError
 
 	if opts.Directory == "" {
 		errs = errs.Also(cli.ErrMissingField(cli.DirectoryFlagName))

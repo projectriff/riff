@@ -37,7 +37,7 @@ func K8sNames(names []string, field string) *apis.FieldError {
 
 	for i, name := range names {
 		if name == "" {
-			errs = errs.Also(apis.ErrInvalidValue(name, field))
+			errs = errs.Also(apis.ErrInvalidValue(name, apis.CurrentField).ViaFieldIndex(field, i))
 		} else {
 			errs = errs.Also(K8sName(name, apis.CurrentField).ViaFieldIndex(field, i))
 		}

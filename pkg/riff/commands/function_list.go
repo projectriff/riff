@@ -35,7 +35,7 @@ type FunctionListOptions struct {
 }
 
 func (opts *FunctionListOptions) Validate(ctx context.Context) *cli.FieldError {
-	errs := &cli.FieldError{}
+	errs := cli.EmptyFieldError
 
 	errs = errs.Also(opts.ListOptions.Validate(ctx))
 

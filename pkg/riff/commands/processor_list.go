@@ -35,7 +35,7 @@ type ProcessorListOptions struct {
 }
 
 func (opts *ProcessorListOptions) Validate(ctx context.Context) *cli.FieldError {
-	errs := &cli.FieldError{}
+	errs := cli.EmptyFieldError
 
 	errs = errs.Also(opts.ListOptions.Validate(ctx))
 

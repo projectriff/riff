@@ -31,7 +31,7 @@ type StreamDeleteOptions struct {
 }
 
 func (opts *StreamDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
-	errs := &cli.FieldError{}
+	errs := cli.EmptyFieldError
 
 	errs = errs.Also(opts.DeleteOptions.Validate(ctx))
 

@@ -36,7 +36,7 @@ type CredentialListOptions struct {
 }
 
 func (opts *CredentialListOptions) Validate(ctx context.Context) *cli.FieldError {
-	errs := &cli.FieldError{}
+	errs := cli.EmptyFieldError
 
 	errs = errs.Also(opts.ListOptions.Validate(ctx))
 

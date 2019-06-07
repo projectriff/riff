@@ -51,7 +51,7 @@ type FunctionCreateOptions struct {
 }
 
 func (opts *FunctionCreateOptions) Validate(ctx context.Context) *cli.FieldError {
-	errs := &cli.FieldError{}
+	errs := cli.EmptyFieldError
 
 	errs = errs.Also(opts.ResourceOptions.Validate(ctx))
 

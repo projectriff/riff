@@ -24,6 +24,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var EmptyFieldError *FieldError
+
 // ValidateOptions bridges a cobra RunE function to the Validatable interface.  All flags and
 // arguments must already be bound, with explicit or default values, to the options struct being
 // validated. This function is typically used to define the PreRunE phase of a command.

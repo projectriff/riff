@@ -35,7 +35,7 @@ type StreamListOptions struct {
 }
 
 func (opts *StreamListOptions) Validate(ctx context.Context) *cli.FieldError {
-	errs := &cli.FieldError{}
+	errs := cli.EmptyFieldError
 
 	errs = errs.Also(opts.ListOptions.Validate(ctx))
 
