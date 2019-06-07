@@ -19,6 +19,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"github.com/projectriff/riff/pkg/validation"
 	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
@@ -45,10 +46,7 @@ func (opts *StreamCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 
 	contentType := opts.ContentType
 	if contentType != "" {
-		index := strings.Index(contentType, "/")
-		if index == -1 || index == len(contentType)-1 {
-			errs = errs.Also(cli.ErrInvalidValue(contentType, cli.ContentTypeName))
-		}
+		errs = errs.Also(validation.MimeType(contentType, cli.ContentTypeName))
 	}
 
 	return errs

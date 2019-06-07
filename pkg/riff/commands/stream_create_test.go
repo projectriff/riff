@@ -54,7 +54,7 @@ func TestStreamCreateOptions(t *testing.T) {
 			ExpectFieldError: cli.ErrMissingField(cli.ProviderFlagName),
 		},
 		{
-			Name: "with content type",
+			Name: "with valid content type",
 			Options: &commands.StreamCreateOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
 				Provider:        "test-provider",
@@ -63,22 +63,13 @@ func TestStreamCreateOptions(t *testing.T) {
 			ShouldValidate: true,
 		},
 		{
-			Name: "invalid content-type (missing slash)",
+			Name: "with invalid content-type",
 			Options: &commands.StreamCreateOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
 				Provider: "test-provider",
 				ContentType: "invalid-content-type",
 			},
 			ExpectFieldError: cli.ErrInvalidValue("invalid-content-type", cli.ContentTypeName),
-		},
-		{
-			Name: "invalid content-type (single slash as suffix)",
-			Options: &commands.StreamCreateOptions{
-				ResourceOptions: rifftesting.ValidResourceOptions,
-				Provider: "test-provider",
-				ContentType: "invalid-content-type/",
-			},
-			ExpectFieldError: cli.ErrInvalidValue("invalid-content-type/", cli.ContentTypeName),
 		},
 	}
 
@@ -118,7 +109,7 @@ Created stream "my-stream"
 `,
 		},
 		{
-			Name: "stream provider and content-type",
+			Name: "with optional content-type",
 			Args: []string{streamName, cli.ProviderFlagName, provider, cli.ContentTypeName, contentType},
 			ExpectCreates: []runtime.Object{
 				&streamv1alpha1.Stream{
