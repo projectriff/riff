@@ -142,7 +142,7 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 		// err guarded by Validate()
 		timeout, _ := time.ParseDuration(opts.WaitTimeout)
 		ctx, cancel := context.WithTimeout(ctx, timeout)
-		errChan := make(chan error, 1)
+		errChan := make(chan error, 3)
 		defer close(errChan)
 
 		go func() {
