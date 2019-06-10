@@ -30,7 +30,7 @@ func NewRootCommand(c *cli.Config) *cobra.Command {
 	cmd := NewRiffCommand(c)
 
 	cmd.Use = c.Name
-	if c.GitDirty {
+	if !c.GitDirty {
 		cmd.Version = fmt.Sprintf("%s (%s)", c.Version, c.GitSha)
 	} else {
 		cmd.Version = fmt.Sprintf("%s (%s, with local modifications)", c.Version, c.GitSha)

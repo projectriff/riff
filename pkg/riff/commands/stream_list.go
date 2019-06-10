@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/cli/printers"
@@ -103,6 +104,7 @@ func printStreamList(streams *streamv1alpha1.StreamList, opts printers.PrintOpti
 }
 
 func printStream(stream *streamv1alpha1.Stream, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
+	now := time.Now()
 	row := metav1beta1.TableRow{
 		Object: runtime.RawExtension{Object: stream},
 	}
@@ -112,7 +114,7 @@ func printStream(stream *streamv1alpha1.Stream, opts printers.PrintOptions) ([]m
 		cli.FormatEmptyString(stream.Status.Address.Gateway),
 		cli.FormatEmptyString(stream.Spec.Provider),
 		cli.FormatConditionStatus(stream.Status.GetCondition(streamv1alpha1.StreamConditionReady)),
-		cli.FormatTimestampSince(stream.CreationTimestamp),
+		cli.FormatTimestampSince(stream.CreationTimestamp, now),
 	)
 	return []metav1beta1.TableRow{row}, nil
 }

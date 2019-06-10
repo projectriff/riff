@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/cli/printers"
@@ -103,6 +104,7 @@ func printFunctionList(functions *buildv1alpha1.FunctionList, opts printers.Prin
 }
 
 func printFunction(function *buildv1alpha1.Function, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
+	now := time.Now()
 	row := metav1beta1.TableRow{
 		Object: runtime.RawExtension{Object: function},
 	}
@@ -113,7 +115,7 @@ func printFunction(function *buildv1alpha1.Function, opts printers.PrintOptions)
 		cli.FormatEmptyString(function.Spec.Handler),
 		cli.FormatEmptyString(function.Spec.Invoker),
 		cli.FormatConditionStatus(function.Status.GetCondition(buildv1alpha1.FunctionConditionReady)),
-		cli.FormatTimestampSince(function.CreationTimestamp),
+		cli.FormatTimestampSince(function.CreationTimestamp, now),
 	)
 	return []metav1beta1.TableRow{row}, nil
 }

@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/cli/printers"
@@ -106,6 +107,7 @@ func printCredentialList(credentials *corev1.SecretList, opts printers.PrintOpti
 }
 
 func printCredential(credential *corev1.Secret, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
+	now := time.Now()
 	row := metav1beta1.TableRow{
 		Object: runtime.RawExtension{Object: credential.DeepCopy()},
 	}
@@ -113,7 +115,7 @@ func printCredential(credential *corev1.Secret, opts printers.PrintOptions) ([]m
 		credential.Name,
 		credential.Labels[build.CredentialLabelKey],
 		credential.Annotations["build.knative.dev/docker-0"],
-		cli.FormatTimestampSince(credential.CreationTimestamp),
+		cli.FormatTimestampSince(credential.CreationTimestamp, now),
 	)
 	return []metav1beta1.TableRow{row}, nil
 }

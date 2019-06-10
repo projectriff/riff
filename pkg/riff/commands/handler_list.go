@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/cli/printers"
@@ -103,6 +104,7 @@ func printHandlerList(handlers *requestv1alpha1.HandlerList, opts printers.Print
 }
 
 func printHandler(handler *requestv1alpha1.Handler, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
+	now := time.Now()
 	row := metav1beta1.TableRow{
 		Object: runtime.RawExtension{Object: handler},
 	}
@@ -117,7 +119,7 @@ func printHandler(handler *requestv1alpha1.Handler, opts printers.PrintOptions) 
 		refValue,
 		cli.FormatEmptyString(host),
 		cli.FormatConditionStatus(handler.Status.GetCondition(requestv1alpha1.HandlerConditionReady)),
-		cli.FormatTimestampSince(handler.CreationTimestamp),
+		cli.FormatTimestampSince(handler.CreationTimestamp, now),
 	)
 	return []metav1beta1.TableRow{row}, nil
 }

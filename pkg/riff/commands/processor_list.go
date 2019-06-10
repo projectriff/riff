@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/cli/printers"
@@ -103,6 +104,7 @@ func printProcessorList(processors *streamv1alpha1.ProcessorList, opts printers.
 }
 
 func printProcessor(processor *streamv1alpha1.Processor, opts printers.PrintOptions) ([]metav1beta1.TableRow, error) {
+	now := time.Now()
 	row := metav1beta1.TableRow{
 		Object: runtime.RawExtension{Object: processor},
 	}
@@ -112,7 +114,7 @@ func printProcessor(processor *streamv1alpha1.Processor, opts printers.PrintOpti
 		cli.FormatEmptyString(strings.Join(processor.Spec.Inputs, ",")),
 		cli.FormatEmptyString(strings.Join(processor.Spec.Outputs, ",")),
 		cli.FormatConditionStatus(processor.Status.GetCondition(streamv1alpha1.ProcessorConditionReady)),
-		cli.FormatTimestampSince(processor.CreationTimestamp),
+		cli.FormatTimestampSince(processor.CreationTimestamp, now),
 	)
 	return []metav1beta1.TableRow{row}, nil
 }

@@ -38,6 +38,6 @@ func init() {
 		Name:     cli_name,
 		Version:  cli_version,
 		GitSha:   cli_gitsha,
-		GitDirty: cli_gitdirty == "",
+		GitDirty: cli_gitdirty != "",
 	}
 }

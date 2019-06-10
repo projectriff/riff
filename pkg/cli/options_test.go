@@ -17,11 +17,119 @@
 package cli_test
 
 import (
+	"context"
+	"fmt"
 	"testing"
 
 	"github.com/projectriff/riff/pkg/cli"
 	rifftesting "github.com/projectriff/riff/pkg/testing"
+	"github.com/spf13/cobra"
 )
+
+type StubValidateOptions struct {
+	called        bool
+	validationErr *cli.FieldError
+}
+
+func (o *StubValidateOptions) Validate(ctx context.Context) *cli.FieldError {
+	o.called = true
+	return o.validationErr
+}
+
+func TestValidateOptions(t *testing.T) {
+	tests := []struct {
+		name          string
+		opts          *StubValidateOptions
+		expectedErr   error
+		usageSilenced bool
+	}{{
+		name:          "valid, no error",
+		opts:          &StubValidateOptions{},
+		usageSilenced: true,
+	}, {
+		name: "valid, empty error",
+		opts: &StubValidateOptions{
+			validationErr: cli.EmptyFieldError,
+		},
+		usageSilenced: true,
+	}, {
+		name: "validation error",
+		opts: &StubValidateOptions{
+			validationErr: cli.ErrMissingField("field-name"),
+		},
+		expectedErr:   cli.ErrMissingField("field-name"),
+		usageSilenced: false,
+	}}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			cmd := &cobra.Command{}
+			err := cli.ValidateOptions(test.opts)(cmd, []string{})
+
+			if expected, actual := true, test.opts.called; true != actual {
+				t.Errorf("expected called to be %v, actually %v", expected, actual)
+			}
+			if expected, actual := test.expectedErr, err; fmt.Sprintf("%s", expected) != fmt.Sprintf("%s", actual) {
+				t.Errorf("expected error to be %v, actually %v", expected, actual)
+			}
+			if expected, actual := test.usageSilenced, cmd.SilenceUsage; expected != actual {
+				t.Errorf("expected cmd.SilenceUsage to be %v, actually %v", expected, actual)
+			}
+		})
+	}
+}
+
+type StubExecOptions struct {
+	called  bool
+	config  *cli.Config
+	cmd     *cobra.Command
+	execErr error
+}
+
+func (o *StubExecOptions) Exec(ctx context.Context, c *cli.Config) error {
+	o.called = true
+	o.config = c
+	o.cmd = cli.CommandFromContext(ctx)
+	return o.execErr
+}
+
+func TestExecOptions(t *testing.T) {
+	tests := []struct {
+		name        string
+		opts        *StubExecOptions
+		expectedErr error
+	}{{
+		name: "success",
+		opts: &StubExecOptions{},
+	}, {
+		name: "failure",
+		opts: &StubExecOptions{
+			execErr: fmt.Errorf("test exec error"),
+		},
+		expectedErr: fmt.Errorf("test exec error"),
+	}}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			cmd := &cobra.Command{}
+			config := &cli.Config{}
+			err := cli.ExecOptions(config, test.opts)(cmd, []string{})
+
+			if expected, actual := true, test.opts.called; true != actual {
+				t.Errorf("expected called to be %v, actually %v", expected, actual)
+			}
+			if expected, actual := test.expectedErr, err; fmt.Sprintf("%s", expected) != fmt.Sprintf("%s", actual) {
+				t.Errorf("expected error to be %v, actually %v", expected, actual)
+			}
+			if expected, actual := config, test.opts.config; expected != actual {
+				t.Errorf("expected config to be %v, actually %v", expected, actual)
+			}
+			if expected, actual := cmd, test.opts.cmd; expected != actual {
+				t.Errorf("expected command to be %v, actually %v", expected, actual)
+			}
+		})
+	}
+}
 
 func TestListOptions(t *testing.T) {
 	table := rifftesting.OptionsTable{
@@ -143,6 +251,13 @@ func TestDeleteOptions(t *testing.T) {
 				All:       true,
 			},
 			ExpectFieldError: cli.ErrMultipleOneOf(cli.AllFlagName, cli.NamesArgumentName),
+		},
+		{
+			Name: "missing namespace",
+			Options: &cli.DeleteOptions{
+				Names: []string{"my-function"},
+			},
+			ExpectFieldError: cli.ErrMissingField(cli.NamespaceFlagName),
 		},
 	}
 
