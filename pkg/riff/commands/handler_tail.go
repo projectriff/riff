@@ -33,7 +33,7 @@ type HandlerTailOptions struct {
 }
 
 func (opts *HandlerTailOptions) Validate(ctx context.Context) *cli.FieldError {
-	errs := &cli.FieldError{}
+	errs := cli.EmptyFieldError
 
 	errs = errs.Also(opts.ResourceOptions.Validate(ctx))
 

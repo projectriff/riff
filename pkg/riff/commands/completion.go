@@ -30,7 +30,7 @@ type CompletionOptions struct {
 }
 
 func (opts *CompletionOptions) Validate(ctx context.Context) *cli.FieldError {
-	errs := &cli.FieldError{}
+	errs := cli.EmptyFieldError
 
 	if opts.Shell == "" {
 		errs = errs.Also(cli.ErrMissingField(cli.ShellFlagName))

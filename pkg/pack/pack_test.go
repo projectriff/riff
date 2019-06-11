@@ -14,30 +14,24 @@
  * limitations under the License.
  */
 
-package cli
+package pack_test
 
-var (
-	cli_name     = "riff"
-	cli_version  = "unknown"
-	cli_gitsha   = "unknown sha"
-	cli_gitdirty = ""
+import (
+	"bytes"
+	"testing"
+
+	"github.com/buildpack/pack"
+	riffpack "github.com/projectriff/riff/pkg/pack"
 )
 
-type CompiledEnv struct {
-	Name     string
-	Version  string
-	GitSha   string
-	GitDirty bool
-}
+func TestNewClient(t *testing.T) {
+	out := &bytes.Buffer{}
+	client, err := riffpack.NewClient(out, out)
 
-var env CompiledEnv
-
-func init() {
-	// must be created inside the init function to pickup build specific params
-	env = CompiledEnv{
-		Name:     cli_name,
-		Version:  cli_version,
-		GitSha:   cli_gitsha,
-		GitDirty: cli_gitdirty != "",
+	if err != nil {
+		t.Errorf("Unexpected error from pack.NewClient(): %s", err)
+	}
+	if _, ok := client.(*pack.Client); !ok {
+		t.Errorf("Expected client from pack.NewClient(), actually %v", client)
 	}
 }

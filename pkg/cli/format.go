@@ -24,11 +24,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/duration"
 )
 
-func FormatTimestampSince(timestamp metav1.Time) string {
+func FormatTimestampSince(timestamp metav1.Time, now time.Time) string {
 	if timestamp.IsZero() {
 		return Swarnf("<unknown>")
 	}
-	return duration.HumanDuration(time.Since(timestamp.Time))
+	return duration.HumanDuration(now.Sub(timestamp.Time))
 }
 
 func FormatEmptyString(str string) string {
@@ -54,22 +54,5 @@ func FormatConditionStatus(cond *duckv1alpha1.Condition) string {
 		return Serrorf(cond.Reason)
 	default:
 		return Sinfof(status)
-	}
-}
-
-func FormatConditionMessage(cond *duckv1alpha1.Condition) string {
-	switch {
-	case cond == nil:
-		return Swarnf("<unknown>")
-	case cond.Message == "":
-		return FormatEmptyString(cond.Message)
-	case cond.IsFalse():
-		return Serrorf(cond.Message)
-	case cond.IsTrue():
-		return Ssuccessf(cond.Message)
-	case cond.IsUnknown():
-		return Sinfof(cond.Message)
-	default:
-		return Swarnf(cond.Message)
 	}
 }
