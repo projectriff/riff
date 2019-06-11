@@ -19,6 +19,7 @@ package cli
 import (
 	"bytes"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -161,7 +162,7 @@ func TestInitKubeConfig_HomeDir(t *testing.T) {
 	os.Setenv("HOME", "testdata")
 	c.initKubeConfig()
 
-	if expected, actual := "testdata/.kube/config", c.KubeConfigFile; expected != actual {
+	if expected, actual := filepath.FromSlash("testdata/.kube/config"), c.KubeConfigFile; expected != actual {
 		t.Errorf("Expected kubeconfig path %q, actually %q", expected, actual)
 	}
 	if diff := cmp.Diff("", strings.TrimSpace(output.String())); diff != "" {
