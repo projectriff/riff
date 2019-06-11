@@ -113,6 +113,7 @@ func printStream(stream *streamv1alpha1.Stream, opts printers.PrintOptions) ([]m
 		cli.FormatEmptyString(stream.Status.Address.Topic),
 		cli.FormatEmptyString(stream.Status.Address.Gateway),
 		cli.FormatEmptyString(stream.Spec.Provider),
+		cli.FormatEmptyString(stream.Spec.ContentType),
 		cli.FormatConditionStatus(stream.Status.GetCondition(streamv1alpha1.StreamConditionReady)),
 		cli.FormatTimestampSince(stream.CreationTimestamp, now),
 	)
@@ -125,6 +126,7 @@ func printStreamColumns() []metav1beta1.TableColumnDefinition {
 		{Name: "Topic", Type: "string"},
 		{Name: "Gateway", Type: "string"},
 		{Name: "Provider", Type: "string"},
+		{Name: "Content-Type", Type: "string"},
 		{Name: "Status", Type: "string"},
 		{Name: "Age", Type: "string"},
 	}

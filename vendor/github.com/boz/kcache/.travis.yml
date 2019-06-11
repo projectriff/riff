@@ -1,0 +1,19 @@
+language: go
+
+sudo: false
+
+go:
+  - "1.12"
+  - tip
+
+install:
+  - make install-deps
+
+env:
+  - KCACHE_TEST_ASYNC_DURATION=50ms
+
+script: |
+  make test-full && \
+  if [ "$TRAVIS_GO_VERSION" == "1.12" ]; then
+    travis_wait 30 make test-cover
+  fi
