@@ -1,0 +1,4 @@
+ignore:
+- pkg/cli/printers
+- pkg/testing
+- vendor
