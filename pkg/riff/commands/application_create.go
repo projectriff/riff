@@ -25,6 +25,7 @@ import (
 	"github.com/buildpack/pack"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/k8s"
+	"github.com/projectriff/riff/pkg/util"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -158,33 +159,23 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 	if opts.Tail {
 		// err guarded by Validate()
 		timeout, _ := time.ParseDuration(opts.WaitTimeout)
-		ctx, cancel := context.WithTimeout(ctx, timeout)
-		errChan := make(chan error, 3)
-		defer close(errChan)
-
-		go func() {
-			defer cancel()
-			err := k8s.WaitUntilReady(ctx, c.Build().RESTClient(), "applications", application)
-			if ctx.Err() == nil {
-				errChan <- err
-			}
-		}()
-		go func() {
-			defer cancel()
-			err := c.Kail.ApplicationLogs(ctx, application, cli.TailSinceCreateDefault, c.Stdout)
-			if ctx.Err() == nil {
-				errChan <- err
-			}
-		}()
-
-		<-ctx.Done()
-		if ctx.Err() == context.DeadlineExceeded {
+		err := util.RaceUntil(ctx, timeout,
+			func(ctx context.Context) error {
+				return k8s.WaitUntilReady(ctx, c.Build().RESTClient(), "applications", application)
+			},
+			func(ctx context.Context) error {
+				return c.Kail.ApplicationLogs(ctx, application, cli.TailSinceCreateDefault, c.Stdout)
+			},
+		)
+		if err == context.DeadlineExceeded {
 			c.Errorf("Timeout after %q waiting for %q to become ready\n", opts.WaitTimeout, opts.Name)
 			c.Infof("To view status run: %s application list %s %s\n", c.Name, cli.NamespaceFlagName, opts.Namespace)
 			c.Infof("To continue watching logs run: %s application tail %s %s %s\n", c.Name, opts.Name, cli.NamespaceFlagName, opts.Namespace)
-			errChan <- cli.SilenceError(ctx.Err())
+			err = cli.SilenceError(err)
 		}
-		return <-errChan
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
