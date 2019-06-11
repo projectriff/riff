@@ -614,6 +614,7 @@ k8s.io/client-go/util/retry
 k8s.io/client-go/tools/auth
 k8s.io/client-go/tools/clientcmd/api/latest
 k8s.io/client-go/util/homedir
+k8s.io/client-go/tools/cache/testing
 k8s.io/client-go/tools/record
 k8s.io/client-go/discovery/fake
 k8s.io/client-go/kubernetes/typed/admissionregistration/v1alpha1/fake
