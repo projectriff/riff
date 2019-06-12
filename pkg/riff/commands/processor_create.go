@@ -24,7 +24,7 @@ import (
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/k8s"
-	"github.com/projectriff/riff/pkg/util"
+	"github.com/projectriff/riff/pkg/race"
 	streamv1alpha1 "github.com/projectriff/system/pkg/apis/stream/v1alpha1"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -86,7 +86,7 @@ func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) err
 	if opts.Tail {
 		// err guarded by Validate()
 		timeout, _ := time.ParseDuration(opts.WaitTimeout)
-		err := util.RaceUntil(ctx, timeout,
+		err := race.Run(ctx, timeout,
 			func(ctx context.Context) error {
 				return k8s.WaitUntilReady(ctx, c.Stream().RESTClient(), "processors", processor)
 			},

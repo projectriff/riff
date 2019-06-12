@@ -25,7 +25,7 @@ import (
 	"github.com/buildpack/pack"
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/k8s"
-	"github.com/projectriff/riff/pkg/util"
+	"github.com/projectriff/riff/pkg/race"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -159,7 +159,7 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 	if opts.Tail {
 		// err guarded by Validate()
 		timeout, _ := time.ParseDuration(opts.WaitTimeout)
-		err := util.RaceUntil(ctx, timeout,
+		err := race.Run(ctx, timeout,
 			func(ctx context.Context) error {
 				return k8s.WaitUntilReady(ctx, c.Build().RESTClient(), "applications", application)
 			},

@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package util
+package race
 
 import (
 	"context"
 	"time"
 )
 
-type RaceTask func(ctx context.Context) error
+// Task is a function which performs some kind of activity and returns an error value. It also observes the given
+// context and, once the context is done, terminates the action and returns (the returned error is ignored in this case).
+type Task func(ctx context.Context) error
 
-// RaceUntil runs each task in go routine and returns the result of the first task to
-// complete (or error). A timeout is specified to limit the whole process. Each task
-// should observe the context to exit once the context is done.
-func RaceUntil(ctx context.Context, timeout time.Duration, tasks ...RaceTask) error {
+// Run runs each task in its own go routine and returns the result of the first task to complete (or error). A timeout
+// is specified to limit the whole process. Each task should observe the context and return once the context is done.
+func Run(ctx context.Context, timeout time.Duration, tasks ...Task) error {
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	errChan := make(chan error, len(tasks)+1)
 	defer close(errChan)
 
 	for _, task := range tasks {
-		go func(task RaceTask) {
+		go func(task Task) {
 			defer cancel()
 			err := task(ctx)
 			if ctx.Err() == nil {

@@ -25,7 +25,7 @@ import (
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/k8s"
 	"github.com/projectriff/riff/pkg/parsers"
-	"github.com/projectriff/riff/pkg/util"
+	"github.com/projectriff/riff/pkg/race"
 	"github.com/projectriff/riff/pkg/validation"
 	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
 	"github.com/spf13/cobra"
@@ -142,7 +142,7 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 	if opts.Tail {
 		// err guarded by Validate()
 		timeout, _ := time.ParseDuration(opts.WaitTimeout)
-		err := util.RaceUntil(ctx, timeout,
+		err := race.Run(ctx, timeout,
 			func(ctx context.Context) error {
 				return k8s.WaitUntilReady(ctx, c.Request().RESTClient(), "handlers", handler)
 			},
