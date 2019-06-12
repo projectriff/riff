@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package util_test
+package race_test
 
 import (
 	"context"
@@ -22,14 +22,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/projectriff/riff/pkg/util"
+	"github.com/projectriff/riff/pkg/race"
 )
 
-func TestRaceUntil(t *testing.T) {
+func TestRun(t *testing.T) {
 	tests := []struct {
 		name    string
 		timeout time.Duration
-		tasks   []util.RaceTask
+		tasks   []race.Task
 		err     error
 	}{{
 		name:    "empty",
@@ -38,7 +38,7 @@ func TestRaceUntil(t *testing.T) {
 	}, {
 		name:    "return immediately",
 		timeout: time.Minute,
-		tasks: []util.RaceTask{
+		tasks: []race.Task{
 			func(ctx context.Context) error {
 				return nil
 			},
@@ -46,7 +46,7 @@ func TestRaceUntil(t *testing.T) {
 	}, {
 		name:    "error immediately",
 		timeout: time.Minute,
-		tasks: []util.RaceTask{
+		tasks: []race.Task{
 			func(ctx context.Context) error {
 				return fmt.Errorf("test error")
 			},
@@ -55,7 +55,7 @@ func TestRaceUntil(t *testing.T) {
 	}, {
 		name:    "block until canceled",
 		timeout: time.Millisecond,
-		tasks: []util.RaceTask{
+		tasks: []race.Task{
 			func(ctx context.Context) error {
 				<-ctx.Done()
 				return nil
@@ -63,9 +63,9 @@ func TestRaceUntil(t *testing.T) {
 		},
 		err: context.DeadlineExceeded,
 	}, {
-		name:    "take first function to return",
+		name:    "take first task to return",
 		timeout: time.Minute,
-		tasks: []util.RaceTask{
+		tasks: []race.Task{
 			func(ctx context.Context) error {
 				<-ctx.Done()
 				return nil
@@ -75,9 +75,9 @@ func TestRaceUntil(t *testing.T) {
 			},
 		},
 	}, {
-		name:    "take first function to error",
+		name:    "take first task to error",
 		timeout: time.Minute,
-		tasks: []util.RaceTask{
+		tasks: []race.Task{
 			func(ctx context.Context) error {
 				<-ctx.Done()
 				return nil
@@ -92,7 +92,7 @@ func TestRaceUntil(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			ctx := context.TODO()
-			err := util.RaceUntil(ctx, test.timeout, test.tasks...)
+			err := race.Run(ctx, test.timeout, test.tasks...)
 			if expected, actual := fmt.Sprintf("%s", test.err), fmt.Sprintf("%s", err); expected != actual {
 				t.Errorf("Expected error to be %q, actually %q", expected, actual)
 			}
