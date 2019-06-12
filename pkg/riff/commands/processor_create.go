@@ -24,6 +24,7 @@ import (
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/k8s"
+	"github.com/projectriff/riff/pkg/race"
 	streamv1alpha1 "github.com/projectriff/system/pkg/apis/stream/v1alpha1"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -85,33 +86,23 @@ func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) err
 	if opts.Tail {
 		// err guarded by Validate()
 		timeout, _ := time.ParseDuration(opts.WaitTimeout)
-		ctx, cancel := context.WithTimeout(ctx, timeout)
-		errChan := make(chan error, 3)
-		defer close(errChan)
-
-		go func() {
-			defer cancel()
-			err := k8s.WaitUntilReady(ctx, c.Stream().RESTClient(), "processors", processor)
-			if ctx.Err() == nil {
-				errChan <- err
-			}
-		}()
-		go func() {
-			defer cancel()
-			err := c.Kail.ProcessorLogs(ctx, processor, cli.TailSinceCreateDefault, c.Stdout)
-			if ctx.Err() == nil {
-				errChan <- err
-			}
-		}()
-
-		<-ctx.Done()
-		if ctx.Err() == context.DeadlineExceeded {
+		err := race.Run(ctx, timeout,
+			func(ctx context.Context) error {
+				return k8s.WaitUntilReady(ctx, c.Stream().RESTClient(), "processors", processor)
+			},
+			func(ctx context.Context) error {
+				return c.Kail.ProcessorLogs(ctx, processor, cli.TailSinceCreateDefault, c.Stdout)
+			},
+		)
+		if err == context.DeadlineExceeded {
 			c.Errorf("Timeout after %q waiting for %q to become ready\n", opts.WaitTimeout, opts.Name)
 			c.Infof("To view status run: %s processor list %s %s\n", c.Name, cli.NamespaceFlagName, opts.Namespace)
 			c.Infof("To continue watching logs run: %s processor tail %s %s %s\n", c.Name, opts.Name, cli.NamespaceFlagName, opts.Namespace)
-			errChan <- cli.SilenceError(ctx.Err())
+			err = cli.SilenceError(err)
 		}
-		return <-errChan
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

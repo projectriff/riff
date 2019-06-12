@@ -25,6 +25,7 @@ import (
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/projectriff/riff/pkg/k8s"
 	"github.com/projectriff/riff/pkg/parsers"
+	"github.com/projectriff/riff/pkg/race"
 	"github.com/projectriff/riff/pkg/validation"
 	requestv1alpha1 "github.com/projectriff/system/pkg/apis/request/v1alpha1"
 	"github.com/spf13/cobra"
@@ -141,33 +142,23 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 	if opts.Tail {
 		// err guarded by Validate()
 		timeout, _ := time.ParseDuration(opts.WaitTimeout)
-		ctx, cancel := context.WithTimeout(ctx, timeout)
-		errChan := make(chan error, 3)
-		defer close(errChan)
-
-		go func() {
-			defer cancel()
-			err := k8s.WaitUntilReady(ctx, c.Request().RESTClient(), "handlers", handler)
-			if ctx.Err() == nil {
-				errChan <- err
-			}
-		}()
-		go func() {
-			defer cancel()
-			err := c.Kail.HandlerLogs(ctx, handler, cli.TailSinceCreateDefault, c.Stdout)
-			if ctx.Err() == nil {
-				errChan <- err
-			}
-		}()
-
-		<-ctx.Done()
-		if ctx.Err() == context.DeadlineExceeded {
+		err := race.Run(ctx, timeout,
+			func(ctx context.Context) error {
+				return k8s.WaitUntilReady(ctx, c.Request().RESTClient(), "handlers", handler)
+			},
+			func(ctx context.Context) error {
+				return c.Kail.HandlerLogs(ctx, handler, cli.TailSinceCreateDefault, c.Stdout)
+			},
+		)
+		if err == context.DeadlineExceeded {
 			c.Errorf("Timeout after %q waiting for %q to become ready\n", opts.WaitTimeout, opts.Name)
 			c.Infof("To view status run: %s handler list %s %s\n", c.Name, cli.NamespaceFlagName, opts.Namespace)
 			c.Infof("To continue watching logs run: %s handler tail %s %s %s\n", c.Name, opts.Name, cli.NamespaceFlagName, opts.Namespace)
-			errChan <- cli.SilenceError(ctx.Err())
+			err = cli.SilenceError(err)
 		}
-		return <-errChan
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
