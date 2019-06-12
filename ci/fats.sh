@@ -4,7 +4,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-mode=${1:-full}
 version=`cat VERSION`
 commit=$(git rev-parse HEAD)
 
@@ -22,18 +21,13 @@ $fats_dir/install.sh duffle
 # install riff-cli
 travis_fold start install-riff
 echo "Installing riff"
-if [ "$mode" = "full" ]; then
-  if [ "$machine" == "MinGw" ]; then
-    curl https://storage.googleapis.com/projectriff/riff-cli/releases/builds/v${version}-${commit}/riff-windows-amd64.zip > riff.zip
-    unzip riff.zip -d /usr/bin/
-    rm riff.zip
-  else
-    curl https://storage.googleapis.com/projectriff/riff-cli/releases/builds/v${version}-${commit}/riff-linux-amd64.tgz | tar xz
-    chmod +x riff
-    sudo cp riff /usr/bin/riff
-  fi
+if [ "$machine" == "MinGw" ]; then
+  curl https://storage.googleapis.com/projectriff/riff-cli/releases/builds/v${version}-${commit}/riff-windows-amd64.zip > riff.zip
+  unzip riff.zip -d /usr/bin/
+  rm riff.zip
 else
-  make build
+  curl https://storage.googleapis.com/projectriff/riff-cli/releases/builds/v${version}-${commit}/riff-linux-amd64.tgz | tar xz
+  chmod +x riff
   sudo cp riff /usr/bin/riff
 fi
 travis_fold end install-riff
@@ -60,13 +54,7 @@ travis_fold end system-install
 # run test functions
 source $fats_dir/functions/helpers.sh
 
-if [ "$mode" = "full" ]; then
-  functions=(java java-boot node npm command)
-else
-  functions=(command)
-fi
-
-for test in "${functions[@]}"; do
+for test in command; do
   path=${fats_dir}/functions/uppercase/${test}
   function_name=fats-cluster-uppercase-${test}
   image=$(fats_image_repo ${function_name})
@@ -78,7 +66,7 @@ for test in "${functions[@]}"; do
 done
 
 if [ "$machine" != "MinGw" ]; then
-  for test in "${functions[@]}"; do
+  for test in command; do
     path=${fats_dir}/functions/uppercase/${test}
     function_name=fats-local-uppercase-${test}
     image=$(fats_image_repo ${function_name})

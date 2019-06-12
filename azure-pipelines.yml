@@ -27,36 +27,6 @@ jobs:
 
   displayName: 'Unit test'
 
-- job: fats_lite
-  dependsOn: unit
-  strategy:
-    matrix:
-      minikube:
-        imageName: ubuntu-16.04
-        qualifier: minikube
-        cluster: minikube
-        # TODO restore registry
-        # registry: minikube
-        registry: docker-daemon
-  pool:
-    vmImage: $(imageName)
-  variables:
-    CLUSTER:  '$(cluster)'
-    REGISTRY: '$(registry)'
-    CLUSTER_NAME: 'riff-$(Build.BuildId)-$(qualifier)'
-    NAMESPACE: '$(CLUSTER_NAME)'
-  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
-  steps:
-  - bash: ./ci/fats.sh lite
-    displayName: 'Run FATS'
-  - template: ci/dump-diagnostics-steps.yml
-  - bash: ./ci/fats-cleanup.sh
-    env:
-      TRAVIS_TEST_RESULT: '' # TODO remove this
-    condition: always()
-    displayName: 'Cleanup FATS'
-  displayName: 'FATS lite'
-
 - job: stage
   dependsOn: unit
   pool:
@@ -81,11 +51,17 @@ jobs:
   dependsOn: stage
   strategy:
     matrix:
-      minikube:
+      linux:
         imageName: ubuntu-16.04
         qualifier: minikube
         cluster: minikube
         registry: dockerhub
+      # TODO restore windows support once we have a linux docker daemon available
+      # windows:
+      #   imageName: windows-2019
+      #   qualifier: windows
+      #   cluster: gke
+      #   registry: gcr
   pool:
     vmImage: $(imageName)
   variables:
