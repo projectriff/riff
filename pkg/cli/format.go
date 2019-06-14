@@ -48,8 +48,15 @@ func FormatConditionStatus(cond *duckv1alpha1.Condition) string {
 		return Ssuccessf(string(cond.Type))
 	case "False":
 		if cond.Reason == "" {
-			// display something if there is no reason
-			return Serrorf("not-" + string(cond.Type))
+			if cond.Message == "" {
+				// display something if there is no reason or message
+				return Serrorf("not-" + string(cond.Type))
+			}
+			if len(cond.Message) > 60 {
+				return Serrorf(cond.Message[:57] + "...")
+			} else {
+				return Serrorf(cond.Message)
+			}
 		}
 		return Serrorf(cond.Reason)
 	default:

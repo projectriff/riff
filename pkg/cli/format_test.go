@@ -115,7 +115,23 @@ func TestFormatConditionStatus(t *testing.T) {
 		},
 		output: cli.Serrorf("uh-oh"),
 	}, {
-		name: "status false, no reason",
+		name: "status false with message",
+		input: &duckv1alpha1.Condition{
+			Type:   duckv1alpha1.ConditionReady,
+			Status: corev1.ConditionFalse,
+			Message: "ouch",
+		},
+		output: cli.Serrorf("ouch"),
+	}, {
+		name: "status false with long message",
+		input: &duckv1alpha1.Condition{
+			Type:   duckv1alpha1.ConditionReady,
+			Status: corev1.ConditionFalse,
+			Message: "ouch, this didn't quite work as we expected (please try again)",
+		},
+		output: cli.Serrorf("ouch, this didn't quite work as we expected (please try a..."),
+	}, {
+		name: "status false, no reason, no message",
 		input: &duckv1alpha1.Condition{
 			Type:   duckv1alpha1.ConditionReady,
 			Status: corev1.ConditionFalse,
