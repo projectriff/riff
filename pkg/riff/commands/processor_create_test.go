@@ -95,6 +95,38 @@ func TestProcessorCreateOptions(t *testing.T) {
 			},
 			ExpectFieldError: cli.ErrInvalidValue("d", cli.WaitTimeoutFlagName),
 		},
+		{
+			Name: "dry run",
+			Options: &commands.ProcessorCreateOptions{
+				ResourceOptions: cli.ResourceOptions{
+					CommonOptions: cli.CommonOptions{
+						DryRun: true,
+					},
+					Namespace: "default",
+					Name:      "my-name",
+				},
+				FunctionRef: "my-function",
+				Inputs:      []string{"input"},
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "dry run, tail",
+			Options: &commands.ProcessorCreateOptions{
+				ResourceOptions: cli.ResourceOptions{
+					CommonOptions: cli.CommonOptions{
+						DryRun: true,
+					},
+					Namespace: "default",
+					Name:      "my-name",
+				},
+				FunctionRef: "my-function",
+				Inputs:      []string{"input"},
+				Tail:        true,
+				WaitTimeout: "10m",
+			},
+			ExpectFieldError: cli.ErrMultipleOneOf(cli.DryRunFlagName, cli.TailFlagName),
+		},
 	}
 
 	table.Run(t)
@@ -131,6 +163,27 @@ func TestProcessorCreateCommand(t *testing.T) {
 				},
 			},
 			ExpectOutput: `
+Created processor "my-processor"
+`,
+		},
+		{
+			Name: "dry run",
+			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.DryRunFlagName},
+			ExpectOutput: `
+---
+apiVersion: stream.projectriff.io/v1alpha1
+kind: Processor
+metadata:
+  creationTimestamp: null
+  name: my-processor
+  namespace: default
+spec:
+  functionRef: my-func
+  inputs:
+  - input
+  outputs: []
+status: {}
+
 Created processor "my-processor"
 `,
 		},

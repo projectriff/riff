@@ -21,6 +21,7 @@ riff application create my-app --image registry.example.com/image --local-path .
 
 ```
       --cache-size size         size of persistent volume to cache resources between builds
+      --dry-run                 print kubernetes resources to stdout rather than apply them to the cluster, messages normally on stdout will be sent to stderr
       --git-repo url            git url to remote source code
       --git-revision refspec    refspec within the git repo to checkout (default "master")
   -h, --help                    help for create

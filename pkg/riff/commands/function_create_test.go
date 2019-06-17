@@ -184,6 +184,40 @@ func TestFunctionCreateOptions(t *testing.T) {
 			},
 			ExpectFieldError: cli.ErrInvalidValue("d", cli.WaitTimeoutFlagName),
 		},
+		{
+			Name: "dry run",
+			Options: &commands.FunctionCreateOptions{
+				ResourceOptions: cli.ResourceOptions{
+					CommonOptions: cli.CommonOptions{
+						DryRun: true,
+					},
+					Namespace: "default",
+					Name:      "my-name",
+				},
+				Image:       "example.com/repo:tag",
+				GitRepo:     "https://example.com/repo.git",
+				GitRevision: "master",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "dry run, tail",
+			Options: &commands.FunctionCreateOptions{
+				ResourceOptions: cli.ResourceOptions{
+					CommonOptions: cli.CommonOptions{
+						DryRun: true,
+					},
+					Namespace: "default",
+					Name:      "my-name",
+				},
+				Image:       "example.com/repo:tag",
+				GitRepo:     "https://example.com/repo.git",
+				GitRevision: "master",
+				Tail:        true,
+				WaitTimeout: "10m",
+			},
+			ExpectFieldError: cli.ErrMultipleOneOf(cli.DryRunFlagName, cli.TailFlagName),
+		},
 	}
 
 	table.Run(t)
@@ -233,6 +267,28 @@ func TestFunctionCreateCommand(t *testing.T) {
 				},
 			},
 			ExpectOutput: `
+Created function "my-function"
+`,
+		},
+		{
+			Name: "git repo, dry run",
+			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.DryRunFlagName},
+			ExpectOutput: `
+---
+apiVersion: build.projectriff.io/v1alpha1
+kind: Function
+metadata:
+  creationTimestamp: null
+  name: my-function
+  namespace: default
+spec:
+  image: registry.example.com/repo:tag
+  source:
+    git:
+      revision: master
+      url: https://example.com/repo.git
+status: {}
+
 Created function "my-function"
 `,
 		},
@@ -364,6 +420,63 @@ Created function "my-function"
 			},
 			ExpectOutput: `
 ...build output...
+Created function "my-function"
+`,
+		},
+		{
+			Name: "local path, dry run",
+			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath, cli.ArtifactFlagName, artifact, cli.HandlerFlagName, handler, cli.InvokerFlagName, invoker, cli.DryRunFlagName},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				packClient := &packtesting.Client{}
+				c.Pack = packClient
+				packClient.On("Build", mock.Anything, pack.BuildOptions{
+					Image:   imageTag,
+					AppDir:  localPath,
+					Builder: "projectriff/builder:0.2.0",
+					Env: map[string]string{
+						"RIFF":          "true",
+						"RIFF_ARTIFACT": artifact,
+						"RIFF_HANDLER":  handler,
+						"RIFF_OVERRIDE": invoker,
+					},
+					Publish: true,
+				}).Return(nil).Run(func(args mock.Arguments) {
+					fmt.Fprintf(c.Stdout, "...build output...\n")
+				})
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				packClient := c.Pack.(*packtesting.Client)
+				packClient.AssertExpectations(t)
+				return nil
+			},
+			GivenObjects: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "riff-system",
+						Name:      "builders",
+					},
+					Data: map[string]string{
+						"riff-function": "projectriff/builder:0.2.0",
+					},
+				},
+			},
+			ExpectOutput: `
+...build output...
+---
+apiVersion: build.projectriff.io/v1alpha1
+kind: Function
+metadata:
+  creationTimestamp: null
+  name: my-function
+  namespace: default
+spec:
+  artifact: test-artifact.js
+  handler: functions.Handler
+  image: registry.example.com/repo:tag
+  invoker: java
+status: {}
+
 Created function "my-function"
 `,
 		},

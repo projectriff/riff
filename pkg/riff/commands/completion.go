@@ -53,6 +53,10 @@ func (opts *CompletionOptions) Exec(ctx context.Context, c *cli.Config) error {
 	panic("invalid shell: " + opts.Shell)
 }
 
+func (*CompletionOptions) IsDryRun() bool {
+	return false
+}
+
 func NewCompletionCommand(c *cli.Config) *cobra.Command {
 	opts := &CompletionOptions{}
 

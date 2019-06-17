@@ -33,6 +33,7 @@ const (
 	DefaultImagePrefixFlagName    = "--default-image-prefix"
 	DirectoryFlagName             = "--directory"
 	DockerHubFlagName             = "--docker-hub"
+	DryRunFlagName                = "--dry-run"
 	EnvFlagName                   = "--env"
 	EnvFromFlagName               = "--env-from"
 	FunctionRefFlagName           = "--function-ref"

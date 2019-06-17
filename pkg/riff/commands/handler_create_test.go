@@ -152,6 +152,36 @@ func TestHandlerCreateOptions(t *testing.T) {
 			},
 			ExpectFieldError: cli.ErrInvalidValue("d", cli.WaitTimeoutFlagName),
 		},
+		{
+			Name: "dry run",
+			Options: &commands.HandlerCreateOptions{
+				ResourceOptions: cli.ResourceOptions{
+					CommonOptions: cli.CommonOptions{
+						DryRun: true,
+					},
+					Namespace: "default",
+					Name:      "my-name",
+				},
+				Image: "example.com/repo:tag",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "dry run, tail",
+			Options: &commands.HandlerCreateOptions{
+				ResourceOptions: cli.ResourceOptions{
+					CommonOptions: cli.CommonOptions{
+						DryRun: true,
+					},
+					Namespace: "default",
+					Name:      "my-name",
+				},
+				Image:       "example.com/repo:tag",
+				Tail:        true,
+				WaitTimeout: "10m",
+			},
+			ExpectFieldError: cli.ErrMultipleOneOf(cli.DryRunFlagName, cli.TailFlagName),
+		},
 	}
 
 	table.Run(t)
@@ -237,6 +267,28 @@ Created handler "my-handler"
 				},
 			},
 			ExpectOutput: `
+Created handler "my-handler"
+`,
+		},
+		{
+			Name: "dry run",
+			Args: []string{handlerName, cli.ImageFlagName, image, cli.DryRunFlagName},
+			ExpectOutput: `
+---
+apiVersion: request.projectriff.io/v1alpha1
+kind: Handler
+metadata:
+  creationTimestamp: null
+  name: my-handler
+  namespace: default
+spec:
+  template:
+    containers:
+    - image: registry.example.com/repo@sha256:deadbeefdeadbeefdeadbeefdeadbeef
+      name: ""
+      resources: {}
+status: {}
+
 Created handler "my-handler"
 `,
 		},

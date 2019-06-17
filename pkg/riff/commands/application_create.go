@@ -94,6 +94,10 @@ func (opts *ApplicationCreateOptions) Validate(ctx context.Context) *cli.FieldEr
 		}
 	}
 
+	if opts.DryRun && opts.Tail {
+		errs = errs.Also(cli.ErrMultipleOneOf(cli.DryRunFlagName, cli.TailFlagName))
+	}
+
 	return errs
 }
 
@@ -151,9 +155,14 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 		}
 	}
 
-	application, err := c.Build().Applications(opts.Namespace).Create(application)
-	if err != nil {
-		return err
+	if opts.DryRun {
+		cli.DryRunResource(ctx, application, application.GetGroupVersionKind())
+	} else {
+		var err error
+		application, err = c.Build().Applications(opts.Namespace).Create(application)
+		if err != nil {
+			return err
+		}
 	}
 	c.Successf("Created application %q\n", application.Name)
 	if opts.Tail {
@@ -209,6 +218,7 @@ func NewApplicationCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.SubPath, cli.StripDash(cli.SubPathFlagName), "", "path to `directory` within the git repo to checkout")
 	cmd.Flags().BoolVar(&opts.Tail, cli.StripDash(cli.TailFlagName), false, "watch build logs")
 	cmd.Flags().StringVar(&opts.WaitTimeout, cli.StripDash(cli.WaitTimeoutFlagName), "10m", "`duration` to wait for the application to become ready when watching logs")
+	cmd.Flags().BoolVar(&opts.DryRun, cli.StripDash(cli.DryRunFlagName), false, "print kubernetes resources to stdout rather than apply them to the cluster, messages normally on stdout will be sent to stderr")
 
 	return cmd
 }

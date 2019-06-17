@@ -184,6 +184,40 @@ func TestApplicationCreateOptions(t *testing.T) {
 			},
 			ExpectFieldError: cli.ErrInvalidValue("d", cli.WaitTimeoutFlagName),
 		},
+		{
+			Name: "dry run",
+			Options: &commands.ApplicationCreateOptions{
+				ResourceOptions: cli.ResourceOptions{
+					CommonOptions: cli.CommonOptions{
+						DryRun: true,
+					},
+					Namespace: "default",
+					Name:      "my-name",
+				},
+				Image:       "example.com/repo:tag",
+				GitRepo:     "https://example.com/repo.git",
+				GitRevision: "master",
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "dry run, tail",
+			Options: &commands.ApplicationCreateOptions{
+				ResourceOptions: cli.ResourceOptions{
+					CommonOptions: cli.CommonOptions{
+						DryRun: true,
+					},
+					Namespace: "default",
+					Name:      "my-name",
+				},
+				Image:       "example.com/repo:tag",
+				GitRepo:     "https://example.com/repo.git",
+				GitRevision: "master",
+				Tail:        true,
+				WaitTimeout: "10m",
+			},
+			ExpectFieldError: cli.ErrMultipleOneOf(cli.DryRunFlagName, cli.TailFlagName),
+		},
 	}
 
 	table.Run(t)
@@ -230,6 +264,28 @@ func TestApplicationCreateCommand(t *testing.T) {
 				},
 			},
 			ExpectOutput: `
+Created application "my-application"
+`,
+		},
+		{
+			Name: "git repo, dry run",
+			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.DryRunFlagName},
+			ExpectOutput: `
+---
+apiVersion: build.projectriff.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: null
+  name: my-application
+  namespace: default
+spec:
+  image: registry.example.com/repo:tag
+  source:
+    git:
+      revision: master
+      url: https://example.com/repo.git
+status: {}
+
 Created application "my-application"
 `,
 		},
@@ -352,6 +408,54 @@ Created application "my-application"
 			},
 			ExpectOutput: `
 ...build output...
+Created application "my-application"
+`,
+		},
+		{
+			Name: "local path, dry run",
+			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath, cli.DryRunFlagName},
+			Prepare: func(t *testing.T, c *cli.Config) error {
+				packClient := &packtesting.Client{}
+				c.Pack = packClient
+				packClient.On("Build", mock.Anything, pack.BuildOptions{
+					Image:   imageTag,
+					AppDir:  localPath,
+					Builder: "cloudfoundry/cnb:bionic",
+					Publish: true,
+				}).Return(nil).Run(func(args mock.Arguments) {
+					fmt.Fprintf(c.Stdout, "...build output...\n")
+				})
+				return nil
+			},
+			CleanUp: func(t *testing.T, c *cli.Config) error {
+				packClient := c.Pack.(*packtesting.Client)
+				packClient.AssertExpectations(t)
+				return nil
+			},
+			GivenObjects: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "riff-system",
+						Name:      "builders",
+					},
+					Data: map[string]string{
+						"riff-application": "cloudfoundry/cnb:bionic",
+					},
+				},
+			},
+			ExpectOutput: `
+...build output...
+---
+apiVersion: build.projectriff.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: null
+  name: my-application
+  namespace: default
+spec:
+  image: registry.example.com/repo:tag
+status: {}
+
 Created application "my-application"
 `,
 		},

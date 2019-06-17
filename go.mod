@@ -8,6 +8,7 @@ require (
 	github.com/boz/kail v0.10.1
 	github.com/buildpack/pack v0.2.0
 	github.com/fatih/color v1.7.0
+	github.com/ghodss/yaml v1.0.0
 	github.com/google/go-cmp v0.3.0
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/knative/pkg v0.0.0-20190510233738-9e0db8f0a7f4

@@ -66,10 +66,24 @@ func TestStreamCreateOptions(t *testing.T) {
 			Name: "with invalid content-type",
 			Options: &commands.StreamCreateOptions{
 				ResourceOptions: rifftesting.ValidResourceOptions,
-				Provider: "test-provider",
-				ContentType: "invalid-content-type",
+				Provider:        "test-provider",
+				ContentType:     "invalid-content-type",
 			},
 			ExpectFieldError: cli.ErrInvalidValue("invalid-content-type", cli.ContentTypeName),
+		},
+		{
+			Name: "dry run",
+			Options: &commands.StreamCreateOptions{
+				ResourceOptions: cli.ResourceOptions{
+					CommonOptions: cli.CommonOptions{
+						DryRun: true,
+					},
+					Namespace: "default",
+					Name:      "my-name",
+				},
+				Provider: "test-provider",
+			},
+			ShouldValidate: true,
 		},
 	}
 
@@ -105,6 +119,26 @@ func TestStreamCreateCommand(t *testing.T) {
 				},
 			},
 			ExpectOutput: `
+Created stream "my-stream"
+`,
+		},
+		{
+			Name: "dry run",
+			Args: []string{streamName, cli.ProviderFlagName, provider, cli.DryRunFlagName},
+			ExpectOutput: `
+---
+apiVersion: stream.projectriff.io/v1alpha1
+kind: Stream
+metadata:
+  creationTimestamp: null
+  name: my-stream
+  namespace: default
+spec:
+  contentType: ""
+  provider: test-provider
+status:
+  address: {}
+
 Created stream "my-stream"
 `,
 		},

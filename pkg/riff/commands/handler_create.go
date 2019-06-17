@@ -91,6 +91,10 @@ func (opts *HandlerCreateOptions) Validate(ctx context.Context) *cli.FieldError 
 		}
 	}
 
+	if opts.DryRun && opts.Tail {
+		errs = errs.Also(cli.ErrMultipleOneOf(cli.DryRunFlagName, cli.TailFlagName))
+	}
+
 	return errs
 }
 
@@ -134,9 +138,14 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 		handler.Spec.Template.Containers[0].Env = append(handler.Spec.Template.Containers[0].Env, parsers.EnvVarFrom(env))
 	}
 
-	handler, err := c.Request().Handlers(opts.Namespace).Create(handler)
-	if err != nil {
-		return err
+	if opts.DryRun {
+		cli.DryRunResource(ctx, handler, handler.GetGroupVersionKind())
+	} else {
+		var err error
+		handler, err = c.Request().Handlers(opts.Namespace).Create(handler)
+		if err != nil {
+			return err
+		}
 	}
 	c.Successf("Created handler %q\n", handler.Name)
 	if opts.Tail {
@@ -192,6 +201,7 @@ func NewHandlerCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringArrayVar(&opts.EnvFrom, cli.StripDash(cli.EnvFromFlagName), []string{}, fmt.Sprintf("environment `variable` from a config map or secret, example %q, %q (may be set multiple times)", fmt.Sprintf("%s MY_SECRET_VALUE=secretKeyRef:my-secret-name:key-in-secret", cli.EnvFromFlagName), fmt.Sprintf("%s MY_CONFIG_MAP_VALUE=configMapKeyRef:my-config-map-name:key-in-config-map", cli.EnvFromFlagName)))
 	cmd.Flags().BoolVar(&opts.Tail, cli.StripDash(cli.TailFlagName), false, "watch handler logs")
 	cmd.Flags().StringVar(&opts.WaitTimeout, cli.StripDash(cli.WaitTimeoutFlagName), "10m", "`duration` to wait for the handler to become ready when watching logs")
+	cmd.Flags().BoolVar(&opts.DryRun, cli.StripDash(cli.DryRunFlagName), false, "print kubernetes resources to stdout rather than apply them to the cluster, messages normally on stdout will be sent to stderr")
 
 	return cmd
 }

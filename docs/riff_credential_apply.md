@@ -26,6 +26,7 @@ riff credential apply my-registry-creds --registry http://registry.example.com -
 ```
       --default-image-prefix repository   default repository prefix for built images, implies --set-default-image-prefix
       --docker-hub username               Docker Hub username, the password must be provided via stdin
+      --dry-run                           print kubernetes resources to stdout rather than apply them to the cluster, messages normally on stdout will be sent to stderr
       --gcr file                          path to Google Container Registry service account token file
   -h, --help                              help for apply
   -n, --namespace name                    kubernetes namespace (defaulted from kube config)
