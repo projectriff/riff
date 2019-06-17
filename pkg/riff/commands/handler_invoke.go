@@ -28,11 +28,17 @@ import (
 
 type HandlerInvokeOptions struct {
 	cli.ResourceOptions
+
 	ContentTypeJSON bool
 	ContentTypeText bool
 	Path            string
 	BareArgs        []string
 }
+
+var (
+	_ cli.Validatable = (*HandlerInvokeOptions)(nil)
+	_ cli.Executable  = (*HandlerInvokeOptions)(nil)
+)
 
 func (opts *HandlerInvokeOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError

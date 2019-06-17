@@ -64,6 +64,11 @@ type Executable interface {
 func ExecOptions(c *Config, opts Executable) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		ctx := WithCommand(context.Background(), cmd)
+		if o, ok := opts.(DryRunable); ok && o.IsDryRun() {
+			// reserve Stdout for resources, redirect normal stdout to stderr
+			ctx = withStdout(ctx, c.Stdout)
+			c.Stdout = c.Stderr
+		}
 		return opts.Exec(ctx, c)
 	}
 }

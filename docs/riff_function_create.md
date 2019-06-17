@@ -22,6 +22,7 @@ riff function create my-func --image registry.example.com/image --local-path ./m
 ```
       --artifact file           file containing the function within the build workspace (detected by default)
       --cache-size size         size of persistent volume to cache resources between builds
+      --dry-run                 print kubernetes resources to stdout rather than apply them to the cluster, messages normally on stdout will be sent to stderr
       --git-repo url            git url to remote source code
       --git-revision refspec    refspec within the git repo to checkout (default "master")
       --handler name            name of the method or class to invoke, depends on the invoker (detected by default)

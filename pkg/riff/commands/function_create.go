@@ -49,7 +49,15 @@ type FunctionCreateOptions struct {
 
 	Tail        bool
 	WaitTimeout string
+
+	DryRun bool
 }
+
+var (
+	_ cli.Validatable = (*FunctionCreateOptions)(nil)
+	_ cli.Executable  = (*FunctionCreateOptions)(nil)
+	_ cli.DryRunable  = (*FunctionCreateOptions)(nil)
+)
 
 func (opts *FunctionCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
@@ -98,6 +106,10 @@ func (opts *FunctionCreateOptions) Validate(ctx context.Context) *cli.FieldError
 		} else if _, err := time.ParseDuration(opts.WaitTimeout); err != nil {
 			errs = errs.Also(cli.ErrInvalidValue(opts.WaitTimeout, cli.WaitTimeoutFlagName))
 		}
+	}
+
+	if opts.DryRun && opts.Tail {
+		errs = errs.Also(cli.ErrMultipleOneOf(cli.DryRunFlagName, cli.TailFlagName))
 	}
 
 	return errs
@@ -167,9 +179,14 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 		}
 	}
 
-	function, err := c.Build().Functions(opts.Namespace).Create(function)
-	if err != nil {
-		return err
+	if opts.DryRun {
+		cli.DryRunResource(ctx, function, function.GetGroupVersionKind())
+	} else {
+		var err error
+		function, err = c.Build().Functions(opts.Namespace).Create(function)
+		if err != nil {
+			return err
+		}
 	}
 	c.Successf("Created function %q\n", function.Name)
 	if opts.Tail {
@@ -194,6 +211,10 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 		}
 	}
 	return nil
+}
+
+func (opts *FunctionCreateOptions) IsDryRun() bool {
+	return opts.DryRun
 }
 
 func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
@@ -228,6 +249,7 @@ func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.SubPath, cli.StripDash(cli.SubPathFlagName), "", "path to `directory` within the git repo to checkout")
 	cmd.Flags().BoolVar(&opts.Tail, cli.StripDash(cli.TailFlagName), false, "watch build logs")
 	cmd.Flags().StringVar(&opts.WaitTimeout, cli.StripDash(cli.WaitTimeoutFlagName), "10m", "`duration` to wait for the function to become ready when watching logs")
+	cmd.Flags().BoolVar(&opts.DryRun, cli.StripDash(cli.DryRunFlagName), false, "print kubernetes resources to stdout rather than apply them to the cluster, messages normally on stdout will be sent to stderr")
 
 	return cmd
 }

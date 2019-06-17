@@ -32,6 +32,11 @@ type ApplicationTailOptions struct {
 	Since string
 }
 
+var (
+	_ cli.Validatable = (*ApplicationTailOptions)(nil)
+	_ cli.Executable  = (*ApplicationTailOptions)(nil)
+)
+
 func (opts *ApplicationTailOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 

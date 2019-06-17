@@ -116,7 +116,6 @@ func TestCredentialApplyOptions(t *testing.T) {
 				cli.ErrMultipleOneOf(cli.DockerHubFlagName, cli.GcrFlagName, cli.RegistryFlagName),
 			),
 		},
-
 		{
 			Name: "docker hub as default image prefix",
 			Options: &commands.CredentialApplyOptions{
@@ -146,6 +145,16 @@ func TestCredentialApplyOptions(t *testing.T) {
 				SetDefaultImagePrefix: true,
 			},
 			ExpectFieldError: cli.ErrInvalidValue(fmt.Sprintf("cannot be used with %s, without %s", cli.RegistryFlagName, cli.DefaultImagePrefixFlagName), cli.SetDefaultImagePrefixFlagName),
+		},
+		{
+			Name: "dry run",
+			Options: &commands.CredentialApplyOptions{
+				ResourceOptions:   rifftesting.ValidResourceOptions,
+				DockerHubId:       "projectriff",
+				DockerHubPassword: []byte("1password"),
+				DryRun:            true,
+			},
+			ShouldValidate: true,
 		},
 	}
 
@@ -681,6 +690,92 @@ Set default image prefix to "docker.io/projectriff"
 				},
 			},
 			ShouldError: true,
+		},
+		{
+			Name:  "create dry run",
+			Args:  []string{credentialName, cli.DockerHubFlagName, dockerHubId, cli.SetDefaultImagePrefixFlagName, cli.DryRunFlagName},
+			Stdin: []byte(dockerHubPassword),
+			ExpectOutput: `
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+    build.knative.dev/docker-0: https://index.docker.io/v1/
+  creationTimestamp: null
+  labels:
+    build.projectriff.io/credential: docker-hub
+  name: test-credential
+  namespace: default
+stringData:
+  password: docker-password
+  username: projectriff
+type: kubernetes.io/basic-auth
+
+Apply credentials "test-credential"
+---
+apiVersion: v1
+data:
+  default-image-prefix: docker.io/projectriff
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: riff-build
+  namespace: default
+
+Set default image prefix to "docker.io/projectriff"
+`,
+		},
+		{
+			Name:  "update dry run",
+			Args:  []string{credentialName, cli.DockerHubFlagName, dockerHubId, cli.SetDefaultImagePrefixFlagName, cli.DryRunFlagName},
+			Stdin: []byte(dockerHubPassword),
+			GivenObjects: []runtime.Object{
+				&corev1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      credentialName,
+						Namespace: defaultNamespace,
+						Labels:    map[string]string{credentialLabel: ""},
+					},
+				},
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      "riff-build",
+					},
+					Data: map[string]string{},
+				},
+			},
+			ExpectOutput: `
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+    build.knative.dev/docker-0: https://index.docker.io/v1/
+  creationTimestamp: null
+  labels:
+    build.projectriff.io/credential: docker-hub
+  name: test-credential
+  namespace: default
+stringData:
+  password: docker-password
+  username: projectriff
+type: kubernetes.io/basic-auth
+
+Apply credentials "test-credential"
+---
+apiVersion: v1
+data:
+  default-image-prefix: docker.io/projectriff
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: riff-build
+  namespace: default
+
+Set default image prefix to "docker.io/projectriff"
+`,
 		},
 	}
 

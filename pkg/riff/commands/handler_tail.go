@@ -29,8 +29,14 @@ import (
 
 type HandlerTailOptions struct {
 	cli.ResourceOptions
+
 	Since string
 }
+
+var (
+	_ cli.Validatable = (*HandlerTailOptions)(nil)
+	_ cli.Executable  = (*HandlerTailOptions)(nil)
+)
 
 func (opts *HandlerTailOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError

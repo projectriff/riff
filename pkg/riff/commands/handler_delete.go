@@ -30,6 +30,11 @@ type HandlerDeleteOptions struct {
 	cli.DeleteOptions
 }
 
+var (
+	_ cli.Validatable = (*HandlerDeleteOptions)(nil)
+	_ cli.Executable  = (*HandlerDeleteOptions)(nil)
+)
+
 func (opts *HandlerDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 

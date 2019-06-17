@@ -35,6 +35,11 @@ type StreamListOptions struct {
 	cli.ListOptions
 }
 
+var (
+	_ cli.Validatable = (*StreamListOptions)(nil)
+	_ cli.Executable  = (*StreamListOptions)(nil)
+)
+
 func (opts *StreamListOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 

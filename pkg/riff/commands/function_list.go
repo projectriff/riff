@@ -35,6 +35,11 @@ type FunctionListOptions struct {
 	cli.ListOptions
 }
 
+var (
+	_ cli.Validatable = (*FunctionListOptions)(nil)
+	_ cli.Executable  = (*FunctionListOptions)(nil)
+)
+
 func (opts *FunctionListOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 

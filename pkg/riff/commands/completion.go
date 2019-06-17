@@ -29,6 +29,11 @@ type CompletionOptions struct {
 	Shell string
 }
 
+var (
+	_ cli.Validatable = (*CompletionOptions)(nil)
+	_ cli.Executable  = (*CompletionOptions)(nil)
+)
+
 func (opts *CompletionOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 

@@ -35,6 +35,11 @@ type HandlerListOptions struct {
 	cli.ListOptions
 }
 
+var (
+	_ cli.Validatable = (*HandlerListOptions)(nil)
+	_ cli.Executable  = (*HandlerListOptions)(nil)
+)
+
 func (opts *HandlerListOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 

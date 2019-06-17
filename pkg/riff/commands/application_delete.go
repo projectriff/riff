@@ -30,6 +30,11 @@ type ApplicationDeleteOptions struct {
 	cli.DeleteOptions
 }
 
+var (
+	_ cli.Validatable = (*ApplicationDeleteOptions)(nil)
+	_ cli.Executable  = (*ApplicationDeleteOptions)(nil)
+)
+
 func (opts *ApplicationDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 

@@ -20,6 +20,7 @@ riff processor create my-processor --function-ref my-func --input my-input-strea
 ### Options
 
 ```
+      --dry-run                 print kubernetes resources to stdout rather than apply them to the cluster, messages normally on stdout will be sent to stderr
       --function-ref name       name of function build to deploy
   -h, --help                    help for create
       --input name              name of stream to read messages from (may be set multiple times)

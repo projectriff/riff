@@ -36,6 +36,11 @@ type CredentialListOptions struct {
 	cli.ListOptions
 }
 
+var (
+	_ cli.Validatable = (*CredentialListOptions)(nil)
+	_ cli.Executable  = (*CredentialListOptions)(nil)
+)
+
 func (opts *CredentialListOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 

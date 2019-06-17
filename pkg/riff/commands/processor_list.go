@@ -35,6 +35,11 @@ type ProcessorListOptions struct {
 	cli.ListOptions
 }
 
+var (
+	_ cli.Validatable = (*ProcessorListOptions)(nil)
+	_ cli.Executable  = (*ProcessorListOptions)(nil)
+)
+
 func (opts *ProcessorListOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 
