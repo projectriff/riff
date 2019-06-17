@@ -33,7 +33,7 @@ $(OUTPUT): $(GO_SOURCES) VERSION
 	go build -mod=vendor -o $(OUTPUT) -ldflags "$(LDFLAGS_VERSION)" ./cmd/riff
 
 .PHONY: release
-release: $(GO_SOURCES) VERSION $$ Cross-compile riff for various operating systems
+release: $(GO_SOURCES) VERSION ## Cross-compile riff for various operating systems
 	GOOS=darwin   GOARCH=amd64 go build -mod=vendor -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     ./cmd/riff && tar -czf riff-darwin-amd64.tgz $(OUTPUT)     && rm -f $(OUTPUT)
 	GOOS=linux    GOARCH=amd64 go build -mod=vendor -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT)     ./cmd/riff && tar -czf riff-linux-amd64.tgz  $(OUTPUT)     && rm -f $(OUTPUT)
 	GOOS=windows  GOARCH=amd64 go build -mod=vendor -ldflags "$(LDFLAGS_VERSION)" -o $(OUTPUT).exe ./cmd/riff && zip -mq riff-windows-amd64.zip $(OUTPUT).exe && rm -f $(OUTPUT).exe
