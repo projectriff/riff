@@ -13,7 +13,7 @@ jobs:
     vmImage: $(imageName)
   variables:
     GOBIN:  '$(GOPATH)/bin' # Go binaries path
-    GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
+    GOROOT: '/opt/hostedtoolcache/go/1.12.6/x64' # Go installation path
     GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
     modulePath: '$(build.repository.name)' # Path to the module's code
   steps:
@@ -33,7 +33,7 @@ jobs:
     vmImage: ubuntu-16.04
   variables:
     GOBIN:  '$(GOPATH)/bin' # Go binaries path
-    GOROOT: '/opt/hostedtoolcache/go/1.12.0/x64' # Go installation path
+    GOROOT: '/opt/hostedtoolcache/go/1.12.6/x64' # Go installation path
     GOPATH: '$(system.defaultWorkingDirectory)/gopath' # Go workspace path
     modulePath: '$(build.repository.name)' # Path to the module's code
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
