@@ -98,32 +98,22 @@ func TestProcessorCreateOptions(t *testing.T) {
 		{
 			Name: "dry run",
 			Options: &commands.ProcessorCreateOptions{
-				ResourceOptions: cli.ResourceOptions{
-					CommonOptions: cli.CommonOptions{
-						DryRun: true,
-					},
-					Namespace: "default",
-					Name:      "my-name",
-				},
-				FunctionRef: "my-function",
-				Inputs:      []string{"input"},
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				FunctionRef:     "my-function",
+				Inputs:          []string{"input"},
+				DryRun:          true,
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "dry run, tail",
 			Options: &commands.ProcessorCreateOptions{
-				ResourceOptions: cli.ResourceOptions{
-					CommonOptions: cli.CommonOptions{
-						DryRun: true,
-					},
-					Namespace: "default",
-					Name:      "my-name",
-				},
-				FunctionRef: "my-function",
-				Inputs:      []string{"input"},
-				Tail:        true,
-				WaitTimeout: "10m",
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				FunctionRef:     "my-function",
+				Inputs:          []string{"input"},
+				Tail:            true,
+				WaitTimeout:     "10m",
+				DryRun:          true,
 			},
 			ExpectFieldError: cli.ErrMultipleOneOf(cli.DryRunFlagName, cli.TailFlagName),
 		},

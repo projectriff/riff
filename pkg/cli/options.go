@@ -49,7 +49,6 @@ func ValidateOptions(opts apis.Validatable) func(cmd *cobra.Command, args []stri
 
 type Executable interface {
 	Exec(ctx context.Context, c *Config) error
-	IsDryRun() bool
 }
 
 // ExecOptions bridges a cobra RunE function to the Executable interface.  All flags and
@@ -65,7 +64,7 @@ type Executable interface {
 func ExecOptions(c *Config, opts Executable) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		ctx := WithCommand(context.Background(), cmd)
-		if opts.IsDryRun() {
+		if o, ok := opts.(DryRunable); ok && o.IsDryRun() {
 			// reserve Stdout for resources, redirect normal stdout to stderr
 			ctx = withStdout(ctx, c.Stdout)
 			c.Stdout = c.Stderr
@@ -74,16 +73,7 @@ func ExecOptions(c *Config, opts Executable) func(cmd *cobra.Command, args []str
 	}
 }
 
-type CommonOptions struct {
-	DryRun bool
-}
-
-func (opts *CommonOptions) IsDryRun() bool {
-	return opts.DryRun
-}
-
 type ListOptions struct {
-	CommonOptions
 	Namespace     string
 	AllNamespaces bool
 }
@@ -102,7 +92,6 @@ func (opts *ListOptions) Validate(ctx context.Context) *FieldError {
 }
 
 type ResourceOptions struct {
-	CommonOptions
 	Namespace string
 	Name      string
 }
@@ -124,7 +113,6 @@ func (opts *ResourceOptions) Validate(ctx context.Context) *FieldError {
 }
 
 type DeleteOptions struct {
-	CommonOptions
 	Namespace string
 	Names     []string
 	All       bool

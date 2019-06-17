@@ -88,6 +88,11 @@ type StubExecOptions struct {
 	execErr error
 }
 
+var (
+	_ cli.Executable = (*StubExecOptions)(nil)
+	_ cli.DryRunable = (*StubExecOptions)(nil)
+)
+
 func (o *StubExecOptions) Exec(ctx context.Context, c *cli.Config) error {
 	o.called = true
 	o.config = c

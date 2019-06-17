@@ -74,14 +74,9 @@ func TestStreamCreateOptions(t *testing.T) {
 		{
 			Name: "dry run",
 			Options: &commands.StreamCreateOptions{
-				ResourceOptions: cli.ResourceOptions{
-					CommonOptions: cli.CommonOptions{
-						DryRun: true,
-					},
-					Namespace: "default",
-					Name:      "my-name",
-				},
-				Provider: "test-provider",
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Provider:        "test-provider",
+				DryRun:          true,
 			},
 			ShouldValidate: true,
 		},

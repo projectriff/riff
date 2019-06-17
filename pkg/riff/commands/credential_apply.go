@@ -33,15 +33,27 @@ import (
 
 type CredentialApplyOptions struct {
 	cli.ResourceOptions
-	DockerHubId           string
-	DockerHubPassword     []byte
-	GcrTokenPath          string
-	Registry              string
-	RegistryUser          string
-	RegistryPassword      []byte
+
+	DockerHubId       string
+	DockerHubPassword []byte
+
+	GcrTokenPath string
+
+	Registry         string
+	RegistryUser     string
+	RegistryPassword []byte
+
 	DefaultImagePrefix    string
 	SetDefaultImagePrefix bool
+
+	DryRun bool
 }
+
+var (
+	_ cli.Validatable = (*CredentialApplyOptions)(nil)
+	_ cli.Executable  = (*CredentialApplyOptions)(nil)
+	_ cli.DryRunable  = (*CredentialApplyOptions)(nil)
+)
 
 func (opts *CredentialApplyOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
@@ -120,6 +132,10 @@ func (opts *CredentialApplyOptions) Exec(ctx context.Context, c *cli.Config) err
 	}
 
 	return nil
+}
+
+func (opts *CredentialApplyOptions) IsDryRun() bool {
+	return opts.DryRun
 }
 
 func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {

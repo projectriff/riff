@@ -39,7 +39,15 @@ type ProcessorCreateOptions struct {
 
 	Tail        bool
 	WaitTimeout string
+
+	DryRun bool
 }
+
+var (
+	_ cli.Validatable = (*ProcessorCreateOptions)(nil)
+	_ cli.Executable  = (*ProcessorCreateOptions)(nil)
+	_ cli.DryRunable  = (*ProcessorCreateOptions)(nil)
+)
 
 func (opts *ProcessorCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
@@ -114,6 +122,10 @@ func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) err
 		}
 	}
 	return nil
+}
+
+func (opts *ProcessorCreateOptions) IsDryRun() bool {
+	return opts.DryRun
 }
 
 func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {

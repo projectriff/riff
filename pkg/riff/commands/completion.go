@@ -29,6 +29,11 @@ type CompletionOptions struct {
 	Shell string
 }
 
+var (
+	_ cli.Validatable = (*CompletionOptions)(nil)
+	_ cli.Executable  = (*CompletionOptions)(nil)
+)
+
 func (opts *CompletionOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 
@@ -51,10 +56,6 @@ func (opts *CompletionOptions) Exec(ctx context.Context, c *cli.Config) error {
 	}
 	// protected by opts.Validate()
 	panic("invalid shell: " + opts.Shell)
-}
-
-func (*CompletionOptions) IsDryRun() bool {
-	return false
 }
 
 func NewCompletionCommand(c *cli.Config) *cobra.Command {

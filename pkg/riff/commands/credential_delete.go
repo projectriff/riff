@@ -31,6 +31,11 @@ type CredentialDeleteOptions struct {
 	cli.DeleteOptions
 }
 
+var (
+	_ cli.Validatable = (*CredentialDeleteOptions)(nil)
+	_ cli.Executable  = (*CredentialDeleteOptions)(nil)
+)
+
 func (opts *CredentialDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 

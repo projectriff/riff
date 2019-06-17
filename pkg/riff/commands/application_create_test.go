@@ -187,34 +187,24 @@ func TestApplicationCreateOptions(t *testing.T) {
 		{
 			Name: "dry run",
 			Options: &commands.ApplicationCreateOptions{
-				ResourceOptions: cli.ResourceOptions{
-					CommonOptions: cli.CommonOptions{
-						DryRun: true,
-					},
-					Namespace: "default",
-					Name:      "my-name",
-				},
-				Image:       "example.com/repo:tag",
-				GitRepo:     "https://example.com/repo.git",
-				GitRevision: "master",
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				GitRepo:         "https://example.com/repo.git",
+				GitRevision:     "master",
+				DryRun:          true,
 			},
 			ShouldValidate: true,
 		},
 		{
 			Name: "dry run, tail",
 			Options: &commands.ApplicationCreateOptions{
-				ResourceOptions: cli.ResourceOptions{
-					CommonOptions: cli.CommonOptions{
-						DryRun: true,
-					},
-					Namespace: "default",
-					Name:      "my-name",
-				},
-				Image:       "example.com/repo:tag",
-				GitRepo:     "https://example.com/repo.git",
-				GitRevision: "master",
-				Tail:        true,
-				WaitTimeout: "10m",
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				GitRepo:         "https://example.com/repo.git",
+				GitRevision:     "master",
+				Tail:            true,
+				WaitTimeout:     "10m",
+				DryRun:          true,
 			},
 			ExpectFieldError: cli.ErrMultipleOneOf(cli.DryRunFlagName, cli.TailFlagName),
 		},

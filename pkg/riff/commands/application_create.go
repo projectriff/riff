@@ -45,7 +45,15 @@ type ApplicationCreateOptions struct {
 
 	Tail        bool
 	WaitTimeout string
+
+	DryRun bool
 }
+
+var (
+	_ cli.Validatable = (*ApplicationCreateOptions)(nil)
+	_ cli.Executable  = (*ApplicationCreateOptions)(nil)
+	_ cli.DryRunable  = (*ApplicationCreateOptions)(nil)
+)
 
 func (opts *ApplicationCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
@@ -187,6 +195,10 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 		}
 	}
 	return nil
+}
+
+func (opts *ApplicationCreateOptions) IsDryRun() bool {
+	return opts.DryRun
 }
 
 func NewApplicationCreateCommand(c *cli.Config) *cobra.Command {

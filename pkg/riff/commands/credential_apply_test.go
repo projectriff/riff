@@ -149,15 +149,10 @@ func TestCredentialApplyOptions(t *testing.T) {
 		{
 			Name: "dry run",
 			Options: &commands.CredentialApplyOptions{
-				ResourceOptions: cli.ResourceOptions{
-					CommonOptions: cli.CommonOptions{
-						DryRun: true,
-					},
-					Namespace: "default",
-					Name:      "my-name",
-				},
+				ResourceOptions:   rifftesting.ValidResourceOptions,
 				DockerHubId:       "projectriff",
 				DockerHubPassword: []byte("1password"),
+				DryRun:            true,
 			},
 			ShouldValidate: true,
 		},

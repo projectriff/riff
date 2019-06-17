@@ -33,7 +33,15 @@ type StreamCreateOptions struct {
 
 	Provider    string
 	ContentType string
+
+	DryRun bool
 }
+
+var (
+	_ cli.Validatable = (*StreamCreateOptions)(nil)
+	_ cli.Executable  = (*StreamCreateOptions)(nil)
+	_ cli.DryRunable  = (*StreamCreateOptions)(nil)
+)
 
 func (opts *StreamCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
@@ -75,6 +83,10 @@ func (opts *StreamCreateOptions) Exec(ctx context.Context, c *cli.Config) error 
 	}
 	c.Successf("Created stream %q\n", stream.Name)
 	return nil
+}
+
+func (opts *StreamCreateOptions) IsDryRun() bool {
+	return opts.DryRun
 }
 
 func NewStreamCreateCommand(c *cli.Config) *cobra.Command {

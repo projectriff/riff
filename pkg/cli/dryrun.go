@@ -28,6 +28,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+type DryRunable interface {
+	IsDryRun() bool
+}
+
 func DryRunResource(ctx context.Context, resource runtime.Object, gvk schema.GroupVersionKind) {
 	stdout := stdoutFromContext(ctx)
 	resource = defaultTypeMeta(resource, gvk)

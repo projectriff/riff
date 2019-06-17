@@ -45,7 +45,15 @@ type HandlerCreateOptions struct {
 
 	Tail        bool
 	WaitTimeout string
+
+	DryRun bool
 }
+
+var (
+	_ cli.Validatable = (*HandlerCreateOptions)(nil)
+	_ cli.Executable  = (*HandlerCreateOptions)(nil)
+	_ cli.DryRunable  = (*HandlerCreateOptions)(nil)
+)
 
 func (opts *HandlerCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
@@ -170,6 +178,10 @@ func (opts *HandlerCreateOptions) Exec(ctx context.Context, c *cli.Config) error
 		}
 	}
 	return nil
+}
+
+func (opts *HandlerCreateOptions) IsDryRun() bool {
+	return opts.DryRun
 }
 
 func NewHandlerCreateCommand(c *cli.Config) *cobra.Command {

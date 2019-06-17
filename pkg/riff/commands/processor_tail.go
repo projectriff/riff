@@ -29,8 +29,14 @@ import (
 
 type ProcessorTailOptions struct {
 	cli.ResourceOptions
+
 	Since string
 }
+
+var (
+	_ cli.Validatable = (*ProcessorTailOptions)(nil)
+	_ cli.Executable  = (*ProcessorTailOptions)(nil)
+)
 
 func (opts *ProcessorTailOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError

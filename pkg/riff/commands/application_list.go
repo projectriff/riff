@@ -35,6 +35,11 @@ type ApplicationListOptions struct {
 	cli.ListOptions
 }
 
+var (
+	_ cli.Validatable = (*ApplicationListOptions)(nil)
+	_ cli.Executable  = (*ApplicationListOptions)(nil)
+)
+
 func (opts *ApplicationListOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 

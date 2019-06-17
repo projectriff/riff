@@ -49,7 +49,15 @@ type FunctionCreateOptions struct {
 
 	Tail        bool
 	WaitTimeout string
+
+	DryRun bool
 }
+
+var (
+	_ cli.Validatable = (*FunctionCreateOptions)(nil)
+	_ cli.Executable  = (*FunctionCreateOptions)(nil)
+	_ cli.DryRunable  = (*FunctionCreateOptions)(nil)
+)
 
 func (opts *FunctionCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
@@ -203,6 +211,10 @@ func (opts *FunctionCreateOptions) Exec(ctx context.Context, c *cli.Config) erro
 		}
 	}
 	return nil
+}
+
+func (opts *FunctionCreateOptions) IsDryRun() bool {
+	return opts.DryRun
 }
 
 func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {

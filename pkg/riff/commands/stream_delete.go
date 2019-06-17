@@ -30,6 +30,11 @@ type StreamDeleteOptions struct {
 	cli.DeleteOptions
 }
 
+var (
+	_ cli.Validatable = (*StreamDeleteOptions)(nil)
+	_ cli.Executable  = (*StreamDeleteOptions)(nil)
+)
+
 func (opts *StreamDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 
