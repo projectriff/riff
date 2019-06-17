@@ -57,7 +57,7 @@ func NewDocsCommand(c *cli.Config) *cobra.Command {
 		Example: fmt.Sprintf("%s docs", c.Name),
 		Hidden:  true,
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opts),
+		PreRunE: cli.ValidateOptions(c, opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := os.MkdirAll(opts.Directory, 0744); err != nil {
 				return err

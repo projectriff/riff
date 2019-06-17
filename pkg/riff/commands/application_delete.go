@@ -80,7 +80,7 @@ func NewApplicationDeleteCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NamesArg(&opts.Names),
 		),
-		PreRunE: cli.ValidateOptions(opts),
+		PreRunE: cli.ValidateOptions(c, opts),
 		RunE:    cli.ExecOptions(c, opts),
 	}
 

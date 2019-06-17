@@ -34,6 +34,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	cachetesting "k8s.io/client-go/tools/cache/testing"
 )
 
 func TestApplicationCreateOptions(t *testing.T) {
@@ -661,6 +662,9 @@ Created application "my-application"
 			Name: "tail logs",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName},
 			Prepare: func(t *testing.T, c *cli.Config) error {
+				lw := cachetesting.NewFakeControllerSource()
+				c.Context = k8s.WithListerWatcher(c.Context, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("ApplicationLogs", mock.Anything, &buildv1alpha1.Application{
@@ -683,6 +687,10 @@ Created application "my-application"
 				return nil
 			},
 			CleanUp: func(t *testing.T, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
@@ -713,6 +721,9 @@ Created application "my-application"
 			Name: "tail timeout",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName, cli.WaitTimeoutFlagName, "5ms"},
 			Prepare: func(t *testing.T, c *cli.Config) error {
+				lw := cachetesting.NewFakeControllerSource()
+				c.Context = k8s.WithListerWatcher(c.Context, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("ApplicationLogs", mock.Anything, &buildv1alpha1.Application{
@@ -738,6 +749,10 @@ Created application "my-application"
 				return nil
 			},
 			CleanUp: func(t *testing.T, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
@@ -777,6 +792,9 @@ To continue watching logs run: riff application tail my-application --namespace 
 			Name: "tail error",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName},
 			Prepare: func(t *testing.T, c *cli.Config) error {
+				lw := cachetesting.NewFakeControllerSource()
+				c.Context = k8s.WithListerWatcher(c.Context, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("ApplicationLogs", mock.Anything, &buildv1alpha1.Application{
@@ -797,6 +815,10 @@ To continue watching logs run: riff application tail my-application --namespace 
 				return nil
 			},
 			CleanUp: func(t *testing.T, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil

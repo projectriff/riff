@@ -87,7 +87,7 @@ func NewStreamListCommand(c *cli.Config) *cobra.Command {
 			fmt.Sprintf("%s stream list %s", c.Name, cli.AllNamespacesFlagName),
 		}, "\n"),
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opts),
+		PreRunE: cli.ValidateOptions(c, opts),
 		RunE:    cli.ExecOptions(c, opts),
 	}
 

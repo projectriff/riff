@@ -115,7 +115,7 @@ func NewHandlerInvokeCommand(c *cli.Config) *cobra.Command {
 			},
 			cli.BareDoubleDashArgs(&opts.BareArgs),
 		),
-		PreRunE: cli.ValidateOptions(opts),
+		PreRunE: cli.ValidateOptions(c, opts),
 		RunE:    cli.ExecOptions(c, opts),
 	}
 

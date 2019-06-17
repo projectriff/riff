@@ -39,12 +39,13 @@ type Config struct {
 	ViperConfigFile string
 	KubeConfigFile  string
 	k8s.Client
-	Exec   func(ctx context.Context, command string, args ...string) *exec.Cmd
-	Pack   pack.Client
-	Kail   kail.Logger
-	Stdin  io.Reader
-	Stdout io.Writer
-	Stderr io.Writer
+	Exec    func(ctx context.Context, command string, args ...string) *exec.Cmd
+	Pack    pack.Client
+	Kail    kail.Logger
+	Stdin   io.Reader
+	Stdout  io.Writer
+	Stderr  io.Writer
+	Context context.Context
 }
 
 func NewDefaultConfig() *Config {
@@ -151,6 +152,9 @@ func (c *Config) initKubeConfig() {
 }
 
 func (c *Config) init() {
+	if c.Context == nil {
+		c.Context = context.Background()
+	}
 	if c.Client == nil {
 		c.Client = k8s.NewClient(c.KubeConfigFile)
 	}

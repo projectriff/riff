@@ -34,6 +34,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	cachetesting "k8s.io/client-go/tools/cache/testing"
 )
 
 func TestFunctionCreateOptions(t *testing.T) {
@@ -697,6 +698,9 @@ Created function "my-function"
 			Name: "tail logs",
 			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName},
 			Prepare: func(t *testing.T, c *cli.Config) error {
+				lw := cachetesting.NewFakeControllerSource()
+				c.Context = k8s.WithListerWatcher(c.Context, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("FunctionLogs", mock.Anything, &buildv1alpha1.Function{
@@ -719,6 +723,10 @@ Created function "my-function"
 				return nil
 			},
 			CleanUp: func(t *testing.T, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
@@ -749,6 +757,9 @@ Created function "my-function"
 			Name: "tail timeout",
 			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName, cli.WaitTimeoutFlagName, "5ms"},
 			Prepare: func(t *testing.T, c *cli.Config) error {
+				lw := cachetesting.NewFakeControllerSource()
+				c.Context = k8s.WithListerWatcher(c.Context, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("FunctionLogs", mock.Anything, &buildv1alpha1.Function{
@@ -774,6 +785,10 @@ Created function "my-function"
 				return nil
 			},
 			CleanUp: func(t *testing.T, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
@@ -813,6 +828,9 @@ To continue watching logs run: riff function tail my-function --namespace defaul
 			Name: "tail error",
 			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName},
 			Prepare: func(t *testing.T, c *cli.Config) error {
+				lw := cachetesting.NewFakeControllerSource()
+				c.Context = k8s.WithListerWatcher(c.Context, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("FunctionLogs", mock.Anything, &buildv1alpha1.Function{
@@ -833,6 +851,10 @@ To continue watching logs run: riff function tail my-function --namespace defaul
 				return nil
 			},
 			CleanUp: func(t *testing.T, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil

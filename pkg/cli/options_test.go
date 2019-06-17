@@ -64,8 +64,11 @@ func TestValidateOptions(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			c := &cli.Config{
+				Context: context.TODO(),
+			}
 			cmd := &cobra.Command{}
-			err := cli.ValidateOptions(test.opts)(cmd, []string{})
+			err := cli.ValidateOptions(c, test.opts)(cmd, []string{})
 
 			if expected, actual := true, test.opts.called; true != actual {
 				t.Errorf("expected called to be %v, actually %v", expected, actual)

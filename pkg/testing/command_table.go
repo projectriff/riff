@@ -191,6 +191,9 @@ func (ctr CommandTableRecord) Run(t *testing.T, cmdFactory func(*cli.Config) *co
 		if c == nil {
 			c = cli.NewDefaultConfig()
 		}
+		if c.Context == nil {
+			c.Context = context.TODO()
+		}
 		client := NewClient(ctr.GivenObjects...)
 		c.Client = client
 		if ctr.ExecHelper != "" {

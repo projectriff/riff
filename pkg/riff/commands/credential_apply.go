@@ -168,7 +168,7 @@ func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {
 				}
 				return nil
 			},
-			cli.ValidateOptions(opts),
+			cli.ValidateOptions(c, opts),
 		),
 		RunE: cli.ExecOptions(c, opts),
 	}

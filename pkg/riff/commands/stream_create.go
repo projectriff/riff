@@ -102,7 +102,7 @@ func NewStreamCreateCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
-		PreRunE: cli.ValidateOptions(opts),
+		PreRunE: cli.ValidateOptions(c, opts),
 		RunE:    cli.ExecOptions(c, opts),
 	}
 

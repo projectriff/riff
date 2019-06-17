@@ -198,4 +198,7 @@ func TestInit(t *testing.T) {
 	if c.Kail == nil {
 		t.Errorf("Expected c.Kail tp be set, actually %v", c.Kail)
 	}
+	if c.Context == nil {
+		t.Errorf("Expected c.Context tp be set, actually %v", c.Context)
+	}
 }

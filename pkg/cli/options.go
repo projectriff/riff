@@ -33,12 +33,12 @@ var EmptyFieldError *FieldError
 // ```
 // cmd := &cobra.Command{
 // 	   ...
-// 	   PreRunE: cli.ValidateOptions(opts),
+// 	   PreRunE: cli.ValidateOptions(c, opts),
 // }
 // ```
-func ValidateOptions(opts apis.Validatable) func(cmd *cobra.Command, args []string) error {
+func ValidateOptions(c *Config, opts apis.Validatable) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
+		ctx := c.Context
 		if err := opts.Validate(ctx); err.Error() != "" {
 			return err
 		}
@@ -63,7 +63,7 @@ type Executable interface {
 // ```
 func ExecOptions(c *Config, opts Executable) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
-		ctx := WithCommand(context.Background(), cmd)
+		ctx := WithCommand(c.Context, cmd)
 		if o, ok := opts.(DryRunable); ok && o.IsDryRun() {
 			// reserve Stdout for resources, redirect normal stdout to stderr
 			ctx = withStdout(ctx, c.Stdout)

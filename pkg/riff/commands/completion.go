@@ -72,7 +72,7 @@ func NewCompletionCommand(c *cli.Config) *cobra.Command {
 			fmt.Sprintf("%s completion %s zsh", c.Name, cli.ShellFlagName),
 		}, "\n"),
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opts),
+		PreRunE: cli.ValidateOptions(c, opts),
 		RunE:    cli.ExecOptions(c, opts),
 	}
 

@@ -31,6 +31,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	cachetesting "k8s.io/client-go/tools/cache/testing"
 )
 
 func TestHandlerCreateOptions(t *testing.T) {
@@ -387,6 +388,9 @@ Created handler "my-handler"
 			Name: "tail logs",
 			Args: []string{handlerName, cli.ImageFlagName, image, cli.TailFlagName},
 			Prepare: func(t *testing.T, c *cli.Config) error {
+				lw := cachetesting.NewFakeControllerSource()
+				c.Context = k8s.WithListerWatcher(c.Context, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("HandlerLogs", mock.Anything, &requestv1alpha1.Handler{
@@ -405,6 +409,10 @@ Created handler "my-handler"
 				return nil
 			},
 			CleanUp: func(t *testing.T, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
@@ -431,6 +439,9 @@ Created handler "my-handler"
 			Name: "tail timeout",
 			Args: []string{handlerName, cli.ImageFlagName, image, cli.TailFlagName, cli.WaitTimeoutFlagName, "5ms"},
 			Prepare: func(t *testing.T, c *cli.Config) error {
+				lw := cachetesting.NewFakeControllerSource()
+				c.Context = k8s.WithListerWatcher(c.Context, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("HandlerLogs", mock.Anything, &requestv1alpha1.Handler{
@@ -452,6 +463,10 @@ Created handler "my-handler"
 				return nil
 			},
 			CleanUp: func(t *testing.T, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
@@ -487,6 +502,9 @@ To continue watching logs run: riff handler tail my-handler --namespace default
 			Name: "tail error",
 			Args: []string{handlerName, cli.ImageFlagName, image, cli.TailFlagName},
 			Prepare: func(t *testing.T, c *cli.Config) error {
+				lw := cachetesting.NewFakeControllerSource()
+				c.Context = k8s.WithListerWatcher(c.Context, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("HandlerLogs", mock.Anything, &requestv1alpha1.Handler{
@@ -503,6 +521,10 @@ To continue watching logs run: riff handler tail my-handler --namespace default
 				return nil
 			},
 			CleanUp: func(t *testing.T, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
