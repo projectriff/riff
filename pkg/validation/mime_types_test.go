@@ -1,8 +1,9 @@
 package validation_test
 
 import (
-	"github.com/projectriff/riff/pkg/validation"
 	"testing"
+
+	"github.com/projectriff/riff/pkg/validation"
 )
 
 func TestValidMimeType(t *testing.T) {

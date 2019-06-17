@@ -360,7 +360,7 @@ Created function "my-function"
 		{
 			Name: "local path",
 			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath, cli.ArtifactFlagName, artifact, cli.HandlerFlagName, handler, cli.InvokerFlagName, invoker},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				packClient := &packtesting.Client{}
 				c.Pack = packClient
 				packClient.On("Build", mock.Anything, pack.BuildOptions{
@@ -377,9 +377,9 @@ Created function "my-function"
 				}).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...build output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				packClient := c.Pack.(*packtesting.Client)
 				packClient.AssertExpectations(t)
 				return nil
@@ -417,7 +417,7 @@ Created function "my-function"
 		{
 			Name: "local path, dry run",
 			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath, cli.ArtifactFlagName, artifact, cli.HandlerFlagName, handler, cli.InvokerFlagName, invoker, cli.DryRunFlagName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				packClient := &packtesting.Client{}
 				c.Pack = packClient
 				packClient.On("Build", mock.Anything, pack.BuildOptions{
@@ -434,9 +434,9 @@ Created function "my-function"
 				}).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...build output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				packClient := c.Pack.(*packtesting.Client)
 				packClient.AssertExpectations(t)
 				return nil
@@ -507,7 +507,7 @@ Created function "my-function"
 		{
 			Name: "local path, pack error",
 			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath, cli.ArtifactFlagName, artifact, cli.HandlerFlagName, handler, cli.InvokerFlagName, invoker},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				packClient := &packtesting.Client{}
 				c.Pack = packClient
 				packClient.On("Build", mock.Anything, pack.BuildOptions{
@@ -524,9 +524,9 @@ Created function "my-function"
 				}).Return(fmt.Errorf("pack error")).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...build output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				packClient := c.Pack.(*packtesting.Client)
 				packClient.AssertExpectations(t)
 				return nil
@@ -555,7 +555,7 @@ Created function "my-function"
 		{
 			Name: "local path, default image",
 			Args: []string{functionName, cli.LocalPathFlagName, localPath, cli.ArtifactFlagName, artifact, cli.HandlerFlagName, handler, cli.InvokerFlagName, invoker},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				packClient := &packtesting.Client{}
 				c.Pack = packClient
 				packClient.On("Build", mock.Anything, pack.BuildOptions{
@@ -572,9 +572,9 @@ Created function "my-function"
 				}).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...build output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				packClient := c.Pack.(*packtesting.Client)
 				packClient.AssertExpectations(t)
 				return nil
@@ -697,9 +697,9 @@ Created function "my-function"
 		{
 			Name: "tail logs",
 			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				lw := cachetesting.NewFakeControllerSource()
-				c.Context = k8s.WithListerWatcher(c.Context, lw)
+				ctx = k8s.WithListerWatcher(ctx, lw)
 
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
@@ -720,10 +720,10 @@ Created function "my-function"
 				}, cli.TailSinceCreateDefault, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...log output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
-				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
 					lw.Shutdown()
 				}
 
@@ -756,9 +756,9 @@ Created function "my-function"
 		{
 			Name: "tail timeout",
 			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName, cli.WaitTimeoutFlagName, "5ms"},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				lw := cachetesting.NewFakeControllerSource()
-				c.Context = k8s.WithListerWatcher(c.Context, lw)
+				ctx = k8s.WithListerWatcher(ctx, lw)
 
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
@@ -782,10 +782,10 @@ Created function "my-function"
 					// wait for context to be cancelled
 					<-ctx.Done()
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
-				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
 					lw.Shutdown()
 				}
 
@@ -827,9 +827,9 @@ To continue watching logs run: riff function tail my-function --namespace defaul
 		{
 			Name: "tail error",
 			Args: []string{functionName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				lw := cachetesting.NewFakeControllerSource()
-				c.Context = k8s.WithListerWatcher(c.Context, lw)
+				ctx = k8s.WithListerWatcher(ctx, lw)
 
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
@@ -848,10 +848,10 @@ To continue watching logs run: riff function tail my-function --namespace defaul
 						},
 					},
 				}, cli.TailSinceCreateDefault, mock.Anything).Return(fmt.Errorf("kail error"))
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
-				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
 					lw.Shutdown()
 				}
 

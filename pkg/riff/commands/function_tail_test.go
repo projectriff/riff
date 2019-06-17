@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -87,15 +88,15 @@ func TestFunctionTailCommand(t *testing.T) {
 		{
 			Name: "show logs",
 			Args: []string{functionName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("FunctionLogs", mock.Anything, function, cli.TailSinceDefault, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...log output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
@@ -110,15 +111,15 @@ func TestFunctionTailCommand(t *testing.T) {
 		{
 			Name: "show logs since",
 			Args: []string{functionName, cli.SinceFlagName, "1h"},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("FunctionLogs", mock.Anything, function, time.Hour, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...log output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
@@ -138,13 +139,13 @@ func TestFunctionTailCommand(t *testing.T) {
 		{
 			Name: "kail error",
 			Args: []string{functionName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("FunctionLogs", mock.Anything, function, cli.TailSinceDefault, mock.Anything).Return(fmt.Errorf("kail error"))
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil

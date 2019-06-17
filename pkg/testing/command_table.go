@@ -151,16 +151,16 @@ type CommandTableRecord struct {
 	// Prepare is called before the command is executed. It is intended to prepare that broader
 	// environment before the specific table record is executed. For example, chaning the working
 	// directory or setting mock expectations.
-	Prepare func(t *testing.T, config *cli.Config) error
+	Prepare func(t *testing.T, ctx context.Context, config *cli.Config) (context.Context, error)
 	// CleanUp is called after the table record is finished and all defined assertions complete.
 	// It is indended to clean up any state created in the Prepare step or during the test
 	// execution, or to make assertions for mocks.
-	CleanUp func(t *testing.T, config *cli.Config) error
+	CleanUp func(t *testing.T, ctx context.Context, config *cli.Config) error
 }
 
 // Run each record for the table. Tables with a focused record will run only the focused records
 // and then fail, to prevent accidental check-in.
-func (ct CommandTable) Run(t *testing.T, cmdFactory func(*cli.Config) *cobra.Command) {
+func (ct CommandTable) Run(t *testing.T, cmdFactory func(context.Context, *cli.Config) *cobra.Command) {
 	focusedTable := CommandTable{}
 	for _, ctr := range ct {
 		if ctr.Focus == true && ctr.Skip != true {
@@ -181,18 +181,16 @@ func (ct CommandTable) Run(t *testing.T, cmdFactory func(*cli.Config) *cobra.Com
 }
 
 // Run a single table record for the command. It is not common to run a record outside of a table.
-func (ctr CommandTableRecord) Run(t *testing.T, cmdFactory func(*cli.Config) *cobra.Command) {
+func (ctr CommandTableRecord) Run(t *testing.T, cmdFactory func(context.Context, *cli.Config) *cobra.Command) {
 	t.Run(ctr.Name, func(t *testing.T) {
 		if ctr.Skip {
 			t.SkipNow()
 		}
 
+		ctx := context.TODO()
 		c := ctr.Config
 		if c == nil {
 			c = cli.NewDefaultConfig()
-		}
-		if c.Context == nil {
-			c.Context = context.TODO()
 		}
 		client := NewClient(ctr.GivenObjects...)
 		c.Client = client
@@ -202,13 +200,14 @@ func (ctr CommandTableRecord) Run(t *testing.T, cmdFactory func(*cli.Config) *co
 
 		if ctr.CleanUp != nil {
 			defer func() {
-				if err := ctr.CleanUp(t, c); err != nil {
+				if err := ctr.CleanUp(t, ctx, c); err != nil {
 					t.Errorf("error during clean up: %s", err)
 				}
 			}()
 		}
 		if ctr.Prepare != nil {
-			if err := ctr.Prepare(t, c); err != nil {
+			var err error
+			if ctx, err = ctr.Prepare(t, ctx, c); err != nil {
 				t.Errorf("error during prepare: %s", err)
 			}
 		}
@@ -227,7 +226,7 @@ func (ctr CommandTableRecord) Run(t *testing.T, cmdFactory func(*cli.Config) *co
 			client.PrependReactor("*", "*", reactor)
 		}
 
-		cmd := cmdFactory(c)
+		cmd := cmdFactory(ctx, c)
 		cmd.SilenceErrors = true
 		cmd.SilenceUsage = true
 		cmd.SetArgs(ctr.Args)

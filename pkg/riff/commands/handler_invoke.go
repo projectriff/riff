@@ -84,7 +84,7 @@ func (opts *HandlerInvokeOptions) Exec(ctx context.Context, c *cli.Config) error
 	return curl.Run()
 }
 
-func NewHandlerInvokeCommand(c *cli.Config) *cobra.Command {
+func NewHandlerInvokeCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &HandlerInvokeOptions{}
 
 	cmd := &cobra.Command{
@@ -115,8 +115,8 @@ func NewHandlerInvokeCommand(c *cli.Config) *cobra.Command {
 			},
 			cli.BareDoubleDashArgs(&opts.BareArgs),
 		),
-		PreRunE: cli.ValidateOptions(c, opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

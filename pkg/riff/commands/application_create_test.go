@@ -357,7 +357,7 @@ Created application "my-application"
 		{
 			Name: "local path",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				packClient := &packtesting.Client{}
 				c.Pack = packClient
 				packClient.On("Build", mock.Anything, pack.BuildOptions{
@@ -368,9 +368,9 @@ Created application "my-application"
 				}).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...build output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				packClient := c.Pack.(*packtesting.Client)
 				packClient.AssertExpectations(t)
 				return nil
@@ -405,7 +405,7 @@ Created application "my-application"
 		{
 			Name: "local path, dry run",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath, cli.DryRunFlagName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				packClient := &packtesting.Client{}
 				c.Pack = packClient
 				packClient.On("Build", mock.Anything, pack.BuildOptions{
@@ -416,9 +416,9 @@ Created application "my-application"
 				}).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...build output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				packClient := c.Pack.(*packtesting.Client)
 				packClient.AssertExpectations(t)
 				return nil
@@ -486,7 +486,7 @@ Created application "my-application"
 		{
 			Name: "local path, pack error",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				packClient := &packtesting.Client{}
 				c.Pack = packClient
 				packClient.On("Build", mock.Anything, pack.BuildOptions{
@@ -497,9 +497,9 @@ Created application "my-application"
 				}).Return(fmt.Errorf("pack error")).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...build output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				packClient := c.Pack.(*packtesting.Client)
 				packClient.AssertExpectations(t)
 				return nil
@@ -528,7 +528,7 @@ Created application "my-application"
 		{
 			Name: "local path, default image",
 			Args: []string{applicationName, cli.LocalPathFlagName, localPath},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				packClient := &packtesting.Client{}
 				c.Pack = packClient
 				packClient.On("Build", mock.Anything, pack.BuildOptions{
@@ -539,9 +539,9 @@ Created application "my-application"
 				}).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...build output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				packClient := c.Pack.(*packtesting.Client)
 				packClient.AssertExpectations(t)
 				return nil
@@ -661,9 +661,9 @@ Created application "my-application"
 		{
 			Name: "tail logs",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				lw := cachetesting.NewFakeControllerSource()
-				c.Context = k8s.WithListerWatcher(c.Context, lw)
+				ctx = k8s.WithListerWatcher(ctx, lw)
 
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
@@ -684,10 +684,10 @@ Created application "my-application"
 				}, cli.TailSinceCreateDefault, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...log output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
-				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
 					lw.Shutdown()
 				}
 
@@ -720,9 +720,9 @@ Created application "my-application"
 		{
 			Name: "tail timeout",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName, cli.WaitTimeoutFlagName, "5ms"},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				lw := cachetesting.NewFakeControllerSource()
-				c.Context = k8s.WithListerWatcher(c.Context, lw)
+				ctx = k8s.WithListerWatcher(ctx, lw)
 
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
@@ -746,10 +746,10 @@ Created application "my-application"
 					// wait for context to be cancelled
 					<-ctx.Done()
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
-				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
 					lw.Shutdown()
 				}
 
@@ -791,9 +791,9 @@ To continue watching logs run: riff application tail my-application --namespace 
 		{
 			Name: "tail error",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				lw := cachetesting.NewFakeControllerSource()
-				c.Context = k8s.WithListerWatcher(c.Context, lw)
+				ctx = k8s.WithListerWatcher(ctx, lw)
 
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
@@ -812,10 +812,10 @@ To continue watching logs run: riff application tail my-application --namespace 
 						},
 					},
 				}, cli.TailSinceCreateDefault, mock.Anything).Return(fmt.Errorf("kail error"))
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
-				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
 					lw.Shutdown()
 				}
 

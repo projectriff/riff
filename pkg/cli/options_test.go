@@ -64,11 +64,9 @@ func TestValidateOptions(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			c := &cli.Config{
-				Context: context.TODO(),
-			}
+			ctx := context.TODO()
 			cmd := &cobra.Command{}
-			err := cli.ValidateOptions(c, test.opts)(cmd, []string{})
+			err := cli.ValidateOptions(ctx, test.opts)(cmd, []string{})
 
 			if expected, actual := true, test.opts.called; true != actual {
 				t.Errorf("expected called to be %v, actually %v", expected, actual)
@@ -130,12 +128,13 @@ func TestExecOptions(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			ctx := context.TODO()
 			cmd := &cobra.Command{}
 			config := &cli.Config{
 				Stdout: &bytes.Buffer{},
 				Stderr: &bytes.Buffer{},
 			}
-			err := cli.ExecOptions(config, test.opts)(cmd, []string{})
+			err := cli.ExecOptions(ctx, config, test.opts)(cmd, []string{})
 
 			if expected, actual := true, test.opts.called; true != actual {
 				t.Errorf("expected called to be %v, actually %v", expected, actual)

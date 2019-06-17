@@ -128,7 +128,7 @@ func (opts *ProcessorCreateOptions) IsDryRun() bool {
 	return opts.DryRun
 }
 
-func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {
+func NewProcessorCreateCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &ProcessorCreateOptions{}
 
 	cmd := &cobra.Command{
@@ -144,8 +144,8 @@ func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
-		PreRunE: cli.ValidateOptions(c, opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

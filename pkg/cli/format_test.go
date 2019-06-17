@@ -43,11 +43,11 @@ func TestFormatTimestampSince(t *testing.T) {
 		output: cli.Swarnf("<unknown>"),
 	}, {
 		name:   "now",
-		input:  metav1.Time{now},
+		input:  metav1.Time{Time: now},
 		output: "0s",
 	}, {
 		name:   "1 minute ago",
-		input:  metav1.Time{now.Add(-1 * time.Minute)},
+		input:  metav1.Time{Time: now.Add(-1 * time.Minute)},
 		output: "60s",
 	}}
 

@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/knative/pkg/apis"
@@ -61,10 +62,10 @@ func TestHandlerListCommand(t *testing.T) {
 		{
 			Name: "invalid args",
 			Args: []string{},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				// disable default namespace
 				c.Client.(*rifftesting.FakeClient).Namespace = ""
-				return nil
+				return ctx, nil
 			},
 			ShouldError: true,
 		},

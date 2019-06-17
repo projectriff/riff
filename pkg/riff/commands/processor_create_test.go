@@ -285,9 +285,9 @@ Created processor "my-processor"
 		{
 			Name: "tail logs",
 			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.TailFlagName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				lw := cachetesting.NewFakeControllerSource()
-				c.Context = k8s.WithListerWatcher(c.Context, lw)
+				ctx = k8s.WithListerWatcher(ctx, lw)
 
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
@@ -304,10 +304,10 @@ Created processor "my-processor"
 				}, cli.TailSinceCreateDefault, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...log output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
-				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
 					lw.Shutdown()
 				}
 
@@ -336,9 +336,9 @@ Created processor "my-processor"
 		{
 			Name: "tail timeout",
 			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.TailFlagName, cli.WaitTimeoutFlagName, "5ms"},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				lw := cachetesting.NewFakeControllerSource()
-				c.Context = k8s.WithListerWatcher(c.Context, lw)
+				ctx = k8s.WithListerWatcher(ctx, lw)
 
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
@@ -358,10 +358,10 @@ Created processor "my-processor"
 					// wait for context to be cancelled
 					<-ctx.Done()
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
-				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
 					lw.Shutdown()
 				}
 
@@ -399,9 +399,9 @@ To continue watching logs run: riff processor tail my-processor --namespace defa
 		{
 			Name: "tail error",
 			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.TailFlagName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				lw := cachetesting.NewFakeControllerSource()
-				c.Context = k8s.WithListerWatcher(c.Context, lw)
+				ctx = k8s.WithListerWatcher(ctx, lw)
 
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
@@ -416,10 +416,10 @@ To continue watching logs run: riff processor tail my-processor --namespace defa
 						Outputs:     []string{},
 					},
 				}, cli.TailSinceCreateDefault, mock.Anything).Return(fmt.Errorf("kail error"))
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
-				if lw, ok := k8s.GetListerWatcher(c.Context, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
 					lw.Shutdown()
 				}
 

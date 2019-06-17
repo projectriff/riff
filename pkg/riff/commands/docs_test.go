@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -58,12 +59,12 @@ func TestDocsCommand(t *testing.T) {
 		{
 			Name: "generate docs",
 			Args: []string{cli.DirectoryFlagName, dir},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				// ensure the directory is empty
 				os.RemoveAll(dir)
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				files, err := ioutil.ReadDir(dir)
 				if err != nil {
 					t.Error(err)

@@ -65,7 +65,7 @@ func (opts *ProcessorTailOptions) Exec(ctx context.Context, c *cli.Config) error
 	return c.Kail.ProcessorLogs(ctx, processor, since, c.Stdout)
 }
 
-func NewProcessorTailCommand(c *cli.Config) *cobra.Command {
+func NewProcessorTailCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &ProcessorTailOptions{}
 
 	cmd := &cobra.Command{
@@ -81,8 +81,8 @@ func NewProcessorTailCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
-		PreRunE: cli.ValidateOptions(c, opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
