@@ -28,7 +28,7 @@ import (
 
 func TestDryRunResource(t *testing.T) {
 	stdout := &bytes.Buffer{}
-	ctx := withStdout(context.TODO(), stdout)
+	ctx := withStdout(context.Background(), stdout)
 	resource := &buildv1alpha1.Application{}
 
 	DryRunResource(ctx, resource, resource.GetGroupVersionKind())

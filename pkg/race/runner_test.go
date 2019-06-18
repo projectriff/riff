@@ -91,7 +91,7 @@ func TestRun(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ctx := context.TODO()
+			ctx := context.Background()
 			err := race.Run(ctx, test.timeout, test.tasks...)
 			if expected, actual := fmt.Sprintf("%s", test.err), fmt.Sprintf("%s", err); expected != actual {
 				t.Errorf("Expected error to be %q, actually %q", expected, actual)

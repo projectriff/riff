@@ -187,7 +187,7 @@ func (ctr CommandTableRecord) Run(t *testing.T, cmdFactory func(context.Context,
 			t.SkipNow()
 		}
 
-		ctx := context.TODO()
+		ctx := context.Background()
 		c := ctr.Config
 		if c == nil {
 			c = cli.NewDefaultConfig()

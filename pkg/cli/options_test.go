@@ -64,7 +64,7 @@ func TestValidateOptions(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ctx := context.TODO()
+			ctx := context.Background()
 			cmd := &cobra.Command{}
 			err := cli.ValidateOptions(ctx, test.opts)(cmd, []string{})
 
@@ -128,7 +128,7 @@ func TestExecOptions(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ctx := context.TODO()
+			ctx := context.Background()
 			cmd := &cobra.Command{}
 			config := &cli.Config{
 				Stdout: &bytes.Buffer{},

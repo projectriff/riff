@@ -75,7 +75,7 @@ func (otr OptionsTableRecord) Run(t *testing.T) {
 			t.SkipNow()
 		}
 
-		errs := otr.Options.Validate(context.TODO())
+		errs := otr.Options.Validate(context.Background())
 		if errs == nil {
 			errs = cli.EmptyFieldError
 		}
