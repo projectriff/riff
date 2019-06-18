@@ -26,5 +26,6 @@ applications built from source using application buildpacks
 * [riff application create](riff_application_create.md)	 - create an application from source
 * [riff application delete](riff_application_delete.md)	 - delete application(s)
 * [riff application list](riff_application_list.md)	 - table listing of applications
+* [riff application status](riff_application_status.md)	 - show application status
 * [riff application tail](riff_application_tail.md)	 - watch build logs
 

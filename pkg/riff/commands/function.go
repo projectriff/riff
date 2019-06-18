@@ -38,6 +38,7 @@ func NewFunctionCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	cmd.AddCommand(NewFunctionListCommand(ctx, c))
 	cmd.AddCommand(NewFunctionCreateCommand(ctx, c))
 	cmd.AddCommand(NewFunctionDeleteCommand(ctx, c))
+	cmd.AddCommand(NewFunctionStatusCommand(ctx, c))
 	cmd.AddCommand(NewFunctionTailCommand(ctx, c))
 
 	return cmd
