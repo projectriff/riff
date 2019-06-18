@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/riff/pkg/cli/printers"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -40,40 +41,49 @@ func (opts *DoctorOptions) Validate(ctx context.Context) *cli.FieldError {
 }
 
 func (opts *DoctorOptions) Exec(ctx context.Context, c *cli.Config) error {
-	missingNamespaces, err := opts.checkMissingNamespaces(c)
+	ok, err := opts.checkNamespaces(c)
 	if err != nil {
 		return err
 	}
-	if len(missingNamespaces) > 0 {
-		msg := "Something is wrong!\n"
-		for _, namespace := range missingNamespaces {
-			msg += fmt.Sprintf("missing %s\n", namespace)
-		}
-		c.Errorf(msg)
-	} else {
+	c.Printf("\n")
+	if ok {
 		c.Successf("Installation is OK\n")
+	} else {
+		c.Errorf("Installation is not healthy\n")
 	}
 	return nil
 }
 
-func (*DoctorOptions) checkMissingNamespaces(c *cli.Config) ([]string, error) {
+func (*DoctorOptions) checkNamespaces(c *cli.Config) (bool, error) {
 	namespaces, err := c.Core().Namespaces().List(metav1.ListOptions{})
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
 	foundNamespaces := sets.NewString()
 	for _, namespace := range namespaces.Items {
 		foundNamespaces.Insert(namespace.Name)
 	}
-	requiredNamespaces := sets.NewString(
+	requiredNamespaces := []string{
 		"istio-system",
 		"knative-build",
 		"knative-serving",
 		"riff-system",
-	)
-	missingNamespaces := requiredNamespaces.Difference(foundNamespaces)
-	return missingNamespaces.List(), nil
+	}
+	printer := printers.GetNewTabWriter(c.Stdout)
+	defer printer.Flush()
+	ok := true
+	for _, namespace := range requiredNamespaces {
+		var status string
+		if foundNamespaces.Has(namespace) {
+			status = cli.Ssuccessf("OK")
+		} else {
+			ok = false
+			status = cli.Serrorf("Missing")
+		}
+		fmt.Fprintf(printer, "Namespace %q\t%s\n", namespace, status)
+	}
+	return ok, nil
 }
 
 func NewDoctorCommand(ctx context.Context, c *cli.Config) *cobra.Command {

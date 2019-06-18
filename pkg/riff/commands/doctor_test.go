@@ -58,6 +58,11 @@ func TestDoctorCommand(t *testing.T) {
 				},
 			},
 			ExpectOutput: `
+Namespace "istio-system"      OK
+Namespace "knative-build"     OK
+Namespace "knative-serving"   OK
+Namespace "riff-system"       OK
+
 Installation is OK
 `,
 		},
@@ -76,8 +81,12 @@ Installation is OK
 				},
 			},
 			ExpectOutput: `
-Something is wrong!
-missing istio-system
+Namespace "istio-system"      Missing
+Namespace "knative-build"     OK
+Namespace "knative-serving"   OK
+Namespace "riff-system"       OK
+
+Installation is not healthy
 `,
 		},
 		{
@@ -92,9 +101,12 @@ missing istio-system
 				},
 			},
 			ExpectOutput: `
-Something is wrong!
-missing istio-system
-missing riff-system
+Namespace "istio-system"      Missing
+Namespace "knative-build"     OK
+Namespace "knative-serving"   OK
+Namespace "riff-system"       Missing
+
+Installation is not healthy
 `,
 		},
 		{
