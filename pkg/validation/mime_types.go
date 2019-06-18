@@ -1,8 +1,9 @@
 package validation
 
 import (
-	"github.com/knative/pkg/apis"
 	"strings"
+
+	"github.com/knative/pkg/apis"
 )
 
 func MimeType(mimeType, field string) *apis.FieldError {

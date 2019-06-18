@@ -17,13 +17,14 @@
 package commands
 
 import (
+	"context"
 	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
-func NewCredentialCommand(c *cli.Config) *cobra.Command {
+func NewCredentialCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "credential",
 		Short: "credentials for container registries",
@@ -34,9 +35,9 @@ func NewCredentialCommand(c *cli.Config) *cobra.Command {
 		Aliases: []string{"credentials", "cred", "creds"},
 	}
 
-	cmd.AddCommand(NewCredentialListCommand(c))
-	cmd.AddCommand(NewCredentialApplyCommand(c))
-	cmd.AddCommand(NewCredentialDeleteCommand(c))
+	cmd.AddCommand(NewCredentialListCommand(ctx, c))
+	cmd.AddCommand(NewCredentialApplyCommand(ctx, c))
+	cmd.AddCommand(NewCredentialDeleteCommand(ctx, c))
 
 	return cmd
 }

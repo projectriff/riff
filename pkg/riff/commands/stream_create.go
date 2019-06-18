@@ -89,7 +89,7 @@ func (opts *StreamCreateOptions) IsDryRun() bool {
 	return opts.DryRun
 }
 
-func NewStreamCreateCommand(c *cli.Config) *cobra.Command {
+func NewStreamCreateCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &StreamCreateOptions{}
 
 	cmd := &cobra.Command{
@@ -102,8 +102,8 @@ func NewStreamCreateCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

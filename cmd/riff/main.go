@@ -17,6 +17,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"strings"
 
@@ -29,8 +30,9 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
 	c := cli.Initialize()
-	cmd := commands.NewRootCommand(c)
+	cmd := commands.NewRootCommand(ctx, c)
 
 	cmd.SilenceErrors = true
 	if err := cmd.Execute(); err != nil {

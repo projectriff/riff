@@ -17,6 +17,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/fatih/color"
@@ -26,8 +27,8 @@ import (
 
 // NewRootCommand wraps the riff command with flags and commands that should only be defined on
 // the CLI root.
-func NewRootCommand(c *cli.Config) *cobra.Command {
-	cmd := NewRiffCommand(c)
+func NewRootCommand(ctx context.Context, c *cli.Config) *cobra.Command {
+	cmd := NewRiffCommand(ctx, c)
 
 	cmd.Use = c.Name
 	if !c.GitDirty {
@@ -43,8 +44,8 @@ func NewRootCommand(c *cli.Config) *cobra.Command {
 	cmd.PersistentFlags().BoolVar(&color.NoColor, cli.StripDash(cli.NoColorFlagName), color.NoColor, "disable color output in terminals")
 
 	// add root-only commands
-	cmd.AddCommand(NewCompletionCommand(c))
-	cmd.AddCommand(NewDocsCommand(c))
+	cmd.AddCommand(NewCompletionCommand(ctx, c))
+	cmd.AddCommand(NewDocsCommand(ctx, c))
 
 	return cmd
 }

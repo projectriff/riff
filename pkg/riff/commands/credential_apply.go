@@ -138,7 +138,7 @@ func (opts *CredentialApplyOptions) IsDryRun() bool {
 	return opts.DryRun
 }
 
-func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {
+func NewCredentialApplyCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &CredentialApplyOptions{}
 
 	cmd := &cobra.Command{
@@ -168,9 +168,9 @@ func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {
 				}
 				return nil
 			},
-			cli.ValidateOptions(opts),
+			cli.ValidateOptions(ctx, opts),
 		),
-		RunE: cli.ExecOptions(c, opts),
+		RunE: cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

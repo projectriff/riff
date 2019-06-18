@@ -73,7 +73,7 @@ func (opts *ApplicationListOptions) Exec(ctx context.Context, c *cli.Config) err
 	return tablePrinter.PrintObj(applications, c.Stdout)
 }
 
-func NewApplicationListCommand(c *cli.Config) *cobra.Command {
+func NewApplicationListCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &ApplicationListOptions{}
 
 	cmd := &cobra.Command{
@@ -87,8 +87,8 @@ func NewApplicationListCommand(c *cli.Config) *cobra.Command {
 			fmt.Sprintf("%s application list %s", c.Name, cli.AllNamespacesFlagName),
 		}, "\n"),
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.AllNamespacesFlag(cmd, c, &opts.Namespace, &opts.AllNamespaces)

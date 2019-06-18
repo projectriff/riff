@@ -45,7 +45,7 @@ func (opts *DocsOptions) Validate(ctx context.Context) *cli.FieldError {
 	return errs
 }
 
-func NewDocsCommand(c *cli.Config) *cobra.Command {
+func NewDocsCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &DocsOptions{}
 
 	cmd := &cobra.Command{
@@ -57,7 +57,7 @@ func NewDocsCommand(c *cli.Config) *cobra.Command {
 		Example: fmt.Sprintf("%s docs", c.Name),
 		Hidden:  true,
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := os.MkdirAll(opts.Directory, 0744); err != nil {
 				return err

@@ -17,6 +17,7 @@
 package commands_test
 
 import (
+	"context"
 	"testing"
 
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
@@ -59,10 +60,10 @@ func TestApplicationListCommand(t *testing.T) {
 		{
 			Name: "invalid args",
 			Args: []string{},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				// disable default namespace
 				c.Client.(*rifftesting.FakeClient).Namespace = ""
-				return nil
+				return ctx, nil
 			},
 			ShouldError: true,
 		},

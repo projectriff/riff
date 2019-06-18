@@ -73,7 +73,7 @@ func (opts *FunctionListOptions) Exec(ctx context.Context, c *cli.Config) error 
 	return tablePrinter.PrintObj(functions, c.Stdout)
 }
 
-func NewFunctionListCommand(c *cli.Config) *cobra.Command {
+func NewFunctionListCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &FunctionListOptions{}
 
 	cmd := &cobra.Command{
@@ -87,8 +87,8 @@ func NewFunctionListCommand(c *cli.Config) *cobra.Command {
 			fmt.Sprintf("%s function list %s", c.Name, cli.AllNamespacesFlagName),
 		}, "\n"),
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.AllNamespacesFlag(cmd, c, &opts.Namespace, &opts.AllNamespaces)

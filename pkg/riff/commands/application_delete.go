@@ -64,7 +64,7 @@ func (opts *ApplicationDeleteOptions) Exec(ctx context.Context, c *cli.Config) e
 	return nil
 }
 
-func NewApplicationDeleteCommand(c *cli.Config) *cobra.Command {
+func NewApplicationDeleteCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &ApplicationDeleteOptions{}
 
 	cmd := &cobra.Command{
@@ -80,8 +80,8 @@ func NewApplicationDeleteCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NamesArg(&opts.Names),
 		),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

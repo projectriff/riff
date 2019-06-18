@@ -217,7 +217,7 @@ func (opts *FunctionCreateOptions) IsDryRun() bool {
 	return opts.DryRun
 }
 
-func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
+func NewFunctionCreateCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &FunctionCreateOptions{}
 
 	cmd := &cobra.Command{
@@ -233,8 +233,8 @@ func NewFunctionCreateCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

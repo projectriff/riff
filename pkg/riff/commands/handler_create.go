@@ -184,7 +184,7 @@ func (opts *HandlerCreateOptions) IsDryRun() bool {
 	return opts.DryRun
 }
 
-func NewHandlerCreateCommand(c *cli.Config) *cobra.Command {
+func NewHandlerCreateCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &HandlerCreateOptions{}
 
 	cmd := &cobra.Command{
@@ -201,8 +201,8 @@ func NewHandlerCreateCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

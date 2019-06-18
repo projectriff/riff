@@ -17,13 +17,14 @@
 package commands
 
 import (
+	"context"
 	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
-func NewHandlerCommand(c *cli.Config) *cobra.Command {
+func NewHandlerCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "handler",
 		Short: "handlers map HTTP requests to applications, functions or images",
@@ -34,11 +35,11 @@ func NewHandlerCommand(c *cli.Config) *cobra.Command {
 		Aliases: []string{"handlers"},
 	}
 
-	cmd.AddCommand(NewHandlerListCommand(c))
-	cmd.AddCommand(NewHandlerCreateCommand(c))
-	cmd.AddCommand(NewHandlerInvokeCommand(c))
-	cmd.AddCommand(NewHandlerDeleteCommand(c))
-	cmd.AddCommand(NewHandlerTailCommand(c))
+	cmd.AddCommand(NewHandlerListCommand(ctx, c))
+	cmd.AddCommand(NewHandlerCreateCommand(ctx, c))
+	cmd.AddCommand(NewHandlerInvokeCommand(ctx, c))
+	cmd.AddCommand(NewHandlerDeleteCommand(ctx, c))
+	cmd.AddCommand(NewHandlerTailCommand(ctx, c))
 
 	return cmd
 }

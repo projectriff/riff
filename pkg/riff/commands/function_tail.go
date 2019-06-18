@@ -64,7 +64,7 @@ func (opts *FunctionTailOptions) Exec(ctx context.Context, c *cli.Config) error 
 	return c.Kail.FunctionLogs(ctx, function, since, c.Stdout)
 }
 
-func NewFunctionTailCommand(c *cli.Config) *cobra.Command {
+func NewFunctionTailCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &FunctionTailOptions{}
 
 	cmd := &cobra.Command{
@@ -80,8 +80,8 @@ func NewFunctionTailCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

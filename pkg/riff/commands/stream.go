@@ -17,13 +17,14 @@
 package commands
 
 import (
+	"context"
 	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
-func NewStreamCommand(c *cli.Config) *cobra.Command {
+func NewStreamCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "stream",
 		Short: "streams of messages",
@@ -34,9 +35,9 @@ func NewStreamCommand(c *cli.Config) *cobra.Command {
 		Aliases: []string{"streams"},
 	}
 
-	cmd.AddCommand(NewStreamListCommand(c))
-	cmd.AddCommand(NewStreamCreateCommand(c))
-	cmd.AddCommand(NewStreamDeleteCommand(c))
+	cmd.AddCommand(NewStreamListCommand(ctx, c))
+	cmd.AddCommand(NewStreamCreateCommand(ctx, c))
+	cmd.AddCommand(NewStreamDeleteCommand(ctx, c))
 
 	return cmd
 }

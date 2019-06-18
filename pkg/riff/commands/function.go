@@ -17,13 +17,14 @@
 package commands
 
 import (
+	"context"
 	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
-func NewFunctionCommand(c *cli.Config) *cobra.Command {
+func NewFunctionCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "function",
 		Short: "functions built from source using function buildpacks",
@@ -34,10 +35,10 @@ func NewFunctionCommand(c *cli.Config) *cobra.Command {
 		Aliases: []string{"functions", "func", "fn"},
 	}
 
-	cmd.AddCommand(NewFunctionListCommand(c))
-	cmd.AddCommand(NewFunctionCreateCommand(c))
-	cmd.AddCommand(NewFunctionDeleteCommand(c))
-	cmd.AddCommand(NewFunctionTailCommand(c))
+	cmd.AddCommand(NewFunctionListCommand(ctx, c))
+	cmd.AddCommand(NewFunctionCreateCommand(ctx, c))
+	cmd.AddCommand(NewFunctionDeleteCommand(ctx, c))
+	cmd.AddCommand(NewFunctionTailCommand(ctx, c))
 
 	return cmd
 }

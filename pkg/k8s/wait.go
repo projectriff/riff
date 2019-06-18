@@ -42,7 +42,7 @@ type object interface {
 
 // WaitUntilReady watches for mutations of the target object until the target is ready.
 func WaitUntilReady(ctx context.Context, client rest.Interface, resource string, target object) error {
-	lw := GetListWatch(ctx, client, resource, target)
+	lw := GetListerWatcher(ctx, client, resource, target)
 	_, err := watchclient.UntilWithSync(ctx, lw, target, nil, readyCondition(target))
 	return err
 }
@@ -77,20 +77,13 @@ func readyCondition(target object) watchclient.ConditionFunc {
 
 type lwKey struct{}
 
-func WithListWatch(ctx context.Context, lw cache.ListerWatcher) context.Context {
+func WithListerWatcher(ctx context.Context, lw cache.ListerWatcher) context.Context {
 	return context.WithValue(ctx, lwKey{}, lw)
 }
 
-func GetListWatch(ctx context.Context, client rest.Interface, resource string, target object) cache.ListerWatcher {
+func GetListerWatcher(ctx context.Context, client rest.Interface, resource string, target object) cache.ListerWatcher {
 	if lw, ok := ctx.Value(lwKey{}).(cache.ListerWatcher); ok {
 		return lw
 	}
-
-	if client == (*rest.RESTClient)(nil) {
-		// the client is nil for tests, simulate waiting by blocking
-		<-ctx.Done()
-		return nil
-	}
-
 	return cache.NewListWatchFromClient(client, resource, target.GetNamespace(), fields.Everything())
 }
