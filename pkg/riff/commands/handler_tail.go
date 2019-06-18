@@ -29,8 +29,14 @@ import (
 
 type HandlerTailOptions struct {
 	cli.ResourceOptions
+
 	Since string
 }
+
+var (
+	_ cli.Validatable = (*HandlerTailOptions)(nil)
+	_ cli.Executable  = (*HandlerTailOptions)(nil)
+)
 
 func (opts *HandlerTailOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
@@ -59,7 +65,7 @@ func (opts *HandlerTailOptions) Exec(ctx context.Context, c *cli.Config) error {
 	return c.Kail.HandlerLogs(ctx, handler, since, c.Stdout)
 }
 
-func NewHandlerTailCommand(c *cli.Config) *cobra.Command {
+func NewHandlerTailCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &HandlerTailOptions{}
 
 	cmd := &cobra.Command{
@@ -75,8 +81,8 @@ func NewHandlerTailCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

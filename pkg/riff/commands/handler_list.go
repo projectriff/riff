@@ -35,6 +35,11 @@ type HandlerListOptions struct {
 	cli.ListOptions
 }
 
+var (
+	_ cli.Validatable = (*HandlerListOptions)(nil)
+	_ cli.Executable  = (*HandlerListOptions)(nil)
+)
+
 func (opts *HandlerListOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 
@@ -68,7 +73,7 @@ func (opts *HandlerListOptions) Exec(ctx context.Context, c *cli.Config) error {
 	return tablePrinter.PrintObj(handlers, c.Stdout)
 }
 
-func NewHandlerListCommand(c *cli.Config) *cobra.Command {
+func NewHandlerListCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &HandlerListOptions{}
 
 	cmd := &cobra.Command{
@@ -82,8 +87,8 @@ func NewHandlerListCommand(c *cli.Config) *cobra.Command {
 			fmt.Sprintf("%s handler list %s", c.Name, cli.AllNamespacesFlagName),
 		}, "\n"),
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.AllNamespacesFlag(cmd, c, &opts.Namespace, &opts.AllNamespaces)

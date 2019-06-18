@@ -19,10 +19,10 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/projectriff/riff/pkg/validation"
 	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
+	"github.com/projectriff/riff/pkg/validation"
 	streamv1alpha1 "github.com/projectriff/system/pkg/apis/stream/v1alpha1"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,7 +33,15 @@ type StreamCreateOptions struct {
 
 	Provider    string
 	ContentType string
+
+	DryRun bool
 }
+
+var (
+	_ cli.Validatable = (*StreamCreateOptions)(nil)
+	_ cli.Executable  = (*StreamCreateOptions)(nil)
+	_ cli.DryRunable  = (*StreamCreateOptions)(nil)
+)
 
 func (opts *StreamCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
@@ -64,15 +72,24 @@ func (opts *StreamCreateOptions) Exec(ctx context.Context, c *cli.Config) error 
 		},
 	}
 
-	stream, err := c.Stream().Streams(opts.Namespace).Create(stream)
-	if err != nil {
-		return err
+	if opts.DryRun {
+		cli.DryRunResource(ctx, stream, stream.GetGroupVersionKind())
+	} else {
+		var err error
+		stream, err = c.Stream().Streams(opts.Namespace).Create(stream)
+		if err != nil {
+			return err
+		}
 	}
 	c.Successf("Created stream %q\n", stream.Name)
 	return nil
 }
 
-func NewStreamCreateCommand(c *cli.Config) *cobra.Command {
+func (opts *StreamCreateOptions) IsDryRun() bool {
+	return opts.DryRun
+}
+
+func NewStreamCreateCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &StreamCreateOptions{}
 
 	cmd := &cobra.Command{
@@ -85,13 +102,14 @@ func NewStreamCreateCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
 	cmd.Flags().StringVar(&opts.Provider, cli.StripDash(cli.ProviderFlagName), "", "`name` of stream provider")
 	cmd.Flags().StringVar(&opts.ContentType, cli.StripDash(cli.ContentTypeName), "", "`MIME type` for message payloads accepted by the stream")
+	cmd.Flags().BoolVar(&opts.DryRun, cli.StripDash(cli.DryRunFlagName), false, "print kubernetes resources to stdout rather than apply them to the cluster, messages normally on stdout will be sent to stderr")
 
 	return cmd
 }

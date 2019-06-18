@@ -41,26 +41,56 @@ func TestDoctorOptions(t *testing.T) {
 func TestDoctorCommand(t *testing.T) {
 	table := rifftesting.CommandTable{
 		{
-			Name:         "installation is ok",
-			Args:         []string{},
-			GivenObjects: requiredNamespacesMocks(commands.RequiredNamespaces),
+			Name: "installation is ok",
+			Args: []string{},
+			GivenObjects: []runtime.Object{
+				&corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{Name: "istio-system"},
+				},
+				&corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{Name: "knative-build"},
+				},
+				&corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{Name: "knative-serving"},
+				},
+				&corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{Name: "riff-system"},
+				},
+			},
 			ExpectOutput: `
 Installation is OK
 `,
 		},
 		{
-			Name:         "istio-system is missing",
-			Args:         []string{},
-			GivenObjects: requiredNamespacesMocks(remove(commands.RequiredNamespaces, "istio-system")),
+			Name: "istio-system is missing",
+			Args: []string{},
+			GivenObjects: []runtime.Object{
+				&corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{Name: "knative-build"},
+				},
+				&corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{Name: "knative-serving"},
+				},
+				&corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{Name: "riff-system"},
+				},
+			},
 			ExpectOutput: `
 Something is wrong!
 missing istio-system
 `,
 		},
 		{
-			Name:         "multiple namespaces are missing",
-			Args:         []string{},
-			GivenObjects: requiredNamespacesMocks(remove(remove(commands.RequiredNamespaces, "istio-system"), "riff-system")),
+			Name: "multiple namespaces are missing",
+			Args: []string{},
+			GivenObjects: []runtime.Object{
+				&corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{Name: "knative-build"},
+				},
+				&corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{Name: "knative-serving"},
+				},
+			},
 			ExpectOutput: `
 Something is wrong!
 missing istio-system
@@ -73,35 +103,9 @@ missing riff-system
 			WithReactors: []rifftesting.ReactionFunc{
 				rifftesting.InduceFailure("list", "namespaces"),
 			},
-			ShouldError:  true,
-			ExpectOutput: `inducing failure for list namespaces`,
+			ShouldError: true,
 		},
 	}
 
 	table.Run(t, commands.NewDoctorCommand)
-}
-
-func requiredNamespacesMocks(namespaces []string) []runtime.Object {
-	mockObjects := []runtime.Object{}
-	for _, namespace := range namespaces {
-		mockNamespace := &corev1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: namespace,
-			},
-		}
-
-		mockObjects = append(mockObjects, mockNamespace)
-	}
-
-	return mockObjects
-}
-
-func remove(s []string, r string) []string {
-	newList := []string{}
-	for i, v := range s {
-		if v != r {
-			newList = append(newList, s[i])
-		}
-	}
-	return newList
 }

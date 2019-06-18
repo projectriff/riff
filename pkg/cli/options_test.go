@@ -17,6 +17,7 @@
 package cli_test
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"testing"
@@ -63,8 +64,9 @@ func TestValidateOptions(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			ctx := context.Background()
 			cmd := &cobra.Command{}
-			err := cli.ValidateOptions(test.opts)(cmd, []string{})
+			err := cli.ValidateOptions(ctx, test.opts)(cmd, []string{})
 
 			if expected, actual := true, test.opts.called; true != actual {
 				t.Errorf("expected called to be %v, actually %v", expected, actual)
@@ -80,17 +82,27 @@ func TestValidateOptions(t *testing.T) {
 }
 
 type StubExecOptions struct {
+	dryRun  bool
 	called  bool
 	config  *cli.Config
 	cmd     *cobra.Command
 	execErr error
 }
 
+var (
+	_ cli.Executable = (*StubExecOptions)(nil)
+	_ cli.DryRunable = (*StubExecOptions)(nil)
+)
+
 func (o *StubExecOptions) Exec(ctx context.Context, c *cli.Config) error {
 	o.called = true
 	o.config = c
 	o.cmd = cli.CommandFromContext(ctx)
 	return o.execErr
+}
+
+func (o *StubExecOptions) IsDryRun() bool {
+	return o.dryRun
 }
 
 func TestExecOptions(t *testing.T) {
@@ -107,13 +119,22 @@ func TestExecOptions(t *testing.T) {
 			execErr: fmt.Errorf("test exec error"),
 		},
 		expectedErr: fmt.Errorf("test exec error"),
+	}, {
+		name: "dry run",
+		opts: &StubExecOptions{
+			dryRun: true,
+		},
 	}}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			ctx := context.Background()
 			cmd := &cobra.Command{}
-			config := &cli.Config{}
-			err := cli.ExecOptions(config, test.opts)(cmd, []string{})
+			config := &cli.Config{
+				Stdout: &bytes.Buffer{},
+				Stderr: &bytes.Buffer{},
+			}
+			err := cli.ExecOptions(ctx, config, test.opts)(cmd, []string{})
 
 			if expected, actual := true, test.opts.called; true != actual {
 				t.Errorf("expected called to be %v, actually %v", expected, actual)
@@ -126,6 +147,15 @@ func TestExecOptions(t *testing.T) {
 			}
 			if expected, actual := cmd, test.opts.cmd; expected != actual {
 				t.Errorf("expected command to be %v, actually %v", expected, actual)
+			}
+			if test.opts.dryRun {
+				if config.Stdout != config.Stderr {
+					t.Errorf("expected stdout and stderr to be the same, actually %v %v", config.Stdout, config.Stderr)
+				}
+			} else {
+				if config.Stdout == config.Stderr {
+					t.Errorf("expected stdout and stderr to be different, actually %v %v", config.Stdout, config.Stderr)
+				}
 			}
 		})
 	}

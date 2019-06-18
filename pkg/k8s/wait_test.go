@@ -94,7 +94,7 @@ func TestWaitUntilReady(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			lw := cachetesting.NewFakeControllerSource()
-			ctx := k8s.WithListWatch(context.TODO(), lw)
+			ctx := k8s.WithListerWatcher(context.Background(), lw)
 
 			client := rifftesting.NewClient(application)
 			done := make(chan error, 1)

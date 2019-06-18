@@ -30,6 +30,11 @@ type ProcessorDeleteOptions struct {
 	cli.DeleteOptions
 }
 
+var (
+	_ cli.Validatable = (*ProcessorDeleteOptions)(nil)
+	_ cli.Executable  = (*ProcessorDeleteOptions)(nil)
+)
+
 func (opts *ProcessorDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 
@@ -59,7 +64,7 @@ func (opts *ProcessorDeleteOptions) Exec(ctx context.Context, c *cli.Config) err
 	return nil
 }
 
-func NewProcessorDeleteCommand(c *cli.Config) *cobra.Command {
+func NewProcessorDeleteCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &ProcessorDeleteOptions{}
 
 	cmd := &cobra.Command{
@@ -75,8 +80,8 @@ func NewProcessorDeleteCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NamesArg(&opts.Names),
 		),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

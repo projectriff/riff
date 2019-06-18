@@ -24,29 +24,27 @@ import (
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/sets"
 )
 
 type DoctorOptions struct {
 }
 
-var RequiredNamespaces = []string{
-	"istio-system",
-	"knative-build",
-	"knative-serving",
-	"riff-system",
-}
+var (
+	_ cli.Validatable = (*DoctorOptions)(nil)
+	_ cli.Executable  = (*DoctorOptions)(nil)
+)
 
 func (opts *DoctorOptions) Validate(ctx context.Context) *cli.FieldError {
 	return cli.EmptyFieldError
 }
 
 func (opts *DoctorOptions) Exec(ctx context.Context, c *cli.Config) error {
-	missingNamespaces, err := checkMissingNamespaces(c)
-
+	missingNamespaces, err := opts.checkMissingNamespaces(c)
 	if err != nil {
-		c.Errorf(err.Error())
 		return err
-	} else if len(missingNamespaces) > 0 {
+	}
+	if len(missingNamespaces) > 0 {
 		msg := "Something is wrong!\n"
 		for _, namespace := range missingNamespaces {
 			msg += fmt.Sprintf("missing %s\n", namespace)
@@ -58,50 +56,41 @@ func (opts *DoctorOptions) Exec(ctx context.Context, c *cli.Config) error {
 	return nil
 }
 
-func NewDoctorCommand(c *cli.Config) *cobra.Command {
+func (*DoctorOptions) checkMissingNamespaces(c *cli.Config) ([]string, error) {
+	namespaces, err := c.Core().Namespaces().List(metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	foundNamespaces := sets.NewString()
+	for _, namespace := range namespaces.Items {
+		foundNamespaces.Insert(namespace.Name)
+	}
+	requiredNamespaces := sets.NewString(
+		"istio-system",
+		"knative-build",
+		"knative-serving",
+		"riff-system",
+	)
+	missingNamespaces := requiredNamespaces.Difference(foundNamespaces)
+	return missingNamespaces.List(), nil
+}
+
+func NewDoctorCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &DoctorOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "doctor",
-		Short: "check riff's requirements are installed",
+		Use:     "doctor",
+		Aliases: []string{"doc"},
+		Short:   "check riff's requirements are installed",
 		Long: strings.TrimSpace(`
     <todo>
     `),
 		Example: "riff doctor",
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	return cmd
-}
-
-func checkMissingNamespaces(c *cli.Config) ([]string, error) {
-	missingNamespaces := []string{}
-	namespaces, err := c.Core().Namespaces().List(metav1.ListOptions{})
-
-	if namespaces == nil || len(namespaces.Items) == 0 {
-		missingNamespaces = RequiredNamespaces
-	} else {
-		names := []string{}
-		for _, namespace := range namespaces.Items {
-			names = append(names, namespace.Name)
-		}
-		for _, requiredNamespace := range RequiredNamespaces {
-			if !stringInSlice(requiredNamespace, names) {
-				missingNamespaces = append(missingNamespaces, requiredNamespace)
-			}
-		}
-	}
-
-	return missingNamespaces, err
-}
-
-func stringInSlice(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
 }

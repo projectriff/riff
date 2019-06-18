@@ -35,6 +35,11 @@ type StreamListOptions struct {
 	cli.ListOptions
 }
 
+var (
+	_ cli.Validatable = (*StreamListOptions)(nil)
+	_ cli.Executable  = (*StreamListOptions)(nil)
+)
+
 func (opts *StreamListOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 
@@ -68,7 +73,7 @@ func (opts *StreamListOptions) Exec(ctx context.Context, c *cli.Config) error {
 	return tablePrinter.PrintObj(streams, c.Stdout)
 }
 
-func NewStreamListCommand(c *cli.Config) *cobra.Command {
+func NewStreamListCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &StreamListOptions{}
 
 	cmd := &cobra.Command{
@@ -82,8 +87,8 @@ func NewStreamListCommand(c *cli.Config) *cobra.Command {
 			fmt.Sprintf("%s stream list %s", c.Name, cli.AllNamespacesFlagName),
 		}, "\n"),
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.AllNamespacesFlag(cmd, c, &opts.Namespace, &opts.AllNamespaces)

@@ -31,6 +31,11 @@ type CredentialDeleteOptions struct {
 	cli.DeleteOptions
 }
 
+var (
+	_ cli.Validatable = (*CredentialDeleteOptions)(nil)
+	_ cli.Executable  = (*CredentialDeleteOptions)(nil)
+)
+
 func (opts *CredentialDeleteOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 
@@ -64,7 +69,7 @@ func (opts *CredentialDeleteOptions) Exec(ctx context.Context, c *cli.Config) er
 	return nil
 }
 
-func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
+func NewCredentialDeleteCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &CredentialDeleteOptions{}
 
 	cmd := &cobra.Command{
@@ -80,8 +85,8 @@ func NewCredentialDeleteCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NamesArg(&opts.Names),
 		),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)

@@ -31,6 +31,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	cachetesting "k8s.io/client-go/tools/cache/testing"
 )
 
 func TestHandlerCreateOptions(t *testing.T) {
@@ -152,6 +153,26 @@ func TestHandlerCreateOptions(t *testing.T) {
 			},
 			ExpectFieldError: cli.ErrInvalidValue("d", cli.WaitTimeoutFlagName),
 		},
+		{
+			Name: "dry run",
+			Options: &commands.HandlerCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				DryRun:          true,
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "dry run, tail",
+			Options: &commands.HandlerCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				Tail:            true,
+				WaitTimeout:     "10m",
+				DryRun:          true,
+			},
+			ExpectFieldError: cli.ErrMultipleOneOf(cli.DryRunFlagName, cli.TailFlagName),
+		},
 	}
 
 	table.Run(t)
@@ -237,6 +258,28 @@ Created handler "my-handler"
 				},
 			},
 			ExpectOutput: `
+Created handler "my-handler"
+`,
+		},
+		{
+			Name: "dry run",
+			Args: []string{handlerName, cli.ImageFlagName, image, cli.DryRunFlagName},
+			ExpectOutput: `
+---
+apiVersion: request.projectriff.io/v1alpha1
+kind: Handler
+metadata:
+  creationTimestamp: null
+  name: my-handler
+  namespace: default
+spec:
+  template:
+    containers:
+    - image: registry.example.com/repo@sha256:deadbeefdeadbeefdeadbeefdeadbeef
+      name: ""
+      resources: {}
+status: {}
+
 Created handler "my-handler"
 `,
 		},
@@ -344,7 +387,10 @@ Created handler "my-handler"
 		{
 			Name: "tail logs",
 			Args: []string{handlerName, cli.ImageFlagName, image, cli.TailFlagName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
+				lw := cachetesting.NewFakeControllerSource()
+				ctx = k8s.WithListerWatcher(ctx, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("HandlerLogs", mock.Anything, &requestv1alpha1.Handler{
@@ -360,9 +406,13 @@ Created handler "my-handler"
 				}, cli.TailSinceCreateDefault, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...log output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
@@ -388,7 +438,10 @@ Created handler "my-handler"
 		{
 			Name: "tail timeout",
 			Args: []string{handlerName, cli.ImageFlagName, image, cli.TailFlagName, cli.WaitTimeoutFlagName, "5ms"},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
+				lw := cachetesting.NewFakeControllerSource()
+				ctx = k8s.WithListerWatcher(ctx, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("HandlerLogs", mock.Anything, &requestv1alpha1.Handler{
@@ -407,9 +460,13 @@ Created handler "my-handler"
 					// wait for context to be cancelled
 					<-ctx.Done()
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
@@ -444,7 +501,10 @@ To continue watching logs run: riff handler tail my-handler --namespace default
 		{
 			Name: "tail error",
 			Args: []string{handlerName, cli.ImageFlagName, image, cli.TailFlagName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
+				lw := cachetesting.NewFakeControllerSource()
+				ctx = k8s.WithListerWatcher(ctx, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("HandlerLogs", mock.Anything, &requestv1alpha1.Handler{
@@ -458,9 +518,13 @@ To continue watching logs run: riff handler tail my-handler --namespace default
 						},
 					},
 				}, cli.TailSinceCreateDefault, mock.Anything).Return(fmt.Errorf("kail error"))
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil

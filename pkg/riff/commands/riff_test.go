@@ -17,7 +17,6 @@
 package commands_test
 
 import (
-	"github.com/projectriff/riff/pkg/cli"
 	"testing"
 
 	"github.com/projectriff/riff/pkg/riff/commands"
@@ -33,15 +32,4 @@ func TestRiffCommand(t *testing.T) {
 	}
 
 	table.Run(t, commands.NewRiffCommand)
-}
-
-func TestRiffMainSubCommands(t *testing.T) {
-	riffCommand := commands.NewRiffCommand(cli.NewDefaultConfig())
-	commands := riffCommand.Commands()
-
-	expectedCount := 7
-	count := len(commands)
-	if count != expectedCount {
-		t.Fatalf("Expected %d riff subcommands, got %d", expectedCount, count)
-	}
 }

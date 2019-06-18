@@ -30,6 +30,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	cachetesting "k8s.io/client-go/tools/cache/testing"
 )
 
 func TestProcessorCreateOptions(t *testing.T) {
@@ -95,6 +96,28 @@ func TestProcessorCreateOptions(t *testing.T) {
 			},
 			ExpectFieldError: cli.ErrInvalidValue("d", cli.WaitTimeoutFlagName),
 		},
+		{
+			Name: "dry run",
+			Options: &commands.ProcessorCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				FunctionRef:     "my-function",
+				Inputs:          []string{"input"},
+				DryRun:          true,
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "dry run, tail",
+			Options: &commands.ProcessorCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				FunctionRef:     "my-function",
+				Inputs:          []string{"input"},
+				Tail:            true,
+				WaitTimeout:     "10m",
+				DryRun:          true,
+			},
+			ExpectFieldError: cli.ErrMultipleOneOf(cli.DryRunFlagName, cli.TailFlagName),
+		},
 	}
 
 	table.Run(t)
@@ -131,6 +154,27 @@ func TestProcessorCreateCommand(t *testing.T) {
 				},
 			},
 			ExpectOutput: `
+Created processor "my-processor"
+`,
+		},
+		{
+			Name: "dry run",
+			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.DryRunFlagName},
+			ExpectOutput: `
+---
+apiVersion: stream.projectriff.io/v1alpha1
+kind: Processor
+metadata:
+  creationTimestamp: null
+  name: my-processor
+  namespace: default
+spec:
+  functionRef: my-func
+  inputs:
+  - input
+  outputs: []
+status: {}
+
 Created processor "my-processor"
 `,
 		},
@@ -241,7 +285,10 @@ Created processor "my-processor"
 		{
 			Name: "tail logs",
 			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.TailFlagName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
+				lw := cachetesting.NewFakeControllerSource()
+				ctx = k8s.WithListerWatcher(ctx, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("ProcessorLogs", mock.Anything, &streamv1alpha1.Processor{
@@ -257,9 +304,13 @@ Created processor "my-processor"
 				}, cli.TailSinceCreateDefault, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...log output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
@@ -285,7 +336,10 @@ Created processor "my-processor"
 		{
 			Name: "tail timeout",
 			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.TailFlagName, cli.WaitTimeoutFlagName, "5ms"},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
+				lw := cachetesting.NewFakeControllerSource()
+				ctx = k8s.WithListerWatcher(ctx, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("ProcessorLogs", mock.Anything, &streamv1alpha1.Processor{
@@ -304,9 +358,13 @@ Created processor "my-processor"
 					// wait for context to be cancelled
 					<-ctx.Done()
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
@@ -341,7 +399,10 @@ To continue watching logs run: riff processor tail my-processor --namespace defa
 		{
 			Name: "tail error",
 			Args: []string{processorName, cli.FunctionRefFlagName, functionRef, cli.InputFlagName, inputName, cli.TailFlagName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
+				lw := cachetesting.NewFakeControllerSource()
+				ctx = k8s.WithListerWatcher(ctx, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("ProcessorLogs", mock.Anything, &streamv1alpha1.Processor{
@@ -355,9 +416,13 @@ To continue watching logs run: riff processor tail my-processor --namespace defa
 						Outputs:     []string{},
 					},
 				}, cli.TailSinceCreateDefault, mock.Anything).Return(fmt.Errorf("kail error"))
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil

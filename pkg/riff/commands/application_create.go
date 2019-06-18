@@ -45,7 +45,15 @@ type ApplicationCreateOptions struct {
 
 	Tail        bool
 	WaitTimeout string
+
+	DryRun bool
 }
+
+var (
+	_ cli.Validatable = (*ApplicationCreateOptions)(nil)
+	_ cli.Executable  = (*ApplicationCreateOptions)(nil)
+	_ cli.DryRunable  = (*ApplicationCreateOptions)(nil)
+)
 
 func (opts *ApplicationCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
@@ -92,6 +100,10 @@ func (opts *ApplicationCreateOptions) Validate(ctx context.Context) *cli.FieldEr
 		} else if _, err := time.ParseDuration(opts.WaitTimeout); err != nil {
 			errs = errs.Also(cli.ErrInvalidValue(opts.WaitTimeout, cli.WaitTimeoutFlagName))
 		}
+	}
+
+	if opts.DryRun && opts.Tail {
+		errs = errs.Also(cli.ErrMultipleOneOf(cli.DryRunFlagName, cli.TailFlagName))
 	}
 
 	return errs
@@ -151,9 +163,14 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 		}
 	}
 
-	application, err := c.Build().Applications(opts.Namespace).Create(application)
-	if err != nil {
-		return err
+	if opts.DryRun {
+		cli.DryRunResource(ctx, application, application.GetGroupVersionKind())
+	} else {
+		var err error
+		application, err = c.Build().Applications(opts.Namespace).Create(application)
+		if err != nil {
+			return err
+		}
 	}
 	c.Successf("Created application %q\n", application.Name)
 	if opts.Tail {
@@ -180,7 +197,11 @@ func (opts *ApplicationCreateOptions) Exec(ctx context.Context, c *cli.Config) e
 	return nil
 }
 
-func NewApplicationCreateCommand(c *cli.Config) *cobra.Command {
+func (opts *ApplicationCreateOptions) IsDryRun() bool {
+	return opts.DryRun
+}
+
+func NewApplicationCreateCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &ApplicationCreateOptions{}
 
 	cmd := &cobra.Command{
@@ -196,8 +217,8 @@ func NewApplicationCreateCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
@@ -209,6 +230,7 @@ func NewApplicationCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.SubPath, cli.StripDash(cli.SubPathFlagName), "", "path to `directory` within the git repo to checkout")
 	cmd.Flags().BoolVar(&opts.Tail, cli.StripDash(cli.TailFlagName), false, "watch build logs")
 	cmd.Flags().StringVar(&opts.WaitTimeout, cli.StripDash(cli.WaitTimeoutFlagName), "10m", "`duration` to wait for the application to become ready when watching logs")
+	cmd.Flags().BoolVar(&opts.DryRun, cli.StripDash(cli.DryRunFlagName), false, "print kubernetes resources to stdout rather than apply them to the cluster, messages normally on stdout will be sent to stderr")
 
 	return cmd
 }

@@ -33,15 +33,27 @@ import (
 
 type CredentialApplyOptions struct {
 	cli.ResourceOptions
-	DockerHubId           string
-	DockerHubPassword     []byte
-	GcrTokenPath          string
-	Registry              string
-	RegistryUser          string
-	RegistryPassword      []byte
+
+	DockerHubId       string
+	DockerHubPassword []byte
+
+	GcrTokenPath string
+
+	Registry         string
+	RegistryUser     string
+	RegistryPassword []byte
+
 	DefaultImagePrefix    string
 	SetDefaultImagePrefix bool
+
+	DryRun bool
 }
+
+var (
+	_ cli.Validatable = (*CredentialApplyOptions)(nil)
+	_ cli.Executable  = (*CredentialApplyOptions)(nil)
+	_ cli.DryRunable  = (*CredentialApplyOptions)(nil)
+)
 
 func (opts *CredentialApplyOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
@@ -98,7 +110,7 @@ func (opts *CredentialApplyOptions) Exec(ctx context.Context, c *cli.Config) err
 		return err
 	}
 
-	if err := applyCredential(c, opts, secret); err != nil {
+	if err := applyCredential(ctx, c, opts, secret); err != nil {
 		return err
 	}
 	c.Successf("Apply credentials %q\n", opts.Name)
@@ -111,7 +123,7 @@ func (opts *CredentialApplyOptions) Exec(ctx context.Context, c *cli.Config) err
 			// guarded by opts.Validate()
 			c.Infof("Unable to derive default image prefix\n")
 		} else {
-			err := setDefaultImagePrefix(c, opts, imagePrefix)
+			err := setDefaultImagePrefix(ctx, c, opts, imagePrefix)
 			if err != nil {
 				return err
 			}
@@ -122,7 +134,11 @@ func (opts *CredentialApplyOptions) Exec(ctx context.Context, c *cli.Config) err
 	return nil
 }
 
-func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {
+func (opts *CredentialApplyOptions) IsDryRun() bool {
+	return opts.DryRun
+}
+
+func NewCredentialApplyCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &CredentialApplyOptions{}
 
 	cmd := &cobra.Command{
@@ -152,9 +168,9 @@ func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {
 				}
 				return nil
 			},
-			cli.ValidateOptions(opts),
+			cli.ValidateOptions(ctx, opts),
 		),
-		RunE: cli.ExecOptions(c, opts),
+		RunE: cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
@@ -164,6 +180,7 @@ func NewCredentialApplyCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringVar(&opts.RegistryUser, cli.StripDash(cli.RegistryUserFlagName), "", "`username` for a registry, the password must be provided via stdin")
 	cmd.Flags().StringVar(&opts.DefaultImagePrefix, cli.StripDash(cli.DefaultImagePrefixFlagName), "", fmt.Sprintf("default `repository` prefix for built images, implies %s", cli.SetDefaultImagePrefixFlagName))
 	cmd.Flags().BoolVar(&opts.SetDefaultImagePrefix, cli.StripDash(cli.SetDefaultImagePrefixFlagName), false, "use this registry as the default for built images")
+	cmd.Flags().BoolVar(&opts.DryRun, cli.StripDash(cli.DryRunFlagName), false, "print kubernetes resources to stdout rather than apply them to the cluster, messages normally on stdout will be sent to stderr")
 
 	return cmd
 }
@@ -236,7 +253,7 @@ func makeCredential(opts *CredentialApplyOptions) (*corev1.Secret, string, error
 	return secret, defaultPrefix, nil
 }
 
-func setDefaultImagePrefix(c *cli.Config, opts *CredentialApplyOptions, defaultImagePrefix string) error {
+func setDefaultImagePrefix(ctx context.Context, c *cli.Config, opts *CredentialApplyOptions, defaultImagePrefix string) error {
 	configMapName := "riff-build"
 	defaultImagePrefixKey := "default-image-prefix"
 
@@ -247,7 +264,7 @@ func setDefaultImagePrefix(c *cli.Config, opts *CredentialApplyOptions, defaultI
 		}
 
 		// create riff-build configmaps
-		_, err = c.Core().ConfigMaps(opts.Namespace).Create(&corev1.ConfigMap{
+		riffBuildConfig := &corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: opts.Namespace,
 				Name:      configMapName,
@@ -255,18 +272,33 @@ func setDefaultImagePrefix(c *cli.Config, opts *CredentialApplyOptions, defaultI
 			Data: map[string]string{
 				defaultImagePrefixKey: defaultImagePrefix,
 			},
-		})
-		return err
+		}
+		if opts.DryRun {
+			cli.DryRunResource(ctx, riffBuildConfig, corev1.SchemeGroupVersion.WithKind("ConfigMap"))
+		} else {
+			_, err := c.Core().ConfigMaps(opts.Namespace).Create(riffBuildConfig)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
 	}
 
 	// update riff-build config
 	riffBuildConfig = riffBuildConfig.DeepCopy()
 	riffBuildConfig.Data[defaultImagePrefixKey] = defaultImagePrefix
-	_, err = c.Core().ConfigMaps(opts.Namespace).Update(riffBuildConfig)
-	return err
+	if opts.DryRun {
+		cli.DryRunResource(ctx, riffBuildConfig, corev1.SchemeGroupVersion.WithKind("ConfigMap"))
+	} else {
+		_, err := c.Core().ConfigMaps(opts.Namespace).Update(riffBuildConfig)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func applyCredential(c *cli.Config, opts *CredentialApplyOptions, desiredSecret *corev1.Secret) error {
+func applyCredential(ctx context.Context, c *cli.Config, opts *CredentialApplyOptions, desiredSecret *corev1.Secret) error {
 	// look for existing secret
 	existing, err := c.Core().Secrets(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
 	if err != nil {
@@ -275,8 +307,16 @@ func applyCredential(c *cli.Config, opts *CredentialApplyOptions, desiredSecret 
 		}
 
 		// create secret
-		_, err = c.Core().Secrets(opts.Namespace).Create(desiredSecret)
-		return err
+		if opts.DryRun {
+			cli.DryRunResource(ctx, desiredSecret, corev1.SchemeGroupVersion.WithKind("Secret"))
+		} else {
+			_, err := c.Core().Secrets(opts.Namespace).Create(desiredSecret)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
 	}
 
 	// ensure we are not mutating a non-riff secret
@@ -291,7 +331,14 @@ func applyCredential(c *cli.Config, opts *CredentialApplyOptions, desiredSecret 
 	existing.Type = desiredSecret.Type
 	existing.StringData = desiredSecret.StringData
 	existing.Data = desiredSecret.Data
-	_, err = c.Core().Secrets(opts.Namespace).Update(existing)
+	if opts.DryRun {
+		cli.DryRunResource(ctx, existing, corev1.SchemeGroupVersion.WithKind("Secret"))
+	} else {
+		_, err := c.Core().Secrets(opts.Namespace).Update(existing)
+		if err != nil {
+			return err
+		}
+	}
 
-	return err
+	return nil
 }

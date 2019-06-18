@@ -29,6 +29,11 @@ type CompletionOptions struct {
 	Shell string
 }
 
+var (
+	_ cli.Validatable = (*CompletionOptions)(nil)
+	_ cli.Executable  = (*CompletionOptions)(nil)
+)
+
 func (opts *CompletionOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 
@@ -53,7 +58,7 @@ func (opts *CompletionOptions) Exec(ctx context.Context, c *cli.Config) error {
 	panic("invalid shell: " + opts.Shell)
 }
 
-func NewCompletionCommand(c *cli.Config) *cobra.Command {
+func NewCompletionCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &CompletionOptions{}
 
 	cmd := &cobra.Command{
@@ -67,8 +72,8 @@ func NewCompletionCommand(c *cli.Config) *cobra.Command {
 			fmt.Sprintf("%s completion %s zsh", c.Name, cli.ShellFlagName),
 		}, "\n"),
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cmd.Flags().StringVar(&opts.Shell, cli.StripDash(cli.ShellFlagName), "bash", "`shell` to generate completion for: bash or zsh")

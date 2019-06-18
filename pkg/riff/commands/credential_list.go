@@ -36,6 +36,11 @@ type CredentialListOptions struct {
 	cli.ListOptions
 }
 
+var (
+	_ cli.Validatable = (*CredentialListOptions)(nil)
+	_ cli.Executable  = (*CredentialListOptions)(nil)
+)
+
 func (opts *CredentialListOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 
@@ -71,7 +76,7 @@ func (opts *CredentialListOptions) Exec(ctx context.Context, c *cli.Config) erro
 	return tablePrinter.PrintObj(secrets, c.Stdout)
 }
 
-func NewCredentialListCommand(c *cli.Config) *cobra.Command {
+func NewCredentialListCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &CredentialListOptions{}
 
 	cmd := &cobra.Command{
@@ -85,8 +90,8 @@ func NewCredentialListCommand(c *cli.Config) *cobra.Command {
 			fmt.Sprintf("%s credential list %s", c.Name, cli.AllNamespacesFlagName),
 		}, "\n"),
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.AllNamespacesFlag(cmd, c, &opts.Namespace, &opts.AllNamespaces)

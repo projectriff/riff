@@ -17,13 +17,14 @@
 package commands
 
 import (
+	"context"
 	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
-func NewRiffCommand(c *cli.Config) *cobra.Command {
+func NewRiffCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "riff",
 		Short: "riff is for functions",
@@ -33,13 +34,12 @@ func NewRiffCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(),
 	}
 
-	cmd.AddCommand(NewCredentialCommand(c))
-	cmd.AddCommand(NewApplicationCommand(c))
-	cmd.AddCommand(NewFunctionCommand(c))
-	cmd.AddCommand(NewHandlerCommand(c))
-	cmd.AddCommand(NewStreamCommand(c))
-	cmd.AddCommand(NewProcessorCommand(c))
-	cmd.AddCommand(NewDoctorCommand(c))
+	cmd.AddCommand(NewCredentialCommand(ctx, c))
+	cmd.AddCommand(NewApplicationCommand(ctx, c))
+	cmd.AddCommand(NewFunctionCommand(ctx, c))
+	cmd.AddCommand(NewHandlerCommand(ctx, c))
+	cmd.AddCommand(NewStreamCommand(ctx, c))
+	cmd.AddCommand(NewProcessorCommand(ctx, c))
 
 	return cmd
 }

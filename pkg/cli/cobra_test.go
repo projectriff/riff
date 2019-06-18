@@ -135,7 +135,7 @@ func TestReadStdin(t *testing.T) {
 
 func TestCommandFromContext_WithCommand(t *testing.T) {
 	cmd := &cobra.Command{}
-	parentCtx := context.TODO()
+	parentCtx := context.Background()
 	childCtx := cli.WithCommand(parentCtx, cmd)
 
 	if expected, actual := (*cobra.Command)(nil), cli.CommandFromContext(parentCtx); expected != actual {

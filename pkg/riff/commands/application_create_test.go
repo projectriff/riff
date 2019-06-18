@@ -34,6 +34,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	cachetesting "k8s.io/client-go/tools/cache/testing"
 )
 
 func TestApplicationCreateOptions(t *testing.T) {
@@ -184,6 +185,30 @@ func TestApplicationCreateOptions(t *testing.T) {
 			},
 			ExpectFieldError: cli.ErrInvalidValue("d", cli.WaitTimeoutFlagName),
 		},
+		{
+			Name: "dry run",
+			Options: &commands.ApplicationCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				GitRepo:         "https://example.com/repo.git",
+				GitRevision:     "master",
+				DryRun:          true,
+			},
+			ShouldValidate: true,
+		},
+		{
+			Name: "dry run, tail",
+			Options: &commands.ApplicationCreateOptions{
+				ResourceOptions: rifftesting.ValidResourceOptions,
+				Image:           "example.com/repo:tag",
+				GitRepo:         "https://example.com/repo.git",
+				GitRevision:     "master",
+				Tail:            true,
+				WaitTimeout:     "10m",
+				DryRun:          true,
+			},
+			ExpectFieldError: cli.ErrMultipleOneOf(cli.DryRunFlagName, cli.TailFlagName),
+		},
 	}
 
 	table.Run(t)
@@ -230,6 +255,28 @@ func TestApplicationCreateCommand(t *testing.T) {
 				},
 			},
 			ExpectOutput: `
+Created application "my-application"
+`,
+		},
+		{
+			Name: "git repo, dry run",
+			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.DryRunFlagName},
+			ExpectOutput: `
+---
+apiVersion: build.projectriff.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: null
+  name: my-application
+  namespace: default
+spec:
+  image: registry.example.com/repo:tag
+  source:
+    git:
+      revision: master
+      url: https://example.com/repo.git
+status: {}
+
 Created application "my-application"
 `,
 		},
@@ -310,7 +357,7 @@ Created application "my-application"
 		{
 			Name: "local path",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				packClient := &packtesting.Client{}
 				c.Pack = packClient
 				packClient.On("Build", mock.Anything, pack.BuildOptions{
@@ -321,9 +368,9 @@ Created application "my-application"
 				}).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...build output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				packClient := c.Pack.(*packtesting.Client)
 				packClient.AssertExpectations(t)
 				return nil
@@ -352,6 +399,54 @@ Created application "my-application"
 			},
 			ExpectOutput: `
 ...build output...
+Created application "my-application"
+`,
+		},
+		{
+			Name: "local path, dry run",
+			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath, cli.DryRunFlagName},
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
+				packClient := &packtesting.Client{}
+				c.Pack = packClient
+				packClient.On("Build", mock.Anything, pack.BuildOptions{
+					Image:   imageTag,
+					AppDir:  localPath,
+					Builder: "cloudfoundry/cnb:bionic",
+					Publish: true,
+				}).Return(nil).Run(func(args mock.Arguments) {
+					fmt.Fprintf(c.Stdout, "...build output...\n")
+				})
+				return ctx, nil
+			},
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				packClient := c.Pack.(*packtesting.Client)
+				packClient.AssertExpectations(t)
+				return nil
+			},
+			GivenObjects: []runtime.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: "riff-system",
+						Name:      "builders",
+					},
+					Data: map[string]string{
+						"riff-application": "cloudfoundry/cnb:bionic",
+					},
+				},
+			},
+			ExpectOutput: `
+...build output...
+---
+apiVersion: build.projectriff.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: null
+  name: my-application
+  namespace: default
+spec:
+  image: registry.example.com/repo:tag
+status: {}
+
 Created application "my-application"
 `,
 		},
@@ -391,7 +486,7 @@ Created application "my-application"
 		{
 			Name: "local path, pack error",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.LocalPathFlagName, localPath},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				packClient := &packtesting.Client{}
 				c.Pack = packClient
 				packClient.On("Build", mock.Anything, pack.BuildOptions{
@@ -402,9 +497,9 @@ Created application "my-application"
 				}).Return(fmt.Errorf("pack error")).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...build output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				packClient := c.Pack.(*packtesting.Client)
 				packClient.AssertExpectations(t)
 				return nil
@@ -433,7 +528,7 @@ Created application "my-application"
 		{
 			Name: "local path, default image",
 			Args: []string{applicationName, cli.LocalPathFlagName, localPath},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
 				packClient := &packtesting.Client{}
 				c.Pack = packClient
 				packClient.On("Build", mock.Anything, pack.BuildOptions{
@@ -444,9 +539,9 @@ Created application "my-application"
 				}).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...build output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
 				packClient := c.Pack.(*packtesting.Client)
 				packClient.AssertExpectations(t)
 				return nil
@@ -566,7 +661,10 @@ Created application "my-application"
 		{
 			Name: "tail logs",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
+				lw := cachetesting.NewFakeControllerSource()
+				ctx = k8s.WithListerWatcher(ctx, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("ApplicationLogs", mock.Anything, &buildv1alpha1.Application{
@@ -586,9 +684,13 @@ Created application "my-application"
 				}, cli.TailSinceCreateDefault, mock.Anything).Return(nil).Run(func(args mock.Arguments) {
 					fmt.Fprintf(c.Stdout, "...log output...\n")
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
@@ -618,7 +720,10 @@ Created application "my-application"
 		{
 			Name: "tail timeout",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName, cli.WaitTimeoutFlagName, "5ms"},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
+				lw := cachetesting.NewFakeControllerSource()
+				ctx = k8s.WithListerWatcher(ctx, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("ApplicationLogs", mock.Anything, &buildv1alpha1.Application{
@@ -641,9 +746,13 @@ Created application "my-application"
 					// wait for context to be cancelled
 					<-ctx.Done()
 				})
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil
@@ -682,7 +791,10 @@ To continue watching logs run: riff application tail my-application --namespace 
 		{
 			Name: "tail error",
 			Args: []string{applicationName, cli.ImageFlagName, imageTag, cli.GitRepoFlagName, gitRepo, cli.TailFlagName},
-			Prepare: func(t *testing.T, c *cli.Config) error {
+			Prepare: func(t *testing.T, ctx context.Context, c *cli.Config) (context.Context, error) {
+				lw := cachetesting.NewFakeControllerSource()
+				ctx = k8s.WithListerWatcher(ctx, lw)
+
 				kail := &kailtesting.Logger{}
 				c.Kail = kail
 				kail.On("ApplicationLogs", mock.Anything, &buildv1alpha1.Application{
@@ -700,9 +812,13 @@ To continue watching logs run: riff application tail my-application --namespace 
 						},
 					},
 				}, cli.TailSinceCreateDefault, mock.Anything).Return(fmt.Errorf("kail error"))
-				return nil
+				return ctx, nil
 			},
-			CleanUp: func(t *testing.T, c *cli.Config) error {
+			CleanUp: func(t *testing.T, ctx context.Context, c *cli.Config) error {
+				if lw, ok := k8s.GetListerWatcher(ctx, nil, "", nil).(*cachetesting.FakeControllerSource); ok {
+					lw.Shutdown()
+				}
+
 				kail := c.Kail.(*kailtesting.Logger)
 				kail.AssertExpectations(t)
 				return nil

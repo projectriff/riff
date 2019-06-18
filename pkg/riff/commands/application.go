@@ -17,13 +17,14 @@
 package commands
 
 import (
+	"context"
 	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
-func NewApplicationCommand(c *cli.Config) *cobra.Command {
+func NewApplicationCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "application",
 		Short: "applications built from source using application buildpacks",
@@ -34,10 +35,10 @@ func NewApplicationCommand(c *cli.Config) *cobra.Command {
 		Aliases: []string{"applications", "app", "apps"},
 	}
 
-	cmd.AddCommand(NewApplicationListCommand(c))
-	cmd.AddCommand(NewApplicationCreateCommand(c))
-	cmd.AddCommand(NewApplicationDeleteCommand(c))
-	cmd.AddCommand(NewApplicationTailCommand(c))
+	cmd.AddCommand(NewApplicationListCommand(ctx, c))
+	cmd.AddCommand(NewApplicationCreateCommand(ctx, c))
+	cmd.AddCommand(NewApplicationDeleteCommand(ctx, c))
+	cmd.AddCommand(NewApplicationTailCommand(ctx, c))
 
 	return cmd
 }

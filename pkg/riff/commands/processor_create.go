@@ -39,7 +39,15 @@ type ProcessorCreateOptions struct {
 
 	Tail        bool
 	WaitTimeout string
+
+	DryRun bool
 }
+
+var (
+	_ cli.Validatable = (*ProcessorCreateOptions)(nil)
+	_ cli.Executable  = (*ProcessorCreateOptions)(nil)
+	_ cli.DryRunable  = (*ProcessorCreateOptions)(nil)
+)
 
 func (opts *ProcessorCreateOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
@@ -62,6 +70,10 @@ func (opts *ProcessorCreateOptions) Validate(ctx context.Context) *cli.FieldErro
 		}
 	}
 
+	if opts.DryRun && opts.Tail {
+		errs = errs.Also(cli.ErrMultipleOneOf(cli.DryRunFlagName, cli.TailFlagName))
+	}
+
 	return errs
 }
 
@@ -78,9 +90,14 @@ func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) err
 		},
 	}
 
-	processor, err := c.Stream().Processors(opts.Namespace).Create(processor)
-	if err != nil {
-		return err
+	if opts.DryRun {
+		cli.DryRunResource(ctx, processor, processor.GetGroupVersionKind())
+	} else {
+		var err error
+		processor, err = c.Stream().Processors(opts.Namespace).Create(processor)
+		if err != nil {
+			return err
+		}
 	}
 	c.Successf("Created processor %q\n", processor.Name)
 	if opts.Tail {
@@ -107,7 +124,11 @@ func (opts *ProcessorCreateOptions) Exec(ctx context.Context, c *cli.Config) err
 	return nil
 }
 
-func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {
+func (opts *ProcessorCreateOptions) IsDryRun() bool {
+	return opts.DryRun
+}
+
+func NewProcessorCreateCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &ProcessorCreateOptions{}
 
 	cmd := &cobra.Command{
@@ -123,8 +144,8 @@ func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {
 		Args: cli.Args(
 			cli.NameArg(&opts.Name),
 		),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.NamespaceFlag(cmd, c, &opts.Namespace)
@@ -133,6 +154,7 @@ func NewProcessorCreateCommand(c *cli.Config) *cobra.Command {
 	cmd.Flags().StringArrayVar(&opts.Outputs, cli.StripDash(cli.OutputFlagName), []string{}, "`name` of stream to write messages to (may be set multiple times)")
 	cmd.Flags().BoolVar(&opts.Tail, cli.StripDash(cli.TailFlagName), false, "watch processor logs")
 	cmd.Flags().StringVar(&opts.WaitTimeout, cli.StripDash(cli.WaitTimeoutFlagName), "10m", "`duration` to wait for the processor to become ready when watching logs")
+	cmd.Flags().BoolVar(&opts.DryRun, cli.StripDash(cli.DryRunFlagName), false, "print kubernetes resources to stdout rather than apply them to the cluster, messages normally on stdout will be sent to stderr")
 
 	return cmd
 }

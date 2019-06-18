@@ -35,6 +35,11 @@ type ProcessorListOptions struct {
 	cli.ListOptions
 }
 
+var (
+	_ cli.Validatable = (*ProcessorListOptions)(nil)
+	_ cli.Executable  = (*ProcessorListOptions)(nil)
+)
+
 func (opts *ProcessorListOptions) Validate(ctx context.Context) *cli.FieldError {
 	errs := cli.EmptyFieldError
 
@@ -68,7 +73,7 @@ func (opts *ProcessorListOptions) Exec(ctx context.Context, c *cli.Config) error
 	return tablePrinter.PrintObj(processors, c.Stdout)
 }
 
-func NewProcessorListCommand(c *cli.Config) *cobra.Command {
+func NewProcessorListCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	opts := &ProcessorListOptions{}
 
 	cmd := &cobra.Command{
@@ -82,8 +87,8 @@ func NewProcessorListCommand(c *cli.Config) *cobra.Command {
 			fmt.Sprintf("%s processor list %s", c.Name, cli.AllNamespacesFlagName),
 		}, "\n"),
 		Args:    cli.Args(),
-		PreRunE: cli.ValidateOptions(opts),
-		RunE:    cli.ExecOptions(c, opts),
+		PreRunE: cli.ValidateOptions(ctx, opts),
+		RunE:    cli.ExecOptions(ctx, c, opts),
 	}
 
 	cli.AllNamespacesFlag(cmd, c, &opts.Namespace, &opts.AllNamespaces)

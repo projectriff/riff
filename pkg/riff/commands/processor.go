@@ -17,13 +17,14 @@
 package commands
 
 import (
+	"context"
 	"strings"
 
 	"github.com/projectriff/riff/pkg/cli"
 	"github.com/spf13/cobra"
 )
 
-func NewProcessorCommand(c *cli.Config) *cobra.Command {
+func NewProcessorCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "processor",
 		Short: "processors apply functions to messages on streams",
@@ -34,10 +35,10 @@ func NewProcessorCommand(c *cli.Config) *cobra.Command {
 		Aliases: []string{"processors"},
 	}
 
-	cmd.AddCommand(NewProcessorListCommand(c))
-	cmd.AddCommand(NewProcessorCreateCommand(c))
-	cmd.AddCommand(NewProcessorDeleteCommand(c))
-	cmd.AddCommand(NewProcessorTailCommand(c))
+	cmd.AddCommand(NewProcessorListCommand(ctx, c))
+	cmd.AddCommand(NewProcessorCreateCommand(ctx, c))
+	cmd.AddCommand(NewProcessorDeleteCommand(ctx, c))
+	cmd.AddCommand(NewProcessorTailCommand(ctx, c))
 
 	return cmd
 }
