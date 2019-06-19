@@ -40,6 +40,7 @@ func NewRiffCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 	cmd.AddCommand(NewHandlerCommand(ctx, c))
 	cmd.AddCommand(NewStreamCommand(ctx, c))
 	cmd.AddCommand(NewProcessorCommand(ctx, c))
+	cmd.AddCommand(NewDoctorCommand(ctx, c))
 
 	return cmd
 }
