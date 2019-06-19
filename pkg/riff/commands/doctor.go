@@ -94,7 +94,13 @@ func NewDoctorCommand(ctx context.Context, c *cli.Config) *cobra.Command {
 		Aliases: []string{"doc"},
 		Short:   "check riff's requirements are installed",
 		Long: strings.TrimSpace(`
-    <todo>
+Check riff's requirements are installed
+
+1. check namespaces are present in Kubernetes
+istio-system
+knative-build
+knative-serving
+riff-system
     `),
 		Example: "riff doctor",
 		Args:    cli.Args(),
