@@ -24,6 +24,7 @@ import (
 	"github.com/projectriff/riff/pkg/cli"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/spf13/cobra"
+	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -47,10 +48,11 @@ func (opts *FunctionStatusOptions) Validate(ctx context.Context) *cli.FieldError
 func (opts *FunctionStatusOptions) Exec(ctx context.Context, c *cli.Config) error {
 	function, err := c.Build().Functions(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			c.Printf("%s\n", err.Error())
-			return cli.SilenceError(err)
+		if !apierrs.IsNotFound(err) {
+			return err
 		}
+		c.Errorf("Function %q not found\n",
+			fmt.Sprintf("%s/%s", opts.Namespace, opts.Name))
 		return err
 	}
 	ready := function.Status.GetCondition(buildv1alpha1.FunctionConditionReady)

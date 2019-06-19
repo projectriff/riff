@@ -24,6 +24,7 @@ import (
 	"github.com/projectriff/riff/pkg/cli"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	"github.com/spf13/cobra"
+	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -47,11 +48,12 @@ func (opts *ApplicationStatusOptions) Validate(ctx context.Context) *cli.FieldEr
 func (opts *ApplicationStatusOptions) Exec(ctx context.Context, c *cli.Config) error {
 	app, err := c.Build().Applications(opts.Namespace).Get(opts.Name, metav1.GetOptions{})
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			c.Printf("%s\n", err.Error())
-			return cli.SilenceError(err)
+		if !apierrs.IsNotFound(err) {
+			return err
 		}
-		return err
+		c.Errorf("Application %q not found\n",
+			fmt.Sprintf("%s/%s", opts.Namespace, opts.Name))
+		return cli.SilenceError(err)
 	}
 	ready := app.Status.GetCondition(buildv1alpha1.ApplicationConditionReady)
 	cli.PrintResourceStatus(c, app.Name, ready)

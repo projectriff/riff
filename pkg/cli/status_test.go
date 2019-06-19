@@ -28,7 +28,29 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-func TestPrintResourceStatus(t *testing.T) {
+func TestPrintResourceStatusForReady(t *testing.T) {
+	stdout := &bytes.Buffer{}
+	config := &cli.Config{
+		Stdout: stdout,
+	}
+	condition := duckv1alpha1.Condition{
+		Type:    buildv1alpha1.FunctionConditionReady,
+		Status:  v1.ConditionTrue,
+	}
+	expected := strings.TrimSpace(`
+# test: Ready
+---
+lastTransitionTime: null
+status: "True"
+type: Ready`)
+	cli.PrintResourceStatus(config, "test", &condition)
+	actual := strings.TrimSpace(stdout.String())
+	if diff := cmp.Diff(expected, actual); diff != "" {
+		t.Errorf("Unexpected stdout (-expected, +actual): %s", diff)
+	}
+}
+
+func TestPrintResourceStatusForFailure(t *testing.T) {
 	stdout := &bytes.Buffer{}
 	config := &cli.Config{
 		Stdout: stdout,
@@ -36,13 +58,17 @@ func TestPrintResourceStatus(t *testing.T) {
 	condition := duckv1alpha1.Condition{
 		Type:    buildv1alpha1.FunctionConditionReady,
 		Status:  v1.ConditionFalse,
-		Message: "message",
+		Reason: "Failure",
+		Severity: "Severe",
+		Message: "message that things aren't working",
 	}
 	expected := strings.TrimSpace(`
-# test: not-Ready
+# test: Failure
 ---
 lastTransitionTime: null
-message: message
+message: message that things aren't working
+reason: Failure
+severity: Severe
 status: "False"
 type: Ready`)
 	cli.PrintResourceStatus(config, "test", &condition)

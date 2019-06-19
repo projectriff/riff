@@ -63,8 +63,24 @@ func TestFunctionStatusCommand(t *testing.T) {
 			Args:        []string{functionName},
 			ShouldError: true,
 			ExpectOutput: `
-functions.build.projectriff.io "test-function" not found
+Function "default/test-function" not found
 `,
+		},
+		{
+			Name: "handle error",
+			Args: []string{functionName},
+			GivenObjects: []runtime.Object{
+				&buildv1alpha1.Function{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      functionName,
+					},
+				},
+			},
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("get", "functions"),
+			},
+			ShouldError: true,
 		},
 		{
 			Name: "show status with ready status",
@@ -90,11 +106,8 @@ functions.build.projectriff.io "test-function" not found
 						Status: duckv1alpha1.Status{
 							Conditions: []duckv1alpha1.Condition{
 								{
-									Type:     buildv1alpha1.FunctionConditionReady,
-									Status:   v1.ConditionTrue,
-									Reason:   "",
-									Severity: "",
-									Message:  "",
+									Type:   buildv1alpha1.FunctionConditionReady,
+									Status: v1.ConditionTrue,
 								},
 							},
 						},
@@ -113,7 +126,7 @@ type: Ready
 `,
 		},
 		{
-			Name: "show status with non-ready status",
+			Name: "show status with non-ready status and reason",
 			Args: []string{functionName},
 			GivenObjects: []runtime.Object{
 				&buildv1alpha1.Function{
@@ -138,9 +151,54 @@ type: Ready
 								{
 									Type:     buildv1alpha1.FunctionConditionReady,
 									Status:   v1.ConditionFalse,
-									Reason:   "",
-									Severity: "",
+									Reason:   "Failure",
+									Severity: "Severe",
 									Message:  "build failed, check logs",
+								},
+							},
+						},
+						BuildStatus: buildv1alpha1.BuildStatus{},
+					},
+				},
+			},
+			ExpectOutput: `
+# test-function: Failure
+---
+lastTransitionTime: null
+message: build failed, check logs
+reason: Failure
+severity: Severe
+status: "False"
+type: Ready
+`,
+		},
+		{
+			Name: "show status with non-ready status and only message",
+			Args: []string{functionName},
+			GivenObjects: []runtime.Object{
+				&buildv1alpha1.Function{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      functionName,
+					},
+					Spec: buildv1alpha1.FunctionSpec{
+						Image: imageTag,
+						Source: &buildv1alpha1.Source{
+							Git: &buildv1alpha1.GitSource{
+								URL:      gitRepo,
+								Revision: gitMaster,
+							},
+						},
+						Artifact: "uppercase.js",
+						Handler:  "functions.Uppercase",
+					},
+					Status: buildv1alpha1.FunctionStatus{
+						Status: duckv1alpha1.Status{
+							Conditions: []duckv1alpha1.Condition{
+								{
+									Type:    buildv1alpha1.FunctionConditionReady,
+									Status:  v1.ConditionFalse,
+									Message: "build failed, check logs",
 								},
 							},
 						},

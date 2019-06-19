@@ -63,8 +63,24 @@ func TestApplicationStatusCommand(t *testing.T) {
 			Args:        []string{appName},
 			ShouldError: true,
 			ExpectOutput: `
-applications.build.projectriff.io "test-app" not found
+Application "default/test-app" not found
 `,
+		},
+		{
+			Name: "handle error",
+			Args: []string{appName},
+			GivenObjects: []runtime.Object{
+				&buildv1alpha1.Application{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      appName,
+					},
+				},
+			},
+			WithReactors: []rifftesting.ReactionFunc{
+				rifftesting.InduceFailure("get", "applications"),
+			},
+			ShouldError: true,
 		},
 		{
 			Name: "show status with ready status",
@@ -90,9 +106,6 @@ applications.build.projectriff.io "test-app" not found
 								{
 									Type:     buildv1alpha1.ApplicationConditionReady,
 									Status:   v1.ConditionTrue,
-									Reason:   "",
-									Severity: "",
-									Message:  "",
 								},
 							},
 						},
@@ -111,7 +124,7 @@ type: Ready
 `,
 		},
 		{
-			Name: "show status with non-ready status",
+			Name: "show status with non-ready status and reason",
 			Args: []string{appName},
 			GivenObjects: []runtime.Object{
 				&buildv1alpha1.Application{
@@ -134,8 +147,51 @@ type: Ready
 								{
 									Type:     buildv1alpha1.ApplicationConditionReady,
 									Status:   v1.ConditionFalse,
-									Reason:   "",
-									Severity: "",
+									Reason:   "Failure",
+									Severity: "Severe",
+									Message:  "build failed, check logs",
+								},
+							},
+						},
+						BuildStatus: buildv1alpha1.BuildStatus{},
+					},
+				},
+			},
+			ExpectOutput: `
+# test-app: Failure
+---
+lastTransitionTime: null
+message: build failed, check logs
+reason: Failure
+severity: Severe
+status: "False"
+type: Ready
+`,
+		},
+		{
+			Name: "show status with non-ready status and only message",
+			Args: []string{appName},
+			GivenObjects: []runtime.Object{
+				&buildv1alpha1.Application{
+					ObjectMeta: metav1.ObjectMeta{
+						Namespace: defaultNamespace,
+						Name:      appName,
+					},
+					Spec: buildv1alpha1.ApplicationSpec{
+						Image: imageTag,
+						Source: &buildv1alpha1.Source{
+							Git: &buildv1alpha1.GitSource{
+								URL:      gitRepo,
+								Revision: gitMaster,
+							},
+						},
+					},
+					Status: buildv1alpha1.ApplicationStatus{
+						Status: duckv1alpha1.Status{
+							Conditions: []duckv1alpha1.Condition{
+								{
+									Type:     buildv1alpha1.ApplicationConditionReady,
+									Status:   v1.ConditionFalse,
 									Message:  "build failed, check logs",
 								},
 							},
