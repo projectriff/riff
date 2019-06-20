@@ -9,7 +9,7 @@ The riff CLI helps developers build and run functions in a Kubernetes cluster.
 
 === Binaries
 
-Official binary releases are available from the link:https://github.com/projectriff/riff/releases[Releases] page. See link:https://projectriff.io/docs/getting-started/[Getting started] for how to install the riff CLI and the riff system.
+Official binary releases are available from the link:https://github.com/projectriff/cli/releases[Releases] page. See link:https://projectriff.io/docs/getting-started/[Getting started] for how to install the riff CLI and the riff system.
 
 === Homebrew
 

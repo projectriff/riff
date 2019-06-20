@@ -1,12 +1,3 @@
-# built artifacts
-/riff
-/riff.zip
-/riff-*.tgz
-/riff-*.zip
-
-# coverage artifacts
-/coverage.txt
-
 # Eclipe artifacts
 .project
 .settings
