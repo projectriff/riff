@@ -1,0 +1,55 @@
+{
+  "Docs": {
+    "Getting Started": [
+      "getting-started-on-gke",
+      "getting-started-on-minikube",
+      "getting-started-on-docker-for-mac",
+      "getting-started-on-docker-for-windows"
+    ]
+  },
+  "CLI": {
+    "CLI Usage": [
+      "riff",
+      "riff-version",
+      "riff-completion"
+    ],
+    "System": [
+      "riff-system",
+      "riff-system-install",
+      "riff-system-uninstall"
+    ],
+    "Namespace": [
+      "riff-namespace",
+      "riff-namespace-cleanup",
+      "riff-namespace-init"
+    ],
+    "Functions": [
+      "riff-function",
+      "riff-function-build",
+      "riff-function-create",
+      "riff-function-update"
+    ],
+    "Services": [
+      "riff-service",
+      "riff-service-create",
+      "riff-service-delete",
+      "riff-service-invoke",
+      "riff-service-list",
+      "riff-service-status",
+      "riff-service-update"
+    ],
+    "Subscriptions": [
+      "riff-subscription",
+      "riff-subscription-create",
+      "riff-subscription-delete",
+      "riff-subscription-list"
+    ],
+    "Channels": [
+      "riff-channel",
+      "riff-channel-create",
+      "riff-channel-delete",
+      "riff-channel-list"
+    ]
+  }
+}
+

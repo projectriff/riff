@@ -1,0 +1,42 @@
+digraph G {
+  compound = true
+
+  node [shape=box fontname="sans-serif" style="filled"]
+  edge [arrowhead=none]
+  
+  "riff" [color="#333333" fillcolor="#ffffff" URL="https://github.com/projectriff/riff"]
+
+  subgraph "cluster_builder" {
+    fontname = "sans-serif";
+
+   "riff Builder" [color="#333333" fillcolor="#ffffdd" URL="https://github.com/projectriff/builder"]
+
+    subgraph "cluster_java" {
+      label = "Java group";
+      "OpenJDK buildpack" [color="#333333" fillcolor="#ffdddd" URL="https://github.com/cloudfoundry/openjdk-buildpack"]
+      "Build System buildpack" [color="#333333" fillcolor="#ffdddd" URL="https://github.com/cloudfoundry/build-system-buildpack"]
+      "Java function buildpack" [color="#333333" fillcolor="#ddffff" URL="https://github.com/projectriff/java-function-buildpack"]
+    }
+
+    subgraph "cluster_node" {
+      label = "Node group";
+      "NodeJS buildpack" [color="#333333" fillcolor="#ffdddd" URL="https://github.com/cloudfoundry/nodejs-cnb"]
+      "NPM buildpack" [color="#333333" fillcolor="#ffdddd" URL="https://github.com/cloudfoundry/npm-cnb"]
+      "Node function buildpack" [color="#333333" fillcolor="#ddffff" URL="https://github.com/projectriff/node-function-buildpack"]
+    }
+
+    subgraph "cluster_command" {
+      label = "Command group";
+      "Command function buildpack" [color="#333333" fillcolor="#ddffff" URL="https://github.com/projectriff/command-function-buildpack"]
+    }
+
+  }
+
+  "riff" -> "riff Builder"
+  "riff Builder" -> "OpenJDK buildpack" [lhead="cluster_java" style="invis"]
+  "riff Builder" -> "NodeJS buildpack"  [lhead="cluster_node" style="invis"]
+  "riff Builder" -> "Command function buildpack" [lhead="cluster_command" style="invis"]
+
+  "OpenJDK buildpack" -> "Build System buildpack" -> "Java function buildpack"
+  "NodeJS buildpack" -> "NPM buildpack" -> "Node function buildpack"
+}
