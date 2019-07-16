@@ -1,0 +1,54 @@
+{
+  "version-v0.3.x-Docs": {
+    "Getting Started": [
+      "version-v0.3.x-getting-started-on-gke",
+      "version-v0.3.x-getting-started-on-minikube",
+      "version-v0.3.x-getting-started-on-docker-for-mac",
+      "version-v0.3.x-getting-started-on-docker-for-windows"
+    ]
+  },
+  "version-v0.3.x-CLI": {
+    "CLI Usage": [
+      "version-v0.3.x-riff",
+      "version-v0.3.x-riff-version",
+      "version-v0.3.x-riff-completion"
+    ],
+    "System": [
+      "version-v0.3.x-riff-system",
+      "version-v0.3.x-riff-system-install",
+      "version-v0.3.x-riff-system-uninstall"
+    ],
+    "Namespace": [
+      "version-v0.3.x-riff-namespace",
+      "version-v0.3.x-riff-namespace-cleanup",
+      "version-v0.3.x-riff-namespace-init"
+    ],
+    "Functions": [
+      "version-v0.3.x-riff-function",
+      "version-v0.3.x-riff-function-build",
+      "version-v0.3.x-riff-function-create",
+      "version-v0.3.x-riff-function-update"
+    ],
+    "Services": [
+      "version-v0.3.x-riff-service",
+      "version-v0.3.x-riff-service-create",
+      "version-v0.3.x-riff-service-delete",
+      "version-v0.3.x-riff-service-invoke",
+      "version-v0.3.x-riff-service-list",
+      "version-v0.3.x-riff-service-status",
+      "version-v0.3.x-riff-service-update"
+    ],
+    "Subscriptions": [
+      "version-v0.3.x-riff-subscription",
+      "version-v0.3.x-riff-subscription-create",
+      "version-v0.3.x-riff-subscription-delete",
+      "version-v0.3.x-riff-subscription-list"
+    ],
+    "Channels": [
+      "version-v0.3.x-riff-channel",
+      "version-v0.3.x-riff-channel-create",
+      "version-v0.3.x-riff-channel-delete",
+      "version-v0.3.x-riff-channel-list"
+    ]
+  }
+}

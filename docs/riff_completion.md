@@ -4,35 +4,40 @@ title: "riff completion"
 ---
 ## riff completion
 
-Generate shell completion scripts
+generate shell completion script
 
 ### Synopsis
 
-Generate shell completion scripts
+Generate the completion script for your shell. The script is printed to stdout
+and needs to be placed in the appropriate directory on your system.
 
 ```
-riff completion [bash|zsh] [flags]
+riff completion [flags]
 ```
 
 ### Examples
 
 ```
-To install completion for bash, assuming you have `bash-completion` installed:
-
-    riff completion bash > /etc/bash_completion.d/riff
-
-or wherever your `bash_completion.d` is, for example `$(brew --prefix)/etc/bash_completion.d` if using homebrew.
-
-Completion for zsh is a work in progress
+riff completion
+riff completion --shell zsh
 ```
 
 ### Options
 
 ```
-  -h, --help   help for completion
+  -h, --help          help for completion
+      --shell shell   shell to generate completion for: bash or zsh (default "bash")
+```
+
+### Options inherited from parent commands
+
+```
+      --config file        config file (default is $HOME/.riff.yaml)
+      --kube-config file   kubectl config file (default is $HOME/.kube/config)
+      --no-color           disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff](riff.md)	 - Commands for creating and managing function resources
+* [riff](riff.md)	 - riff is for functions
 

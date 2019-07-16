@@ -4,29 +4,45 @@ title: "riff"
 ---
 ## riff
 
-Commands for creating and managing function resources
+riff is for functions
 
 ### Synopsis
 
-riff is for functions.
+The riff CLI combines with the projectriff system CRDs to build, run and wire
+workloads (applications and functions). The CRDs provide the riff API of which
+this CLI is a client.
 
-riff is a CLI for functions on Knative.
-See https://projectriff.io and https://github.com/knative/docs
+Before running riff, please install the projectriff system and its dependencies.
+See https://projectriff.io/docs/getting-started/
+
+This CLI contains commands that fit into three themes:
+
+Builds - the application and function commands to define build plans and the
+credential commands to authenticate builds to container registries.
+
+Requests - the handler command to map HTTP requests to a built application,
+function or container image.
+
+Streams - the stream and processor commands to define streams of messages and
+map those streams to function inputs and outputs with processors.
 
 ### Options
 
 ```
-  -h, --help   help for riff
+      --config file        config file (default is $HOME/.riff.yaml)
+  -h, --help               help for riff
+      --kube-config file   kubectl config file (default is $HOME/.kube/config)
+      --no-color           disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff channel](riff_channel.md)	 - [DEPRECATED] Interact with channel related resources
-* [riff completion](riff_completion.md)	 - Generate shell completion scripts
-* [riff function](riff_function.md)	 - Interact with function related resources
-* [riff namespace](riff_namespace.md)	 - Manage namespaces used for riff resources
-* [riff service](riff_service.md)	 - Interact with service related resources
-* [riff subscription](riff_subscription.md)	 - [DEPRECATED] Interact with subscription-related resources
-* [riff system](riff_system.md)	 - Manage system related resources
-* [riff version](riff_version.md)	 - Print version information about riff
+* [riff application](riff_application.md)	 - applications built from source using application buildpacks
+* [riff completion](riff_completion.md)	 - generate shell completion script
+* [riff credential](riff_credential.md)	 - credentials for container registries
+* [riff doctor](riff_doctor.md)	 - check riff's requirements are installed
+* [riff function](riff_function.md)	 - functions built from source using function buildpacks
+* [riff handler](riff_handler.md)	 - handlers map HTTP requests to applications, functions or images
+* [riff processor](riff_processor.md)	 - processors apply functions to messages on streams
+* [riff stream](riff_stream.md)	 - streams of messages
 

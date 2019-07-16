@@ -4,23 +4,35 @@ title: "riff function create"
 ---
 ## riff function create
 
-Create a new function resource
+create a function from source
 
 ### Synopsis
 
-Create a new function resource from the content of the provided Git repo/revision or local source.
+Create a function from source using the function Cloud Native Buildpack builder.
 
-The --invoker flag can be used to force the language runtime and function invoker that is added to the function code in the build step. The resulting image is then used to create a Knative Service (`service.serving.knative.dev`) instance of the name specified for the function.
+Function source can be specified either as a Git repository or as a local
+directory. Builds from Git are run in the cluster while builds from a local
+directory are run inside a local Docker daemon and are orchestrated by this
+command (in the future, builds from local source may also be run in the
+cluster).
 
-Images will be pushed to the registry specified in the image name. If a default image prefix was specified during namespace init, the image flag is optional. The function name is combined with the default prefix to define the image. Instead of using the function name, a custom repository can be specified with the image set like `--image _/custom-name` which would resolve to `docker.io/example/custom-name`.
+In addition to the source code, functions are defined by these properties:
 
-From then on you can use the sub-commands for the `service` command to interact with the service created for the function.
+- invoker - language runtime that should host the function, the invoker is often
+    auto-detected, but may need to be specified in cases of ambiguity.
+- artifact - file in the source that contains the function.
+- handler - invoker specific, typically the method or class within the artifact.
 
-If `--env-from` is specified the source reference can be `configMapKeyRef` to select a key from a ConfigMap or `secretKeyRef` to select a key from a Secret. The following formats are supported:
+These values can be versioned with the source code in a riff.toml file, or
+specified here to override the source. Versioning with the source is preferred
+as changed can be deployed as a unit. Overriding is necessary when deploying
+multiple functions from a single code base.
 
-    --env-from configMapKeyRef:{config-map-name}:{key-to-select}
-    --env-from secretKeyRef:{secret-name}:{key-to-select}
+The riff.toml file takes the form:
 
+    override = "<invoker name>"
+	artifact = "<path to artifact>"
+	handler = "<function handler>"
 
 ```
 riff function create [flags]
@@ -29,38 +41,38 @@ riff function create [flags]
 ### Examples
 
 ```
-  riff function create square --git-repo https://github.com/acme/square --artifact square.js --image acme/square --invoker node --namespace joseph-ns
-  riff function create tweets-logger --git-repo https://github.com/acme/tweets --image acme/tweets-logger:1.0.0
+riff function create my-func --image registry.example.com/image --git-repo https://example.com/my-func.git
+riff function create my-func --image registry.example.com/image --local-path ./my-func
 ```
 
 ### Options
 
 ```
-      --artifact path                  path to the function source code or jar file; auto-detected if not specified
-      --dry-run                        don't create resources but print yaml representation on stdout
-      --env stringArray                environment variable expressed in a 'key=value' format
-      --env-from stringArray           environment variable created from a source reference; see command help for supported formats
-      --git-repo URL                   the URL for a git repository hosting the function code
-      --git-revision ref-spec          the git ref-spec of the function code to use (default "master")
-      --handler method or class        the name of the method or class to invoke, depending on the invoker used
-  -h, --help                           help for create
-      --image repository/image[:tag]   the name of the image to build; must be a writable repository/image[:tag] with credentials configured
-      --invoker language               invoker runtime to override language detected by buildpack
-  -l, --local-path path                path to local source to build the image from; only build-pack builds are supported at this time
-  -n, --namespace namespace            the namespace of the service
-      --sub-path string                the directory within the git repo to expose, files outside of this directory will not be available during the build
-  -v, --verbose                        print details of command progress
-  -w, --wait                           wait until the created resource reaches either a successful or an error state (automatic with --verbose)
+      --artifact file           file containing the function within the build workspace (detected by default)
+      --cache-size size         size of persistent volume to cache resources between builds
+      --dry-run                 print kubernetes resources to stdout rather than apply them to the cluster, messages normally on stdout will be sent to stderr
+      --git-repo url            git url to remote source code
+      --git-revision refspec    refspec within the git repo to checkout (default "master")
+      --handler name            name of the method or class to invoke, depends on the invoker (detected by default)
+  -h, --help                    help for create
+      --image repository        repository where the built images are pushed (default "_")
+      --invoker name            language runtime invoker name (detected by default)
+      --local-path directory    path to directory containing source code on the local machine
+  -n, --namespace name          kubernetes namespace (defaulted from kube config)
+      --sub-path directory      path to directory within the git repo to checkout
+      --tail                    watch build logs
+      --wait-timeout duration   duration to wait for the function to become ready when watching logs (default "10m")
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --kubeconfig path   the path of a kubeconfig (default "~/.kube/config")
-      --master address    the address of the Kubernetes API server; overrides any value in kubeconfig
+      --config file        config file (default is $HOME/.riff.yaml)
+      --kube-config file   kubectl config file (default is $HOME/.kube/config)
+      --no-color           disable color output in terminals
 ```
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - Interact with function related resources
+* [riff function](riff_function.md)	 - functions built from source using function buildpacks
 

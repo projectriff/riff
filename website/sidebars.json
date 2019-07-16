@@ -10,45 +10,53 @@
   "CLI": {
     "CLI Usage": [
       "riff",
-      "riff-version",
-      "riff-completion"
+      "riff-completion",
+      "riff-doctor"
     ],
-    "System": [
-      "riff-system",
-      "riff-system-install",
-      "riff-system-uninstall"
-    ],
-    "Namespace": [
-      "riff-namespace",
-      "riff-namespace-cleanup",
-      "riff-namespace-init"
+    "Credentials": [
+      "riff-credential",
+      "riff-credential-apply",
+      "riff-credential-delete",
+      "riff-credential-list"
     ],
     "Functions": [
       "riff-function",
-      "riff-function-build",
       "riff-function-create",
-      "riff-function-update"
+      "riff-function-delete",
+      "riff-function-list",
+      "riff-function-status",
+      "riff-function-tail"
     ],
-    "Services": [
-      "riff-service",
-      "riff-service-create",
-      "riff-service-delete",
-      "riff-service-invoke",
-      "riff-service-list",
-      "riff-service-status",
-      "riff-service-update"
+    "Handlers": [
+      "riff-handler",
+      "riff-handler-create",
+      "riff-handler-delete",
+      "riff-handler-list",
+      "riff-handler-status",
+      "riff-handler-tail"
     ],
-    "Subscriptions": [
-      "riff-subscription",
-      "riff-subscription-create",
-      "riff-subscription-delete",
-      "riff-subscription-list"
+    "Applications": [
+      "riff-application",
+      "riff-application-create",
+      "riff-application-delete",
+      "riff-application-list",
+      "riff-application-status",
+      "riff-application-tail"
     ],
-    "Channels": [
-      "riff-channel",
-      "riff-channel-create",
-      "riff-channel-delete",
-      "riff-channel-list"
+    "Processors": [
+      "riff-processor",
+      "riff-processor-create",
+      "riff-processor-delete",
+      "riff-processor-list",
+      "riff-processor-status",
+      "riff-processor-tail"
+    ],
+    "Streams": [
+      "riff-stream",
+      "riff-stream-create",
+      "riff-stream-delete",
+      "riff-stream-list",
+      "riff-stream-status"
     ]
   }
 }
