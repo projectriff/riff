@@ -1,5 +1,30 @@
 /* your custom css */
 
+.fixedHeaderContainer {
+  background-color: #000;
+}
+.projectTitle {
+  color: #fff;
+}
+
+.homeContainer {
+  background-image: url('/img/playriff2.jpg');
+  padding: 2em 0;
+  font-size: 1.2em;
+  background-color: #333;
+  background-size:cover;
+  background-repeat:no-repeat;
+  background-position:center;
+  -webkit-animation:intro 0.3s both;
+  animation:intro 0.3s both;
+  -webkit-animation-delay:0.25s;
+  animation-delay:0.25s;
+}
+
+.imageAlignSide .blockImage {
+  flex: none;
+}
+
 @media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
 }
 

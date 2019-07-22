@@ -23,8 +23,8 @@ const siteConfig = {
   favicon: 'img/favicon.ico',
 
   colors: {
-    primaryColor: '#111111',
-    secondaryColor: '#555555',
+    primaryColor: '#52adc8',
+    secondaryColor: '#111111',
   },
 
   // theme for syntax highlighting

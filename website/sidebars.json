@@ -27,14 +27,6 @@
       "riff-function-status",
       "riff-function-tail"
     ],
-    "Handlers": [
-      "riff-handler",
-      "riff-handler-create",
-      "riff-handler-delete",
-      "riff-handler-list",
-      "riff-handler-status",
-      "riff-handler-tail"
-    ],
     "Applications": [
       "riff-application",
       "riff-application-create",
@@ -43,13 +35,13 @@
       "riff-application-status",
       "riff-application-tail"
     ],
-    "Processors": [
-      "riff-processor",
-      "riff-processor-create",
-      "riff-processor-delete",
-      "riff-processor-list",
-      "riff-processor-status",
-      "riff-processor-tail"
+    "Handlers": [
+      "riff-handler",
+      "riff-handler-create",
+      "riff-handler-delete",
+      "riff-handler-list",
+      "riff-handler-status",
+      "riff-handler-tail"
     ],
     "Streams": [
       "riff-stream",
@@ -57,6 +49,14 @@
       "riff-stream-delete",
       "riff-stream-list",
       "riff-stream-status"
+    ],
+    "Processors": [
+      "riff-processor",
+      "riff-processor-create",
+      "riff-processor-delete",
+      "riff-processor-list",
+      "riff-processor-status",
+      "riff-processor-tail"
     ]
   }
 }
