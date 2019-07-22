@@ -11,6 +11,7 @@ const siteConfig = {
   // https://docusaurus.io/docs/en/publishing#deploying-to-github-pages
   projectName: 'riff',
   organizationName: 'jldec', // 'projectriff',
+  cname: 'jldec.projectriff.io', // projectriff.io
 
   headerLinks: [
     {doc: 'getting-started-on-gke', label: 'Docs'},
