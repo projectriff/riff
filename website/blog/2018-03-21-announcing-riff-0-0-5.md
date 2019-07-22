@@ -5,6 +5,8 @@ title: "riff 0.0.5"
 We are happy to announce the 0.0.5 release of riff. A huge thanks to all
 who contributed to this effort. Here are some of the highlights.
 
+<!--truncate-->
+
 ## go invoker
 A new [Go function invoker](https://github.com/projectriff/go-function-invoker) provides support for functions built as [Go plugins](https://golang.org/pkg/plugin/). This makes it possible to compile Go functions into standalone packages, loaded at runtime into the Go function invoker. E.g.
 

@@ -5,6 +5,8 @@ title: "Announcing riff v0.0.6"
 The 0.0.6 release of riff is now available. A big thank you, once again, to everyone
 who contributed on this effort.
 
+<!--truncate-->
+
 ## riff installation
 
 We recommend [installing](/docs/) riff v0.0.6 on a fresh Kubernetes cluster. The latest Helm chart has an option to deploy riff together with Kafka. If you played with previous riff releases, remember to install the [latest riff CLI](https://github.com/projectriff/riff/releases) as well.

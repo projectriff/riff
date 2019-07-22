@@ -5,6 +5,8 @@ title: "Announcing riff v0.1.2 on Knative"
 [riff v0.1.2](https://github.com/projectriff/riff/releases/tag/v0.1.2) on Knative is now available.  
 Many thanks to all the riff and Knative contributors.
 
+<!--truncate-->
+
 ## install
 We recommend installing riff v0.1.2 on a fresh Kubernetes cluster. The riff CLI can be downloaded from our [releases page](https://github.com/projectriff/riff/releases/tag/v0.1.2) on GitHub. Please follow one of the [getting started](/docs) guides, to create a new cluster on GKE or minikube. Remember that you can also use the CLI to uninstall everything.
 

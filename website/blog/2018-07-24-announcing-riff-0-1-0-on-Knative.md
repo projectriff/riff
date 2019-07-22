@@ -4,6 +4,8 @@ title: "Announcing riff v0.1.0 on Knative"
 
 We are excited to announce that the riff team has re-architected the riff core, bringing essential aspects of riff to Knative. This is the first release of riff on Knative.
 
+<!--truncate-->
+
 [Knative](https://github.com/knative/docs) is a new open source project announced at [Google Cloud Next '18](https://cloud.withgoogle.com/next18).
 
 Knative provides Kubernetes-native APIs for deploying serverless-style functions, applications, and containers.

@@ -4,6 +4,8 @@ title: "Announcing riff v0.1.1 on Knative"
 
 We are pleased to announce that [riff v0.1.1](https://github.com/projectriff/riff/releases/tag/v0.1.1) on Knative is now available. Thanks, everyone for contributing.
 
+<!--truncate-->
+
 ## Uninstall
 
 If you are using the latest riff on Knative for demos, you might find it useful to do a quick uninstall without zapping your whole cluster and cached images.

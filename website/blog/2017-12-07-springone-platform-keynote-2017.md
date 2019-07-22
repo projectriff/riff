@@ -2,4 +2,7 @@
 title: "Mark Fisher's Keynote at SpringOne Platform 2017"
 ---
 
-youtubeVideoId: mlRSp9Z3zwY
+<figure class="video-container">
+  <iframe src="//www.youtube.com/embed/mlRSp9Z3zwY" frameborder="0" allowfullscreen width="100%"></iframe>
+</figure>
+

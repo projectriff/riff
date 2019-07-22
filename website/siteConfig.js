@@ -42,6 +42,9 @@ const siteConfig = {
   // open Graph and twitter card images
   ogImage: 'img/riff.svg',
   twitterImage: 'img/riff.svg',
+  
+  // show all blog posts in sidebar
+  blogSidebarCount: 'ALL',
 
   // other keys
   // repoUrl: 'https://github.com/projectriff/riff',

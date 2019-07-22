@@ -5,6 +5,8 @@ title: "Announcing the 0.0.3 release of riff"
 We are excited to announce a shiny new release of riff. Thank you, all the riff team and community members
 who contributed to make this happen.
 
+<!--truncate-->
+
 Highlights of the 0.0.3 release include the following:
 
 - Ported the [function controller](https://github.com/projectriff/riff/tree/master/function-controller) to go.

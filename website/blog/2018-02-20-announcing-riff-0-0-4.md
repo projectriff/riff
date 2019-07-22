@@ -5,6 +5,8 @@ title: "Announcing riff 0.0.4"
 We are happy to announce a new release of riff. Thank you, once again, everyone
 who contributed to this effort. Here are some of the highlights.
 
+<!--truncate-->
+
 ## a new riff CLI written in go
 The [riff CLI](https://github.com/projectriff/riff/tree/master/riff-cli) is now a go binary, available to download from our GitHub [releases](https://github.com/projectriff/riff/releases) page or, if you have a go development environment, you can use 'go get' to build and install into $GOPATH/bin as follows.
 

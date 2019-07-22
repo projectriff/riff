@@ -4,6 +4,8 @@ title: "Introducing riff"
 
 Welcome to the riff blog! With this first post, we are pleased to announce the 0.0.2 release of riff. The 0.0.2 release includes the code as shown in demos at SpringOne Platform, along with a handful of issues we were able to address over the past few days. 
 
+<!--truncate-->
+
 riff was introduced to the world during the Wednesday [keynote](/video/mark-fisher-at-springone-platform-2017/) at SpringOne Platform. Our goal was to describe riff in one concise story, with a slide for each step of the function lifecycle.
 - developers write functions
 - functions are packaged as containers

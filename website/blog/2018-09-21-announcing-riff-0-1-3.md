@@ -4,6 +4,8 @@ title: "Announcing riff v0.1.3"
 
 We are pleased to announce the release of [riff v0.1.3](https://github.com/projectriff/riff/releases/tag/v0.1.3). Thank you riff and Knative contributors.
 
+<!--truncate-->
+
 The riff CLI can be downloaded from our [releases page](https://github.com/projectriff/riff/releases/tag/v0.1.3) on GitHub. Please follow one of the [getting started](/docs) guides, to create a new cluster on GKE or minikube. To update an existing riff install first run `riff system uninstall --istio`. This release includes new manifests for the latest Knative and Istio.
 
 Here's an overview of some of the new features in riff v0.1.3:

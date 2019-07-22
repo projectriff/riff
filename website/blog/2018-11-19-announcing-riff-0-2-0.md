@@ -4,6 +4,8 @@ title: "Announcing riff v0.2.0"
 
 We are happy to announce the release of [riff v0.2.0](https://github.com/projectriff/riff/releases/tag/v0.2.0). Thank you once again, all riff, Buildpacks, and Knative contributors.
 
+<!--truncate-->
+
 The riff CLI can be downloaded from our [releases page](https://github.com/projectriff/riff/releases/tag/v0.2.0) on GitHub. Please follow one of the [getting started](/docs) guides, to create a new cluster on GKE or minikube.
 
 Notable changes in this release include:

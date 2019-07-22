@@ -4,6 +4,8 @@ title: "Announcing riff v0.0.7"
 
 We are happy to announce the 0.0.7 release of riff. Thank you all who worked on this effort.
 
+<!--truncate-->
+
 
 ## go streaming
 
