@@ -1,3 +1,7 @@
+---
+id: riff-namespace-cleanup
+title: "riff namespace cleanup"
+---
 ## riff namespace cleanup
 
 cleans up riff resources in the namespace

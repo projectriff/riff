@@ -1,3 +1,7 @@
+---
+id: riff-subscription-delete
+title: "riff subscription delete"
+---
 ## riff subscription delete
 
 [DEPRECATED] Delete existing subscriptions

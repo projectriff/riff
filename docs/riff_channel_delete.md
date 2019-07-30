@@ -1,3 +1,7 @@
+---
+id: riff-channel-delete
+title: "riff channel delete"
+---
 ## riff channel delete
 
 [DEPRECATED] Delete existing channels

@@ -30,3 +30,10 @@ gcr-storage-admin.json
 /riff-darwin-amd64.tgz
 /riff-linux-amd64.tgz
 /riff-windows-amd64.zip
+
+# Docusaurus website
+website/translated_docs
+website/build/
+website/yarn.lock
+website/node_modules
+website/i18n/*

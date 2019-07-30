@@ -1,3 +1,7 @@
+---
+id: riff
+title: "riff"
+---
 ## riff
 
 Commands for creating and managing function resources

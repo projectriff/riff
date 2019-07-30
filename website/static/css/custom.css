@@ -1,0 +1,50 @@
+/* your custom css */
+
+.fixedHeaderContainer {
+  background-color: #000;
+}
+.projectTitle {
+  color: #fff;
+}
+
+.homeContainer {
+  background-image: url('/img/playriff2.jpg');
+  padding: 2em 0;
+  font-size: 1.2em;
+  background-color: #333;
+  background-size:cover;
+  background-repeat:no-repeat;
+  background-position:center;
+}
+
+.imageAlignSide .blockImage {
+  flex: none;
+}
+
+/*
+embed video with:
+
+<figure class="video-container">
+  <iframe src="//www.youtube.com/embed/xxx" frameborder="0" allowfullscreen width="100%"></iframe>
+</figure>
+
+from https://github.com/facebook/flux/blob/abb5c0c43fa6d7c017ebef613776c3fd91db5d8d/website/src/css/custom.css
+*/
+
+.video-container {
+  height: 0;
+  margin: 0;
+  margin-bottom: 30px;
+  overflow: hidden;
+  padding-bottom: 56.25%;
+  padding-top: 30px;
+  position: relative;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}

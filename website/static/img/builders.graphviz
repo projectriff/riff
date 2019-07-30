@@ -1,0 +1,24 @@
+digraph G {
+node [shape=box fontname="sans-serif" style="filled"]
+edge [arrowhead=none]
+"riff" [color="#333333" fillcolor="#ffffff"]
+"riff-builder" [color="#333333" fillcolor="#ffffdd"]
+"riff-buildpack" [color="#333333" fillcolor="#ffdddd"]
+"OpenJDK buildpack" [color="#333333" fillcolor="#ffdddd"]
+"Build System buildpack" [color="#333333" fillcolor="#ffdddd"]
+"NodeJS buildpack" [color="#333333" fillcolor="#ffdddd"]
+"NPM buildpack" [color="#333333" fillcolor="#ffdddd"]
+"Java invoker" [color="#333333" fillcolor="#ddffff"]
+"Node invoker" [color="#333333" fillcolor="#ddffff"]
+"Command invoker" [color="#333333" fillcolor="#ddffff"]
+
+  "riff" -> "riff-builder"
+  "riff-builder" -> "riff-buildpack"
+  "riff-builder" -> "OpenJDK buildpack"
+  "riff-builder" -> "Build System buildpack"
+  "riff-builder" -> "NodeJS buildpack"
+  "riff-builder" -> "NPM buildpack"
+  "riff-buildpack" -> "Java invoker"
+  "riff-buildpack" -> "Node invoker"
+  "riff-buildpack" -> "Command invoker"
+}

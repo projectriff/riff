@@ -1,3 +1,7 @@
+---
+id: riff-completion
+title: "riff completion"
+---
 ## riff completion
 
 Generate shell completion scripts

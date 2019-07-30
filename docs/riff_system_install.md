@@ -1,3 +1,7 @@
+---
+id: riff-system-install
+title: "riff system install"
+---
 ## riff system install
 
 Install riff and Knative system components

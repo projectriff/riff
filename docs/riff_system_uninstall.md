@@ -1,3 +1,7 @@
+---
+id: riff-system-uninstall
+title: "riff system uninstall"
+---
 ## riff system uninstall
 
 Remove riff and Knative system components

@@ -1,3 +1,7 @@
+---
+id: riff-service-update
+title: "riff service update"
+---
 ## riff service update
 
 Create a new revision for a service, with updated attributes

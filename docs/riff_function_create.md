@@ -1,3 +1,7 @@
+---
+id: riff-function-create
+title: "riff function create"
+---
 ## riff function create
 
 Create a new function resource

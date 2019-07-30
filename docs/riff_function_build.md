@@ -1,3 +1,7 @@
+---
+id: riff-function-build
+title: "riff function build"
+---
 ## riff function build
 
 Build a function container from local source

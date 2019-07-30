@@ -1,3 +1,7 @@
+---
+id: riff-version
+title: "riff version"
+---
 ## riff version
 
 Print version information about riff

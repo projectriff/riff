@@ -1,3 +1,7 @@
+---
+id: riff-subscription-create
+title: "riff subscription create"
+---
 ## riff subscription create
 
 [DEPRECATED] Create a new subscription, binding a service to an input channel

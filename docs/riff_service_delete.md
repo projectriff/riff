@@ -1,3 +1,7 @@
+---
+id: riff-service-delete
+title: "riff service delete"
+---
 ## riff service delete
 
 Delete existing services

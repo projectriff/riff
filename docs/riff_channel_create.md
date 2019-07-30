@@ -1,3 +1,7 @@
+---
+id: riff-channel-create
+title: "riff channel create"
+---
 ## riff channel create
 
 [DEPRECATED] Create a new channel

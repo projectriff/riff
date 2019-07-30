@@ -1,3 +1,7 @@
+---
+id: riff-namespace-init
+title: "riff namespace init"
+---
 ## riff namespace init
 
 initialize riff resources in the namespace

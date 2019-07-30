@@ -1,3 +1,7 @@
+---
+id: riff-namespace
+title: "riff namespace"
+---
 ## riff namespace
 
 Manage namespaces used for riff resources

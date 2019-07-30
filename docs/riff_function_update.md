@@ -1,3 +1,7 @@
+---
+id: riff-function-update
+title: "riff function update"
+---
 ## riff function update
 
 Trigger a build to generate a new revision for a function resource

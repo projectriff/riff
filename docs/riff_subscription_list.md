@@ -1,3 +1,7 @@
+---
+id: riff-subscription-list
+title: "riff subscription list"
+---
 ## riff subscription list
 
 [DEPRECATED] List existing subscriptions

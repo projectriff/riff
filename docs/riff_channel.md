@@ -1,3 +1,7 @@
+---
+id: riff-channel
+title: "riff channel"
+---
 ## riff channel
 
 [DEPRECATED] Interact with channel related resources

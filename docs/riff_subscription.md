@@ -1,3 +1,7 @@
+---
+id: riff-subscription
+title: "riff subscription"
+---
 ## riff subscription
 
 [DEPRECATED] Interact with subscription-related resources

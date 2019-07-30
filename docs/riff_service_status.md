@@ -1,3 +1,7 @@
+---
+id: riff-service-status
+title: "riff service status"
+---
 ## riff service status
 
 Display the status of a service
