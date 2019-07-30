@@ -17,9 +17,35 @@
 package commands
 
 import (
+	"fmt"
+	"path"
+	"path/filepath"
+	"strings"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 )
+
+// frontmatter for docusaurus markdown
+// per https://docusaurus.io/docs/en/doc-markdown#documents
+const fmTemplate = `---
+id: %s
+title: "%s"
+---
+`
+
+func filePrepender(filename string) string {
+	name := filepath.Base(filename)
+	base := strings.TrimSuffix(name, path.Ext(name))
+	id := strings.Replace(base, "_", "-", -1)
+	title := strings.Replace(base, "_", " ", -1)
+
+	return fmt.Sprintf(fmTemplate, id, title)
+}
+
+func linkHandler(name string) string {
+	return name
+}
 
 func Docs(rootCmd *cobra.Command, fs Filesystem) *cobra.Command {
 
@@ -41,5 +67,5 @@ func GenerateDocs(rootCommand *cobra.Command, directory string, fs Filesystem) e
 	if err := fs.MkdirAll(directory, 0744); err != nil {
 		return err
 	}
-	return doc.GenMarkdownTree(rootCommand, directory)
+	return doc.GenMarkdownTreeCustom(rootCommand, directory, filePrepender, linkHandler)
 }
