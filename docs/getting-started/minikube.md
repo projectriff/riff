@@ -1,8 +1,7 @@
 ---
-id: getting-started-on-minikube
+id: minikube
 title: Getting started on Minikube
 sidebar_label: Minikube
-original_id: getting-started-on-minikube
 ---
 
 The following will help you get started running a riff function with Knative on Minikube.

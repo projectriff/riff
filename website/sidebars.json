@@ -1,10 +1,11 @@
 {
   "Docs": {
     "Getting Started": [
-      "getting-started-on-gke",
-      "getting-started-on-minikube",
-      "getting-started-on-docker-for-mac",
-      "getting-started-on-docker-for-windows"
+      "getting-started",
+      "getting-started/gke",
+      "getting-started/minikube",
+      "getting-started/docker-for-mac",
+      "getting-started/docker-for-windows"
     ]
   },
   "CLI": {

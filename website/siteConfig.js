@@ -26,7 +26,7 @@ const siteConfig = {
 
   headerLinks: [
     {page: 'versions', label: 'v0.3.x'},
-    {doc: 'getting-started-on-gke', label: 'Docs'},
+    {doc: 'getting-started', label: 'Docs'},
     {doc: 'riff', label: 'CLI'},
     {blog: true, label: 'Blog'},
   ],

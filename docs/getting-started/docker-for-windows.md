@@ -1,8 +1,7 @@
 ---
-id: getting-started-on-docker-for-windows
+id: docker-for-windows
 title: Getting Started on Docker for Windows
 sidebar_label: Docker for Windows
-original_id: getting-started-on-docker-for-windows
 ---
 
 The following will help you get started running a riff function with Knative on Docker Community Edition for Windows.
