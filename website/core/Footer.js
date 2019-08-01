@@ -37,7 +37,7 @@ class Footer extends React.Component {
           </a>
           <div>
             <h5>Docs</h5>
-            <a href={this.docUrl('getting-started-on-gke.html', this.props.language)}>
+            <a href={this.docUrl('getting-started', this.props.language)}>
               Getting Started
             </a>
             <a href={this.docUrl('riff', this.props.language)}>
@@ -63,7 +63,7 @@ class Footer extends React.Component {
           </div>
         </section>
         <section className="copyright">
-          Copyright © ${new Date().getFullYear()} Pivotal Software, Inc. All Rights Reserved.
+          Copyright © {new Date().getFullYear()} Pivotal Software, Inc. All Rights Reserved.
         </section>
       </footer>
     );
