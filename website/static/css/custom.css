@@ -19,6 +19,17 @@
 
 .imageAlignSide .blockImage {
   flex: none;
+  padding: 3em;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.imageAlignRight .blockContent {
+  padding-left: 2em;
+}
+
+.imageAlignLeft .blockContent {
+  padding-right: 2em;
 }
 
 /*
