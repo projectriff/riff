@@ -1,28 +1,28 @@
 ---
-id: riff-handler-tail
-title: "riff handler tail"
+id: riff-knative-deployer-tail
+title: "riff knative deployer tail"
 ---
-## riff handler tail
+## riff knative deployer tail
 
-watch handler logs
+watch deployer logs
 
 ### Synopsis
 
-Stream runtime logs for a handler until canceled. To cancel, press Ctl-c in the
+Stream runtime logs for a deployer until canceled. To cancel, press Ctl-c in the
 shell or kill the process.
 
-As new handler instances are started, the logs are displayed. To show historical logs use
---since.
+As new deployer pods are started, the logs are displayed. To show historical logs
+use --since.
 
 ```
-riff handler tail [flags]
+riff knative deployer tail <name> [flags]
 ```
 
 ### Examples
 
 ```
-riff handler tail my-handler
-riff handler tail my-handler --since 1h
+riff knative deployer tail my-deployer
+riff knative deployer tail my-deployer --since 1h
 ```
 
 ### Options
@@ -43,5 +43,5 @@ riff handler tail my-handler --since 1h
 
 ### SEE ALSO
 
-* [riff handler](riff_handler.md)	 - handlers map HTTP requests to applications, functions or images
+* [riff knative deployer](riff_knative_deployer.md)	 - deployers map HTTP requests to a workload
 

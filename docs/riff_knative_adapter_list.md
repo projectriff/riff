@@ -1,28 +1,28 @@
 ---
-id: riff-processor-list
-title: "riff processor list"
+id: riff-knative-adapter-list
+title: "riff knative adapter list"
 ---
-## riff processor list
+## riff knative adapter list
 
-table listing of processors
+table listing of adapters
 
 ### Synopsis
 
-List processors in a namespace or across all namespaces.
+List adapters in a namespace or across all namespaces.
 
-For detail regarding the status of a single processor, run:
+For detail regarding the status of a single adapter, run:
 
-	riff processor status <processor-name>
+    riff knative adapter status <adapter-name>
 
 ```
-riff processor list [flags]
+riff knative adapter list [flags]
 ```
 
 ### Examples
 
 ```
-riff processor list
-riff processor list --all-namespaces
+riff knative adapter list
+riff knative adapter list --all-namespaces
 ```
 
 ### Options
@@ -43,5 +43,5 @@ riff processor list --all-namespaces
 
 ### SEE ALSO
 
-* [riff processor](riff_processor.md)	 - processors apply functions to messages on streams
+* [riff knative adapter](riff_knative_adapter.md)	 - adapters push built images to Knative
 

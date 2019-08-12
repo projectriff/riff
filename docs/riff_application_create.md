@@ -18,7 +18,7 @@ command (in the future, builds from local source may also be run in the
 cluster).
 
 ```
-riff application create [flags]
+riff application create <name> [flags]
 ```
 
 ### Examples

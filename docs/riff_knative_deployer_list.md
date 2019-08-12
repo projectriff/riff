@@ -1,28 +1,28 @@
 ---
-id: riff-function-list
-title: "riff function list"
+id: riff-knative-deployer-list
+title: "riff knative deployer list"
 ---
-## riff function list
+## riff knative deployer list
 
-table listing of functions
+table listing of deployers
 
 ### Synopsis
 
-List functions in a namespace or across all namespaces.
+List deployers in a namespace or across all namespaces.
 
-For detail regarding the status of a single function, run:
+For detail regarding the status of a single deployer, run:
 
-    riff function status <function-name>
+    riff knative deployer status <deployer-name>
 
 ```
-riff function list [flags]
+riff knative deployer list [flags]
 ```
 
 ### Examples
 
 ```
-riff function list
-riff function list --all-namespaces
+riff knative deployer list
+riff knative deployer list --all-namespaces
 ```
 
 ### Options
@@ -43,5 +43,5 @@ riff function list --all-namespaces
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - functions built from source using function buildpacks
+* [riff knative deployer](riff_knative_deployer.md)	 - deployers map HTTP requests to a workload
 

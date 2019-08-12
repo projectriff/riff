@@ -1,28 +1,28 @@
 ---
-id: riff-function-status
-title: "riff function status"
+id: riff-knative-adapter-status
+title: "riff knative adapter status"
 ---
-## riff function status
+## riff knative adapter status
 
-show function status
+show knative adapter status
 
 ### Synopsis
 
-Display status details for a function.
+Display status details for a adapter.
 
 The Ready condition is shown which should include a reason code and a
 descriptive message when the status is not "True". The status for the condition
 may be: "True", "False" or "Unknown". An "Unknown" status is common while the
-function roll out is processed or a build is in progress.
+adapter roll out is processed.
 
 ```
-riff function status <name> [flags]
+riff knative adapter status <name> [flags]
 ```
 
 ### Examples
 
 ```
-riff function status my-function
+riff knative adapter status my-adapter
 ```
 
 ### Options
@@ -42,5 +42,5 @@ riff function status my-function
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - functions built from source using function buildpacks
+* [riff knative adapter](riff_knative_adapter.md)	 - adapters push built images to Knative
 

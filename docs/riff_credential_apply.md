@@ -11,9 +11,8 @@ create or update credentials for a container registry
 Create or update credentials for a container registry.
 
 In addition to creating a credential, the default image prefix can be set by
-specifying --set-default-image-prefix. The prefix is applied to application and
-function builds in order to skip needing to specify a fully qualified image
-repository.
+specifying --set-default-image-prefix. The prefix is applied to builds in order
+to skip needing to specify a fully qualified image repository.
 
 The default image prefix depends on the repository and take the form:
 - Docker Hub: docker.io/<docker-user-name>
@@ -25,7 +24,7 @@ While multiple credentials can be created in a single namespace, only a single
 default image prefix can be set.
 
 ```
-riff credential apply [flags]
+riff credential apply <name> [flags]
 ```
 
 ### Examples

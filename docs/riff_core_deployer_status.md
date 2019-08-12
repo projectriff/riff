@@ -1,28 +1,28 @@
 ---
-id: riff-stream-status
-title: "riff stream status"
+id: riff-core-deployer-status
+title: "riff core deployer status"
 ---
-## riff stream status
+## riff core deployer status
 
-show stream status
+show core deployer status
 
 ### Synopsis
 
-Display status details for a stream.
+Display status details for a deployer.
 
 The Ready condition is shown which should include a reason code and a
 descriptive message when the status is not "True". The status for the condition
 may be: "True", "False" or "Unknown". An "Unknown" status is common while the
-stream is being processed.
+deployer roll out is processed.
 
 ```
-riff stream status [flags]
+riff core deployer status <name> [flags]
 ```
 
 ### Examples
 
 ```
-riff stream status my-stream
+riff core deployer status my-deployer
 ```
 
 ### Options
@@ -42,5 +42,5 @@ riff stream status my-stream
 
 ### SEE ALSO
 
-* [riff stream](riff_stream.md)	 - streams of messages
+* [riff core deployer](riff_core_deployer.md)	 - deployers deploy a workload
 

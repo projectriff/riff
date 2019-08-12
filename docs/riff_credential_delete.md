@@ -10,12 +10,11 @@ delete credential(s)
 
 Delete one or more credentials by name or all credentials within a namespace.
 
-Deleting a credential will cause application and function builds that depend on
-the credential to fail unless another credential for the same registry is
-available.
+Deleting a credential will cause builds that depend on the credential to fail
+unless another credential for the same registry is available.
 
 ```
-riff credential delete [flags]
+riff credential delete <name(s)> [flags]
 ```
 
 ### Examples

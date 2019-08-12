@@ -15,7 +15,7 @@ As new builds are started, the logs are displayed. To show historical logs use
 --since.
 
 ```
-riff application tail [flags]
+riff application tail <name> [flags]
 ```
 
 ### Examples

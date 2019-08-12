@@ -35,7 +35,7 @@ The riff.toml file takes the form:
 	handler = "<function handler>"
 
 ```
-riff function create [flags]
+riff function create <name> [flags]
 ```
 
 ### Examples

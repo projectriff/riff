@@ -1,28 +1,28 @@
 ---
-id: riff-function-tail
-title: "riff function tail"
+id: riff-core-deployer-tail
+title: "riff core deployer tail"
 ---
-## riff function tail
+## riff core deployer tail
 
-watch build logs
+watch deployer logs
 
 ### Synopsis
 
-Stream build logs for a function until canceled. To cancel, press Ctl-c in the
+Stream runtime logs for a deployer until canceled. To cancel, press Ctl-c in the
 shell or kill the process.
 
-As new builds are started, the logs are displayed. To show historical logs use
---since.
+As new deployer pods are started, the logs are displayed. To show historical logs
+use --since.
 
 ```
-riff function tail <name> [flags]
+riff core deployer tail <name> [flags]
 ```
 
 ### Examples
 
 ```
-riff function tail my-function
-riff function tail my-function --since 1h
+riff core deployer tail my-deployer
+riff core deployer tail my-deployer --since 1h
 ```
 
 ### Options
@@ -43,5 +43,5 @@ riff function tail my-function --since 1h
 
 ### SEE ALSO
 
-* [riff function](riff_function.md)	 - functions built from source using function buildpacks
+* [riff core deployer](riff_core_deployer.md)	 - deployers deploy a workload
 

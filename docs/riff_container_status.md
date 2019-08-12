@@ -1,28 +1,28 @@
 ---
-id: riff-handler-status
-title: "riff handler status"
+id: riff-container-status
+title: "riff container status"
 ---
-## riff handler status
+## riff container status
 
-show handler status
+show container status
 
 ### Synopsis
 
-Display status details for a handler.
+Display status details for a container.
 
 The Ready condition is shown which should include a reason code and a
 descriptive message when the status is not "True". The status for the condition
 may be: "True", "False" or "Unknown". An "Unknown" status is common while the
-handler is processed.
+container is processed or a build is in progress.
 
 ```
-riff handler status [flags]
+riff container status <name> [flags]
 ```
 
 ### Examples
 
 ```
-riff handler status my-handler
+riff container status my-container
 ```
 
 ### Options
@@ -42,5 +42,5 @@ riff handler status my-handler
 
 ### SEE ALSO
 
-* [riff handler](riff_handler.md)	 - handlers map HTTP requests to applications, functions or images
+* [riff container](riff_container.md)	 - containers resolve the latest image
 

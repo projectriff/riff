@@ -1,28 +1,28 @@
 ---
-id: riff-processor-status
-title: "riff processor status"
+id: riff-knative-deployer-status
+title: "riff knative deployer status"
 ---
-## riff processor status
+## riff knative deployer status
 
-show processor status
+show knative deployer status
 
 ### Synopsis
 
-Display status details for a processor.
+Display status details for a deployer.
 
 The Ready condition is shown which should include a reason code and a
 descriptive message when the status is not "True". The status for the condition
 may be: "True", "False" or "Unknown". An "Unknown" status is common while the
-processor is processed.
+deployer roll out is processed.
 
 ```
-riff processor status [flags]
+riff knative deployer status <name> [flags]
 ```
 
 ### Examples
 
 ```
-riff processor status my-processor
+riff knative deployer status my-deployer
 ```
 
 ### Options
@@ -42,5 +42,5 @@ riff processor status my-processor
 
 ### SEE ALSO
 
-* [riff processor](riff_processor.md)	 - processors apply functions to messages on streams
+* [riff knative deployer](riff_knative_deployer.md)	 - deployers map HTTP requests to a workload
 

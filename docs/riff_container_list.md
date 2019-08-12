@@ -1,28 +1,28 @@
 ---
-id: riff-handler-list
-title: "riff handler list"
+id: riff-container-list
+title: "riff container list"
 ---
-## riff handler list
+## riff container list
 
-table listing of handlers
+table listing of containers
 
 ### Synopsis
 
-List handlers in a namespace or across all namespaces.
+List containers in a namespace or across all namespaces.
 
-For detail regarding the status of a single handler, run:
+For detail regarding the status of a single container, run:
 
-	riff handler status <handler-name>
+    riff container status <container-name>
 
 ```
-riff handler list [flags]
+riff container list [flags]
 ```
 
 ### Examples
 
 ```
-riff handler list
-riff handler list --all-namespaces
+riff container list
+riff container list --all-namespaces
 ```
 
 ### Options
@@ -43,5 +43,5 @@ riff handler list --all-namespaces
 
 ### SEE ALSO
 
-* [riff handler](riff_handler.md)	 - handlers map HTTP requests to applications, functions or images
+* [riff container](riff_container.md)	 - containers resolve the latest image
 

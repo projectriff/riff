@@ -1,28 +1,28 @@
 ---
-id: riff-stream-list
-title: "riff stream list"
+id: riff-core-deployer-list
+title: "riff core deployer list"
 ---
-## riff stream list
+## riff core deployer list
 
-table listing of streams
+table listing of deployers
 
 ### Synopsis
 
-List streams in a namespace or across all namespaces.
+List deployers in a namespace or across all namespaces.
 
-For detail regarding the status of a single stream, run:
+For detail regarding the status of a single deployer, run:
 
-	riff stream status <stream-name>
+    riff core deployer status <deployer-name>
 
 ```
-riff stream list [flags]
+riff core deployer list [flags]
 ```
 
 ### Examples
 
 ```
-riff stream list
-riff stream list --all-namespaces
+riff core deployer list
+riff core deployer list --all-namespaces
 ```
 
 ### Options
@@ -43,5 +43,5 @@ riff stream list --all-namespaces
 
 ### SEE ALSO
 
-* [riff stream](riff_stream.md)	 - streams of messages
+* [riff core deployer](riff_core_deployer.md)	 - deployers deploy a workload
 

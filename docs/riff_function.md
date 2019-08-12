@@ -15,9 +15,8 @@ language runtime, install build and runtime dependencies, compile the function,
 and packaging everything as a container.
 
 The function resource is only responsible for converting source code into a
-container. The function container image may then be deployed as a request
-handler, or as a stream processor. See `riff handler --help` and
-`riff processor --help` for detail.
+container. The function container image may then be deployed to one of the
+runtimes.
 
 Functions are distinct from applications in the scope and responsibilities of
 the source code. Unlike applications, functions:
