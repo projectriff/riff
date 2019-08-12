@@ -36,28 +36,35 @@
       "riff-application-status",
       "riff-application-tail"
     ],
-    "Handlers": [
-      "riff-handler",
-      "riff-handler-create",
-      "riff-handler-delete",
-      "riff-handler-list",
-      "riff-handler-status",
-      "riff-handler-tail"
+    "Containers": [
+      "riff-container",
+      "riff-container-create",
+      "riff-container-delete",
+      "riff-container-list",
+      "riff-container-status"
     ],
-    "Streams": [
-      "riff-stream",
-      "riff-stream-create",
-      "riff-stream-delete",
-      "riff-stream-list",
-      "riff-stream-status"
+    "Core Runtime": [
+      "riff-core",
+      "riff-core-deployer",
+      "riff-core-deployer-create",
+      "riff-core-deployer-delete",
+      "riff-core-deployer-list",
+      "riff-core-deployer-status",
+      "riff-core-deployer-tail"
     ],
-    "Processors": [
-      "riff-processor",
-      "riff-processor-create",
-      "riff-processor-delete",
-      "riff-processor-list",
-      "riff-processor-status",
-      "riff-processor-tail"
+    "Knative Runtime": [
+      "riff-knative",
+      "riff-knative-adapter",
+      "riff-knative-adapter-create",
+      "riff-knative-adapter-delete",
+      "riff-knative-adapter-list",
+      "riff-knative-adapter-status",
+      "riff-knative-deployer",
+      "riff-knative-deployer-create",
+      "riff-knative-deployer-delete",
+      "riff-knative-deployer-list",
+      "riff-knative-deployer-status",
+      "riff-knative-deployer-tail"
     ]
   }
 }
