@@ -1,0 +1,47 @@
+
+name: Add issues to project boards
+on:
+  issues:
+    types:
+    - opened
+    - labeled
+    - milestoned
+jobs:
+  one:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: projectriff/actions-move-labeled-issue@master
+      with:
+        action-token: "${{ secrets.GITHUB_PROJECT_TOKEN }}"
+        milestone-name: "v0.5.0"
+        project-url: "https://github.com/orgs/projectriff/projects/6" # "v0.5.0" project
+        column-name: "To do"
+        columns-to-ignore: "To do,In progress,Review in progress,Reviewer approved,Done"
+    - uses: projectriff/actions-move-labeled-issue@master
+      with:
+        action-token: "${{ secrets.GITHUB_PROJECT_TOKEN }}"
+        label-name: "build"
+        project-url: "https://github.com/orgs/projectriff/projects/10" # "invokers" project
+        column-name: "To do"
+        columns-to-ignore: "To do,In progress,Review in progress,Reviewer approved,Done"
+    - uses: projectriff/actions-move-labeled-issue@master
+      with:
+        action-token: "${{ secrets.GITHUB_PROJECT_TOKEN }}"
+        label-name: "core-runtime"
+        project-url: "https://github.com/orgs/projectriff/projects/8" # "core runtime" project
+        column-name: "To do"
+        columns-to-ignore: "To do,In progress,Review in progress,Reviewer approved,Done"
+    - uses: projectriff/actions-move-labeled-issue@master
+      with:
+        action-token: "${{ secrets.GITHUB_PROJECT_TOKEN }}"
+        label-name: "knative-runtime"
+        project-url: "https://github.com/orgs/projectriff/projects/7" # "knative runtime" project
+        column-name: "To do"
+        columns-to-ignore: "To do,In progress,Review in progress,Reviewer approved,Done"
+    - uses: projectriff/actions-move-labeled-issue@master
+      with:
+        action-token: "${{ secrets.GITHUB_PROJECT_TOKEN }}"
+        label-name: "streaming-runtime"
+        project-url: "https://github.com/orgs/projectriff/projects/9" # "streaming runtime" project
+        column-name: "To do"
+        columns-to-ignore: "To do,In progress,Review in progress,Reviewer approved,Done"
