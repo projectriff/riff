@@ -32,6 +32,3 @@
 
 ## FAQ
 *Answers to questions you’ve commonly been asked after requesting comments for this proposal.*
-
-## Errata
-*What are minor adjustments that had to be made to the proposal since it was approved?*

@@ -54,11 +54,6 @@ It’s encouraged to write an RFC for any major change. A major change might be:
     2. If we are moving forward the status goes to *Active*
     3. When there is a newer RFC that replaces this one the status goes to *Superseded* and the *Superseded By* gets updated with the number of the new RFC.
 
-### Immutability & Errata
-Once approved the existing body of the RFC should remain immutable. 
-
-Once the proposed work starts, we likely will learn things that require minor changes to the RFC to keep it current. These changes should be captured in an *Errata* section at the end of the document rather than modifying the existing body of the  document directly. This is to highlight how the approach has changed, since initial discussion.
-
 ### Humble Advice
 Some things can be helpful to keep in mind when writing technical documents:
 
@@ -72,5 +67,3 @@ Although any collaborative development process will have feedback as a core comp
 The main reason to avoid this style is that IETF RFCs have evolved into ["the Internet documents of record", containing "very detailed technical information"](https://www.livinginternet.com/i/ia_rfc_invent.htm) about standards that browser vendors and network middleware need to implement. These documents will impact the whole industry and hence warrant [a complex publishing workflow](https://www.rfc-editor.org/wp-content/uploads/rfc-editor-process.gif). The process we propose in this document, on the other hand, is about putting forward an idea as early as possible and receiving feedback on it by a wide audience. With this goal in mind, a less formal process like the one described here is preferred.
 
 ## FAQ
-
-## Errata
