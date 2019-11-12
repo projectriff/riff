@@ -66,9 +66,6 @@ Some things can be helpful to keep in mind when writing technical documents:
 2. Include evidence of the problem if at all possible, even if it’s anecdotal. This can help others see the core causes of the issue rather than only being able to comment on the diagnosis or solution. For example, consider linking to evidence inline, brief inline quotes, and/or footnotes.
 3. IETF RFCs you may see contain strict rules conveyed within the semantic meaning of *SHOULD*, *MUST*, and *MAY*. You don’t need to stress about the particulars of language or semantics when writing riff-RFCs. Place importance explaining your problem and proposal clearly, succinctly, and convincingly over the specifics of implementation.
 
-## Prior Art
-There are some existing solutions that might accomplish the same as this proposal. However, we believe that those solutions are inferior for the reasons below.
-
 ### IEEE RFC Model as-is
 Although any collaborative development process will have feedback as a core component, the name *RFC* was made popular by the process used by the IETF to document fundamental standards for what eventually became the Internet. We could follow the [IETF RFC model](http://www.livinginternet.com/i/ia_rfc.htm), and maybe even require authors to use terms like MUST, SHOULD, and MAY as formally specified by [RFC2119](https://www.ietf.org/rfc/rfc2119.txt) to avoid ambiguity. 
 
