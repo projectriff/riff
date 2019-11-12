@@ -26,7 +26,7 @@ All RFCs are submitted via PRs which will be merged when approved.
 ### Collaboration
 Comments and feedback should be provided on the PR and focus on the technical content.
 
-Authors must address all comments written by the deadline. This doesn't mean every comment and suggestion must be accepted and incorporated, but they must be carefully read and responded to.
+Authors should address all comments written by the deadline. This doesn't mean every comment and suggestion must be accepted and incorporated, but they should be carefully read and responded to.
 
 Every RFC has a lifecycle. The life cycle has the following phases:
 * **Active**: The RFC has been drafted and is open for comments. When making the PR, the doc should start out in this state.
@@ -42,10 +42,11 @@ There is always the option of going straight to a pull request. However, for lar
 It’s encouraged to write an RFC for any major change. A major change might be:
 * Addition of any major new feature or subsystem
 * Changes that impact existing, or introduce new public APIs.
+* Changes that need to be coordinated across multiple repositories.
 
 ### How to write an RFC?
 1. Copy the RFC template (in same folder as this document) and write your proposal! It's up to the author's discretion to decide which section in the template make sense for their proposal. It's recommended to cover the problem the proposal is solving, who it affects, how you’re proposing to solve it, and answers to frequently asked questions. Explicitly listing the goals will also make it easier to retrospect later on the proposal.
-2. Add your RFC to the geode/rfcs source directory, update to the next unique number. 
+2. Add your RFC to the riff/rfcs source directory, update to the next unique number. 
 3. Post a PR for your RFC prefixing the title with `RFC-#`, where `#` is the number of your RFC. Make sure to state the deadline clearly in your PR. 
 4. Answer questions and concerns on the PR. Consider adding questions that get asked more than once to the FAQ section of the RFC.
 5. After the deadline for feedback has been reached summarize the consensus and your decision on the PR  thread. 
@@ -63,7 +64,7 @@ Some things can be helpful to keep in mind when writing technical documents:
 
 1. Keep the document brief but complete. People don’t have time to thoroughly read and think about extremely long documents and they’ll receive less feedback compared with a shorter document. If you find it challenging to meet this limit then maybe the proposal is too big and could be broken up.
 2. Include evidence of the problem if at all possible, even if it’s anecdotal. This can help others see the core causes of the issue rather than only being able to comment on the diagnosis or solution. For example, consider linking to evidence inline, brief inline quotes, and/or footnotes.
-3. IETF RFCs you may see contain strict rules conveyed within the semantic meaning of *SHOULD*, *MUST*, and *MAY*. You don’t need to stress about the particulars of language or semantics when writing Geode-RFCs. Place importance explaining your problem and proposal clearly, succinctly, and convincingly over the specifics of implementation.
+3. IETF RFCs you may see contain strict rules conveyed within the semantic meaning of *SHOULD*, *MUST*, and *MAY*. You don’t need to stress about the particulars of language or semantics when writing riff-RFCs. Place importance explaining your problem and proposal clearly, succinctly, and convincingly over the specifics of implementation.
 
 ## Prior Art
 There are some existing solutions that might accomplish the same as this proposal. However, we believe that those solutions are inferior for the reasons below.
