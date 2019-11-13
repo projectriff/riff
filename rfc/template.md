@@ -8,6 +8,8 @@
 
 **Superseded by:** N/A
 
+**Supersedes:** N/A
+
 **Related:** N/A
 
 
@@ -21,14 +23,14 @@
 *Describe your solution and how it’s going to solve the problem. This is likely the largest section of your proposal and might even include some high-level diagrams if you are proposing code changes. While all important aspects need to be covered, also keep in mind that shorter documents are more likely to be read.*
 
 ### User Impact
-*If you are proposing to add or modify public interfaces, those changes should be outlined here in detail.*
+*If you are proposing to add or modify public interfaces, those changes should be listed here in detail.*
 
 ### Backwards Compatibility and Upgrade Path
 *Will the regular rolling upgrade process work with these changes?*
 
-*How do the proposed changes impact backwards-compatibility? Are message or file formats changing?*
+*How do the proposed changes impact backwards-compatibility? Are APIs and CLI commands changing?*
 
 *Is there a need for a deprecation process to provide an upgrade path to users who will need to adjust their applications?*
 
 ## FAQ
-*Answers to questions you’ve commonly been asked after requesting comments for this proposal.*
+*Answers to common questions that may arise and those that you’ve commonly been asked after requesting comments for this proposal.*
