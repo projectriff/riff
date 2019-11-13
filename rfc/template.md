@@ -26,11 +26,9 @@
 *If you are proposing to add or modify public interfaces, those changes should be listed here in detail.*
 
 ### Backwards Compatibility and Upgrade Path
-*Will the regular rolling upgrade process work with these changes?*
-
 *How do the proposed changes impact backwards-compatibility? Are APIs and CLI commands changing?*
 
-*Is there a need for a deprecation process to provide an upgrade path to users who will need to adjust their applications?*
+*Is there a need for a deprecation process to provide an upgrade path to users?*
 
 ## FAQ
 *Answers to common questions that may arise and those that you’ve commonly been asked after requesting comments for this proposal.*
