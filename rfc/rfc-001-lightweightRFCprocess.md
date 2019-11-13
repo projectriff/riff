@@ -23,7 +23,10 @@ The proposed solution to address the problem described above is to have an indiv
 
 Much inspiration for this proposal has been drawn from [Apache Geode's RFC process](https://cwiki.apache.org/confluence/display/GEODE/Lightweight+RFC+Process), which in turn draws from Phil Calçado’s [Structured RFC Process](https://philcalcado.com/2018/11/19/a_structured_rfc_process.html).
 
-All RFCs are submitted via PRs to the [github.com/projectriff/riff](https://github.com/projectriff/riff) repo which will be merged when approved.
+All RFCs are submitted via PRs to the [github.com/projectriff/riff](https://github.com/projectriff/riff) repo which will be merged when:
+- The `Reviewed By` date has elapsed
+- The RFC author has summarized the discussion in the PR thread.
+- concensus has been reached about the state ("Accepted/Dropped").
 
 ### Collaboration
 Comments and feedback should be provided on the PR.
@@ -32,7 +35,7 @@ Authors should address all comments by the deadline. This doesn't mean every com
 
 Every RFC is in one of the following phases:
 * **Active**: The RFC has been drafted and is open for comments. When making the PR, the doc should start out in this state.
-* **Accepted**: All the comments have been addressed and the proposed changes have been agreed upon. The implementation may start after this point. This should be the state while merging the PR.
+* **Accepted**: All the comments have been addressed and the proposed changes have been agreed upon. The implementation may start after this point.
 * **Dropped**: The changes proposed on this RFC were not agreed upon and no implementation will follow.
 * **Superseded**: The changes proposed on this RFC aren't in effect anymore, the document may be kept for historical purposes and there is a new RFC that’s more current.
 
@@ -58,6 +61,7 @@ It’s encouraged to write an RFC for any major change. A major change might be:
     1. If the decision is to drop the proposal, the status should be updated to Dropped. 
     2. If we are moving forward the status goes to *Accepted*
     3. When there is a newer RFC that replaces this one the status goes to *Superseded* and the *Superseded By* gets updated with the number of the new RFC.
+7. Someone with merge privilage can then merge the PR.
 
 ### Humble Advice
 Some things can be helpful to keep in mind when writing technical documents:
