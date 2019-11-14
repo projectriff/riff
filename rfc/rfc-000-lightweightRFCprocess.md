@@ -61,10 +61,10 @@ It’s encouraged to write an RFC for any major change. A major change might be:
 5. Answer questions and concerns on the PR. Consider adding questions that get asked more than once to the FAQ section of the RFC.
 6. After the deadline for feedback has been reached summarize the consensus and your decision on the PR thread. 
     1. Add a link to the Pull request in the RFC so that the discussion and summary does not get lost.
-    2. If the decision is to drop the proposal, the status should be updated to Dropped. 
+    2. If the decision is to drop the proposal, the status should be updated to *Dropped*. 
     3. If we are moving forward the status goes to *Accepted*
     4. When there is a newer RFC that replaces this one the status goes to *Superseded* and the *Superseded By* gets updated with the number of the new RFC.
-7. Someone with merge privilage can then merge the PR.
+7. Someone with merge privilege can then merge the PR.
 
 ### Humble Advice
 Some things can be helpful to keep in mind when writing technical documents:
