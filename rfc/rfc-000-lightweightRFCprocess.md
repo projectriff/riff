@@ -1,4 +1,4 @@
-# RFC-0: Lightweight RFC Process for riff
+# RFC-000: Lightweight RFC Process for riff
 
 **To be Reviewed By:** Nov 15th 2019
 
