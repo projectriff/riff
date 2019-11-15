@@ -19,7 +19,7 @@ As the scope of the project expands and the number of moving pieces increases, w
 This document will refer to that process as the “Request For Comments (RFC) process”.
 
 ## Solution
-The proposed solution to address the problem described above is to have an individual author or a group of authors submit a proposal to the community in the form of a RFC PR with a RFC markdown file, both called RFC-xxx-<some-name>.md, in order to gather feedback and achieve consensus. The RFC follows the same format as used by this proposal.
+The proposed solution to address the problem described above is to have an individual author or a group of authors submit a proposal to the community in the form of a RFC PR with a RFC markdown file, both called rfc-xxxx-<some-name>.md, in order to gather feedback and achieve consensus. The RFC follows the same format as used by this proposal.
 
 Much inspiration for this proposal has been drawn from [Apache Geode's RFC process](https://cwiki.apache.org/confluence/display/GEODE/Lightweight+RFC+Process), which in turn draws from Phil Calçado’s [Structured RFC Process](https://philcalcado.com/2018/11/19/a_structured_rfc_process.html).
 
@@ -48,7 +48,7 @@ It’s encouraged to write an RFC for any major change. A major change might be:
 ### How to write an RFC?
 1. Copy the RFC template (in same folder as this document) and write your proposal! It's up to the author's discretion to decide which sections in the template make sense for their proposal. Cover the problem the proposal is solving, who it affects, how you’re proposing to solve it, and answers to frequently asked questions. Explicitly listing the goals will also make it easier to evaluate whether the proposal was successful.
 2. Add your RFC to the riff/rfc source directory, update to the next unique number. 
-3. Post a PR for your RFC prefixing the title with `RFC-#`, where `#` is the number of your RFC.
+3. Post a PR for your RFC prefixing the title with `rfc-#`, where `#` is the number of your RFC.
 4. If the proposed RFC replaces another, update the *Supersedes* field.
 5. Answer questions and concerns on the PR. Consider adding questions that get asked more than once to the FAQ section of the RFC.
 6. Summarize the consensus and your decision on the PR thread. 

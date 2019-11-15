@@ -7,6 +7,6 @@ https://stackoverflow.com/questions/20348629/what-are-advantages-of-keeping-line
 Working on a new branch of your fork will help you base your git history on the upstream master.
 Please leave multiple commits intact for ease of reviewing. Whoever merges the PR may decide to squash commits together.
 
-If you would like to contribute a major feature, please consider writing a link:rfc/rfc-001-lightweightRFCprocess.md[RFC].
+If you would like to contribute a major feature, please consider writing a link:rfc/rfc-0000-lightweight-rfc-process.md[RFC].
 
 If you have not previously done so, please submit the https://cla.pivotal.io/sign/spring[Contributor License Agreement].
