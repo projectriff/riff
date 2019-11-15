@@ -1,7 +1,5 @@
 # RFC-#: Title
 
-**To be Reviewed By:** 
-
 **Authors:**
 
 **Status:** **Active** | Accepted | Dropped | Superseded
