@@ -2,7 +2,7 @@
 
 **Authors:** Swapnil Bawaskar
 
-**Status:** **Active** | Accepted | Rejected | Superseded
+**Status:** **Active** | Accepted | Rejected | Deprecated
 
 **Pull Request URL:** https://github.com/projectriff/riff/pull/1358
 
@@ -34,7 +34,7 @@ Every RFC is in one of the following phases:
 * **Active**: The RFC has been drafted and is open for comments. When making the PR, the doc should start out in this state.
 * **Accepted**: All the comments have been addressed and the proposed changes have been agreed upon. The implementation may start after this point.
 * **Rejected**: The changes proposed on this RFC were not agreed upon and no implementation will follow.
-* **Superseded**: The changes proposed on this RFC aren't in effect anymore, the document may be kept for historical purposes and there is a new RFC that’s more current.
+* **Deprecated**: The changes proposed on this RFC aren't in effect anymore, the document may be kept for historical purposes and there is a new RFC that’s more current.
 
 ### When to write an RFC?
 The first step for any enhancement should be to file an issue. Then you could proceed to open a pull request. However, for larger changes, it is advisable to reduce the risk of rejection of the pull request by first gathering input from the community.
@@ -54,7 +54,7 @@ It’s encouraged to write an RFC for any major change. A major change might be:
 6. Summarize the consensus and your decision on the PR thread. 
     1. Add a link to the Pull request in the RFC so that the discussion and summary are not lost.
     2. Update the status to *Accepted* or *Rejected*
-    4. When there is a newer RFC that replaces this one the status goes to *Superseded* and the *Superseded By* gets updated with the number of the new RFC.
+    4. When there is a newer RFC that replaces this one the status goes to *Deprecated* and the *Superseded By* gets updated with the number of the new RFC.
 7. Someone with merge privilege can then merge the PR.
 
 ### Humble Advice
