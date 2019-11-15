@@ -2,7 +2,7 @@
 
 **Authors:** Swapnil Bawaskar
 
-**Status:** **Active** | Accepted | Rejected | Deprecated
+**Status:**
 
 **Pull Request URL:** https://github.com/projectriff/riff/pull/1358
 
@@ -30,8 +30,7 @@ Comments and feedback should be provided on the PR.
 
 Authors should address all comments. This doesn't mean every comment and suggestion must be accepted and incorporated, but they should be carefully read and responded to.
 
-Every RFC is in one of the following phases:
-* **Active**: The RFC has been drafted and is open for comments. When making the PR, the doc should start out in this state.
+After it is merged, every RFC is in one of the following phases:
 * **Accepted**: All the comments have been addressed and the proposed changes have been agreed upon. The implementation may start after this point.
 * **Rejected**: The changes proposed on this RFC were not agreed upon and no implementation will follow.
 * **Deprecated**: The changes proposed on this RFC aren't in effect anymore, the document may be kept for historical purposes and there is a new RFC that’s more current.
