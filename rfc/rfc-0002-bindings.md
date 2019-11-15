@@ -30,7 +30,7 @@ riff should adopt CNB Bindings spec for bindings at both build and runtime.
 
 Kubernetes uses [Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) to inject files from an external source into a running container. While there is a diverse spectrum of volume implementations available, in order to maximize both compatibility with bog standard Kubernetes and simplify the implementation, we should focus on a [configMap volume](https://kubernetes.io/docs/concepts/storage/volumes/#configmap) for binding metadata and a [secret volume](https://kubernetes.io/docs/concepts/storage/volumes/#secret) for binding secrets, which map directly to Kubernetes [ConfigMaps](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) and [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) respectively.
 
-As a binding is backed by a ConfigMap and Secret a mechanism is needed to specify which ConfigMap and Secret. [ObjectReferences](https://godoc.org/k8s.io/api/core/v1#ObjectReference) are commonly used to define the coordinates to an arbitrary resources. A binding reference consists of metadata ObjectReference and a secret ObjectReference.
+As a binding is backed by a ConfigMap and Secret a mechanism is needed to specify which ConfigMap and Secret. [LocalObjectReferences](https://godoc.org/k8s.io/api/core/v1#LocalObjectReference) are commonly used to define the coordinates to an arbitrary resources. A binding reference consists of `metadata` LocalObjectReference to a ConfigMap and a `secret` LocalObjectReference to a Secret.
 
 Any resource that provides a binding should include the binding reference on its status, for example:
 
@@ -41,14 +41,8 @@ status:
   ...
   binding:
     metadataRef:
-      apiVersion: v1
-      kind: ConfigMap
-      namespace: default
       name: provider-binding-metadata
     secretRef:
-      apiVersion: v1
-      kind: Secret
-      namespace: default
       name: provider-binding-secret
 ```
 
@@ -64,20 +58,14 @@ spec:
   bindings:
   - name: my-binding
     metadataRef:
-      apiVersion: v1
-      kind: ConfigMap
-      namespace: default
       name: provider-binding-metadata
     secretRef:
-      apiVersion: v1
-      kind: Secret
-      namespace: default
       name: provider-binding-secret
 ```
 
 It is common to consume multiple bindings within a single workload. Each binding must have a unique name for the workload. The binding name is the directory the metadata and secret volumes are mounted within. While the name has no impact on the binding per se, workloads may use the name to convey semantic meaning about the intent of the binding (e.g. a primary database vs a replica).
 
-Note: The ConfigMap and Secret for the binding must be in the same namespace as the workload Pod, as Kubernetes does not support mounting resources defined in other namespaces.
+Note: The ConfigMap and Secret for the binding must be in the same namespace as the workload Pod.
 
 The reconciler for the resource consuming a binding is responsible for mapping the ConfigMap and Secret to volume mounts within the pod.
 
