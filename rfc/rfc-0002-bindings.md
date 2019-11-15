@@ -4,9 +4,9 @@
 
 **Authors:** @scothis
 
-**Status:** **Active** | Accepted | Dropped | Superseded
+**Status:** 
 
-**Pull Request URL:** #1360
+**Pull Request URL:** [#1360](https://github.com/projectriff/riff/pull/1360)
 
 **Superseded by:** N/A
 
@@ -32,7 +32,7 @@ Kubernetes uses [Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) 
 
 As a binding is backed by a ConfigMap and Secret a mechanism is needed to specify which ConfigMap and Secret. [ObjectReferences](https://godoc.org/k8s.io/api/core/v1#ObjectReference) are commonly used to define the coordinates to an arbitrary resources. A binding reference consists of metadata ObjectReference and a secret ObjectReference.
 
-Any resource that produces a binding should include the binding reference on it's status, for example:
+Any resource that provides a binding should include the binding reference on its status, for example:
 
 ```yaml
 name: provider
@@ -79,12 +79,12 @@ It is common to consume multiple bindings within a single workload. Each binding
 
 Note: The ConfigMap and Secret for the binding must be in the same namespace as the workload Pod, as Kubernetes does not support mounting resources defined in other namespaces.
 
-The reconcile for the consumer resource is responsible for mapping the bindings to volume mounts within the pod.
+The reconciler for the resource consuming a binding is responsible for mapping the ConfigMap and Secret to volume mounts within the pod.
 
 kpack, as of v0.0.5, does not provide any mechanism for injecting volumes into builds, or any other means to satisfy the CNB Bindings spec. Further work will be required for proper integration of bindings at buildtime.
 
 ### User Impact
-Users are not required to use binding. They remain free to use any other mechanism provided by Kubernetes to discover and/or inject credentials into their workloads. riff resources like Deployers and Processors currently contain a PodSpec where custom volumes, environment variables and arguments may be defined.
+This RFC does not require users to take any action. They remain free to use any other mechanism provided by Kubernetes to discover and/or inject credentials into their workloads. riff resources like Deployers and Processors currently contain a PodSpec where custom volumes, environment variables and arguments may be defined. Individual riff resources may start to produce and/or consume bindings, which users may then consume.
 
 While a user may continue to use lower-level Kubernetes idioms, a higher-level experience can provide users a simpler and more maintainable experience.
 
@@ -94,4 +94,14 @@ There are no direct backwards compatibility concerns as riff does not current pr
 It is expected that the bindings space will actively evolve within the Kubernetes ecosystem. As the space matures this RFC will almost certainly be superseded to align with the broader community.
 
 ## FAQ
-*Answers to common questions that may arise and those that you’ve commonly been asked after requesting comments for this proposal.*
+*How do functions and applications consume the binding?*
+
+It's anticipated that frameworks and libraries will manage the binding within the container without the developer needing to directly read from the filesystem. This RFC has no opinion how a container should consume the binding metadata or secret. At this time, there are no known such libraries. It would be logical for riff function invokers to adopt an appropriate library to provide a higher level experience to function authors.
+
+*Does the binding name have any meaning?*
+
+Maybe. The name of the binding appears in the filesystem as the directory containing the `metadata` and `secret` directories that comprise the binding. A workload may take the name of a binding into considering when consuming the binding, or it may ignore it. The binding name is the only aspect of the binding that is under control of the consumer. All other elements of the binding are defined by the binding producer. Additional metadata may be injected into the workload about the binding out of band, but is not part of this RFC.
+
+*How do consumers discover bindings?*
+
+This RFC does not prescribe a mechanism for discovering bindings, it is assumed that the consumer has foreknowledge. Another RFC may define a higher level experience.
