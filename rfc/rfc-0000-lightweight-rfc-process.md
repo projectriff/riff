@@ -46,7 +46,7 @@ It’s encouraged to write an RFC for any major change. A major change might be:
 * Changes that need to be coordinated across multiple repositories.
 
 ### How to write an RFC?
-1. Copy the RFC template (in same folder as this document) and write your proposal! It's up to the author's discretion to decide which sections in the template make sense for their proposal. Cover the problem the proposal is solving, who it affects, how you’re proposing to solve it, and answers to frequently asked questions. Explicitly listing the goals will also make it easier to evaluate whether the proposal was successful.
+1. Copy the RFC [template](rfc-xxxx-template.md) (in same folder as this document) and write your proposal! It's up to the author's discretion to decide which sections in the template make sense for their proposal. Cover the problem the proposal is solving, who it affects, how you’re proposing to solve it, and answers to frequently asked questions. Explicitly listing the goals will also make it easier to evaluate whether the proposal was successful.
 2. Add your RFC to the riff/rfc source directory, update to the next unique number. 
 3. Post a PR for your RFC prefixing the title with `rfc-#`, where `#` is the number of your RFC.
 4. If the proposed RFC replaces another, update the *Supersedes* field.
