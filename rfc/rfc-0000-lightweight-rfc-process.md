@@ -1,4 +1,4 @@
-# RFC-000: Lightweight RFC Process for riff
+# RFC-0000: Lightweight RFC Process for riff
 
 **Authors:** Swapnil Bawaskar
 
@@ -14,7 +14,7 @@
 
 
 ## Problem
-As the scope of the project expands and the number of moving pieces increases, we a way for contributors to propose designs for significant changes, and encourage discussion and feedback in a PR forum before proceeding with implementation.
+As the scope of the project expands and the number of moving pieces increases, we need a way for contributors to propose designs for significant changes, and encourage discussion and feedback in a PR forum before proceeding with implementation.
 
 This document will refer to that process as the “Request For Comments (RFC) process”.
 
