@@ -2,7 +2,7 @@
 
 **Authors:**
 
-**Status:** **Active** | Accepted | Dropped | Superseded
+**Status:** **Active** | Accepted | Rejected | Superseded
 
 **Pull Request URL:** link
 

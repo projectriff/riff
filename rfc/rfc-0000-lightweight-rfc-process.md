@@ -2,7 +2,7 @@
 
 **Authors:** Swapnil Bawaskar
 
-**Status:** **Active** | Accepted | Dropped | Superseded
+**Status:** **Active** | Accepted | Rejected | Superseded
 
 **Pull Request URL:** https://github.com/projectriff/riff/pull/1358
 
@@ -23,7 +23,7 @@ The proposed solution to address the problem described above is to have an indiv
 
 Much inspiration for this proposal has been drawn from [Apache Geode's RFC process](https://cwiki.apache.org/confluence/display/GEODE/Lightweight+RFC+Process), which in turn draws from Phil Calçado’s [Structured RFC Process](https://philcalcado.com/2018/11/19/a_structured_rfc_process.html).
 
-All RFCs are submitted via PRs to the [github.com/projectriff/riff](https://github.com/projectriff/riff) repo which will be merged when consensus has been reached about the state ("Accepted/Dropped").
+All RFCs are submitted via PRs to the [github.com/projectriff/riff](https://github.com/projectriff/riff) repo which will be merged when consensus has been reached about the state ("Accepted/Rejected").
 
 ### Collaboration
 Comments and feedback should be provided on the PR.
@@ -33,7 +33,7 @@ Authors should address all comments. This doesn't mean every comment and suggest
 Every RFC is in one of the following phases:
 * **Active**: The RFC has been drafted and is open for comments. When making the PR, the doc should start out in this state.
 * **Accepted**: All the comments have been addressed and the proposed changes have been agreed upon. The implementation may start after this point.
-* **Dropped**: The changes proposed on this RFC were not agreed upon and no implementation will follow.
+* **Rejected**: The changes proposed on this RFC were not agreed upon and no implementation will follow.
 * **Superseded**: The changes proposed on this RFC aren't in effect anymore, the document may be kept for historical purposes and there is a new RFC that’s more current.
 
 ### When to write an RFC?
@@ -53,8 +53,7 @@ It’s encouraged to write an RFC for any major change. A major change might be:
 5. Answer questions and concerns on the PR. Consider adding questions that get asked more than once to the FAQ section of the RFC.
 6. Summarize the consensus and your decision on the PR thread. 
     1. Add a link to the Pull request in the RFC so that the discussion and summary are not lost.
-    2. If the decision is to drop the proposal, the status should be updated to *Dropped*. 
-    3. If we are moving forward the status goes to *Accepted*
+    2. Update the status to *Accepted* or *Rejected*
     4. When there is a newer RFC that replaces this one the status goes to *Superseded* and the *Superseded By* gets updated with the number of the new RFC.
 7. Someone with merge privilege can then merge the PR.
 
