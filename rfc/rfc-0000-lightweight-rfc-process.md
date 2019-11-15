@@ -16,19 +16,19 @@
 
 
 ## Problem
-As the scope of the project expands and the number of moving pieces increases, we need a process to gather feedback on the changes proposed to the architecture and interaction of various components in the system.
+As the scope of the project expands and the number of moving pieces increases, we a way for contributors to propose designs for significant changes, and encourage discussion and feedback in a PR forum before proceeding with implementation.
 
 This document will refer to that process as the “Request For Comments (RFC) process”.
 
 ## Solution
-The proposed solution to address the problem described above is to have an individual author or a group of authors submit a proposal to the community in order to gather feedback and achieve consensus. The RFC follows the same format as used by this proposal.
+The proposed solution to address the problem described above is to have an individual author or a group of authors submit a proposal to the community in the form of a RFC PR with a RFC markdown file, both called RFC-xxx-<some-name>.md, in order to gather feedback and achieve consensus. The RFC follows the same format as used by this proposal.
 
 Much inspiration for this proposal has been drawn from [Apache Geode's RFC process](https://cwiki.apache.org/confluence/display/GEODE/Lightweight+RFC+Process), which in turn draws from Phil Calçado’s [Structured RFC Process](https://philcalcado.com/2018/11/19/a_structured_rfc_process.html).
 
 All RFCs are submitted via PRs to the [github.com/projectriff/riff](https://github.com/projectriff/riff) repo which will be merged when:
 - The `Reviewed By` date has elapsed
 - The RFC author has summarized the discussion in the PR thread.
-- concensus has been reached about the state ("Accepted/Dropped").
+- consensus has been reached about the state ("Accepted/Dropped").
 
 ### Collaboration
 Comments and feedback should be provided on the PR.
