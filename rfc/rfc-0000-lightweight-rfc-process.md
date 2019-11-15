@@ -37,7 +37,7 @@ Every RFC is in one of the following phases:
 * **Superseded**: The changes proposed on this RFC aren't in effect anymore, the document may be kept for historical purposes and there is a new RFC that’s more current.
 
 ### When to write an RFC?
-There is always the option of going straight to a pull request. However, for larger changes, it is advisable to reduce the risk of rejection of the pull request by first gathering input from the community.
+The first step for any enhancement should be to file an issue. Then you could proceed to open a pull request. However, for larger changes, it is advisable to reduce the risk of rejection of the pull request by first gathering input from the community.
 
 It’s encouraged to write an RFC for any major change. A major change might be:
 * Addition of new feature or subsystem
