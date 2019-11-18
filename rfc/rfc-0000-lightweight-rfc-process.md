@@ -2,7 +2,7 @@
 
 **Authors:** Swapnil Bawaskar
 
-**Status:**
+**Status:** Accepted
 
 **Pull Request URL:** https://github.com/projectriff/riff/pull/1358
 
