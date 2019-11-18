@@ -1,7 +1,5 @@
 # RFC-0002: Bindings
 
-**To be Reviewed By:** 
-
 **Authors:** @scothis
 
 **Status:** 
