@@ -30,7 +30,7 @@ Comments and feedback should be provided on the PR.
 
 Authors should address all comments. This doesn't mean every comment and suggestion must be accepted and incorporated, but they should be carefully read and responded to.
 
-After it is merged, every RFC is in one of the following phases:
+After it is merged, every RFC is in one of the following states:
 * **Accepted**: All the comments have been addressed and the proposed changes have been agreed upon. The implementation may start after this point.
 * **Rejected**: The changes proposed on this RFC were not agreed upon and no implementation will follow.
 * **Deprecated**: The changes proposed on this RFC aren't in effect anymore, the document may be kept for historical purposes and there is a new RFC that’s more current.
