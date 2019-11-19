@@ -24,7 +24,7 @@ The  is to provide users with only one cli (riff cli) that will enable users to 
 
 #### User Impact
 We should introduce the following commands to the riff cli:
-- send a massage to the stream:
+- send a message to the stream:
 
     `riff streaming stream publish <stream-name> --payload <payload-as-string> --headers <headers-as-string>`  
     content type has already been specified while creating the stream.
