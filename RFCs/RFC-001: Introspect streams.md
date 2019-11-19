@@ -1,4 +1,4 @@
-# RFC-001: Introspect Streams
+# RFC-001: CLI support for publishing and subscribing to streams
 
 **To be Reviewed By:** 11/19/2019
 
@@ -19,8 +19,7 @@ but there is no easy mechanism to get events into the stream and look into the c
 We will only address this problem for development/demos, not production, so topics like auth/authz are out of scope for this document.
 
 ## Solution
-### Ideal solution:
-The  is to provide users with only one cli (riff cli) that will enable users to send/receive messages to/from a stream (commands below). We will have to ask the users to port-forward the gateway service if they are running outside the cluster.
+The idea is to provide users with only one cli (riff cli) that will enable users to send/receive messages to/from a stream (commands below). We will have to ask the users to port-forward the gateway service if they are running outside the cluster.
 
 #### User Impact
 We should introduce the following commands to the riff cli:
