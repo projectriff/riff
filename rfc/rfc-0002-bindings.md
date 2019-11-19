@@ -91,3 +91,7 @@ Maybe. The name of the binding appears in the filesystem as the directory contai
 *How do consumers discover bindings?*
 
 This RFC does not prescribe a mechanism for discovering bindings, it is assumed that the consumer has foreknowledge. Another RFC may define a higher level experience.
+
+*How do CNB Bindings relate to a [Service Catalog ServiceBinding](https://svc-cat.io/docs/resources/#servicebinding)?*
+
+Service Catalog is a client to an Open Service Broker. A Service Catalog ServiceBinding is a mechanism to bind a provisioned "service" to the cluster by exposing the credentials as a Secret. CNB Bindings have no mechanism to create "service" instances, instead, its focus is binding metadata and secrets to a workload. The output of the ServiceBinding is not directly consumable by CNB Bindings. A mechanism to convert a ServiceBinding to a format consumable by CNB Bindings is out of scope for this RFC.
