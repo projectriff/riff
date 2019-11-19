@@ -1,12 +1,14 @@
-# RFC-001: CLI support for publishing and subscribing to streams
-
-**To be Reviewed By:** 11/19/2019
+# RFC-0001: CLI support for publishing and subscribing to streams
 
 **Authors:** Swapnil Bawaskar
 
-**Status:** **Active** | Accepted | Dropped | Superseded
+**Status:**
+
+**Pull Request URL:** https://github.com/projectriff/riff/pull/1359
 
 **Superseded by:** N/A
+
+**Supersedes:** N/A
 
 **Related:** N/A
 
