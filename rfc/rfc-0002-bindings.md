@@ -75,7 +75,7 @@ This RFC does not require users to take any action. They remain free to use any 
 While a user may continue to use lower-level Kubernetes idioms, a higher-level experience can provide users a simpler and more maintainable experience.
 
 ### Backwards Compatibility and Upgrade Path
-There are no direct backwards compatibility concerns as riff does not current provide any support for bindings. Cloud Foundry services are exposed to application via the `VCAP_SERVICES` environment variable which is a different structure than the CNB Bindings spec.
+There are no direct backwards compatibility concerns as riff does not currently provide any support for bindings. Cloud Foundry services are exposed to application via the `VCAP_SERVICES` environment variable which is a different structure than the CNB Bindings spec.
 
 It is expected that the bindings space will actively evolve within the Kubernetes ecosystem. As the space matures this RFC will almost certainly be superseded to align with the broader community.
 
