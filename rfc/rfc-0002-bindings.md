@@ -28,7 +28,7 @@ riff should adopt CNB Bindings spec for bindings at both build and runtime.
 
 Kubernetes uses [Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) to inject files from an external source into a running container. While there is a diverse spectrum of volume implementations available, in order to maximize both compatibility with bog standard Kubernetes and simplify the implementation, we should focus on a [configMap volume](https://kubernetes.io/docs/concepts/storage/volumes/#configmap) for binding metadata and a [secret volume](https://kubernetes.io/docs/concepts/storage/volumes/#secret) for binding secrets, which map directly to Kubernetes [ConfigMaps](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) and [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) respectively.
 
-As a binding is backed by a ConfigMap and Secret a mechanism is needed to specify which ConfigMap and Secret. [LocalObjectReferences](https://godoc.org/k8s.io/api/core/v1#LocalObjectReference) are commonly used to define the coordinates to an arbitrary resources. A binding reference consists of `metadata` LocalObjectReference to a ConfigMap and a `secret` LocalObjectReference to a Secret.
+As a binding is backed by a ConfigMap and Secret a mechanism is needed to specify which ConfigMap and Secret. [LocalObjectReferences](https://godoc.org/k8s.io/api/core/v1#LocalObjectReference) are commonly used to define the coordinates to an arbitrary resource. A binding reference consists of `metadata` LocalObjectReference to a ConfigMap and a `secret` LocalObjectReference to a Secret.
 
 Any resource that provides a binding should include the binding reference on its status, for example:
 
