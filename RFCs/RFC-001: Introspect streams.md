@@ -41,20 +41,6 @@ We should introduce the following commands to the riff cli:
     }
     ```
 
-### Interim solution:
-We have a go library at projectriff/stream-client-go which has methods to `Publish` and `Subscribe` to/from streams. We will create two simple binaries one for publishing and one for subscribing within this repo.
-
-Steps:
-1. Move the existing client.go and client_test.go to `pkg` folder. 
-1. create `cmd/publish/main.go` for the publish binary
-1. create `cmd/subscribe/main.go` for the subscribe binary.
-1. setup CI to publish the binaries.
-
-#### User Impact
-The users will download the publish and subscribe binaries and run them by passing positional parameters:  
-- `$ streampublish <gateway-address> <topic-name> <payload-as-string> <key> <headers> <content-type>`
-- `$ streamsubscribe <gateway-address> <topic-name> <group> <long-offset>`
-
 ### Backwards Compatibility and Upgrade Path
 
 ## FAQ
