@@ -86,7 +86,7 @@ It's anticipated that frameworks and libraries will manage the binding within th
 
 *Does the binding name have any meaning?*
 
-Maybe. The name of the binding appears in the filesystem as the directory containing the `metadata` and `secret` directories that comprise the binding. A workload may take the name of a binding into considering when consuming the binding, or it may ignore it. The binding name is the only aspect of the binding that is under control of the consumer. All other elements of the binding are defined by the binding producer. Additional metadata may be injected into the workload about the binding out of band, but is not part of this RFC.
+Maybe. The name of the binding appears in the filesystem as the directory containing the `metadata` and `secret` directories that comprise the binding. A workload may take the name of a binding into consideration when consuming the binding, or it may ignore it. The binding name is the only aspect of the binding that is under control of the consumer. All other elements of the binding are defined by the binding producer. Additional metadata may be injected into the workload about the binding out of band, but is not part of this RFC.
 
 *How do consumers discover bindings?*
 
