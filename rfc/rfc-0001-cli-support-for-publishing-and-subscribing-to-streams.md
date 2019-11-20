@@ -45,6 +45,7 @@ We should introduce the following commands to the riff cli:
     ```
 
 ### Backwards Compatibility and Upgrade Path
+This is net new functionality, so backward compatibility is not an issue.
 
 ## FAQ
 *Answers to questions you’ve commonly been asked after requesting comments for this proposal.*
