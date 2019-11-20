@@ -70,7 +70,7 @@ The reconciler for the resource consuming a binding is responsible for mapping t
 kpack, as of v0.0.5, does not provide any mechanism for injecting volumes into builds, or any other means to satisfy the CNB Bindings spec. Further work will be required for proper integration of bindings at buildtime.
 
 ### User Impact
-This RFC does not require users to take any action. They remain free to use any other mechanism provided by Kubernetes to discover and/or inject credentials into their workloads. riff resources like Deployers and Processors currently contain a PodSpec where custom volumes, environment variables and arguments may be defined. Individual riff resources may start to produce and/or consume bindings, which users may then consume.
+This RFC does not require users to take any action. They remain free to use any other mechanism provided by Kubernetes to discover and/or inject credentials into their workloads. riff resources like Deployers and Processors currently contain a PodSpec where custom volumes, environment variables and arguments may be defined. Individual riff resources may start to produce and/or consume bindings.
 
 While a user may continue to use lower-level Kubernetes idioms, a higher-level experience can provide users a simpler and more maintainable experience.
 
