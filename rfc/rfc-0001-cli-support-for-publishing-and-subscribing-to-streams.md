@@ -27,9 +27,8 @@ The idea is to provide users with only one cli (riff cli) that will enable users
 We should introduce the following commands to the riff cli:
 - send a message to the stream:
 
-    `riff streaming stream publish <stream-name> --payload <payload-as-string> --headers <headers-as-string> --payload-file <relative-filepath>`  
+    `riff streaming stream publish <stream-name> --payload <payload-as-string> --headers <headers-as-string>`  
     content type has already been specified while creating the stream.
-    Options `payload` and `payload-file` are mutually exclusive. The former is to be used for strings and the later for binary payloads. The binary payload will be base64 encoded.
 
 - subscribe for messages from a stream:
 
