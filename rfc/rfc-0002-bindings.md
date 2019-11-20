@@ -72,7 +72,7 @@ kpack, as of v0.0.5, does not provide any mechanism for injecting volumes into b
 ### User Impact
 This RFC does not require users to take any action. They remain free to use any other mechanism provided by Kubernetes to discover and/or inject credentials into their workloads. riff resources like Deployers and Processors currently contain a PodSpec where custom volumes, environment variables and arguments may be defined. Individual riff resources may start to produce and/or consume bindings.
 
-While a user may continue to use lower-level Kubernetes idioms, a higher-level experience can provide users a simpler and more maintainable experience.
+While a user may use lower-level binding ConfigMap and Secret resources directly, higher-level user experiences are out of scope for this RFC and should be the focus of future RFCs.
 
 ### Backwards Compatibility and Upgrade Path
 There are no direct backwards compatibility concerns as riff does not currently provide any support for bindings. Cloud Foundry services are exposed to applications via the `VCAP_SERVICES` environment variable which is a different structure than the CNB Bindings spec.
