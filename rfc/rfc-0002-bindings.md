@@ -22,13 +22,13 @@ The binding contains both metadata and credentials to provide a workload the det
 A generic mechanism to provision bindings, and the specific structure of the metadata and credentials are out of scope for this RFC.
 
 ## Solution
-The Cloud Native Buildpacks project has a [spec for Bindings](https://github.com/buildpack/spec/blob/master/extensions/bindings.md) which defines the form bindings should take at both build and runtime. In short, each binding is represented as a directory inside a well known directory with two sub-directories: `metadata` for general non-sensitive information about the binding, and `secret` for credentials and other sensitive information. Each attribute for the binding is a file in one of those two directories. The metadata is available at buildtime and both the metadata and secret is available at runtime.
+The Cloud Native Buildpacks project has a [spec for Bindings](https://github.com/buildpack/spec/blob/master/extensions/bindings.md) which defines the form bindings should take at both build and runtime. In short, each binding is represented as a directory inside a well known base directory, and each binding directory contains two sub-directories: `metadata` for general non-sensitive information about the binding, and `secret` for credentials and other sensitive information. Each attribute for the binding is a file in one of those two directories. The metadata is available at buildtime and both the metadata and secret are available at runtime.
 
-riff should adopt CNB Bindings spec for bindings at both build and runtime.
+riff should adopt the CNB Bindings spec for bindings at both buildtime and runtime.
 
 Kubernetes uses [Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) to inject files from an external source into a running container. While there is a diverse spectrum of volume implementations available, in order to maximize both compatibility with standard Kubernetes and simplify the implementation, we should focus on a [configMap volume](https://kubernetes.io/docs/concepts/storage/volumes/#configmap) for binding metadata and a [secret volume](https://kubernetes.io/docs/concepts/storage/volumes/#secret) for binding secrets, which map directly to Kubernetes [ConfigMaps](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) and [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) respectively.
 
-As a binding is backed by a ConfigMap and Secret a mechanism is needed to specify which ConfigMap and Secret. [LocalObjectReferences](https://godoc.org/k8s.io/api/core/v1#LocalObjectReference) are commonly used to define the coordinates to an arbitrary resource. A binding reference consists of `metadata` LocalObjectReference to a ConfigMap and a `secret` LocalObjectReference to a Secret.
+As a binding is backed by a ConfigMap and Secret a mechanism is needed to specify which ConfigMap and Secret. [LocalObjectReferences](https://godoc.org/k8s.io/api/core/v1#LocalObjectReference) are commonly used to define the coordinates to an arbitrary resource. Therefore, a binding reference consists of a `metadata` LocalObjectReference to a ConfigMap and a `secret` LocalObjectReference to a Secret.
 
 Any resource that provides a binding should include the binding reference on its status, for example:
 
@@ -75,7 +75,7 @@ This RFC does not require users to take any action. They remain free to use any 
 While a user may continue to use lower-level Kubernetes idioms, a higher-level experience can provide users a simpler and more maintainable experience.
 
 ### Backwards Compatibility and Upgrade Path
-There are no direct backwards compatibility concerns as riff does not currently provide any support for bindings. Cloud Foundry services are exposed to application via the `VCAP_SERVICES` environment variable which is a different structure than the CNB Bindings spec.
+There are no direct backwards compatibility concerns as riff does not currently provide any support for bindings. Cloud Foundry services are exposed to applications via the `VCAP_SERVICES` environment variable which is a different structure than the CNB Bindings spec.
 
 It is expected that the bindings space will actively evolve within the Kubernetes ecosystem. As the space matures this RFC will almost certainly be superseded to align with the broader community.
 
@@ -86,11 +86,11 @@ It's anticipated that frameworks and libraries will manage the binding within th
 
 *Does the binding name have any meaning?*
 
-Maybe. The name of the binding appears in the filesystem as the directory containing the `metadata` and `secret` directories that comprise the binding. A workload may take the name of a binding into consideration when consuming the binding, or it may ignore it. The binding name is the only aspect of the binding that is under control of the consumer. All other elements of the binding are defined by the binding producer. Additional metadata may be injected into the workload about the binding out of band, but is not part of this RFC.
+Maybe. The name of the binding appears in the filesystem as the directory containing the `metadata` and `secret` directories that comprise the binding. A workload may take the name of a binding into consideration when consuming the binding, or it may ignore it. The binding name is the only aspect of the binding that is under the control of the consumer. All other elements of the binding are defined by the binding producer. Additional metadata may be injected into the workload about the binding out of band, but is not part of this RFC.
 
 *How do consumers discover bindings?*
 
-This RFC does not prescribe a mechanism for discovering bindings, it is assumed that the consumer has foreknowledge. Another RFC may define a higher level experience.
+This RFC does not prescribe a mechanism for discovering bindings. It is assumed that the consumer has foreknowledge. Another RFC may define a higher level experience.
 
 *How do CNB Bindings relate to a [Service Catalog ServiceBinding](https://svc-cat.io/docs/resources/#servicebinding)?*
 
