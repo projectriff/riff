@@ -2,11 +2,11 @@
 
 **Authors:** Swapnil Bawaskar
 
-**Status:**
+**Status:** Rejected
 
 **Pull Request URL:** https://github.com/projectriff/riff/pull/1359
 
-**Superseded by:** N/A
+**Superseded by:** https://github.com/projectriff/riff/pull/1362
 
 **Supersedes:** N/A
 
