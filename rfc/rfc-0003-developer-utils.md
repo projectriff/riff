@@ -46,13 +46,13 @@ The command takes the form:
 1. **subscribe-stream:** To subscribe for events from the given stream.
 The command takes the form:
     ```
-    subscribe-stream <stream-name> --offset <long-offset>
+    subscribe-stream <stream-name> --offset <long-offset> --payload-as-string
     ```
     This will display all the events in the stream from the given offset in the following json format:
     ```
     {"payload": "base64 encoded user payload","content-type": "the content type of the message","headers": {"user provided header": "while publishing"}}
     ```
-    We will use the content-type of the event to determine how the payload should be displayed. i.e. for content-type "text/plain" and "application/json" convert the binary payload to string, for all others display base64 encoded string.
+    The payload will be base64 encoded unless the `--payload-as-string` flag is present, in which case it will be displayed as a string.
 
 The namespace parameter is optional for all the commands. If not specified, namespace of the `riff-developer-utils` pod will be assumed.
 
