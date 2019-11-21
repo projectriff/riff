@@ -46,15 +46,11 @@ The command takes the form:
 1. **subscribe-stream:** To subscribe for events from the given stream.
 The command takes the form:
     ```
-    riff streaming stream subscribe <stream-name> --offset <long-offset>
+    subscribe-stream <stream-name> --offset <long-offset>
     ```
     This will display all the events in the stream from the given offset in the following json format:
     ```
-    {
-        "payload": "base64 encoded user payload",
-        "content-type": "the content type of the message",
-        "headers": {"user provided header": "while publishing"}
-    }
+    {"payload": "base64 encoded user payload","content-type": "the content type of the message","headers": {"user provided header": "while publishing"}}
     ```
     We will use the content-type of the event to determine how the payload should be displayed. i.e. for content-type "text/plain" and "application/json" convert the binary payload to string, for all others display base64 encoded string.
 
@@ -63,19 +59,16 @@ The namespace parameter is optional for all the commands. If not specified, name
 ### User Impact
 The user will be able to able to invoke functions/deployers and publish and subscribe to streams using the following workflow:
 1. Run the `riff-developer-utils` pod in their cluster with something like:
-```
-kubectl run --image=projectriff/developer-utils:latest
-```
+    ```
+    kubectl run --image=projectriff/developer-utils:latest
+    ```
 1. Invoke the commands specified above using kubectl exec. An example follows:
-```
-kubectl exec -it riff-developer-utils -- invoke-core upper -d test
-```
+    ```
+    kubectl exec -it riff-developer-utils -- invoke-core upper -d test
+    ```
 
 
 ### Backwards Compatibility and Upgrade Path
-*How do the proposed changes impact backwards-compatibility? Are APIs and CLI commands changing?*
-
-*Is there a need for a deprecation process to provide an upgrade path to users?*
+Net new functionality, no impact on backward compatibility.
 
 ## FAQ
-*Answers to common questions that may arise and those that you’ve commonly been asked after requesting comments for this proposal.*
