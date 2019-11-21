@@ -1,16 +1,16 @@
 # RFC-#: A pod with utilities for better developer experience
 
-**Authors:**
+**Authors:** Swapnil Bawaskar
 
 **Status:**
 
-**Pull Request URL:** link
+**Pull Request URL:** https://github.com/projectriff/riff/pull/1362
 
 **Superseded by:** N/A
 
-**Supersedes:** N/A
+**Supersedes:** https://github.com/projectriff/riff/pull/1359
 
-**Related:** https://github.com/projectriff/riff/pull/1359 and 
+**Related:**
 
 
 ## Problem
