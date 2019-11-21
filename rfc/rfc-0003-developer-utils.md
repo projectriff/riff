@@ -27,13 +27,13 @@ We will have the following commands to start with:
 1. **invoke-core:** To invoke the given core deployer.  
 The command takes the form:  
     ```
-    invoke-core <deployer-name> -n <namespace> <curl-params>
+    invoke-core <deployer-name> -n <namespace> -c "<curl-params>"
     ```
     where `<curl-params>` are passed along to the post-request.
 1. **invoke-knative:** To invoke the given knative deployer.
 The command takes the form:  
     ```
-    invoke-knative <deployer-name> -n <namespace> <curl-params>
+    invoke-knative <deployer-name> -n <namespace> -c "<curl-params>"
     ```
     where `<curl-params>` are passed along to the post-request.
 
