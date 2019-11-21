@@ -4,19 +4,19 @@
 
 **Status:**
 
-**Pull Request URL:** https://github.com/projectriff/riff/pull/1362
+**Pull Request URL:** [#1362](https://github.com/projectriff/riff/pull/1362)
 
 **Superseded by:** N/A
 
-**Supersedes:** https://github.com/projectriff/riff/pull/1359
+**Supersedes:** [RFC 0001](https://github.com/projectriff/riff/pull/1359)
 
 **Related:**
 
 
 ## Problem
-The function developer would like to invoke the function for which they just created the `core deployer` or the `knative deployer`.
-When the streaming runtime is installed, they would like to test the function by getting events into the stream and look into the contents of the stream. There is no one step mechanism for accomplishing any of these currently.
-An [earlier proposal](https://github.com/projectriff/riff/pull/1359) was to provide some of this functionality in the riff cli, this proposal expands on Mark's comment https://github.com/projectriff/riff/pull/1359#discussion_r348617981
+A developer would like to invoke the function for which they just created the `core deployer` or the `knative deployer`.
+When the streaming runtime is installed, they would like to test the processor by getting events into the stream and look into the contents of the stream. There is no one step mechanism for accomplishing any of these currently.
+An [earlier proposal](https://github.com/projectriff/riff/pull/1359) was to provide some of this functionality in the riff cli, this proposal expands on [Mark's comment](https://github.com/projectriff/riff/pull/1359#discussion_r348617981).
 
 ### Anti-Goals
 We will only address this problem for development/demos, not production, so topics like auth/authz are out of scope for this document.
@@ -40,9 +40,9 @@ The command takes the form:
 1. **publish-stream:** To publish an event to the given stream.
 The command takes the form:
     ```
-    publish-stream <stream-name> -n <namespace> --payload <payload-as-string> --content-type <content-type> --header <headers-as-string>
+    publish-stream <stream-name> -n <namespace> --payload <payload-as-string> --content-type <content-type> --header "<header-name>: <header-value>"
     ```
-    where `stream-name`, `payload` and `content-type` are mandatory and `headers` can be used multiple times.
+    where `stream-name`, `payload` and `content-type` are mandatory and `header` can be used multiple times.
 1. **subscribe-stream:** To subscribe for events from the given stream.
 The command takes the form:
     ```
