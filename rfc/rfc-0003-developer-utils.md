@@ -16,7 +16,7 @@
 ## Problem
 A developer would like to invoke the function for which they just created the `core deployer` or the `knative deployer`.
 When the streaming runtime is installed, they would like to test the processor by getting events into the stream and look into the contents of the stream. There is no one step mechanism for accomplishing any of these currently.
-An [earlier proposal](https://github.com/projectriff/riff/pull/1359) was to provide some of this functionality in the riff cli, this proposal expands on [Mark's comment](https://github.com/projectriff/riff/pull/1359#discussion_r348617981).
+An [earlier proposal](https://github.com/projectriff/riff/pull/1359) was to provide some of this functionality in the riff cli. The current proposal is a response to [feedback](https://github.com/projectriff/riff/pull/1359#discussion_r348617981) on that earlier proposal.
 
 ### Anti-Goals
 We will only address this problem for development/demos, not production, so topics like auth/authz are out of scope for this document.
@@ -54,13 +54,13 @@ The command takes the form:
     ```
     The payload will be base64 encoded unless the `--payload-as-string` flag is present, in which case it will be displayed as a string.
 
-The namespace parameter is optional for all the commands. If not specified, namespace of the `riff-developer-utils` pod will be assumed.
+The namespace parameter is optional for all the commands. If not specified, the namespace of the `riff-developer-utils` pod will be assumed.
 
 ### User Impact
 The user will be able to able to invoke functions/deployers and publish and subscribe to streams using the following workflow:
 1. Run the `riff-developer-utils` pod in their cluster with something like:
     ```
-    kubectl run --image=projectriff/developer-utils:latest
+    kubectl run --image=projectriff/developer-utils
     ```
 1. Invoke the commands specified above using kubectl exec. An example follows:
     ```
