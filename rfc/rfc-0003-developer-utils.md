@@ -37,16 +37,16 @@ The command takes the form:
     ```
     where `<curl-params>` are passed along to the post-request.
 
-1. **publish-stream:** To publish an event to the given stream.
+1. **publish:** To publish an event to the given stream.
 The command takes the form:
     ```
-    publish-stream <stream-name> -n <namespace> --payload <payload-as-string> --content-type <content-type> --header "<header-name>: <header-value>"
+    publish <stream-name> -n <namespace> --payload <payload-as-string> --content-type <content-type> --header "<header-name>: <header-value>"
     ```
     where `stream-name`, `payload` and `content-type` are mandatory and `header` can be used multiple times.
-1. **subscribe-stream:** To subscribe for events from the given stream.
+1. **subscribe:** To subscribe for events from the given stream.
 The command takes the form:
     ```
-    subscribe-stream <stream-name> --offset <long-offset> --payload-as-string
+    subscribe <stream-name> --offset <long-offset> --payload-as-string
     ```
     This will display all the events in the stream from the given offset in the following json format:
     ```
