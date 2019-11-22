@@ -46,9 +46,9 @@ The command takes the form:
 1. **subscribe:** To subscribe for events from the given stream.
 The command takes the form:
     ```
-    subscribe <stream-name> --offset <long-offset> --payload-as-string
+    subscribe <stream-name> --payload-as-string
     ```
-    This will display all the events in the stream from the given offset in the following json format:
+    This will display all the events in the stream in the following json format:
     ```
     {"payload": "base64 encoded user payload","content-type": "the content type of the message","headers": {"user provided header": "while publishing"}}
     ```
