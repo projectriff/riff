@@ -27,15 +27,15 @@ We will have the following commands to start with:
 1. **invoke-core:** To invoke the given core deployer.  
 The command takes the form:  
     ```
-    invoke-core <deployer-name> -n <namespace> -c "<curl-params>"
+    invoke-core <deployer-name> -n <namespace> -- <curl-params>
     ```
-    where `<curl-params>` are passed along to the post-request.
+    where everything after `--` is passed as parameter to curl
 1. **invoke-knative:** To invoke the given knative deployer.
 The command takes the form:  
     ```
-    invoke-knative <deployer-name> -n <namespace> -c "<curl-params>"
+    invoke-knative <deployer-name> -n <namespace> -- <curl-params>
     ```
-    where `<curl-params>` are passed along to the post-request.
+    where everything after `--` is passed as parameter to curl
 
 1. **publish:** To publish an event to the given stream.
 The command takes the form:
