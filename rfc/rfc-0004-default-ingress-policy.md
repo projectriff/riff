@@ -20,7 +20,7 @@ Core and Knative runtime `Deployer`s are exposed outside the cluster via ingress
 This RFC does not define a new Ingress Policy, or resource.
 
 ## Solution
-The current default Ingress Policy is `External`, this RFC changes that default to `ClusterLocal`. ClusterLocal ingress exposes the workload to traffic that already inside the cluster, while External exposes the workload to traffic outside of the cluster. 
+The current default Ingress Policy is `External`, this RFC changes that default to `ClusterLocal`. ClusterLocal ingress exposes the workload to traffic that is already inside the cluster, while External exposes the workload to traffic outside of the cluster. 
 
 This default is applied in the system's admission webhook and via the CLI. Both of those defaults should change.
 
@@ -36,7 +36,7 @@ Users creating new Deployers will either need to accept that the workload is not
 The Knative runtime Adapter resource is not changing as part of this RFC as it does not create a Knative workload. The ingress policy of the adapted resource is preserved.
 
 ### Backwards Compatibility and Upgrade Path
-While this is a breaking change from master for both the Core and Knative runtimes. This is restoring the existing behavior from riff 0.4 for the core runtime.
+While this is a breaking change from master for both the Core and Knative runtimes, this is restoring the existing behavior from riff 0.4 for the core runtime.
 
 ## FAQ
 **Is ClusterLocal really "ingress"?**
