@@ -31,7 +31,7 @@ This change should be rolled out consciously as it may break existing users and 
 1. change the default for riff CLI
 
 ### User Impact
-Users creating new Deployers will either need to accept that the workload is not exposed outside the cluster, or they will need to add `--ingress-policy External` to the command that creation command.
+Users creating new Deployers will either need to accept that the workload is not exposed outside the cluster, or they will need to add `--ingress-policy External` to the creation command.
 
 The Knative runtime Adapter resource is not changing as part of this RFC as it does not create a Knative workload. The ingress policy of the adapted resource is preserved.
 
@@ -41,4 +41,4 @@ While this is a breaking change from master for both the Core and Knative runtim
 ## FAQ
 **Is ClusterLocal really "ingress"?**
 
-Maybe. While the core runtime will create an Ingress resource, or not, depending on the ingress policy. The Knative runtime, at least with Istio, defines an ingress gateway and a cluster-local gateway. The workload is always registered on the cluster-local gateway and selectively registered on the ingress gateway.
+Maybe. While the core runtime will create an Ingress resource - or not -depending on the ingress policy, the Knative runtime (at least with Istio) defines an ingress gateway and a cluster-local gateway. The workload is always registered on the cluster-local gateway and selectively registered on the ingress gateway.
