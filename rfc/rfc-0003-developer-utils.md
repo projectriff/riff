@@ -1,6 +1,6 @@
 # RFC-0003: A pod with utilities for better developer experience
 
-**Authors:** Swapnil Bawaskar
+**Authors:** Swapnil Bawaskar, Scott Andrews
 
 **Status:**
 
@@ -14,7 +14,7 @@
 
 
 ## Problem
-A developer would like to interact with riff resources inside the cluster in ways that may not be desirable to expose outside of the cluster. This may be reading or writing message from a stream or invoking an http workload whose ingress policy is cluster-local. There is no one step mechanism for accomplishing any of these currently.
+A developer would like to interact with riff resources inside the cluster in ways that may not be desirable to expose outside of the cluster. This may be reading or writing messages from/to a stream or invoking an http workload whose ingress policy is cluster-local. There is no one step mechanism for accomplishing any of these currently.
 
 An [earlier proposal](https://github.com/projectriff/riff/pull/1359) was to provide some of this functionality in the riff cli. The current proposal is a response to [feedback](https://github.com/projectriff/riff/pull/1359#discussion_r348617981) on that earlier proposal.
 
@@ -22,7 +22,7 @@ An [earlier proposal](https://github.com/projectriff/riff/pull/1359) was to prov
 We will only address this problem for development/demos, not production, so topics like auth/authz are out of scope for this document.
 
 ## Solution
-We will ask the developers to run a `riff-dev` pod in their development cluster. This pod will bundle a few commands that users can invoke using `kubectl exec`. Since the commands will be run in-cluster, users won't need to run `kubectl port-forward`, however, the pod will need to be run with a service account that has appropriate RBAC permissions.
+We will ask the developers to run a `riff-dev` pod in their development cluster. This pod will bundle a few commands that users can invoke using `kubectl exec`. Since the commands will be run in-cluster, users won't need to run `kubectl port-forward`. However, the pod will need to be run with a service account that has appropriate RBAC permissions.
 
 We will have the following commands to start with:
 
@@ -31,7 +31,7 @@ We will have the following commands to start with:
     The command takes the form:
     
     ```
-    publish <stream-name> --content-type <content-type> [--payload <payload-as-plain-text>] [--payload-base64 <payload-as-base64-text>] [--header "<header-name>: <header-value>"]
+    publish <stream-name> --content-type <content-type> {--payload <payload-as-plain-text> | --payload-base64 <payload-as-base64-text>} [--header "<header-name>: <header-value>"]
     ```
     
     where `stream-name`, and `--content-type` are mandatory and `--header` can be used multiple times. `--payload` and `--payload-base64` are mutually exclusive. Binary data should only be passed via `--payload-base64` after it has been `base64` encoded.
@@ -43,7 +43,7 @@ We will have the following commands to start with:
     subscribe <stream-name> [--from-beginning]
     ```
     
-    If the `--from-beginning` option is present, display all the events in the stream, otherwise only new events are displayed as [JSON Lines](http://jsonlines.org) in the following form:
+    If the `--from-beginning` option is present, display all the events in the stream. Otherwise only new events are displayed as [JSON Lines](http://jsonlines.org) in the following form:
     
     ```
     {"payload":"base64 encoded message payload","content-type":"the content type of the message","headers":{"header name": "header value"}}
@@ -56,9 +56,9 @@ We will have the following commands to start with:
 
 1. [**jq**](https://stedolan.github.io/jq/): Process JSON.
 
-1. [**base64:**](http://manpages.ubuntu.com/manpages/bionic/man1/base64.1.html) Encode and decode base64 strings.
+1. [**base64**](http://manpages.ubuntu.com/manpages/bionic/man1/base64.1.html): Encode and decode base64 strings.
 
-1. [**curl:**](https://curl.haxx.se) Make HTTP requests.
+1. [**curl**](https://curl.haxx.se): Make HTTP requests.
 
 Each command targets resources in the same namespace as the pod is running. Additional commands and behaviors may be defined by future RFCs.
 
