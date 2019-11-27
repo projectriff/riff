@@ -2,7 +2,7 @@
 
 **Authors:** @scothis
 
-**Status:**
+**Status:** Accepted
 
 **Pull Request URL:** [#1366](https://github.com/projectriff/riff/pull/1366)
 
