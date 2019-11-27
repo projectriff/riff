@@ -2,7 +2,7 @@
 
 **Authors:** Swapnil Bawaskar, Scott Andrews
 
-**Status:** Approved
+**Status:** Accepted
 
 **Pull Request URL:** [#1362](https://github.com/projectriff/riff/pull/1362)
 
