@@ -1,10 +1,10 @@
-# RFC-#: Child Resource Names
+# RFC-0006: Child Resource Names
 
 **Authors:** Scott Andrews
 
 **Status:**
 
-**Pull Request URL:** link
+**Pull Request URL:** [#1369](https://github.com/projectriff/riff/pull/1369)
 
 **Superseded by:** N/A
 
