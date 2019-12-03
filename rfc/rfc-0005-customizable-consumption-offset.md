@@ -1,10 +1,10 @@
-# RFC-#: Title
+# RFC-0005: Optional starting offset for processor inputs
 
 **Authors:** Eric Bottard
 
 **Status:**
 
-**Pull Request URL:** link
+**Pull Request URL:** https://github.com/projectriff/riff/pull/1367
 
 **Superseded by:** N/A
 
@@ -25,6 +25,23 @@ With a top to bottom view of the user experience, the proposed solution is to
 - have the Processor reconciler forward that option to the streaming-processor, so that it changes its SubscriptionRequests accordingly
 
 ### User Impact
+This RFC proposes to change the `Inputs` field of the `Processor` CRD from
+```go
+Inputs []StreamBinding `json:"inputs"`
+```
+to
+```go
+Inputs []InputStreamBinding `json:"inputs"`
+...
+type InputStreamBinding struct {
+    StreamBinding
+	// Where to start consuming this stream the first time a processor runs.
+    StartOffset int64 `json:"startOffset"`
+}
+```
+
+with `StartOffset` supporting only two special, negative values for now: earliest and latest (default).
+
 This RFC proposes to change the `riff streaming processor create` command from
 ```
 riff streaming processor create <name> ... --input [alias:]stream ...
