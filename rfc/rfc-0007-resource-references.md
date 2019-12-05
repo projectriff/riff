@@ -22,11 +22,13 @@ This RFC does not define how specific riff resources reference other resources. 
 ## Solution
 The Kubernetes API project provides two mechanisms for referencing other resources: ObjectReference and LocalObjectReference.
 
-[ObjectReference](https://godoc.org/k8s.io/api/core/v1#ObjectReference) has full support for referencing any k8s resource, commonly by apiGroup, kind, namespace, and name.
+[ObjectReference](https://godoc.org/k8s.io/api/core/v1#ObjectReference) has full support for referencing any k8s resource, commonly by `apiVersion`, `kind`, `namespace`, and `name`.
 
-[LocalObjectReference](https://godoc.org/k8s.io/api/core/v1#LocalObjectReference) contains only a resource's name. The apiGroup, kind and namespace must be inferred.
+[LocalObjectReference](https://godoc.org/k8s.io/api/core/v1#LocalObjectReference) contains only a resource's `name`. The `apiVersion`, `kind` and `namespace` must be inferred.
 
-riff should favor using ObjectReferences when the kind or namespace may vary or is unknown. LocalObjectReferences should be used when only the name of the resource will vary. `nil` should replace the reference if the relationship is not defined.
+riff should favor using ObjectReferences when the kind or namespace may vary or is unknown. LocalObjectReferences should be used when only the name of the resource will vary. A LocalObjectReference may be upgraded to an ObjectReference if explicitness is desired, however, it imposes a higher burden on those using the resource. `nil` should replace the reference if the relationship is not defined.
+
+A validating webhook (or equivalent) should validate ObjectReferences before accepting the resource. The validation may restrict which fields are required and/or prohibited (`name` is typically required, `revision` is typically prohibited). The `apiVersion` and `kind` may be left open or restricted to known values.
 
 ### User Impact
 Other tools in the k8s ecosystem are more likely to understand and be able to traverse (Local)ObjectReferences than ad hoc references. Replacing a string with a LocalObjectReference incurs a trivial performance overhead to marshal an object instead.
