@@ -14,7 +14,7 @@
 
 
 ## Problem
-When a controller creates a new resource, it needs to either pick a static name or let Kubernetes generate a name. Static names are predictable, but may already be in use. Generated names cannot be predicated, but are guaranteed to be available. As the authors of reconcilers, we must define how each controlled resource is named.
+When a controller creates a new resource, it needs to either pick a static name or let Kubernetes generate a name. Static names are predictable, but may already be in use. Generated names cannot be predicted, but are guaranteed to be available. As the authors of reconcilers, we must define how each controlled resource is named.
 
 ### Anti-Goals
 This RFC does not prescribe which naming scheme to use for any specific resource.
