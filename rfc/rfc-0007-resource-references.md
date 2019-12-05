@@ -26,7 +26,7 @@ The Kubernetes API project provides two mechanisms for referencing other resourc
 
 [LocalObjectReference](https://godoc.org/k8s.io/api/core/v1#LocalObjectReference) contains only a resource's `name`. The `apiVersion`, `kind` and `namespace` must be inferred.
 
-riff should favor using ObjectReferences when the kind or namespace may vary or is unknown. LocalObjectReferences should be used when only the name of the resource will vary. A LocalObjectReference may be upgraded to an ObjectReference if explicitness is desired, however, it imposes a higher burden on those using the resource. `nil` should replace the reference if the relationship is not defined.
+riff should favor using ObjectReferences when the kind or namespace may vary or is unknown. LocalObjectReferences should be used when only the name of the resource will vary. A LocalObjectReference may be upgraded to an ObjectReference if explicitness is desired, however, it imposes a higher burden on those using the resource. `nil` should replace the reference if the referent is not defined.
 
 A validating webhook (or equivalent) should validate ObjectReferences before accepting the resource. The validation may restrict which fields are required and/or prohibited (`name` is typically required, `revision` is typically prohibited). The `apiVersion` and `kind` may be left open or restricted to known values.
 
