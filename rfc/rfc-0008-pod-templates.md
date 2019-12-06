@@ -30,7 +30,7 @@ This is a breaking change. Users will need to move the content of `.spec.templat
 ### Backwards Compatibility and Upgrade Path
 This is a breaking change for our CRDs. The impact can be minimized if the CLI is updated at the same time as the system and charts. No automatic migration will be performed.
 
-Since our APIs are still alpha breaking changes are permitted without a version bump.
+Since our APIs are still alpha, breaking changes are permitted without a version bump.
 
 ## FAQ
 *Answers to common questions that may arise and those that you’ve commonly been asked after requesting comments for this proposal.*
