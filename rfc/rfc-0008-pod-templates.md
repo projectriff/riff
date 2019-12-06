@@ -19,6 +19,11 @@ Many Kubernetes resources that decompose to Pods (like Deployment, ReplicaSet, J
 ## Solution
 riff should switch all usage of PodSpec at `.spec.template` to be a PodTemplateSpec.
 
+Specifically:
+- deployers.core.projectriff.io
+- deployers.knative.projectriff.io
+- processors.streaming.projectriff.io
+
 ### User Impact
 This is a breaking change. Users will need to move the content of `.spec.template` to `.spec.template.spec`.
 
