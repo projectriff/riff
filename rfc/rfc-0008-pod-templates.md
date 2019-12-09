@@ -2,7 +2,7 @@
 
 **Authors:** Scott Andrews
 
-**Status:**
+**Status:** Accepted
 
 **Pull Request URL:** [#1371](https://github.com/projectriff/riff/pull/1371)
 
