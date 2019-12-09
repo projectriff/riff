@@ -25,7 +25,7 @@ Specifically:
 - processors.streaming.projectriff.io
 
 ### User Impact
-This is a breaking change. Users will need to move the content of `.spec.template` to `.spec.template.spec`.
+This is a breaking change. Users will need to move the current content of `.spec.template` to `.spec.template.spec`, since the former will now be the `PodTemplateSpec` and the latter will be the `PodSpec` within that template.
 
 ### Backwards Compatibility and Upgrade Path
 This is a breaking change for our CRDs. The impact can be minimized if the CLI is updated at the same time as the system and charts. No automatic migration will be performed.
