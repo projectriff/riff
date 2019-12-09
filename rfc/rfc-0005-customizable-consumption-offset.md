@@ -10,7 +10,7 @@
 
 **Supersedes:** N/A
 
-**Related:** rfc-0003: developer utils
+**Related:** rfc-0003: developer utils, which also support viewing stream data from the earliest offset.
 
 
 ## Problem
@@ -38,11 +38,11 @@ type InputStreamBinding struct {
     Alias string `json:"alias,omitempty"`
 
 	// Where to start consuming this stream the first time a processor runs.
-    StartOffset *int64 `json:"startOffset"`
+    StartOffset string `json:"startOffset"`
 }
 ```
 
-with `StartOffset` supporting only two special, negative values for now: `Earliest` and `Latest` (default).
+with `StartOffset` supporting only two special, textual values for now: `earliest` and `latest` (default). Future support for parsing to a non negative number after failing to recognize those two values is possible.
 
 This RFC proposes to change the `riff streaming processor create` command from
 ```
