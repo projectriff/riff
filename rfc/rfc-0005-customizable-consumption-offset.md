@@ -2,7 +2,7 @@
 
 **Authors:** Eric Bottard
 
-**Status:**
+**Status:** Accepted
 
 **Pull Request URL:** https://github.com/projectriff/riff/pull/1367
 
@@ -15,8 +15,6 @@
 
 ## Problem
 Sometimes users want to replay data through functions, maybe because the function logic has changed, or maybe because downstream systems have lost state and that state needs to be re-created. The current Processor concept in riff doesn't support such a mechanism though, and always consumes data from the (current) end of streams.
-
-### Anti-Goals
 
 ## Solution
 With a top to bottom view of the user experience, the proposed solution is to
@@ -62,6 +60,3 @@ NOTE: riff currently uses in-memory positions storage for liiklus, until support
 The proposed change should be totally backwards compatible with existing riff with
 - the cli option being optional
 - its default value being `latest`, which is the current effective mode used.
-
-## FAQ
-*Answers to common questions that may arise and those that you’ve commonly been asked after requesting comments for this proposal.*
