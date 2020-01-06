@@ -21,28 +21,37 @@ riff needs to adopt a single, consistent approach.
 For the purpose of this document, unit testing refers to testing the
 `Reconcile` method of a controller.
 
-Apart from checking that various objects are created etc., it should be straigthtforward
+Apart from checking that various objects are created etc., it should be straightforward
 to test error paths by injecting errors in object lookup and creation.
 
 ### Anti-Goals
 
-None.
+It is not a goal of this RFC to tie down the details of the test framework.
 
 ## Solution
 
-The approach taken is to use a fake client and other interfaces and introduce a test framework
+The approach taken is to use a fake Kubernetes client and introduce a test framework
 which allows tests to be written in a declarative style. See "Rejected Alternatives" below for 
 some other approaches which were tried out.
 
 The test framework supports table-driven tests. Each row of the table tests a single call to `Reconcile` by
 setting up some initial Kubernetes objects, modifying the client behaviour using various hooks
-or reactors, and then asserting that various Kubernetes objects are created, updated, etc.
+or reactors, and then asserting that various Kubernetes objects are created, updated, tracked, etc.
 
-When a helper method is used to construct a Kubernetes object, it should construct a fixed value and any variations
-should be explicitly coded in the table row. This avoids details of a particular test being "buried" in helper methods.
+When a helper function (a utility function provided by a test) is used to construct a Kubernetes object, it should
+construct a fixed value and any variations should be explicitly coded in the table row. This avoids details of a
+particular test being "buried" in helper functions.
 
 Since kubebuilder was used to generate the controllers, some packages contain more than one controller and so
-helper methods need to be named or organised carefully to avoid clashes. 
+helper functions need to be named or organised carefully to avoid clashes. 
+
+### User Impact
+
+Users of riff are not impacted.
+
+### Backwards Compatibility and Upgrade Path
+
+Not applicable.
 
 ## Rejected Alternatives
 
@@ -68,16 +77,20 @@ See here for a quick
 
 ### Depending on Knative testing packages
 Another approach which was quickly [spiked](https://github.com/projectriff/system/pull/233) and
-rejected was to depend on Knative testing packages. This was abandoned because of dependency
-management problems.
+rejected was to depend on Knative testing packages. This was abandoned because Knative uses a different client interface
+to that used by controller runtime. Also, it was not possible to resolve the dependency management problems associated
+with depending on Knative testing packages.
 
+### BDD testing
 
-### User Impact
+[Ginkgo](http://onsi.github.io/ginkgo/) and [Gomega](https://onsi.github.io/gomega/) allow Behavior-Driven
+Development(BDD) tests to be written in Go. One advantage of BDD is that it facilitates writing tests with
+a tree structure and which can explore arbitrary "corners" of the behaviour in as much detail as necessary.
 
-Users of riff are not impacted.
+Reading a BDD test involves reading the test tree from root to leaves building up an understanding of the context in
+which the tests run.
 
-### Backwards Compatibility and Upgrade Path
-
-Not applicable.
+Table-driven testing was chosen instead so that each test could simply be read from a row of the table without
+having to perform a mental calculation of the test context. 
 
 ## FAQ
