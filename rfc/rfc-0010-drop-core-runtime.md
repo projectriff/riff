@@ -4,7 +4,7 @@
 
 **Status:**
 
-**Pull Request URL:** link
+**Pull Request URL:** [#1373](https://github.com/projectriff/riff/pull/1373)
 
 **Superseded by:** N/A
 
