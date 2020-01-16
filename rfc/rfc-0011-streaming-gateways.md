@@ -47,10 +47,6 @@ This RFC will not prevent naming collisions between different provisioners withi
 
    The `Stream` reconciler can track the `Gateway` and include the `Gateway`'s Ready condition as one of its conditions. `Processor`s already track each input and output `Stream`'s Ready condition to scale down the processor when a stream goes red.
 
-1. [maybe] Pin a `Stream` to a `Gateway` instance
-
-   `Stream`s are inherently stateful. A new `Gateway`, even if it has the same name, is unlikely to contain the same state. The gateway's UID could be saved on the stream and compared. if the UID changes, the stream's Ready condition could flip False to prevent usage of the stream.
-
 1. Update Streaming CRDs status for new relationships
 
   Changes to the reconciliation object graph invalidate many of the existing status references.
