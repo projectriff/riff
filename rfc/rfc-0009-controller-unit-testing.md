@@ -2,7 +2,7 @@
 
 **Authors:** Glyn Normington
 
-**Status:**
+**Status:** Accepted
 
 **Pull Request URL:** https://github.com/projectriff/riff/pull/1372
 
