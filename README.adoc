@@ -33,6 +33,10 @@ choco install riff
 
 Please refer to the link:CONTRIBUTING.adoc[Contributors' Guide].
 
+There are many repos under the projectriff org
+
+image::dependencies.png[riff dependencies]
+
 == Code of Conduct
 
 Please refer to the link:CODE_OF_CONDUCT.adoc[Contributor Code of Conduct].

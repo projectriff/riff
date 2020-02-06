@@ -1,0 +1,75 @@
+digraph G {
+    "projectriff.io" -> riff
+    "projectriff.io" -> cli
+    "projectriff.io" -> release
+    "projectriff.io" -> "dev-utils"
+    release -> system
+    release -> builder
+    # release -> fats
+    release -> "k8s-manifest-scanner"
+    builder -> "command-function-buildpack"
+    builder -> "java-function-buildpack"
+    builder -> "node-function-buildpack"
+    # builder -> fats
+    "invoker-specification"
+    "command-function-buildpack" -> libfnbuildpack
+    "command-function-buildpack" -> "command-function-invoker"
+    # "command-function-buildpack" -> fats
+    "java-function-buildpack" -> libfnbuildpack
+    "java-function-buildpack" -> "java-function-invoker"
+    "java-function-buildpack" -> "streaming-http-adapter"
+    # "java-function-buildpack" -> fats
+    "node-function-buildpack" -> libfnbuildpack
+    "node-function-buildpack" -> "node-function-invoker"
+    "node-function-buildpack" -> "streaming-http-adapter"
+    # "node-function-buildpack" -> fats
+    "node-function-invoker" -> "node-message"
+    cli -> system
+    # cli -> fats
+    system -> "streaming-processor"
+    system -> "nop-provisioner"
+    system -> "kafka-provisioner"
+    system -> "pulsar-provisioner"
+    # system -> fats
+    fats -> "no-resource-requests-webhook"
+    fats -> "dev-utils"
+    fats -> cli
+    fats -> release
+    "k8s-manifest-scanner" -> "cnab-k8s-installer-base"
+    "dev-utils" -> "stream-client-go"
+    "dev-utils" -> "cli"
+    chocolatey -> cli
+    "http-source" -> "stream-client-go"
+    "http-gateway" -> "stream-client-go"
+    "http-gateway" -> "system"
+}
+
+## All github.com/projectriff repos
+# projectriff.io
+# riff
+# release
+# builder
+# invoker-specification
+# libfnbuildpack
+# command-function-buildpack
+# command-function-invoker
+# java-function-buildpack
+# java-function-invoker
+# node-function-buildpack
+# node-function-invoker
+# node-message
+# streaming-http-adapter
+# cli
+# system
+# streaming-processor
+# kafka-provisioner
+# nop-provisioner
+# pulsar-provisioner
+# fats
+# k8s-manifest-scanner
+# no-resource-requests-webhook
+# dev-utils
+# stream-client-go
+# chocolatey
+# http-source
+# http-gateway
