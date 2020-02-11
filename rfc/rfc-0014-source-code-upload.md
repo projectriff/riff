@@ -4,7 +4,7 @@
 
 **Status:**
 
-**Pull Request URL:** link
+**Pull Request URL:** [#1374](https://github.com/projectriff/riff/pull/1374)
 
 **Superseded by:** N/A
 
@@ -15,7 +15,7 @@
 
 ## Problem
 The way we currently handle local source is less than ideal in a few ways:
-1. Images built from local source cannot get rebased or rebuilt based on buildpack updates,
+1. Images built from local source will not get autmatically rebased or rebuilt based on stack or buildpack updates,
  and are therefore susceptible to more security vulnerability
 1. Because build from source uses `pack`, it requires users to have a docker daemon
 1. It requires users to wait for large builder images to pull
@@ -34,13 +34,15 @@ This will require a repository to which riff can upload the source image. By def
 derivation of the target image tag, by appending a suffix to the tag. For example if the generated image will be published to `docker.io/my/app:latest`,
 the source image will be uploaded to `docker.io/my/app:latest-source`
 
-The following flags will allows for configurability:
+The following flags will allow for configurability:
 
 * `--source-image repository`
 
 #### Source Image Push Auth
-When pushing the source image `riff` will use the default docker keychain and will not try to use the registry secrets
-configure in `riff`
+When pushing the source image `riff` will use the default docker keychain and will not try to use the registry secrets configured in `riff`
+
+#### Source Image Pull Auth
+Credentials for the source image must be present in the riff service account so that kpack can pull the source code
 
 #### Include/Exclude
 `riff` will respect include/exclude configuration from a [CNB project descriptor](https://github.com/buildpacks/rfcs/blob/master/text/0019-project-descriptor.md#buildinclude-and-buildexclude)
