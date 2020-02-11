@@ -24,7 +24,7 @@ The way we currently handle local source is less than ideal in a few ways:
 ## Solution
 
 #### Registry Type SourceResolver
-When a user specificies the `--local-path <dir>` flag during `riff function create` or `riff application create` the source
+When a user specifies the `--local-path <dir>` flag during `riff function create` or `riff application create` the source
 code in the specified directory will be packaged as a OCI image containing a single layer and uploaded to a docker registry.
 `riff` with create a `kpack` `image` with a `registry` type `sourceresolver` https://github.com/pivotal/kpack/blob/master/docs/image.md#source-configuration.
 `kpack` can than build the image as it does in the git source type case.
