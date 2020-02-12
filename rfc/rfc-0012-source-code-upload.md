@@ -51,9 +51,9 @@ if present
 ### User Impact
 
 #### Pros
-By making builds from local source behave more similarly to builds from a git source the behavior of `riff` will be less
-surprising to users. Users will also be able to receive CVE fixes for images built from local source through a declarative
-model, rather than requiring an imperative rebuild or rebase like the current model.
+* By making builds from local source behave more similarly to builds from a git source, the behavior of `riff` will be less surprising to users.
+* Users will also be able to receive CVE fixes for images built from local source through a declarative model, rather than requiring an imperative rebuild or rebase like the current model.
+* The cli will be decoupled from the implementation of build, making it more modular and making it easier to support alternative build technologies in the future
 
 #### Cons
 Upload source introduces risks, especially if the include/exclude model is opaque or unexpected. Users may accidentally upload
