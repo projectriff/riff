@@ -2,7 +2,7 @@
 
 **Authors:** Emily Casey
 
-**Status:**
+**Status:** Accepted
 
 **Pull Request URL:** [#1374](https://github.com/projectriff/riff/pull/1374)
 
