@@ -23,7 +23,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/projectriff/system/pkg/validation"
+	"github.com/projectriff/riff/system/pkg/validation"
 )
 
 func TestValidatePulsarGateway(t *testing.T) {

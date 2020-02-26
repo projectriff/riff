@@ -21,10 +21,10 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	"github.com/projectriff/system/pkg/apis"
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
-	rtesting "github.com/projectriff/system/pkg/controllers/testing"
-	"github.com/projectriff/system/pkg/refs"
+	"github.com/projectriff/riff/system/pkg/apis"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/build/v1alpha1"
+	rtesting "github.com/projectriff/riff/system/pkg/controllers/testing"
+	"github.com/projectriff/riff/system/pkg/refs"
 )
 
 type application struct {

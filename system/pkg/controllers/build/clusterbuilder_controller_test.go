@@ -27,11 +27,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	kpackbuildv1alpha1 "github.com/projectriff/system/pkg/apis/thirdparty/kpack/build/v1alpha1"
-	"github.com/projectriff/system/pkg/controllers/build"
-	rtesting "github.com/projectriff/system/pkg/controllers/testing"
-	"github.com/projectriff/system/pkg/controllers/testing/factories"
-	"github.com/projectriff/system/pkg/tracker"
+	kpackbuildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/thirdparty/kpack/build/v1alpha1"
+	"github.com/projectriff/riff/system/pkg/controllers/build"
+	rtesting "github.com/projectriff/riff/system/pkg/controllers/testing"
+	"github.com/projectriff/riff/system/pkg/controllers/testing/factories"
+	"github.com/projectriff/riff/system/pkg/tracker"
 )
 
 func TestClusterBuildersReconciler(t *testing.T) {

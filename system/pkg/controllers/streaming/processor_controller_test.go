@@ -29,14 +29,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
-	streamingv1alpha1 "github.com/projectriff/system/pkg/apis/streaming/v1alpha1"
-	kedav1alpha1 "github.com/projectriff/system/pkg/apis/thirdparty/keda/v1alpha1"
-	"github.com/projectriff/system/pkg/controllers"
-	"github.com/projectriff/system/pkg/controllers/streaming"
-	rtesting "github.com/projectriff/system/pkg/controllers/testing"
-	"github.com/projectriff/system/pkg/controllers/testing/factories"
-	"github.com/projectriff/system/pkg/tracker"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/build/v1alpha1"
+	streamingv1alpha1 "github.com/projectriff/riff/system/pkg/apis/streaming/v1alpha1"
+	kedav1alpha1 "github.com/projectriff/riff/system/pkg/apis/thirdparty/keda/v1alpha1"
+	"github.com/projectriff/riff/system/pkg/controllers"
+	"github.com/projectriff/riff/system/pkg/controllers/streaming"
+	rtesting "github.com/projectriff/riff/system/pkg/controllers/testing"
+	"github.com/projectriff/riff/system/pkg/controllers/testing/factories"
+	"github.com/projectriff/riff/system/pkg/tracker"
 )
 
 func TestProcessorReconciler(t *testing.T) {

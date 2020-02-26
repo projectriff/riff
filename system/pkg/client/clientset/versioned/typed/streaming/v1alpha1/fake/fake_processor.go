@@ -25,7 +25,7 @@ import (
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
 
-	v1alpha1 "github.com/projectriff/system/pkg/apis/streaming/v1alpha1"
+	v1alpha1 "github.com/projectriff/riff/system/pkg/apis/streaming/v1alpha1"
 )
 
 // FakeProcessors implements ProcessorInterface

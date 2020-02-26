@@ -20,8 +20,8 @@ package v1alpha1
 import (
 	rest "k8s.io/client-go/rest"
 
-	v1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
-	"github.com/projectriff/system/pkg/client/clientset/versioned/scheme"
+	v1alpha1 "github.com/projectriff/riff/system/pkg/apis/build/v1alpha1"
+	"github.com/projectriff/riff/system/pkg/client/clientset/versioned/scheme"
 )
 
 type BuildV1alpha1Interface interface {

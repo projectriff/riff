@@ -24,15 +24,15 @@ import (
 	fakediscovery "k8s.io/client-go/discovery/fake"
 	"k8s.io/client-go/testing"
 
-	clientset "github.com/projectriff/system/pkg/client/clientset/versioned"
-	buildv1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/build/v1alpha1"
-	fakebuildv1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/build/v1alpha1/fake"
-	corev1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/core/v1alpha1"
-	fakecorev1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/core/v1alpha1/fake"
-	knativev1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/knative/v1alpha1"
-	fakeknativev1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/knative/v1alpha1/fake"
-	streamingv1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/streaming/v1alpha1"
-	fakestreamingv1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/streaming/v1alpha1/fake"
+	clientset "github.com/projectriff/riff/system/pkg/client/clientset/versioned"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/client/clientset/versioned/typed/build/v1alpha1"
+	fakebuildv1alpha1 "github.com/projectriff/riff/system/pkg/client/clientset/versioned/typed/build/v1alpha1/fake"
+	corev1alpha1 "github.com/projectriff/riff/system/pkg/client/clientset/versioned/typed/core/v1alpha1"
+	fakecorev1alpha1 "github.com/projectriff/riff/system/pkg/client/clientset/versioned/typed/core/v1alpha1/fake"
+	knativev1alpha1 "github.com/projectriff/riff/system/pkg/client/clientset/versioned/typed/knative/v1alpha1"
+	fakeknativev1alpha1 "github.com/projectriff/riff/system/pkg/client/clientset/versioned/typed/knative/v1alpha1/fake"
+	streamingv1alpha1 "github.com/projectriff/riff/system/pkg/client/clientset/versioned/typed/streaming/v1alpha1"
+	fakestreamingv1alpha1 "github.com/projectriff/riff/system/pkg/client/clientset/versioned/typed/streaming/v1alpha1/fake"
 )
 
 // NewSimpleClientset returns a clientset that will respond with the provided objects.

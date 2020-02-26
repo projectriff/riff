@@ -21,7 +21,7 @@ import (
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/projectriff/system/pkg/validation"
+	"github.com/projectriff/riff/system/pkg/validation"
 )
 
 // +kubebuilder:webhook:path=/validate-build-projectriff-io-v1alpha1-application,mutating=false,failurePolicy=fail,groups=build.projectriff.io,resources=applications,verbs=create;update,versions=v1alpha1,name=applications.build.projectriff.io

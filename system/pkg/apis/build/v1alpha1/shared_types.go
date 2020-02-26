@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/projectriff/system/pkg/apis"
-	"github.com/projectriff/system/pkg/refs"
+	"github.com/projectriff/riff/system/pkg/apis"
+	"github.com/projectriff/riff/system/pkg/refs"
 )
 
 var (

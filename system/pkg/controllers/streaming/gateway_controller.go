@@ -24,10 +24,10 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/projectriff/system/pkg/apis"
-	streamingv1alpha1 "github.com/projectriff/system/pkg/apis/streaming/v1alpha1"
-	"github.com/projectriff/system/pkg/controllers"
-	"github.com/projectriff/system/pkg/refs"
+	"github.com/projectriff/riff/system/pkg/apis"
+	streamingv1alpha1 "github.com/projectriff/riff/system/pkg/apis/streaming/v1alpha1"
+	"github.com/projectriff/riff/system/pkg/controllers"
+	"github.com/projectriff/riff/system/pkg/refs"
 )
 
 // +kubebuilder:rbac:groups=streaming.projectriff.io,resources=gateways,verbs=get;list;watch;create;update;patch;delete

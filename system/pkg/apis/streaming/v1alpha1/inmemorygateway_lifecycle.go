@@ -19,7 +19,7 @@ package v1alpha1
 import (
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/projectriff/system/pkg/apis"
+	"github.com/projectriff/riff/system/pkg/apis"
 )
 
 const (

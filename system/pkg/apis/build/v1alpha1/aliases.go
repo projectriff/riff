@@ -17,7 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	kpackv1alpha1 "github.com/projectriff/system/pkg/apis/thirdparty/kpack/build/v1alpha1"
+	kpackv1alpha1 "github.com/projectriff/riff/system/pkg/apis/thirdparty/kpack/build/v1alpha1"
 )
 
 // +k8s:deepcopy-gen=false

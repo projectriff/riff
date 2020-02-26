@@ -24,10 +24,10 @@ import (
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
-	corev1alpha1 "github.com/projectriff/system/pkg/apis/core/v1alpha1"
-	knativev1alpha1 "github.com/projectriff/system/pkg/apis/knative/v1alpha1"
-	streamingv1alpha1 "github.com/projectriff/system/pkg/apis/streaming/v1alpha1"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/build/v1alpha1"
+	corev1alpha1 "github.com/projectriff/riff/system/pkg/apis/core/v1alpha1"
+	knativev1alpha1 "github.com/projectriff/riff/system/pkg/apis/knative/v1alpha1"
+	streamingv1alpha1 "github.com/projectriff/riff/system/pkg/apis/streaming/v1alpha1"
 )
 
 var scheme = runtime.NewScheme()

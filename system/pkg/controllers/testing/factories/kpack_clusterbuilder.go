@@ -19,9 +19,9 @@ package factories
 import (
 	"fmt"
 
-	"github.com/projectriff/system/pkg/apis"
-	kpackbuildv1alpha1 "github.com/projectriff/system/pkg/apis/thirdparty/kpack/build/v1alpha1"
-	rtesting "github.com/projectriff/system/pkg/controllers/testing"
+	"github.com/projectriff/riff/system/pkg/apis"
+	kpackbuildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/thirdparty/kpack/build/v1alpha1"
+	rtesting "github.com/projectriff/riff/system/pkg/controllers/testing"
 )
 
 type kpackClusterBuilder struct {

@@ -17,7 +17,7 @@ limitations under the License.
 package testing
 
 import (
-	"github.com/projectriff/system/pkg/apis"
+	"github.com/projectriff/riff/system/pkg/apis"
 )
 
 // Factory creates Kubernetes objects

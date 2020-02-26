@@ -19,10 +19,10 @@ package factories
 import (
 	"fmt"
 
-	"github.com/projectriff/system/pkg/apis"
-	streamingv1alpha1 "github.com/projectriff/system/pkg/apis/streaming/v1alpha1"
-	rtesting "github.com/projectriff/system/pkg/controllers/testing"
-	"github.com/projectriff/system/pkg/refs"
+	"github.com/projectriff/riff/system/pkg/apis"
+	streamingv1alpha1 "github.com/projectriff/riff/system/pkg/apis/streaming/v1alpha1"
+	rtesting "github.com/projectriff/riff/system/pkg/controllers/testing"
+	"github.com/projectriff/riff/system/pkg/refs"
 )
 
 type kafkaGateway struct {

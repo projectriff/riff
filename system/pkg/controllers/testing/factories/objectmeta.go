@@ -24,7 +24,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/projectriff/system/pkg/controllers/testing"
+	"github.com/projectriff/riff/system/pkg/controllers/testing"
 )
 
 type ObjectMeta interface {

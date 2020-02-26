@@ -35,8 +35,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/projectriff/system/pkg/apis"
-	"github.com/projectriff/system/pkg/tracker"
+	"github.com/projectriff/riff/system/pkg/apis"
+	"github.com/projectriff/riff/system/pkg/tracker"
 )
 
 var (

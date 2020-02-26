@@ -26,11 +26,11 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
-	knativev1alpha1 "github.com/projectriff/system/pkg/apis/knative/v1alpha1"
-	servingv1 "github.com/projectriff/system/pkg/apis/thirdparty/knative/serving/v1"
-	"github.com/projectriff/system/pkg/controllers"
-	"github.com/projectriff/system/pkg/tracker"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/build/v1alpha1"
+	knativev1alpha1 "github.com/projectriff/riff/system/pkg/apis/knative/v1alpha1"
+	servingv1 "github.com/projectriff/riff/system/pkg/apis/thirdparty/knative/serving/v1"
+	"github.com/projectriff/riff/system/pkg/controllers"
+	"github.com/projectriff/riff/system/pkg/tracker"
 )
 
 // +kubebuilder:rbac:groups=knative.projectriff.io,resources=adapters,verbs=get;list;watch;create;update;patch;delete

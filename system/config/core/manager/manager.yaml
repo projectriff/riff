@@ -18,7 +18,7 @@ spec:
       containers:
       - args:
         - --enable-leader-election
-        image: github.com/projectriff/system/cmd/managers/core
+        image: github.com/projectriff/riff/system/cmd/managers/core
         name: manager
         resources:
           limits:

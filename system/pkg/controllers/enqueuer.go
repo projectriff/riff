@@ -22,7 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/projectriff/system/pkg/tracker"
+	"github.com/projectriff/riff/system/pkg/tracker"
 )
 
 func EnqueueTracked(by runtime.Object, t tracker.Tracker, s *runtime.Scheme) *handler.EnqueueRequestsFromMapFunc {

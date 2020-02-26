@@ -27,7 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/projectriff/system/pkg/apis"
+	"github.com/projectriff/riff/system/pkg/apis"
 )
 
 type clientWrapper struct {

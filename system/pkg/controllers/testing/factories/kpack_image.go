@@ -23,9 +23,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/projectriff/system/pkg/apis"
-	kpackbuildv1alpha1 "github.com/projectriff/system/pkg/apis/thirdparty/kpack/build/v1alpha1"
-	rtesting "github.com/projectriff/system/pkg/controllers/testing"
+	"github.com/projectriff/riff/system/pkg/apis"
+	kpackbuildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/thirdparty/kpack/build/v1alpha1"
+	rtesting "github.com/projectriff/riff/system/pkg/controllers/testing"
 )
 
 type kpackImage struct {

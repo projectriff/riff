@@ -21,7 +21,7 @@ import (
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 
-	v1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/knative/v1alpha1"
+	v1alpha1 "github.com/projectriff/riff/system/pkg/client/clientset/versioned/typed/knative/v1alpha1"
 )
 
 type FakeKnativeV1alpha1 struct {

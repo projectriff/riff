@@ -29,12 +29,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	streamingv1alpha1 "github.com/projectriff/system/pkg/apis/streaming/v1alpha1"
-	"github.com/projectriff/system/pkg/controllers"
-	"github.com/projectriff/system/pkg/controllers/streaming"
-	rtesting "github.com/projectriff/system/pkg/controllers/testing"
-	"github.com/projectriff/system/pkg/controllers/testing/factories"
-	"github.com/projectriff/system/pkg/tracker"
+	streamingv1alpha1 "github.com/projectriff/riff/system/pkg/apis/streaming/v1alpha1"
+	"github.com/projectriff/riff/system/pkg/controllers"
+	"github.com/projectriff/riff/system/pkg/controllers/streaming"
+	rtesting "github.com/projectriff/riff/system/pkg/controllers/testing"
+	"github.com/projectriff/riff/system/pkg/controllers/testing/factories"
+	"github.com/projectriff/riff/system/pkg/tracker"
 )
 
 func TestGatewayReconciler(t *testing.T) {

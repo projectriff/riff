@@ -22,7 +22,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/projectriff/system/pkg/validation"
+	"github.com/projectriff/riff/system/pkg/validation"
 )
 
 func TestFieldErrors_Also(t *testing.T) {

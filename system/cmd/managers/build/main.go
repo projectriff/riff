@@ -27,10 +27,10 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
-	kpackbuildv1alpha1 "github.com/projectriff/system/pkg/apis/thirdparty/kpack/build/v1alpha1"
-	"github.com/projectriff/system/pkg/controllers"
-	buildcontrollers "github.com/projectriff/system/pkg/controllers/build"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/build/v1alpha1"
+	kpackbuildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/thirdparty/kpack/build/v1alpha1"
+	"github.com/projectriff/riff/system/pkg/controllers"
+	buildcontrollers "github.com/projectriff/riff/system/pkg/controllers/build"
 	// +kubebuilder:scaffold:imports
 )
 

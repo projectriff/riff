@@ -66,7 +66,7 @@ manifests:
 # Run go fmt against code
 .PHONY: fmt
 fmt: goimports
-	$(GOIMPORTS) --local github.com/projectriff/system -w pkg/ cmd/
+	$(GOIMPORTS) --local github.com/projectriff/riff/system -w pkg/ cmd/
 
 # Run go vet against code
 .PHONY: vet

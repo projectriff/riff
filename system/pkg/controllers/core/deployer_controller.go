@@ -31,12 +31,12 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	"github.com/projectriff/system/pkg/apis"
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
-	corev1alpha1 "github.com/projectriff/system/pkg/apis/core/v1alpha1"
-	"github.com/projectriff/system/pkg/controllers"
-	"github.com/projectriff/system/pkg/refs"
-	"github.com/projectriff/system/pkg/tracker"
+	"github.com/projectriff/riff/system/pkg/apis"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/build/v1alpha1"
+	corev1alpha1 "github.com/projectriff/riff/system/pkg/apis/core/v1alpha1"
+	"github.com/projectriff/riff/system/pkg/controllers"
+	"github.com/projectriff/riff/system/pkg/refs"
+	"github.com/projectriff/riff/system/pkg/tracker"
 )
 
 // +kubebuilder:rbac:groups=core.projectriff.io,resources=deployers,verbs=get;list;watch;create;update;patch;delete

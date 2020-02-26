@@ -21,7 +21,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1beta1 "k8s.io/api/networking/v1beta1"
 
-	apis "github.com/projectriff/system/pkg/apis"
+	apis "github.com/projectriff/riff/system/pkg/apis"
 )
 
 const (

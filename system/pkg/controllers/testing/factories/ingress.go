@@ -23,8 +23,8 @@ import (
 	networkingv1beta1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"github.com/projectriff/system/pkg/apis"
-	rtesting "github.com/projectriff/system/pkg/controllers/testing"
+	"github.com/projectriff/riff/system/pkg/apis"
+	rtesting "github.com/projectriff/riff/system/pkg/controllers/testing"
 )
 
 type ingress struct {

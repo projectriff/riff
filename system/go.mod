@@ -1,4 +1,4 @@
-module github.com/projectriff/system
+module github.com/projectriff/riff/system
 
 go 1.13
 

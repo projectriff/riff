@@ -21,9 +21,9 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/projectriff/system/pkg/apis"
-	knativeservingv1 "github.com/projectriff/system/pkg/apis/thirdparty/knative/serving/v1"
-	rtesting "github.com/projectriff/system/pkg/controllers/testing"
+	"github.com/projectriff/riff/system/pkg/apis"
+	knativeservingv1 "github.com/projectriff/riff/system/pkg/apis/thirdparty/knative/serving/v1"
+	rtesting "github.com/projectriff/riff/system/pkg/controllers/testing"
 )
 
 type knativeConfiguration struct {

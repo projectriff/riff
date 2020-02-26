@@ -18,7 +18,7 @@ spec:
       containers:
       - args:
         - --enable-leader-election
-        image: github.com/projectriff/system/cmd/managers/knative
+        image: github.com/projectriff/riff/system/cmd/managers/knative
         name: manager
         resources:
           limits:

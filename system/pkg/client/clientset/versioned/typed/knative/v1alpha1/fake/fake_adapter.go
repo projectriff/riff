@@ -25,7 +25,7 @@ import (
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
 
-	v1alpha1 "github.com/projectriff/system/pkg/apis/knative/v1alpha1"
+	v1alpha1 "github.com/projectriff/riff/system/pkg/apis/knative/v1alpha1"
 )
 
 // FakeAdapters implements AdapterInterface

@@ -28,8 +28,8 @@ import (
 	controllerruntime "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/projectriff/system/pkg/controllers"
-	"github.com/projectriff/system/pkg/tracker"
+	"github.com/projectriff/riff/system/pkg/controllers"
+	"github.com/projectriff/riff/system/pkg/tracker"
 )
 
 // SubTestcase holds a single row of a table test.

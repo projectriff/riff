@@ -21,7 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/projectriff/system/pkg/apis"
+	"github.com/projectriff/riff/system/pkg/apis"
 )
 
 func IndexControllersOfType(mgr ctrl.Manager, field string, owner, ownee apis.Object, scheme *runtime.Scheme) error {

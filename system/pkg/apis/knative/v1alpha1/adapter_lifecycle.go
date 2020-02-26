@@ -17,7 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	apis "github.com/projectriff/system/pkg/apis"
+	apis "github.com/projectriff/riff/system/pkg/apis"
 )
 
 const (

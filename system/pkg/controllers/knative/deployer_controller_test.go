@@ -31,14 +31,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
-	knativev1alpha1 "github.com/projectriff/system/pkg/apis/knative/v1alpha1"
-	knativeservingv1 "github.com/projectriff/system/pkg/apis/thirdparty/knative/serving/v1"
-	"github.com/projectriff/system/pkg/controllers"
-	"github.com/projectriff/system/pkg/controllers/knative"
-	rtesting "github.com/projectriff/system/pkg/controllers/testing"
-	"github.com/projectriff/system/pkg/controllers/testing/factories"
-	"github.com/projectriff/system/pkg/tracker"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/build/v1alpha1"
+	knativev1alpha1 "github.com/projectriff/riff/system/pkg/apis/knative/v1alpha1"
+	knativeservingv1 "github.com/projectriff/riff/system/pkg/apis/thirdparty/knative/serving/v1"
+	"github.com/projectriff/riff/system/pkg/controllers"
+	"github.com/projectriff/riff/system/pkg/controllers/knative"
+	rtesting "github.com/projectriff/riff/system/pkg/controllers/testing"
+	"github.com/projectriff/riff/system/pkg/controllers/testing/factories"
+	"github.com/projectriff/riff/system/pkg/tracker"
 )
 
 func TestDeployerReconciler(t *testing.T) {

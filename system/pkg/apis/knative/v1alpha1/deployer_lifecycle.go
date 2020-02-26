@@ -19,8 +19,8 @@ package v1alpha1
 import (
 	corev1 "k8s.io/api/core/v1"
 
-	apis "github.com/projectriff/system/pkg/apis"
-	servingv1 "github.com/projectriff/system/pkg/apis/thirdparty/knative/serving/v1"
+	apis "github.com/projectriff/riff/system/pkg/apis"
+	servingv1 "github.com/projectriff/riff/system/pkg/apis/thirdparty/knative/serving/v1"
 )
 
 const (

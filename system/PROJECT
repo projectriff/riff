@@ -1,6 +1,6 @@
 version: "2"
 domain: projectriff.io
-repo: github.com/projectriff/system
+repo: github.com/projectriff/riff/system
 multigroup: true
 resources:
 - group: build

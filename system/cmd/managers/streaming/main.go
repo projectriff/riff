@@ -28,13 +28,13 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	kedav1alpha1 "github.com/projectriff/system/pkg/apis/thirdparty/keda/v1alpha1"
+	kedav1alpha1 "github.com/projectriff/riff/system/pkg/apis/thirdparty/keda/v1alpha1"
 
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
-	streamingv1alpha1 "github.com/projectriff/system/pkg/apis/streaming/v1alpha1"
-	"github.com/projectriff/system/pkg/controllers"
-	streamingcontrollers "github.com/projectriff/system/pkg/controllers/streaming"
-	"github.com/projectriff/system/pkg/tracker"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/build/v1alpha1"
+	streamingv1alpha1 "github.com/projectriff/riff/system/pkg/apis/streaming/v1alpha1"
+	"github.com/projectriff/riff/system/pkg/controllers"
+	streamingcontrollers "github.com/projectriff/riff/system/pkg/controllers/streaming"
+	"github.com/projectriff/riff/system/pkg/tracker"
 	// +kubebuilder:scaffold:imports
 )
 

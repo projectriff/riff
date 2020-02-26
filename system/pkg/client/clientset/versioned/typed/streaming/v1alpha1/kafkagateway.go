@@ -25,8 +25,8 @@ import (
 	watch "k8s.io/apimachinery/pkg/watch"
 	rest "k8s.io/client-go/rest"
 
-	v1alpha1 "github.com/projectriff/system/pkg/apis/streaming/v1alpha1"
-	scheme "github.com/projectriff/system/pkg/client/clientset/versioned/scheme"
+	v1alpha1 "github.com/projectriff/riff/system/pkg/apis/streaming/v1alpha1"
+	scheme "github.com/projectriff/riff/system/pkg/client/clientset/versioned/scheme"
 )
 
 // KafkaGatewaysGetter has a method to return a KafkaGatewayInterface.

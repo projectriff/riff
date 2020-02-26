@@ -25,7 +25,7 @@ import (
 
 	"github.com/go-logr/logr"
 
-	streamingv1alpha1 "github.com/projectriff/system/pkg/apis/streaming/v1alpha1"
+	streamingv1alpha1 "github.com/projectriff/riff/system/pkg/apis/streaming/v1alpha1"
 )
 
 type StreamProvisionerClient interface {

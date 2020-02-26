@@ -32,14 +32,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
-	corev1alpha1 "github.com/projectriff/system/pkg/apis/core/v1alpha1"
-	"github.com/projectriff/system/pkg/controllers"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/build/v1alpha1"
+	corev1alpha1 "github.com/projectriff/riff/system/pkg/apis/core/v1alpha1"
+	"github.com/projectriff/riff/system/pkg/controllers"
 
-	corecontrollers "github.com/projectriff/system/pkg/controllers/core"
-	rtesting "github.com/projectriff/system/pkg/controllers/testing"
-	"github.com/projectriff/system/pkg/controllers/testing/factories"
-	"github.com/projectriff/system/pkg/tracker"
+	corecontrollers "github.com/projectriff/riff/system/pkg/controllers/core"
+	rtesting "github.com/projectriff/riff/system/pkg/controllers/testing"
+	"github.com/projectriff/riff/system/pkg/controllers/testing/factories"
+	"github.com/projectriff/riff/system/pkg/tracker"
 )
 
 func TestDeployerReconciler(t *testing.T) {
