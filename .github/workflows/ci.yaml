@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - '**'
+    - '!dependabot/**'
+  pull_request: {}
+
+jobs:
+
+  unit:
+    name: Unit test
+    strategy:
+      matrix:
+        os:
+        - ubuntu-latest
+        - macos-latest
+        - windows-latest
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v1
+      with:
+        go-version: '1.13'
+    # TODO remove after https://github.com/actions/setup-go/issues/14
+    - name: Add GOPATH/bin to PATH
+      run: |
+        echo "##[set-env name=GOPATH;]$(go env GOPATH)"
+        echo "##[add-path]$(go env GOPATH)/bin"
+      shell: bash
+    - name: Test cli
+      run: make build coverage verify-docs
+      working-directory: cli
+    - name: Test system
+      run: |
+        . ../fats/install.sh kubebuilder
+        . ../fats/install.sh kustomize
+        make compile test
+      working-directory: system
+      if: success() && matrix.os == 'ubuntu-latest'
+    - name: Report coverage
+      run: curl -s https://codecov.io/bash | bash -s
+      shell: bash
+      env:
+        CODECOV_TOKEN: 9ff1715b-5be2-44d7-ae21-b14ff7165fa9
