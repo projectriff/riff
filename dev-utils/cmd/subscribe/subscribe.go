@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	devutil "github.com/projectriff/developer-utils/pkg"
+	devutil "github.com/projectriff/riff/developer-utils/pkg"
 	client "github.com/projectriff/stream-client-go"
 	"github.com/spf13/cobra"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
