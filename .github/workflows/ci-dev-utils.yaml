@@ -44,6 +44,6 @@ jobs:
         working-directory: dev-utils
         shell: bash
       - name: Publish to Registry
-        run: .github/workflows/ci-dev-utils/push-to-dockerhub.sh ${{ github.ref }}
+        run: ../.github/workflows/ci-dev-utils/push-to-dockerhub.sh ${{ github.ref }}
         working-directory: dev-utils
         shell: bash

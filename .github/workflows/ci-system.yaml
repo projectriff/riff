@@ -117,7 +117,7 @@ jobs:
         env:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
       - name: Stage artifacts
-        run: .github/workflows/ci-system/stage.sh
+        run: ../.github/workflows/ci-system/stage.sh
         working-directory: system
         shell: bash
         env:
@@ -171,12 +171,12 @@ jobs:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
       - name: 'Install tools'
         run: |
-          ./fats/install.sh kubectl
-          ./fats/install.sh riff
-          ./fats/install.sh ytt
-          ./fats/install.sh kapp
+          ../fats/install.sh kubectl
+          ../fats/install.sh riff
+          ../fats/install.sh ytt
+          ../fats/install.sh kapp
           if [ ! -z "$GCLOUD_CLIENT_SECRET" ]; then
-            ./fats/install.sh gcloud
+            ../fats/install.sh gcloud
           fi
           GO111MODULE=off go get github.com/google/ko/cmd/ko
           echo "##[add-path]$(go env GOPATH)/bin"
@@ -186,38 +186,38 @@ jobs:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
         timeout-minutes: 5
       - name: 'Start FATS'
-        run: ./fats/start.sh
+        run: ../fats/start.sh
         working-directory: system
         shell: bash
         timeout-minutes: 10
       - name: 'Install runtime'
-        run: .github/workflows/ci-system/install-runtime.sh
+        run: ../.github/workflows/ci-system/install-runtime.sh
         working-directory: system
         shell: bash
         timeout-minutes: 10
       - name: 'Run acceptance tests'
-        run: .github/workflows/ci-system/acceptance.sh
+        run: ../.github/workflows/ci-system/acceptance.sh
         working-directory: system
         shell: bash
         env:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
         timeout-minutes: 30
       - name: 'Collect diagnostics'
-        run: ./fats/diagnostics.sh
+        run: .././fats/diagnostics.sh
         working-directory: system
         shell: bash
         if: always()
         continue-on-error: true
         timeout-minutes: 1
       - name: 'Uninstall runtime'
-        run: .github/workflows/ci-system/cleanup-runtime.sh
+        run: ../.github/workflows/ci-system/cleanup-runtime.sh
         working-directory: system
         shell: bash
         if: always()
         continue-on-error: true
         timeout-minutes: 5
       - name: 'Cleanup FATS'
-        run: ./fats/cleanup.sh
+        run: .././fats/cleanup.sh
         working-directory: system
         shell: bash
         if: always()
@@ -243,6 +243,6 @@ jobs:
         env:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
       - name: Publish artifacts
-        run: .github/workflows/ci-system/publish.sh ${{ github.ref }}
+        run: ../.github/workflows/ci-system/publish.sh ${{ github.ref }}
         working-directory: system
         shell: bash

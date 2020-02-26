@@ -57,34 +57,34 @@ jobs:
       working-directory: fats
       shell: bash
     - name: Start FATS
-      run: ./fats/start.sh
+      run: ../fats/start.sh
       working-directory: fats
       shell: bash
       timeout-minutes: 45
     - name: Install riff
-      run: .github/workflows/ci-fats/install.sh
+      run: ../.github/workflows/ci-fats/install.sh
       working-directory: fats
       shell: bash
       timeout-minutes: 10
     - name: Run Tests
-      run: .github/workflows/ci-fats/run.sh
+      run: ../.github/workflows/ci-fats/run.sh
       working-directory: fats
       shell: bash
       timeout-minutes: 30
     - name: Collect diagnostics
-      run: ./fats/diagnostics.sh
+      run: ../fats/diagnostics.sh
       working-directory: fats
       shell: bash
       if: always()
       timeout-minutes: 1
     - name: Cleanup riff
-      run: .github/workflows/ci-fats/cleanup.sh
+      run: ../.github/workflows/ci-fats/cleanup.sh
       working-directory: fats
       shell: bash
       if: always()
       timeout-minutes: 20
     - name: Cleanup FATS
-      run: ./fats/cleanup.sh
+      run: ../fats/cleanup.sh
       working-directory: fats
       shell: bash
       if: always()

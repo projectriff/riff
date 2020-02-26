@@ -18,7 +18,6 @@ jobs:
         go-version: '1.13'
     # TODO remove after https://github.com/actions/setup-go/issues/14
     - name: Add GOPATH/bin to PATH
-      shell: bash
       run: |
         echo "##[set-env name=GOPATH;]$(go env GOPATH)"
         echo "##[add-path]$(go env GOPATH)/bin"
@@ -31,7 +30,6 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
     - name: Run tests
-      shell: bash
       run: make build test
       working-directory: pulsar-provisioner
       shell: bash
@@ -46,7 +44,7 @@ jobs:
             startsWith(github.ref, 'refs/heads/v') && endsWith(github.ref, 'x')
           )
         )
-      run: .github/workflows/ci-pulsar-provider/publish.sh
+      run: ../.github/workflows/ci-pulsar-provider/publish.sh
       working-directory: pulsar-provisioner
       shell: bash
       env:

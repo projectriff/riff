@@ -52,7 +52,6 @@ jobs:
       shell: bash
     - name: Report coverage
       run: curl -s https://codecov.io/bash | bash -s
-      shell: bash
       working-directory: cli
       shell: bash
       env:
@@ -76,7 +75,7 @@ jobs:
       working-directory: cli
       shell: bash
     - name: Stage riff release artifacts
-      run: .github/workflows/ci-cli/stage.sh
+      run: ../.github/workflows/ci-cli/stage.sh
       working-directory: cli
       shell: bash
       env:
@@ -117,16 +116,16 @@ jobs:
         working-directory: cli
         shell: bash
       - name: Run acceptance tests
-        run: .github/workflows/ci-cli/acceptance.sh
+        run: ../.github/workflows/ci-cli/acceptance.sh
         working-directory: cli
         shell: bash
       - name: Collect diagnostics
-        run: ./fats/diagnostics.sh
+        run: ../fats/diagnostics.sh
         working-directory: cli
         shell: bash
         if: always()
       - name: Cleanup
-        run: .github/workflows/ci-cli/acceptance-cleanup.sh
+        run: ../.github/workflows/ci-cli/acceptance-cleanup.sh
         working-directory: cli
         shell: bash
         if: always()
@@ -145,7 +144,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Publish riff release artifacts
-      run: .github/workflows/ci-cli/publish.sh ${{ github.ref }}
+      run: ../.github/workflows/ci-cli/publish.sh ${{ github.ref }}
       working-directory: cli
       shell: bash
       env:

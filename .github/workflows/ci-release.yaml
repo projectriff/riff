@@ -63,12 +63,12 @@ jobs:
       shell: bash
     - name: Install tools
       run: |
-        ./fats/install.sh kubectl
-        ./fats/install.sh riff
-        ./fats/install.sh helm
-        ./fats/install.sh ytt
-        ./fats/install.sh kapp
-        ./fats/install.sh k8s-tag-resolver
+        ../fats/install.sh kubectl
+        ../fats/install.sh riff
+        ../fats/install.sh helm
+        ../fats/install.sh ytt
+        ../fats/install.sh kapp
+        ../fats/install.sh k8s-tag-resolver
         curl -L https://github.com/mikefarah/yq/releases/download/2.4.1/yq_linux_amd64 -o yq
         chmod +x yq
         sudo mv yq /usr/local/bin/
@@ -81,34 +81,34 @@ jobs:
       working-directory: release
       shell: bash
     - name: Start
-      run: ./fats/start.sh
+      run: ../fats/start.sh
       working-directory: release
       shell: bash
       timeout-minutes: 15
     - name: Install riff
-      run: ./.github/workflows/ci-release/install-riff.sh unstaged
+      run: ../.github/workflows/ci-release/install-riff.sh unstaged
       working-directory: release
       shell: bash
       timeout-minutes: 15
     - name: Run tests
-      run: ./.github/workflows/ci-release/acceptance.sh
+      run: ../.github/workflows/ci-release/acceptance.sh
       working-directory: release
       shell: bash
       timeout-minutes: 30
     - name: Collect diagnostics
-      run: ./fats/diagnostics.sh
+      run: ../fats/diagnostics.sh
       working-directory: release
       shell: bash
       if: always()
       timeout-minutes: 1
     - name: Uninstall riff
-      run: ./.github/workflows/ci-release/cleanup-riff.sh
+      run: ../.github/workflows/ci-release/cleanup-riff.sh
       working-directory: release
       shell: bash
       if: always()
       timeout-minutes: 10
     - name: Cleanup
-      run: ./fats/cleanup.sh
+      run: ../fats/cleanup.sh
       working-directory: release
       shell: bash
       if: always()
@@ -127,10 +127,10 @@ jobs:
       shell: bash
     - name: Install tools
       run: |
-        ./fats/install.sh helm
-        ./fats/install.sh gcloud
-        ./fats/install.sh ytt
-        ./fats/install.sh k8s-tag-resolver
+        ../fats/install.sh helm
+        ../fats/install.sh gcloud
+        ../fats/install.sh ytt
+        ../fats/install.sh k8s-tag-resolver
         curl -L https://github.com/mikefarah/yq/releases/download/2.4.1/yq_linux_amd64 -o yq
         chmod +x yq
         sudo mv yq /usr/local/bin/
@@ -139,7 +139,7 @@ jobs:
       env:
         GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
     - name: Stage projectriff chart artifacts
-      run: ./.github/workflows/ci-release/stage.sh
+      run: ../.github/workflows/ci-release/stage.sh
       working-directory: release
       shell: bash
 
@@ -201,43 +201,43 @@ jobs:
       shell: bash
     - name: Install tools
       run: |
-        ./fats/install.sh kubectl
-        ./fats/install.sh riff
-        ./fats/install.sh helm
-        ./fats/install.sh ytt
-        ./fats/install.sh kapp
-        ./fats/install.sh gcloud
+        ../fats/install.sh kubectl
+        ../fats/install.sh riff
+        ../fats/install.sh helm
+        ../fats/install.sh ytt
+        ../fats/install.sh kapp
+        ../fats/install.sh gcloud
       working-directory: release
       shell: bash
     - name: Start
-      run: ./fats/start.sh
+      run: ../fats/start.sh
       working-directory: release
       shell: bash
       timeout-minutes: 15
     - name: Install riff
-      run: ./.github/workflows/ci-release/install-riff.sh staged
+      run: ../.github/workflows/ci-release/install-riff.sh staged
       working-directory: release
       shell: bash
       timeout-minutes: 15
     - name: Run tests
-      run: ./.github/workflows/ci-release/acceptance.sh
+      run: ../.github/workflows/ci-release/acceptance.sh
       working-directory: release
       shell: bash
       timeout-minutes: 30
     - name: Collect diagnostics
-      run: ./fats/diagnostics.sh
+      run: ../fats/diagnostics.sh
       working-directory: release
       shell: bash
       if: always()
       timeout-minutes: 1
     - name: Uninstall riff
-      run: ./.github/workflows/ci-release/cleanup-riff.sh
+      run: ../.github/workflows/ci-release/cleanup-riff.sh
       working-directory: release
       shell: bash
       if: always()
       timeout-minutes: 10
     - name: Cleanup
-      run: ./fats/cleanup.sh
+      run: ../fats/cleanup.sh
       working-directory: release
       shell: bash
       if: always()
@@ -257,13 +257,13 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install tools
       run: |
-        ./fats/install.sh helm
-        ./fats/install.sh gcloud
+        ../fats/install.sh helm
+        ../fats/install.sh gcloud
       working-directory: release
       shell: bash
       env:
         GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
     - name: Publish Chart
-      run: ./.github/workflows/ci-release/publish.sh
+      run: ../.github/workflows/ci-release/publish.sh
       working-directory: release
       shell: bash
