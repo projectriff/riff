@@ -1,0 +1,232 @@
+
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: mutating-webhook-configuration
+webhooks:
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-streaming-projectriff-io-v1alpha1-gateway
+  failurePolicy: Fail
+  name: gateways.streaming.projectriff.io
+  rules:
+  - apiGroups:
+    - streaming.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - gateway
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-streaming-projectriff-io-v1alpha1-inmemorygateway
+  failurePolicy: Fail
+  name: inmemorygateways.streaming.projectriff.io
+  rules:
+  - apiGroups:
+    - streaming.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - inmemorygateways
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-streaming-projectriff-io-v1alpha1-kafkagateway
+  failurePolicy: Fail
+  name: kafkagateways.streaming.projectriff.io
+  rules:
+  - apiGroups:
+    - streaming.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - kafkagateways
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-streaming-projectriff-io-v1alpha1-processor
+  failurePolicy: Fail
+  name: processors.streaming.projectriff.io
+  rules:
+  - apiGroups:
+    - streaming.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - processors
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-streaming-projectriff-io-v1alpha1-pulsargateway
+  failurePolicy: Fail
+  name: pulsargateways.streaming.projectriff.io
+  rules:
+  - apiGroups:
+    - streaming.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - pulsargateways
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-streaming-projectriff-io-v1alpha1-stream
+  failurePolicy: Fail
+  name: streams.streaming.projectriff.io
+  rules:
+  - apiGroups:
+    - streaming.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - streams
+
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: validating-webhook-configuration
+webhooks:
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-streaming-projectriff-io-v1alpha1-gateway
+  failurePolicy: Fail
+  name: gateways.streaming.projectriff.io
+  rules:
+  - apiGroups:
+    - streaming.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - gateway
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-streaming-projectriff-io-v1alpha1-inmemorygateway
+  failurePolicy: Fail
+  name: inmemorygateways.streaming.projectriff.io
+  rules:
+  - apiGroups:
+    - streaming.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - inmemorygateways
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-streaming-projectriff-io-v1alpha1-kafkagateway
+  failurePolicy: Fail
+  name: kafkagateways.streaming.projectriff.io
+  rules:
+  - apiGroups:
+    - streaming.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - kafkagateways
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-streaming-projectriff-io-v1alpha1-processor
+  failurePolicy: Fail
+  name: processors.streaming.projectriff.io
+  rules:
+  - apiGroups:
+    - streaming.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - processors
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-streaming-projectriff-io-v1alpha1-pulsargateway
+  failurePolicy: Fail
+  name: pulsargateways.streaming.projectriff.io
+  rules:
+  - apiGroups:
+    - streaming.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - pulsargateways
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-streaming-projectriff-io-v1alpha1-stream
+  failurePolicy: Fail
+  name: streams.streaming.projectriff.io
+  rules:
+  - apiGroups:
+    - streaming.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - streams

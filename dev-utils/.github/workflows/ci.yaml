@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+      - '!dependabot/**'
+  pull_request: {}
+
+jobs:
+  publish:
+    if: |
+      github.event_name == 'push' && startsWith(github.repository, 'projectriff/') && (
+        github.ref == 'refs/heads/master' || (
+          startsWith(github.ref, 'refs/heads/v') && endsWith(github.ref, 'x')
+        )
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: docker login
+        run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: docker build
+        run: docker build . -t projectriff/dev-utils
+      - name: Publish to Registry
+        run: .github/workflows/push-to-dockerhub.sh ${{ github.ref }}

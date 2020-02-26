@@ -1,0 +1,7 @@
+apiVersion: streaming.projectriff.io/v1alpha1
+kind: Processor
+metadata:
+  name: processor-sample
+spec:
+  # Add fields here
+  foo: bar

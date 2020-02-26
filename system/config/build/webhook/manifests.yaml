@@ -1,0 +1,124 @@
+
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: mutating-webhook-configuration
+webhooks:
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-build-projectriff-io-v1alpha1-application
+  failurePolicy: Fail
+  name: applications.build.projectriff.io
+  rules:
+  - apiGroups:
+    - build.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - applications
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-build-projectriff-io-v1alpha1-container
+  failurePolicy: Fail
+  name: containers.build.projectriff.io
+  rules:
+  - apiGroups:
+    - build.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - containers
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-build-projectriff-io-v1alpha1-function
+  failurePolicy: Fail
+  name: functions.build.projectriff.io
+  rules:
+  - apiGroups:
+    - build.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - functions
+
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: validating-webhook-configuration
+webhooks:
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-build-projectriff-io-v1alpha1-application
+  failurePolicy: Fail
+  name: applications.build.projectriff.io
+  rules:
+  - apiGroups:
+    - build.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - applications
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-build-projectriff-io-v1alpha1-container
+  failurePolicy: Fail
+  name: containers.build.projectriff.io
+  rules:
+  - apiGroups:
+    - build.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - containers
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-build-projectriff-io-v1alpha1-function
+  failurePolicy: Fail
+  name: functions.build.projectriff.io
+  rules:
+  - apiGroups:
+    - build.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - functions

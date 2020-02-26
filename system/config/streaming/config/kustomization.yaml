@@ -1,0 +1,5 @@
+resources:
+  - bases/processor.yaml
+  - bases/kafka-gateway.yaml
+  - bases/inmemory-gateway.yaml
+  - bases/pulsar-gateway.yaml

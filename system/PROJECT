@@ -1,0 +1,41 @@
+version: "2"
+domain: projectriff.io
+repo: github.com/projectriff/system
+multigroup: true
+resources:
+- group: build
+  version: v1alpha1
+  kind: Application
+- group: build
+  version: v1alpha1
+  kind: Container
+- group: build
+  version: v1alpha1
+  kind: Function
+- group: core
+  version: v1alpha1
+  kind: Deployer
+- group: knative
+  version: v1alpha1
+  kind: Adapter
+- group: knative
+  version: v1alpha1
+  kind: Deployer
+- group: streaming
+  version: v1alpha1
+  kind: Stream
+- group: streaming
+  version: v1alpha1
+  kind: Processor
+- group: streaming
+  version: v1alpha1
+  kind: Gateway
+- group: streaming
+  version: v1alpha1
+  kind: KafkaGateway
+- group: streaming
+  version: v1alpha1
+  kind: InMemoryGateway
+- group: streaming
+  version: v1alpha1
+  kind: PulsarGateway

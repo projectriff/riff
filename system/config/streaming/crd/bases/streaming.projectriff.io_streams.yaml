@@ -1,0 +1,110 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.4
+  creationTimestamp: null
+  name: streams.streaming.projectriff.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.gateway.name
+    name: Gateway
+    type: string
+  - JSONPath: .spec.contentType
+    name: Content Type
+    type: string
+  - JSONPath: .status.conditions[?(@.type=="Ready")].status
+    name: Ready
+    type: string
+  - JSONPath: .status.conditions[?(@.type=="Ready")].reason
+    name: Reason
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
+  group: streaming.projectriff.io
+  names:
+    categories:
+    - riff
+    kind: Stream
+    listKind: StreamList
+    plural: streams
+    singular: stream
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            contentType:
+              type: string
+            gateway:
+              properties:
+                name:
+                  type: string
+              type: object
+          required:
+          - contentType
+          - gateway
+          type: object
+        status:
+          properties:
+            binding:
+              properties:
+                metadataRef:
+                  properties:
+                    name:
+                      type: string
+                  type: object
+                secretRef:
+                  properties:
+                    name:
+                      type: string
+                  type: object
+              type: object
+            conditions:
+              items:
+                properties:
+                  lastTransitionTime:
+                    type: string
+                  message:
+                    type: string
+                  reason:
+                    type: string
+                  severity:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+            observedGeneration:
+              format: int64
+              type: integer
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

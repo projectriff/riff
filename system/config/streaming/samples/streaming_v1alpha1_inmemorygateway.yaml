@@ -1,0 +1,5 @@
+apiVersion: streaming.projectriff.io/v1alpha1
+kind: InMemoryGateway
+metadata:
+  name: dory
+spec: {}

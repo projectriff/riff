@@ -1,0 +1,7 @@
+apiVersion: knative.projectriff.io/v1alpha1
+kind: Adapter
+metadata:
+  name: adapter-sample
+spec:
+  # Add fields here
+  foo: bar

@@ -1,0 +1,16 @@
+#@ load("@ytt:overlay", "overlay")
+
+#! Add missing namespace to resources
+
+#@overlay/match by=overlay.all,expects="0+"
+---
+#@overlay/match missing_ok=True
+metadata:
+  #@overlay/match missing_ok=True
+  namespace: kafka
+
+#@overlay/match by=overlay.subset({"kind": "Namespace"}),expects="0+"
+---
+metadata:
+  #@overlay/remove
+  namespace:

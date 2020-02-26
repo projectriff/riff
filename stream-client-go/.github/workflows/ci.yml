@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - '**'
+    - '!dependabot/**'
+  pull_request: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-go@v1
+      with:
+        go-version: '1.13'
+    # TODO remove after https://github.com/actions/setup-go/issues/14
+    - name: Add GOPATH/bin to PATH
+      run: |
+        echo "##[set-env name=GOPATH;]$(go env GOPATH)"
+        echo "##[add-path]$(go env GOPATH)/bin"
+      shell: bash
+    - name: Start liiklus
+      run: |
+        docker run --name liiklus \
+          --rm --detach \
+          -p 6565:6565/tcp \
+          -e storage_positions_type=MEMORY \
+          -e storage_records_type=MEMORY \
+          sbawaska/liiklus:20200223160346-a85402e4332c51d9
+      shell: bash
+    - name: Test
+      run: make test
+    - name: Stop liiklus
+      run: |
+        docker stop liiklus
+      shell: bash
+    - name: Report coverage
+      run: curl -s https://codecov.io/bash | bash -s
+      shell: bash
+      env:
+        CODECOV_TOKEN: f9727f0e-d03f-4bde-8836-781574f4b4a2

@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: public-builders-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  resourceNames: 
+  - builders
+  verbs:
+  - get

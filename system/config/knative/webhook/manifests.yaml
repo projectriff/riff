@@ -1,0 +1,88 @@
+
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: mutating-webhook-configuration
+webhooks:
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-knative-projectriff-io-v1alpha1-adapter
+  failurePolicy: Fail
+  name: adapters.knative.projectriff.io
+  rules:
+  - apiGroups:
+    - knative.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - adapters
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-knative-projectriff-io-v1alpha1-deployer
+  failurePolicy: Fail
+  name: deployers.knative.projectriff.io
+  rules:
+  - apiGroups:
+    - knative.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - deployers
+
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: validating-webhook-configuration
+webhooks:
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-knative-projectriff-io-v1alpha1-adapter
+  failurePolicy: Fail
+  name: adapters.knative.projectriff.io
+  rules:
+  - apiGroups:
+    - knative.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - adapters
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-knative-projectriff-io-v1alpha1-deployer
+  failurePolicy: Fail
+  name: deployers.knative.projectriff.io
+  rules:
+  - apiGroups:
+    - knative.projectriff.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - deployers

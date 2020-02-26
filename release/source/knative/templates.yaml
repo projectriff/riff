@@ -1,0 +1,3 @@
+serving-core: https://storage.googleapis.com/knative-releases/serving/previous/v0.12.1/serving-core.yaml
+serving-hpa: https://storage.googleapis.com/knative-releases/serving/previous/v0.12.1/serving-hpa.yaml
+net-contour: https://storage.googleapis.com/knative-nightly/net-contour/previous/v20200206-896dd2e/net-contour.yaml

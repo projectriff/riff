@@ -1,0 +1,9 @@
+namespace: https://storage.googleapis.com/projectriff/charts/extras/keda/keda-namespace.yaml
+crd-scaledobject: https://github.com/kedacore/keda/raw/42f27d22173d83856672d76a5587b55f88f289ec/deploy/crds/keda.k8s.io_scaledobjects_crd.yaml
+crd-triggerauthentications: https://github.com/kedacore/keda/raw/42f27d22173d83856672d76a5587b55f88f289ec/deploy/crds/keda.k8s.io_triggerauthentications_crd.yaml
+api-service: https://github.com/kedacore/keda/raw/42f27d22173d83856672d76a5587b55f88f289ec/deploy/api_service.yaml
+operator: https://github.com/kedacore/keda/raw/42f27d22173d83856672d76a5587b55f88f289ec/deploy/operator.yaml
+role: https://github.com/kedacore/keda/raw/42f27d22173d83856672d76a5587b55f88f289ec/deploy/role.yaml
+role-binding: https://github.com/kedacore/keda/raw/42f27d22173d83856672d76a5587b55f88f289ec/deploy/role_binding.yaml
+service: https://github.com/kedacore/keda/raw/42f27d22173d83856672d76a5587b55f88f289ec/deploy/service.yaml
+service-account: https://github.com/kedacore/keda/raw/42f27d22173d83856672d76a5587b55f88f289ec/deploy/service_account.yaml

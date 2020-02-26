@@ -1,0 +1,36 @@
+#@ load("@ytt:overlay", "overlay")
+
+#! Order API service and its backing services: related https://github.com/k14s/kapp/issues/12
+
+#@overlay/match by=overlay.subset({"kind": "APIService"})
+---
+metadata:
+  #@overlay/match missing_ok=True
+  annotations:
+    #@overlay/match missing_ok=True
+    kapp.k14s.io/change-rule: "upsert after upserting knative-deployment"
+    #@overlay/match missing_ok=True
+    kapp.k14s.io/change-rule.0: "delete before deleting knative-deployment"
+
+#@overlay/match by=overlay.subset({"kind": "Deployment", "metadata": {"namespace": "knative-serving", "name": "autoscaler"}}),expects="0+"
+---
+apiVersion: apps/v1
+metadata:
+  #@overlay/match missing_ok=True
+  annotations:
+    kapp.k14s.io/change-group: "knative-deployment"
+
+#@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"namespace": "knative-serving", "name": "autoscaler"}}),expects="0+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  annotations:
+    kapp.k14s.io/change-group: "knative-deployment"
+
+#! Remove _unnecessary_ status blocks as make kapp show CRDs as changed
+
+#@overlay/match by=overlay.all,expects="1+"
+---
+#@overlay/match missing_ok=True
+#@overlay/remove
+status:

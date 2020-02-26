@@ -1,0 +1,102 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.4
+  creationTimestamp: null
+  name: adapters.knative.projectriff.io
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.conditions[?(@.type=="Ready")].status
+    name: Ready
+    type: string
+  - JSONPath: .status.conditions[?(@.type=="Ready")].reason
+    name: Reason
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
+  group: knative.projectriff.io
+  names:
+    categories:
+    - riff
+    kind: Adapter
+    listKind: AdapterList
+    plural: adapters
+    singular: adapter
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            build:
+              properties:
+                applicationRef:
+                  type: string
+                containerRef:
+                  type: string
+                functionRef:
+                  type: string
+              type: object
+            target:
+              properties:
+                configurationRef:
+                  type: string
+                serviceRef:
+                  type: string
+              type: object
+          required:
+          - build
+          - target
+          type: object
+        status:
+          properties:
+            conditions:
+              items:
+                properties:
+                  lastTransitionTime:
+                    type: string
+                  message:
+                    type: string
+                  reason:
+                    type: string
+                  severity:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - status
+                - type
+                type: object
+              type: array
+            latestImage:
+              type: string
+            observedGeneration:
+              format: int64
+              type: integer
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

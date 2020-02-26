@@ -1,0 +1,6 @@
+apiVersion: streaming.projectriff.io/v1alpha1
+kind: PulsarGateway
+metadata:
+  name: jocelyn
+spec:
+  serviceURL: pulsar://localhost:6650

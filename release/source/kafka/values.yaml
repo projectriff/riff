@@ -1,0 +1,5 @@
+replicas: 1
+zookeeper:
+  replicaCount: 1
+  env:
+    ZK_HEAP_SIZE: 128m

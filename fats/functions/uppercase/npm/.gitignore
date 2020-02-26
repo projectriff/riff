@@ -1,0 +1,6 @@
+/*
+!.gitignore
+!/lib
+!package*.json
+!tsconfig.json
+!LICENSE

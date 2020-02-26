@@ -1,0 +1,141 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - build.pivotal.io
+  resources:
+  - clusterbuilders
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - build.pivotal.io
+  resources:
+  - images
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - build.projectriff.io
+  resources:
+  - applications
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - build.projectriff.io
+  resources:
+  - applications
+  - functions
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - build.projectriff.io
+  resources:
+  - applications/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - build.projectriff.io
+  resources:
+  - containers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - build.projectriff.io
+  resources:
+  - containers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - build.projectriff.io
+  resources:
+  - functions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - build.projectriff.io
+  resources:
+  - functions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch

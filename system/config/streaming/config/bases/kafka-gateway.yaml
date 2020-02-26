@@ -1,0 +1,9 @@
+# DO NOT EDIT - this file is the output of the 'config/streaming/config/bases/kafka-gateway.yaml.tpl' template 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-gateway
+data:
+  gatewayImage: bsideup/liiklus:0.9.2
+  provisionerImage: gcr.io/projectriff/kafka-provisioner/provisioner@sha256:c5917a348faae5ababb7371be200c933d50f12f2698d6635d138f047300d68a6
+

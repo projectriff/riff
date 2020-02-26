@@ -1,0 +1,6 @@
+apiVersion: streaming.projectriff.io/v1alpha1
+kind: KafkaGateway
+metadata:
+  name: franz
+spec:
+  bootstrapServers: kafkabroker:9092

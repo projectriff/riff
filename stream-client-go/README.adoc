@@ -1,0 +1,3 @@
+= Stream Client Go
+
+A library for interacting with riff streams in go.

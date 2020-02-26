@@ -1,0 +1,223 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - build.projectriff.io
+  resources:
+  - containers
+  verbs:
+  - get
+  - watch
+- apiGroups:
+  - build.projectriff.io
+  resources:
+  - functions
+  verbs:
+  - get
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - keda.k8s.io
+  resources:
+  - scaledobjects
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - streaming.projectriff.io
+  resources:
+  - gateways
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - streaming.projectriff.io
+  resources:
+  - gateways/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - streaming.projectriff.io
+  resources:
+  - inmemorygateways
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - streaming.projectriff.io
+  resources:
+  - inmemorygateways/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - streaming.projectriff.io
+  resources:
+  - kafkagateways
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - streaming.projectriff.io
+  resources:
+  - kafkagateways/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - streaming.projectriff.io
+  resources:
+  - processors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - streaming.projectriff.io
+  resources:
+  - processors/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - streaming.projectriff.io
+  resources:
+  - pulsargateways
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - streaming.projectriff.io
+  resources:
+  - pulsargateways/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - streaming.projectriff.io
+  resources:
+  - streams
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - streaming.projectriff.io
+  resources:
+  - streams/status
+  verbs:
+  - get
+  - patch
+  - update

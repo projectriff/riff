@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - '**'
+    - '!dependabot/**'
+  pull_request: {}
+
+env:
+  FATS_DIR: "."
+  FATS_REPO: ${{ github.repository }}
+  FATS_REFSPEC: ${{ github.sha }}
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
+  PIVNET_REFRESH_TOKEN: ${{ secrets.PIVNET_REFRESH_TOKEN }}
+  TOOLSMITH_ENV: ${{ secrets.PKS_16_GCP_ENV }}
+
+jobs:
+
+  fats:
+    name: FATS
+    # skip pull requests from the projectriff org, the push is tested
+    # pull requests will fail because they do not have access to secrets
+    if: "!(github.event_name == 'pull_request' && startsWith(github.repository, 'projectriff/'))"
+    strategy:
+      matrix:
+        config:
+        - os: ubuntu-latest
+          qualifier: kind
+          cluster: kind
+          registry: docker-daemon
+        - os: ubuntu-latest
+          qualifier: dockerhub
+          cluster: kind
+          registry: dockerhub
+        - os: ubuntu-latest
+          qualifier: gke
+          cluster: gke
+          registry: gcr
+        - os: ubuntu-latest
+          qualifier: pks
+          cluster: pks-gcp
+          registry: gcr
+        - os: windows-latest
+          qualifier: windows
+          cluster: gke
+          registry: gcr
+      fail-fast: false
+    runs-on: ${{ matrix.config.os }}
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup env
+      run: |
+        job=$(date +%s) # TODO use something that is assigned by CI to guarantee uniqueness
+        echo "JOB_ID=${job}"
+
+        echo "##[set-env name=CLUSTER]${{ matrix.config.cluster }}"
+        echo "##[set-env name=REGISTRY]${{ matrix.config.registry }}"
+        echo "##[set-env name=CLUSTER_NAME]fats-${job}-${{ matrix.config.qualifier }}"
+        echo "##[set-env name=NAMESPACE]fats-${job}-${{ matrix.config.qualifier }}"
+      shell: bash
+    - name: Start FATS
+      run: ${FATS_DIR}/start.sh
+      shell: bash
+      timeout-minutes: 45
+    - name: Install riff
+      run: .github/workflows/install.sh
+      shell: bash
+      timeout-minutes: 10
+    - name: Run Tests
+      run: .github/workflows/run.sh
+      shell: bash
+      timeout-minutes: 30
+    - name: Collect diagnostics
+      run: ${FATS_DIR}/diagnostics.sh
+      shell: bash
+      if: always()
+      timeout-minutes: 1
+    - name: Cleanup riff
+      run: .github/workflows/cleanup.sh
+      shell: bash
+      if: always()
+      timeout-minutes: 20
+    - name: Cleanup FATS
+      run: ${FATS_DIR}/cleanup.sh
+      shell: bash
+      if: always()
+      timeout-minutes: 30

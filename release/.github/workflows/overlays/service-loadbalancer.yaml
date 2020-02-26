@@ -1,0 +1,9 @@
+#@ load("@ytt:overlay", "overlay")
+
+#! replace LoadBalancer services with LoadBalancer (no-op)
+
+#@overlay/match by=overlay.subset({ "apiVersion": "v1", "kind": "Service", "spec": { "type": "LoadBalancer" } }), missing_ok=True
+---
+spec:
+  #@overlay/replace
+  type: "LoadBalancer"

@@ -1,0 +1,7 @@
+apiVersion: build.projectriff.io/v1alpha1
+kind: Container
+metadata:
+  name: container-sample
+spec:
+  # Add fields here
+  foo: bar

@@ -1,0 +1,8 @@
+apiVersion: streaming.projectriff.io/v1alpha1
+kind: Stream
+metadata:
+  name: in
+spec:
+  contentType: application/json
+  gateway:
+    name: dory

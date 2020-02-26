@@ -1,0 +1,14 @@
+[
+    {
+        "name": "reactor.core.publisher.Traces$StackWalkerCallSiteSupplierFactory",
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "reactor.core.publisher.Traces$SharedSecretsCallSiteSupplierFactory",
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "reactor.core.publisher.Traces$ExceptionCallSiteSupplierFactory",
+        "allDeclaredConstructors": true
+    }
+]

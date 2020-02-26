@@ -1,0 +1,16 @@
+{
+  "name": "@projectriff/fats-uppercase-npm",
+  "version": "1.0.0",
+  "description": "Typescript greeting sample",
+  "main": "dist/uppercase.js",
+  "scripts": {
+    "build": "tsc",
+    "install": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Scott Andrews",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "typescript": "^3.1.6"
+  }
+}

@@ -1,0 +1,9 @@
+#@ load("@ytt:overlay", "overlay")
+
+#! Patch ingress controller to use contour by default
+
+#@overlay/match by=overlay.subset({"kind": "ConfigMap", "metadata": {"name": "config-network"}})
+---
+data:
+  #@overlay/match missing_ok=True
+  ingress.class: contour.ingress.networking.knative.dev

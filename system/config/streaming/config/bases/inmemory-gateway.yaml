@@ -1,0 +1,8 @@
+# DO NOT EDIT - this file is the output of the 'config/streaming/config/bases/inmemory-gateway.yaml.tpl' template 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inmemory-gateway
+data:
+  gatewayImage: bsideup/liiklus:0.9.2
+  provisionerImage: gcr.io/projectriff/nop-provisioner/provisioner@sha256:4bfa270f904a979c858d50267bb5e99df3b4ec44babe993f949193404f58f64b

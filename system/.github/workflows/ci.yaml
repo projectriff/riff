@@ -1,0 +1,218 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - '**'
+    - '!dependabot/**'
+  pull_request: {}
+
+env:
+  FATS_DIR: fats
+  FATS_REPO: projectriff/fats
+  FATS_REFSPEC: 3d6cead12932026fdb933a1bb550cb7eca0a8def # master as of 2020-02-04
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-go@v1
+      with:
+        go-version: '1.13'
+    - name: Install kubebuilder
+      run: |
+        # from https://book.kubebuilder.io/quick-start.html#installation
+        os=`go env GOOS`
+        arch=`go env GOARCH`
+
+        # download kubebuilder and extract it to tmp
+        curl -sL https://go.kubebuilder.io/dl/2.0.0/${os}/${arch} | tar -xz -C /tmp/
+
+        # move to a long-term location and put it on your path
+        # (you'll need to set the KUBEBUILDER_ASSETS env var if you put it somewhere else)
+        sudo mv /tmp/kubebuilder_2.0.0_${os}_${arch} /usr/local/kubebuilder
+        echo "##[add-path]/usr/local/kubebuilder/bin"
+    - name: Install kustomize
+      run: |
+        opsys=`go env GOOS`
+        curl -s https://api.github.com/repos/kubernetes-sigs/kustomize/releases |\
+          grep browser_download |\
+          grep $opsys |\
+          cut -d '"' -f 4 |\
+          grep /kustomize/v |\
+          sort | tail -n 1 |\
+          xargs curl -O -L
+        tar xzf ./kustomize_v*_${opsys}_amd64.tar.gz
+        sudo mv kustomize /usr/local/bin/
+    - name: Build & Test
+      run: make compile test
+    - name: Check generated code is up to date
+      run: git diff --exit-code .
+    - name: Report coverage
+      run: bash <(curl -s https://codecov.io/bash)
+      env:
+        CODECOV_TOKEN: 39b82cdd-7ed3-4692-b2ea-f31ed9b84cef
+
+  stage:
+    needs: test
+    if: github.event_name == 'push' && startsWith(github.repository, 'projectriff/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-go@v1
+        with:
+          go-version: '1.13'
+      - name: Install kubebuilder
+        run: |
+          # from https://book.kubebuilder.io/quick-start.html#installation
+          os=`go env GOOS`
+          arch=`go env GOARCH`
+
+          # download kubebuilder and extract it to tmp
+          curl -sL https://go.kubebuilder.io/dl/2.0.0/${os}/${arch} | tar -xz -C /tmp/
+
+          # move to a long-term location and put it on your path
+          # (you'll need to set the KUBEBUILDER_ASSETS env var if you put it somewhere else)
+          sudo mv /tmp/kubebuilder_2.0.0_${os}_${arch} /usr/local/kubebuilder
+          echo "##[add-path]/usr/local/kubebuilder/bin"
+      - name: Install kustomize
+        run: |
+          opsys=`go env GOOS`
+          curl -s https://api.github.com/repos/kubernetes-sigs/kustomize/releases |\
+            grep browser_download |\
+            grep $opsys |\
+            cut -d '"' -f 4 |\
+            grep /kustomize/v |\
+            sort | tail -n 1 |\
+            xargs curl -O -L
+          tar xzf ./kustomize_v*_${opsys}_amd64.tar.gz
+          sudo mv kustomize /usr/local/bin/
+      - name: Install ko
+        run: |
+          go get github.com/google/ko/cmd/ko
+          echo "##[add-path]$(go env GOPATH)/bin"
+        env:
+          GO111MODULE: "off"
+      - name: gcloud auth
+        run: |
+          gcloud config set project cf-spring-pfs-eng
+          gcloud config set compute/region us-central1
+          gcloud config set compute/zone us-central1-a
+          gcloud config set disable_prompts True
+          gcloud auth activate-service-account --key-file <(echo $GCLOUD_CLIENT_SECRET | base64 --decode)
+          gcloud auth configure-docker
+        env:
+          GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
+      - name: Stage artifacts
+        run: .github/workflows/stage.sh
+        env:
+          KO_DOCKER_REPO: gcr.io/projectriff/system
+
+  acceptance:
+    needs: stage
+    # run even if the stage job was skipped
+    if: "!( cancelled() || failure() )"
+    strategy:
+      matrix:
+        config:
+        - runtime: core
+        - runtime: knative
+        - runtime: streaming
+          gateway: inmemory
+        - runtime: streaming
+          gateway: kafka
+        - runtime: streaming
+          gateway: pulsar
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-go@v1
+        with:
+          go-version: '1.13'
+      - name: 'Setup env'
+        run: |
+          job=$(date +%s) # TODO can use something that is assigned by CI to guarantee uniqueness
+          echo "JOB_ID=${job}"
+          if [ '${{ github.event_name }}' = 'push' ] && [ '${{ github.repository }}' = projectriff/* ]; then
+            echo "##[set-env name=MODE]push"
+          else 
+            echo "##[set-env name=MODE]pull_request"
+          fi
+          if [ ! -z "$GCLOUD_CLIENT_SECRET" ] && [ "${MODE}" = 'push' ] ; then
+            echo "##[set-env name=CLUSTER]gke"
+            echo "##[set-env name=REGISTRY]gcr"
+          else
+            echo "##[set-env name=CLUSTER]kind"
+            echo "##[set-env name=REGISTRY]docker-daemon"
+          fi
+          echo "##[set-env name=RUNTIME]${{ matrix.config.runtime }}"
+          echo "##[set-env name=GATEWAY]${{ matrix.config.gateway }}"
+          echo "##[set-env name=CLUSTER_NAME]system-${job}-${{ matrix.config.gateway }}-${{ matrix.config.runtime }}"
+          echo "##[set-env name=NAMESPACE]system-${job}-${{ matrix.config.gateway }}-${{ matrix.config.runtime }}"
+        env:
+          GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
+      - name: 'Fetch FATS'
+        run: .github/workflows/fats-fetch.sh ${FATS_DIR} ${FATS_REFSPEC} ${FATS_REPO}
+        timeout-minutes: 1
+      - name: 'Install tools'
+        run: |
+          ${FATS_DIR}/install.sh kubectl
+          ${FATS_DIR}/install.sh riff
+          ${FATS_DIR}/install.sh ytt
+          ${FATS_DIR}/install.sh kapp
+          if [ ! -z "$GCLOUD_CLIENT_SECRET" ]; then
+            ${FATS_DIR}/install.sh gcloud
+          fi
+          GO111MODULE=off go get github.com/google/ko/cmd/ko
+          echo "##[add-path]$(go env GOPATH)/bin"
+        env:
+          GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
+        timeout-minutes: 5
+      - name: 'Start FATS'
+        run: ${FATS_DIR}/start.sh
+        timeout-minutes: 10
+      - name: 'Install runtime'
+        run: .github/workflows/install-runtime.sh
+        timeout-minutes: 10
+      - name: 'Run acceptance tests'
+        run: .github/workflows/acceptance.sh
+        env:
+          GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
+        timeout-minutes: 30
+      - name: 'Collect diagnostics'
+        run: ${FATS_DIR}/diagnostics.sh
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 1
+      - name: 'Uninstall runtime'
+        run: .github/workflows/cleanup-runtime.sh
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 5
+      - name: 'Cleanup FATS'
+        run: ${FATS_DIR}/cleanup.sh
+        if: always()
+        timeout-minutes: 10
+
+  publish:
+    needs: acceptance
+    if: |
+      github.event_name == 'push' && startsWith(github.repository, 'projectriff/') && (
+        github.ref == 'refs/heads/master' || (
+          startsWith(github.ref, 'refs/heads/v') && endsWith(github.ref, 'x')
+        )
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: gcloud auth
+        run: |
+          gcloud config set disable_prompts True
+          gcloud auth activate-service-account --key-file <(echo $GCLOUD_CLIENT_SECRET | base64 --decode)
+        env:
+          GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
+      - name: Publish artifacts
+        run: .github/workflows/publish.sh ${{ github.ref }}

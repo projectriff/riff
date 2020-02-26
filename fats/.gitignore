@@ -1,0 +1,6 @@
+*.out
+.DS_Store
+.project
+.classpath
+.settings
+*.installed

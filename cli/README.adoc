@@ -1,0 +1,38 @@
+= riff is for functions
+
+image::logo.png[riff logo, link=https://projectriff.io/]
+= A FaaS for Kubernetes
+
+The riff CLI helps developers build and run functions in a Kubernetes cluster.
+
+== Installation of the latest release
+
+=== Binaries
+
+Official binary releases are available from the link:https://github.com/projectriff/cli/releases[Releases] page. See link:https://projectriff.io/docs/getting-started/[Getting started] for how to install the riff CLI and the riff system.
+
+=== Homebrew
+
+To install the CLI for Mac OS with link:https://brew.sh/[Homebrew]:
+
+[source, bash]
+----
+brew install riff
+----
+
+=== Chocolatey
+
+To install the CLI for Windows with link:https://chocolatey.org/[Chocolatey]:
+
+[source, bash]
+----
+choco install riff
+----
+
+== Contributing to riff
+
+Please refer to the link:CONTRIBUTING.adoc[Contributors' Guide].
+
+== Code of Conduct
+
+Please refer to the link:CODE_OF_CONDUCT.adoc[Contributor Code of Conduct].

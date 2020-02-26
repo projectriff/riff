@@ -1,0 +1,23 @@
+// This protobuf definition defines how riff encodes messages at rest once they're serialized on the broker
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.projectriff.processor.serialization";
+
+package serialization;
+
+option go_package = "serialization";
+
+
+// A Message represents a single event, serialized as an opaque payload, to be interpreted according to a given content-type.
+message Message {
+
+    // The actual content of the event.
+    bytes payload = 1;
+
+    // How to interpret the bytes that make up the payload of this message.
+    string contentType = 2;
+
+    // Additional custom headers for this message.
+    map<string, string> headers = 3;
+}

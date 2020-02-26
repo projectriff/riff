@@ -1,0 +1,7 @@
+#@ load("@ytt:overlay", "overlay")
+
+#! Remove resources with helm hooks
+
+#@overlay/match by=overlay.subset({ "metadata": { "annotations": { "helm.sh/hook": "test-success" } } }), expects="0+"
+#@overlay/remove
+---

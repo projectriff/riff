@@ -1,0 +1,1 @@
+defaultBaseImage: cloudfoundry/run:tiny

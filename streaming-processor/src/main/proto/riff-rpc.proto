@@ -1,0 +1,71 @@
+// This protobuf definition defines how riff encodes messages on the wire when doing an RPC function invocation.
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.projectriff.invoker.rpc";
+option java_outer_classname = "Invoker";
+
+package streaming;
+
+service Riff {
+    rpc Invoke (stream InputSignal) returns (stream OutputSignal) {}
+}
+
+// Represents data flowing in when invoking a riff function. A special StartFrame is sent first to specify metadata
+// about the invocation
+message InputSignal {
+    oneof frame {
+        StartFrame start = 1;
+        InputFrame data = 2;
+    }
+}
+
+// Contains setup data for an invocation
+message StartFrame {
+    // The ContentTypes that an invocation is allowed to produce for each output parameter
+    repeated string expectedContentTypes = 1;
+    // The logical names for input arguments
+    repeated string inputNames = 2;
+    // The logical names for output arguments
+    repeated string outputNames = 3;
+}
+
+// Contains actual invocation data, as input events.
+message InputFrame {
+    // The actual content of the event.
+    bytes payload = 1;
+
+    // How to interpret the bytes that make up the payload of this frame.
+    string contentType = 2;
+
+    // Additional custom headers.
+    map<string, string> headers = 3;
+
+    // The input argument index this frame pertains to.
+    int32 argIndex = 4;
+}
+
+// Represents data flowing out when invoking a riff function. Represented as a oneof with a single case to allow for
+// future extensions
+message OutputSignal {
+    oneof frame {
+        OutputFrame data = 1;
+    }
+}
+
+// Contains actual function invocation result data, as output events.
+message OutputFrame {
+
+    // The actual content of the event.
+    bytes payload = 1;
+
+    // How to interpret the bytes that make up the payload of this frame.
+    string contentType = 2;
+
+    // Additional custom headers.
+    map<string, string> headers = 3;
+
+    // The index of the result this frame pertains to.
+    int32 resultIndex = 4;
+}
+

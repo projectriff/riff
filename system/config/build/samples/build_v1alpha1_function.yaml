@@ -1,0 +1,7 @@
+apiVersion: build.projectriff.io/v1alpha1
+kind: Function
+metadata:
+  name: function-sample
+spec:
+  # Add fields here
+  foo: bar

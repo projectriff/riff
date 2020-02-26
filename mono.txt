@@ -1,0 +1,11 @@
+https://github.com/projectriff/system/tree/ffc78699b50aadab6e01cc14c5110a075af7cfb0
+https://github.com/projectriff/cli/tree/f521af58fbd94c4b4a446705fe091a0f06bdf54c
+https://github.com/projectriff/release/tree/9dfe1e66af0c62b7fca964f299fdf10155189130
+https://github.com/projectriff/pulsar-provisioner/tree/c06b5ee9cb128c2649da9d1ad899790422ad8eff
+https://github.com/projectriff/kafka-provisioner/tree/c038d350eace9c2615c1ff08e754a6364fb71e70
+https://github.com/projectriff/nop-provisioner/tree/80530ec94f650df23bdee59654dbc5afb779931f
+https://github.com/projectriff/fats/tree/4a7a0f156234400701b77671a46c545c075f421f
+https://github.com/projectriff/streaming-processor/tree/560d966c576e518c1f7005bd20047c06afe54cf5
+https://github.com/projectriff/stream-client-go/tree/836809a469fa55e7cbff4811c68b50fc2a1448d4
+https://github.com/projectriff/dev-utils/tree/5770fbb31cbac3d1be7b95f3b9a3fa4fa4a0fe52
+
