@@ -43,6 +43,7 @@ jobs:
         sudo mv kustomize /usr/local/bin/
     - name: Build & Test
       run: make compile test
+      working-directory: system
     - name: Check generated code is up to date
       run: git diff --exit-code .
     - name: Report coverage

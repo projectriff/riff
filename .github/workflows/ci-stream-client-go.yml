@@ -30,12 +30,15 @@ jobs:
           -e storage_records_type=MEMORY \
           sbawaska/liiklus:20200223160346-a85402e4332c51d9
       shell: bash
+      working-directory: stream-client-go
     - name: Test
       run: make test
+      working-directory: stream-client-go
     - name: Stop liiklus
       run: |
         docker stop liiklus
       shell: bash
+      working-directory: stream-client-go
     - name: Report coverage
       run: curl -s https://codecov.io/bash | bash -s
       shell: bash

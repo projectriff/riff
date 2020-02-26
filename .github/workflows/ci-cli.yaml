@@ -35,16 +35,21 @@ jobs:
         go get golang.org/x/tools/cmd/goimports
         make verify-goimports
       shell: bash
+      working-directory: cli
       if: success() && runner.os != 'Windows'
     - name: Build
       run: make build
+      working-directory: cli
     - name: Unit test
       run: make coverage
+      working-directory: cli
     - name: Verify docs
       run: make verify-docs
+      working-directory: cli
     - name: Report coverage
       run: curl -s https://codecov.io/bash | bash -s
       shell: bash
+      working-directory: cli
       env:
         CODECOV_TOKEN: d09bee7e-6c5a-4316-a48f-266e08d0f70f
 

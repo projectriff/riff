@@ -29,11 +29,14 @@ jobs:
       - name: build publish
         run: |
           GOOS=linux GOARCH=amd64 go build -o bin/publish ./cmd/publish
+        working-directory: dev-utils
       - name: build subscribe
         run: |
           GOOS=linux GOARCH=amd64 go build -o bin/subscribe ./cmd/subscribe
+        working-directory: dev-utils
       - name: docker build
         run: |
           docker build . -t projectriff/dev-utils
+        working-directory: dev-utils
       - name: Publish to Registry
         run: .github/workflows/ci-dev-utils/push-to-dockerhub.sh ${{ github.ref }}

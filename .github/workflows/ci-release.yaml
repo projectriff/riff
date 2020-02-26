@@ -74,6 +74,7 @@ jobs:
       run: |
         helm init --client-only
         make clean package
+      working-directory: release
     - name: Start
       run: ./fats/start.sh
       timeout-minutes: 15
