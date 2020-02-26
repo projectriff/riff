@@ -1,4 +1,4 @@
-VERSION ?= $(shell cat VERSION)
+VERSION ?= $(shell cat ../VERSION)
 export KAFKA_VERSION = 0.20.8
 
 .PHONY: package

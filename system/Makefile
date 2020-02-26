@@ -1,7 +1,7 @@
 
 # Target component to build/run
 COMPONENT ?= build
-VERSION ?= $(shell cat VERSION)
+VERSION ?= $(shell cat ../VERSION)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= crd:trivialVersions=true
 

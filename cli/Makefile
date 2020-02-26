@@ -1,7 +1,7 @@
 OUTPUT = ./riff
 GO_SOURCES = $(shell find . -type f -name '*.go')
 GOBIN ?= $(shell go env GOPATH)/bin
-VERSION ?= $(shell cat VERSION)
+VERSION ?= $(shell cat ../VERSION)
 GITSHA = $(shell git rev-parse HEAD)
 GITDIRTY = $(shell git diff --quiet HEAD || echo "dirty")
 LDFLAGS_VERSION = -X github.com/projectriff/riff/cli/pkg/cli.cli_name=riff \
