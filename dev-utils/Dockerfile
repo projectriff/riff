@@ -1,18 +1,7 @@
-# build stage
-FROM golang:1.13 AS build
-ADD . /src
-RUN cd /src \
-  && go build ./cmd/subscribe \
-  && go build ./cmd/publish
-
-
-# final stage
 FROM ubuntu:bionic
 
 ADD scripts/* /riff/dev-utils/bin/
-
-COPY --from=build /src/subscribe /riff/dev-utils/bin
-COPY --from=build /src/publish /riff/dev-utils/bin
+COPY bin/* /riff/dev-utils/bin/
 
 WORKDIR /riff/dev-utils
 

@@ -10,8 +10,8 @@ import (
 	"os"
 	"strings"
 
-	devutil "github.com/projectriff/riff/developer-utils/pkg"
-	client "github.com/projectriff/stream-client-go"
+	devutil "github.com/projectriff/riff/dev-utils/pkg"
+	client "github.com/projectriff/riff/stream-client-go"
 	"github.com/spf13/cobra"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth"

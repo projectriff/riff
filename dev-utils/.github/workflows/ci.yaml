@@ -18,12 +18,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - uses: actions/setup-go@v1
+        with:
+          go-version: '1.13'
       - name: docker login
         run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: build publish
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o bin/publish ./cmd/publish
+      - name: build subscribe
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o bin/subscribe ./cmd/subscribe
       - name: docker build
-        run: docker build . -t projectriff/dev-utils
+        run: |
+          docker build . -t projectriff/dev-utils
       - name: Publish to Registry
         run: .github/workflows/push-to-dockerhub.sh ${{ github.ref }}
