@@ -28,7 +28,7 @@ import (
 	"github.com/projectriff/riff/cli/pkg/parsers"
 	"github.com/projectriff/riff/cli/pkg/race"
 	"github.com/projectriff/riff/cli/pkg/validation"
-	knativev1alpha1 "github.com/projectriff/system/pkg/apis/knative/v1alpha1"
+	knativev1alpha1 "github.com/projectriff/riff/system/pkg/apis/knative/v1alpha1"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"

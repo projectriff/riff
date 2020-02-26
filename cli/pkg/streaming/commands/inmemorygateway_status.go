@@ -23,7 +23,7 @@ import (
 
 	"github.com/projectriff/riff/cli/pkg/cli"
 	"github.com/projectriff/riff/cli/pkg/cli/options"
-	streamv1alpha1 "github.com/projectriff/system/pkg/apis/streaming/v1alpha1"
+	streamv1alpha1 "github.com/projectriff/riff/system/pkg/apis/streaming/v1alpha1"
 	"github.com/spf13/cobra"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

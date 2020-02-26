@@ -23,7 +23,7 @@ import (
 
 	"github.com/projectriff/riff/cli/pkg/cli"
 	"github.com/projectriff/riff/cli/pkg/cli/options"
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/build/v1alpha1"
 	"github.com/spf13/cobra"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

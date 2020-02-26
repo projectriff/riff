@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/build/v1alpha1"
 )
 
 func TestDryRunResource(t *testing.T) {

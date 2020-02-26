@@ -27,7 +27,7 @@ import (
 	"github.com/projectriff/riff/cli/pkg/k8s"
 	"github.com/projectriff/riff/cli/pkg/race"
 	"github.com/projectriff/riff/cli/pkg/validation"
-	streamv1alpha1 "github.com/projectriff/system/pkg/apis/streaming/v1alpha1"
+	streamv1alpha1 "github.com/projectriff/riff/system/pkg/apis/streaming/v1alpha1"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

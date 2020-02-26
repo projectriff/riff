@@ -22,7 +22,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/projectriff/riff/cli/pkg/cli"
-	"github.com/projectriff/system/pkg/apis"
+	"github.com/projectriff/riff/system/pkg/apis"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

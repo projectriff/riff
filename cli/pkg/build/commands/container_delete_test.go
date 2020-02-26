@@ -22,7 +22,7 @@ import (
 	"github.com/projectriff/riff/cli/pkg/build/commands"
 	"github.com/projectriff/riff/cli/pkg/cli"
 	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/build/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )

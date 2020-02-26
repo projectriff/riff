@@ -17,7 +17,7 @@
 package testing
 
 import (
-	fakeprojectriffclientset "github.com/projectriff/system/pkg/client/clientset/versioned/fake"
+	fakeprojectriffclientset "github.com/projectriff/riff/system/pkg/client/clientset/versioned/fake"
 	fakeapiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	fakekubeclientset "k8s.io/client-go/kubernetes/fake"

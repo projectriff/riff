@@ -31,7 +31,7 @@ import (
 	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
 	kailtesting "github.com/projectriff/riff/cli/pkg/testing/kail"
 	packtesting "github.com/projectriff/riff/cli/pkg/testing/pack"
-	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/apis/build/v1alpha1"
 	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"

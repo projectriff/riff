@@ -25,7 +25,7 @@ import (
 	"github.com/projectriff/riff/cli/pkg/k8s"
 	"github.com/projectriff/riff/cli/pkg/knative/commands"
 	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
-	knativev1alpha1 "github.com/projectriff/system/pkg/apis/knative/v1alpha1"
+	knativev1alpha1 "github.com/projectriff/riff/system/pkg/apis/knative/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	cachetesting "k8s.io/client-go/tools/cache/testing"

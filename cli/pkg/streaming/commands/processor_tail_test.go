@@ -26,7 +26,7 @@ import (
 	"github.com/projectriff/riff/cli/pkg/streaming/commands"
 	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
 	kailtesting "github.com/projectriff/riff/cli/pkg/testing/kail"
-	streamv1alpha1 "github.com/projectriff/system/pkg/apis/streaming/v1alpha1"
+	streamv1alpha1 "github.com/projectriff/riff/system/pkg/apis/streaming/v1alpha1"
 	"github.com/stretchr/testify/mock"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"

@@ -26,7 +26,7 @@ import (
 	"github.com/projectriff/riff/cli/pkg/cli/options"
 	"github.com/projectriff/riff/cli/pkg/k8s"
 	"github.com/projectriff/riff/cli/pkg/race"
-	knativev1alpha1 "github.com/projectriff/system/pkg/apis/knative/v1alpha1"
+	knativev1alpha1 "github.com/projectriff/riff/system/pkg/apis/knative/v1alpha1"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

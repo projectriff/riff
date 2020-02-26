@@ -17,11 +17,11 @@
 package k8s
 
 import (
-	projectriffclientset "github.com/projectriff/system/pkg/client/clientset/versioned"
-	buildv1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/build/v1alpha1"
-	corev1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/core/v1alpha1"
-	knativev1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/knative/v1alpha1"
-	streamv1alpha1 "github.com/projectriff/system/pkg/client/clientset/versioned/typed/streaming/v1alpha1"
+	projectriffclientset "github.com/projectriff/riff/system/pkg/client/clientset/versioned"
+	buildv1alpha1 "github.com/projectriff/riff/system/pkg/client/clientset/versioned/typed/build/v1alpha1"
+	corev1alpha1 "github.com/projectriff/riff/system/pkg/client/clientset/versioned/typed/core/v1alpha1"
+	knativev1alpha1 "github.com/projectriff/riff/system/pkg/client/clientset/versioned/typed/knative/v1alpha1"
+	streamv1alpha1 "github.com/projectriff/riff/system/pkg/client/clientset/versioned/typed/streaming/v1alpha1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	"k8s.io/client-go/kubernetes"

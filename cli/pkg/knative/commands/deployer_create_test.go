@@ -27,7 +27,7 @@ import (
 	"github.com/projectriff/riff/cli/pkg/knative/commands"
 	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
 	kailtesting "github.com/projectriff/riff/cli/pkg/testing/kail"
-	knativev1alpha1 "github.com/projectriff/system/pkg/apis/knative/v1alpha1"
+	knativev1alpha1 "github.com/projectriff/riff/system/pkg/apis/knative/v1alpha1"
 	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
