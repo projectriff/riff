@@ -1,4 +1,4 @@
-name: CI
+name: CI - streaming-processor
 
 on:
   push:
@@ -42,6 +42,6 @@ jobs:
       env:
         GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
     - name: Publish artifacts
-      run: .github/workflows/deploy-image.sh
+      run: .github/workflows/ci-streaming-processor/deploy-image.sh
     - name: Publish native artifacts
-      run: .github/workflows/deploy-native-image.sh
+      run: .github/workflows/ci-streaming-processor/deploy-native-image.sh

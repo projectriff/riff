@@ -1,4 +1,4 @@
-name: CI
+name: CI - pulsar-provider
 
 on:
   push:
@@ -38,6 +38,6 @@ jobs:
             startsWith(github.ref, 'refs/heads/v') && endsWith(github.ref, 'x')
           )
         )
-      run: .github/workflows/publish.sh
+      run: .github/workflows/ci-pulsar-provider/publish.sh
       env:
         GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}

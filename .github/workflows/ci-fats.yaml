@@ -1,4 +1,4 @@
-name: CI
+name: CI - fats
 
 on:
   push:
@@ -63,11 +63,11 @@ jobs:
       shell: bash
       timeout-minutes: 45
     - name: Install riff
-      run: .github/workflows/install.sh
+      run: .github/workflows/ci-fats/install.sh
       shell: bash
       timeout-minutes: 10
     - name: Run Tests
-      run: .github/workflows/run.sh
+      run: .github/workflows/ci-fats/run.sh
       shell: bash
       timeout-minutes: 30
     - name: Collect diagnostics
@@ -76,7 +76,7 @@ jobs:
       if: always()
       timeout-minutes: 1
     - name: Cleanup riff
-      run: .github/workflows/cleanup.sh
+      run: .github/workflows/ci-fats/cleanup.sh
       shell: bash
       if: always()
       timeout-minutes: 20

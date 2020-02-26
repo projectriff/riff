@@ -1,4 +1,4 @@
-name: CI
+name: CI - release
 
 on:
   push:
@@ -78,17 +78,17 @@ jobs:
       run: ./fats/start.sh
       timeout-minutes: 15
     - name: Install riff
-      run: ./.github/workflows/install-riff.sh unstaged
+      run: ./.github/workflows/ci-release/install-riff.sh unstaged
       timeout-minutes: 15
     - name: Run tests
-      run: ./.github/workflows/acceptance.sh
+      run: ./.github/workflows/ci-release/acceptance.sh
       timeout-minutes: 30
     - name: Collect diagnostics
       run: ./fats/diagnostics.sh
       if: always()
       timeout-minutes: 1
     - name: Uninstall riff
-      run: ./.github/workflows/cleanup-riff.sh
+      run: ./.github/workflows/ci-release/cleanup-riff.sh
       if: always()
       timeout-minutes: 10
     - name: Cleanup
@@ -117,7 +117,7 @@ jobs:
       env:
         GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
     - name: Stage projectriff chart artifacts
-      run: ./.github/workflows/stage.sh
+      run: ./.github/workflows/ci-release/stage.sh
 
   test:
     name: Test
@@ -185,17 +185,17 @@ jobs:
       run: ./fats/start.sh
       timeout-minutes: 15
     - name: Install riff
-      run: ./.github/workflows/install-riff.sh staged
+      run: ./.github/workflows/ci-release/install-riff.sh staged
       timeout-minutes: 15
     - name: Run tests
-      run: ./.github/workflows/acceptance.sh
+      run: ./.github/workflows/ci-release/acceptance.sh
       timeout-minutes: 30
     - name: Collect diagnostics
       run: ./fats/diagnostics.sh
       if: always()
       timeout-minutes: 1
     - name: Uninstall riff
-      run: ./.github/workflows/cleanup-riff.sh
+      run: ./.github/workflows/ci-release/cleanup-riff.sh
       if: always()
       timeout-minutes: 10
     - name: Cleanup
@@ -222,4 +222,4 @@ jobs:
       env:
         GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
     - name: Publish Chart
-      run: ./.github/workflows/publish.sh
+      run: ./.github/workflows/ci-release/publish.sh

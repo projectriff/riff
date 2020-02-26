@@ -1,4 +1,4 @@
-name: CI
+name: CI - system
 
 on:
   push:
@@ -101,7 +101,7 @@ jobs:
         env:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
       - name: Stage artifacts
-        run: .github/workflows/stage.sh
+        run: .github/workflows/ci-system/stage.sh
         env:
           KO_DOCKER_REPO: gcr.io/projectriff/system
 
@@ -167,10 +167,10 @@ jobs:
         run: ./fats/start.sh
         timeout-minutes: 10
       - name: 'Install runtime'
-        run: .github/workflows/install-runtime.sh
+        run: .github/workflows/ci-system/install-runtime.sh
         timeout-minutes: 10
       - name: 'Run acceptance tests'
-        run: .github/workflows/acceptance.sh
+        run: .github/workflows/ci-system/acceptance.sh
         env:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
         timeout-minutes: 30
@@ -180,7 +180,7 @@ jobs:
         continue-on-error: true
         timeout-minutes: 1
       - name: 'Uninstall runtime'
-        run: .github/workflows/cleanup-runtime.sh
+        run: .github/workflows/ci-system/cleanup-runtime.sh
         if: always()
         continue-on-error: true
         timeout-minutes: 5
@@ -207,4 +207,4 @@ jobs:
         env:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
       - name: Publish artifacts
-        run: .github/workflows/publish.sh ${{ github.ref }}
+        run: .github/workflows/ci-system/publish.sh ${{ github.ref }}

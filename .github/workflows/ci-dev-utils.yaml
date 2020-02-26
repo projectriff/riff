@@ -1,4 +1,4 @@
-name: CI
+name: CI - dev-utils
 
 on:
   push:
@@ -36,4 +36,4 @@ jobs:
         run: |
           docker build . -t projectriff/dev-utils
       - name: Publish to Registry
-        run: .github/workflows/push-to-dockerhub.sh ${{ github.ref }}
+        run: .github/workflows/ci-dev-utils/push-to-dockerhub.sh ${{ github.ref }}

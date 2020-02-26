@@ -1,4 +1,4 @@
-name: CI
+name: CI - stream-client-go
 
 on:
   push:

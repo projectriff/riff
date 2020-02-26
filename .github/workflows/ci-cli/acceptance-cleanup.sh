@@ -2,7 +2,8 @@
 
 set -o nounset
 
-fats_dir=`dirname "${BASH_SOURCE[0]}"`/fats
+readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
+readonly fats_dir=$root_dir/fats
 
 # attempt to uninstall and cleanup test resources
 if [ -d "$fats_dir" ]; then
