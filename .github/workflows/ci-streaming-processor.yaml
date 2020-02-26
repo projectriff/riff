@@ -39,10 +39,13 @@ jobs:
         gcloud config set disable_prompts True
         gcloud auth activate-service-account --key-file <(echo $GCLOUD_CLIENT_SECRET | base64 --decode)
         gcloud auth configure-docker
+      working-directory: streaming-processor
       shell: bash
       env:
         GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
     - name: Publish artifacts
       run: .github/workflows/ci-streaming-processor/deploy-image.sh
+      working-directory: streaming-processor
     - name: Publish native artifacts
       run: .github/workflows/ci-streaming-processor/deploy-native-image.sh
+      working-directory: streaming-processor

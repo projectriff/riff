@@ -22,8 +22,10 @@ jobs:
       run: |
         echo "##[set-env name=GOPATH;]$(go env GOPATH)"
         echo "##[add-path]$(go env GOPATH)/bin"
+      working-directory: pulsar-provisioner
     - name: Install ko
       run: GO111MODULE=on go get github.com/google/ko/cmd/ko
+      working-directory: pulsar-provisioner
     - name: Check out code
       uses: actions/checkout@v2
     - name: Run tests
@@ -41,5 +43,6 @@ jobs:
           )
         )
       run: .github/workflows/ci-pulsar-provider/publish.sh
+      working-directory: pulsar-provisioner
       env:
         GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}

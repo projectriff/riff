@@ -20,6 +20,7 @@ jobs:
       run: |
         echo "##[set-env name=GOPATH;]$(go env GOPATH)"
         echo "##[add-path]$(go env GOPATH)/bin"
+      working-directory: stream-client-go
       shell: bash
     - name: Start liiklus
       run: |
@@ -41,6 +42,7 @@ jobs:
       working-directory: stream-client-go
     - name: Report coverage
       run: curl -s https://codecov.io/bash | bash -s
+      working-directory: stream-client-go
       shell: bash
       env:
         CODECOV_TOKEN: f9727f0e-d03f-4bde-8836-781574f4b4a2

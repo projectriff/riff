@@ -29,6 +29,7 @@ jobs:
         # (you'll need to set the KUBEBUILDER_ASSETS env var if you put it somewhere else)
         sudo mv /tmp/kubebuilder_2.0.0_${os}_${arch} /usr/local/kubebuilder
         echo "##[add-path]/usr/local/kubebuilder/bin"
+      working-directory: system
     - name: Install kustomize
       run: |
         opsys=`go env GOOS`
@@ -41,13 +42,16 @@ jobs:
           xargs curl -O -L
         tar xzf ./kustomize_v*_${opsys}_amd64.tar.gz
         sudo mv kustomize /usr/local/bin/
+      working-directory: system
     - name: Build & Test
       run: make compile test
       working-directory: system
     - name: Check generated code is up to date
       run: git diff --exit-code .
+      working-directory: system
     - name: Report coverage
       run: bash <(curl -s https://codecov.io/bash)
+      working-directory: system
       env:
         CODECOV_TOKEN: 39b82cdd-7ed3-4692-b2ea-f31ed9b84cef
 
@@ -73,6 +77,7 @@ jobs:
           # (you'll need to set the KUBEBUILDER_ASSETS env var if you put it somewhere else)
           sudo mv /tmp/kubebuilder_2.0.0_${os}_${arch} /usr/local/kubebuilder
           echo "##[add-path]/usr/local/kubebuilder/bin"
+        working-directory: system
       - name: Install kustomize
         run: |
           opsys=`go env GOOS`
@@ -85,10 +90,12 @@ jobs:
             xargs curl -O -L
           tar xzf ./kustomize_v*_${opsys}_amd64.tar.gz
           sudo mv kustomize /usr/local/bin/
+        working-directory: system
       - name: Install ko
         run: |
           go get github.com/google/ko/cmd/ko
           echo "##[add-path]$(go env GOPATH)/bin"
+       working-directory: system
         env:
           GO111MODULE: "off"
       - name: gcloud auth
@@ -99,10 +106,12 @@ jobs:
           gcloud config set disable_prompts True
           gcloud auth activate-service-account --key-file <(echo $GCLOUD_CLIENT_SECRET | base64 --decode)
           gcloud auth configure-docker
+        working-directory: system
         env:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
       - name: Stage artifacts
         run: .github/workflows/ci-system/stage.sh
+        working-directory: system
         env:
           KO_DOCKER_REPO: gcr.io/projectriff/system
 
@@ -148,6 +157,7 @@ jobs:
           echo "##[set-env name=GATEWAY]${{ matrix.config.gateway }}"
           echo "##[set-env name=CLUSTER_NAME]system-${job}-${{ matrix.config.gateway }}-${{ matrix.config.runtime }}"
           echo "##[set-env name=NAMESPACE]system-${job}-${{ matrix.config.gateway }}-${{ matrix.config.runtime }}"
+        working-directory: system
         env:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
       - name: 'Install tools'
@@ -161,32 +171,39 @@ jobs:
           fi
           GO111MODULE=off go get github.com/google/ko/cmd/ko
           echo "##[add-path]$(go env GOPATH)/bin"
+        working-directory: system
         env:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
         timeout-minutes: 5
       - name: 'Start FATS'
         run: ./fats/start.sh
+        working-directory: system
         timeout-minutes: 10
       - name: 'Install runtime'
         run: .github/workflows/ci-system/install-runtime.sh
+        working-directory: system
         timeout-minutes: 10
       - name: 'Run acceptance tests'
         run: .github/workflows/ci-system/acceptance.sh
+        working-directory: system
         env:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
         timeout-minutes: 30
       - name: 'Collect diagnostics'
         run: ./fats/diagnostics.sh
+        working-directory: system
         if: always()
         continue-on-error: true
         timeout-minutes: 1
       - name: 'Uninstall runtime'
         run: .github/workflows/ci-system/cleanup-runtime.sh
+        working-directory: system
         if: always()
         continue-on-error: true
         timeout-minutes: 5
       - name: 'Cleanup FATS'
         run: ./fats/cleanup.sh
+        working-directory: system
         if: always()
         timeout-minutes: 10
 
@@ -205,7 +222,9 @@ jobs:
         run: |
           gcloud config set disable_prompts True
           gcloud auth activate-service-account --key-file <(echo $GCLOUD_CLIENT_SECRET | base64 --decode)
+        working-directory: system
         env:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
       - name: Publish artifacts
         run: .github/workflows/ci-system/publish.sh ${{ github.ref }}
+        working-directory: system

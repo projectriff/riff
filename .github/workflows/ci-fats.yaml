@@ -54,31 +54,38 @@ jobs:
         echo "##[set-env name=REGISTRY]${{ matrix.config.registry }}"
         echo "##[set-env name=CLUSTER_NAME]fats-${job}-${{ matrix.config.qualifier }}"
         echo "##[set-env name=NAMESPACE]fats-${job}-${{ matrix.config.qualifier }}"
+      working-directory: fats
       shell: bash
     - name: Start FATS
       run: ./fats/start.sh
+      working-directory: fats
       shell: bash
       timeout-minutes: 45
     - name: Install riff
       run: .github/workflows/ci-fats/install.sh
+      working-directory: fats
       shell: bash
       timeout-minutes: 10
     - name: Run Tests
       run: .github/workflows/ci-fats/run.sh
+      working-directory: fats
       shell: bash
       timeout-minutes: 30
     - name: Collect diagnostics
       run: ./fats/diagnostics.sh
+      working-directory: fats
       shell: bash
       if: always()
       timeout-minutes: 1
     - name: Cleanup riff
       run: .github/workflows/ci-fats/cleanup.sh
+      working-directory: fats
       shell: bash
       if: always()
       timeout-minutes: 20
     - name: Cleanup FATS
       run: ./fats/cleanup.sh
+      working-directory: fats
       shell: bash
       if: always()
       timeout-minutes: 30
