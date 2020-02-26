@@ -1,11 +1,11 @@
 name: CI - fats
 
-on:
-  push:
-    branches:
-    - '**'
-    - '!dependabot/**'
-  pull_request: {}
+on: {}
+  # TODO figure out when and where to run fats tests
+  # push:
+  #   branches:
+  #   - '**'
+  #   - '!dependabot/**'
 
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -18,9 +18,6 @@ jobs:
 
   fats:
     name: FATS
-    # skip pull requests from the projectriff org, the push is tested
-    # pull requests will fail because they do not have access to secrets
-    if: "!(github.event_name == 'pull_request' && startsWith(github.repository, 'projectriff/'))"
     strategy:
       matrix:
         config:
