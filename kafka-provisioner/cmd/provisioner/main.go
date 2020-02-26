@@ -18,12 +18,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/Shopify/sarama"
-	"github.com/projectriff/kafka-provisioner/pkg/provisioner/handler"
-	client "github.com/projectriff/kafka-provisioner/pkg/provisioner/kafka"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/Shopify/sarama"
+	"github.com/projectriff/riff/developer-utils/pkg/provisioner/handler"
+	client "github.com/projectriff/riff/developer-utils/pkg/provisioner/kafka"
 )
 
 func main() {

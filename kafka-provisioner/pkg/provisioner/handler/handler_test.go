@@ -2,15 +2,16 @@ package handler_test
 
 import (
 	"fmt"
-	"github.com/Shopify/sarama"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"github.com/projectriff/kafka-provisioner/pkg/provisioner/handler"
-	client "github.com/projectriff/kafka-provisioner/pkg/provisioner/kafka"
-	"github.com/projectriff/kafka-provisioner/pkg/provisioner/kafka/kafkafakes"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/Shopify/sarama"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	"github.com/projectriff/riff/developer-utils/pkg/provisioner/handler"
+	client "github.com/projectriff/riff/developer-utils/pkg/provisioner/kafka"
+	"github.com/projectriff/riff/developer-utils/pkg/provisioner/kafka/kafkafakes"
 )
 
 var _ = Describe("Provisioner HTTP Handler", func() {

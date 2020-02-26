@@ -4,7 +4,7 @@ package kafkafakes
 import (
 	"sync"
 
-	client "github.com/projectriff/kafka-provisioner/pkg/provisioner/kafka"
+	client "github.com/projectriff/riff/developer-utils/pkg/provisioner/kafka"
 )
 
 type FakeKafkaClient struct {

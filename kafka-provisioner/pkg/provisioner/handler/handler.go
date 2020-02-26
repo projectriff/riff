@@ -3,7 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	client "github.com/projectriff/kafka-provisioner/pkg/provisioner/kafka"
+	client "github.com/projectriff/riff/developer-utils/pkg/provisioner/kafka"
 	"io"
 	"net/http"
 	"strings"
