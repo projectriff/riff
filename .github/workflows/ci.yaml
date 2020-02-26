@@ -30,11 +30,53 @@ jobs:
         echo "##[set-env name=GOPATH;]$(go env GOPATH)"
         echo "##[add-path]$(go env GOPATH)/bin"
       shell: bash
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '8.x'
     - name: Test cli
       run: make build coverage verify-docs
       working-directory: cli
+    - name: Test dev-utils
+      run: |
+        echo "TODO"
+      working-directory: dev-utils
+      if: success() && matrix.os == 'ubuntu-latest'
+    - name: Test kafka-provisioner
+      run: make build test
+      working-directory: kafka-provisioner
+      if: success() && matrix.os == 'ubuntu-latest'
+    - name: Test nop-provisioner
+      run: make build test
+      working-directory: nop-provisioner
+      if: success() && matrix.os == 'ubuntu-latest'
+    - name: Test pulsar-provisioner
+      run: make build test
+      working-directory: pulsar-provisioner
+      if: success() && matrix.os == 'ubuntu-latest'
+    - name: Test stream-client-go
+      run: |
+        set -o errexit
+        set -o pipefail  
+        
+        docker run --name liiklus \
+          --rm --detach \
+          -p 6565:6565/tcp \
+          -e storage_positions_type=MEMORY \
+          -e storage_records_type=MEMORY \
+          sbawaska/liiklus:20200223160346-a85402e4332c51d9
+        make test
+        docker stop liiklus
+      working-directory: stream-client-go
+      if: success() && matrix.os == 'ubuntu-latest'
+    - name: Test streaming-processor
+      run: ./mvnw -q -B -V test
+      working-directory: streaming-processor
+      shell: bash
     - name: Test system
       run: |
+        set -o errexit
+        set -o pipefail  
+        
         . ../fats/install.sh kubebuilder
         . ../fats/install.sh kustomize
         make compile test
