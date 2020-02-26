@@ -41,16 +41,20 @@ jobs:
     - name: Build
       run: make build
       working-directory: cli
+      shell: bash
     - name: Unit test
       run: make coverage
       working-directory: cli
+      shell: bash
     - name: Verify docs
       run: make verify-docs
       working-directory: cli
+      shell: bash
     - name: Report coverage
       run: curl -s https://codecov.io/bash | bash -s
       shell: bash
       working-directory: cli
+      shell: bash
       env:
         CODECOV_TOKEN: d09bee7e-6c5a-4316-a48f-266e08d0f70f
 
@@ -70,9 +74,11 @@ jobs:
         echo "##[set-env name=GOPATH]$(go env GOPATH)"
         echo "##[add-path]$(go env GOPATH)/bin"
       working-directory: cli
+      shell: bash
     - name: Stage riff release artifacts
       run: .github/workflows/ci-cli/stage.sh
       working-directory: cli
+      shell: bash
       env:
         GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
 
@@ -141,5 +147,6 @@ jobs:
     - name: Publish riff release artifacts
       run: .github/workflows/ci-cli/publish.sh ${{ github.ref }}
       working-directory: cli
+      shell: bash
       env:
         GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}

@@ -24,6 +24,7 @@ jobs:
       - name: docker login
         run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
         working-directory: dev-utils
+        shell: bash
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -31,14 +32,18 @@ jobs:
         run: |
           GOOS=linux GOARCH=amd64 go build -o bin/publish ./cmd/publish
         working-directory: dev-utils
+        shell: bash
       - name: build subscribe
         run: |
           GOOS=linux GOARCH=amd64 go build -o bin/subscribe ./cmd/subscribe
         working-directory: dev-utils
+        shell: bash
       - name: docker build
         run: |
           docker build . -t projectriff/dev-utils
         working-directory: dev-utils
+        shell: bash
       - name: Publish to Registry
         run: .github/workflows/ci-dev-utils/push-to-dockerhub.sh ${{ github.ref }}
         working-directory: dev-utils
+        shell: bash

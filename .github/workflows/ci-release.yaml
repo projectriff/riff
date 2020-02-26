@@ -60,6 +60,7 @@ jobs:
         echo "##[set-env name=GATEWAY]${{ matrix.config.gateway }}"
         echo "##[add-path]$(go env GOPATH)/bin"
       working-directory: release
+      shell: bash
     - name: Install tools
       run: |
         ./fats/install.sh kubectl
@@ -72,36 +73,44 @@ jobs:
         chmod +x yq
         sudo mv yq /usr/local/bin/
       working-directory: release
+      shell: bash
     - name: Package release
       run: |
         helm init --client-only
         make clean package
       working-directory: release
+      shell: bash
     - name: Start
       run: ./fats/start.sh
       working-directory: release
+      shell: bash
       timeout-minutes: 15
     - name: Install riff
       run: ./.github/workflows/ci-release/install-riff.sh unstaged
       working-directory: release
+      shell: bash
       timeout-minutes: 15
     - name: Run tests
       run: ./.github/workflows/ci-release/acceptance.sh
       working-directory: release
+      shell: bash
       timeout-minutes: 30
     - name: Collect diagnostics
       run: ./fats/diagnostics.sh
       working-directory: release
+      shell: bash
       if: always()
       timeout-minutes: 1
     - name: Uninstall riff
       run: ./.github/workflows/ci-release/cleanup-riff.sh
       working-directory: release
+      shell: bash
       if: always()
       timeout-minutes: 10
     - name: Cleanup
       run: ./fats/cleanup.sh
       working-directory: release
+      shell: bash
       if: always()
       timeout-minutes: 10
 
@@ -115,6 +124,7 @@ jobs:
       run: |
         echo "##[add-path]$(go env GOPATH)/bin"
       working-directory: release
+      shell: bash
     - name: Install tools
       run: |
         ./fats/install.sh helm
@@ -125,11 +135,13 @@ jobs:
         chmod +x yq
         sudo mv yq /usr/local/bin/
       working-directory: release
+      shell: bash
       env:
         GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
     - name: Stage projectriff chart artifacts
       run: ./.github/workflows/ci-release/stage.sh
       working-directory: release
+      shell: bash
 
   test:
     name: Test
@@ -186,6 +198,7 @@ jobs:
         echo "##[set-env name=RUNTIME]${{ matrix.config.runtime }}"
         echo "##[set-env name=GATEWAY]${{ matrix.config.gateway }}"
       working-directory: release
+      shell: bash
     - name: Install tools
       run: |
         ./fats/install.sh kubectl
@@ -195,31 +208,38 @@ jobs:
         ./fats/install.sh kapp
         ./fats/install.sh gcloud
       working-directory: release
+      shell: bash
     - name: Start
       run: ./fats/start.sh
       working-directory: release
+      shell: bash
       timeout-minutes: 15
     - name: Install riff
       run: ./.github/workflows/ci-release/install-riff.sh staged
       working-directory: release
+      shell: bash
       timeout-minutes: 15
     - name: Run tests
       run: ./.github/workflows/ci-release/acceptance.sh
       working-directory: release
+      shell: bash
       timeout-minutes: 30
     - name: Collect diagnostics
       run: ./fats/diagnostics.sh
       working-directory: release
+      shell: bash
       if: always()
       timeout-minutes: 1
     - name: Uninstall riff
       run: ./.github/workflows/ci-release/cleanup-riff.sh
       working-directory: release
+      shell: bash
       if: always()
       timeout-minutes: 10
     - name: Cleanup
       run: ./fats/cleanup.sh
       working-directory: release
+      shell: bash
       if: always()
       timeout-minutes: 10
 
@@ -240,8 +260,10 @@ jobs:
         ./fats/install.sh helm
         ./fats/install.sh gcloud
       working-directory: release
+      shell: bash
       env:
         GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
     - name: Publish Chart
       run: ./.github/workflows/ci-release/publish.sh
       working-directory: release
+      shell: bash

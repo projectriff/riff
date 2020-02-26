@@ -19,6 +19,7 @@ jobs:
     - name: Build & Test
       run: ./mvnw -q -B -V test
       working-directory: streaming-processor
+      shell: bash
 
   publish:
     needs: test
@@ -46,6 +47,8 @@ jobs:
     - name: Publish artifacts
       run: .github/workflows/ci-streaming-processor/deploy-image.sh
       working-directory: streaming-processor
+      shell: bash
     - name: Publish native artifacts
       run: .github/workflows/ci-streaming-processor/deploy-native-image.sh
       working-directory: streaming-processor
+      shell: bash
