@@ -46,7 +46,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.config.os }}
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Setup env
       run: |
         job=$(date +%s) # TODO use something that is assigned by CI to guarantee uniqueness
@@ -102,7 +102,7 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.repository, 'projectriff/')
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Setup env
       run: |
         echo "##[add-path]$(go env GOPATH)/bin"
@@ -162,7 +162,7 @@ jobs:
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Setup env
       run: |
         job=$(date +%s) # TODO use something that is assigned by CI to guarantee uniqueness
@@ -215,7 +215,7 @@ jobs:
       )
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Install tools
       run: |
         ./fats/install.sh helm

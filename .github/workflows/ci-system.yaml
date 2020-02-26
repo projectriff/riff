@@ -12,7 +12,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - uses: actions/setup-go@v1
       with:
         go-version: '1.13'
@@ -56,7 +56,7 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.repository, 'projectriff/')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/setup-go@v1
         with:
           go-version: '1.13'
@@ -124,7 +124,7 @@ jobs:
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/setup-go@v1
         with:
           go-version: '1.13'
@@ -200,7 +200,7 @@ jobs:
       )
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: gcloud auth
         run: |
           gcloud config set disable_prompts True
