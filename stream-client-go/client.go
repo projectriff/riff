@@ -29,7 +29,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
-	"github.com/projectriff/stream-client-go/pkg/liiklus"
+	"github.com/projectriff/riff/stream-client-go/pkg/liiklus"
 )
 
 // StreamClient allows publishing to a riff stream, through a liiklus gateway and using the riff serialization format.
@@ -83,7 +83,7 @@ func (lc *StreamClient) Publish(ctx context.Context, payload io.Reader, key io.R
 		return PublishResult{}, fmt.Errorf("contentType %q not compatible with expected contentType %q", contentType, lc.acceptableContentType)
 	}
 
-	ce := liiklus.LiiklusEvent{Extensions:make(map[string]string, len(headers))}
+	ce := liiklus.LiiklusEvent{Extensions: make(map[string]string, len(headers))}
 	ce.DataContentType = contentType
 	ce.Source = "source-todo" // TODO
 	ce.Type = "riff-event"    // TODO
@@ -147,8 +147,8 @@ func (lc *StreamClient) Subscribe(ctx context.Context, group string, fromBeginni
 			}
 
 			receiveRequest := liiklus.ReceiveRequest{
-				Assignment:      subscribeReply.GetAssignment(),
-				Format:          liiklus.ReceiveRequest_LIIKLUS_EVENT,
+				Assignment: subscribeReply.GetAssignment(),
+				Format:     liiklus.ReceiveRequest_LIIKLUS_EVENT,
 			}
 			receiveClient, err := lc.client.Receive(subContext, &receiveRequest)
 			if err != nil {

@@ -1,4 +1,4 @@
-module github.com/projectriff/stream-client-go
+module github.com/projectriff/riff/stream-client-go
 
 go 1.13
 

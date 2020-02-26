@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	client "github.com/projectriff/stream-client-go"
+	client "github.com/projectriff/riff/stream-client-go"
 )
 
 // This is an integration test meant to be run against a liiklus gateway. Please refer to the CI scripts for
@@ -74,7 +74,7 @@ func subscribe(c *client.StreamClient, expectedValue, topic string, fromBeginnin
 	if v1 != expectedValue {
 		t.Errorf("expected value: %s, but was: %s", expectedValue, v1)
 	}
-	// see: https://github.com/projectriff/stream-client-go/issues/19
+	// see: https://github.com/projectriff/riff/stream-client-go/issues/19
 	//h := <-headersChan
 	//if !reflect.DeepEqual(headers, h) {
 	//	t.Errorf("headers not equal. expected %s, but was: %s", headers, h)
