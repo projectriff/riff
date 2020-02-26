@@ -41,7 +41,7 @@ install_app cert-manager
 source ${fats_dir}/macros/no-resource-requests.sh
 
 echo "Install Contour"
-install_app contour .github/workflows/overlays/service-$(echo ${K8S_SERVICE_TYPE} | tr '[A-Z]' '[a-z]').yaml
+install_app contour ../.github/workflows/ci-release/overlays/service-$(echo ${K8S_SERVICE_TYPE} | tr '[A-Z]' '[a-z]').yaml
 
 echo "Install riff Build"
 install_app kpack
