@@ -43,7 +43,7 @@ for test in java java-boot node npm command; do
   echo "##[group]Run function $name"
 
   riff function create $name --image $image --namespace $NAMESPACE --tail \
-    --git-repo https://github.com/projectriff/fats --git-revision $git_sha --sub-path fats/functions/uppercase/${test} &
+    --git-repo https://github.com/projectriff/riff --git-revision $git_sha --sub-path fats/functions/uppercase/${test} &
 
   if [ $RUNTIME = "core" ] || [ $RUNTIME = "knative" ]; then
     riff $RUNTIME deployer create $name \
