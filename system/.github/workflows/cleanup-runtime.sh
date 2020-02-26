@@ -2,7 +2,10 @@
 
 set -o nounset
 
-source $FATS_DIR/macros/cleanup-user-resources.sh
+readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
+readonly fats_dir=$root_dir/fats
+
+source ${fats_dir}/macros/cleanup-user-resources.sh
 
 if [ $RUNTIME = "core" ]; then
   echo "Cleanup riff Core Runtime"

@@ -4,12 +4,17 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-source ${FATS_DIR}/.configure.sh
+readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
+readonly fats_dir=$root_dir/fats
+
+readonly git_sha=$(git rev-parse HEAD)
+
+source ${fats_dir}/.configure.sh
 
 # setup namespace
 kubectl create namespace ${NAMESPACE}
 fats_create_push_credentials ${NAMESPACE}
-source ${FATS_DIR}/macros/create-riff-dev-pod.sh
+source ${fats_dir}/macros/create-riff-dev-pod.sh
 
 if [ $RUNTIME = "core" ] || [ $RUNTIME = "knative" ]; then
   for location in cluster local; do
@@ -21,10 +26,10 @@ if [ $RUNTIME = "core" ] || [ $RUNTIME = "knative" ]; then
 
       if [ $location = 'cluster' ] ; then
         riff $test create $name --image $image --namespace $NAMESPACE --tail \
-          --git-repo https://github.com/${FATS_REPO}.git --git-revision ${FATS_REFSPEC} --sub-path ${test}s/uppercase/node &
+          --git-repo https://github.com/projectriff/riff --git-revision ${git_sha} --sub-path fats/${test}s/uppercase/node &
       else
         riff $test create $name --image $image --namespace $NAMESPACE --tail \
-          --local-path ${FATS_DIR}/${test}s/uppercase/node
+          --local-path ${fats_dir}/${test}s/uppercase/node
       fi
 
       riff $RUNTIME deployer create $name --${test}-ref $name --namespace $NAMESPACE --ingress-policy External --tail
@@ -36,12 +41,12 @@ if [ $RUNTIME = "core" ] || [ $RUNTIME = "knative" ]; then
         expected_data="SYSTEM"
       fi
       # invoke ClusterLocal
-      source ${FATS_DIR}/macros/invoke_incluster.sh \
+      source ${fats_dir}/macros/invoke_incluster.sh \
         "$(kubectl get deployers.${RUNTIME}.projectriff.io ${name} --namespace ${NAMESPACE} -ojsonpath='{.status.address.url}')" \
         "${curl_opts}" \
         "${expected_data}"
       # invoke External
-      source ${FATS_DIR}/macros/invoke_contour.sh \
+      source ${fats_dir}/macros/invoke_contour.sh \
         "$(kubectl get deployers.${RUNTIME}.projectriff.io ${name} --namespace ${NAMESPACE} -ojsonpath='{.status.url}')" \
         "${curl_opts}" \
         "${expected_data}"
@@ -75,7 +80,7 @@ if [ $RUNTIME = "streaming" ]; then
     echo "##[group]Run function ${name}"
 
     riff function create ${name} --image ${image} --namespace ${NAMESPACE} --tail \
-      --git-repo https://github.com/${FATS_REPO} --git-revision ${FATS_REFSPEC} --sub-path functions/uppercase/${test}
+      --git-repo https://github.com/projectriff/riff --git-revision ${git_sha} --sub-path fats/functions/uppercase/${test}
 
     lower_stream=${name}-lower
     upper_stream=${name}-upper

@@ -2,9 +2,12 @@
 
 set -o nounset
 
-source ${FATS_DIR}/.util.sh
+readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
+readonly fats_dir=$root_dir/fats
 
-source ${FATS_DIR}/macros/cleanup-user-resources.sh
+source ${fats_dir}/.util.sh
+
+source ${fats_dir}/macros/cleanup-user-resources.sh
 kubectl delete namespace ${NAMESPACE}
 
 echo "Removing riff Streaming Runtime"

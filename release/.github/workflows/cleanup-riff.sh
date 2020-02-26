@@ -1,12 +1,15 @@
 #!/bin/bash
 
+readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
+readonly fats_dir=$root_dir/fats
+
 uninstall_app() {
   local name=$1
 
   kapp delete -n apps -a $name -y
 }
 
-source $FATS_DIR/macros/cleanup-user-resources.sh
+source ${fats_dir}/macros/cleanup-user-resources.sh
 
 if [ $RUNTIME = "core" ]; then
   echo "Uninstall riff Core runtime"

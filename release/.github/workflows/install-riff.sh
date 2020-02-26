@@ -5,13 +5,14 @@ set -o nounset
 set -o pipefail
 
 readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
+readonly fats_dir=$root_dir/fats
 
 readonly version=$(cat ${root_dir}/VERSION)
 readonly git_sha=$(git rev-parse HEAD)
 readonly git_timestamp=$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M%S' --format="%cd")
 readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
 
-source $FATS_DIR/.configure.sh
+source ${fats_dir}/.configure.sh
 
 if [ ${1:-unknown} = staged ] ; then
   echo "Using staged releases"
@@ -37,7 +38,7 @@ kubectl create ns apps
 echo "Install Cert Manager"
 install_app cert-manager
 
-source $FATS_DIR/macros/no-resource-requests.sh
+source ${fats_dir}/macros/no-resource-requests.sh
 
 echo "Install Contour"
 install_app contour .github/workflows/overlays/service-$(echo ${K8S_SERVICE_TYPE} | tr '[A-Z]' '[a-z]').yaml

@@ -5,6 +5,7 @@ set -o nounset
 set -o pipefail
 
 readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
+readonly fats_dir=$root_dir/fats
 
 readonly version=$(cat ${root_dir}/VERSION)
 readonly git_sha=$(git rev-parse HEAD)
@@ -13,7 +14,7 @@ readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
 
 readonly riff_version=0.5.0-snapshot
 
-source ${FATS_DIR}/.configure.sh
+source ${fats_dir}/.configure.sh
 
 export KO_DOCKER_REPO=$(fats_image_repo '#' | cut -d '#' -f 1 | sed 's|/$||g')
 kubectl create ns apps
@@ -21,7 +22,7 @@ kubectl create ns apps
 echo "Installing Cert Manager"
 kapp deploy -n apps -a cert-manager -f https://storage.googleapis.com/projectriff/release/${riff_version}/cert-manager.yaml -y
 
-source $FATS_DIR/macros/no-resource-requests.sh
+source ${fats_dirs}/macros/no-resource-requests.sh
 
 echo "Installing kpack"
 kapp deploy -n apps -a kpack -f https://storage.googleapis.com/projectriff/release/${riff_version}/kpack.yaml -y

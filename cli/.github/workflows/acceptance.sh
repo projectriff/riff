@@ -5,17 +5,13 @@ set -o nounset
 set -o pipefail
 
 readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
+readonly fats_dir=$root_dir/fats
 
 readonly version=$(cat ${root_dir}/VERSION)
 readonly git_sha=$(git rev-parse HEAD)
 readonly git_timestamp=$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M%S' --format="%cd")
 readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
 
-# fetch FATS scripts
-fats_dir=`dirname "${BASH_SOURCE[0]}"`/fats
-fats_repo="projectriff/fats"
-fats_refspec=3d6cead12932026fdb933a1bb550cb7eca0a8def # master as of 2020-02-04
-source `dirname "${BASH_SOURCE[0]}"`/fats-fetch.sh $fats_dir $fats_refspec $fats_repo
 source $fats_dir/.util.sh
 
 # install riff-cli
@@ -80,7 +76,7 @@ for test in command; do
   echo "##[group]Run function $name"
 
   riff function create $name --image $image --namespace $NAMESPACE --tail \
-    --git-repo https://github.com/$fats_repo --git-revision $fats_refspec --sub-path functions/uppercase/${test} &
+    --git-repo https://github.com/projectriff/riff --git-revision $git_sha --sub-path fats/functions/uppercase/${test} &
 
   riff core deployer create $name \
     --function-ref $name \

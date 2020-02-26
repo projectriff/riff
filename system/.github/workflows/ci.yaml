@@ -7,11 +7,6 @@ on:
     - '!dependabot/**'
   pull_request: {}
 
-env:
-  FATS_DIR: fats
-  FATS_REPO: projectriff/fats
-  FATS_REFSPEC: 3d6cead12932026fdb933a1bb550cb7eca0a8def # master as of 2020-02-04
-
 jobs:
 
   test:
@@ -154,17 +149,14 @@ jobs:
           echo "##[set-env name=NAMESPACE]system-${job}-${{ matrix.config.gateway }}-${{ matrix.config.runtime }}"
         env:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
-      - name: 'Fetch FATS'
-        run: .github/workflows/fats-fetch.sh ${FATS_DIR} ${FATS_REFSPEC} ${FATS_REPO}
-        timeout-minutes: 1
       - name: 'Install tools'
         run: |
-          ${FATS_DIR}/install.sh kubectl
-          ${FATS_DIR}/install.sh riff
-          ${FATS_DIR}/install.sh ytt
-          ${FATS_DIR}/install.sh kapp
+          ./fats/install.sh kubectl
+          ./fats/install.sh riff
+          ./fats/install.sh ytt
+          ./fats/install.sh kapp
           if [ ! -z "$GCLOUD_CLIENT_SECRET" ]; then
-            ${FATS_DIR}/install.sh gcloud
+            ./fats/install.sh gcloud
           fi
           GO111MODULE=off go get github.com/google/ko/cmd/ko
           echo "##[add-path]$(go env GOPATH)/bin"
@@ -172,7 +164,7 @@ jobs:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
         timeout-minutes: 5
       - name: 'Start FATS'
-        run: ${FATS_DIR}/start.sh
+        run: ./fats/start.sh
         timeout-minutes: 10
       - name: 'Install runtime'
         run: .github/workflows/install-runtime.sh
@@ -183,7 +175,7 @@ jobs:
           GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
         timeout-minutes: 30
       - name: 'Collect diagnostics'
-        run: ${FATS_DIR}/diagnostics.sh
+        run: ./fats/diagnostics.sh
         if: always()
         continue-on-error: true
         timeout-minutes: 1
@@ -193,7 +185,7 @@ jobs:
         continue-on-error: true
         timeout-minutes: 5
       - name: 'Cleanup FATS'
-        run: ${FATS_DIR}/cleanup.sh
+        run: ./fats/cleanup.sh
         if: always()
         timeout-minutes: 10
 

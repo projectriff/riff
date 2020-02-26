@@ -4,15 +4,20 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-source ${FATS_DIR}/.configure.sh
+readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
+readonly fats_dir=$root_dir/fats
+
+readonly git_sha=$(git rev-parse HEAD)
+
+source ${fats_dir}/.configure.sh
 
 # install tools
-${FATS_DIR}/install.sh riff
-${FATS_DIR}/install.sh kubectl
+${fats_dir}/install.sh riff
+${fats_dir}/install.sh kubectl
 
 kubectl create ns $NAMESPACE
 fats_create_push_credentials ${NAMESPACE}
-source ${FATS_DIR}/macros/create-riff-dev-pod.sh
+source ${fats_dir}/macros/create-riff-dev-pod.sh
 
 if [ "${machine}" != "MinGw" ]; then
   modes="cluster local"
@@ -38,15 +43,15 @@ for mode in ${modes}; do
       riff function create ${name} \
         --image ${image} \
         --namespace ${NAMESPACE} \
-        --git-repo https://github.com/${FATS_REPO} \
-        --git-revision ${FATS_REFSPEC} \
-        --sub-path functions/uppercase/${test} \
+        --git-repo https://github.com/projectriff/riff \
+        --git-revision ${git_sha} \
+        --sub-path fats/functions/uppercase/${test} \
         --tail
     elif [ "${mode}" == "local" ]; then
       riff function create ${name} \
         --image ${image} \
         --namespace ${NAMESPACE} \
-        --local-path ${FATS_DIR}/functions/uppercase/${test} \
+        --local-path fats/functions/uppercase/${test} \
         --tail
     else
       echo "Unknown mode: ${mode}"
@@ -59,11 +64,11 @@ for mode in ${modes}; do
       --ingress-policy External \
       --namespace ${NAMESPACE} \
       --tail
-    source ${FATS_DIR}/macros/invoke_contour.sh \
+    source ${fats_dir}/macros/invoke_contour.sh \
       "$(kubectl get deployers.core.projectriff.io --namespace $NAMESPACE ${name}-core -o jsonpath='{$.status.url}')" \
       "-H Content-Type:text/plain -H Accept:text/plain -d fats" \
       FATS
-    source ${FATS_DIR}/macros/invoke_incluster.sh \
+    source ${fats_dir}/macros/invoke_incluster.sh \
       "$(kubectl get deployers.core.projectriff.io --namespace $NAMESPACE ${name}-core -o jsonpath='{$.status.address.url}')" \
       "-H Content-Type:text/plain -H Accept:text/plain -d fats" \
       FATS
@@ -75,11 +80,11 @@ for mode in ${modes}; do
       --ingress-policy External \
       --namespace ${NAMESPACE} \
       --tail
-    source ${FATS_DIR}/macros/invoke_contour.sh \
+    source ${fats_dir}/macros/invoke_contour.sh \
       "$(kubectl get deployers.knative.projectriff.io --namespace $NAMESPACE ${name}-knative -o jsonpath='{$.status.url}')" \
       "-H Content-Type:text/plain -H Accept:text/plain -d fats" \
       FATS
-    source ${FATS_DIR}/macros/invoke_incluster.sh \
+    source ${fats_dir}/macros/invoke_incluster.sh \
       "$(kubectl get deployers.knative.projectriff.io --namespace $NAMESPACE ${name}-knative -o jsonpath='{$.status.address.url}')" \
       "-H Content-Type:text/plain -H Accept:text/plain -d fats" \
       FATS
@@ -103,15 +108,15 @@ for mode in ${modes}; do
       riff application create ${name} \
         --image ${image} \
         --namespace ${NAMESPACE} \
-        --git-repo https://github.com/${FATS_REPO} \
-        --git-revision ${FATS_REFSPEC} \
-        --sub-path applications/uppercase/${test} \
+        --git-repo https://github.com/projectriff/riff \
+        --git-revision ${git_sha} \
+        --sub-path fats/applications/uppercase/${test} \
         --tail
     elif [ "${mode}" == "local" ]; then
       riff application create ${name} \
         --image ${image} \
         --namespace ${NAMESPACE} \
-        --local-path ${FATS_DIR}/applications/uppercase/${test} \
+        --local-path fats/applications/uppercase/${test} \
         --tail
     else
       echo "Unknown mode: ${mode}"
@@ -124,11 +129,11 @@ for mode in ${modes}; do
       --ingress-policy External \
       --namespace ${NAMESPACE} \
       --tail
-    source ${FATS_DIR}/macros/invoke_contour.sh \
+    source ${fats_dir}/macros/invoke_contour.sh \
       "$(kubectl get deployers.core.projectriff.io --namespace $NAMESPACE ${name}-core -o jsonpath='{$.status.url}')" \
       "--get --data-urlencode input=fats" \
       FATS
-    source ${FATS_DIR}/macros/invoke_incluster.sh \
+    source ${fats_dir}/macros/invoke_incluster.sh \
       "$(kubectl get deployers.core.projectriff.io --namespace $NAMESPACE ${name}-core -o jsonpath='{$.status.address.url}')" \
       "--get --data-urlencode input=fats" \
       FATS
@@ -140,11 +145,11 @@ for mode in ${modes}; do
       --ingress-policy External \
       --namespace ${NAMESPACE} \
       --tail
-    source ${FATS_DIR}/macros/invoke_contour.sh \
+    source ${fats_dir}/macros/invoke_contour.sh \
       "$(kubectl get deployers.knative.projectriff.io --namespace $NAMESPACE ${name}-knative -o jsonpath='{$.status.url}')" \
       "--get --data-urlencode input=fats" \
       FATS
-    source ${FATS_DIR}/macros/invoke_incluster.sh \
+    source ${fats_dir}/macros/invoke_incluster.sh \
       "$(kubectl get deployers.knative.projectriff.io --namespace $NAMESPACE ${name}-knative -o jsonpath='{$.status.address.url}')" \
       "--get --data-urlencode input=fats" \
       FATS

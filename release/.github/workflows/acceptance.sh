@@ -4,12 +4,17 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-source $FATS_DIR/.configure.sh
+readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
+readonly fats_dir=$root_dir/fats
+
+readonly git_sha=$(git rev-parse HEAD)
+
+source $fats_dir/.configure.sh
 
 # setup namespace
 kubectl create namespace $NAMESPACE
 fats_create_push_credentials $NAMESPACE
-source ${FATS_DIR}/macros/create-riff-dev-pod.sh
+source ${fats_dir}/macros/create-riff-dev-pod.sh
 
 if [ $RUNTIME = "streaming" ]; then
   echo "##[group]Create gateway"
@@ -38,7 +43,7 @@ for test in java java-boot node npm command; do
   echo "##[group]Run function $name"
 
   riff function create $name --image $image --namespace $NAMESPACE --tail \
-    --git-repo https://github.com/$FATS_REPO --git-revision $FATS_REFSPEC --sub-path functions/uppercase/${test} &
+    --git-repo https://github.com/projectriff/fats --git-revision $git_sha --sub-path fats/functions/uppercase/${test} &
 
   if [ $RUNTIME = "core" ] || [ $RUNTIME = "knative" ]; then
     riff $RUNTIME deployer create $name \
@@ -48,13 +53,13 @@ for test in java java-boot node npm command; do
       --tail
 
     # cluster local invoke
-    source ${FATS_DIR}/macros/invoke_incluster.sh \
+    source ${fats_dir}/macros/invoke_incluster.sh \
       "$(kubectl get deployers.${RUNTIME}.projectriff.io ${name} --namespace ${NAMESPACE} -ojsonpath='{.status.address.url}')" \
       "${curl_opts}" \
       "${expected_data}"
 
     # external invoke
-    source ${FATS_DIR}/macros/invoke_contour.sh \
+    source ${fats_dir}/macros/invoke_contour.sh \
       "$(kubectl get deployers.${RUNTIME}.projectriff.io ${name} --namespace ${NAMESPACE} -ojsonpath='{.status.url}')" \
       "${curl_opts}" \
       "${expected_data}"

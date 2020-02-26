@@ -7,11 +7,6 @@ on:
     - '!dependabot/**'
   pull_request: {}
 
-env:
-  FATS_DIR: fats
-  FATS_REPO: projectriff/fats
-  FATS_REFSPEC: 3d6cead12932026fdb933a1bb550cb7eca0a8def # master as of 2020-02-04
-
 jobs:
 
   test_pr:
@@ -64,16 +59,14 @@ jobs:
         echo "##[set-env name=RUNTIME]${{ matrix.config.runtime }}"
         echo "##[set-env name=GATEWAY]${{ matrix.config.gateway }}"
         echo "##[add-path]$(go env GOPATH)/bin"
-    - name: Fetch FATS
-      run: ./.github/workflows/fats-fetch.sh $FATS_DIR $FATS_REFSPEC $FATS_REPO
     - name: Install tools
       run: |
-        $FATS_DIR/install.sh kubectl
-        $FATS_DIR/install.sh riff
-        $FATS_DIR/install.sh helm
-        $FATS_DIR/install.sh ytt
-        $FATS_DIR/install.sh kapp
-        $FATS_DIR/install.sh k8s-tag-resolver
+        ./fats/install.sh kubectl
+        ./fats/install.sh riff
+        ./fats/install.sh helm
+        ./fats/install.sh ytt
+        ./fats/install.sh kapp
+        ./fats/install.sh k8s-tag-resolver
         curl -L https://github.com/mikefarah/yq/releases/download/2.4.1/yq_linux_amd64 -o yq
         chmod +x yq
         sudo mv yq /usr/local/bin/
@@ -82,7 +75,7 @@ jobs:
         helm init --client-only
         make clean package
     - name: Start
-      run: $FATS_DIR/start.sh
+      run: ./fats/start.sh
       timeout-minutes: 15
     - name: Install riff
       run: ./.github/workflows/install-riff.sh unstaged
@@ -91,7 +84,7 @@ jobs:
       run: ./.github/workflows/acceptance.sh
       timeout-minutes: 30
     - name: Collect diagnostics
-      run: $FATS_DIR/diagnostics.sh
+      run: ./fats/diagnostics.sh
       if: always()
       timeout-minutes: 1
     - name: Uninstall riff
@@ -99,7 +92,7 @@ jobs:
       if: always()
       timeout-minutes: 10
     - name: Cleanup
-      run: $FATS_DIR/cleanup.sh
+      run: ./fats/cleanup.sh
       if: always()
       timeout-minutes: 10
 
@@ -112,14 +105,12 @@ jobs:
     - name: Setup env
       run: |
         echo "##[add-path]$(go env GOPATH)/bin"
-    - name: Fetch FATS
-      run: ./.github/workflows/fats-fetch.sh $FATS_DIR $FATS_REFSPEC $FATS_REPO
     - name: Install tools
       run: |
-        $FATS_DIR/install.sh helm
-        $FATS_DIR/install.sh gcloud
-        $FATS_DIR/install.sh ytt
-        $FATS_DIR/install.sh k8s-tag-resolver
+        ./fats/install.sh helm
+        ./fats/install.sh gcloud
+        ./fats/install.sh ytt
+        ./fats/install.sh k8s-tag-resolver
         curl -L https://github.com/mikefarah/yq/releases/download/2.4.1/yq_linux_amd64 -o yq
         chmod +x yq
         sudo mv yq /usr/local/bin/
@@ -182,18 +173,16 @@ jobs:
         echo "##[set-env name=NAMESPACE]release-${job}-${{ matrix.config.qualifier }}"
         echo "##[set-env name=RUNTIME]${{ matrix.config.runtime }}"
         echo "##[set-env name=GATEWAY]${{ matrix.config.gateway }}"
-    - name: Fetch FATS
-      run: ./.github/workflows/fats-fetch.sh $FATS_DIR $FATS_REFSPEC $FATS_REPO
     - name: Install tools
       run: |
-        $FATS_DIR/install.sh kubectl
-        $FATS_DIR/install.sh riff
-        $FATS_DIR/install.sh helm
-        $FATS_DIR/install.sh ytt
-        $FATS_DIR/install.sh kapp
-        $FATS_DIR/install.sh gcloud
+        ./fats/install.sh kubectl
+        ./fats/install.sh riff
+        ./fats/install.sh helm
+        ./fats/install.sh ytt
+        ./fats/install.sh kapp
+        ./fats/install.sh gcloud
     - name: Start
-      run: $FATS_DIR/start.sh
+      run: ./fats/start.sh
       timeout-minutes: 15
     - name: Install riff
       run: ./.github/workflows/install-riff.sh staged
@@ -202,7 +191,7 @@ jobs:
       run: ./.github/workflows/acceptance.sh
       timeout-minutes: 30
     - name: Collect diagnostics
-      run: $FATS_DIR/diagnostics.sh
+      run: ./fats/diagnostics.sh
       if: always()
       timeout-minutes: 1
     - name: Uninstall riff
@@ -210,7 +199,7 @@ jobs:
       if: always()
       timeout-minutes: 10
     - name: Cleanup
-      run: $FATS_DIR/cleanup.sh
+      run: ./fats/cleanup.sh
       if: always()
       timeout-minutes: 10
 
@@ -226,12 +215,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Fetch FATS
-      run: ./.github/workflows/fats-fetch.sh $FATS_DIR $FATS_REFSPEC $FATS_REPO
     - name: Install tools
       run: |
-        $FATS_DIR/install.sh helm
-        $FATS_DIR/install.sh gcloud
+        ./fats/install.sh helm
+        ./fats/install.sh gcloud
       env:
         GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
     - name: Publish Chart

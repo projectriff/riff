@@ -8,9 +8,6 @@ on:
   pull_request: {}
 
 env:
-  FATS_DIR: "."
-  FATS_REPO: ${{ github.repository }}
-  FATS_REFSPEC: ${{ github.sha }}
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
@@ -62,7 +59,7 @@ jobs:
         echo "##[set-env name=NAMESPACE]fats-${job}-${{ matrix.config.qualifier }}"
       shell: bash
     - name: Start FATS
-      run: ${FATS_DIR}/start.sh
+      run: ./fats/start.sh
       shell: bash
       timeout-minutes: 45
     - name: Install riff
@@ -74,7 +71,7 @@ jobs:
       shell: bash
       timeout-minutes: 30
     - name: Collect diagnostics
-      run: ${FATS_DIR}/diagnostics.sh
+      run: ./fats/diagnostics.sh
       shell: bash
       if: always()
       timeout-minutes: 1
@@ -84,7 +81,7 @@ jobs:
       if: always()
       timeout-minutes: 20
     - name: Cleanup FATS
-      run: ${FATS_DIR}/cleanup.sh
+      run: ./fats/cleanup.sh
       shell: bash
       if: always()
       timeout-minutes: 30

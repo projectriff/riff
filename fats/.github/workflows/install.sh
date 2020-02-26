@@ -4,20 +4,23 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
+readonly fats_dir=$root_dir/fats
+
 readonly riff_version=0.6.0-snapshot
 
-source ${FATS_DIR}/.configure.sh
+source ${fats_dir}/.configure.sh
 
-${FATS_DIR}/install.sh kapp
-${FATS_DIR}/install.sh ytt
-${FATS_DIR}/install.sh kubectl
+${fats_dir}/install.sh kapp
+${fats_dir}/install.sh ytt
+${fats_dir}/install.sh kubectl
 
 kubectl create ns apps
 
 echo "Installing Cert Manager"
 kapp deploy -n apps -a cert-manager -f https://storage.googleapis.com/projectriff/release/${riff_version}/cert-manager.yaml -y
 
-source $FATS_DIR/macros/no-resource-requests.sh
+source ${fats_dir}/macros/no-resource-requests.sh
 
 echo "Installing kpack"
 kapp deploy -n apps -a kpack -f https://storage.googleapis.com/projectriff/release/${riff_version}/kpack.yaml -y
