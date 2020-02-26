@@ -30,7 +30,7 @@ jobs:
       shell: bash
       run: make build test
     - name: Build using ko
-      run: ko publish -L github.com/projectriff/nop-provisioner/cmd/provisioner
+      run: ko publish -L github.com/projectriff/riff/nop-provisioner/cmd/provisioner
     - name: Publish
       if: |
         github.event_name == 'push' && startsWith(github.repository, 'projectriff/') && (
