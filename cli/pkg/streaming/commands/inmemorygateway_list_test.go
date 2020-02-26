@@ -20,9 +20,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/projectriff/cli/pkg/cli"
-	"github.com/projectriff/cli/pkg/streaming/commands"
-	rifftesting "github.com/projectriff/cli/pkg/testing"
+	"github.com/projectriff/riff/cli/pkg/cli"
+	"github.com/projectriff/riff/cli/pkg/streaming/commands"
+	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
 	"github.com/projectriff/system/pkg/apis"
 	streamv1alpha1 "github.com/projectriff/system/pkg/apis/streaming/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

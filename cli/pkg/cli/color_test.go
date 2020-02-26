@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/fatih/color"
-	"github.com/projectriff/cli/pkg/cli"
+	"github.com/projectriff/riff/cli/pkg/cli"
 )
 
 func Test_Print(t *testing.T) {

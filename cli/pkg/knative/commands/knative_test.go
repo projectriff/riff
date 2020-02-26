@@ -19,8 +19,8 @@ package commands_test
 import (
 	"testing"
 
-	"github.com/projectriff/cli/pkg/knative/commands"
-	rifftesting "github.com/projectriff/cli/pkg/testing"
+	"github.com/projectriff/riff/cli/pkg/knative/commands"
+	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
 )
 
 func TestKnativeCommand(t *testing.T) {

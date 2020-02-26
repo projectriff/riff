@@ -27,8 +27,8 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/openstack"
 
-	"github.com/projectriff/cli/pkg/cli"
-	"github.com/projectriff/cli/pkg/riff/commands"
+	"github.com/projectriff/riff/cli/pkg/cli"
+	"github.com/projectriff/riff/cli/pkg/riff/commands"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 )
 

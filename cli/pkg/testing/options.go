@@ -17,8 +17,8 @@
 package testing
 
 import (
-	"github.com/projectriff/cli/pkg/cli"
-	"github.com/projectriff/cli/pkg/cli/options"
+	"github.com/projectriff/riff/cli/pkg/cli"
+	"github.com/projectriff/riff/cli/pkg/cli/options"
 )
 
 const TestField = "test-field"

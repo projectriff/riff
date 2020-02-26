@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/projectriff/cli/pkg/parsers"
+	"github.com/projectriff/riff/cli/pkg/parsers"
 	corev1 "k8s.io/api/core/v1"
 )
 

@@ -19,7 +19,7 @@ package validation
 import (
 	"fmt"
 
-	"github.com/projectriff/cli/pkg/cli"
+	"github.com/projectriff/riff/cli/pkg/cli"
 )
 
 func PortNumber(port int32, field string) cli.FieldErrors {

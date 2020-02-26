@@ -20,8 +20,8 @@ import (
 	"context"
 	"strings"
 
-	buildcommands "github.com/projectriff/cli/pkg/build/commands"
-	"github.com/projectriff/cli/pkg/cli"
+	buildcommands "github.com/projectriff/riff/cli/pkg/build/commands"
+	"github.com/projectriff/riff/cli/pkg/cli"
 	"github.com/spf13/cobra"
 )
 

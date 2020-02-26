@@ -26,9 +26,9 @@ import (
 
 	"github.com/fatih/color"
 	homedir "github.com/mitchellh/go-homedir"
-	"github.com/projectriff/cli/pkg/k8s"
-	"github.com/projectriff/cli/pkg/kail"
-	"github.com/projectriff/cli/pkg/pack"
+	"github.com/projectriff/riff/cli/pkg/k8s"
+	"github.com/projectriff/riff/cli/pkg/kail"
+	"github.com/projectriff/riff/cli/pkg/pack"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

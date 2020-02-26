@@ -19,8 +19,8 @@ package options
 import (
 	"context"
 
-	"github.com/projectriff/cli/pkg/cli"
-	"github.com/projectriff/cli/pkg/validation"
+	"github.com/projectriff/riff/cli/pkg/cli"
+	"github.com/projectriff/riff/cli/pkg/validation"
 )
 
 type ListOptions struct {

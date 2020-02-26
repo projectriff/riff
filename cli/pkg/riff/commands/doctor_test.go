@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/projectriff/cli/pkg/cli"
-	"github.com/projectriff/cli/pkg/riff/commands"
-	rifftesting "github.com/projectriff/cli/pkg/testing"
+	"github.com/projectriff/riff/cli/pkg/cli"
+	"github.com/projectriff/riff/cli/pkg/riff/commands"
+	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
 	authorizationv1 "k8s.io/api/authorization/v1"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"

@@ -19,7 +19,7 @@ package validation
 import (
 	"strings"
 
-	"github.com/projectriff/cli/pkg/cli"
+	"github.com/projectriff/riff/cli/pkg/cli"
 )
 
 func MimeType(mimeType, field string) cli.FieldErrors {

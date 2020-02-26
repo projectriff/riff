@@ -19,7 +19,7 @@ package validation
 import (
 	"fmt"
 
-	"github.com/projectriff/cli/pkg/cli"
+	"github.com/projectriff/riff/cli/pkg/cli"
 )
 
 const (

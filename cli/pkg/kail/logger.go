@@ -26,7 +26,7 @@ import (
 
 	logutil "github.com/boz/go-logutil"
 	"github.com/boz/kail"
-	"github.com/projectriff/cli/pkg/k8s"
+	"github.com/projectriff/riff/cli/pkg/k8s"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	corev1alpha1 "github.com/projectriff/system/pkg/apis/core/v1alpha1"
 	knativev1alpha1 "github.com/projectriff/system/pkg/apis/knative/v1alpha1"

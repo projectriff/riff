@@ -22,10 +22,10 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/projectriff/cli/pkg/cli"
-	corecommands "github.com/projectriff/cli/pkg/core/commands"
-	knativecommands "github.com/projectriff/cli/pkg/knative/commands"
-	streamingcommands "github.com/projectriff/cli/pkg/streaming/commands"
+	"github.com/projectriff/riff/cli/pkg/cli"
+	corecommands "github.com/projectriff/riff/cli/pkg/core/commands"
+	knativecommands "github.com/projectriff/riff/cli/pkg/knative/commands"
+	streamingcommands "github.com/projectriff/riff/cli/pkg/streaming/commands"
 	"github.com/spf13/cobra"
 )
 

@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/projectriff/cli/pkg/cli"
-	rifftesting "github.com/projectriff/cli/pkg/testing"
+	"github.com/projectriff/riff/cli/pkg/cli"
+	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
 	"github.com/spf13/cobra"
 )
 

@@ -19,9 +19,9 @@ package commands_test
 import (
 	"testing"
 
-	"github.com/projectriff/cli/pkg/cli"
-	"github.com/projectriff/cli/pkg/core/commands"
-	rifftesting "github.com/projectriff/cli/pkg/testing"
+	"github.com/projectriff/riff/cli/pkg/cli"
+	"github.com/projectriff/riff/cli/pkg/core/commands"
+	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
 	corev1alpha1 "github.com/projectriff/system/pkg/apis/core/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"

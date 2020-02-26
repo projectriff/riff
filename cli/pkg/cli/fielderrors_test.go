@@ -20,8 +20,8 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/projectriff/cli/pkg/cli"
-	rifftesting "github.com/projectriff/cli/pkg/testing"
+	"github.com/projectriff/riff/cli/pkg/cli"
+	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 

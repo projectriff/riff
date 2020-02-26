@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/projectriff/cli/pkg/build/commands"
-	rifftesting "github.com/projectriff/cli/pkg/testing"
+	"github.com/projectriff/riff/cli/pkg/build/commands"
+	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
 	"github.com/projectriff/system/pkg/apis"
 	buildv1alpha1 "github.com/projectriff/system/pkg/apis/build/v1alpha1"
 	corev1 "k8s.io/api/core/v1"

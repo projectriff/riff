@@ -19,9 +19,9 @@ package options_test
 import (
 	"testing"
 
-	"github.com/projectriff/cli/pkg/cli"
-	"github.com/projectriff/cli/pkg/cli/options"
-	rifftesting "github.com/projectriff/cli/pkg/testing"
+	"github.com/projectriff/riff/cli/pkg/cli"
+	"github.com/projectriff/riff/cli/pkg/cli/options"
+	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
 )
 
 func TestListOptions(t *testing.T) {

@@ -17,7 +17,7 @@
 package validation
 
 import (
-	"github.com/projectriff/cli/pkg/cli"
+	"github.com/projectriff/riff/cli/pkg/cli"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 

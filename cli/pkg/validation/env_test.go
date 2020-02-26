@@ -20,9 +20,9 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/projectriff/cli/pkg/cli"
-	rifftesting "github.com/projectriff/cli/pkg/testing"
-	"github.com/projectriff/cli/pkg/validation"
+	"github.com/projectriff/riff/cli/pkg/cli"
+	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
+	"github.com/projectriff/riff/cli/pkg/validation"
 )
 
 func TestEnvVar(t *testing.T) {

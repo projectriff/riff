@@ -19,8 +19,8 @@ package commands_test
 import (
 	"testing"
 
-	"github.com/projectriff/cli/pkg/core/commands"
-	rifftesting "github.com/projectriff/cli/pkg/testing"
+	"github.com/projectriff/riff/cli/pkg/core/commands"
+	rifftesting "github.com/projectriff/riff/cli/pkg/testing"
 )
 
 func TestDeployerCommand(t *testing.T) {
