@@ -12,8 +12,8 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Golang
-      uses: actions/setup-go@v1
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v1
       with:
         go-version: '1.13'
     # TODO remove after https://github.com/actions/setup-go/issues/14
@@ -27,8 +27,6 @@ jobs:
       run: GO111MODULE=on go get github.com/google/ko/cmd/ko
       working-directory: nop-provisioner
       shell: bash
-    - name: Check out code
-      uses: actions/checkout@v2
     - name: Run tests
       run: make build test
       working-directory: nop-provisioner
