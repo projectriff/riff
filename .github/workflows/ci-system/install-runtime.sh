@@ -22,7 +22,7 @@ kubectl create ns apps
 echo "Installing Cert Manager"
 kapp deploy -n apps -a cert-manager -f https://storage.googleapis.com/projectriff/release/${riff_version}/cert-manager.yaml -y
 
-source ${fats_dirs}/macros/no-resource-requests.sh
+source ${fats_dir}/macros/no-resource-requests.sh
 
 echo "Installing kpack"
 kapp deploy -n apps -a kpack -f https://storage.googleapis.com/projectriff/release/${riff_version}/kpack.yaml -y

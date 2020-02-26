@@ -1,4 +1,4 @@
-name: CI - pulsar-provider
+name: CI - pulsar-provisioner
 
 on:
   push:
