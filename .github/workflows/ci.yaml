@@ -72,6 +72,7 @@ jobs:
       run: ./mvnw -q -B -V test
       working-directory: streaming-processor
       shell: bash
+      if: success() && matrix.os == 'ubuntu-latest'
     - name: Test system
       run: |
         set -o errexit
