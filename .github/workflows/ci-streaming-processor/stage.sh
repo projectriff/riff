@@ -19,5 +19,6 @@ readonly base_image="gcr.io/projectriff/streaming-processor/processor"
   -Djib.to.image=${base_image}:${slug}
 
 # stage native image
+./mvnw -q -B package -Dmaven.test.skip=true
 docker build -t ${base_image}-native:${slug} .
 docker push ${base_image}-native:${slug}
