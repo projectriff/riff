@@ -130,10 +130,8 @@ jobs:
       run: ../.github/workflows/ci-streaming-processor/stage.sh
       working-directory: streaming-processor
     - name: Stage system
-      working-directory: system
       run: ../.github/workflows/ci-system/stage.sh
       working-directory: system
-      shell: bash        
     - name: Stage release
       run: ../.github/workflows/ci-release/stage.sh
       working-directory: release
