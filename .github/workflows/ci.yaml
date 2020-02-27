@@ -120,7 +120,15 @@ jobs:
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
+    - name: Setup env
+      run: |
+        readonly version=$(cat ${root_dir}/VERSION)
+        readonly git_sha=$(git rev-parse HEAD)
+        readonly git_timestamp=$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M%S' --format="%cd")
+        readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
+        echo "##[set-env name=VERSION_SLUG]${slug}"
+      shell: bash
+      
     - name: Stage cli
       run: ../.github/workflows/ci-cli/stage.sh
       working-directory: cli

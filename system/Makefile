@@ -121,10 +121,7 @@ endif
 
 .PHONY: templates
 templates: ## update templated components
-	./hack/apply-template.sh config/streaming/config/bases/processor.yaml.tpl > config/streaming/config/bases/processor.yaml
-	./hack/apply-template.sh config/streaming/config/bases/inmemory-gateway.yaml.tpl > config/streaming/config/bases/inmemory-gateway.yaml
-	./hack/apply-template.sh config/streaming/config/bases/kafka-gateway.yaml.tpl > config/streaming/config/bases/kafka-gateway.yaml
-	./hack/apply-template.sh config/streaming/config/bases/pulsar-gateway.yaml.tpl > config/streaming/config/bases/pulsar-gateway.yaml
+	VERSION_SLUG=$(VERSION) ./hack/apply-template.sh config/streaming/config/bases/processor.yaml.tpl > config/streaming/config/bases/processor.yaml
 
 # Absolutely awesome: http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 help: ## Print help for each make target

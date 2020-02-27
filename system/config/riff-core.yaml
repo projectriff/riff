@@ -3097,7 +3097,7 @@ spec:
       - args:
         - --metrics-addr=127.0.0.1:8080
         - --enable-leader-election
-        image: github.com/projectriff/riff/system/cmd/managers/core
+        image: ko://github.com/projectriff/riff/system/cmd/managers/core
         livenessProbe:
           httpGet:
             path: /healthz

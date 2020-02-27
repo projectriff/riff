@@ -1,8 +1,7 @@
-# DO NOT EDIT - this file is the output of the 'config/streaming/config/bases/pulsar-gateway.yaml.tpl' template 
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: pulsar-gateway
 data:
   gatewayImage: bsideup/liiklus:0.9.2
-  provisionerImage: gcr.io/projectriff/pulsar-provisioner/provisioner@sha256:028ec53ad146efe05f7f6122b89d97ee189f396780b744a1e348ee0fcee35ff2
+  provisionerImage: ko://github.com/projectriff/riff/pulsar-provisioner/cmd/provisioner

@@ -1,4 +1,4 @@
-module github.com/projectriff/riff/developer-utils
+module github.com/projectriff/riff/kafka-provisioner
 
 go 1.13
 
