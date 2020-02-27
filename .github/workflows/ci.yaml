@@ -92,7 +92,8 @@ jobs:
 
   stage:
     name: Stage
-    needs: unit
+    # TODO(scothis) restore dependency
+    # needs: unit
     if: success() && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
