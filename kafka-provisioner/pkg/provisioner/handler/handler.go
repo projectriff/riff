@@ -3,10 +3,11 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	client "github.com/projectriff/riff/developer-utils/pkg/provisioner/kafka"
 	"io"
 	"net/http"
 	"strings"
+
+	client "github.com/projectriff/riff/kafka-provisioner/pkg/provisioner/kafka"
 )
 
 type TopicCreationRequestHandler struct {

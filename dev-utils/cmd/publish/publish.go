@@ -14,7 +14,9 @@ import (
 	client "github.com/projectriff/riff/stream-client-go"
 	"github.com/spf13/cobra"
 
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	// load credential helpers
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 )
 
 var (

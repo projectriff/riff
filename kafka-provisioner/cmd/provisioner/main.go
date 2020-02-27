@@ -23,8 +23,8 @@ import (
 	"os"
 
 	"github.com/Shopify/sarama"
-	"github.com/projectriff/riff/developer-utils/pkg/provisioner/handler"
-	client "github.com/projectriff/riff/developer-utils/pkg/provisioner/kafka"
+	"github.com/projectriff/riff/kafka-provisioner/pkg/provisioner/handler"
+	client "github.com/projectriff/riff/kafka-provisioner/pkg/provisioner/kafka"
 )
 
 func main() {

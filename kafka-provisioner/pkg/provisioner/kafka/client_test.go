@@ -4,7 +4,7 @@ import (
 	"github.com/Shopify/sarama"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	client "github.com/projectriff/riff/developer-utils/pkg/provisioner/kafka"
+	client "github.com/projectriff/riff/kafka-provisioner/pkg/provisioner/kafka"
 )
 
 var _ = Describe("Kafka Client", func() {

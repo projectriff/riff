@@ -9,9 +9,9 @@ import (
 	"github.com/Shopify/sarama"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/projectriff/riff/developer-utils/pkg/provisioner/handler"
-	client "github.com/projectriff/riff/developer-utils/pkg/provisioner/kafka"
-	"github.com/projectriff/riff/developer-utils/pkg/provisioner/kafka/kafkafakes"
+	"github.com/projectriff/riff/kafka-provisioner/pkg/provisioner/handler"
+	client "github.com/projectriff/riff/kafka-provisioner/pkg/provisioner/kafka"
+	"github.com/projectriff/riff/kafka-provisioner/pkg/provisioner/kafka/kafkafakes"
 )
 
 var _ = Describe("Provisioner HTTP Handler", func() {
