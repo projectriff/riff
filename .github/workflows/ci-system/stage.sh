@@ -17,10 +17,11 @@ stageComponent() {
   echo ""
   echo "# Stage riff System: ${component}"
   echo ""
-  ko resolve -P -t ${slug} -f config/riff-${component}.yaml > bin/riff-${component}.yaml
+  KO_DOCKER_REPO=gcr.io/projectriff/system ko resolve -P -t ${slug} -f config/riff-${component}.yaml > bin/riff-${component}.yaml
   gsutil cp -a public-read bin/riff-${component}.yaml gs://projectriff/riff-system/snapshots/riff-${component}-${slug}.yaml
 }
 
+${root_dir}/fats/install.sh ko
 mkdir bin
 
 stageComponent build

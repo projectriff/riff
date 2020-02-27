@@ -1,4 +1,4 @@
-F#!/bin/bash
+#!/usr/bin/env bash
 
 set -o errexit
 set -o nounset
@@ -11,13 +11,9 @@ readonly git_sha=$(git rev-parse HEAD)
 readonly git_timestamp=$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M%S' --format="%cd")
 readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
 
-${root_dir}/fats/install.sh helm
-${root_dir}/fats/install.sh ytt
-${root_dir}/fats/install.sh k8s-tag-resolver
-${root_dir}/fats/install.sh yq
 
-helm init --client-only
-make clean package
+GOOS=linux GOARCH=amd64 go build -o bin/publish ./cmd/publish
+GOOS=linux GOARCH=amd64 go build -o bin/subscribe ./cmd/subscribe
 
-# upload releases
-gsutil cp -a public-read target/*.yaml gs://projectriff/release/snapshots/${slug}/
+docker build . -t projectriff/dev-utils:${slug}
+docker push projectriff/dev-utils:${slug}
