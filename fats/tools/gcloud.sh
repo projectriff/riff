@@ -42,3 +42,4 @@ gcloud config set disable_prompts True
 echo $GCLOUD_CLIENT_SECRET | base64 --decode > key.json
 gcloud auth activate-service-account --key-file key.json
 rm key.json
+gcloud auth configure-docker

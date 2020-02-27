@@ -4,10 +4,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-gcloud config set disable_prompts True
-gcloud auth activate-service-account --key-file <(echo ${GCLOUD_CLIENT_SECRET} | base64 --decode)
-gcloud auth configure-docker
-
 readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
 
 readonly version=$(cat ${root_dir}/VERSION)
