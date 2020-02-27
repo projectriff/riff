@@ -17,7 +17,6 @@ readonly base_image="gcr.io/projectriff/streaming-processor/processor"
 ./mvnw -q -B compile -Dmaven.test.skip=true
 ./mvnw -B com.google.cloud.tools:jib-maven-plugin:1.3.0:build \
   -Djib.to.image=${base_image}:${slug}
-docker push ${base_image}:${slug}
 
 # stage native image
 docker build -t ${base_image}-native:${slug} .
