@@ -12,6 +12,12 @@ ${root_dir}/fats/install.sh k8s-tag-resolver
 ${root_dir}/fats/install.sh yq
 ${root_dir}/fats/install.sh ko
 
+if [ $STAGE = "remote" ]; then
+  export KO_DOCKER_REPO=gcr.io/projectriff/release
+else
+  export KO_DOCKER_REPO=ko.local/projectriff/release
+fi
+
 helm init --client-only
 make clean package
 
