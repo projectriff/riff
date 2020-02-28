@@ -7,6 +7,7 @@ set -o pipefail
 readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
 
 ${root_dir}/fats/install.sh ko
+${root_dir}/fats/install.sh kustomize
 
 make prepare
 
