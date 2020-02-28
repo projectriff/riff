@@ -4,35 +4,18 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-component=$1
-version=$2
+readonly component=$1
+readonly version=$2
 
-build_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null 2>&1 && pwd )/build/${component}"
-source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/${component}"
+readonly root_dir=$(cd `dirname $0`/../.. && pwd)
+readonly build_dir="${root_dir}/release/build/${component}"
+readonly source_dir="${root_dir}/release/source/${component}"
+readonly target_dir="${root_dir}/release/target"
 
-# download config and apply overlays
-
-mkdir -p ${build_dir}/templates
-
-if [ -f ${source_dir}/templates.yaml ] ; then
-  while IFS= read -r line
-  do
-    arr=($line)
-    name=${arr[0]%?}
-    url=${arr[1]}
-    args=$(echo $line | cut -d "#" -s -f 2)
-    file=${build_dir}/templates/${name}.yml
-
-    curl -L -s ${url} > ${file}
-
-    # resolve tags to digests
-    k8s-tag-resolver ${file} -o ${file}.tmp
-    mv ${file}.tmp ${file}
-  done < "${source_dir}/templates.yaml"
-fi
+mkdir -p ${build_dir}
 
 if [ -f ${source_dir}/values.yaml.tpl ] ; then
-  $( dirname "${BASH_SOURCE[0]}" )/apply-template.sh ${source_dir}/values.yaml.tpl > ${source_dir}/values.yaml
+  $(cd `dirname $0` && pwd)/apply-template.sh ${source_dir}/values.yaml.tpl > ${source_dir}/values.yaml
 fi
 
 if [ -f ${source_dir}/values.yaml ] ; then
@@ -42,12 +25,6 @@ if [ -f ${source_dir}/values.yaml ] ; then
   else
     cp ${source_dir}/values.yaml ${build_dir}/values.yaml
   fi
-fi
-
-# Resolve any image tags to digests in our values.yaml
-if [ -f ${build_dir}/values.yaml ] ; then
-    k8s-tag-resolver ${build_dir}/values.yaml -o ${build_dir}/values.yaml.tmp || cp ${build_dir}/values.yaml ${build_dir}/values.yaml.tmp
-    mv ${build_dir}/values.yaml.tmp ${build_dir}/values.yaml
 fi
 
 if [ -f ${source_dir}/Chart.yaml ] ; then
@@ -67,10 +44,6 @@ if [ $component == "kafka" ] ; then
   helm package ${build_dir}/../kafka --destination repository --version ${version}
 fi
 
-# create release artifacts
-
-target_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null 2>&1 && pwd )/target"
-
 # download config and apply overlays
 file=${target_dir}/${component}.yaml
 rm -f $file
@@ -85,7 +58,11 @@ if [ -f ${source_dir}/templates.yaml ] ; then
 
     echo "" >> ${file}
     echo "---" >> ${file}
-    curl -L -s ${url} >> ${file}
+    if [[ $url = 'riff+ko://'* ]]; then
+      ko resolve -f ${root_dir}$(echo ${url} | cut -c11-) >> ${file}
+    else
+      curl -L -s ${url} >> ${file}
+    fi
   done < "${source_dir}/templates.yaml"
 fi
 

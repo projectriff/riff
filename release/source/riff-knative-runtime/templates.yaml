@@ -1,0 +1,1 @@
+knative-runtime: riff+ko:///system/config/riff-knative.yaml
