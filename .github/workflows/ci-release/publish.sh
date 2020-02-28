@@ -4,12 +4,13 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
+readonly bucket=gs://projectriff/release
 
-readonly version=$(cat ${root_dir}/VERSION)
-readonly git_sha=$(git rev-parse HEAD)
-readonly git_timestamp=$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M%S' --format="%cd")
-readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
+cache_control='Cache-Control: public'
+if echo $VERSION | grep -iqF snapshot; then
+  cache_control="${cache_control}, max-age=60"
+else
+  cache_control="${cache_control}, max-age=3600"
+fi
 
-# publish releases
-gsutil -h 'Cache-Control: public, max-age=60' cp -a public-read gs://projectriff/release/snapshots/${slug}/*.yaml gs://projectriff/release/${version}/
+gsutil -h "${cache_control}" rsync -a public-read -d ${bucket}/snapshots/${VERSION_SLUG}/ ${bucket}/${VERSION}/

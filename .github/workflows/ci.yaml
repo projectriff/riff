@@ -92,7 +92,7 @@ jobs:
 
   stage:
     name: Stage
-    if: success() && github.event_name == 'push'
+    if: success() && github.event_name == 'push' && startsWith(github.repository, 'projectriff/')
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -243,3 +243,45 @@ jobs:
       shell: bash
       if: always()
       timeout-minutes: 10
+
+  publish:
+    name: Publish
+    needs: acceptance
+    # TODO(scothis) remove publishing from mono branch
+    if: |
+      success() && github.event_name == 'push' && startsWith(github.repository, 'projectriff/') && (
+        github.ref == 'refs/heads/mono' ||
+        github.ref == 'refs/heads/master' || (
+          startsWith(github.ref, 'refs/heads/v') && endsWith(github.ref, 'x')
+        )
+      )
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup env
+      run: |
+        readonly version=$(cat VERSION)
+        readonly git_sha=$(git rev-parse HEAD)
+        readonly git_timestamp=$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M%S' --format="%cd")
+        readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
+        echo "##[set-env name=VERSION]${version}"
+        echo "##[set-env name=VERSION_SLUG]${slug}"
+      shell: bash
+    - name: Install tools
+      run: |
+        ../fats/install.sh gcloud
+      shell: bash
+
+    - name: Publish cli
+      run: ../.github/workflows/ci-cli/publish.sh
+      working-directory: cli
+    - name: Publish dev-utils
+      run: ../.github/workflows/ci-dev-utils/publish.sh
+      working-directory: dev-utils
+    - name: Publish release
+      run: ../.github/workflows/ci-release/publish.sh
+      working-directory: release
