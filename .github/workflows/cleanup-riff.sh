@@ -1,6 +1,6 @@
 #!/bin/bash
 
-readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
+readonly root_dir=$(cd `dirname $0`/../.. && pwd)
 readonly fats_dir=$root_dir/fats
 
 uninstall_app() {
