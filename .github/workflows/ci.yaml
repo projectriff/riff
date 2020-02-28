@@ -200,7 +200,7 @@ jobs:
         echo "##[set-env name=RUNTIME]${{ matrix.config.runtime }}"
         echo "##[set-env name=GATEWAY]${{ matrix.config.gateway }}"
 
-        readonly version=$(cat ${root_dir}/VERSION)
+        readonly version=$(cat VERSION)
         readonly git_sha=$(git rev-parse HEAD)
         readonly git_timestamp=$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M%S' --format="%cd")
         readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
