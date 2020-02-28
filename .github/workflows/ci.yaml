@@ -127,11 +127,7 @@ jobs:
         readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
         echo "##[set-env name=VERSION_SLUG]${slug}"
 
-        if [ "${{ github.event_name }}" = "push" ]; then
-          echo "##[set-env name=STAGE]remote"
-        else
-          echo "##[set-env name=STAGE]local"
-        fi
+        echo "##[set-env name=STAGE]remote"
       shell: bash
       
     - name: Stage cli
@@ -149,6 +145,135 @@ jobs:
     - name: Stage release
       run: ../.github/workflows/stage-release.sh
       working-directory: release
+
+  pr_acceptance:
+    name: PR Acceptance
+    needs:
+    - unit
+    if: success() && github.event_name == 'pull_request'
+    strategy:
+      matrix:
+        config:
+        - qualifier: core
+          os: ubuntu-latest
+          cluster: kind
+          registry: dockerhub
+          runtime: core
+        - qualifier: knative
+          os: ubuntu-latest
+          cluster: kind
+          registry: dockerhub
+          runtime: knative
+        - qualifier: streaming-inmemory
+          os: ubuntu-latest
+          cluster: kind
+          registry: dockerhub
+          runtime: streaming
+          gateway: inmemory
+        - qualifier: streaming-kafka
+          os: ubuntu-latest
+          cluster: kind
+          registry: dockerhub
+          runtime: streaming
+          gateway: kafka
+        - qualifier: streaming-pulsar
+          os: ubuntu-latest
+          cluster: kind
+          registry: dockerhub
+          runtime: streaming
+          gateway: pulsar
+      fail-fast: false
+    runs-on: ${{ matrix.config.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v1
+      with:
+        go-version: '1.13'
+    # TODO remove after https://github.com/actions/setup-go/issues/14
+    - name: Add GOPATH/bin to PATH
+      run: |
+        echo "##[set-env name=GOPATH;]$(go env GOPATH)"
+        echo "##[add-path]$(go env GOPATH)/bin"
+      shell: bash
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '8.x'
+    - name: Setup env
+      run: |
+        job=$(date +%s) # TODO use something that is assigned by CI to guarantee uniqueness
+        echo "JOB_ID=${job}"
+
+        echo "##[set-env name=CLUSTER]${{ matrix.config.cluster }}"
+        echo "##[set-env name=REGISTRY]${{ matrix.config.registry }}"
+        echo "##[set-env name=CLUSTER_NAME]release-${job}-${{ matrix.config.qualifier }}"
+        echo "##[set-env name=NAMESPACE]release-${job}-${{ matrix.config.qualifier }}"
+        echo "##[set-env name=RUNTIME]${{ matrix.config.runtime }}"
+        echo "##[set-env name=GATEWAY]${{ matrix.config.gateway }}"
+
+        readonly version=$(cat VERSION)
+        readonly git_sha=$(git rev-parse HEAD)
+        readonly git_timestamp=$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M%S' --format="%cd")
+        readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
+        echo "##[set-env name=VERSION_SLUG]${slug}"
+
+        echo "##[set-env name=STAGE]local"
+      shell: bash
+    - name: Install tools
+      run: |
+        ./fats/install.sh kubectl
+        ./fats/install.sh helm
+        ./fats/install.sh ytt
+        ./fats/install.sh kapp
+      shell: bash
+
+    - name: Stage cli
+      run: ../.github/workflows/stage-cli.sh
+      working-directory: cli
+    - name: Stage dev-utils
+      run: ../.github/workflows/stage-dev-utils.sh
+      working-directory: dev-utils
+    - name: Stage streaming-processor
+      run: ../.github/workflows/stage-streaming-processor.sh
+      working-directory: streaming-processor
+    - name: Stage system
+      run: ../.github/workflows/stage-system.sh
+      working-directory: system
+    - name: Stage release
+      run: ../.github/workflows/stage-release.sh
+      working-directory: release
+
+    - name: Start
+      run: ./fats/start.sh
+      shell: bash
+      timeout-minutes: 15
+    - name: Sideload images
+      run: ./.github/workflows/acceptance-load-images.sh
+      shell: bash
+      timeout-minutes: 5
+    - name: Install riff
+      run: ./.github/workflows/acceptance-install.sh local
+      shell: bash
+      timeout-minutes: 15
+    - name: Run tests
+      run: ./.github/workflows/acceptance.sh
+      shell: bash
+      timeout-minutes: 30
+    - name: Collect diagnostics
+      run: ./fats/diagnostics.sh
+      shell: bash
+      if: always()
+      timeout-minutes: 1
+    - name: Uninstall riff
+      run: ./.github/workflows/acceptance-cleanup.sh
+      shell: bash
+      if: always()
+      timeout-minutes: 10
+    - name: Cleanup
+      run: ./fats/cleanup.sh
+      shell: bash
+      if: always()
+      timeout-minutes: 10
+
 
   acceptance:
     name: Acceptance
@@ -215,13 +340,12 @@ jobs:
       shell: bash
     - name: Install tools
       run: |
-        ../fats/install.sh kubectl
-        ../fats/install.sh riff builds/v${VERSION_SLUG}
-        ../fats/install.sh helm
-        ../fats/install.sh ytt
-        ../fats/install.sh kapp
-        ../fats/install.sh gcloud
-      working-directory: release
+        ./fats/install.sh kubectl
+        ./fats/install.sh riff builds/v${VERSION_SLUG}
+        ./fats/install.sh helm
+        ./fats/install.sh ytt
+        ./fats/install.sh kapp
+        ./fats/install.sh gcloud
       shell: bash
     - name: Start
       run: ./fats/start.sh
