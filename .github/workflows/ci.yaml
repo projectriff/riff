@@ -273,7 +273,7 @@ jobs:
       shell: bash
     - name: Install tools
       run: |
-        ../fats/install.sh gcloud
+        ./fats/install.sh gcloud
       shell: bash
 
     - name: Publish cli
