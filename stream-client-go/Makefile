@@ -29,9 +29,8 @@ vet:
 # find or download goimports, download goimports if necessary
 goimports:
 ifeq (, $(shell which goimports))
-	cp go.mod go.mod~ && cp go.sum go.sum~ # avoid go.* mutations from go get
-	go get golang.org/x/tools/cmd/goimports@release-branch.go1.13
-	mv go.mod~ go.mod && mv go.sum~ go.sum
+	# avoid go.* mutations from go get
+	( cd / && GO111MODULE=on go get golang.org/x/tools/cmd/goimports@release-branch.go1.13 )
 GOIMPORTS=$(GOBIN)/goimports
 else
 GOIMPORTS=$(shell which goimports)
