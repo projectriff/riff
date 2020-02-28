@@ -10,6 +10,7 @@ ${root_dir}/fats/install.sh helm
 ${root_dir}/fats/install.sh ytt
 ${root_dir}/fats/install.sh k8s-tag-resolver
 ${root_dir}/fats/install.sh yq
+${root_dir}/fats/install.sh ko
 
 helm init --client-only
 make clean package
