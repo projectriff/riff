@@ -210,7 +210,7 @@ jobs:
     - name: Install tools
       run: |
         ../fats/install.sh kubectl
-        ../fats/install.sh riff ${VERSION_SLUG}
+        ../fats/install.sh riff builds/v${VERSION_SLUG}
         ../fats/install.sh helm
         ../fats/install.sh ytt
         ../fats/install.sh kapp
