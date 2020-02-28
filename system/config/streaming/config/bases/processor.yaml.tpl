@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: processor
 data:
-  processorImage: gcr.io/projectriff/streaming-processor/processor-native:{{ echo -n $VERSION_SLUG }}
+  processorImage: {{ echo -n $PROCESSOR_IMAGE_REPO }}-native:{{ echo -n $VERSION_SLUG }}

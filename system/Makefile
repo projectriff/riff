@@ -3,6 +3,7 @@
 COMPONENT ?= build
 VERSION ?= $(shell cat ../VERSION)
 export VERSION_SLUG ?= $(VERSION)
+export PROCESSOR_IMAGE_REPO ?= gcr.io/projectriff/streaming-processor/processor
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= crd:trivialVersions=true
 

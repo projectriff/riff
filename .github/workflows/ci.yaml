@@ -126,6 +126,12 @@ jobs:
         readonly git_timestamp=$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M%S' --format="%cd")
         readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
         echo "##[set-env name=VERSION_SLUG]${slug}"
+
+        if [ "${{ github.event_name }}" = "push" ]; then
+          echo "##[set-env name=STAGE]remote"
+        else
+          echo "##[set-env name=STAGE]local"
+        fi
       shell: bash
       
     - name: Stage cli

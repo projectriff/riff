@@ -14,5 +14,7 @@ ${root_dir}/fats/install.sh yq
 helm init --client-only
 make clean package
 
-# upload releases
-gsutil cp -a public-read target/*.yaml gs://projectriff/release/snapshots/${VERSION_SLUG}/
+if [ $STAGE = "remote" ]; then
+  # upload releases
+  gsutil cp -a public-read target/*.yaml gs://projectriff/release/snapshots/${VERSION_SLUG}/
+fi
