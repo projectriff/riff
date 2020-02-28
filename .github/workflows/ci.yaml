@@ -272,10 +272,16 @@ jobs:
         echo "##[set-env name=VERSION]${version}"
         echo "##[set-env name=VERSION_SLUG]${slug}"
       shell: bash
-    - name: Install tools
-      run: |
-        ./fats/install.sh gcloud
+    - name: GCP login
+      run: ./fats/install.sh gcloud
+      env:
+        GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
+    - name: docker login
+      run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
       shell: bash
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Publish cli
       run: ../.github/workflows/ci-cli/publish.sh
