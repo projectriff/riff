@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-readonly root_dir=$(cd `dirname $0`/../../.. && pwd)
+readonly root_dir=$(cd `dirname $0`/../.. && pwd)
 readonly fats_dir=$root_dir/fats
 
 readonly version=$(cat ${root_dir}/VERSION)
@@ -19,7 +19,7 @@ if [ ${1:-unknown} = staged ] ; then
   release_base=https://storage.googleapis.com/projectriff/release/snapshots/${slug}
 else
   echo "Using locally built releases"
-  release_base=./target
+  release_base=${root_dir}/release/target
 fi
 
 install_app() {
@@ -41,7 +41,7 @@ install_app cert-manager
 source ${fats_dir}/macros/no-resource-requests.sh
 
 echo "Install Contour"
-install_app contour ../.github/workflows/ci-release/overlays/service-$(echo ${K8S_SERVICE_TYPE} | tr '[A-Z]' '[a-z]').yaml
+install_app contour ${root_dir}/.github/workflows/overlays/service-$(echo ${K8S_SERVICE_TYPE} | tr '[A-Z]' '[a-z]').yaml
 
 echo "Install riff Build"
 install_app kpack

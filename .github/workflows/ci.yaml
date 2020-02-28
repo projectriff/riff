@@ -135,19 +135,19 @@ jobs:
       shell: bash
       
     - name: Stage cli
-      run: ../.github/workflows/ci-cli/stage.sh
+      run: ../.github/workflows/stage-cli.sh
       working-directory: cli
     - name: Stage dev-utils
-      run: ../.github/workflows/ci-dev-utils/stage.sh
+      run: ../.github/workflows/stage-dev-utils.sh
       working-directory: dev-utils
     - name: Stage streaming-processor
-      run: ../.github/workflows/ci-streaming-processor/stage.sh
+      run: ../.github/workflows/stage-streaming-processor.sh
       working-directory: streaming-processor
     - name: Stage system
-      run: ../.github/workflows/ci-system/stage.sh
+      run: ../.github/workflows/stage-system.sh
       working-directory: system
     - name: Stage release
-      run: ../.github/workflows/ci-release/stage.sh
+      run: ../.github/workflows/stage-release.sh
       working-directory: release
 
   acceptance:
@@ -224,29 +224,29 @@ jobs:
       working-directory: release
       shell: bash
     - name: Start
-      run: fats/start.sh
+      run: ./fats/start.sh
       shell: bash
       timeout-minutes: 15
     - name: Install riff
-      run: .github/workflows/install-riff.sh staged
+      run: ./.github/workflows/acceptance-install.sh staged
       shell: bash
       timeout-minutes: 15
     - name: Run tests
-      run: .github/workflows/acceptance.sh
+      run: ./.github/workflows/acceptance.sh
       shell: bash
       timeout-minutes: 30
     - name: Collect diagnostics
-      run: fats/diagnostics.sh
+      run: ./fats/diagnostics.sh
       shell: bash
       if: always()
       timeout-minutes: 1
     - name: Uninstall riff
-      run: .github/workflows/cleanup-riff.sh
+      run: ./.github/workflows/acceptance-cleanup.sh
       shell: bash
       if: always()
       timeout-minutes: 10
     - name: Cleanup
-      run: fats/cleanup.sh
+      run: ./fats/cleanup.sh
       shell: bash
       if: always()
       timeout-minutes: 10
@@ -290,11 +290,11 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Publish cli
-      run: ../.github/workflows/ci-cli/publish.sh
+      run: ../.github/workflows/publish-cli.sh
       working-directory: cli
     - name: Publish dev-utils
-      run: ../.github/workflows/ci-dev-utils/publish.sh
+      run: ../.github/workflows/publish-dev-utils.sh
       working-directory: dev-utils
     - name: Publish release
-      run: ../.github/workflows/ci-release/publish.sh
+      run: ../.github/workflows/publish-release.sh
       working-directory: release
