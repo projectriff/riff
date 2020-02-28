@@ -28,7 +28,7 @@ compile: prepare ko ## Compile target binaries
 	$(KO) resolve -L -f config/ > /dev/null
 
 .PHONY: prepare
-prepare: generate fmt vet manifests ## Create all generated and scaffolded files
+prepare: generate fmt vet manifests templates ## Create all generated and scaffolded files
 	kustomize build config/build/default > config/riff-build.yaml
 	kustomize build config/core/default > config/riff-core.yaml
 	kustomize build config/knative/default > config/riff-knative.yaml
