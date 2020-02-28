@@ -2,6 +2,7 @@
 # Target component to build/run
 COMPONENT ?= build
 VERSION ?= $(shell cat ../VERSION)
+export VERSION_SLUG ?= $(VERSION)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= crd:trivialVersions=true
 
@@ -120,7 +121,7 @@ endif
 
 .PHONY: templates
 templates: ## update templated components
-	VERSION_SLUG=$(VERSION) ./hack/apply-template.sh config/streaming/config/bases/processor.yaml.tpl > config/streaming/config/bases/processor.yaml
+	./hack/apply-template.sh config/streaming/config/bases/processor.yaml.tpl > config/streaming/config/bases/processor.yaml
 
 # Absolutely awesome: http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 help: ## Print help for each make target

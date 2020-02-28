@@ -1,4 +1,5 @@
 VERSION ?= $(shell cat ../VERSION)
+export VERSION_SLUG ?= $(VERSION)
 export KAFKA_VERSION = 0.20.8
 
 .PHONY: package
@@ -27,12 +28,16 @@ repository: source/*.sh
 	
 	./source/package.sh riff-builders ${VERSION}
 	
+	./source/update-template.sh riff-build
 	./source/package.sh riff-build ${VERSION}
 	
+	./source/update-template.sh riff-core-runtime
 	./source/package.sh riff-core-runtime ${VERSION}
 	
+	./source/update-template.sh riff-knative-runtime
 	./source/package.sh riff-knative-runtime ${VERSION}
 	
+	./source/update-template.sh riff-streaming-runtime
 	./source/package.sh riff-streaming-runtime ${VERSION}
 
 .PHONY: templates
@@ -42,10 +47,6 @@ templates:
 	./source/update-template.sh knative
 	./source/update-template.sh kpack
 	./source/update-template.sh riff-builders
-	./source/update-template.sh riff-build
-	./source/update-template.sh riff-core-runtime
-	./source/update-template.sh riff-knative-runtime
-	./source/update-template.sh riff-streaming-runtime
 
 .PHONY: clean
 clean:
