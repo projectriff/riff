@@ -89,6 +89,7 @@ jobs:
       shell: bash
       env:
         CODECOV_TOKEN: 9ff1715b-5be2-44d7-ae21-b14ff7165fa9
+      continue-on-error: true
 
   stage:
     name: Stage
