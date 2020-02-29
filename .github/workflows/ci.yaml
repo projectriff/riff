@@ -150,8 +150,9 @@ jobs:
 
   pr_acceptance:
     name: PR Acceptance
-    needs:
-    - unit
+    # TODO(scothis) 
+    # needs:
+    # - unit
     if: success() && github.event_name == 'pull_request'
     strategy:
       matrix:
@@ -159,29 +160,29 @@ jobs:
         - qualifier: core
           os: ubuntu-latest
           cluster: kind
-          registry: dockerhub
+          registry: docker-daemon
           runtime: core
         - qualifier: knative
           os: ubuntu-latest
           cluster: kind
-          registry: dockerhub
+          registry: docker-daemon
           runtime: knative
         - qualifier: streaming-inmemory
           os: ubuntu-latest
           cluster: kind
-          registry: dockerhub
+          registry: docker-daemon
           runtime: streaming
           gateway: inmemory
         - qualifier: streaming-kafka
           os: ubuntu-latest
           cluster: kind
-          registry: dockerhub
+          registry: docker-daemon
           runtime: streaming
           gateway: kafka
         - qualifier: streaming-pulsar
           os: ubuntu-latest
           cluster: kind
-          registry: dockerhub
+          registry: docker-daemon
           runtime: streaming
           gateway: pulsar
       fail-fast: false
