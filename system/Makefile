@@ -27,10 +27,6 @@ run: manifests ## Run component against the configured Kubernetes cluster in ~/.
 test: generate fmt vet manifests ## Run tests
 	go test ./... -coverprofile cover.out
 
-.PHONY: compile
-compile: prepare ko ## Compile target binaries
-	$(KO) resolve -L -f config/ > /dev/null
-
 .PHONY: prepare
 prepare: generate fmt vet manifests templates ## Create all generated and scaffolded files
 	kustomize build config/build/default > config/riff-build.yaml

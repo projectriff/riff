@@ -82,7 +82,7 @@ jobs:
         
         ../fats/install.sh kubebuilder
         ../fats/install.sh kustomize
-        make compile test
+        make prepare test
       working-directory: system
       if: success() && matrix.os == 'ubuntu-latest'
     - name: Report coverage
