@@ -7,6 +7,8 @@ export PROCESSOR_IMAGE_REPO ?= gcr.io/projectriff/streaming-processor/processor
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= crd:trivialVersions=true
 
+CONTROLLER_GEN=go run sigs.k8s.io/controller-tools/cmd/controller-gen
+
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
@@ -79,18 +81,9 @@ vet:
 generate: generate-internal fmt ## Generate code
 
 .PHONY: generate-internal
-generate-internal: controller-gen mockery
+generate-internal: mockery
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
 	$(MOCKERY) -dir ./pkg/controllers/streaming -inpkg -name StreamProvisionerClient -case snake
-
-# find or download controller-gen, download controller-gen if necessary
-controller-gen:
-ifeq (, $(shell which controller-gen))
-	go install sigs.k8s.io/controller-tools/cmd/controller-gen
-CONTROLLER_GEN=$(GOBIN)/controller-gen
-else
-CONTROLLER_GEN=$(shell which controller-gen)
-endif
 
 # find or download goimports, download goimports if necessary
 goimports:
