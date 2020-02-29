@@ -203,16 +203,6 @@ jobs:
         java-version: '8.x'
     - name: Setup env
       run: |
-        job=$(date +%s) # TODO use something that is assigned by CI to guarantee uniqueness
-        echo "JOB_ID=${job}"
-
-        echo "##[set-env name=CLUSTER]${{ matrix.config.cluster }}"
-        echo "##[set-env name=REGISTRY]${{ matrix.config.registry }}"
-        echo "##[set-env name=CLUSTER_NAME]release-${job}-${{ matrix.config.qualifier }}"
-        echo "##[set-env name=NAMESPACE]release-${job}-${{ matrix.config.qualifier }}"
-        echo "##[set-env name=RUNTIME]${{ matrix.config.runtime }}"
-        echo "##[set-env name=GATEWAY]${{ matrix.config.gateway }}"
-
         readonly version=$(cat VERSION)
         readonly git_sha=$(git rev-parse HEAD)
         readonly git_timestamp=$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M%S' --format="%cd")
@@ -220,13 +210,6 @@ jobs:
         echo "##[set-env name=VERSION_SLUG]${slug}"
 
         echo "##[set-env name=STAGE]local"
-      shell: bash
-    - name: Install tools
-      run: |
-        ./fats/install.sh kubectl
-        ./fats/install.sh helm
-        ./fats/install.sh ytt
-        ./fats/install.sh kapp
       shell: bash
 
     - name: Stage cli
@@ -244,6 +227,32 @@ jobs:
     - name: Stage release
       run: ../.github/workflows/stage-release.sh
       working-directory: release
+
+    - name: Setup env
+      run: |
+        job=$(date +%s) # TODO use something that is assigned by CI to guarantee uniqueness
+        echo "JOB_ID=${job}"
+
+        echo "##[set-env name=CLUSTER]${{ matrix.config.cluster }}"
+        echo "##[set-env name=REGISTRY]${{ matrix.config.registry }}"
+        echo "##[set-env name=CLUSTER_NAME]release-${job}-${{ matrix.config.qualifier }}"
+        echo "##[set-env name=NAMESPACE]release-${job}-${{ matrix.config.qualifier }}"
+        echo "##[set-env name=RUNTIME]${{ matrix.config.runtime }}"
+        echo "##[set-env name=GATEWAY]${{ matrix.config.gateway }}"
+
+        readonly version=$(cat VERSION)
+        readonly git_sha=$(git rev-parse HEAD)
+        readonly git_timestamp=$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M%S' --format="%cd")
+        readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
+        echo "##[set-env name=VERSION_SLUG]${slug}"
+      shell: bash
+    - name: Install tools
+      run: |
+        ./fats/install.sh kubectl
+        ./fats/install.sh helm
+        ./fats/install.sh ytt
+        ./fats/install.sh kapp
+      shell: bash
 
     - name: Start
       run: ./fats/start.sh
