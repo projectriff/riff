@@ -7,9 +7,9 @@ set -o pipefail
 if [ $CLUSTER = kind ]; then
   while IFS= read -r line; do
     image=$(echo $line | awk 'BEGIN { OFS=":" } { print $1, $2 }')
-    kind load docker-image $image
+    kind load docker-image --name ${CLUSTER_NAME} $image
   done < <(docker images | grep ko.local)
 
-  kind load docker-image projectriff/dev-utils:${VERSION_SLUG}
+  kind load docker-image --name ${CLUSTER_NAME} projectriff/dev-utils:${VERSION_SLUG}
 fi
 
