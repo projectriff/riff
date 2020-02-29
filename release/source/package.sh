@@ -82,6 +82,8 @@ if [ -d ${source_dir}/overlays-release ] ; then
   mv ${file}.tmp ${file}
 fi
 
-# resolve tags to digests
-k8s-tag-resolver ${file} -o ${file}.tmp
-mv ${file}.tmp ${file}
+if [ $STAGE = remote ]; then
+  # resolve tags to digests
+  k8s-tag-resolver ${file} -o ${file}.tmp
+  mv ${file}.tmp ${file}
+fi
