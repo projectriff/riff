@@ -27,6 +27,7 @@ jobs:
     # TODO remove after https://github.com/actions/setup-go/issues/14
     - name: Add GOPATH/bin to PATH
       run: |
+        mkdir -p $(go env GOPATH)/bin
         echo "##[set-env name=GOPATH;]$(go env GOPATH)"
         echo "##[add-path]$(go env GOPATH)/bin"
       shell: bash
@@ -103,6 +104,7 @@ jobs:
     # TODO remove after https://github.com/actions/setup-go/issues/14
     - name: Add GOPATH/bin to PATH
       run: |
+        mkdir -p $(go env GOPATH)/bin
         echo "##[set-env name=GOPATH;]$(go env GOPATH)"
         echo "##[add-path]$(go env GOPATH)/bin"
       shell: bash
@@ -192,6 +194,7 @@ jobs:
     # TODO remove after https://github.com/actions/setup-go/issues/14
     - name: Add GOPATH/bin to PATH
       run: |
+        mkdir -p $(go env GOPATH)/bin
         echo "##[set-env name=GOPATH;]$(go env GOPATH)"
         echo "##[add-path]$(go env GOPATH)/bin"
       shell: bash
