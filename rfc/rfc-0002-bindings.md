@@ -2,11 +2,11 @@
 
 **Authors:** @scothis
 
-**Status:** Accepted
+**Status:** Deprecated
 
 **Pull Request URL:** [#1360](https://github.com/projectriff/riff/pull/1360)
 
-**Superseded by:** N/A
+**Superseded by:** [RFC 0014 Service Binding](./rfc-0014-service-binding.md)
 
 **Supersedes:** N/A
 
