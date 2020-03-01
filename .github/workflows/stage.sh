@@ -23,7 +23,7 @@ stage() {
 }
 
 stage cli
-stage dev-utilss
+stage dev-utils
 stage streaming-processor
 stage system
 stage release
