@@ -66,7 +66,7 @@ jobs:
       run: ./fats/install.sh gcloud
       env:
         GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
-    - name: docker login
+    - name: Docker Hub login
       run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
       shell: bash
       env:
