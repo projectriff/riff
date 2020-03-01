@@ -9,7 +9,7 @@ readonly root_dir=$(cd `dirname $0`/../.. && pwd)
 test() {
     local component=$1
 
-    echo "##[group]Stage ${component}"
+    echo "##[group]Test ${component}"
     ( cd ${root_dir}/${component} && ${root_dir}/.github/workflows/test-${component}.sh )
     echo "##[endgroup]"
 }
