@@ -91,19 +91,10 @@ else
 GOIMPORTS=$(shell which goimports)
 endif
 
-# find or download ko, download ko if necessary
-ko:
-ifeq (, $(shell which ko))
-	GO111MODULE=off go get github.com/google/ko/cmd/ko
-KO=$(GOBIN)/ko
-else
-KO=$(shell which ko)
-endif
-
 # find or download mockery, download mockery if necessary
 mockery:
 ifeq (, $(shell which mockery))
-	GO111MODULE=off go get -u  github.com/vektra/mockery/.../
+	GO111MODULE=off go get github.com/vektra/mockery/cmd/mockery
 MOCKERY=$(GOBIN)/mockery
 else
 MOCKERY=$(shell which mockery)
