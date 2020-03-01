@@ -1,10 +1,10 @@
-# RFC-0014: Binding Inject
+# RFC-0014: Binding Injection
 
 **Authors:** @scothis
 
 **Status:**
 
-**Pull Request URL:** link
+**Pull Request URL:** [#1382](https://github.com/projectriff/riff/pull/1382)
 
 **Superseded by:** N/A
 
