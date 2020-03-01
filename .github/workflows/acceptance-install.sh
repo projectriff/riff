@@ -13,6 +13,8 @@ readonly git_timestamp=$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M
 readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
 
 source ${fats_dir}/.configure.sh
+${fats_dir}/install.sh kapp
+${fats_dir}/install.sh ytt
 
 if [ ${1:-unknown} = staged ] ; then
   echo "Using staged releases"

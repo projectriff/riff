@@ -3,6 +3,8 @@
 readonly root_dir=$(cd `dirname $0`/../.. && pwd)
 readonly fats_dir=$root_dir/fats
 
+${fats_dir}/install.sh kapp
+
 uninstall_app() {
   local name=$1
 
