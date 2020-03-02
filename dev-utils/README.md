@@ -36,6 +36,8 @@ The command takes the form:
 
 1. [curl](https://curl.haxx.se/): To make HTTP requests.
 
+1. [kafkacat](https://github.com/edenhill/kafkacat): To interact with kafka
+
 The namespace parameter is optional for all the commands. If not specified, the namespace of the `riff-dev` pod will be assumed.
 
 ## Examples
@@ -55,4 +57,8 @@ kubectl exec riff-dev --namespace ${NAMESPACE} -it -- curl http://hello.default.
 
 ```bash
 kubectl exec riff-dev --namespace ${NAMESPACE} -it -- bash
+```
+
+```bash
+kafkacat -C -b YOUR_BROKER -t TOPIC
 ```
