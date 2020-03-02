@@ -15,9 +15,7 @@ source $fats_dir/.configure.sh
 kubectl create namespace $NAMESPACE
 fats_create_push_credentials $NAMESPACE
 
-# TODO(scothis) unpin dev-utils version
-# riff_dev_version=$VERSION_SLUG
-riff_dev_version=0.5.0
+riff_dev_version=$VERSION_SLUG
 source ${fats_dir}/macros/create-riff-dev-pod.sh
 
 if [ $RUNTIME = "streaming" ]; then
