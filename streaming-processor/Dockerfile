@@ -1,7 +1,7 @@
 FROM oracle/graalvm-ce:19.2.0.1 AS native
 RUN gu install native-image
 COPY target/*.jar /tmp/app.jar
-RUN mkdir /tmp/app && cd /tmp/app && jar -xvf /tmp/app.jar
+RUN mkdir /tmp/app && cd /tmp/app && jar -xf /tmp/app.jar
 RUN mkdir /app
 RUN mv /tmp/app/BOOT-INF/lib /app/lib
 RUN mv /tmp/app/META-INF /app/META-INF

@@ -1,26 +1,14 @@
 package io.projectriff.processor;
 
-import com.github.bsideup.liiklus.protocol.AckRequest;
-import com.github.bsideup.liiklus.protocol.Assignment;
-import com.github.bsideup.liiklus.protocol.PublishRequest;
-import com.github.bsideup.liiklus.protocol.ReactorLiiklusServiceGrpc;
-import com.github.bsideup.liiklus.protocol.ReceiveReply;
-import com.github.bsideup.liiklus.protocol.ReceiveRequest;
-import com.github.bsideup.liiklus.protocol.SubscribeReply;
-import com.github.bsideup.liiklus.protocol.SubscribeRequest;
-import com.google.protobuf.ByteString;
+import com.github.bsideup.liiklus.protocol.*;
 import com.google.protobuf.Empty;
-import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Channel;
 import io.grpc.netty.NettyChannelBuilder;
-import io.projectriff.invoker.rpc.InputFrame;
-import io.projectriff.invoker.rpc.InputSignal;
-import io.projectriff.invoker.rpc.OutputFrame;
-import io.projectriff.invoker.rpc.OutputSignal;
-import io.projectriff.invoker.rpc.ReactorRiffGrpc;
-import io.projectriff.invoker.rpc.StartFrame;
-import io.projectriff.processor.serialization.Message;
-import reactor.core.publisher.*;
+import io.projectriff.invoker.rpc.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.UnicastProcessor;
 import reactor.util.function.Tuple2;
 
 import java.io.IOException;
@@ -37,10 +25,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.github.bsideup.liiklus.protocol.ReceiveReply.ReplyCase.LIIKLUS_EVENT_RECORD;
+import static com.github.bsideup.liiklus.protocol.ReceiveRequest.ContentFormat.LIIKLUS_EVENT;
+import static com.github.bsideup.liiklus.protocol.SubscribeRequest.AutoOffsetReset.EARLIEST;
+import static com.github.bsideup.liiklus.protocol.SubscribeRequest.AutoOffsetReset.LATEST;
+
 /**
  * Main driver class for the streaming processor.
  *
- * <p>Continually pumps data from one or several input streams (see {@code riff-serialization.proto} for this so-called "at rest" format),
+ * <p>Continually pumps data from one or several input streams (serialized as CloudEvents),
  * arranges messages in invocation windows and invokes the riff function over RPC by multiplexing messages from several
  * streams into one RPC channel (see {@code riff-rpc.proto} for the wire format).
  * On the way back, performs the opposite operations: de-muxes results and serializes them back to the corresponding
@@ -321,23 +314,25 @@ public class Processor {
     }
 
     /**
-     * This converts an RPC representation of an {@link OutputFrame} to an at-rest {@link Message}, and creates a publish request for it.
+     * This converts an RPC representation of an {@link OutputFrame} to an at-rest CloudEvent, and creates a publish request for it.
      */
     private PublishRequest createPublishRequest(OutputFrame next, String topic) {
-        Message msg = Message.newBuilder()
-                .setPayload(next.getPayload())
-                .setContentType(next.getContentType())
-                .putAllHeaders(next.getHeadersMap())
-                .build();
-
         return PublishRequest.newBuilder()
-                .setValue(msg.toByteString())
+                .setLiiklusEvent(
+                        LiiklusEvent.newBuilder()
+                                .setData(next.getPayload())
+                                .setDataContentType(next.getContentType())
+                                .setType("riff-event") // TODO
+                                .setSource(this.group) // TODO
+                                .putAllExtensions(next.getHeadersMap())
+                                .setId(UUID.randomUUID().toString())
+                )
                 .setTopic(topic)
                 .build();
     }
 
     private static ReceiveRequest receiveRequestForAssignment(Assignment assignment) {
-        return ReceiveRequest.newBuilder().setAssignment(assignment).build();
+        return ReceiveRequest.newBuilder().setAssignment(assignment).setFormat(LIIKLUS_EVENT).build();
     }
 
     private <T> Flux<Flux<T>> riffWindowing(Flux<T> linear) {
@@ -345,23 +340,23 @@ public class Processor {
     }
 
     /**
-     * This converts a liiklus received message (representing an at-rest riff {@link Message}) into an RPC {@link InputFrame}.
+     * This converts a liiklus received message (in CloudEvent format) into an RPC {@link InputFrame}.
      */
     private InputFrame toRiffSignal(ReceiveReply receiveReply, FullyQualifiedTopic fullyQualifiedTopic) {
         int inputIndex = inputs.indexOf(fullyQualifiedTopic);
         if (inputIndex == -1) {
             throw new RuntimeException("Unknown topic: " + fullyQualifiedTopic);
         }
-        ByteString bytes = receiveReply.getRecord().getValue();
-        try {
-            Message message = Message.parseFrom(bytes);
+        if (receiveReply.getReplyCase() == LIIKLUS_EVENT_RECORD) {
+            LiiklusEvent event = receiveReply.getLiiklusEventRecord().getEvent();
             return InputFrame.newBuilder()
-                    .setPayload(message.getPayload())
-                    .setContentType(message.getContentType())
+                    .setPayload(event.getData())
+                    .setContentType(event.getDataContentType())
                     .setArgIndex(inputIndex)
+                    .putAllHeaders(event.getExtensionsMap())
                     .build();
-        } catch (InvalidProtocolBufferException e) {
-            throw new RuntimeException(e);
+        } else {
+            throw new RuntimeException("Expected messages in CloudEvent format, got " + receiveReply.getReplyCase());
         }
 
     }
@@ -370,7 +365,7 @@ public class Processor {
         return SubscribeRequest.newBuilder()
                 .setTopic(topicAddressAndOffset.getT1().getTopic())
                 .setGroup(group)
-                .setAutoOffsetReset(topicAddressAndOffset.getT2().equals("earliest") ? SubscribeRequest.AutoOffsetReset.EARLIEST : SubscribeRequest.AutoOffsetReset.LATEST)
+                .setAutoOffsetReset(topicAddressAndOffset.getT2().equals("earliest") ? EARLIEST : LATEST)
                 .build();
     }
 

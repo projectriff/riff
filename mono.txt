@@ -12,3 +12,10 @@ https://github.com/projectriff/dev-utils/tree/5770fbb31cbac3d1be7b95f3b9a3fa4fa4
 # update
 
 https://github.com/projectriff/system/tree/f54c367b63e33a6c375f8ccce0b2386c98eb5a7c
+https://github.com/projectriff/cli/tree/f521af58fbd94c4b4a446705fe091a0f06bdf54c
+https://github.com/projectriff/release/tree/49646b585b279207b7b3259ed77e4df2615f1867
+https://github.com/projectriff/pulsar-provisioner/tree/c06b5ee9cb128c2649da9d1ad899790422ad8eff
+https://github.com/projectriff/kafka-provisioner/tree/c038d350eace9c2615c1ff08e754a6364fb71e70
+https://github.com/projectriff/nop-provisioner/tree/80530ec94f650df23bdee59654dbc5afb779931f
+https://github.com/projectriff/fats/tree/1e1631bae0bf0e206a7f9e65c6aa3e807c66cd27
+https://github.com/projectriff/streaming-processor/tree/5884ec5ffbd3b2bc7ca2a3cbe6639ba223caa879

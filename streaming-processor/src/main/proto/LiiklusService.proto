@@ -25,9 +25,32 @@ service LiiklusService {
 
     }
 
-    rpc GetOffsets(GetOffsetsRequest) returns (GetOffsetsReply) {
+    rpc GetOffsets (GetOffsetsRequest) returns (GetOffsetsReply) {
 
     }
+
+    rpc GetEndOffsets (GetEndOffsetsRequest) returns (GetEndOffsetsReply) {
+
+    }
+}
+
+message LiiklusEvent {
+    // Required
+    string id = 1;
+
+    // Required
+    string type = 2;
+
+    // Required
+    string source = 3;
+
+    string time = 5;
+
+    string data_content_type = 100;
+
+    bytes data = 101;
+
+    map<string, string> extensions = 200;
 }
 
 message PublishRequest {
@@ -35,7 +58,11 @@ message PublishRequest {
 
     bytes key = 2;
 
-    bytes value = 3;
+    bytes value = 3 [deprecated = true];
+
+    oneof event {
+        LiiklusEvent liiklusEvent = 4;
+    }
 }
 
 message PublishReply {
@@ -53,9 +80,9 @@ message SubscribeRequest {
 
     string group = 2;
 
-    uint32 groupVersion = 4;
+    uint32 group_version = 4;
 
-    AutoOffsetReset autoOffsetReset = 3;
+    AutoOffsetReset auto_offset_reset = 3;
 
     enum AutoOffsetReset {
         EARLIEST = 0;
@@ -64,7 +91,7 @@ message SubscribeRequest {
 }
 
 message Assignment {
-    string sessionId = 1;
+    string session_id = 1;
 
     uint32 partition = 2;
 }
@@ -76,11 +103,11 @@ message SubscribeReply {
 }
 
 message AckRequest {
-    Assignment assignment = 1 [deprecated=true];
+    Assignment assignment = 1 [deprecated = true];
 
     string topic = 3;
     string group = 4;
-    uint32 groupVersion = 5;
+    uint32 group_version = 5;
     uint32 partition = 6;
 
     uint64 offset = 2;
@@ -89,12 +116,20 @@ message AckRequest {
 message ReceiveRequest {
     Assignment assignment = 1;
 
-    uint64 lastKnownOffset = 2;
+    uint64 last_known_offset = 2;
+
+    ContentFormat format = 3;
+
+    enum ContentFormat {
+        BINARY = 0;
+        LIIKLUS_EVENT = 1;
+    }
 }
 
 message ReceiveReply {
     oneof reply {
         Record record = 1;
+        LiiklusEventRecord liiklus_event_record = 2;
     }
 
     message Record {
@@ -108,6 +143,19 @@ message ReceiveReply {
 
         bool replay = 5;
     }
+
+    message LiiklusEventRecord {
+        uint64 offset = 1;
+
+        bytes key = 2;
+
+        LiiklusEvent event = 3;
+
+        // TODO drop?
+        google.protobuf.Timestamp timestamp = 4;
+
+        bool replay = 5;
+    }
 }
 
 message GetOffsetsRequest {
@@ -116,10 +164,18 @@ message GetOffsetsRequest {
 
     string group = 2;
 
-    uint32 groupVersion = 3;
+    uint32 group_version = 3;
 
 }
 
 message GetOffsetsReply {
+    map<uint32, uint64> offsets = 1;
+}
+
+message GetEndOffsetsRequest {
+    string topic = 1;
+}
+
+message GetEndOffsetsReply {
     map<uint32, uint64> offsets = 1;
 }
