@@ -19,3 +19,4 @@ https://github.com/projectriff/kafka-provisioner/tree/c038d350eace9c2615c1ff08e7
 https://github.com/projectriff/nop-provisioner/tree/80530ec94f650df23bdee59654dbc5afb779931f
 https://github.com/projectriff/fats/tree/1e1631bae0bf0e206a7f9e65c6aa3e807c66cd27
 https://github.com/projectriff/streaming-processor/tree/5884ec5ffbd3b2bc7ca2a3cbe6639ba223caa879
+https://github.com/projectriff/stream-client-go/tree/fdfb945cd872218c22e1866201782e168d7ee460

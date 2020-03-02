@@ -9,7 +9,7 @@ docker run --name liiklus \
     -p 6565:6565/tcp \
     -e storage_positions_type=MEMORY \
     -e storage_records_type=MEMORY \
-    sbawaska/liiklus:20200223160346-a85402e4332c51d9
+    bsideup/liiklus:0.10.0-rc1
 
 make test
 

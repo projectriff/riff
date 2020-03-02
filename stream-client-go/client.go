@@ -17,7 +17,6 @@
 package client
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -51,9 +50,9 @@ type PublishResult struct {
 	Offset    uint64
 }
 
-// EventHandler is a function to process the messages read from the stream and is passed as
+// EventHandler is a function to process the events read from the stream and is passed as
 // a parameter to the subscribe call.
-type EventHandler = func(ctx context.Context, payload io.Reader, contentType string, headers map[string]string) error
+type EventHandler = func(ctx context.Context, event liiklus.LiiklusEvent) error
 
 // EventErrHandler is a function to handle errors while reading subscription messages and
 // is passed as a parameter to the subscribe call.
@@ -88,6 +87,7 @@ func (lc *StreamClient) Publish(ctx context.Context, payload io.Reader, key io.R
 	ce.Source = "source-todo" // TODO
 	ce.Type = "riff-event"    // TODO
 	ce.Id = uuid.New().String()
+	ce.Time = time.Now().String()
 
 	if bytes, err := ioutil.ReadAll(payload); err != nil {
 		return PublishResult{}, err
@@ -171,7 +171,7 @@ func (lc *StreamClient) Subscribe(ctx context.Context, group string, fromBeginni
 					}
 
 					eventRecord := recvReply.GetLiiklusEventRecord()
-					err = f(subContext, bytes.NewReader(eventRecord.Event.Data), eventRecord.Event.DataContentType, nil /*TODO*/)
+					err = f(subContext, *eventRecord.Event)
 					if err != nil {
 						e(cancel, err)
 						return

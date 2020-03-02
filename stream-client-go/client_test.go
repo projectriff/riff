@@ -3,14 +3,13 @@ package client_test
 import (
 	"context"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
 	client "github.com/projectriff/riff/stream-client-go"
+	"github.com/projectriff/riff/stream-client-go/pkg/liiklus"
 )
 
 // This is an integration test meant to be run against a liiklus gateway. Please refer to the CI scripts for
@@ -56,13 +55,15 @@ func subscribe(c *client.StreamClient, expectedValue, topic string, fromBeginnin
 	headersChan := make(chan map[string]string)
 
 	var eventHandler client.EventHandler
-	eventHandler = func(ctx context.Context, payload io.Reader, contentType string, headers map[string]string) error {
-		bytes, err := ioutil.ReadAll(payload)
-		if err != nil {
-			return err
-		}
-		payloadChan <- string(bytes)
+	eventHandler = func(ctx context.Context, event liiklus.LiiklusEvent) error {
+		payloadChan <- string(event.Data)
 		headersChan <- headers
+		if event.Id == "" {
+			t.Error("did not expect id to be empty")
+		}
+		if event.Time == "" {
+			t.Error("did not expect time to be empty")
+		}
 		return nil
 	}
 
@@ -74,7 +75,7 @@ func subscribe(c *client.StreamClient, expectedValue, topic string, fromBeginnin
 	if v1 != expectedValue {
 		t.Errorf("expected value: %s, but was: %s", expectedValue, v1)
 	}
-	// see: https://github.com/projectriff/riff/stream-client-go/issues/19
+	// see: https://github.com/projectriff/stream-client-go/issues/19
 	//h := <-headersChan
 	//if !reflect.DeepEqual(headers, h) {
 	//	t.Errorf("headers not equal. expected %s, but was: %s", headers, h)
@@ -94,12 +95,8 @@ func TestSubscribeBeforePublish(t *testing.T) {
 	result := make(chan string)
 
 	var eventHandler client.EventHandler
-	eventHandler = func(ctx context.Context, payload io.Reader, contentType string, headers map[string]string) error {
-		bytes, err := ioutil.ReadAll(payload)
-		if err != nil {
-			return err
-		}
-		result <- string(bytes)
+	eventHandler = func(ctx context.Context, event liiklus.LiiklusEvent) error {
+		result <- string(event.Data)
 		return nil
 	}
 	var eventErrHandler client.EventErrHandler
@@ -130,12 +127,8 @@ func TestSubscribeCancel(t *testing.T) {
 	result := make(chan string)
 
 	var eventHandler client.EventHandler
-	eventHandler = func(ctx context.Context, payload io.Reader, contentType string, headers map[string]string) error {
-		bytes, err := ioutil.ReadAll(payload)
-		if err != nil {
-			return err
-		}
-		result <- string(bytes)
+	eventHandler = func(ctx context.Context, event liiklus.LiiklusEvent) error {
+		result <- string(event.Data)
 		return nil
 	}
 	var eventErrHandler client.EventErrHandler
@@ -171,23 +164,15 @@ func TestMultipleSubscribe(t *testing.T) {
 		panic(err)
 	}
 	var err error
-	_, err = c1.Subscribe(context.Background(), t.Name()+"1", true, func(ctx context.Context, payload io.Reader, contentType string, headers map[string]string) error {
-		bytes, err := ioutil.ReadAll(payload)
-		if err != nil {
-			return err
-		}
-		result1 <- string(bytes)
+	_, err = c1.Subscribe(context.Background(), t.Name()+"1", true, func(ctx context.Context, event liiklus.LiiklusEvent) error {
+		result1 <- string(event.Data)
 		return nil
 	}, eventErrHandler)
 	if err != nil {
 		t.Error(err)
 	}
-	_, err = c2.Subscribe(context.Background(), t.Name()+"2", true, func(ctx context.Context, payload io.Reader, contentType string, headers map[string]string) error {
-		bytes, err := ioutil.ReadAll(payload)
-		if err != nil {
-			return err
-		}
-		result2 <- string(bytes)
+	_, err = c2.Subscribe(context.Background(), t.Name()+"2", true, func(ctx context.Context, event liiklus.LiiklusEvent) error {
+		result2 <- string(event.Data)
 		return nil
 	}, eventErrHandler)
 	if err != nil {
@@ -224,12 +209,8 @@ func TestSubscribeFromLatest(t *testing.T) {
 	eventErrHandler = func(cancel context.CancelFunc, err error) {
 		panic(err)
 	}
-	_, err = c.Subscribe(context.Background(), t.Name(), false, func(ctx context.Context, payload io.Reader, contentType string, headers map[string]string) error {
-		bytes, err := ioutil.ReadAll(payload)
-		if err != nil {
-			return err
-		}
-		result <- string(bytes)
+	_, err = c.Subscribe(context.Background(), t.Name(), false, func(ctx context.Context, event liiklus.LiiklusEvent) error {
+		result <- string(event.Data)
 		return nil
 	}, eventErrHandler)
 	if err != nil {
