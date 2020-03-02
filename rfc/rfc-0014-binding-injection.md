@@ -51,7 +51,7 @@ status:
 - `.spec.binding` is an ObjectReference to a resource implementing the binding duck type
 - `.spec.containers` optionally restricts which containers are augmented, defaults to all containers
 - `.spec.subject` is an ObjectReference to a resource implementing the podspecable duck type
-- the subject and binding target much be in the same namespace as the injection resource
+- the subject and binding target mush be in the same namespace as the injection resource
 
 The subject resource will be injected with the binding metadata and secret.
 
