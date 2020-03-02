@@ -5,13 +5,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"os"
 	"time"
 
 	devutil "github.com/projectriff/riff/dev-utils/pkg"
 	client "github.com/projectriff/riff/stream-client-go"
+	"github.com/projectriff/riff/stream-client-go/pkg/liiklus"
 	"github.com/spf13/cobra"
 
 	// load credential helpers
@@ -26,7 +25,11 @@ var (
 )
 
 type Event struct {
+	Id          string            `json:"id"`
 	Payload     string            `json:"payload"`
+	Source      string            `json:"source"`
+	Type        string            `json:"type"`
+	Time        string            `json:"time"`
 	ContentType string            `json:"contentType"`
 	Headers     map[string]string `json:"headers"`
 }
@@ -38,30 +41,25 @@ func main() {
 	}
 }
 
-var eventHandler = func(ctx context.Context, payload io.Reader, contentType string, headers map[string]string) error {
-	bytes, err := ioutil.ReadAll(payload)
-	if err != nil {
-		return err
-	}
-
+var eventHandler = func(ctx context.Context, event liiklus.LiiklusEvent) error {
 	var payloadStr string
 	switch payloadEncoding {
 	case "raw":
-		payloadStr = string(bytes)
+		payloadStr = string(event.Data)
 	case "base64":
-		payloadStr = base64.StdEncoding.EncodeToString(bytes)
+		payloadStr = base64.StdEncoding.EncodeToString(event.Data)
 	default:
 		return fmt.Errorf("unsupported --payload-encoding %q", payloadEncoding)
 	}
 
-	if headers == nil {
-		headers = map[string]string{}
-	}
-
 	evt := Event{
+		Id:          event.Id,
 		Payload:     payloadStr,
-		ContentType: contentType,
-		Headers:     headers,
+		ContentType: event.DataContentType,
+		Headers:     event.Extensions,
+		Source:      event.Source,
+		Type:        event.Type,
+		Time:        event.Time,
 	}
 	marshaledEvt, err := json.Marshal(evt)
 	if err != nil {

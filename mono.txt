@@ -20,4 +20,4 @@ https://github.com/projectriff/nop-provisioner/tree/80530ec94f650df23bdee59654db
 https://github.com/projectriff/fats/tree/1e1631bae0bf0e206a7f9e65c6aa3e807c66cd27
 https://github.com/projectriff/streaming-processor/tree/5884ec5ffbd3b2bc7ca2a3cbe6639ba223caa879
 https://github.com/projectriff/stream-client-go/tree/fdfb945cd872218c22e1866201782e168d7ee460
-https://github.com/projectriff/dev-utils/tree/916c4deeb72231805e8a5bd1bbeea8502d518fea
+https://github.com/projectriff/dev-utils/tree/c91cf6ea1c23891f11358e780d143e07059840c4
