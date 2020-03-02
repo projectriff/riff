@@ -9,3 +9,6 @@ https://github.com/projectriff/streaming-processor/tree/560d966c576e518c1f7005bd
 https://github.com/projectriff/stream-client-go/tree/836809a469fa55e7cbff4811c68b50fc2a1448d4
 https://github.com/projectriff/dev-utils/tree/5770fbb31cbac3d1be7b95f3b9a3fa4fa4a0fe52
 
+# update
+
+https://github.com/projectriff/system/tree/f54c367b63e33a6c375f8ccce0b2386c98eb5a7c

@@ -84,8 +84,7 @@ generate-internal: mockery
 # find or download goimports, download goimports if necessary
 goimports:
 ifeq (, $(shell which goimports))
-	# avoid go.* mutations from go get
-	( cd / && GO111MODULE=on go get golang.org/x/tools/cmd/goimports@release-branch.go1.13 )
+	( cd / && GO111MODULE=on go get golang.org/x/tools/cmd/goimports@release-branch.go1.13 ) # avoid go.* mutations from go get
 GOIMPORTS=$(GOBIN)/goimports
 else
 GOIMPORTS=$(shell which goimports)
@@ -94,7 +93,7 @@ endif
 # find or download mockery, download mockery if necessary
 mockery:
 ifeq (, $(shell which mockery))
-	GO111MODULE=off go get github.com/vektra/mockery/cmd/mockery
+	GO111MODULE=off go get -u  github.com/vektra/mockery/.../
 MOCKERY=$(GOBIN)/mockery
 else
 MOCKERY=$(shell which mockery)

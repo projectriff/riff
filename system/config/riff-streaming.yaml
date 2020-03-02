@@ -6439,7 +6439,7 @@ subjects:
 ---
 apiVersion: v1
 data:
-  gatewayImage: bsideup/liiklus:0.9.2
+  gatewayImage: bsideup/liiklus:0.10.0-rc1
   provisionerImage: ko://github.com/projectriff/riff/nop-provisioner/cmd/provisioner
 kind: ConfigMap
 metadata:
@@ -6450,7 +6450,7 @@ metadata:
 ---
 apiVersion: v1
 data:
-  gatewayImage: bsideup/liiklus:0.9.2
+  gatewayImage: bsideup/liiklus:0.10.0-rc1
   provisionerImage: ko://github.com/projectriff/riff/kafka-provisioner/cmd/provisioner
 kind: ConfigMap
 metadata:
@@ -6471,7 +6471,7 @@ metadata:
 ---
 apiVersion: v1
 data:
-  gatewayImage: bsideup/liiklus:0.9.2
+  gatewayImage: bsideup/liiklus:0.10.0-rc1
   provisionerImage: ko://github.com/projectriff/riff/pulsar-provisioner/cmd/provisioner
 kind: ConfigMap
 metadata:
