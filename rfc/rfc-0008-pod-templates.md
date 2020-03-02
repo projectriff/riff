@@ -14,7 +14,7 @@
 
 
 ## Problem
-Many Kubernetes resources that decompose to Pods (like Deployment, ReplicaSet, Job, etc) embed a [PodTemplateSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#podtemplatespec-v1-core) at `.spec.template`. This not only makes these resources easier for users and tools to consume, it facilitates duck typed operations on resources that follow this pattern. riff doesn't follow this pattern, as our resources embed a [PodSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#podspec-v1-core) at `.spec.template` instead. The PodTemplateSpec contains inlined ObjectMeta in addition to the PodSpec; this enables adding custom labels and/or annotations to the resulting Pod.
+Many Kubernetes resources that decompose to Pods (like Deployment, ReplicaSet, Job, etc) embed a [PodTemplateSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#podtemplatespec-v1-core) at `.spec.template`. This not only makes these resources easier for users and tools to consume, it facilitates duck typed operations on resources that follow this pattern. riff doesn't follow this pattern, as our resources embed a [PodSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#podspec-v1-core) at `.spec` instead. The PodTemplateSpec contains inlined ObjectMeta in addition to the PodSpec; this enables adding custom labels and/or annotations to the resulting Pod.
 
 ## Solution
 riff should switch all usage of PodSpec at `.spec.template` to be a PodTemplateSpec.
