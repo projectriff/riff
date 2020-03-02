@@ -23,7 +23,7 @@ This RFC has no opinion as to the type of binding being injected, or the consume
 
 ## Solution
 
-Knative Bindings (yea, the term is overloaded) define an abstract way for reconcilers to operate on resources by duck typing known elements of the resource without requiring pre-knowledge or full type knowledge at runtime. By leveraging resources that use a PodTemplateSpec, it's possible to inject volumes, volume mounts and environment variables into an existing resource (even if owned and controlled by another resource). With [RFC 0008 Pod Templates](./rfc-0008-pod-templates.md) the riff Deployers and Processor resources implement the PodSpecable duck type.
+[Knative Bindings](https://docs.google.com/document/d/1t5WVrj2KQZ2u5s0LvIUtfHnSonBv5Vcv8Gl2k5NXrCQ/edit#heading=h.lnql658xmg9p) [Knative membership required to view] (yea, the term is overloaded) define an abstract way for reconcilers to operate on resources by duck typing known elements of the resource without requiring pre-knowledge or full type knowledge at runtime. By leveraging resources that use a PodTemplateSpec, it's possible to inject volumes, volume mounts and environment variables into an existing resource (even if owned and controlled by another resource). With [RFC 0008 Pod Templates](./rfc-0008-pod-templates.md) the riff Deployers and Processor resources implement the PodSpecable duck type.
 
 A duck type for exposing a binding is defined in RFC 0002. While not as wide spread, the Stream resource currently implements this duck type. Combining the Binding and PodSpecable duck types allows for a generic means to inject binding metadata and secrets into a consuming workload. A new CRD can express this injection:
 
