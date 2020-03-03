@@ -113,7 +113,7 @@ spec:
 ```
 
 Notes:
-- each container may only define the `CNB_BINDINGS` env var once, if already defined the value must be respected
+- each container may only define the `CNB_BINDINGS` env var once, if already defined the value must be preserved and respected
 - injected volume names must not collide with an existing volume
 - injected volume mount paths must not collide with an existing volume
 - injected volume mount paths must compile with RFC 0002
