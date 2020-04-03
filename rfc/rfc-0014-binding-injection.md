@@ -29,30 +29,33 @@ A duck type for exposing a CNB binding is defined in RFC 0002. While not wide sp
 
 ```yaml
 apiVersion: bindings.projectriff.io/v1alpha1
-kind: Injection
+kind: ServiceBinding
 metadata:
-  name: my-binding-injection
+  name: my-service-binding
 spec:
-  provider:
-    apiVersion: streaming.projectriff.io/v1alpha1
-    kind: Stream
-    name: my-stream
   subject:
     apiVersion: knative.projectriff.io/v1alpha1
     kind: Deployer
     name: my-deployer
-  allowedContainers:
-  - user-container
+  provider:
+    apiVersion: streaming.projectriff.io/v1alpha1
+    kind: Stream
+    name: my-stream
+  containerName: user-container # optional, defaults to all containers
+  bindingMode: Secret # optional, defaults to 'Secret'
 status:
   {}
 ```
 
-- `.spec.provider` is an ObjectReference to a resource implementing the CNB binding duck type
-- `.spec.subject` is an ObjectReference to a resource implementing the podspecable duck type
-- `.spec.allowedContainers` optionally restricts which containers are augmented, defaults to all containers
+- `.spec.subject` is a reference to a resource implementing the PodSpecable duck type
+- `.spec.provider` is a reference to a resource implementing the CNB binding duck type
+- `.spec.containerName` optionally restricts which container is augmented, defaults to all containers
+- `.spec.bindingMode` optionally restricts which parts of the binding is exposed to the subject. There are two values:
+  - `"Metadata"` - only the non-sensitive, metadata element of the binding is mounted
+  - `"Secret"` (default) - the metadata and secret element of the binding are both mounted
 - the `subject` and `provider` targets must be in the same namespace as the injection resource
 
-The subject resource will be injected with the CNB binding's metadata and secret.
+The subject resource is injected with the CNB binding's metadata and secret.
 
 ```yaml
 apiVersion: streaming.projectriff.io/v1alpha1
@@ -95,19 +98,19 @@ spec:
         image: square
         env:
         - name: CNB_BINDINGS
-          value: /var/bindings
+          value: /platform/bindings
         volumeMounts:
-        - mountPath: /var/bindings/my-binding-injection/metadata
-          name: my-binding-injection-metadata
+        - mountPath: /platform/bindings/my-service-binding/metadata
+          name: my-service-binding-metadata
           readOnly: true
-        - mountPath: /var/bindings/my-binding-injection/secret
-          name: my-binding-injection-secret
+        - mountPath: /platform/bindings/my-service-binding/secret
+          name: my-service-binding-secret
           readOnly: true
     volumes:
-    - name: my-binding-injection-metadata
+    - name: my-service-binding-metadata
       configMap:
         name: my-stream-binding-metadata
-    - name: my-binding-injection-secret
+    - name: my-service-binding-secret
       secret:
         secretName: my-stream-binding-secret
 ```
@@ -115,6 +118,7 @@ spec:
 Notes:
 - each container may only define the `CNB_BINDINGS` env var once, if already defined the value must be preserved and respected
 - injected volume names must not collide with an existing volume
+  - the volume name has no semantic meaning and may be any value unique within the pod
 - injected volume mount paths must not collide with an existing volume
 - injected volume mount paths must compile with RFC 0002
 
