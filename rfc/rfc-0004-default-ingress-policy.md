@@ -36,7 +36,7 @@ Users creating new Deployers will either need to accept that the workload is not
 The Knative runtime Adapter resource is not changing as part of this RFC as it does not create a Knative workload. The ingress policy of the adapted resource is preserved.
 
 ### Backwards Compatibility and Upgrade Path
-While this is a breaking change from master for both the Core and Knative runtimes, this is restoring the existing behavior from riff 0.4 for the core runtime.
+While this is a breaking change from main for both the Core and Knative runtimes, this is restoring the existing behavior from riff 0.4 for the core runtime.
 
 ## FAQ
 **Is ClusterLocal really "ingress"?**

@@ -4,7 +4,7 @@ Hello and thank you for your interest in making riff better.
 
 Pull requests are welcome. The project tries to maintain a
 https://stackoverflow.com/questions/20348629/what-are-advantages-of-keeping-linear-history-in-git[linear history].
-Working on a new branch of your fork will help you base your git history on the upstream master.
+Working on a new branch of your fork will help you base your git history on the upstream main branch.
 Please leave multiple commits intact for ease of reviewing. Whoever merges the PR may decide to squash commits together.
 
 If you would like to contribute a major feature, please consider writing a link:rfc/rfc-0000-lightweight-rfc-process.md[RFC].
