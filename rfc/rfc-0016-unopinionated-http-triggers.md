@@ -1,10 +1,10 @@
-# RFC-#: Unopinionated HTTP Triggers
+# RFC-0016: Unopinionated HTTP Triggers
 
 **Authors:** @scothis
 
 **Status:**
 
-**Pull Request URL:** link
+**Pull Request URL:** [#1389](https://github.com/projectriff/riff/pull/1389)
 
 **Superseded by:** N/A
 
