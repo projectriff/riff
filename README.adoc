@@ -1,4 +1,4 @@
-= riff is for functions
+= Project riff is complete. So Long, and Thanks for All the Fish
 
 image::logo.png[riff logo, link=https://projectriff.io/]
 = A FaaS for Kubernetes
